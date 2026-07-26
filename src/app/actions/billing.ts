@@ -7,6 +7,7 @@ import { activatePlan, downgradeToFree, planOrThrow } from "@/lib/billing";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
 import { siteUrl } from "@/lib/format";
+import { planPrice, requestCurrency, stripeUnitAmount } from "@/lib/currency";
 
 /**
  * Starts a Stripe Checkout session and redirects the buyer to Stripe.
@@ -19,6 +20,8 @@ export async function startStripeCheckoutAction(formData: FormData) {
 
   if (!stripeEnabled()) redirect("/pricing?error=stripe_unavailable");
 
+  const currency = requestCurrency();
+
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     customer_email: user.email,
@@ -28,8 +31,8 @@ export async function startStripeCheckoutAction(formData: FormData) {
       {
         quantity: 1,
         price_data: {
-          currency: "inr",
-          unit_amount: plan.priceInr * 100,
+          currency: currency.toLowerCase(),
+          unit_amount: stripeUnitAmount(plan, currency),
           product_data: {
             name: `Godesi ${plan.name} — 30 days`,
             description: plan.features.join(" · "),
@@ -63,13 +66,15 @@ export async function mockSubscribeAction(formData: FormData) {
 
   if (stripeEnabled() || paypalEnabled()) redirect("/pricing?error=mock_disabled");
 
+  const mockCurrency = requestCurrency();
+
   await activatePlan({
     userId: user.id,
     plan: plan.id,
     provider: "mock",
     reference: `mock_${user.id}_${Date.now()}`,
-    amount: plan.priceInr,
-    currency: "INR",
+    amount: planPrice(plan, mockCurrency),
+    currency: mockCurrency,
   });
 
   revalidatePath("/dashboard");

@@ -10,7 +10,7 @@ import {
 } from "@/app/actions/admin";
 import { Badge, Card } from "@/components/ui";
 import { PLAN_ORDER } from "@/lib/plans";
-import { formatInr } from "@/lib/format";
+import { formatInr, formatUsd } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" };
@@ -181,7 +181,8 @@ export default async function AdminPage() {
                   {payment.user.email} · {payment.plan}
                 </span>
                 <span className="text-slate-500">
-                  {formatInr(payment.amount)} · {payment.createdAt.toLocaleDateString("en-IN")}
+                  {payment.currency === "USD" ? formatUsd(payment.amount) : formatInr(payment.amount)}{" "}
+                  · {payment.createdAt.toLocaleDateString("en-IN")}
                 </span>
               </li>
             ))}

@@ -65,9 +65,11 @@ npm run dev
 Checkout is real when provider keys are present, and falls back to an instant
 "test mode" upgrade only when **no** provider is configured.
 
-- **Stripe** — `startStripeCheckoutAction` creates a Checkout Session (INR) and redirects
-  to Stripe. The plan is granted only after Stripe confirms payment, via either the
-  webhook (`/api/webhooks/stripe`) or the server-verified return at `/pricing/success`.
+- **Stripe** — `startStripeCheckoutAction` creates a Checkout Session and redirects
+  to Stripe. Visitors in India are billed in INR and everyone else in USD, resolved
+  server-side from Vercel's `x-vercel-ip-country` header (`src/lib/currency.ts`);
+  without that header (local dev) prices fall back to INR. The plan is granted only
+  after Stripe confirms payment, via either the webhook (`/api/webhooks/stripe`) or the server-verified return at `/pricing/success`.
 - **PayPal** — the Orders API: `/api/paypal/create-order` then `/api/paypal/capture-order`
   (USD, since PayPal cannot settle INR). The buyer/plan is read from the order's
   server-set `custom_id`, so it cannot be forged by the client.

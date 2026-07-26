@@ -11,7 +11,8 @@ import { stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
 import { PayPalCheckout } from "@/components/PayPalCheckout";
 import { Alert, Badge, Card } from "@/components/ui";
-import { formatInr } from "@/lib/format";
+import { formatPlanPrice, requestCurrency } from "@/lib/currency";
+import { formatUsd } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default async function PricingPage({
   const paypalOn = paypalEnabled();
   const paypalClientId = process.env.PAYPAL_CLIENT_ID ?? "";
   const providersOn = stripeOn || paypalOn;
+  const currency = requestCurrency();
 
   return (
     <div className="space-y-6">
@@ -74,14 +76,14 @@ export default async function PricingPage({
                   {isCurrent ? <Badge tone="green">Current</Badge> : null}
                 </div>
                 <p className="mt-1 text-3xl font-black">
-                  {plan.priceInr ? formatInr(plan.priceInr) : "Free"}
-                  {plan.priceInr ? (
+                  {isFree ? "Free" : formatPlanPrice(plan, currency)}
+                  {isFree ? null : (
                     <span className="text-sm font-medium text-slate-500">/month</span>
-                  ) : null}
+                  )}
                 </p>
-                {plan.priceUsd && paypalOn ? (
+                {!isFree && paypalOn && currency === "INR" ? (
                   <p className="text-xs text-slate-500">
-                    or ${plan.priceUsd.toFixed(2)} via PayPal
+                    or {formatUsd(plan.priceUsd)} via PayPal
                   </p>
                 ) : null}
               </div>
@@ -128,7 +130,7 @@ export default async function PricingPage({
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                         >
-                          Pay by card — {formatInr(plan.priceInr)}
+                          Pay by card — {formatPlanPrice(plan, currency)}
                         </button>
                       </form>
                     ) : null}

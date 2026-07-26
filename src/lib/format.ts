@@ -6,6 +6,13 @@ export function formatInr(value: number) {
   }).format(value);
 }
 
+export function formatUsd(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+}
+
 export function normalizeWhatsApp(input: string) {
   const digits = input.replace(/\D/g, "");
   if (digits.length === 10) return `91${digits}`;
