@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { effectivePlan } from "@/lib/plans";
+import { ingestIfStale } from "@/lib/news";
 import { NewsCard } from "@/components/NewsCard";
 import { NewsForm } from "@/components/forms/NewsForm";
 import { SidebarBanners } from "@/components/Banners";
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
 export default async function NewsPage() {
   const user = await getCurrentUser();
   const canSubmit = user && (user.role === "ADMIN" || effectivePlan(user) !== "FREE");
+
+  // Refreshes the feed if the last crawl is older than 30 minutes.
+  await ingestIfStale(30).catch(() => null);
 
   const items = await db.newsItem.findMany({
     where: { status: "PUBLISHED" },

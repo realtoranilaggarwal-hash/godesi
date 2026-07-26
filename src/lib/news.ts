@@ -157,3 +157,25 @@ export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
 
   return result;
 }
+
+/**
+ * Keeps the news list fresh on Vercel Hobby, where scheduled crons may only run daily:
+ * the first visitor after the staleness window triggers an ingest.
+ */
+export async function ingestIfStale(maxAgeMinutes = 30) {
+  await ensureDefaultFeeds();
+
+  const stale = await db.newsFeed.findFirst({
+    where: {
+      active: true,
+      OR: [
+        { lastFetchedAt: null },
+        { lastFetchedAt: { lt: new Date(Date.now() - maxAgeMinutes * 60 * 1000) } },
+      ],
+    },
+    select: { id: true },
+  });
+  if (!stale) return null;
+
+  return ingestNews();
+}
