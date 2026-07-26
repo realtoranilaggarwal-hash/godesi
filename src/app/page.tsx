@@ -1,101 +1,125 @@
-import Image from "next/image";
+import Link from "next/link";
+import { searchBusinesses, listCategories } from "@/lib/businesses";
+import { BusinessCard } from "@/components/BusinessCard";
+import { Card, LinkButton } from "@/components/ui";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+const HIGHLIGHTS = [
+  {
+    title: "Digital business card",
+    body: "A mobile-first profile with your logo, gallery, website, maps and social links.",
+  },
+  {
+    title: "QR code, ready to print",
+    body: "Every profile gets a unique QR code you can download and put on your shop or bill book.",
+  },
+  {
+    title: "WhatsApp in one tap",
+    body: "Customers chat with you instantly, and every click is tracked in your dashboard.",
+  },
+  {
+    title: "Lead marketplace",
+    body: "Clients post requirements. Premium members unlock contact details and win the job.",
+  },
+];
+
+export default async function HomePage() {
+  const [businesses, categories] = await Promise.all([
+    searchBusinesses({ take: 6 }),
+    listCategories(),
+  ]);
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="space-y-10">
+      <section className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 px-5 py-10 text-white sm:px-10 sm:py-14">
+        <h1 className="max-w-2xl text-3xl font-black leading-tight sm:text-5xl">
+          Your business, one link and one QR code away.
+        </h1>
+        <p className="mt-3 max-w-2xl text-indigo-100">
+          Godesi is a digital business card for small businesses — with WhatsApp chat,
+          reviews, and a marketplace of buyer requirements.
+        </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <form action="/search" className="mt-6 flex max-w-xl flex-col gap-2 sm:flex-row">
+          <input
+            name="q"
+            placeholder="Search plumbers, bakers, printers..."
+            className="w-full rounded-xl px-4 py-3 text-sm text-slate-900 outline-none"
+            aria-label="Search businesses"
+          />
+          <button
+            type="submit"
+            className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Search
+          </button>
+        </form>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <LinkButton href="/signup" variant="secondary">
+            Create your free card
+          </LinkButton>
+          <LinkButton
+            href="/leads/new"
+            variant="secondary"
+            className="bg-transparent text-white hover:bg-white/10"
           >
-            Read our docs
-          </a>
+            Post a requirement
+          </LinkButton>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {HIGHLIGHTS.map((item) => (
+          <Card key={item.title}>
+            <h2 className="font-semibold">{item.title}</h2>
+            <p className="mt-1 text-sm text-slate-600">{item.body}</p>
+          </Card>
+        ))}
+      </section>
+
+      {categories.length ? (
+        <section>
+          <h2 className="mb-3 text-lg font-bold">Browse by category</h2>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <Link
+                key={category}
+                href={`/search?category=${encodeURIComponent(category)}`}
+                className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm hover:border-indigo-400 hover:text-indigo-600"
+              >
+                {category}
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-bold">Featured businesses</h2>
+          <Link href="/search" className="text-sm font-semibold text-indigo-600">
+            See all
+          </Link>
+        </div>
+        {businesses.length ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {businesses.map((business) => (
+              <BusinessCard key={business.id} business={business} />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <p className="text-sm text-slate-600">
+              No approved listings yet.{" "}
+              <Link href="/signup" className="font-semibold text-indigo-600">
+                Be the first to create one.
+              </Link>
+            </p>
+          </Card>
+        )}
+      </section>
     </div>
   );
 }

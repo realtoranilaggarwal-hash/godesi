@@ -1,0 +1,63 @@
+import Link from "next/link";
+import type { BusinessListItem } from "@/lib/businesses";
+import { Badge, Card, Stars } from "@/components/ui";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { whatsappLink } from "@/lib/format";
+
+export function BusinessCard({ business }: { business: BusinessListItem }) {
+  return (
+    <Card className="flex flex-col gap-3">
+      <div className="flex items-start gap-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={business.logoUrl ?? "/placeholder-logo.svg"}
+          alt=""
+          className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 object-cover"
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/b/${business.slug}`}
+              className="truncate font-semibold text-slate-900 hover:text-indigo-600"
+            >
+              {business.name}
+            </Link>
+            {business.plan !== "FREE" ? (
+              <Badge tone="indigo">{business.plan}</Badge>
+            ) : null}
+          </div>
+          <p className="text-sm text-slate-500">
+            {business.category} · {business.city}
+          </p>
+          <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
+            <Stars rating={business.rating} />
+            <span>
+              {business.reviewCount
+                ? `${business.rating.toFixed(1)} (${business.reviewCount})`
+                : "No reviews yet"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {business.description ? (
+        <p className="line-clamp-2 text-sm text-slate-600">{business.description}</p>
+      ) : null}
+
+      <div className="mt-auto flex gap-2">
+        <Link
+          href={`/b/${business.slug}`}
+          className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-center text-sm font-semibold hover:bg-slate-50"
+        >
+          View card
+        </Link>
+        <WhatsAppButton
+          slug={business.slug}
+          href={whatsappLink(business.whatsappNumber, `Hi ${business.name}, I found you on Godesi.`)}
+          label="WhatsApp"
+          className="flex-1"
+        />
+      </div>
+    </Card>
+  );
+}

@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUSINESS
+  CLIENT
+  ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum ListingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum EventType {
+  PROFILE_VIEW
+  QR_SCAN
+  WHATSAPP_CLICK
+}
+
+enum LeadStatus {
+  OPEN
+  CLOSED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String
+  role          Role      @default(BUSINESS)
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  business Business?
+  leads    Lead[]
+  unlocks  LeadUnlock[]
+  payments Payment[]
+  reviews  Review[]
+}
+
+model Business {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  name           String
+  category       String
+  city           String
+  state          String?
+  description    String?
+  logoUrl        String?
+  websiteUrl     String?
+  whatsappNumber String
+  phone          String?
+  publicEmail    String?
+  instagramUrl   String?
+  facebookUrl    String?
+  youtubeUrl     String?
+  mapsUrl        String?
+  address        String?
+  status         ListingStatus @default(PENDING)
+  featured       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  ownerId String @unique
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  media   Media[]
+  reviews Review[]
+  events  Event[]
+
+  @@index([category])
+  @@index([city])
+}
+
+model Media {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  url        String
+  type       MediaType @default(IMAGE)
+  caption    String?
+  sortOrder  Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([businessId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  authorId   String?
+  author     User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@index([businessId])
+}
+
+model Event {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  type       EventType
+  createdAt  DateTime  @default(now())
+
+  @@index([businessId, type])
+}
+
+model Lead {
+  id           String     @id @default(cuid())
+  clientId     String
+  client       User       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  category     String
+  city         String
+  budgetMin    Int?
+  budgetMax    Int?
+  contactName  String
+  contactPhone String
+  contactEmail String?
+  status       LeadStatus @default(OPEN)
+  createdAt    DateTime   @default(now())
+
+  unlocks LeadUnlock[]
+
+  @@index([category])
+  @@index([city])
+}
+
+model LeadUnlock {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([leadId, userId])
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      Plan
+  amount    Int
+  currency  String   @default("INR")
+  provider  String   @default("mock")
+  reference String?
+  createdAt DateTime @default(now())
+}
