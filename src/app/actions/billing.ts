@@ -2,51 +2,77 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Plan } from "@prisma/client";
-import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { PLANS } from "@/lib/plans";
+import { activatePlan, downgradeToFree, planOrThrow } from "@/lib/billing";
+import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { paypalEnabled } from "@/lib/paypal";
+import { siteUrl } from "@/lib/format";
 
 /**
- * Mock checkout: records a Payment row and activates the plan for 30 days.
- * Swap the provider block for a real gateway (Stripe/Razorpay) webhook later.
+ * Starts a Stripe Checkout session and redirects the buyer to Stripe.
+ * The plan is only granted once Stripe confirms payment — either via the
+ * webhook or the verified redirect back to /pricing/success.
  */
-export async function subscribeAction(formData: FormData) {
+export async function startStripeCheckoutAction(formData: FormData) {
   const user = await requireUser();
-  const planId = String(formData.get("plan") ?? "") as Plan;
-  const plan = PLANS[planId];
-  if (!plan) throw new Error("Unknown plan");
+  const plan = planOrThrow(String(formData.get("plan") ?? ""));
 
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  if (!stripeEnabled()) redirect("/pricing?error=stripe_unavailable");
 
-  if (plan.id === "FREE") {
-    await db.user.update({
-      where: { id: user.id },
-      data: { plan: "FREE", planExpiresAt: null },
-    });
-  } else {
-    await db.$transaction([
-      db.payment.create({
-        data: {
-          userId: user.id,
-          plan: plan.id,
-          amount: plan.priceInr,
-          provider: "mock",
-          reference: `mock_${Date.now()}`,
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    client_reference_id: user.id,
+    metadata: { userId: user.id, plan: plan.id },
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "inr",
+          unit_amount: plan.priceInr * 100,
+          product_data: {
+            name: `Godesi ${plan.name} — 30 days`,
+            description: plan.features.join(" · "),
+          },
         },
-      }),
-      db.user.update({
-        where: { id: user.id },
-        data: { plan: plan.id, planExpiresAt: expiresAt },
-      }),
-      db.business.updateMany({
-        where: { ownerId: user.id },
-        data: { featured: true },
-      }),
-    ]);
-  }
+      },
+    ],
+    success_url: `${siteUrl()}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl()}/pricing?error=cancelled`,
+  });
+
+  if (!session.url) redirect("/pricing?error=stripe_session");
+  redirect(session.url);
+}
+
+export async function downgradeToFreeAction() {
+  const user = await requireUser();
+  await downgradeToFree(user.id);
+  revalidatePath("/dashboard");
+  revalidatePath("/pricing");
+  redirect("/dashboard?upgraded=FREE");
+}
+
+/**
+ * Dev-only instant activation, available when no payment provider is configured
+ * so the app stays demoable without live keys.
+ */
+export async function mockSubscribeAction(formData: FormData) {
+  const user = await requireUser();
+  const plan = planOrThrow(String(formData.get("plan") ?? ""));
+
+  if (stripeEnabled() || paypalEnabled()) redirect("/pricing?error=mock_disabled");
+
+  await activatePlan({
+    userId: user.id,
+    plan: plan.id,
+    provider: "mock",
+    reference: `mock_${user.id}_${Date.now()}`,
+    amount: plan.priceInr,
+    currency: "INR",
+  });
 
   revalidatePath("/dashboard");
   revalidatePath("/pricing");
-  redirect("/dashboard?upgraded=" + plan.id);
+  redirect(`/dashboard?upgraded=${plan.id}`);
 }

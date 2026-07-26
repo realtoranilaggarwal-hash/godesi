@@ -4,6 +4,8 @@ export type PlanInfo = {
   id: Plan;
   name: string;
   priceInr: number;
+  /** PayPal cannot settle INR, so paid plans are also priced in USD. */
+  priceUsd: number;
   mediaLimit: number;
   features: string[];
 };
@@ -13,6 +15,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "FREE",
     name: "Free",
     priceInr: 0,
+    priceUsd: 0,
     mediaLimit: 3,
     features: [
       "Digital business card profile",
@@ -25,6 +28,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "PRO",
     name: "Pro",
     priceInr: 499,
+    priceUsd: 5.99,
     mediaLimit: 15,
     features: [
       "Everything in Free",
@@ -37,6 +41,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "PREMIUM",
     name: "Premium",
     priceInr: 999,
+    priceUsd: 11.99,
     mediaLimit: 40,
     features: [
       "Everything in Pro",

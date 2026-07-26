@@ -21,7 +21,7 @@ QR codes, WhatsApp integration, reviews, a lead marketplace, and paid membership
 | WhatsApp | Click-to-chat button with click tracking |
 | Analytics | Profile views, QR scans, WhatsApp clicks, leads unlocked |
 | Lead marketplace | Clients post requirements; businesses browse; **Premium** unlocks contact details |
-| Membership | Free / Pro / Premium plans with mock checkout (Stripe/Razorpay-ready) |
+| Membership | Free / Pro / Premium plans with real **Stripe** and **PayPal** checkout |
 | Search | Filter by category, city, rating, premium badge; premium/featured ranking |
 | Admin | Approve/reject listings, manage user plans, toggle featured, view payments |
 
@@ -55,3 +55,25 @@ npm run dev
 | `DATABASE_URL` | PostgreSQL connection string |
 | `AUTH_SECRET` | Secret for signing session JWTs |
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL (used for QR targets, canonical URLs, sitemap) |
+| `STRIPE_SECRET_KEY` | Enables Stripe Checkout (card payments) |
+| `STRIPE_WEBHOOK_SECRET` | Verifies `checkout.session.completed` webhooks at `/api/webhooks/stripe` |
+| `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | Enables PayPal buttons |
+| `PAYPAL_ENV` | `sandbox` or `live` (default `live`) |
+
+## Payments
+
+Checkout is real when provider keys are present, and falls back to an instant
+"test mode" upgrade only when **no** provider is configured.
+
+- **Stripe** — `startStripeCheckoutAction` creates a Checkout Session (INR) and redirects
+  to Stripe. The plan is granted only after Stripe confirms payment, via either the
+  webhook (`/api/webhooks/stripe`) or the server-verified return at `/pricing/success`.
+- **PayPal** — the Orders API: `/api/paypal/create-order` then `/api/paypal/capture-order`
+  (USD, since PayPal cannot settle INR). The buyer/plan is read from the order's
+  server-set `custom_id`, so it cannot be forged by the client.
+
+`activatePlan()` is idempotent on the provider payment id (unique `Payment.reference`),
+so a webhook and a redirect callback can both fire safely.
+
+Point a Stripe webhook at `https://<your-domain>/api/webhooks/stripe` for the
+`checkout.session.completed` event and set `STRIPE_WEBHOOK_SECRET`.

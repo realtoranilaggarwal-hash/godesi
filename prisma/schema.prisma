@@ -170,6 +170,6 @@ model Payment {
   amount    Int
   currency  String   @default("INR")
   provider  String   @default("mock")
-  reference String?
+  reference String?  @unique
   createdAt DateTime @default(now())
 }
