@@ -6,7 +6,7 @@ import type { Plan } from "@prisma/client";
 import { Alert } from "@/components/ui";
 
 type PayPalButtonsConfig = {
-  style?: Record<string, string>;
+  style?: { layout?: string; height?: number; tagline?: boolean; shape?: string; color?: string };
   createOrder: () => Promise<string>;
   onApprove: (data: { orderID: string }) => Promise<void>;
   onError: (error: unknown) => void;
@@ -74,7 +74,7 @@ export function PayPalCheckout({ plan, clientId }: { plan: Plan; clientId: strin
 
         window.paypal
           .Buttons({
-            style: { layout: "horizontal", height: "40", tagline: "false" },
+            style: { layout: "horizontal", height: 40, tagline: false },
             createOrder: async () => {
               const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
