@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
+import { confirmTicket } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -28,9 +29,19 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     if (session.payment_status === "paid") {
+      const ticketId = session.metadata?.ticketId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
-      if (userId && plan) {
+
+      if (session.metadata?.kind === "ticket" && ticketId) {
+        await confirmTicket({
+          ticketId,
+          provider: "stripe",
+          reference: session.id,
+          amount: Math.round((session.amount_total ?? 0) / 100),
+          currency: (session.currency ?? "inr").toUpperCase(),
+        });
+      } else if (userId && plan) {
         await activatePlan({
           userId,
           plan: assertPaidPlan(plan),

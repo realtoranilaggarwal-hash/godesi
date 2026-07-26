@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
-import { Alert, Badge, Card, Stars } from "@/components/ui";
+import { effectivePlan } from "@/lib/plans";
+import { softFor } from "@/lib/categories";
+import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { QrCard } from "@/components/QrCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { TrackVisit } from "@/components/TrackVisit";
@@ -16,7 +18,9 @@ async function getBusiness(slug: string) {
   return db.business.findUnique({
     where: { slug },
     include: {
-      owner: { select: { id: true, plan: true } },
+      owner: { select: { id: true, plan: true, planExpiresAt: true } },
+      categoryRef: { select: { slug: true, name: true, icon: true, color: true } },
+      subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
       reviews: { orderBy: { createdAt: "desc" } },
     },
@@ -74,6 +78,13 @@ export default async function BusinessProfilePage({
   if (!business) notFound();
 
   const isOwner = viewer?.id === business.ownerId;
+  /**
+   * Phone and email are only rendered for paid listings (or to the owner/admin), so a
+   * free listing never exposes them in the HTML. WhatsApp chat stays open to everyone,
+   * as promised by the Free plan.
+   */
+  const contactVisible =
+    isOwner || viewer?.role === "ADMIN" || effectivePlan(business.owner) !== "FREE";
   const reviewCount = business.reviews.length;
   const rating = reviewCount
     ? business.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
@@ -86,7 +97,7 @@ export default async function BusinessProfilePage({
     description: business.description ?? undefined,
     image: business.logoUrl ?? undefined,
     url: `${siteUrl()}/b/${business.slug}`,
-    telephone: business.phone ?? `+${business.whatsappNumber}`,
+    ...(contactVisible ? { telephone: business.phone ?? `+${business.whatsappNumber}` } : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: business.address ?? undefined,
@@ -139,6 +150,24 @@ export default async function BusinessProfilePage({
               {business.category} · {business.city}
               {business.state ? `, ${business.state}` : ""}
             </p>
+            {business.categoryRef ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <Link
+                  href={`/categories/${business.categoryRef.slug}`}
+                  className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
+                >
+                  {business.categoryRef.icon} {business.categoryRef.name}
+                </Link>
+                {business.subcategoryRef ? (
+                  <Link
+                    href={`/categories/${business.subcategoryRef.slug}`}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
+                  >
+                    {business.subcategoryRef.name}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
             <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
               <Stars rating={rating} />
               <span>
@@ -159,12 +188,20 @@ export default async function BusinessProfilePage({
                   `Hi ${business.name}, I found you on Godesi.`,
                 )}
               />
-              {business.phone ? (
+              {contactVisible && business.phone ? (
                 <a
                   href={`tel:${business.phone}`}
                   className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
                 >
-                  Call
+                  Call {business.phone}
+                </a>
+              ) : null}
+              {contactVisible && business.publicEmail ? (
+                <a
+                  href={`mailto:${business.publicEmail}`}
+                  className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
+                >
+                  Email
                 </a>
               ) : null}
               {socialLinks.map(({ key, label }) =>
@@ -184,6 +221,16 @@ export default async function BusinessProfilePage({
           </div>
         </div>
       </Card>
+
+      {!contactVisible && (business.phone || business.publicEmail) ? (
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">
+          <p className="text-sm text-amber-900">
+            📞 Phone and email are shown on Pro &amp; Premium listings. This business can
+            unlock them by upgrading — meanwhile you can chat on WhatsApp.
+          </p>
+          {isOwner ? <LinkButton href="/pricing">Upgrade to show contact</LinkButton> : null}
+        </Card>
+      ) : null}
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">

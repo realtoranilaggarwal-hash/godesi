@@ -7,6 +7,11 @@ export type BusinessListItem = {
   slug: string;
   name: string;
   category: string;
+  categorySlug: string | null;
+  categoryName: string | null;
+  categoryColor: string | null;
+  categoryIcon: string | null;
+  subcategoryName: string | null;
   city: string;
   description: string | null;
   logoUrl: string | null;
@@ -20,6 +25,8 @@ export type BusinessListItem = {
 export type SearchFilters = {
   q?: string;
   category?: string;
+  /** Matches the taxonomy: a top-level slug also matches its subcategories. */
+  categorySlugs?: string[];
   city?: string;
   minRating?: number;
   premiumOnly?: boolean;
@@ -29,28 +36,58 @@ export type SearchFilters = {
 export async function searchBusinesses(
   filters: SearchFilters = {},
 ): Promise<BusinessListItem[]> {
-  const { q, category, city, minRating = 0, premiumOnly = false, take = 60 } = filters;
+  const {
+    q,
+    category,
+    categorySlugs,
+    city,
+    minRating = 0,
+    premiumOnly = false,
+    take = 60,
+  } = filters;
 
   const rows = await db.business.findMany({
     where: {
       status: "APPROVED",
       ...(category ? { category: { equals: category, mode: "insensitive" } } : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
-      ...(q
-        ? {
-            OR: [
-              { name: { contains: q, mode: "insensitive" } },
-              { description: { contains: q, mode: "insensitive" } },
-              { category: { contains: q, mode: "insensitive" } },
-              { city: { contains: q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
+      AND: [
+        ...(categorySlugs?.length
+          ? [
+              {
+                OR: [
+                  { categorySlug: { in: categorySlugs } },
+                  { subcategorySlug: { in: categorySlugs } },
+                ],
+              },
+            ]
+          : []),
+        ...(q
+          ? [
+              {
+                OR: [
+                  { name: { contains: q, mode: "insensitive" as const } },
+                  { description: { contains: q, mode: "insensitive" as const } },
+                  { category: { contains: q, mode: "insensitive" as const } },
+                  { city: { contains: q, mode: "insensitive" as const } },
+                  { categoryRef: { name: { contains: q, mode: "insensitive" as const } } },
+                  {
+                    subcategoryRef: {
+                      name: { contains: q, mode: "insensitive" as const },
+                    },
+                  },
+                ],
+              },
+            ]
+          : []),
+      ],
     },
     include: {
       owner: { select: { plan: true } },
       reviews: { select: { rating: true } },
+      categoryRef: { select: { name: true, color: true, icon: true } },
+      subcategoryRef: { select: { name: true } },
     },
     take,
   });
@@ -66,6 +103,11 @@ export async function searchBusinesses(
         slug: row.slug,
         name: row.name,
         category: row.category,
+        categorySlug: row.categorySlug,
+        categoryName: row.categoryRef?.name ?? null,
+        categoryColor: row.categoryRef?.color ?? null,
+        categoryIcon: row.categoryRef?.icon ?? null,
+        subcategoryName: row.subcategoryRef?.name ?? null,
         city: row.city,
         description: row.description,
         logoUrl: row.logoUrl,

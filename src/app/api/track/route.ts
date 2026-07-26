@@ -20,6 +20,6 @@ export async function POST(request: Request) {
   });
   if (!business) return NextResponse.json({ ok: false }, { status: 404 });
 
-  await db.event.create({ data: { businessId: business.id, type: body.type } });
+  await db.analyticsEvent.create({ data: { businessId: business.id, type: body.type } });
   return NextResponse.json({ ok: true });
 }

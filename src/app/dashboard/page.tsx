@@ -39,11 +39,11 @@ export default async function DashboardPage({
 
   const [views, qrScans, whatsappClicks, unlocks, myLeads] = await Promise.all([
     business
-      ? db.event.count({ where: { businessId: business.id, type: "PROFILE_VIEW" } })
+      ? db.analyticsEvent.count({ where: { businessId: business.id, type: "PROFILE_VIEW" } })
       : 0,
-    business ? db.event.count({ where: { businessId: business.id, type: "QR_SCAN" } }) : 0,
+    business ? db.analyticsEvent.count({ where: { businessId: business.id, type: "QR_SCAN" } }) : 0,
     business
-      ? db.event.count({ where: { businessId: business.id, type: "WHATSAPP_CLICK" } })
+      ? db.analyticsEvent.count({ where: { businessId: business.id, type: "WHATSAPP_CLICK" } })
       : 0,
     db.leadUnlock.count({ where: { userId: user.id } }),
     db.lead.findMany({ where: { clientId: user.id }, orderBy: { createdAt: "desc" } }),

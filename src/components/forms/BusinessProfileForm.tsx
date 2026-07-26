@@ -6,8 +6,15 @@ import { saveBusinessProfileAction } from "@/app/actions/business";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 
-export function BusinessProfileForm({ business }: { business: Business | null }) {
+export function BusinessProfileForm({
+  business,
+  categories,
+}: {
+  business: Business | null;
+  categories: CategoryOption[];
+}) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
 
   return (
@@ -18,14 +25,11 @@ export function BusinessProfileForm({ business }: { business: Business | null })
         <Field label="Business name">
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
-        <Field label="Category" hint="e.g. Bakery, Electrician, Interior Designer">
-          <input
-            name="category"
-            required
-            defaultValue={business?.category ?? ""}
-            className={inputClass}
-          />
-        </Field>
+        <CategorySelect
+          categories={categories}
+          defaultCategory={business?.categorySlug}
+          defaultSubcategory={business?.subcategorySlug}
+        />
         <Field label="City">
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />
         </Field>

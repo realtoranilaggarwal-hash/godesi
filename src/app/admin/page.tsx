@@ -4,10 +4,19 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import {
+  deleteBannerAction,
+  deleteNewsAction,
+  deleteNewsFeedAction,
+  setEventStatusAction,
   setListingStatusAction,
+  setNewsStatusAction,
   setUserPlanAction,
+  toggleBannerAction,
   toggleFeaturedAction,
 } from "@/app/actions/admin";
+import { BannerForm } from "@/components/forms/BannerForm";
+import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
+import { formatEventDate } from "@/lib/events";
 import { Badge, Card } from "@/components/ui";
 import { PLAN_ORDER } from "@/lib/plans";
 import { formatInr, formatUsd } from "@/lib/format";
@@ -20,7 +29,8 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (user.role !== "ADMIN") redirect("/dashboard");
 
-  const [businesses, users, payments, leadCount] = await Promise.all([
+  const [businesses, users, payments, leadCount, banners, events, newsItems, feeds] =
+    await Promise.all([
     db.business.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       include: { owner: { select: { email: true, plan: true } } },
@@ -31,8 +41,19 @@ export default async function AdminPage() {
       take: 20,
       include: { user: { select: { email: true } } },
     }),
-    db.lead.count(),
-  ]);
+      db.lead.count(),
+      db.banner.findMany({ orderBy: [{ slot: "asc" }, { position: "asc" }] }),
+      db.event.findMany({
+        orderBy: { startsAt: "desc" },
+        take: 30,
+        include: {
+          organizer: { select: { email: true } },
+          _count: { select: { tickets: true } },
+        },
+      }),
+      db.newsItem.findMany({ orderBy: { createdAt: "desc" }, take: 40 }),
+      db.newsFeed.findMany({ orderBy: { createdAt: "asc" } }),
+    ]);
 
   const pending = businesses.filter((b) => b.status === "PENDING").length;
 
@@ -169,6 +190,229 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+      </Card>
+
+      <Card>
+        <h2 className="mb-3 text-lg font-bold">Events</h2>
+        {events.length ? (
+          <ul className="divide-y divide-slate-100 text-sm">
+            {events.map((event) => (
+              <li key={event.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                <div>
+                  <Link href={`/events/${event.slug}`} className="font-medium text-indigo-600">
+                    {event.title}
+                  </Link>
+                  <div className="text-xs text-slate-500">
+                    {formatEventDate(event.startsAt)} · {event.city} · {event.organizer.email} ·{" "}
+                    {event.seatsBooked}/{event.seatsTotal} seats · {event._count.tickets} bookings
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    tone={
+                      event.status === "APPROVED"
+                        ? "green"
+                        : event.status === "PENDING"
+                          ? "amber"
+                          : "red"
+                    }
+                  >
+                    {event.status}
+                  </Badge>
+                  {(["APPROVED", "REJECTED"] as const)
+                    .filter((status) => status !== event.status)
+                    .map((status) => (
+                      <form key={status} action={setEventStatusAction}>
+                        <input type="hidden" name="id" value={event.id} />
+                        <input type="hidden" name="status" value={status} />
+                        <button
+                          type="submit"
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                        >
+                          {status.toLowerCase()}
+                        </button>
+                      </form>
+                    ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-500">No events posted yet.</p>
+        )}
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-lg font-bold">Banners</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          10 sidebar slots (300×250) and 1 header slot. Saving a slot replaces whatever is in
+          it.
+        </p>
+        <BannerForm />
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead className="text-left text-xs uppercase text-slate-500">
+              <tr>
+                <th className="py-2">Slot</th>
+                <th>Banner</th>
+                <th>Impressions</th>
+                <th>Clicks</th>
+                <th>CTR</th>
+                <th className="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {banners.map((banner) => (
+                <tr key={banner.id}>
+                  <td className="py-2 text-xs font-semibold">
+                    {banner.slot} #{banner.position}
+                  </td>
+                  <td>
+                    <a
+                      href={banner.linkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-indigo-600"
+                    >
+                      {banner.title}
+                    </a>
+                    <div className="text-xs text-slate-400">
+                      {banner.active ? "active" : "paused"}
+                    </div>
+                  </td>
+                  <td>{banner.impressions}</td>
+                  <td>{banner.clicks}</td>
+                  <td className="text-xs text-slate-500">
+                    {banner.impressions
+                      ? `${((banner.clicks / banner.impressions) * 100).toFixed(1)}%`
+                      : "—"}
+                  </td>
+                  <td>
+                    <div className="flex justify-end gap-2">
+                      <form action={toggleBannerAction}>
+                        <input type="hidden" name="id" value={banner.id} />
+                        <button
+                          type="submit"
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                        >
+                          {banner.active ? "pause" : "activate"}
+                        </button>
+                      </form>
+                      <form action={deleteBannerAction}>
+                        <input type="hidden" name="id" value={banner.id} />
+                        <button
+                          type="submit"
+                          className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                        >
+                          delete
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {banners.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-3 text-sm text-slate-500">
+                    No banners yet.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-lg font-bold">News</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          The crawler runs every 30 minutes and skips duplicates. Member submissions arrive as
+          pending.
+        </p>
+        <NewsFeedForm />
+
+        <ul className="mt-3 divide-y divide-slate-100 text-sm">
+          {feeds.map((feed) => (
+            <li key={feed.id} className="flex items-center justify-between gap-2 py-2">
+              <div>
+                <p className="font-medium">{feed.name}</p>
+                <p className="text-xs text-slate-400">
+                  {feed.url} · last run{" "}
+                  {feed.lastFetchedAt ? feed.lastFetchedAt.toLocaleString("en-IN") : "never"}
+                </p>
+              </div>
+              <form action={deleteNewsFeedAction}>
+                <input type="hidden" name="id" value={feed.id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                >
+                  remove
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+
+        <ul className="mt-4 divide-y divide-slate-100 text-sm">
+          {newsItems.map((item) => (
+            <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <div className="min-w-0">
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-indigo-600"
+                >
+                  {item.title}
+                </a>
+                <p className="text-xs text-slate-400">
+                  {item.source} · {item.publishedAt.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge
+                  tone={
+                    item.status === "PUBLISHED"
+                      ? "green"
+                      : item.status === "PENDING"
+                        ? "amber"
+                        : "red"
+                  }
+                >
+                  {item.status}
+                </Badge>
+                {(["PUBLISHED", "REJECTED"] as const)
+                  .filter((status) => status !== item.status)
+                  .map((status) => (
+                    <form key={status} action={setNewsStatusAction}>
+                      <input type="hidden" name="id" value={item.id} />
+                      <input type="hidden" name="status" value={status} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                      >
+                        {status.toLowerCase()}
+                      </button>
+                    </form>
+                  ))}
+                <form action={deleteNewsAction}>
+                  <input type="hidden" name="id" value={item.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    delete
+                  </button>
+                </form>
+              </div>
+            </li>
+          ))}
+          {newsItems.length === 0 ? (
+            <li className="py-2 text-slate-500">No stories ingested yet.</li>
+          ) : null}
+        </ul>
       </Card>
 
       <Card>

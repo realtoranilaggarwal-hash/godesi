@@ -19,7 +19,8 @@ const optionalUrl = z
 
 const profileSchema = z.object({
   name: z.string().trim().min(2, "Business name is required"),
-  category: z.string().trim().min(2, "Category is required"),
+  categorySlug: z.string().trim().min(1, "Choose a category"),
+  subcategorySlug: z.string().trim().optional(),
   city: z.string().trim().min(2, "City is required"),
   state: z.string().trim().optional(),
   description: z.string().trim().max(2000).optional(),
@@ -50,7 +51,8 @@ function readProfileForm(formData: FormData) {
   };
   return profileSchema.safeParse({
     name: value("name"),
-    category: value("category"),
+    categorySlug: value("categorySlug"),
+    subcategorySlug: value("subcategorySlug"),
     city: value("city"),
     state: value("state"),
     description: value("description"),
@@ -77,8 +79,25 @@ export async function saveBusinessProfileAction(
     const parsed = readProfileForm(formData);
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
+    const category = await db.category.findUnique({
+      where: { slug: parsed.data.categorySlug },
+      include: { children: { select: { slug: true, name: true } } },
+    });
+    if (!category || category.parentSlug) return { error: "Choose a valid category." };
+
+    const subcategory = parsed.data.subcategorySlug
+      ? category.children.find((child) => child.slug === parsed.data.subcategorySlug)
+      : undefined;
+    if (parsed.data.subcategorySlug && !subcategory) {
+      return { error: "That subcategory does not belong to the chosen category." };
+    }
+
     const data = {
       ...parsed.data,
+      categorySlug: category.slug,
+      subcategorySlug: subcategory?.slug ?? null,
+      // Kept in sync for search snippets and legacy listings.
+      category: subcategory?.name ?? category.name,
       state: parsed.data.state || null,
       description: parsed.data.description || null,
       phone: parsed.data.phone || null,

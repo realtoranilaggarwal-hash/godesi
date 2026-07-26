@@ -1,10 +1,31 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { syncCategories } from "./categories";
+import { ensureDefaultFeeds } from "../src/lib/news";
 
 const db = new PrismaClient();
 
+/** Legacy free-text categories mapped onto the taxonomy. */
+const CATEGORY_MAP: Record<string, { categorySlug: string; subcategorySlug: string | null }> = {
+  Bakery: {
+    categorySlug: "food-catering",
+    subcategorySlug: "food-catering-bakers-and-cakes",
+  },
+  Electrician: {
+    categorySlug: "home-services",
+    subcategorySlug: "home-services-electricians",
+  },
+  Printing: {
+    categorySlug: "business-services",
+    subcategorySlug: "business-services-printing-and-signage",
+  },
+  Gardening: { categorySlug: "home-services", subcategorySlug: null },
+};
+
 async function main() {
   const password = await bcrypt.hash("password123", 10);
+  await syncCategories(db);
+  await ensureDefaultFeeds();
 
   const admin = await db.user.upsert({
     where: { email: "admin@godesi.in" },
@@ -118,10 +139,16 @@ async function main() {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
 
+    const taxonomy = CATEGORY_MAP[entry.business.category] ?? {
+      categorySlug: null,
+      subcategorySlug: null,
+    };
+    const businessData = { ...entry.business, ...taxonomy };
+
     const business = await db.business.upsert({
       where: { ownerId: owner.id },
-      update: entry.business,
-      create: { ...entry.business, slug, ownerId: owner.id },
+      update: businessData,
+      create: { ...businessData, slug, ownerId: owner.id },
     });
 
     await db.media.deleteMany({ where: { businessId: business.id } });
@@ -151,7 +178,7 @@ async function main() {
       ],
     });
 
-    await db.event.createMany({
+    await db.analyticsEvent.createMany({
       data: [
         ...Array.from({ length: 20 }, () => ({
           businessId: business.id,
@@ -218,6 +245,70 @@ async function main() {
         contactPhone: "+919812300000",
         contactEmail: client.email,
       },
+    });
+  }
+
+  const day = 24 * 60 * 60 * 1000;
+  const sampleEvents = [
+    {
+      slug: "jaipur-diwali-mela-2026",
+      title: "Jaipur Diwali Mela 2026",
+      description:
+        "Two days of food stalls, handicraft bazaar, garba night and fireworks at Jawahar Circle. Family entry ticket covers two adults.",
+      startsAt: new Date(Date.now() + 12 * day),
+      venue: "Jawahar Circle Garden",
+      city: "Jaipur",
+      priceInr: 299,
+      seatsTotal: 500,
+      categorySlug: "events-wedding",
+      imageUrl: "https://images.unsplash.com/photo-1604608672516-f1b9b1a0a3f9?w=1200",
+    },
+    {
+      slug: "pune-startup-gst-workshop",
+      title: "GST & bookkeeping workshop for small businesses",
+      description:
+        "A practical three-hour workshop covering GST filing, invoicing and simple bookkeeping for shop owners and service providers. Includes tea and worksheets.",
+      startsAt: new Date(Date.now() + 5 * day),
+      venue: "Baner Community Hall",
+      city: "Pune",
+      priceInr: 0,
+      seatsTotal: 80,
+      categorySlug: "business-services",
+      imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200",
+    },
+  ];
+
+  for (const event of sampleEvents) {
+    await db.event.upsert({
+      where: { slug: event.slug },
+      update: { ...event, organizerId: admin.id },
+      create: { ...event, organizerId: admin.id },
+    });
+  }
+
+  const sampleBanners = [
+    {
+      slot: "HEADER" as const,
+      position: 1,
+      title: "Godesi Premium — unlock buyer leads",
+      imageUrl: "https://placehold.co/970x90/4f46e5/ffffff?text=Advertise+on+Godesi",
+      linkUrl: "https://godesi-app.vercel.app/pricing",
+    },
+    ...Array.from({ length: 3 }, (_, index) => ({
+      slot: "SIDEBAR" as const,
+      position: index + 1,
+      title: `Sponsored slot ${index + 1}`,
+      imageUrl: `https://placehold.co/300x250/f97316/ffffff?text=Sidebar+${index + 1}`,
+      linkUrl: "https://godesi-app.vercel.app/pricing",
+    })),
+  ];
+
+  for (const banner of sampleBanners) {
+    const { slot, position, ...rest } = banner;
+    await db.banner.upsert({
+      where: { slot_position: { slot, position } },
+      update: rest,
+      create: { slot, position, ...rest },
     });
   }
 

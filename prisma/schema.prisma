@@ -36,6 +36,23 @@ enum EventType {
   WHATSAPP_CLICK
 }
 
+enum TicketStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum BannerSlot {
+  HEADER
+  SIDEBAR
+}
+
+enum NewsStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
 enum LeadStatus {
   OPEN
   CLOSED
@@ -56,6 +73,30 @@ model User {
   unlocks  LeadUnlock[]
   payments Payment[]
   reviews  Review[]
+  events   Event[]
+  tickets  Ticket[]
+  news     NewsItem[]
+}
+
+/// Multi-level taxonomy: top-level categories have `parentId = null`,
+/// subcategories point at their parent.
+model Category {
+  slug      String  @id
+  name      String
+  icon      String  @default("⭐")
+  color     String  @default("indigo")
+  blurb     String?
+  sortOrder Int     @default(0)
+
+  parentSlug String?
+  parent     Category?  @relation("CategoryTree", fields: [parentSlug], references: [slug], onDelete: Cascade)
+  children   Category[] @relation("CategoryTree")
+
+  businesses    Business[] @relation("BusinessCategory")
+  subBusinesses Business[] @relation("BusinessSubcategory")
+  eventListings Event[]
+
+  @@index([parentSlug, sortOrder])
 }
 
 model Business {
@@ -84,12 +125,20 @@ model Business {
   ownerId String @unique
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  media   Media[]
-  reviews Review[]
-  events  Event[]
+  categorySlug    String?
+  categoryRef     Category? @relation("BusinessCategory", fields: [categorySlug], references: [slug], onDelete: SetNull)
+  subcategorySlug String?
+  subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
+
+  media         Media[]
+  reviews       Review[]
+  trackedEvents AnalyticsEvent[]
+  eventListings Event[]
 
   @@index([category])
   @@index([city])
+  @@index([categorySlug])
+  @@index([subcategorySlug])
 }
 
 model Media {
@@ -119,7 +168,8 @@ model Review {
   @@index([businessId])
 }
 
-model Event {
+/// Analytics counter rows (profile views, QR scans, WhatsApp clicks).
+model AnalyticsEvent {
   id         String    @id @default(cuid())
   businessId String
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -127,6 +177,107 @@ model Event {
   createdAt  DateTime  @default(now())
 
   @@index([businessId, type])
+  @@map("Event")
+}
+
+/// A public event listing with ticket booking.
+model Event {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String
+  startsAt    DateTime
+  endsAt      DateTime?
+  venue       String
+  city        String
+  imageUrl    String?
+  priceInr    Int           @default(0)
+  seatsTotal  Int
+  seatsBooked Int           @default(0)
+  status      ListingStatus @default(APPROVED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  organizerId String
+  organizer   User      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  businessId  String?
+  business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  categorySlug String?
+  category     Category? @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
+
+  tickets Ticket[]
+
+  @@index([startsAt])
+  @@index([categorySlug])
+  @@index([city])
+  @@map("EventListing")
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  eventId     String
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  buyerName   String
+  buyerEmail  String
+  buyerPhone  String?
+  quantity    Int          @default(1)
+  amount      Int          @default(0)
+  currency    String       @default("INR")
+  provider    String       @default("free")
+  reference   String?      @unique
+  status      TicketStatus @default(PENDING)
+  checkedInAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  @@index([eventId, status])
+  @@index([userId])
+}
+
+model Banner {
+  id          String     @id @default(cuid())
+  slot        BannerSlot @default(SIDEBAR)
+  position    Int        @default(1)
+  title       String
+  imageUrl    String
+  linkUrl     String
+  active      Boolean    @default(true)
+  impressions Int        @default(0)
+  clicks      Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  @@unique([slot, position])
+  @@index([slot, active])
+}
+
+model NewsFeed {
+  id            String    @id @default(cuid())
+  name          String
+  url           String    @unique
+  active        Boolean   @default(true)
+  lastFetchedAt DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+model NewsItem {
+  id          String     @id @default(cuid())
+  guid        String     @unique
+  title       String
+  summary     String
+  imageUrl    String?
+  link        String
+  source      String
+  publishedAt DateTime   @default(now())
+  status      NewsStatus @default(PUBLISHED)
+  createdAt   DateTime   @default(now())
+
+  submittedById String?
+  submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
 }
 
 model Lead {

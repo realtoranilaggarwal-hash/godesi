@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getCategoryTree } from "@/lib/directory";
 import { BusinessProfileForm } from "@/components/forms/BusinessProfileForm";
 import { Card } from "@/components/ui";
 
@@ -12,7 +13,10 @@ export default async function ProfileEditorPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const business = await db.business.findUnique({ where: { ownerId: user.id } });
+  const [business, categories] = await Promise.all([
+    db.business.findUnique({ where: { ownerId: user.id } }),
+    getCategoryTree(),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -20,7 +24,7 @@ export default async function ProfileEditorPage() {
         {business ? "Edit your digital card" : "Create your digital card"}
       </h1>
       <Card>
-        <BusinessProfileForm business={business} />
+        <BusinessProfileForm business={business} categories={categories} />
       </Card>
     </div>
   );
