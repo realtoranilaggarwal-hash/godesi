@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Godesi
 
-## Getting Started
+A mobile-first SaaS platform of **digital business cards** for small businesses, with
+QR codes, WhatsApp integration, reviews, a lead marketplace, and paid membership tiers.
 
-First, run the development server:
+## Tech stack
+
+- **Next.js 14** (App Router, Server Actions) + **TypeScript**
+- **Tailwind CSS** (mobile-first, responsive UI)
+- **Prisma** + **PostgreSQL**
+- Cookie/JWT auth (`jose`), password hashing (`bcryptjs`)
+- QR generation (`qrcode`), validation (`zod`)
+
+## Features
+
+| Area | What it does |
+| --- | --- |
+| Business profile | Name, logo, description, gallery (images/videos), website, socials, Google Maps, WhatsApp, reviews |
+| Public card | SEO-friendly `/b/[slug]` with metadata, JSON-LD, sitemap & robots |
+| QR system | Unique QR per profile at `/api/qr/[slug]`, with download & share |
+| WhatsApp | Click-to-chat button with click tracking |
+| Analytics | Profile views, QR scans, WhatsApp clicks, leads unlocked |
+| Lead marketplace | Clients post requirements; businesses browse; **Premium** unlocks contact details |
+| Membership | Free / Pro / Premium plans with mock checkout (Stripe/Razorpay-ready) |
+| Search | Filter by category, city, rating, premium badge; premium/featured ranking |
+| Admin | Approve/reject listings, manage user plans, toggle featured, view payments |
+
+## Getting started
 
 ```bash
+cp .env.example .env         # set DATABASE_URL, AUTH_SECRET, NEXT_PUBLIC_SITE_URL
+npm install
+npx prisma migrate deploy    # or: npx prisma migrate dev
+npm run db:seed              # demo data
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Seeded accounts (password: `password123`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Admin: `admin@godesi.in`
+- Business (Premium): `sweetcrumbs@example.com`
+- Client: `client@example.com`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+- `npm run dev` / `build` / `start`
+- `npm run lint` — ESLint
+- `npm run typecheck` — `tsc --noEmit`
+- `npm run db:migrate` / `db:seed`
 
-To learn more about Next.js, take a look at the following resources:
+## Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Name | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `AUTH_SECRET` | Secret for signing session JWTs |
+| `NEXT_PUBLIC_SITE_URL` | Absolute site URL (used for QR targets, canonical URLs, sitemap) |
