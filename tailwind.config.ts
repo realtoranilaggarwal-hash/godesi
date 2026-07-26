@@ -5,6 +5,8 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    // Category gradient/soft palettes live here as class-name literals.
+    "./src/lib/**/*.{js,ts}",
   ],
   theme: {
     extend: {

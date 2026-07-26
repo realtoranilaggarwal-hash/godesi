@@ -89,20 +89,18 @@ export default async function HomePage() {
           <LinkButton href="/signup" variant="secondary">
             List your business free
           </LinkButton>
-          <LinkButton
+          <Link
             href="/events/new"
-            variant="secondary"
-            className="bg-transparent text-white hover:bg-white/10"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
           >
             Post an event
-          </LinkButton>
-          <LinkButton
+          </Link>
+          <Link
             href="/leads/new"
-            variant="secondary"
-            className="bg-transparent text-white hover:bg-white/10"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
           >
             Post a requirement
-          </LinkButton>
+          </Link>
         </div>
       </section>
 
