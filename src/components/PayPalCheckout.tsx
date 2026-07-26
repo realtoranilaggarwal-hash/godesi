@@ -24,22 +24,38 @@ declare global {
 
 const SDK_ID = "paypal-sdk";
 
+/** Shared across every PayPalCheckout instance so the SDK is requested once. */
+let sdkPromise: Promise<void> | null = null;
+
 function loadSdk(clientId: string) {
-  return new Promise<void>((resolve, reject) => {
-    if (window.paypal) return resolve();
+  if (window.paypal) return Promise.resolve();
+  if (sdkPromise) return sdkPromise;
+
+  sdkPromise = new Promise<void>((resolve, reject) => {
     const existing = document.getElementById(SDK_ID);
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("SDK failed to load")));
-      return;
+    const script = existing instanceof HTMLScriptElement ? existing : document.createElement("script");
+
+    const settle = () => (window.paypal ? resolve() : reject(new Error("SDK failed to load")));
+    script.addEventListener("load", settle);
+    script.addEventListener("error", () => reject(new Error("SDK failed to load")));
+
+    if (!existing) {
+      script.id = SDK_ID;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD`;
+      document.body.appendChild(script);
+    } else if (script.getAttribute("data-loaded") === "true") {
+      settle();
     }
-    const script = document.createElement("script");
-    script.id = SDK_ID;
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD`;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("SDK failed to load"));
-    document.body.appendChild(script);
-  });
+  })
+    .then(() => {
+      document.getElementById(SDK_ID)?.setAttribute("data-loaded", "true");
+    })
+    .catch((error) => {
+      sdkPromise = null;
+      throw error;
+    });
+
+  return sdkPromise;
 }
 
 export function PayPalCheckout({ plan, clientId }: { plan: Plan; clientId: string }) {
