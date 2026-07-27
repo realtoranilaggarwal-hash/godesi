@@ -18,8 +18,8 @@ export function AdPreview({
 }) {
   return (
     <div
-      style={{ aspectRatio: `${width} / ${height}` }}
-      className={`relative overflow-hidden rounded-xl ${className}`}
+      style={{ aspectRatio: `${width} / ${height}`, maxWidth: width }}
+      className={`relative mx-auto overflow-hidden rounded-xl ${className}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
