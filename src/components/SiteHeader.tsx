@@ -55,7 +55,7 @@ export async function SiteHeader() {
           Godesi
         </Link>
 
-        <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 md:flex">
+        <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 lg:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -110,7 +110,7 @@ export async function SiteHeader() {
                   </span>
                 ) : null}
               </Link>
-              <div className="hidden items-center gap-2 md:flex">
+              <div className="hidden items-center gap-2 lg:flex">
                 <Link
                   href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
                   className="rounded-lg px-2 py-1 hover:text-slate-900"
@@ -144,7 +144,7 @@ export async function SiteHeader() {
       </div>
 
       {/* Colourful category strip — the primary way around the directory. */}
-      <div className="hidden border-t border-slate-100 bg-white md:block">
+      <div className="hidden border-t border-slate-100 bg-white lg:block">
         <CategoryStrip items={categoryItems} />
       </div>
     </header>
