@@ -17,6 +17,7 @@ import { WorshipCard } from "@/components/WorshipCard";
 import { NewsCard } from "@/components/NewsCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
+import { freshNewsCutoff } from "@/lib/news";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -50,10 +51,21 @@ export default async function ReligiousPage({
       },
       orderBy: { startsAt: "asc" },
       take: 6,
-      select: { id: true, slug: true, title: true, city: true, venue: true, startsAt: true },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        city: true,
+        venue: true,
+        startsAt: true,
+      },
     }),
     db.newsItem.findMany({
-      where: { status: "PUBLISHED", topic: "faith" },
+      where: {
+        status: "PUBLISHED",
+        topic: "faith",
+        publishedAt: { gte: freshNewsCutoff() },
+      },
       orderBy: { publishedAt: "desc" },
       take: 6,
     }),
@@ -69,8 +81,8 @@ export default async function ReligiousPage({
         >
           <h1 className="text-3xl font-black">Religious & cultural 🛕</h1>
           <p className="mt-1 max-w-xl text-white/90">
-            Temples, gurudwaras, mosques and churches near you — with festival dates,
-            community events and a WhatsApp link to join in.
+            Temples, gurudwaras, mosques and churches near you — with festival
+            dates, community events and a WhatsApp link to join in.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/religious/new" variant="secondary">
@@ -123,7 +135,9 @@ export default async function ReligiousPage({
             />
             <select
               name="faith"
-              defaultValue={isFaith(searchParams.faith) ? searchParams.faith : ""}
+              defaultValue={
+                isFaith(searchParams.faith) ? searchParams.faith : ""
+              }
               aria-label="Type of place"
               className={inputClass}
             >
@@ -185,7 +199,10 @@ export default async function ReligiousPage({
             <h2 className="mb-3 font-bold">Upcoming events</h2>
             <ul className="space-y-2">
               {events.map((event) => (
-                <li key={event.id} className="rounded-xl border border-slate-200 px-3 py-2">
+                <li
+                  key={event.id}
+                  className="rounded-xl border border-slate-200 px-3 py-2"
+                >
                   <Link
                     href={`/events/${event.slug}`}
                     className="font-semibold text-indigo-600 hover:underline"
@@ -193,7 +210,8 @@ export default async function ReligiousPage({
                     {event.title}
                   </Link>
                   <p className="text-sm text-slate-600">
-                    {formatEventDate(event.startsAt)} · {event.venue}, {event.city}
+                    {formatEventDate(event.startsAt)} · {event.venue},{" "}
+                    {event.city}
                   </p>
                 </li>
               ))}
@@ -203,7 +221,9 @@ export default async function ReligiousPage({
 
         {news.length ? (
           <div>
-            <h2 className="mb-3 text-lg font-bold">Faith & spirituality news</h2>
+            <h2 className="mb-3 text-lg font-bold">
+              Faith & spirituality news
+            </h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {news.map((item) => (
                 <NewsCard key={item.id} item={item} />
@@ -211,7 +231,7 @@ export default async function ReligiousPage({
             </div>
           </div>
         ) : null}
-      <InlineBanner />
+        <InlineBanner />
       </div>
 
       <SidebarBanners />

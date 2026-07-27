@@ -10,6 +10,7 @@ import { HeaderBanner } from "@/components/Banners";
 import { WhyGodesi } from "@/components/WhyGodesi";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { Card, LinkButton } from "@/components/ui";
+import { freshNewsCutoff } from "@/lib/news";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export default async function HomePage() {
       },
     }),
     db.newsItem.findMany({
-      where: { status: "PUBLISHED" },
+      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
       orderBy: { publishedAt: "desc" },
       take: 4,
     }),

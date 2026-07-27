@@ -5,7 +5,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Runs every 30 minutes (see vercel.json). Vercel Cron sends an Authorization
+ * Runs daily (see vercel.json): pulls new items and drops anything older than six
+ * days. Vercel Cron sends an Authorization
  * header built from CRON_SECRET; manual calls must send the same bearer token.
  */
 function authorized(request: Request) {

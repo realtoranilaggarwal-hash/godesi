@@ -14,12 +14,18 @@ const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
     name: "Times of India — Top Stories",
     url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
   },
-  { name: "NDTV — India", url: "https://feeds.feedburner.com/ndtvnews-india-news" },
+  {
+    name: "NDTV — India",
+    url: "https://feeds.feedburner.com/ndtvnews-india-news",
+  },
   {
     name: "Economic Times — Top Stories",
     url: "https://economictimes.indiatimes.com/rssfeedstopstories.cms",
   },
-  { name: "Fibre2Fashion", url: "https://www.fibre2fashion.com/rss/textile-news.xml" },
+  {
+    name: "Fibre2Fashion",
+    url: "https://www.fibre2fashion.com/rss/textile-news.xml",
+  },
   { name: "Apparel Resources", url: "https://apparelresources.com/feed/" },
   {
     name: "The Hindu — Business",
@@ -68,12 +74,16 @@ function decode(value: string) {
 }
 
 function tag(block: string, name: string) {
-  const match = block.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, "i"));
+  const match = block.match(
+    new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, "i"),
+  );
   return match ? decode(match[1]) : null;
 }
 
 function attr(block: string, name: string, attribute: string) {
-  const match = block.match(new RegExp(`<${name}\\b[^>]*\\b${attribute}="([^"]+)"`, "i"));
+  const match = block.match(
+    new RegExp(`<${name}\\b[^>]*\\b${attribute}="([^"]+)"`, "i"),
+  );
   return match ? match[1] : null;
 }
 
@@ -109,9 +119,15 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
     if (!title || !link) continue;
 
     const description =
-      tag(block, "description") ?? tag(block, "content:encoded") ?? tag(block, "summary") ?? "";
+      tag(block, "description") ??
+      tag(block, "content:encoded") ??
+      tag(block, "summary") ??
+      "";
     const dateText =
-      tag(block, "pubDate") ?? tag(block, "published") ?? tag(block, "updated") ?? "";
+      tag(block, "pubDate") ??
+      tag(block, "published") ??
+      tag(block, "updated") ??
+      "";
     const parsedDate = dateText ? new Date(dateText) : null;
 
     items.push({
@@ -121,7 +137,9 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
       imageUrl: firstImage(block),
       link,
       publishedAt:
-        parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : new Date(),
+        parsedDate && !Number.isNaN(parsedDate.getTime())
+          ? parsedDate
+          : new Date(),
     });
   }
 
@@ -134,7 +152,13 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
  */
 export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
   const feeds = await db.newsFeed.findMany({ where: { active: true } });
-  const result = { feeds: feeds.length, fetched: 0, inserted: 0, skipped: 0, failed: [] as string[] };
+  const result = {
+    feeds: feeds.length,
+    fetched: 0,
+    inserted: 0,
+    skipped: 0,
+    failed: [] as string[],
+  };
 
   for (const feed of feeds) {
     try {
@@ -151,7 +175,9 @@ export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
 
       for (const item of items) {
         // eslint-disable-next-line no-await-in-loop
-        const existing = await db.newsItem.findUnique({ where: { guid: item.guid } });
+        const existing = await db.newsItem.findUnique({
+          where: { guid: item.guid },
+        });
         if (existing) {
           result.skipped += 1;
           continue;
@@ -183,7 +209,23 @@ export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
     }
   }
 
-  return result;
+  const purged = await purgeOldNews();
+
+  return { ...result, purged };
+}
+
+/** News is a rolling window: anything older than six days drops off the site. */
+export const NEWS_MAX_AGE_DAYS = 6;
+
+export function freshNewsCutoff() {
+  return new Date(Date.now() - NEWS_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+}
+
+export async function purgeOldNews() {
+  const { count } = await db.newsItem.deleteMany({
+    where: { publishedAt: { lt: freshNewsCutoff() } },
+  });
+  return count;
 }
 
 /**
@@ -198,7 +240,11 @@ export async function ingestIfStale(maxAgeMinutes = 30) {
       active: true,
       OR: [
         { lastFetchedAt: null },
-        { lastFetchedAt: { lt: new Date(Date.now() - maxAgeMinutes * 60 * 1000) } },
+        {
+          lastFetchedAt: {
+            lt: new Date(Date.now() - maxAgeMinutes * 60 * 1000),
+          },
+        },
       ],
     },
     select: { id: true },

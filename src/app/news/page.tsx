@@ -8,22 +8,25 @@ import { NewsForm } from "@/components/forms/NewsForm";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
+import { freshNewsCutoff } from "@/lib/news";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Desi news",
-  description: "Community, business and India headlines, refreshed every 30 minutes.",
+  description:
+    "Community, business and India headlines, refreshed every 30 minutes.",
 };
 
 export default async function NewsPage() {
   const user = await getCurrentUser();
-  const canSubmit = user && (user.role === "ADMIN" || effectivePlan(user) !== "FREE");
+  const canSubmit =
+    user && (user.role === "ADMIN" || effectivePlan(user) !== "FREE");
 
   // Refreshes the feed if the last crawl is older than 30 minutes.
   await ingestIfStale(30).catch(() => null);
 
   const items = await db.newsItem.findMany({
-    where: { status: "PUBLISHED" },
+    where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
     orderBy: { publishedAt: "desc" },
     take: 40,
   });
@@ -36,8 +39,8 @@ export default async function NewsPage() {
         >
           <h1 className="text-3xl font-black">Desi news 📰</h1>
           <p className="mt-1 max-w-xl text-white/90">
-            Headlines pulled from trusted feeds every 30 minutes, plus stories submitted by
-            our members.
+            Headlines pulled from trusted feeds every 30 minutes, plus stories
+            submitted by our members.
           </p>
         </section>
 
@@ -63,14 +66,14 @@ export default async function NewsPage() {
           ) : (
             <div className="mt-2 space-y-3">
               <p className="text-sm text-slate-600">
-                Submitting news is a Pro and Premium member benefit. Admins publish
-                instantly; member stories are reviewed first.
+                Submitting news is a Pro and Premium member benefit. Admins
+                publish instantly; member stories are reviewed first.
               </p>
               <LinkButton href="/pricing">See plans</LinkButton>
             </div>
           )}
         </Card>
-      <InlineBanner />
+        <InlineBanner />
       </div>
 
       <SidebarBanners />
