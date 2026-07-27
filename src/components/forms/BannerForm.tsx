@@ -49,7 +49,18 @@ export function BannerForm() {
         <Field label="Destination URL">
           <input name="linkUrl" type="url" required className={inputClass} />
         </Field>
+        <Field label="Views cap" hint="Optional — retires the banner once delivered">
+          <input name="impressionCap" type="number" min={1} className={inputClass} />
+        </Field>
+        <Field label="Runs until" hint="Optional end date">
+          <input name="endsAt" type="date" className={inputClass} />
+        </Field>
       </div>
+
+      <p className="text-xs text-slate-500">
+        Saved banners go live immediately — no payment step. Leave the views cap and end
+        date blank to run indefinitely.
+      </p>
 
       <SubmitButton>Save banner</SubmitButton>
     </form>

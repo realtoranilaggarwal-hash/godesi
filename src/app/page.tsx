@@ -6,7 +6,12 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { CategoryTiles } from "@/components/CategoryTiles";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
-import { HeaderBanner, HeroBanner, SidebarBanners } from "@/components/Banners";
+import {
+  HeaderBanner,
+  HeroBanner,
+  InlineBanner,
+  SidebarBanners,
+} from "@/components/Banners";
 import { Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -132,6 +137,8 @@ export default async function HomePage() {
               </Card>
             )}
           </section>
+
+          <InlineBanner />
 
           {events.length ? (
             <section>

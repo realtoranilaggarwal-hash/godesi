@@ -11,6 +11,15 @@ import {
   slotSoldCount,
 } from "@/lib/banners";
 import { BannerImpression } from "@/components/BannerImpression";
+import { AdSenseUnit } from "@/components/AdSenseUnit";
+
+/** AdSense slot ids per placement, so unsold space still earns. */
+const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
+  HERO: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HERO,
+  HEADER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER,
+  SIDEBAR: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
+  SKYSCRAPER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SKYSCRAPER,
+};
 
 type BannerRow = {
   id: string;
@@ -64,14 +73,26 @@ function AdvertiseHere({
   slot: BannerSlot;
   className?: string;
 }) {
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const adsenseSlot = ADSENSE_SLOTS[slot];
+
+  if (client && adsenseSlot) {
+    return (
+      <div className={className}>
+        <AdSenseUnit client={client} slotId={adsenseSlot} height={height} />
+        <BookThisSpot slot={slot} label={label} />
+      </div>
+    );
+  }
+
   return (
     <Link
       href={`/advertise?slot=${slot}#book`}
       style={{ minHeight: height }}
-      className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-center transition hover:border-indigo-400 hover:bg-indigo-50 ${className}`}
+      className={`flex flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center transition hover:border-indigo-400 hover:bg-indigo-50/60 ${className}`}
     >
-      <span className="text-sm font-bold text-indigo-700">Book this spot</span>
-      <span className="text-xs text-indigo-500">{label}</span>
+      <span className="text-sm font-bold text-slate-700">Book this spot</span>
+      <span className="text-xs text-slate-500">{label}</span>
       <span className="mt-1 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
         Monthly or pay per views →
       </span>
@@ -169,6 +190,23 @@ export async function HeroBanner() {
           banner={banner}
           width={HERO_SIZE.width}
           height={HERO_SIZE.height}
+          className="rounded-3xl"
+        />
+        <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
+      </div>
+    );
+  }
+
+  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const adsenseSlot = ADSENSE_SLOTS.HERO;
+
+  if (client && adsenseSlot) {
+    return (
+      <div>
+        <AdSenseUnit
+          client={client}
+          slotId={adsenseSlot}
+          height={280}
           className="rounded-3xl"
         />
         <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />

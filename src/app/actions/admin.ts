@@ -43,11 +43,13 @@ export async function setUserPlanAction(formData: FormData) {
 }
 
 const bannerSchema = z.object({
-  slot: z.enum(["SIDEBAR", "HEADER", "SKYSCRAPER"]),
+  slot: z.enum(["HERO", "SIDEBAR", "HEADER", "SKYSCRAPER"]),
   position: z.coerce.number().int().min(1),
   title: z.string().trim().min(2, "Banner title is required"),
   imageUrl: z.string().trim().url("Enter a valid image URL"),
   linkUrl: z.string().trim().url("Enter a valid destination URL"),
+  impressionCap: z.coerce.number().int().min(1).optional(),
+  endsAt: z.coerce.date().optional(),
 });
 
 export async function saveBannerAction(
@@ -62,6 +64,8 @@ export async function saveBannerAction(
       title: formData.get("title"),
       imageUrl: formData.get("imageUrl"),
       linkUrl: formData.get("linkUrl"),
+      impressionCap: formData.get("impressionCap") || undefined,
+      endsAt: formData.get("endsAt") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -70,11 +74,16 @@ export async function saveBannerAction(
       return { error: `${parsed.data.slot} has only ${limit} slot(s).` };
     }
 
-    const { slot, position, ...rest } = parsed.data;
+    const { slot, position, impressionCap, endsAt, ...rest } = parsed.data;
+    const schedule = {
+      impressionCap: impressionCap ?? null,
+      endsAt: endsAt ?? null,
+      startsAt: new Date(),
+    };
     await db.banner.upsert({
       where: { slot_position: { slot, position } },
-      create: { slot, position, ...rest, status: "ACTIVE" },
-      update: { ...rest, active: true, status: "ACTIVE" },
+      create: { slot, position, ...rest, ...schedule, status: "ACTIVE" },
+      update: { ...rest, ...schedule, active: true, status: "ACTIVE" },
     });
 
     revalidatePath("/admin");
