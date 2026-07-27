@@ -4,6 +4,8 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AiChat } from "@/components/AiChat";
+import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -30,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
         <CookieConsent />
+        {aiEnabled() && <AiChat />}
       </body>
     </html>
   );
