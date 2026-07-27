@@ -93,7 +93,8 @@ function AdvertiseHere({
       href={`/advertise?slot=${slot}#book`}
       className={`block transition hover:opacity-90 ${className}`}
     >
-      <AdPreview width={width} height={height} sub={label} />
+      <AdPreview width={width} height={height} />
+      <span className="sr-only">{label}</span>
       <span className="mt-1 block text-center text-xs font-semibold text-indigo-600">
         Book this spot — monthly or pay per views →
       </span>

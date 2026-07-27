@@ -1,42 +1,35 @@
 /**
- * A designed stand-in for an unsold placement: brand gradient, the exact size and a
- * clear invitation, so empty inventory still looks intentional.
+ * A designed stand-in for an unsold placement: brand artwork cropped to the exact
+ * placement size, so empty inventory still looks intentional and sells itself.
  */
+function artworkFor(width: number, height: number) {
+  if (height > width) return "/ad-skyscraper.jpg";
+  return width / height > 2 ? "/ad-leaderboard.jpg" : "/ad-sidebar.jpg";
+}
+
 export function AdPreview({
   width,
   height,
   className = "",
-  headline = "Advertise here",
-  sub,
 }: {
   width: number;
   height: number;
   className?: string;
-  headline?: string;
-  sub?: string;
 }) {
-  const tall = height > width;
-
   return (
     <div
       style={{ aspectRatio: `${width} / ${height}` }}
-      className={`relative flex flex-col items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-3 text-center text-white ${className}`}
+      className={`relative overflow-hidden rounded-xl ${className}`}
     >
-      <p
-        className={`font-black leading-tight drop-shadow-sm ${
-          tall ? "text-sm" : "text-base sm:text-xl"
-        }`}
-      >
-        {headline}
-      </p>
-      <p className="mt-1 text-[11px] font-medium text-white/90 sm:text-xs">
-        {sub ?? "Reach the desi community"}
-      </p>
-      <span className="mt-2 rounded-lg bg-white/95 px-2 py-1 text-[10px] font-bold text-rose-700 sm:text-xs">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={artworkFor(width, height)}
+        alt="Advertise here — reach the desi community on Godesi"
+        loading="lazy"
+        className="h-full w-full object-cover"
+      />
+      <span className="absolute bottom-1 left-1 rounded bg-black/35 px-1.5 py-0.5 text-[10px] font-semibold text-white">
         {width} × {height}
-      </span>
-      <span className="absolute bottom-1 right-2 text-[10px] font-semibold text-white/80">
-        godesi.com
       </span>
     </div>
   );
