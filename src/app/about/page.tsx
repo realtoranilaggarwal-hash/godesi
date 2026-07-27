@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const shareUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL;
+
   return (
     <LegalPage title="About Godesi">
       <p>
@@ -63,7 +65,23 @@ export default function AboutPage() {
         starter entries that the owner can claim and complete. We do not copy listings
         from other directories. Places of worship include a small openly licensed
         starter set from OpenStreetMap contributors, and anyone can submit corrections.
+        Basic business starter entries also use openly licensed OpenStreetMap data
+        (name, area, phone, website) under the ODbL until an owner claims them.
       </p>
+
+      {shareUrl ? (
+        <>
+          <h2>Our traffic, in the open</h2>
+          <p>
+            We publish our visitor numbers:{" "}
+            <a href={shareUrl} target="_blank" rel="noreferrer">
+              live traffic dashboard
+            </a>{" "}
+            — visitors, countries and referrers, updated in real time. No personal data,
+            no cross-site tracking.
+          </p>
+        </>
+      ) : null}
 
       <h2>Talk to us</h2>
       <p>

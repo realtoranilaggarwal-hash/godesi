@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getCategory, categoryScopeSlugs } from "@/lib/directory";
 import { searchBusinesses } from "@/lib/businesses";
 import { gradientFor, softFor } from "@/lib/categories";
+import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
 import { SidebarBanners } from "@/components/Banners";
@@ -40,6 +41,7 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   const scope = categoryScopeSlugs(category);
+  const guide = guideFor(category.parent?.slug ?? category.slug);
   /** Pre-selects this category (and subcategory) in the business card form. */
   const postQuery = new URLSearchParams({
     ...(category.parent
@@ -158,6 +160,45 @@ export default async function CategoryPage({
             />
           )}
         </section>
+
+        {guide ? (
+          <Card className="space-y-4">
+            <div>
+              <h2 className="text-lg font-bold">
+                How to choose {category.name.toLowerCase()} on Godesi
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">{guide.intro}</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Before you book</h3>
+                <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
+                  {guide.checklist.map((item) => (
+                    <li key={item}>✅ {item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Questions to ask</h3>
+                <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
+                  {guide.askVendors.map((item) => (
+                    <li key={item}>❓ {item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600">
+              Run a {category.name.toLowerCase()} business?{" "}
+              <Link
+                href={`/dashboard/profile?${postQuery}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                Add your free listing
+              </Link>{" "}
+              and start getting enquiries on WhatsApp.
+            </p>
+          </Card>
+        ) : null}
 
         {events.length ? (
           <section>

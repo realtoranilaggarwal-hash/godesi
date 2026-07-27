@@ -44,6 +44,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
 
 export function SiteFooter() {
   const socials = socialLinks();
+  /** Public Umami dashboard, shown only when a share URL is configured. */
+  const statsUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL;
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
@@ -91,6 +93,18 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              {section.title === "Company" && statsUrl ? (
+                <li>
+                  <a
+                    href={statsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-slate-900"
+                  >
+                    Live traffic stats
+                  </a>
+                </li>
+              ) : null}
             </ul>
           </div>
         ))}
