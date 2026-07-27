@@ -13,6 +13,11 @@ export function formatUsd(value: number) {
   }).format(value);
 }
 
+/** Whole-unit amount in the currency the poster priced it in. */
+export function formatMoney(value: number, currency: string) {
+  return currency.toUpperCase() === "INR" ? formatInr(value) : formatUsd(value);
+}
+
 /**
  * Money is stored in the currency's minor unit (paise, cents) so fractional
  * prices such as $5.99 survive a round trip through the database.

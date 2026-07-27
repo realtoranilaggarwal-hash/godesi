@@ -4,11 +4,18 @@ import { useFormState } from "react-dom";
 import { createEventAction } from "@/app/actions/events";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
+import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 
-export function EventForm({ categories }: { categories: CategoryOption[] }) {
+export function EventForm({
+  categories,
+  defaultCurrency,
+}: {
+  categories: CategoryOption[];
+  defaultCurrency: string;
+}) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
 
   return (
@@ -36,9 +43,10 @@ export function EventForm({ categories }: { categories: CategoryOption[] }) {
           <input name="city" required className={inputClass} />
         </Field>
         <CategorySelect categories={categories} required={false} />
-        <Field label="Ticket price (₹)" hint="Leave 0 for a free event">
-          <input name="priceInr" type="number" min={0} defaultValue={0} className={inputClass} />
+        <Field label="Ticket price" hint="Leave 0 for a free event">
+          <input name="price" type="number" min={0} defaultValue={0} className={inputClass} />
         </Field>
+        <CurrencySelect defaultValue={defaultCurrency} />
         <Field label="Seats available">
           <input
             name="seatsTotal"

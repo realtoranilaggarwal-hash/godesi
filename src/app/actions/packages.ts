@@ -5,12 +5,14 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { requestCurrency } from "@/lib/currency";
 
 const MAX_PACKAGES = 8;
 
 const schema = z.object({
   name: z.string().min(3, "Name your package"),
-  priceInr: z.coerce.number().int().min(0).max(50_000_000),
+  price: z.coerce.number().int().min(0).max(50_000_000),
+  currency: z.enum(["INR", "USD"]).optional(),
   description: z.string().max(400).optional(),
 });
 
@@ -25,7 +27,8 @@ export async function addPackageAction(
 
     const parsed = schema.safeParse({
       name: formData.get("name"),
-      priceInr: formData.get("priceInr") || 0,
+      price: formData.get("price") || 0,
+      currency: formData.get("currency") || undefined,
       description: formData.get("description") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -39,7 +42,8 @@ export async function addPackageAction(
       data: {
         businessId: business.id,
         name: parsed.data.name,
-        priceInr: parsed.data.priceInr,
+        price: parsed.data.price,
+        currency: parsed.data.currency ?? requestCurrency(),
         description: parsed.data.description ?? null,
         sortOrder: count,
       },

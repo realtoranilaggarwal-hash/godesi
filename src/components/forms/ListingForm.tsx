@@ -5,6 +5,7 @@ import { useFormState } from "react-dom";
 import { createListingAction } from "@/app/actions/listings";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
+import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
@@ -22,10 +23,12 @@ export function ListingForm({
   defaultKind,
   imageLimit,
   defaultWhatsapp,
+  defaultCurrency,
 }: {
   defaultKind: ListingKind;
   imageLimit: number;
   defaultWhatsapp: string;
+  defaultCurrency: string;
 }) {
   const [state, formAction] = useFormState(createListingAction, emptyState);
   const [kind, setKind] = useState<ListingKind>(defaultKind);
@@ -69,17 +72,18 @@ export function ListingForm({
           <input name="area" className={inputClass} />
         </Field>
         <Field
-          label={monthly ? "Rent per month (₹)" : "Price (₹)"}
+          label={monthly ? "Rent per month" : "Price"}
           hint="Leave 0 for price on request"
         >
           <input
-            name="priceInr"
+            name="price"
             type="number"
             min={0}
             defaultValue={0}
             className={inputClass}
           />
         </Field>
+        <CurrencySelect defaultValue={defaultCurrency} />
         <Field label="WhatsApp number" hint="Buyers message you directly here">
           <input
             name="whatsapp"

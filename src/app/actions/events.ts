@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { requestCurrency } from "@/lib/currency";
 import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
@@ -26,7 +27,8 @@ const eventSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
-  priceInr: z.coerce.number().int().min(0, "Price cannot be negative"),
+  price: z.coerce.number().int().min(0, "Price cannot be negative"),
+  currency: z.enum(["INR", "USD"]).optional(),
   seatsTotal: z.coerce.number().int().min(1, "At least 1 seat is required"),
   imageUrl: optionalUrl,
 });
@@ -47,7 +49,8 @@ export async function createEventAction(
       city: formData.get("city"),
       categorySlug: formData.get("categorySlug"),
       subcategorySlug: formData.get("subcategorySlug"),
-      priceInr: formData.get("priceInr") || 0,
+      price: formData.get("price") || 0,
+      currency: formData.get("currency") || undefined,
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl"),
     });
@@ -68,7 +71,8 @@ export async function createEventAction(
         venue: parsed.data.venue,
         city: parsed.data.city,
         imageUrl: parsed.data.imageUrl ?? null,
-        priceInr: parsed.data.priceInr,
+        price: parsed.data.price,
+        currency: parsed.data.currency ?? requestCurrency(),
         seatsTotal: parsed.data.seatsTotal,
         organizerId: user.id,
         businessId: business?.id ?? null,
@@ -120,7 +124,7 @@ export async function bookTicketAction(
       return { error: `Only ${seatsLeft(event)} seat(s) left for this event.` };
     }
 
-    const amountMinor = toMinor(event.priceInr * parsed.data.quantity);
+    const amountMinor = toMinor(event.price * parsed.data.quantity);
 
     const ticket = await db.ticket.create({
       data: {
@@ -132,18 +136,18 @@ export async function bookTicketAction(
         buyerPhone: parsed.data.buyerPhone || null,
         quantity: parsed.data.quantity,
         amountMinor,
-        currency: "INR",
-        provider: event.priceInr === 0 ? "free" : "stripe",
+        currency: event.currency,
+        provider: event.price === 0 ? "free" : "stripe",
       },
     });
 
-    if (event.priceInr === 0) {
+    if (event.price === 0) {
       await confirmTicket({
         ticketId: ticket.id,
         provider: "free",
         reference: `free_${ticket.id}`,
         amountMinor: 0,
-        currency: "INR",
+        currency: event.currency,
       });
       destination = `/tickets/${ticket.code}`;
     } else {
@@ -160,8 +164,8 @@ export async function bookTicketAction(
           {
             quantity: parsed.data.quantity,
             price_data: {
-              currency: "inr",
-              unit_amount: toMinor(event.priceInr),
+              currency: event.currency.toLowerCase(),
+              unit_amount: toMinor(event.price),
               product_data: {
                 name: `${event.title} — ticket`,
                 description: `${event.venue}, ${event.city}`,

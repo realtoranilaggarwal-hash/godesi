@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { searchBusinesses, type BusinessListItem } from "@/lib/businesses";
 import { CATEGORY_TREE } from "@/lib/categories";
 import { formatEventDate, seatsLeft } from "@/lib/events";
-import { formatInr } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 
 const STOPWORDS = new Set([
   "a", "an", "and", "any", "are", "best", "can", "find", "for", "get", "good",
@@ -72,7 +72,7 @@ export async function buildContext(question: string) {
           .map(
             (e) =>
               `- ${e.title} — ${formatEventDate(e.startsAt)}, ${e.venue}, ${e.city}, ${
-                e.priceInr > 0 ? formatInr(e.priceInr) : "free"
+                e.price > 0 ? formatMoney(e.price, e.currency) : "free"
               }, ${seatsLeft(e)} seats left. Link: /events/${e.slug}`,
           )
           .join("\n")}`

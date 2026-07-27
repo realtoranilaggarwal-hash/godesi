@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatInr, siteUrl } from "@/lib/format";
+import { formatMoney, siteUrl } from "@/lib/format";
 import { formatEventDate, isPast, seatsLeft } from "@/lib/events";
 import { gradientFor } from "@/lib/categories";
 import { TicketForm } from "@/components/forms/TicketForm";
@@ -98,7 +98,7 @@ export default async function EventPage({
                 📍 {event.venue}, {event.city}
               </p>
               <p>
-                🎫 {event.priceInr ? `${formatInr(event.priceInr)} per seat` : "Free entry"}
+                🎫 {event.price ? `${formatMoney(event.price, event.currency)} per seat` : "Free entry"}
               </p>
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>
@@ -153,7 +153,7 @@ export default async function EventPage({
             <div className="mt-3">
               <TicketForm
                 eventId={event.id}
-                priceInr={event.priceInr}
+                price={event.price}
                 seatsLeft={left}
                 maxPerBooking={maxPerBooking}
                 defaultName={user.name}

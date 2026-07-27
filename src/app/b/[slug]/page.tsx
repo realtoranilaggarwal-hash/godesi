@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatInr, siteUrl, whatsappLink } from "@/lib/format";
+import { formatMoney, siteUrl, whatsappLink } from "@/lib/format";
 import { effectivePlan } from "@/lib/plans";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -265,7 +265,7 @@ export default async function BusinessProfilePage({
                   >
                     <p className="font-bold">{item.name}</p>
                     <p className="text-xl font-black text-emerald-700">
-                      {formatInr(item.priceInr)}
+                      {formatMoney(item.price, item.currency)}
                     </p>
                     {item.description ? (
                       <p className="mt-1 text-sm text-slate-600">{item.description}</p>

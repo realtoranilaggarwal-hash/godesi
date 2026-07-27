@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { mediaLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
+import { requestCurrency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Post a listing" };
@@ -48,6 +49,7 @@ export default async function NewListingPage({
           defaultKind={kind}
           imageLimit={mediaLimit(user)}
           defaultWhatsapp={business?.whatsappNumber ?? business?.phone ?? ""}
+          defaultCurrency={requestCurrency()}
         />
       </Card>
     </div>

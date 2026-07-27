@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatInr } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import { formatEventDate, seatsLeft } from "@/lib/events";
 import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
@@ -12,7 +12,8 @@ export type EventListItem = {
   venue: string;
   city: string;
   imageUrl: string | null;
-  priceInr: number;
+  price: number;
+  currency: string;
   seatsTotal: number;
   seatsBooked: number;
   category: { name: string; icon: string; color: string } | null;
@@ -61,7 +62,7 @@ export function EventCard({ event }: { event: EventListItem }) {
         </p>
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="font-bold text-indigo-600">
-            {event.priceInr ? formatInr(event.priceInr) : "Free entry"}
+            {event.price ? formatMoney(event.price, event.currency) : "Free entry"}
           </span>
           <span className="text-xs text-slate-500">{left} seats left</span>
         </div>

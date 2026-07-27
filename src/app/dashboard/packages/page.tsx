@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatInr } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { PackageForm } from "@/components/forms/PackageForm";
 import { deletePackageAction } from "@/app/actions/packages";
+import { requestCurrency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Packages & pricing" };
@@ -32,7 +33,7 @@ export default async function PackagesPage() {
       {business ? (
         <>
           <Card>
-            <PackageForm />
+            <PackageForm defaultCurrency={requestCurrency()} />
           </Card>
 
           {business.packages.length ? (
@@ -50,7 +51,7 @@ export default async function PackagesPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-black text-emerald-700">
-                      {formatInr(item.priceInr)}
+                      {formatMoney(item.price, item.currency)}
                     </span>
                     <form action={deletePackageAction}>
                       <input type="hidden" name="id" value={item.id} />

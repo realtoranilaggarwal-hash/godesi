@@ -157,7 +157,9 @@ model Listing {
   description String
   city        String
   area        String?
-  priceInr    Int               @default(0)
+  price       Int               @default(0)
+  /// ISO currency of `price`, chosen from the poster's location.
+  currency    String            @default("INR")
   /// Monthly rents and shared rooms are per month; sales and items are one-off.
   perMonth    Boolean           @default(false)
   bedrooms    Int?
@@ -195,7 +197,8 @@ model VendorPackage {
   businessId  String
   business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name        String
-  priceInr    Int
+  price       Int
+  currency    String   @default("INR")
   description String?
   sortOrder   Int      @default(0)
 
@@ -343,7 +346,9 @@ model Event {
   venue       String
   city        String
   imageUrl    String?
-  priceInr    Int           @default(0)
+  price       Int           @default(0)
+  /// ISO currency of `price`, chosen from the organiser's location.
+  currency    String        @default("INR")
   seatsTotal  Int
   seatsBooked Int           @default(0)
   status      ListingStatus @default(APPROVED)

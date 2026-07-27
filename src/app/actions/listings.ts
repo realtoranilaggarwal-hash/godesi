@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
+import { requestCurrency } from "@/lib/currency";
 import { isMonthly, uniqueListingSlug } from "@/lib/listings";
 import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
@@ -16,7 +17,8 @@ const schema = z.object({
   description: z.string().min(20, "Add a few lines of detail"),
   city: z.string().min(2, "Which city?"),
   area: z.string().optional(),
-  priceInr: z.coerce.number().int().min(0).max(500_000_000),
+  price: z.coerce.number().int().min(0).max(500_000_000),
+  currency: z.enum(["INR", "USD"]).optional(),
   bedrooms: z.coerce.number().int().min(0).max(20).optional(),
   furnishing: z.enum(["FURNISHED", "SEMI_FURNISHED", "UNFURNISHED"]).optional(),
   genderPref: z.enum(["ANY", "MALE", "FEMALE"]).optional(),
@@ -36,7 +38,8 @@ export async function createListingAction(
       description: formData.get("description"),
       city: formData.get("city"),
       area: formData.get("area") || undefined,
-      priceInr: formData.get("priceInr") || 0,
+      price: formData.get("price") || 0,
+      currency: formData.get("currency") || undefined,
       bedrooms: formData.get("bedrooms") || undefined,
       furnishing: formData.get("furnishing") || undefined,
       genderPref: formData.get("genderPref") || undefined,
@@ -58,7 +61,8 @@ export async function createListingAction(
         description: parsed.data.description,
         city: parsed.data.city,
         area: parsed.data.area ?? null,
-        priceInr: parsed.data.priceInr,
+        price: parsed.data.price,
+        currency: parsed.data.currency ?? requestCurrency(),
         perMonth: isMonthly(parsed.data.kind),
         bedrooms: parsed.data.bedrooms ?? null,
         furnishing: parsed.data.furnishing ?? null,

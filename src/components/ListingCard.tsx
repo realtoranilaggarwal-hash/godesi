@@ -15,7 +15,8 @@ export type ListingCardItem = {
   title: string;
   city: string;
   area: string | null;
-  priceInr: number;
+  price: number;
+  currency: string;
   perMonth: boolean;
   bedrooms: number | null;
   furnishing: Furnishing | null;

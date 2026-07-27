@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { EventForm } from "@/components/forms/EventForm";
 import { Card } from "@/components/ui";
+import { requestCurrency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Post an event" };
@@ -23,7 +24,7 @@ export default async function NewEventPage() {
         </p>
       </div>
       <Card>
-        <EventForm categories={categories} />
+        <EventForm categories={categories} defaultCurrency={requestCurrency()} />
       </Card>
     </div>
   );

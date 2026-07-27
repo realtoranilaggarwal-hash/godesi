@@ -4,6 +4,7 @@ import { useFormState } from "react-dom";
 import { adminUpdateEventAction } from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
+import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
@@ -18,7 +19,8 @@ export type AdminEventValues = {
   city: string;
   categorySlug: string;
   subcategorySlug: string;
-  priceInr: number;
+  price: number;
+  currency: string;
   seatsTotal: number;
   seatsBooked: number;
   imageUrl: string;
@@ -84,15 +86,16 @@ export function AdminEventForm({
           defaultCategory={event.categorySlug}
           defaultSubcategory={event.subcategorySlug}
         />
-        <Field label="Ticket price (₹)" hint="0 for a free event">
+        <Field label="Ticket price" hint="0 for a free event">
           <input
-            name="priceInr"
+            name="price"
             type="number"
             min={0}
-            defaultValue={event.priceInr}
+            defaultValue={event.price}
             className={inputClass}
           />
         </Field>
+        <CurrencySelect defaultValue={event.currency} />
         <Field label="Seats available" hint={`${event.seatsBooked} already booked`}>
           <input
             name="seatsTotal"

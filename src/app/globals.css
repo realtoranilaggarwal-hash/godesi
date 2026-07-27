@@ -20,6 +20,19 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* User-generated text can contain unbroken strings (pasted URLs, spam); never let it widen the page. */
+p,
+h1,
+h2,
+h3,
+h4,
+li,
+dd,
+td,
+blockquote {
+  overflow-wrap: anywhere;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

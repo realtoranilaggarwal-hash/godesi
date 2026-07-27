@@ -8,14 +8,14 @@ import { SubmitButton } from "@/components/SubmitButton";
 
 export function TicketForm({
   eventId,
-  priceInr,
+  price,
   seatsLeft,
   maxPerBooking,
   defaultName,
   defaultEmail,
 }: {
   eventId: string;
-  priceInr: number;
+  price: number;
   seatsLeft: number;
   maxPerBooking: number;
   defaultName?: string;
@@ -58,11 +58,11 @@ export function TicketForm({
       </div>
 
       <SubmitButton pendingLabel="Booking...">
-        {priceInr ? "Book & pay" : "Get free ticket"}
+        {price ? "Book & pay" : "Get free ticket"}
       </SubmitButton>
       <p className="text-xs text-slate-500">
         {seatsLeft} seat(s) left · max {maxPerBooking} per booking
-        {priceInr ? " · payment handled securely by Stripe" : ""}
+        {price ? " · payment handled securely by Stripe" : ""}
       </p>
     </form>
   );

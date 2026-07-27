@@ -1,6 +1,6 @@
 import type { Furnishing, GenderPreference, ListingKind, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { formatInr } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import { slugify } from "@/lib/slug";
 
 export type ListingSection = "real-estate" | "rooms" | "marketplace";
@@ -36,11 +36,14 @@ export function isMonthly(kind: ListingKind) {
   return kind === "PROPERTY_RENT" || kind === "ROOM_OFFERED" || kind === "ROOM_WANTED";
 }
 
-export function priceLabel(listing: { priceInr: number; perMonth: boolean }) {
-  if (!listing.priceInr) return "Price on request";
-  return listing.perMonth
-    ? `${formatInr(listing.priceInr)}/month`
-    : formatInr(listing.priceInr);
+export function priceLabel(listing: {
+  price: number;
+  currency: string;
+  perMonth: boolean;
+}) {
+  if (!listing.price) return "Price on request";
+  const amount = formatMoney(listing.price, listing.currency);
+  return listing.perMonth ? `${amount}/month` : amount;
 }
 
 export async function uniqueListingSlug(title: string, city: string) {
@@ -88,7 +91,7 @@ export function listingWhere(
     status: "APPROVED",
     kind: kind ? kind : { in: kinds },
     ...(filters.city ? { city: { contains: filters.city, mode: "insensitive" } } : {}),
-    ...(max ? { priceInr: { lte: max, gt: 0 } } : {}),
+    ...(max ? { price: { lte: max, gt: 0 } } : {}),
     ...(bedrooms ? { bedrooms: { gte: bedrooms } } : {}),
     ...(filters.furnishing && filters.furnishing in FURNISHING_LABELS
       ? { furnishing: filters.furnishing as Furnishing }
