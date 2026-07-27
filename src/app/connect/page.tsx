@@ -8,7 +8,8 @@ import {
   GENDER_LABELS,
   INTENT_LABELS,
   MARITAL_LABELS,
-  MEETUP_INTENTS,
+  MEETUP_INTENT_GROUPS,
+  MEETUP_INTENT_NOTE,
   intentLabels,
 } from "@/lib/meetups";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
@@ -27,7 +28,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Connect — meet desis near you",
   description:
-    "Meet desis in your city for business networking, a coffee catch-up or friendly conversation. Strictly platonic, reviewed and moderated.",
+    "Meet desis in your city for networking, mentorship, cultural meetups, workshops and community groups. Reviewed and moderated; not a dating service.",
 };
 
 type Filters = {
@@ -103,9 +104,8 @@ export default async function ConnectPage({
             Meet desis near you 🤝
           </h1>
           <p className="mt-3 max-w-2xl text-white/90">
-            For business networking, a coffee catch-up or simple friendly chit-chat —
-            students, professionals, singles and married folks all welcome. This is a
-            platonic community space: no dating, no adult content.
+            Networking, mentorship, cultural meetups, workshops and local community
+            groups — students, professionals and families all welcome. {MEETUP_INTENT_NOTE}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <LinkButton href="/connect/new" variant="secondary">
@@ -141,11 +141,15 @@ export default async function ConnectPage({
               aria-label="Open to"
               className={inputClass}
             >
-              <option value="">Any reason to meet</option>
-              {MEETUP_INTENTS.map((intent) => (
-                <option key={intent.id} value={intent.id}>
-                  {intent.label}
-                </option>
+              <option value="">Any interest</option>
+              {MEETUP_INTENT_GROUPS.map((group) => (
+                <optgroup key={group.id} label={group.label}>
+                  {group.intents.map((intent) => (
+                    <option key={intent.id} value={intent.id}>
+                      {intent.label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <select
@@ -281,8 +285,8 @@ export default async function ConnectPage({
           <ul className="mt-2 space-y-1 text-sm text-slate-600">
             <li>• 18+ only, and every profile is reviewed before it appears.</li>
             <li>
-              • Business, coffee, community and friendly conversation only — no dating,
-              adult or sexual content. Such wording is blocked automatically.
+              • Networking, community and activities only. Dating and adult content are
+              not allowed and such wording is blocked automatically.
             </li>
             <li>• Meet in public places and never send money to anyone.</li>
             <li>

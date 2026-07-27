@@ -9,6 +9,7 @@ import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 
@@ -210,6 +211,8 @@ export default async function CategoryPage({
             </div>
           </section>
         ) : null}
+      <RecommendedLinks categorySlug={category.slug} />
+
       <InlineBanner />
       </div>
 

@@ -4,6 +4,7 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
 import { confirmTicket } from "@/lib/events";
 import { confirmAdOrder } from "@/lib/adOrders";
+import { confirmResourceOrder } from "@/lib/resourceOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
     if (session.payment_status === "paid") {
       const ticketId = session.metadata?.ticketId;
       const adOrderId = session.metadata?.adOrderId;
+      const resourceOrderId = session.metadata?.resourceOrderId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
@@ -47,6 +49,14 @@ export async function POST(request: Request) {
       } else if (session.metadata?.kind === "ad" && adOrderId) {
         await confirmAdOrder({
           adOrderId,
+          provider: "stripe",
+          reference: session.id,
+          amountMinor: session.amount_total ?? 0,
+          currency: (session.currency ?? "inr").toUpperCase(),
+        });
+      } else if (session.metadata?.kind === "resource" && resourceOrderId) {
+        await confirmResourceOrder({
+          resourceOrderId,
           provider: "stripe",
           reference: session.id,
           amountMinor: session.amount_total ?? 0,

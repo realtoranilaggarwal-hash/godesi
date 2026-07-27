@@ -1,15 +1,52 @@
 import type { MeetupGender, MeetupMarital } from "@prisma/client";
 
-/** What members are open to; deliberately platonic, no dating option. */
-export const MEETUP_INTENTS = [
-  { id: "business", label: "Business & networking" },
-  { id: "coffee", label: "Coffee catch-up" },
-  { id: "chit-chat", label: "Friendly chit-chat" },
-  { id: "community", label: "Community & volunteering" },
-  { id: "activity", label: "Sports & activities" },
-] as const;
+/**
+ * What members are open to, grouped for the form. Deliberately professional and
+ * community focused — Connect is for networking and activities, not dating.
+ */
+type MeetupIntent = { id: string; label: string };
+type MeetupIntentGroup = { id: string; label: string; intents: MeetupIntent[] };
 
-export type MeetupIntent = (typeof MEETUP_INTENTS)[number]["id"];
+export const MEETUP_INTENT_GROUPS: MeetupIntentGroup[] = [
+  {
+    id: "professional",
+    label: "Professional",
+    intents: [
+      { id: "business", label: "Business & networking" },
+      { id: "industry", label: "Industry discussions" },
+      { id: "mentorship", label: "Mentorship & guidance" },
+    ],
+  },
+  {
+    id: "community",
+    label: "Community",
+    intents: [
+      { id: "cultural", label: "Cultural meetups" },
+      { id: "community", label: "Local community groups" },
+      { id: "volunteering", label: "Community & volunteering" },
+      { id: "family", label: "Family-friendly activities" },
+    ],
+  },
+  {
+    id: "activities",
+    label: "Activities",
+    intents: [
+      { id: "coffee", label: "Coffee catch-up" },
+      { id: "workshops", label: "Workshops & learning" },
+      { id: "fitness", label: "Fitness & wellness" },
+      { id: "hobby", label: "Hobby groups" },
+      { id: "activity", label: "Sports & activities" },
+      { id: "chit-chat", label: "Friendly conversation" },
+    ],
+  },
+];
+
+export const MEETUP_INTENTS: MeetupIntent[] = MEETUP_INTENT_GROUPS.flatMap(
+  (group) => group.intents,
+);
+
+export const MEETUP_INTENT_NOTE =
+  "This section is for networking, community, and activities — not dating.";
 
 export const INTENT_LABELS: Record<string, string> = Object.fromEntries(
   MEETUP_INTENTS.map((intent) => [intent.id, intent.label]),

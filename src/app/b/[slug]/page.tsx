@@ -15,7 +15,8 @@ import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { RecommendedLinks } from "@/components/RecommendedLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -429,6 +430,10 @@ export default async function BusinessProfilePage({
           ) : null}
         </div>
       </div>
+
+      <RecommendedLinks categorySlug={business.categoryRef?.slug ?? null} />
+
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

@@ -170,6 +170,9 @@ model User {
 
   meetupProfile MeetupProfile?
   meetupReports MeetupReport[]
+
+  resourceLinks  ResourceLink[]
+  resourceOrders ResourceOrder[]
 }
 
 enum ReferralStatus {
@@ -375,6 +378,7 @@ model Category {
   businesses    Business[] @relation("BusinessCategory")
   subBusinesses Business[] @relation("BusinessSubcategory")
   eventListings Event[]
+  resourceLinks ResourceLink[]
 
   @@index([parentSlug, sortOrder])
 }
@@ -838,4 +842,55 @@ model MeetupReport {
 
   @@unique([profileId, reporterId])
   @@index([profileId])
+}
+
+enum ResourceKind {
+  AFFILIATE
+  SPONSORED
+  EDITORIAL
+}
+
+/// Paid or editorial outbound link shown in the "Recommended links" boxes.
+/// Sold per 1,000 views: once `impressions` reaches `impressionCap` it retires.
+model ResourceLink {
+  id            String        @id @default(cuid())
+  title         String
+  url           String
+  /// Category slug this link is relevant to; null shows it everywhere.
+  categorySlug  String?
+  category      Category?     @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
+  tag           String?
+  kind          ResourceKind  @default(SPONSORED)
+  status        ListingStatus @default(PENDING)
+  active        Boolean       @default(true)
+  impressions   Int           @default(0)
+  clicks        Int           @default(0)
+  /// Purchased views; null for editorial links that never expire.
+  impressionCap Int?
+  submittedById String?
+  submittedBy   User?         @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  orders ResourceOrder[]
+
+  @@index([status, active, categorySlug])
+}
+
+/// Checkout for a resource link view pack.
+model ResourceOrder {
+  id          String        @id @default(cuid())
+  linkId      String
+  link        ResourceLink  @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impressions Int
+  amountMinor Int
+  currency    String
+  status      AdOrderStatus @default(PENDING)
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  createdAt   DateTime      @default(now())
+
+  @@index([userId])
 }

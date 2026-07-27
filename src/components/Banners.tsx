@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { BannerSlot } from "@prisma/client";
 import {
   activeBanners,
   HEADER_SIZE,
@@ -55,23 +56,37 @@ function BannerLink({
 function AdvertiseHere({
   label,
   height,
+  slot,
   className = "",
 }: {
   label: string;
   height: number;
+  slot: BannerSlot;
   className?: string;
 }) {
   return (
     <Link
-      href="/advertise"
+      href={`/advertise?slot=${slot}#book`}
       style={{ minHeight: height }}
       className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-center transition hover:border-indigo-400 hover:bg-indigo-50 ${className}`}
     >
-      <span className="text-sm font-bold text-indigo-700">Advertise here</span>
+      <span className="text-sm font-bold text-indigo-700">Book this spot</span>
       <span className="text-xs text-indigo-500">{label}</span>
       <span className="mt-1 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
-        See rates →
+        Monthly or pay per views →
       </span>
+    </Link>
+  );
+}
+
+/** Even a filled spot stays for sale: the next advertiser can book the rotation. */
+function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
+  return (
+    <Link
+      href={`/advertise?slot=${slot}#book`}
+      className="block text-center text-[11px] font-semibold text-slate-400 hover:text-indigo-600"
+    >
+      Book this spot — {label}
     </Link>
   );
 }
@@ -112,6 +127,7 @@ export async function SidebarBanners() {
           key={`sidebar-open-${index}`}
           label={`300 × 250 sidebar banner · slot ${rectanglesSold + index + 1}`}
           height={SIDEBAR_SIZE.height}
+          slot="SIDEBAR"
         />
       ))}
       {/* Skyscrapers run two-up so the pair fills the same 300px rail width. */}
@@ -131,6 +147,7 @@ export async function SidebarBanners() {
             key={`sky-open-${index}`}
             label="160 × 600"
             height={SKYSCRAPER_SIZE.height}
+            slot="SKYSCRAPER"
           />
         ))}
       </div>
@@ -147,18 +164,21 @@ export async function HeroBanner() {
 
   if (banner) {
     return (
-      <BannerLink
-        banner={banner}
-        width={HERO_SIZE.width}
-        height={HERO_SIZE.height}
-        className="rounded-3xl"
-      />
+      <div className="space-y-1">
+        <BannerLink
+          banner={banner}
+          width={HERO_SIZE.width}
+          height={HERO_SIZE.height}
+          className="rounded-3xl"
+        />
+        <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
+      </div>
     );
   }
 
   return (
     <Link
-      href="/advertise#placements"
+      href="/advertise?slot=HERO#book"
       className="group relative block overflow-hidden rounded-3xl"
     >
       <Image
@@ -171,7 +191,7 @@ export async function HeroBanner() {
         className="h-auto w-full"
       />
       <span className="absolute bottom-3 right-3 rounded-xl bg-slate-900/80 px-3 py-2 text-xs font-bold text-white group-hover:bg-indigo-600 sm:text-sm">
-        This banner space is for sale — advertise here →
+        Book this spot — monthly or pay per views →
       </span>
     </Link>
   );
@@ -186,16 +206,21 @@ export async function FooterBanner() {
       <AdvertiseHere
         label="970 × 90 leaderboard — rotates with other advertisers"
         height={90}
+        slot="HEADER"
       />
     );
   }
 
   return (
-    <BannerLink
-      banner={banner}
-      width={HEADER_SIZE.width}
-      height={HEADER_SIZE.height}
-    />
+    <div className="space-y-1">
+      <BannerLink
+        banner={banner}
+        width={HEADER_SIZE.width}
+        height={HEADER_SIZE.height}
+        className="mx-auto max-w-full"
+      />
+      <BookThisSpot slot="HEADER" label="970 × 90 leaderboard" />
+    </div>
   );
 }
 
@@ -216,6 +241,7 @@ export async function InlineBanner() {
         <AdvertiseHere
           label="300 × 250 sidebar banner"
           height={SIDEBAR_SIZE.height}
+          slot="SIDEBAR"
           className="mx-auto max-w-[300px]"
         />
       )}
@@ -232,6 +258,7 @@ export async function HeaderBanner() {
       <AdvertiseHere
         label="970 × 90 header leaderboard"
         height={90}
+        slot="HEADER"
         className="mb-4"
       />
     );

@@ -114,26 +114,32 @@ export async function slotSoldCount(slot: BannerSlot) {
  * used up, so a sold pack stops serving without an admin step.
  */
 export async function countImpression(bannerId: string) {
-  const banner = await db.banner
-    .update({
-      where: { id: bannerId },
-      data: { impressions: { increment: 1 } },
-      select: { id: true, impressions: true, impressionCap: true, status: true },
-    })
-    .catch(() => null);
+  const now = new Date();
 
-  if (!banner) return null;
+  // A single conditional statement, so parallel page views can never push a
+  // booking past the quota it paid for.
+  const counted = await db.$executeRaw`
+    UPDATE "Banner"
+    SET impressions = impressions + 1
+    WHERE id = ${bannerId}
+      AND active = true
+      AND status = 'ACTIVE'
+      AND ("startsAt" IS NULL OR "startsAt" <= ${now})
+      AND ("endsAt" IS NULL OR "endsAt" >= ${now})
+      AND ("impressionCap" IS NULL OR impressions < "impressionCap")
+  `;
 
-  if (
-    banner.impressionCap !== null &&
-    banner.impressions >= banner.impressionCap &&
-    banner.status === "ACTIVE"
-  ) {
-    await db.banner.update({
-      where: { id: banner.id },
-      data: { status: "EXPIRED", active: false },
-    });
-  }
+  if (!counted) return false;
 
-  return banner;
+  // The view that consumed the last impression also retires the booking.
+  await db.$executeRaw`
+    UPDATE "Banner"
+    SET status = 'EXPIRED', active = false
+    WHERE id = ${bannerId}
+      AND status = 'ACTIVE'
+      AND "impressionCap" IS NOT NULL
+      AND impressions >= "impressionCap"
+  `;
+
+  return true;
 }

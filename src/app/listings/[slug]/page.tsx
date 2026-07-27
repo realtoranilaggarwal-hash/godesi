@@ -13,6 +13,7 @@ import { Badge, Card } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { VideoEmbed } from "@/components/VideoEmbed";
 
 export const dynamic = "force-dynamic";
@@ -130,6 +131,14 @@ export default async function ListingPage({ params }: { params: { slug: string }
             {listing.description}
           </p>
         </Card>
+      <RecommendedLinks
+        categorySlug={
+          listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED"
+            ? "rooms-roommates"
+            : "real-estate"
+        }
+      />
+
       <InlineBanner />
       </div>
 

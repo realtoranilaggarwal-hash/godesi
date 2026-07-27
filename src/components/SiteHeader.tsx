@@ -43,6 +43,7 @@ export async function SiteHeader() {
   ];
   const menuLinks = [
     ...NAV,
+    { href: "/resources", label: "Resources", icon: "🔗" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
   ];

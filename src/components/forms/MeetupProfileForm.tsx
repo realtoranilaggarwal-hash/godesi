@@ -6,7 +6,8 @@ import { emptyState } from "@/lib/actions";
 import {
   GENDER_LABELS,
   MARITAL_LABELS,
-  MEETUP_INTENTS,
+  MEETUP_INTENT_GROUPS,
+  MEETUP_INTENT_NOTE,
   MEETUP_MAX_AGE,
   MEETUP_MIN_AGE,
 } from "@/lib/meetups";
@@ -95,18 +96,28 @@ export function MeetupProfileForm({
         <legend className="px-1 text-sm font-bold text-slate-900">
           I am open to
         </legend>
-        <div className="mt-1 grid gap-2 sm:grid-cols-2">
-          {MEETUP_INTENTS.map((intent) => (
-            <label key={intent.id} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="intents"
-                value={intent.id}
-                defaultChecked={defaults?.intents.includes(intent.id)}
-                className="h-4 w-4 rounded border-slate-300"
-              />
-              {intent.label}
-            </label>
+        <p className="text-xs text-slate-500">{MEETUP_INTENT_NOTE}</p>
+        <div className="mt-3 space-y-4">
+          {MEETUP_INTENT_GROUPS.map((group) => (
+            <div key={group.id}>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {group.label}
+              </p>
+              <div className="mt-1 grid gap-2 sm:grid-cols-2">
+                {group.intents.map((intent) => (
+                  <label key={intent.id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="intents"
+                      value={intent.id}
+                      defaultChecked={defaults?.intents.includes(intent.id)}
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                    {intent.label}
+                  </label>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </fieldset>
@@ -136,8 +147,8 @@ export function MeetupProfileForm({
 
       <SubmitButton pendingLabel="Saving…">Save my Connect profile</SubmitButton>
       <p className="text-xs text-slate-500">
-        Connect is for business, coffee and friendly conversation only. Dating, adult or
-        sexual content is removed and the account blocked.
+        Connect is for networking, community and activities. Dating or adult content is
+        removed and the account blocked.
       </p>
     </form>
   );

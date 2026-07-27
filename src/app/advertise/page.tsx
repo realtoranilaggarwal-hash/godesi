@@ -35,7 +35,7 @@ const ERRORS: Record<string, string> = {
 export default async function AdvertisePage({
   searchParams,
 }: {
-  searchParams: { error?: string };
+  searchParams: { error?: string; slot?: string };
 }) {
   const [user, currency] = [await getCurrentUser(), requestCurrency()];
 
@@ -45,6 +45,11 @@ export default async function AdvertisePage({
     _count: { _all: true },
   });
   const usedBySlot = new Map(taken.map((row) => [row.slot, row._count._all]));
+  // A "Book this spot" link names its placement, so we lead with that card.
+  const requested = AD_SLOT_ORDER.find((slot) => slot === searchParams.slot);
+  const order = requested
+    ? [requested, ...AD_SLOT_ORDER.filter((slot) => slot !== requested)]
+    : AD_SLOT_ORDER;
 
   return (
     <div className="space-y-8">
@@ -78,20 +83,52 @@ export default async function AdvertisePage({
         <Alert>{ERRORS[searchParams.error] ?? "Something went wrong."}</Alert>
       ) : null}
 
+      <Card id="book">
+        <h2 className="text-lg font-bold">Two ways to book — and how rotation works</h2>
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl bg-slate-50 p-3">
+            <p className="text-sm font-bold">Monthly</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Your banner runs for the months you book, from the day we approve it. Book
+              now to hold next month, and longer bookings are discounted.
+            </p>
+          </div>
+          <div className="rounded-xl bg-slate-50 p-3">
+            <p className="text-sm font-bold">Pay per views</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Buy a pack of views instead of a date range. Your banner retires itself the
+              moment the last purchased view is delivered — you never pay for more.
+            </p>
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-slate-600">
+          Every spot is shared. When several advertisers book the same placement their
+          banners <strong>rotate</strong>: each page view shows one of them, weighted so
+          everyone gets a fair share of the views they paid for. That means a spot that
+          already shows an ad is still bookable — you simply join the rotation.
+        </p>
+      </Card>
+
       <section id="placements" className="grid gap-4 lg:grid-cols-3">
-        {AD_SLOT_ORDER.map((slot) => {
+        {order.map((slot) => {
           const placement = AD_PLACEMENTS[slot];
           const used = usedBySlot.get(slot) ?? 0;
           const available = Math.max(placement.slots - used, 0);
 
           return (
-            <Card key={slot} className="flex flex-col">
+            <Card
+              key={slot}
+              id={`slot-${slot}`}
+              className={`flex flex-col ${
+                slot === requested ? "ring-2 ring-indigo-500" : ""
+              }`}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-bold">{placement.name}</h2>
                   <p className="text-xs font-medium text-slate-500">
                     {placement.size.width} × {placement.size.height} px ·{" "}
-                    {available} of {placement.slots} slots free
+                    {available} of {placement.slots} rotating slots free
                   </p>
                 </div>
               </div>
