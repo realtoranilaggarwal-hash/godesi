@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { AD_PLACEMENTS, formatCtr } from "@/lib/ads";
 import { formatMinor } from "@/lib/format";
+import { requestCurrency } from "@/lib/currency";
 import { Alert, Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 import { AdCreativeForm } from "@/components/forms/AdCreativeForm";
 
@@ -67,7 +68,10 @@ export default async function AdvertiserDashboardPage({
   const spend = orders
     .filter((order) => order.status === "PAID")
     .reduce((sum, order) => sum + order.amountMinor, 0);
-  const spendCurrency = orders.find((o) => o.status === "PAID")?.currency ?? "INR";
+  const spendCurrency =
+    orders.find((o) => o.status === "PAID")?.currency ??
+    orders[0]?.currency ??
+    requestCurrency();
 
   return (
     <div className="space-y-5">
