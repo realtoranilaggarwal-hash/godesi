@@ -24,6 +24,15 @@ const rowSchema = z.object({
   websiteUrl: z.string().trim().optional(),
   address: z.string().trim().optional(),
   description: z.string().trim().max(2000).optional(),
+  profileType: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => (value ? value.toUpperCase() : ""))
+    .refine(
+      (value) => value === "" || value === "BUSINESS" || value === "PROFESSIONAL",
+      "Type must be business or professional",
+    ),
 });
 
 type Row = z.infer<typeof rowSchema>;
@@ -59,6 +68,7 @@ async function createSeedListing(row: Row) {
       websiteUrl: row.websiteUrl || null,
       address: row.address || null,
       description: row.description || null,
+      profileType: row.profileType === "PROFESSIONAL" ? "PROFESSIONAL" : "BUSINESS",
       status: "APPROVED",
     },
   });
@@ -79,6 +89,7 @@ export async function addSeedListingAction(
       phone: formData.get("phone"),
       whatsappNumber: formData.get("whatsappNumber"),
       websiteUrl: formData.get("websiteUrl"),
+      profileType: formData.get("profileType"),
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -122,6 +133,7 @@ const CSV_COLUMNS = [
   "city",
   "categorySlug",
   "subcategorySlug",
+  "profileType",
   "state",
   "phone",
   "whatsappNumber",

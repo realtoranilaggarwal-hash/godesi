@@ -27,17 +27,30 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const umamiId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  const umamiSrc =
+    process.env.NEXT_PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js";
 
   return (
     <html lang="en">
-      {adsenseClient ? (
+      {adsenseClient || umamiId ? (
         <head>
-          <Script
-            async
-            crossOrigin="anonymous"
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-            strategy="afterInteractive"
-          />
+          {adsenseClient ? (
+            <Script
+              async
+              crossOrigin="anonymous"
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+              strategy="afterInteractive"
+            />
+          ) : null}
+          {umamiId ? (
+            <Script
+              defer
+              src={umamiSrc}
+              data-website-id={umamiId}
+              strategy="afterInteractive"
+            />
+          ) : null}
         </head>
       ) : null}
       <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900`}>

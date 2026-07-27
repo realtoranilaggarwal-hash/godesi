@@ -8,7 +8,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 
 const CSV_TEMPLATE =
-  "name,city,categorySlug,subcategorySlug,state,phone,whatsappNumber,websiteUrl,address,description";
+  "name,city,categorySlug,subcategorySlug,profileType,state,phone,whatsappNumber,websiteUrl,address,description";
 
 /** Admin-only: seed a starter listing that a business can later claim. */
 export function SeedListingForm({ categories }: { categories: CategoryOption[] }) {
@@ -36,6 +36,12 @@ export function SeedListingForm({ categories }: { categories: CategoryOption[] }
         <Field label="WhatsApp" hint="Optional until the owner claims it">
           <input name="whatsappNumber" className={inputClass} />
         </Field>
+        <Field label="Type">
+          <select name="profileType" defaultValue="BUSINESS" className={inputClass}>
+            <option value="BUSINESS">Business / shop</option>
+            <option value="PROFESSIONAL">Individual professional</option>
+          </select>
+        </Field>
         <Field label="Website">
           <input name="websiteUrl" type="url" placeholder="https://" className={inputClass} />
         </Field>
@@ -62,7 +68,7 @@ export function SeedListingImportForm() {
         <textarea
           name="csv"
           rows={5}
-          placeholder={`${CSV_TEMPLATE}\nSharma Sweets,Edison,food-catering,,NJ,,19735550123,,`}
+          placeholder={`${CSV_TEMPLATE}\nSharma Sweets,Edison,food-catering,,business,NJ,,19735550123,,`}
           className={`${inputClass} font-mono text-xs`}
         />
       </Field>

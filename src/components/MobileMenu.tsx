@@ -25,7 +25,7 @@ export function MobileMenu({
   const close = () => setOpen(false);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -67,7 +67,7 @@ export function MobileMenu({
             </div>
           ) : null}
 
-          <div className="border-t border-slate-100 px-4 py-3">
+          <div className="border-t border-slate-100 px-4 py-3 md:hidden">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
               Categories
             </p>

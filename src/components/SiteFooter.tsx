@@ -23,13 +23,21 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     ],
   },
   {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About us" },
+      { href: "/sitemap", label: "Sitemap" },
+      { href: "/faq", label: "FAQ" },
+      { href: "/contact", label: "Contact us" },
+    ],
+  },
+  {
     title: "Legal",
     links: [
       { href: "/terms", label: "Terms of service" },
       { href: "/privacy", label: "Privacy policy" },
       { href: "/cookies", label: "Cookie policy" },
       { href: "/refunds", label: "Refund policy" },
-      { href: "/contact", label: "Contact us" },
     ],
   },
 ];
@@ -39,7 +47,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5">
         <div>
           <p className="bg-gradient-to-r from-orange-500 via-rose-500 to-fuchsia-600 bg-clip-text text-xl font-black text-transparent">
             Godesi
