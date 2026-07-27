@@ -6,12 +6,19 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 
-export function SignupForm({ defaultRole = "BUSINESS" }: { defaultRole?: string }) {
+export function SignupForm({
+  defaultRole = "BUSINESS",
+  next,
+}: {
+  defaultRole?: string;
+  next?: string;
+}) {
   const [state, formAction] = useFormState(signupAction, emptyState);
 
   return (
     <form action={formAction} className="space-y-3">
       {state.error ? <Alert>{state.error}</Alert> : null}
+      {next ? <input type="hidden" name="next" value={next} /> : null}
 
       <Field label="I am a">
         <select name="role" defaultValue={defaultRole} className={inputClass}>

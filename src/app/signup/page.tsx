@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Create your account" };
 export default function SignupPage({
   searchParams,
 }: {
-  searchParams: { role?: string };
+  searchParams: { role?: string; next?: string };
 }) {
   return (
     <div className="mx-auto max-w-md space-y-4 py-6">
@@ -16,11 +16,19 @@ export default function SignupPage({
       <Card>
         <SignupForm
           defaultRole={searchParams.role === "CLIENT" ? "CLIENT" : "BUSINESS"}
+          next={searchParams.next}
         />
       </Card>
       <p className="text-sm text-slate-600">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-indigo-600">
+        <Link
+          href={
+            searchParams.next
+              ? `/login?next=${encodeURIComponent(searchParams.next)}`
+              : "/login"
+          }
+          className="font-semibold text-indigo-600"
+        >
           Sign in
         </Link>
       </p>

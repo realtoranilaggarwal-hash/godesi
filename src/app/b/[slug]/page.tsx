@@ -13,6 +13,7 @@ import { TrackVisit } from "@/components/TrackVisit";
 import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
+import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export default async function BusinessProfilePage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { src?: string };
+  searchParams: { src?: string; claim?: string };
 }) {
   const [business, viewer] = await Promise.all([
     getBusiness(params.slug),
@@ -96,7 +97,9 @@ export default async function BusinessProfilePage({
    * as promised by the Free plan.
    */
   const contactVisible =
-    isOwner || viewer?.role === "ADMIN" || effectivePlan(business.owner) !== "FREE";
+    isOwner ||
+    viewer?.role === "ADMIN" ||
+    (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
     ? business.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
@@ -109,7 +112,9 @@ export default async function BusinessProfilePage({
     description: business.description ?? undefined,
     image: business.logoUrl ?? undefined,
     url: `${siteUrl()}/b/${business.slug}`,
-    ...(contactVisible ? { telephone: business.phone ?? `+${business.whatsappNumber}` } : {}),
+    ...(contactVisible && (business.phone || business.whatsappNumber)
+      ? { telephone: business.phone ?? `+${business.whatsappNumber}` }
+      : {}),
     address: {
       "@type": "PostalAddress",
       streetAddress: business.address ?? undefined,
@@ -153,9 +158,10 @@ export default async function BusinessProfilePage({
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
-              {business.owner.plan !== "FREE" ? (
+              {business.owner && business.owner.plan !== "FREE" ? (
                 <Badge tone="indigo">{business.owner.plan}</Badge>
               ) : null}
+              {business.owner ? null : <Badge tone="slate">Unclaimed</Badge>}
               {business.featured ? <Badge tone="amber">Featured</Badge> : null}
             </div>
             <p className="text-slate-600">
@@ -193,7 +199,11 @@ export default async function BusinessProfilePage({
             ) : null}
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-              <PostedBy user={business.owner} prefix="Listed by" />
+              {business.owner ? (
+                <PostedBy user={business.owner} prefix="Listed by" />
+              ) : (
+                <p className="text-sm text-slate-500">Not claimed yet</p>
+              )}
               <ShareButtons
                 url={`${siteUrl()}/b/${business.slug}`}
                 title={business.name}
@@ -201,13 +211,15 @@ export default async function BusinessProfilePage({
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <WhatsAppButton
-                slug={business.slug}
-                href={whatsappLink(
-                  business.whatsappNumber,
-                  `Hi ${business.name}, I found you on Godesi.`,
-                )}
-              />
+              {business.whatsappNumber ? (
+                <WhatsAppButton
+                  slug={business.slug}
+                  href={whatsappLink(
+                    business.whatsappNumber,
+                    `Hi ${business.name}, I found you on Godesi.`,
+                  )}
+                />
+              ) : null}
               {contactVisible && business.phone ? (
                 <a
                   href={`tel:${business.phone}`}
@@ -241,6 +253,23 @@ export default async function BusinessProfilePage({
           </div>
         </div>
       </Card>
+
+      {!business.owner ? (
+        <Card className="space-y-3 border-amber-200 bg-amber-50">
+          <p className="text-sm text-amber-900">
+            🏷️ This is a starter listing added by the Godesi team — nobody has claimed it
+            yet. If you run {business.name}, claim it to add photos, packages, WhatsApp and
+            your contact details.
+          </p>
+          {viewer ? (
+            <ClaimBusinessForm businessId={business.id} open={searchParams.claim === "1"} />
+          ) : (
+            <LinkButton href={`/login?next=/b/${business.slug}?claim=1`}>
+              Sign in to claim this business
+            </LinkButton>
+          )}
+        </Card>
+      ) : null}
 
       {!contactVisible && (business.phone || business.publicEmail) ? (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">

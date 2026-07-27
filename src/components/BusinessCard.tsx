@@ -51,12 +51,24 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         >
           View card
         </Link>
-        <WhatsAppButton
-          slug={business.slug}
-          href={whatsappLink(business.whatsappNumber, `Hi ${business.name}, I found you on Godesi.`)}
-          label="WhatsApp"
-          className="flex-1"
-        />
+        {business.whatsappNumber ? (
+          <WhatsAppButton
+            slug={business.slug}
+            href={whatsappLink(
+              business.whatsappNumber,
+              `Hi ${business.name}, I found you on Godesi.`,
+            )}
+            label="WhatsApp"
+            className="flex-1"
+          />
+        ) : (
+          <Link
+            href={`/b/${business.slug}?claim=1`}
+            className="flex-1 rounded-xl bg-amber-500 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-amber-600"
+          >
+            Claim
+          </Link>
+        )}
       </div>
     </Card>
   );

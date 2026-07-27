@@ -15,7 +15,7 @@ export type BusinessListItem = {
   city: string;
   description: string | null;
   logoUrl: string | null;
-  whatsappNumber: string;
+  whatsappNumber: string | null;
   featured: boolean;
   plan: Plan;
   rating: number;
@@ -113,7 +113,7 @@ export async function searchBusinesses(
         logoUrl: row.logoUrl,
         whatsappNumber: row.whatsappNumber,
         featured: row.featured,
-        plan: row.owner.plan,
+        plan: row.owner?.plan ?? "FREE",
         rating,
         reviewCount,
       };

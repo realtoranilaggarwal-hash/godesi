@@ -86,8 +86,8 @@ export default async function HomePage() {
         </form>
 
         <div className="mt-6 flex flex-wrap gap-2">
-          <LinkButton href="/signup" variant="secondary">
-            List your business free
+          <LinkButton href="/add-business" variant="secondary">
+            Add your business free
           </LinkButton>
           <Link
             href="/events/new"
@@ -99,7 +99,7 @@ export default async function HomePage() {
             href="/leads/new"
             className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
           >
-            Post a requirement
+            Request a service
           </Link>
         </div>
       </section>

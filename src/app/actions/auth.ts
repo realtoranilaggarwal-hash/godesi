@@ -14,6 +14,12 @@ import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
 
+/** Only same-site paths may be used as a post-auth destination. */
+function safeNext(value: FormDataEntryValue | null) {
+  const raw = typeof value === "string" ? value : "";
+  return raw.startsWith("/") && !raw.startsWith("//") ? raw : null;
+}
+
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
   email: z.string().email("Enter a valid email"),
@@ -55,7 +61,9 @@ export async function signupAction(
       await issueEmailOtp(email);
       target = "/verify-email";
     } else {
-      target = parsed.data.role === "CLIENT" ? "/leads/new" : "/dashboard/profile";
+      target =
+        safeNext(formData.get("next")) ??
+        (parsed.data.role === "CLIENT" ? "/leads/new" : "/dashboard/profile");
     }
   } catch (error) {
     return fieldError(error);
@@ -76,7 +84,9 @@ export async function loginAction(
       return { error: "Invalid email or password." };
     }
     await createSession(user.id);
-    target = user.role === "ADMIN" ? "/admin" : "/dashboard";
+    target =
+      safeNext(formData.get("next")) ??
+      (user.role === "ADMIN" ? "/admin" : "/dashboard");
   } catch (error) {
     return fieldError(error);
   }

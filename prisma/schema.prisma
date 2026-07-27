@@ -129,6 +129,7 @@ model User {
   location  String?
 
   business Business?
+  claims   BusinessClaim[]
   leads    Lead[]
   unlocks  LeadUnlock[]
   payments Payment[]
@@ -316,7 +317,7 @@ model Business {
   description    String?
   logoUrl        String?
   websiteUrl     String?
-  whatsappNumber String
+  whatsappNumber String?
   phone          String?
   publicEmail    String?
   instagramUrl   String?
@@ -329,8 +330,9 @@ model Business {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  ownerId String @unique
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  /// Null for admin-seeded starter listings until somebody claims them.
+  ownerId String? @unique
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   categorySlug    String?
   categoryRef     Category? @relation("BusinessCategory", fields: [categorySlug], references: [slug], onDelete: SetNull)
@@ -338,6 +340,7 @@ model Business {
   subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
 
   media         Media[]
+  claims        BusinessClaim[]
   packages      VendorPackage[]
   reviews       Review[]
   trackedEvents AnalyticsEvent[]
@@ -577,4 +580,27 @@ model Payment {
   provider    String   @default("mock")
   reference   String?  @unique
   createdAt   DateTime @default(now())
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A user asking to take ownership of a seeded (unowned) business listing.
+model BusinessClaim {
+  id         String      @id @default(cuid())
+  businessId String
+  business   Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// How the claimant proves the business is theirs.
+  message    String
+  phone      String?
+  status     ClaimStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+
+  @@unique([businessId, userId])
+  @@index([status])
 }
