@@ -267,10 +267,24 @@ export default async function BusinessProfilePage({
       {!business.owner ? (
         <Card className="space-y-3 border-amber-200 bg-amber-50">
           <p className="text-sm text-amber-900">
-            🏷️ This is a starter listing added by the Godesi team — nobody has claimed it
-            yet. If you run {business.name}, claim it to add photos, packages, WhatsApp and
-            your contact details.
+            🏷️ This is a starter listing — nobody has claimed it yet. If you run{" "}
+            {business.name}, claim it to add photos, packages, WhatsApp and your contact
+            details.
           </p>
+          {business.source === "osm" ? (
+            <p className="text-xs text-amber-800">
+              Basic details from{" "}
+              <a
+                href="https://www.openstreetmap.org/copyright"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                OpenStreetMap contributors
+              </a>{" "}
+              (ODbL).
+            </p>
+          ) : null}
           {viewer ? (
             <ClaimBusinessForm businessId={business.id} open={searchParams.claim === "1"} />
           ) : (

@@ -390,6 +390,10 @@ model Business {
   address        String?
   status         ListingStatus @default(PENDING)
   featured       Boolean       @default(false)
+  /// "osm" for openly-licensed starter rows; null for user-created cards.
+  source         String?
+  /// OpenStreetMap element id, so imports stay re-runnable without duplicates.
+  osmId          String?       @unique
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
