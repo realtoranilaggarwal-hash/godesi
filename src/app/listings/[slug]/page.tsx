@@ -13,6 +13,10 @@ import { Badge, Card } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import {
+  FairHousingNotice,
+  RoomSharingNotice,
+} from "@/components/FairHousingNotice";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { VideoEmbed } from "@/components/VideoEmbed";
 
@@ -48,6 +52,8 @@ export async function generateMetadata({
 export default async function ListingPage({ params }: { params: { slug: string } }) {
   const listing = await getListing(params.slug);
   if (!listing) notFound();
+
+  const isRoom = listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED";
 
   const facts = [
     ["Type", KIND_LABELS[listing.kind]],
@@ -132,12 +138,11 @@ export default async function ListingPage({ params }: { params: { slug: string }
           </p>
         </Card>
       <RecommendedLinks
-        categorySlug={
-          listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED"
-            ? "rooms-roommates"
-            : "real-estate"
-        }
+        categorySlug={isRoom ? "rooms-roommates" : "real-estate"}
       />
+
+      {isRoom || listing.kind.startsWith("PROPERTY") ? <FairHousingNotice /> : null}
+      {isRoom ? <RoomSharingNotice /> : null}
 
       <InlineBanner />
       </div>

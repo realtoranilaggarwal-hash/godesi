@@ -2,24 +2,42 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getCategory } from "@/lib/directory";
+import { CATEGORY_TREE } from "@/lib/categories";
+import { WEDDING_SLUG } from "@/lib/wedding";
+import type { ServiceGroup } from "@/components/forms/ServicePicker";
 import { LeadForm } from "@/components/forms/LeadForm";
 import { Card } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Post a requirement" };
+export const metadata: Metadata = {
+  title: "Post a requirement — get quotes from desi businesses",
+  description:
+    "Tell desi businesses what you need — pick the services, add your city, budget and date, and get quotes. Your contact stays private until a Premium business unlocks it.",
+  alternates: { canonical: "/leads/new" },
+};
 
 export default async function NewLeadPage({
   searchParams,
 }: {
   searchParams: { category?: string };
 }) {
+  if (searchParams.category === WEDDING_SLUG) redirect("/wedding/requirements/new");
+
   const user = await getCurrentUser();
   if (!user) redirect("/signup?role=CLIENT");
 
   const category = searchParams.category
     ? await getCategory(searchParams.category)
     : null;
+
+  const groups: ServiceGroup[] = category
+    ? [{ title: category.name, icon: category.icon, items: category.children.map((child) => child.name) }]
+    : CATEGORY_TREE.map((entry) => ({
+        title: entry.name,
+        icon: entry.icon,
+        items: entry.children,
+      }));
 
   return (
     <div className="flex justify-center gap-6">
@@ -36,6 +54,7 @@ export default async function NewLeadPage({
             defaultName={user.name}
             defaultEmail={user.email}
             defaultCategory={category?.name}
+            groups={groups.filter((group) => group.items.length)}
           />
         </Card>
       </div>

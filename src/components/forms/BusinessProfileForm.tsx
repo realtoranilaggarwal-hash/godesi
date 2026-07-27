@@ -113,6 +113,40 @@ export function BusinessProfileForm({
         <Field label="Google Maps link">
           <input name="mapsUrl" defaultValue={business?.mapsUrl ?? ""} className={inputClass} />
         </Field>
+        <Field
+          label="Starting price"
+          hint="Shown as “From …” on marketplace cards. Leave blank to hide."
+        >
+          <div className="flex gap-2">
+            <input
+              name="startingPrice"
+              type="number"
+              min={0}
+              defaultValue={business?.startingPrice ?? ""}
+              className={inputClass}
+            />
+            <select
+              name="priceCurrency"
+              defaultValue={business?.priceCurrency ?? "USD"}
+              aria-label="Price currency"
+              className={inputClass}
+            >
+              <option value="USD">USD</option>
+              <option value="INR">INR</option>
+            </select>
+          </div>
+        </Field>
+        <Field label="Custom quotes">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="customQuote"
+              defaultChecked={business?.customQuote ?? false}
+              className="h-4 w-4"
+            />
+            I price every job individually — invite enquiries for a quote
+          </label>
+        </Field>
         <Field label="Instagram">
           <input
             name="instagramUrl"

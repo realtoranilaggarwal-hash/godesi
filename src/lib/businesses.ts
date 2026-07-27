@@ -15,6 +15,11 @@ export type BusinessListItem = {
   city: string;
   description: string | null;
   logoUrl: string | null;
+  /** First gallery image, used by the image-heavy marketplace cards. */
+  coverUrl: string | null;
+  startingPrice: number | null;
+  priceCurrency: string | null;
+  customQuote: boolean;
   whatsappNumber: string | null;
   featured: boolean;
   plan: Plan;
@@ -96,6 +101,12 @@ export async function searchBusinesses(
       reviews: { select: { rating: true } },
       categoryRef: { select: { name: true, color: true, icon: true } },
       subcategoryRef: { select: { name: true } },
+      media: {
+        where: { type: "IMAGE" },
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { url: true },
+      },
     },
     take,
   });
@@ -119,6 +130,10 @@ export async function searchBusinesses(
         city: row.city,
         description: row.description,
         logoUrl: row.logoUrl,
+        coverUrl: row.media[0]?.url ?? null,
+        startingPrice: row.startingPrice,
+        priceCurrency: row.priceCurrency,
+        customQuote: row.customQuote,
         whatsappNumber: row.whatsappNumber,
         featured: row.featured,
         plan: row.owner?.plan ?? "FREE",

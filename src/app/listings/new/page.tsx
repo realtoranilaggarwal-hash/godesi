@@ -6,10 +6,19 @@ import { getCurrentUser } from "@/lib/auth";
 import { mediaLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
+import {
+  FairHousingNotice,
+  RoomSharingNotice,
+} from "@/components/FairHousingNotice";
 import { requestCurrency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Post a listing" };
+export const metadata: Metadata = {
+  title: "Post a property, room or item — free listing",
+  description:
+    "List a home for sale or rent, a room to share or something to sell. Free, with photos, video and WhatsApp contact. Fair housing rules apply.",
+  alternates: { canonical: "/listings/new" },
+};
 
 const KINDS: ListingKind[] = [
   "PROPERTY_SALE",
@@ -52,6 +61,11 @@ export default async function NewListingPage({
           defaultCurrency={requestCurrency()}
         />
       </Card>
+
+      <FairHousingNotice />
+      {kind === "ROOM_OFFERED" || kind === "ROOM_WANTED" ? (
+        <RoomSharingNotice />
+      ) : null}
     </div>
   );
 }

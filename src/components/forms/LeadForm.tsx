@@ -5,15 +5,19 @@ import { createLeadAction } from "@/app/actions/leads";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ServicePicker, type ServiceGroup } from "@/components/forms/ServicePicker";
 
 export function LeadForm({
   defaultName,
   defaultEmail,
   defaultCategory,
+  groups,
 }: {
   defaultName?: string;
   defaultEmail?: string;
   defaultCategory?: string;
+  /** Tick-box services; falls back to a plain text field when omitted. */
+  groups?: ServiceGroup[];
 }) {
   const [state, formAction] = useFormState(createLeadAction, emptyState);
 
@@ -28,15 +32,26 @@ export function LeadForm({
         <textarea name="description" rows={4} required className={inputClass} />
       </Field>
 
+      {groups?.length ? (
+        <ServicePicker
+          groups={groups}
+          fallbackLabel={defaultCategory ?? "General requirement"}
+          legend="What do you need?"
+          hint="Tick everything you need — matching businesses will see your post."
+        />
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Category">
-          <input
-            name="category"
-            required
-            defaultValue={defaultCategory ?? ""}
-            className={inputClass}
-          />
-        </Field>
+        {groups?.length ? null : (
+          <Field label="Category">
+            <input
+              name="category"
+              required
+              defaultValue={defaultCategory ?? ""}
+              className={inputClass}
+            />
+          </Field>
+        )}
         <Field label="City">
           <input name="city" required className={inputClass} />
         </Field>
@@ -45,6 +60,9 @@ export function LeadForm({
         </Field>
         <Field label="Budget to (₹)">
           <input name="budgetMax" type="number" min={0} className={inputClass} />
+        </Field>
+        <Field label="Event date" hint="Optional — helps vendors check availability">
+          <input name="eventDate" type="date" className={inputClass} />
         </Field>
       </div>
 

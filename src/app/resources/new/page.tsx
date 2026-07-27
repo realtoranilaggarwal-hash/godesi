@@ -10,7 +10,12 @@ import { Alert, Card, Field, inputClass } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Advertise a link" };
+export const metadata: Metadata = {
+  title: "Advertise a link — text links from $10 per 1,000 views",
+  description:
+    "Promote your website, offer or affiliate link inside Godesi's Recommended links boxes. Pick a category, buy a views pack and the link retires when the views are delivered.",
+  alternates: { canonical: "/resources/new" },
+};
 
 const ERRORS: Record<string, string> = {
   cancelled: "Checkout was cancelled — you have not been charged.",

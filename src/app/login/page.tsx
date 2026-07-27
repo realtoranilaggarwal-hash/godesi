@@ -5,7 +5,13 @@ import { Card } from "@/components/ui";
 import { JoinBenefits } from "@/components/JoinBenefits";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = {
+  title: "Sign in to Godesi",
+  description:
+    "Sign in to manage your Godesi business card, listings, events, leads, coupons and reward points.",
+  alternates: { canonical: "/login" },
+  robots: { index: false },
+};
 
 export default function LoginPage({
   searchParams,

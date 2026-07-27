@@ -38,6 +38,25 @@ export default function TermsPage() {
         </li>
       </ul>
 
+      <h3>Housing, real estate and room listings</h3>
+      <p>
+        Fair Housing Notice: Godesi is committed to providing an inclusive platform for
+        housing and real estate listings. All users must comply with applicable fair
+        housing laws. Listings must not discriminate based on race, color, religion,
+        sex, disability, familial status, national origin, sexual orientation, gender
+        identity, or any other protected characteristic under applicable laws. Users are
+        solely responsible for the content they post. Godesi does not verify listings and
+        is not responsible for any claims or agreements between parties.
+      </p>
+      <p>
+        Room &amp; Shared Housing Disclaimer: Listings for shared housing or roommates
+        are intended for individuals seeking compatible living arrangements. While users
+        may describe preferences (such as lifestyle, cleanliness, or habits),
+        discriminatory language or exclusion based on protected characteristics is
+        strictly prohibited. Please ensure all listings comply with local housing and
+        anti-discrimination laws.
+      </p>
+
       <h2>3. Memberships</h2>
       <p>
         Paid plans run for 30 days from the date payment is confirmed and are charged

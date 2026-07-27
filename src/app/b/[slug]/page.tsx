@@ -239,6 +239,14 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
+            {business.startingPrice !== null || business.customQuote ? (
+              <p className="mt-3 text-sm font-bold text-emerald-700">
+                {business.startingPrice !== null
+                  ? `Packages from ${formatMoney(business.startingPrice, business.priceCurrency ?? "USD")}`
+                  : "Custom quote for every booking"}
+              </p>
+            ) : null}
+
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
               {business.owner ? (
                 <PostedBy user={business.owner} prefix="Listed by" />
@@ -396,6 +404,17 @@ export default async function BusinessProfilePage({
                     </p>
                     {item.description ? (
                       <p className="mt-1 text-sm text-slate-600">{item.description}</p>
+                    ) : null}
+                    {item.includes ? (
+                      <ul className="mt-2 space-y-0.5 text-sm text-slate-600">
+                        {item.includes
+                          .split("\n")
+                          .map((line) => line.trim())
+                          .filter(Boolean)
+                          .map((line) => (
+                            <li key={line}>✓ {line}</li>
+                          ))}
+                      </ul>
                     ) : null}
                   </div>
                 ))}

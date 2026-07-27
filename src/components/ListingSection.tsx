@@ -10,6 +10,10 @@ import {
 import { ListingCard } from "@/components/ListingCard";
 import { ListingFilters } from "@/components/ListingFilters";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import {
+  FairHousingNotice,
+  RoomSharingNotice,
+} from "@/components/FairHousingNotice";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 
 /** Shared shell for /real-estate and /rooms — same query, different copy. */
@@ -76,6 +80,11 @@ export async function ListingSectionPage({
           </Link>{" "}
           — buyers reach you straight on WhatsApp.
         </p>
+      {section === "real-estate" || section === "rooms" ? (
+        <FairHousingNotice />
+      ) : null}
+      {section === "rooms" ? <RoomSharingNotice /> : null}
+
       <InlineBanner />
       </div>
 

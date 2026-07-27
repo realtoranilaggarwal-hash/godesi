@@ -10,7 +10,17 @@ import { requestCurrency } from "@/lib/currency";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { findBlockedTerm } from "@/lib/moderation";
-import { resourcePackOrThrow, resourcePrice } from "@/lib/resources";
+import {
+  RESOURCE_PLACEMENTS,
+  type ResourcePlacement,
+  resourcePackOrThrow,
+  resourcePrice,
+} from "@/lib/resources";
+
+function knownPlacement(value?: string): ResourcePlacement | null {
+  const match = RESOURCE_PLACEMENTS.find((option) => option.value === value);
+  return match ? match.value : null;
+}
 
 const linkSchema = z.object({
   title: z.string().trim().min(4, "Give the link a clear title").max(90),
@@ -25,6 +35,7 @@ const linkSchema = z.object({
   categorySlug: z.string().trim().optional(),
   tag: z.string().trim().max(30).optional(),
   kind: z.enum(["AFFILIATE", "SPONSORED", "EDITORIAL"]),
+  placement: z.string().trim().optional(),
 });
 
 function parseLink(formData: FormData) {
@@ -34,6 +45,7 @@ function parseLink(formData: FormData) {
     categorySlug: formData.get("categorySlug") || undefined,
     tag: formData.get("tag") || undefined,
     kind: formData.get("kind") ?? "SPONSORED",
+    placement: formData.get("placement") || undefined,
   });
 }
 
@@ -128,6 +140,7 @@ export async function saveResourceLinkAction(
       categorySlug: parsed.data.categorySlug || null,
       tag: parsed.data.tag ?? null,
       kind: parsed.data.kind,
+      placement: knownPlacement(parsed.data.placement),
       impressionCap,
       status: "APPROVED" as const,
       active: true,

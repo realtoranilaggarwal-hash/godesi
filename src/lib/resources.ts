@@ -18,6 +18,16 @@ export const RESOURCE_KIND_LABELS: Record<ResourceKind, string> = {
 /** How many links a "Recommended links" box shows. */
 export const RESOURCE_BOX_SIZE = 4;
 
+/**
+ * Named rails a link can be pinned to. A link with a placement only shows in
+ * that rail; links without one flow into the normal category boxes.
+ */
+export const RESOURCE_PLACEMENTS = [
+  { value: "connect-safety", label: "Safety tools & tips (Connect)" },
+] as const;
+
+export type ResourcePlacement = (typeof RESOURCE_PLACEMENTS)[number]["value"];
+
 export function resourcePackOrThrow(value: string): ResourcePack {
   const impressions = Number(value);
   const match = RESOURCE_PACKS.find((pack) => pack === impressions);
@@ -76,16 +86,24 @@ function rotate(links: LinkRow[], take: number) {
  * first; untargeted links fill the rest so a box is never nearly empty.
  */
 export async function recommendedLinks(
-  categorySlug?: string | null,
+  categorySlug?: string | string[] | null,
   take = RESOURCE_BOX_SIZE,
+  placement: ResourcePlacement | null = null,
 ) {
+  const slugs = (
+    Array.isArray(categorySlug) ? categorySlug : categorySlug ? [categorySlug] : []
+  ).filter(Boolean);
+
   const eligible = await db.resourceLink.findMany({
     where: {
       status: "APPROVED",
       active: true,
-      ...(categorySlug
-        ? { OR: [{ categorySlug }, { categorySlug: null }] }
-        : { categorySlug: null }),
+      placement,
+      ...(slugs.length
+        ? { OR: [{ categorySlug: { in: slugs } }, { categorySlug: null }] }
+        : placement
+          ? {}
+          : { categorySlug: null }),
     },
     orderBy: { createdAt: "desc" },
     take: 40,
@@ -103,7 +121,9 @@ export async function recommendedLinks(
   const withQuota = eligible.filter(
     (link) => link.impressionCap === null || link.impressions < link.impressionCap,
   );
-  const targeted = withQuota.filter((link) => link.categorySlug === categorySlug);
+  const targeted = withQuota.filter(
+    (link) => link.categorySlug !== null && slugs.includes(link.categorySlug),
+  );
   const general = withQuota.filter((link) => link.categorySlug === null);
 
   const picked = rotate(targeted, take);

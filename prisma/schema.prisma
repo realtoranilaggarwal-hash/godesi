@@ -274,6 +274,8 @@ model VendorPackage {
   price       Int
   currency    String   @default("INR")
   description String?
+  /// One inclusion per line, listed as ticks under the package.
+  includes    String?
   sortOrder   Int      @default(0)
 
   @@index([businessId])
@@ -405,6 +407,11 @@ model Business {
   videoUrl       String?
   mapsUrl        String?
   address        String?
+  /// "Packages from …" shown on marketplace cards; null hides the price line.
+  startingPrice  Int?
+  priceCurrency  String?
+  /// Invites enquiries when the vendor prices every job individually.
+  customQuote    Boolean       @default(false)
   status         ListingStatus @default(PENDING)
   featured       Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.
@@ -689,6 +696,8 @@ model Lead {
   city         String
   budgetMin    Int?
   budgetMax    Int?
+  /// Wedding/event date the requirement is for.
+  eventDate    DateTime?
   contactName  String
   contactPhone String
   contactEmail String?
@@ -912,6 +921,8 @@ model ResourceLink {
   categorySlug  String?
   category      Category?     @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
   tag           String?
+  /// Named rail this link belongs to (see RESOURCE_PLACEMENTS), e.g. connect safety tools.
+  placement     String?
   kind          ResourceKind  @default(SPONSORED)
   status        ListingStatus @default(PENDING)
   active        Boolean       @default(true)

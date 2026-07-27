@@ -49,6 +49,14 @@ const profileSchema = z.object({
     "Paste a YouTube or Vimeo video link",
   ),
   mapsUrl: optionalUrl,
+  startingPrice: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  priceCurrency: z.enum(["USD", "INR"]).optional(),
+  customQuote: z.coerce.boolean().optional(),
 });
 
 function readProfileForm(formData: FormData) {
@@ -75,6 +83,9 @@ function readProfileForm(formData: FormData) {
     youtubeUrl: value("youtubeUrl"),
     videoUrl: value("videoUrl"),
     mapsUrl: value("mapsUrl"),
+    startingPrice: value("startingPrice") || undefined,
+    priceCurrency: value("priceCurrency") || undefined,
+    customQuote: formData.get("customQuote") === "on",
   });
 }
 
@@ -119,6 +130,9 @@ export async function saveBusinessProfileAction(
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       videoUrl: parsed.data.videoUrl ?? null,
       mapsUrl: parsed.data.mapsUrl ?? null,
+      startingPrice: parsed.data.startingPrice ?? null,
+      priceCurrency: parsed.data.startingPrice ? (parsed.data.priceCurrency ?? "USD") : null,
+      customQuote: parsed.data.customQuote ?? false,
       whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber),
     };
 

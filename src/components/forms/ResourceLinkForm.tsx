@@ -3,6 +3,7 @@
 import { useFormState } from "react-dom";
 import { saveResourceLinkAction } from "@/app/actions/resources";
 import { emptyState } from "@/lib/actions";
+import { RESOURCE_PLACEMENTS } from "@/lib/resources";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 
@@ -43,6 +44,19 @@ export function ResourceLinkForm({
             <option value="EDITORIAL">Editorial</option>
             <option value="SPONSORED">Sponsored</option>
             <option value="AFFILIATE">Affiliate</option>
+          </select>
+        </Field>
+        <Field
+          label="Special rail"
+          hint="Pins the link to one rail instead of the category boxes"
+        >
+          <select name="placement" defaultValue="" className={inputClass}>
+            <option value="">Normal category boxes</option>
+            {RESOURCE_PLACEMENTS.map((placement) => (
+              <option key={placement.value} value={placement.value}>
+                {placement.label}
+              </option>
+            ))}
           </select>
         </Field>
         <Field label="Views purchased" hint="Blank for unlimited">

@@ -8,7 +8,12 @@ import { FeaturedEventRail } from "@/components/FeaturedEvents";
 import { requestCurrency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Post an event" };
+export const metadata: Metadata = {
+  title: "Post a desi event — free listing and ticketing",
+  description:
+    "List your garba, concert, puja, workshop or community event free on Godesi, sell tickets, add coupons and feature it to reach more people in your city.",
+  alternates: { canonical: "/events/new" },
+};
 
 export default async function NewEventPage({
   searchParams,

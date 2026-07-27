@@ -12,7 +12,8 @@ import {
   MEETUP_INTENT_NOTE,
   intentLabels,
 } from "@/lib/meetups";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { InlineBanner } from "@/components/Banners";
+import { SafetyResourcesRail } from "@/components/SafetyResourcesRail";
 import { PostedBy } from "@/components/PostedBy";
 import { ReportMeetupForm } from "@/components/forms/ReportMeetupForm";
 import {
@@ -303,7 +304,7 @@ export default async function ConnectPage({
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <SafetyResourcesRail />
     </div>
   );
 }

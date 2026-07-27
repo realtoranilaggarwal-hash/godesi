@@ -17,7 +17,7 @@ const NAV = [
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
-  { href: "/wedding", label: "Wedding", icon: "💐" },
+  { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/news", label: "News", icon: "📰" },

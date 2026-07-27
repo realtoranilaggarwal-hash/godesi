@@ -24,8 +24,16 @@ export function PackageForm({ defaultCurrency }: { defaultCurrency: string }) {
         </Field>
         <CurrencySelect defaultValue={defaultCurrency} />
       </div>
-      <Field label="What's included">
+      <Field label="Short description">
         <textarea name="description" rows={2} className={inputClass} />
+      </Field>
+      <Field label="What's included" hint="One item per line, e.g. 8 hours coverage">
+        <textarea
+          name="includes"
+          rows={4}
+          placeholder={"8 hours coverage\n300 edited photos\nOnline gallery"}
+          className={inputClass}
+        />
       </Field>
       <SubmitButton pendingLabel="Adding...">Add package</SubmitButton>
     </form>

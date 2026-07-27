@@ -14,6 +14,7 @@ const schema = z.object({
   price: z.coerce.number().int().min(0).max(50_000_000),
   currency: z.enum(["INR", "USD"]).optional(),
   description: z.string().max(400).optional(),
+  includes: z.string().max(800).optional(),
 });
 
 export async function addPackageAction(
@@ -30,6 +31,7 @@ export async function addPackageAction(
       price: formData.get("price") || 0,
       currency: formData.get("currency") || undefined,
       description: formData.get("description") || undefined,
+      includes: formData.get("includes") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -45,6 +47,7 @@ export async function addPackageAction(
         price: parsed.data.price,
         currency: parsed.data.currency ?? requestCurrency(),
         description: parsed.data.description ?? null,
+        includes: parsed.data.includes ?? null,
         sortOrder: count,
       },
     });

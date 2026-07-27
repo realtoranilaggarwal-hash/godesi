@@ -15,6 +15,7 @@ const leadSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   budgetMin: z.coerce.number().int().min(0).optional(),
   budgetMax: z.coerce.number().int().min(0).optional(),
+  eventDate: z.coerce.date().optional(),
   contactName: z.string().trim().min(2, "Contact name is required"),
   contactPhone: z.string().trim().min(10, "Enter a valid contact phone"),
   contactEmail: z
@@ -38,6 +39,7 @@ export async function createLeadAction(
       city: formData.get("city"),
       budgetMin: formData.get("budgetMin") || undefined,
       budgetMax: formData.get("budgetMax") || undefined,
+      eventDate: formData.get("eventDate") || undefined,
       contactName: formData.get("contactName") || user.name,
       contactPhone: formData.get("contactPhone"),
       contactEmail: formData.get("contactEmail"),
@@ -60,6 +62,7 @@ export async function createLeadAction(
         city: parsed.data.city,
         budgetMin: parsed.data.budgetMin ?? null,
         budgetMax: parsed.data.budgetMax ?? null,
+        eventDate: parsed.data.eventDate ?? null,
         contactName: parsed.data.contactName,
         contactPhone: parsed.data.contactPhone,
         contactEmail: parsed.data.contactEmail ?? null,
@@ -69,6 +72,7 @@ export async function createLeadAction(
     return fieldError(error);
   }
   revalidatePath("/leads");
+  revalidatePath("/wedding/requirements");
   redirect("/dashboard?posted=1");
 }
 

@@ -8,10 +8,16 @@ import {
   toggleMeetupVisibilityAction,
 } from "@/app/actions/meetups";
 import { MeetupProfileForm } from "@/components/forms/MeetupProfileForm";
+import { SafetyResourcesRail } from "@/components/SafetyResourcesRail";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "My Connect profile" };
+export const metadata: Metadata = {
+  title: "My Connect profile — meet desis near you",
+  description:
+    "Create or edit your Godesi Connect profile: say what you would like to meet about — networking, mentorship, cultural meetups, workshops or community groups. Reviewed before it appears.",
+  alternates: { canonical: "/connect/new" },
+};
 
 export default async function ConnectProfilePage() {
   const user = await getCurrentUser();
@@ -20,7 +26,8 @@ export default async function ConnectProfilePage() {
   const profile = await db.meetupProfile.findUnique({ where: { userId: user.id } });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="flex justify-center gap-6">
+      <div className="min-w-0 max-w-3xl flex-1 space-y-5">
       <div>
         <h1 className="text-2xl font-bold">
           {profile ? "Edit my Connect profile" : "Create my Connect profile"}
@@ -77,6 +84,9 @@ export default async function ConnectProfilePage() {
           </div>
         </Card>
       ) : null}
+      </div>
+
+      <SafetyResourcesRail />
     </div>
   );
 }

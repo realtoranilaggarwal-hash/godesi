@@ -9,7 +9,12 @@ import { WorshipForm } from "@/components/forms/WorshipForm";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Add a place of worship" };
+export const metadata: Metadata = {
+  title: "Add a temple, gurudwara, mosque or church",
+  description:
+    "Add a place of worship to the Godesi religious directory with timings, address, photos and contact so the community can find it.",
+  alternates: { canonical: "/religious/new" },
+};
 
 export default async function NewWorshipPage({
   searchParams,

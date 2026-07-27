@@ -5,7 +5,12 @@ import { Card } from "@/components/ui";
 import { JoinBenefits } from "@/components/JoinBenefits";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Create your account" };
+export const metadata: Metadata = {
+  title: "Create your free Godesi account",
+  description:
+    "Join Godesi free: a digital business card with QR code and WhatsApp button, buyer requirements, event tickets, coupons and reward points for the desi community.",
+  alternates: { canonical: "/signup" },
+};
 
 export default function SignupPage({
   searchParams,
