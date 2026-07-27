@@ -103,7 +103,10 @@ export default async function DashboardPage({
             My listings
           </LinkButton>
           <LinkButton href="/dashboard/rewards" variant="secondary">
-            Rewards
+            Refer &amp; earn
+          </LinkButton>
+          <LinkButton href="/dashboard/notifications" variant="secondary">
+            Notifications
           </LinkButton>
           <LinkButton href="/leads">Browse leads</LinkButton>
         </div>

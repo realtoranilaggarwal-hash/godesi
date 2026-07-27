@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -25,8 +26,20 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+
   return (
     <html lang="en">
+      {adsenseClient ? (
+        <head>
+          <Script
+            async
+            crossOrigin="anonymous"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+            strategy="afterInteractive"
+          />
+        </head>
+      ) : null}
       <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900`}>
         <SiteHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>

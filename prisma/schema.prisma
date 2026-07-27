@@ -100,6 +100,10 @@ enum PointsReason {
   PROFILE_CREATED
   PAID_UPGRADE
   LISTING_POSTED
+  /// Bonuses paid to the inviter when their referral does something.
+  REFERRAL_PROFILE
+  REFERRAL_UPGRADE
+  REFERRAL_LISTING
   REDEMPTION
   ADJUSTMENT
 }
@@ -148,6 +152,56 @@ model User {
   referredById String?
   referredBy   User?   @relation("Referrals", fields: [referredById], references: [id], onDelete: SetNull)
   referrals    User[]  @relation("Referrals")
+
+  referralMade     Referral?  @relation("ReferralInvitee")
+  referralsTracked Referral[] @relation("ReferralInviter")
+
+  notifications Notification[]
+}
+
+enum ReferralStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// One row per referred signup, with the signals we use to spot self-referrals.
+model Referral {
+  id         String         @id @default(cuid())
+  referrerId String
+  referrer   User           @relation("ReferralInviter", fields: [referrerId], references: [id], onDelete: Cascade)
+  userId     String         @unique
+  user       User           @relation("ReferralInvitee", fields: [userId], references: [id], onDelete: Cascade)
+  ip         String?
+  userAgent  String?
+  /// PENDING holds the payout until an admin clears a suspicious signup.
+  status     ReferralStatus @default(APPROVED)
+  /// Why the signup was held, shown to admins.
+  flagReason String?
+  createdAt  DateTime       @default(now())
+
+  @@index([referrerId, status])
+  @@index([status])
+}
+
+/// Admin-tunable point values; missing keys fall back to the published defaults.
+model RewardSetting {
+  key       String   @id
+  points    Int
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
 }
 
 /// Real estate, roommate and buy/sell classifieds.
@@ -219,9 +273,12 @@ model PointsEntry {
   note      String?
   /// Set for one-per-user credits so the same award cannot be granted twice.
   uniqueKey String?      @unique
+  /// Set on inviter bonuses so a rejected referral can be reversed exactly.
+  referralId String?
   createdAt DateTime     @default(now())
 
   @@index([userId])
+  @@index([referralId])
 }
 
 model Redemption {

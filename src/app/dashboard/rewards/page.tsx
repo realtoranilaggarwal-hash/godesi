@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
-import { POINTS, referralStats, wallet } from "@/lib/rewards";
+import { pointValues, referralStats, wallet } from "@/lib/rewards";
 import { Badge, Card } from "@/components/ui";
 import { ShareButtons } from "@/components/ShareButtons";
 import { RedeemPanel } from "@/components/forms/RedeemPanel";
@@ -12,21 +12,15 @@ import { RedeemPanel } from "@/components/forms/RedeemPanel";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Referrals & rewards" };
 
-const EARNING_ROWS: [string, number][] = [
-  ["A friend signs up with your link", POINTS.REFERRAL_SIGNUP],
-  ["You complete your business profile", POINTS.PROFILE_CREATED],
-  ["You (or a referral) upgrade to a paid plan", POINTS.PAID_UPGRADE],
-  ["You post a listing or an event", POINTS.LISTING_POSTED],
-];
-
 export default async function RewardsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/dashboard/rewards");
   if (!user.username) redirect("/dashboard/me?needsUsername=1");
 
-  const [balance, stats, entries, redemptions] = await Promise.all([
+  const [balance, stats, points, entries, redemptions] = await Promise.all([
     wallet(user.id),
     referralStats(user.id),
+    pointValues(),
     db.pointsEntry.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -40,6 +34,14 @@ export default async function RewardsPage() {
   ]);
 
   const link = `${siteUrl()}/ref/${user.username}`;
+  const earningRows: [string, number][] = [
+    ["A friend signs up with your link", points.REFERRAL_SIGNUP],
+    ["Your referral completes their profile", points.REFERRAL_PROFILE],
+    ["Your referral upgrades to a paid plan", points.REFERRAL_UPGRADE],
+    ["Your referral posts a listing or event", points.REFERRAL_LISTING],
+    ["You complete your business profile", points.PROFILE_CREATED],
+    ["You post a listing or an event", points.LISTING_POSTED],
+  ];
 
   return (
     <div className="space-y-5">
@@ -63,13 +65,14 @@ export default async function RewardsPage() {
         </p>
       </Card>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
         {[
           ["Points earned", balance.earned, "bg-emerald-50 text-emerald-700"],
           ["Points used", balance.used, "bg-amber-50 text-amber-800"],
           ["Balance", balance.balance, "bg-indigo-50 text-indigo-700"],
           ["Referrals", stats.referrals, "bg-sky-50 text-sky-700"],
           ["Conversion", `${stats.conversionRate}%`, "bg-fuchsia-50 text-fuchsia-700"],
+          ["Under review", stats.pending, "bg-slate-100 text-slate-700"],
         ].map(([label, value, tone]) => (
           <div key={String(label)} className={`rounded-2xl p-4 ${tone}`}>
             <p className="text-2xl font-black">{value}</p>
@@ -84,10 +87,10 @@ export default async function RewardsPage() {
         <Card>
           <h2 className="mb-2 font-bold">How to earn</h2>
           <ul className="space-y-2 text-sm">
-            {EARNING_ROWS.map(([label, points]) => (
+            {earningRows.map(([label, value]) => (
               <li key={label} className="flex items-center justify-between gap-3">
                 <span className="text-slate-700">{label}</span>
-                <Badge tone="green">+{points}</Badge>
+                <Badge tone="green">+{value}</Badge>
               </li>
             ))}
           </ul>
@@ -127,7 +130,7 @@ export default async function RewardsPage() {
               <Link href="/dashboard/profile" className="font-semibold text-indigo-600">
                 finish your profile
               </Link>{" "}
-              for {POINTS.PROFILE_CREATED} points.
+              for {points.PROFILE_CREATED} points.
             </p>
           )}
         </Card>

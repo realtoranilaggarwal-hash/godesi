@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
 import { effectivePlan } from "@/lib/plans";
 import { getCategoryTree } from "@/lib/directory";
+import { unreadCount } from "@/lib/notifications";
 import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { CategoryStrip } from "@/components/CategoryStrip";
@@ -21,6 +22,7 @@ const NAV = [
 
 export async function SiteHeader() {
   const [user, categories] = await Promise.all([getCurrentUser(), getCategoryTree()]);
+  const unread = user ? await unreadCount(user.id) : 0;
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
@@ -62,6 +64,18 @@ export async function SiteHeader() {
           </Link>
           {user ? (
             <>
+              <Link
+                href="/dashboard/notifications"
+                className="relative rounded-lg px-2 py-1 hover:text-slate-900"
+                aria-label={unread ? `${unread} unread notifications` : "Notifications"}
+              >
+                <span aria-hidden>🔔</span>
+                {unread ? (
+                  <span className="absolute -right-0.5 -top-0.5 rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                ) : null}
+              </Link>
               <Link
                 href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
                 className="rounded-lg px-2 py-1 hover:text-slate-900"
