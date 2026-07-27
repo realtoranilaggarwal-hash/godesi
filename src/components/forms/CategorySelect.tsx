@@ -18,6 +18,7 @@ export function CategorySelect({
   required = true,
   label = "Category",
   subLabel = "Subcategory",
+  onSubcategoryChange,
 }: {
   categories: CategoryOption[];
   defaultCategory?: string | null;
@@ -25,9 +26,17 @@ export function CategorySelect({
   required?: boolean;
   label?: string;
   subLabel?: string;
+  /** Lets the form show fields that only apply to one subcategory. */
+  onSubcategoryChange?: (slug: string) => void;
 }) {
   const [category, setCategory] = useState(defaultCategory ?? "");
+  const [subcategory, setSubcategory] = useState(defaultSubcategory ?? "");
   const children = categories.find((item) => item.slug === category)?.children ?? [];
+
+  const selectSubcategory = (slug: string) => {
+    setSubcategory(slug);
+    onSubcategoryChange?.(slug);
+  };
 
   return (
     <>
@@ -36,7 +45,10 @@ export function CategorySelect({
           name="categorySlug"
           required={required}
           value={category}
-          onChange={(event) => setCategory(event.target.value)}
+          onChange={(event) => {
+            setCategory(event.target.value);
+            selectSubcategory("");
+          }}
           className={inputClass}
         >
           <option value="">Select a category</option>
@@ -52,8 +64,8 @@ export function CategorySelect({
         <select
           name="subcategorySlug"
           required={required && children.length > 0}
-          defaultValue={defaultSubcategory ?? ""}
-          key={category}
+          value={subcategory}
+          onChange={(event) => selectSubcategory(event.target.value)}
           disabled={!children.length}
           className={inputClass}
         >

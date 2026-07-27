@@ -40,6 +40,27 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       </div>
 
+      {business.specialties.length ? (
+        <div className="flex flex-wrap gap-1.5">
+          {business.featuredSpecialty ? (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
+              ⭐ {business.featuredSpecialty}
+            </span>
+          ) : null}
+          {business.specialties
+            .filter((item) => item !== business.featuredSpecialty)
+            .slice(0, 4)
+            .map((item) => (
+              <span
+                key={item}
+                className="rounded-full bg-cyan-50 px-2 py-0.5 text-xs font-semibold text-cyan-800"
+              >
+                {item}
+              </span>
+            ))}
+        </div>
+      ) : null}
+
       {business.description ? (
         <p className="line-clamp-2 text-sm text-slate-600">{business.description}</p>
       ) : null}

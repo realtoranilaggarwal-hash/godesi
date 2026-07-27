@@ -6,7 +6,8 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { mediaLimit } from "@/lib/plans";
+import { effectivePlan, mediaLimit } from "@/lib/plans";
+import { cleanSpecialties, specialtySet } from "@/lib/specialties";
 import { uniqueSlug } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewards";
@@ -134,8 +135,24 @@ export async function saveBusinessProfileAction(
       return { error: "That subcategory does not belong to the chosen category." };
     }
 
+    const set = specialtySet(subcategory?.slug);
+    const specialties = cleanSpecialties(
+      subcategory?.slug,
+      formData.getAll("specialties").map(String),
+    );
+    if (set && specialties.length === 0) {
+      return { error: `${set.title}: pick at least one.` };
+    }
+    const wantedBadge = String(formData.get("featuredSpecialty") ?? "");
+    const featuredSpecialty =
+      effectivePlan(user) !== "FREE" && specialties.includes(wantedBadge)
+        ? wantedBadge
+        : null;
+
     const data = {
       ...parsed.data,
+      specialties,
+      featuredSpecialty,
       categorySlug: category.slug,
       subcategorySlug: subcategory?.slug ?? null,
       // Kept in sync for search snippets and legacy listings.

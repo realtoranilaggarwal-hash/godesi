@@ -13,6 +13,7 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
+import { cleanSpecialties, specialtySet } from "@/lib/specialties";
 
 export const dynamic = "force-dynamic";
 
@@ -37,12 +38,21 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { city?: string; q?: string };
+  searchParams: { city?: string; q?: string; service?: string | string[] };
 }) {
   const category = await getCategory(params.slug);
   if (!category) notFound();
 
   const scope = categoryScopeSlugs(category);
+  const services = specialtySet(category.slug);
+  const selectedServices = cleanSpecialties(
+    category.slug,
+    Array.isArray(searchParams.service)
+      ? searchParams.service
+      : searchParams.service
+        ? [searchParams.service]
+        : [],
+  );
   const guide = guideFor(category.parent?.slug ?? category.slug);
   /** Pre-selects this category (and subcategory) in the business card form. */
   const postQuery = new URLSearchParams({
@@ -59,6 +69,7 @@ export default async function CategoryPage({
       categorySlugs: scope,
       city: searchParams.city,
       q: searchParams.q,
+      specialties: selectedServices,
     }),
     db.event.findMany({
       where: {
@@ -162,6 +173,39 @@ export default async function CategoryPage({
             >
               Search
             </button>
+
+            {services ? (
+              <fieldset className="sm:col-span-3">
+                <legend className="text-sm font-bold text-slate-900">
+                  {services.title}
+                </legend>
+                <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {services.options.map((option) => (
+                    <label
+                      key={option}
+                      className="flex items-start gap-2 text-sm text-slate-700"
+                    >
+                      <input
+                        type="checkbox"
+                        name="service"
+                        value={option}
+                        defaultChecked={selectedServices.includes(option)}
+                        className="mt-0.5 h-4 w-4"
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+                {selectedServices.length ? (
+                  <Link
+                    href={`/categories/${category.slug}`}
+                    className="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline"
+                  >
+                    Clear service filters
+                  </Link>
+                ) : null}
+              </fieldset>
+            ) : null}
           </form>
         </Card>
 

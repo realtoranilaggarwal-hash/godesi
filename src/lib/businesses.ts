@@ -22,6 +22,9 @@ export type BusinessListItem = {
   customQuote: boolean;
   whatsappNumber: string | null;
   featured: boolean;
+  /** Sub-services picked from the subcategory checklist, shown as tags. */
+  specialties: string[];
+  featuredSpecialty: string | null;
   plan: Plan;
   rating: number;
   reviewCount: number;
@@ -35,6 +38,8 @@ export type SearchFilters = {
   city?: string;
   minRating?: number;
   premiumOnly?: boolean;
+  /** Sub-services the card must offer (all of them).  */
+  specialties?: string[];
   take?: number;
 };
 
@@ -48,6 +53,7 @@ export async function searchBusinesses(
     city,
     minRating = 0,
     premiumOnly = false,
+    specialties,
     take = 60,
   } = filters;
 
@@ -59,6 +65,7 @@ export async function searchBusinesses(
         : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
+      ...(specialties?.length ? { specialties: { hasEvery: specialties } } : {}),
       AND: [
         ...(categorySlugs?.length
           ? [
@@ -136,6 +143,8 @@ export async function searchBusinesses(
         customQuote: row.customQuote,
         whatsappNumber: row.whatsappNumber,
         featured: row.featured,
+        specialties: row.specialties,
+        featuredSpecialty: row.featuredSpecialty,
         plan: row.owner?.plan ?? "FREE",
         rating,
         reviewCount,

@@ -9,6 +9,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
+import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
+import { useState } from "react";
 
 export function BusinessProfileForm({
   business,
@@ -16,15 +18,21 @@ export function BusinessProfileForm({
   defaultCategory,
   defaultSubcategory,
   defaultProfileType = "BUSINESS",
+  canFeatureSpecialty = false,
 }: {
   business: Business | null;
   categories: CategoryOption[];
+  /** Paid plans may highlight one specialisation as a badge. */
+  canFeatureSpecialty?: boolean;
   /** Pre-selected when arriving from a category page or the guided posting flow. */
   defaultCategory?: string;
   defaultSubcategory?: string;
   defaultProfileType?: string;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
+  const [subcategory, setSubcategory] = useState(
+    business?.subcategorySlug ?? defaultSubcategory ?? "",
+  );
 
   return (
     <form action={formAction} className="space-y-4">
@@ -48,6 +56,7 @@ export function BusinessProfileForm({
           categories={categories}
           defaultCategory={business?.categorySlug ?? defaultCategory}
           defaultSubcategory={business?.subcategorySlug ?? defaultSubcategory}
+          onSubcategoryChange={setSubcategory}
         />
         <Field label="City">
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />
@@ -56,6 +65,13 @@ export function BusinessProfileForm({
           <input name="state" defaultValue={business?.state ?? ""} className={inputClass} />
         </Field>
       </div>
+
+      <SpecialtyPicker
+        subcategorySlug={subcategory}
+        defaultValues={business?.specialties ?? []}
+        defaultFeatured={business?.featuredSpecialty ?? null}
+        canFeature={canFeatureSpecialty}
+      />
 
       <Field label="About your business">
         <textarea

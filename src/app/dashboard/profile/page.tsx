@@ -8,6 +8,7 @@ import { isAgentCard } from "@/lib/agents";
 import { Card, LinkButton } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 import { ListingHelp } from "@/components/ListingHelp";
+import { effectivePlan } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -71,6 +72,7 @@ export default async function ProfileEditorPage({
             defaultProfileType={
               searchParams.type === "professional" ? "PROFESSIONAL" : "BUSINESS"
             }
+            canFeatureSpecialty={effectivePlan(user) !== "FREE"}
           />
         </Card>
       </div>

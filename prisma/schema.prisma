@@ -424,6 +424,10 @@ model Business {
   priceCurrency  String?
   /// Invites enquiries when the vendor prices every job individually.
   customQuote    Boolean       @default(false)
+  /// Sub-services from the subcategory's checklist (e.g. an attorney's practice areas).
+  specialties    String[]      @default([])
+  /// Paid plans highlight one specialty as a badge; must be one of `specialties`.
+  featuredSpecialty String?
   status         ListingStatus @default(PENDING)
   featured       Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.

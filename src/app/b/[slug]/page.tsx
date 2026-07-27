@@ -19,6 +19,7 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
+import { specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
@@ -227,6 +228,32 @@ export default async function BusinessProfilePage({
               <p className="mt-3 whitespace-pre-line text-slate-700">
                 {business.description}
               </p>
+            ) : null}
+
+            {business.specialties.length ? (
+              <div className="mt-3">
+                <h2 className="text-sm font-bold text-slate-900">
+                  {specialtySet(business.subcategorySlug)?.title ?? "Services"}
+                </h2>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {business.featuredSpecialty ? (
+                    <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                      ⭐ {business.featuredSpecialty}
+                    </span>
+                  ) : null}
+                  {business.specialties
+                    .filter((item) => item !== business.featuredSpecialty)
+                    .map((item) => (
+                      <Link
+                        key={item}
+                        href={`/categories/${business.subcategorySlug}?service=${encodeURIComponent(item)}`}
+                        className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800 hover:bg-cyan-100"
+                      >
+                        {item}
+                      </Link>
+                    ))}
+                </div>
+              </div>
             ) : null}
 
             {business.videoUrl ? (
