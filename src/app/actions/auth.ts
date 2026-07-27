@@ -10,6 +10,8 @@ import {
   verifyPassword,
 } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { emailEnabled } from "@/lib/email";
+import { issueEmailOtp } from "@/lib/otp";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -46,7 +48,13 @@ export async function signupAction(
       },
     });
     await createSession(user.id);
-    target = parsed.data.role === "CLIENT" ? "/leads/new" : "/dashboard/profile";
+
+    if (emailEnabled()) {
+      await issueEmailOtp(email);
+      target = "/verify-email";
+    } else {
+      target = parsed.data.role === "CLIENT" ? "/leads/new" : "/dashboard/profile";
+    }
   } catch (error) {
     return fieldError(error);
   }

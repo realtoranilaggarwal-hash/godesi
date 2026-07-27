@@ -83,6 +83,8 @@ model User {
   planExpiresAt DateTime?
   createdAt     DateTime  @default(now())
 
+  emailVerifiedAt DateTime?
+
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
   avatarUrl String?
@@ -350,6 +352,19 @@ model Lead {
 
   @@index([category])
   @@index([city])
+}
+
+/// Short-lived email verification codes. Only the hash is stored.
+model EmailOtp {
+  id        String    @id @default(cuid())
+  email     String
+  codeHash  String
+  attempts  Int       @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
 }
 
 model LeadUnlock {

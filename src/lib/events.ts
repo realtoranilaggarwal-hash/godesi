@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
+import { emailEnabled, sendEmail, ticketEmail } from "@/lib/email";
 
 export async function uniqueEventSlug(title: string, city: string) {
   const base = slugify([title, city].filter(Boolean).join(" ")) || "event";
@@ -90,5 +91,27 @@ export async function confirmTicket({
     return tx.ticket.findUniqueOrThrow({ where: { id: current.id } });
   });
 
+  await sendTicketConfirmation(ticket.id);
   return { alreadyProcessed: false as const, ticket };
+}
+
+/** Best-effort ticket receipt with the QR code; never blocks the booking. */
+async function sendTicketConfirmation(ticketId: string) {
+  if (!emailEnabled()) return;
+  const ticket = await db.ticket.findUnique({
+    where: { id: ticketId },
+    include: {
+      event: { select: { title: true, startsAt: true, venue: true, city: true } },
+    },
+  });
+  if (!ticket?.buyerEmail) return;
+
+  const { subject, html } = ticketEmail({
+    eventTitle: ticket.event.title,
+    when: formatEventDate(ticket.event.startsAt),
+    venue: `${ticket.event.venue}, ${ticket.event.city}`,
+    seats: ticket.quantity,
+    code: ticket.code,
+  });
+  await sendEmail({ to: ticket.buyerEmail, subject, html });
 }

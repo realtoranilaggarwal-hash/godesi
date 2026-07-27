@@ -8,6 +8,7 @@ import { Alert, Badge, Card, EmptyState, LinkButton, Stars } from "@/components/
 import { QrCard } from "@/components/QrCard";
 import { siteUrl } from "@/lib/format";
 import { closeLeadAction } from "@/app/actions/leads";
+import { emailEnabled } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -42,7 +43,12 @@ function Stat({
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: { saved?: string; posted?: string; upgraded?: string };
+  searchParams: {
+    saved?: string;
+    posted?: string;
+    upgraded?: string;
+    verified?: string;
+  };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -97,6 +103,16 @@ export default async function DashboardPage({
         </div>
       </div>
 
+      {searchParams.verified ? <Alert tone="success">Email verified — thanks!</Alert> : null}
+      {!user.emailVerifiedAt && emailEnabled() ? (
+        <Alert tone="info">
+          Your email is not verified yet.{" "}
+          <Link href="/verify-email" className="font-semibold underline">
+            Verify {user.email}
+          </Link>{" "}
+          to secure your account and earn referral rewards.
+        </Alert>
+      ) : null}
       {searchParams.saved ? <Alert tone="success">Profile saved.</Alert> : null}
       {searchParams.posted ? <Alert tone="success">Requirement posted.</Alert> : null}
       {searchParams.upgraded ? (

@@ -32,6 +32,7 @@ export const RESERVED_USERNAMES = new Set([
   "terms",
   "tickets",
   "u",
+  "verify-email",
   "wedding",
   "real-estate",
   "rooms",
