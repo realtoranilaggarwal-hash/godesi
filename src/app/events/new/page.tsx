@@ -9,7 +9,11 @@ import { requestCurrency } from "@/lib/currency";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Post an event" };
 
-export default async function NewEventPage() {
+export default async function NewEventPage({
+  searchParams,
+}: {
+  searchParams: { category?: string; subcategory?: string };
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/events/new");
   const categories = await getCategoryTree();
@@ -24,7 +28,12 @@ export default async function NewEventPage() {
         </p>
       </div>
       <Card>
-        <EventForm categories={categories} defaultCurrency={requestCurrency()} />
+        <EventForm
+          categories={categories}
+          defaultCurrency={requestCurrency()}
+          defaultCategory={searchParams.category}
+          defaultSubcategory={searchParams.subcategory}
+        />
       </Card>
     </div>
   );

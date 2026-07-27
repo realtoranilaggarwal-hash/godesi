@@ -12,9 +12,13 @@ import { ImageField } from "@/components/forms/ImageField";
 export function EventForm({
   categories,
   defaultCurrency,
+  defaultCategory,
+  defaultSubcategory,
 }: {
   categories: CategoryOption[];
   defaultCurrency: string;
+  defaultCategory?: string;
+  defaultSubcategory?: string;
 }) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
 
@@ -42,7 +46,12 @@ export function EventForm({
         <Field label="City">
           <input name="city" required className={inputClass} />
         </Field>
-        <CategorySelect categories={categories} required={false} />
+        <CategorySelect
+          categories={categories}
+          required={false}
+          defaultCategory={defaultCategory}
+          defaultSubcategory={defaultSubcategory}
+        />
         <Field label="Ticket price" hint="Leave 0 for a free event">
           <input name="price" type="number" min={0} defaultValue={0} className={inputClass} />
         </Field>

@@ -54,6 +54,12 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 text-sm font-medium">
+          <Link
+            href="/post"
+            className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-3 py-1.5 font-semibold text-white hover:opacity-90"
+          >
+            + Post
+          </Link>
           {user ? (
             <>
               <Link
@@ -104,6 +110,12 @@ export async function SiteHeader() {
             className="whitespace-nowrap rounded-full bg-slate-900 px-2.5 py-1 text-white"
           >
             📢 Advertise
+          </Link>
+          <Link
+            href="/post"
+            className="whitespace-nowrap rounded-full bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-2.5 py-1 text-white"
+          >
+            ➕ Post
           </Link>
         </div>
       </div>

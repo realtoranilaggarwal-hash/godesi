@@ -40,6 +40,16 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   const scope = categoryScopeSlugs(category);
+  /** Pre-selects this category (and subcategory) in the business card form. */
+  const postQuery = new URLSearchParams({
+    ...(category.parent
+      ? { category: category.parent.slug, subcategory: category.slug }
+      : { category: category.slug }),
+    type:
+      (category.parent?.slug ?? category.slug) === "professionals"
+        ? "professional"
+        : "business",
+  }).toString();
   const [businesses, events] = await Promise.all([
     searchBusinesses({ categorySlugs: scope, city: searchParams.city, q: searchParams.q }),
     db.event.findMany({
@@ -73,6 +83,20 @@ export default async function CategoryPage({
             <span aria-hidden>{category.icon}</span> {category.name}
           </h1>
           {category.blurb ? <p className="mt-1 text-white/90">{category.blurb}</p> : null}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href={`/dashboard/profile?${postQuery}`}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-white/90"
+            >
+              ➕ Add your business in this category
+            </Link>
+            <Link
+              href={`/leads/new?category=${category.slug}`}
+              className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
+            >
+              Request a service
+            </Link>
+          </div>
         </section>
 
         {category.children.length ? (

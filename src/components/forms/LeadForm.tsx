@@ -9,9 +9,11 @@ import { SubmitButton } from "@/components/SubmitButton";
 export function LeadForm({
   defaultName,
   defaultEmail,
+  defaultCategory,
 }: {
   defaultName?: string;
   defaultEmail?: string;
+  defaultCategory?: string;
 }) {
   const [state, formAction] = useFormState(createLeadAction, emptyState);
 
@@ -28,7 +30,12 @@ export function LeadForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Category">
-          <input name="category" required className={inputClass} />
+          <input
+            name="category"
+            required
+            defaultValue={defaultCategory ?? ""}
+            className={inputClass}
+          />
         </Field>
         <Field label="City">
           <input name="city" required className={inputClass} />

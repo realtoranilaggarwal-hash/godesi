@@ -20,6 +20,7 @@ const optionalUrl = z
 
 const profileSchema = z.object({
   name: z.string().trim().min(2, "Business name is required"),
+  profileType: z.enum(["BUSINESS", "PROFESSIONAL"]).default("BUSINESS"),
   categorySlug: z.string().trim().min(1, "Choose a category"),
   subcategorySlug: z.string().trim().optional(),
   city: z.string().trim().min(2, "City is required"),
@@ -52,6 +53,7 @@ function readProfileForm(formData: FormData) {
   };
   return profileSchema.safeParse({
     name: value("name"),
+    profileType: value("profileType") || "BUSINESS",
     categorySlug: value("categorySlug"),
     subcategorySlug: value("subcategorySlug"),
     city: value("city"),

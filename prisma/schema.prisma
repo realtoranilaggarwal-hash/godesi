@@ -311,6 +311,8 @@ model Business {
   id             String        @id @default(cuid())
   slug           String        @unique
   name           String
+  /// A shop/company card versus an individual professional (realtor, attorney…).
+  profileType    ProfileType   @default(BUSINESS)
   category       String
   city           String
   state          String?
@@ -580,6 +582,11 @@ model Payment {
   provider    String   @default("mock")
   reference   String?  @unique
   createdAt   DateTime @default(now())
+}
+
+enum ProfileType {
+  BUSINESS
+  PROFESSIONAL
 }
 
 enum ClaimStatus {

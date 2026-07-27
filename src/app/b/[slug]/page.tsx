@@ -162,6 +162,9 @@ export default async function BusinessProfilePage({
                 <Badge tone="indigo">{business.owner.plan}</Badge>
               ) : null}
               {business.owner ? null : <Badge tone="slate">Unclaimed</Badge>}
+              {business.profileType === "PROFESSIONAL" ? (
+                <Badge tone="green">Professional</Badge>
+              ) : null}
               {business.featured ? <Badge tone="amber">Featured</Badge> : null}
             </div>
             <p className="text-slate-600">

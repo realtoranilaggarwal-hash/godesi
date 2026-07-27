@@ -12,9 +12,16 @@ import { ImageField } from "@/components/forms/ImageField";
 export function BusinessProfileForm({
   business,
   categories,
+  defaultCategory,
+  defaultSubcategory,
+  defaultProfileType = "BUSINESS",
 }: {
   business: Business | null;
   categories: CategoryOption[];
+  /** Pre-selected when arriving from a category page or the guided posting flow. */
+  defaultCategory?: string;
+  defaultSubcategory?: string;
+  defaultProfileType?: string;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
 
@@ -23,13 +30,23 @@ export function BusinessProfileForm({
       {state.error ? <Alert>{state.error}</Alert> : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Business name">
+        <Field label="This card is for">
+          <select
+            name="profileType"
+            defaultValue={business?.profileType ?? defaultProfileType}
+            className={inputClass}
+          >
+            <option value="BUSINESS">A business / shop</option>
+            <option value="PROFESSIONAL">An individual professional</option>
+          </select>
+        </Field>
+        <Field label="Business or professional name">
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
         <CategorySelect
           categories={categories}
-          defaultCategory={business?.categorySlug}
-          defaultSubcategory={business?.subcategorySlug}
+          defaultCategory={business?.categorySlug ?? defaultCategory}
+          defaultSubcategory={business?.subcategorySlug ?? defaultSubcategory}
         />
         <Field label="City">
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />

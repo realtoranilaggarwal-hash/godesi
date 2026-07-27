@@ -1,15 +1,22 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { getCategory } from "@/lib/directory";
 import { LeadForm } from "@/components/forms/LeadForm";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Post a requirement" };
 
-export default async function NewLeadPage() {
+export default async function NewLeadPage({
+  searchParams,
+}: {
+  searchParams: { category?: string };
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/signup?role=CLIENT");
+
+  const category = searchParams.category ? await getCategory(searchParams.category) : null;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -21,7 +28,11 @@ export default async function NewLeadPage() {
         </p>
       </div>
       <Card>
-        <LeadForm defaultName={user.name} defaultEmail={user.email} />
+        <LeadForm
+          defaultName={user.name}
+          defaultEmail={user.email}
+          defaultCategory={category?.name}
+        />
       </Card>
     </div>
   );
