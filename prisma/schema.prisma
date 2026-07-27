@@ -428,6 +428,15 @@ model Business {
   specialties    String[]      @default([])
   /// Paid plans highlight one specialty as a badge; must be one of `specialties`.
   featuredSpecialty String?
+  /// Certifications, licences and designations from the subcategory checklist.
+  certifications String[]      @default([])
+  /// Professional licence / bar / CRD number where the profession has one.
+  licenseNumber  String?
+  /// Consultation fee, pricing model or fee structure, per profession.
+  feeStructure   String?
+  /// Insurance carriers or partner companies represented.
+  carriers       String?
+  yearsExperience Int?
   status         ListingStatus @default(PENDING)
   featured       Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.

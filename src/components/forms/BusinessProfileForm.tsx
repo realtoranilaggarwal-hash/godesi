@@ -10,6 +10,7 @@ import { CategorySelect, type CategoryOption } from "@/components/forms/Category
 import { ImageField } from "@/components/forms/ImageField";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
+import { specialtySet } from "@/lib/specialties";
 import { useState } from "react";
 
 export function BusinessProfileForm({
@@ -33,6 +34,13 @@ export function BusinessProfileForm({
   const [subcategory, setSubcategory] = useState(
     business?.subcategorySlug ?? defaultSubcategory ?? "",
   );
+  /** Saved certifications split back into checkbox values and free-text extras. */
+  const offered = specialtySet(subcategory)?.certifications?.options ?? [];
+  const saved = business?.certifications ?? [];
+  const knownCertifications = saved.filter((item) => offered.includes(item));
+  const otherCertifications = saved
+    .filter((item) => !offered.includes(item))
+    .join(", ");
 
   return (
     <form action={formAction} className="space-y-4">
@@ -67,9 +75,21 @@ export function BusinessProfileForm({
       </div>
 
       <SpecialtyPicker
+        key={subcategory}
         subcategorySlug={subcategory}
-        defaultValues={business?.specialties ?? []}
-        defaultFeatured={business?.featuredSpecialty ?? null}
+        defaults={{
+          specialties: business?.specialties ?? [],
+          featuredSpecialty: business?.featuredSpecialty ?? null,
+          certifications: knownCertifications,
+          certificationsOther: otherCertifications,
+          licenseNumber: business?.licenseNumber ?? "",
+          feeStructure: business?.feeStructure ?? "",
+          carriers: business?.carriers ?? "",
+          yearsExperience:
+            business?.yearsExperience === null || business?.yearsExperience === undefined
+              ? ""
+              : String(business.yearsExperience),
+        }}
         canFeature={canFeatureSpecialty}
       />
 

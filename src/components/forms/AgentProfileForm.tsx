@@ -3,12 +3,7 @@
 import { useFormState } from "react-dom";
 import { saveAgentProfileAction } from "@/app/actions/agents";
 import { emptyState } from "@/lib/actions";
-import {
-  AGENT_CERTIFICATIONS,
-  AGENT_LANGUAGES,
-  AGENT_LICENSE_TYPES,
-  AGENT_SPECIALTIES,
-} from "@/lib/agents";
+import { AGENT_LANGUAGES, AGENT_LICENSE_TYPES } from "@/lib/agents";
 import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
@@ -24,13 +19,10 @@ export type AgentProfileDefaults = {
   licenseDocUrl: string;
   mlsId: string;
   mlsBoard: string;
-  certifications: string[];
-  certificationsOther: string;
   languages: string[];
   languagesOther: string;
   designations: string;
   awards: string;
-  specialties: string[];
   yearsExperience: string;
   transactions: string;
   totalSales: string;
@@ -175,53 +167,6 @@ export function AgentProfileForm({ defaults }: { defaults: AgentProfileDefaults 
       <Field label="Awards" hint="Comma separated with the year, e.g. 2026 Top Agent">
         <textarea name="awards" rows={2} defaultValue={defaults.awards} className={inputClass} />
       </Field>
-
-      <fieldset className="rounded-2xl border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-bold text-slate-900">Specialties</legend>
-        <div className="mt-1 grid gap-2 sm:grid-cols-2">
-          {AGENT_SPECIALTIES.map((specialty) => (
-            <label key={specialty} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="specialties"
-                value={specialty}
-                defaultChecked={defaults.specialties.includes(specialty)}
-                className="h-4 w-4 rounded border-slate-300"
-              />
-              {specialty}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <fieldset className="rounded-2xl border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-bold text-slate-900">
-          Certifications &amp; memberships
-        </legend>
-        <div className="mt-1 grid gap-2 sm:grid-cols-2">
-          {AGENT_CERTIFICATIONS.map((certification) => (
-            <label key={certification} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                name="certifications"
-                value={certification}
-                defaultChecked={defaults.certifications.includes(certification)}
-                className="h-4 w-4 rounded border-slate-300"
-              />
-              {certification}
-            </label>
-          ))}
-        </div>
-        <div className="mt-3">
-          <Field label="Other certifications" hint="Comma separated">
-            <input
-              name="certificationsOther"
-              defaultValue={defaults.certificationsOther}
-              className={inputClass}
-            />
-          </Field>
-        </div>
-      </fieldset>
 
       <fieldset className="rounded-2xl border border-slate-200 p-4">
         <legend className="px-1 text-sm font-bold text-slate-900">

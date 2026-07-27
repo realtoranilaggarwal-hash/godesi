@@ -7,7 +7,11 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { effectivePlan, mediaLimit } from "@/lib/plans";
-import { cleanSpecialties, specialtySet } from "@/lib/specialties";
+import {
+  cleanCertifications,
+  cleanSpecialties,
+  specialtySet,
+} from "@/lib/specialties";
 import { uniqueSlug } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewards";
@@ -149,10 +153,36 @@ export async function saveBusinessProfileAction(
         ? wantedBadge
         : null;
 
+    const certifications = cleanCertifications(
+      subcategory?.slug,
+      formData.getAll("certifications").map(String),
+      String(formData.get("certificationsOther") ?? ""),
+    );
+    const licenseNumber = set ? String(formData.get("licenseNumber") ?? "").trim() : "";
+    if (set?.license?.required && !licenseNumber) {
+      return { error: `${set.license.label} is required.` };
+    }
+    const experienceRaw = set?.experience
+      ? String(formData.get("yearsExperience") ?? "").trim()
+      : "";
+    const yearsExperience = experienceRaw ? Number(experienceRaw) : null;
+    if (yearsExperience !== null && (!Number.isInteger(yearsExperience) || yearsExperience < 0 || yearsExperience > 70)) {
+      return { error: "Years of experience must be between 0 and 70." };
+    }
+
     const data = {
       ...parsed.data,
       specialties,
       featuredSpecialty,
+      certifications,
+      licenseNumber: licenseNumber || null,
+      feeStructure: set?.fee
+        ? String(formData.get("feeStructure") ?? "").trim() || null
+        : null,
+      carriers: set?.carriers
+        ? String(formData.get("carriers") ?? "").trim() || null
+        : null,
+      yearsExperience,
       categorySlug: category.slug,
       subcategorySlug: subcategory?.slug ?? null,
       // Kept in sync for search snippets and legacy listings.

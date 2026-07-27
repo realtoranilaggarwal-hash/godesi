@@ -5,13 +5,11 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fromMinor } from "@/lib/format";
 import {
-  AGENT_CERTIFICATIONS,
   AGENT_LANGUAGES,
   SALE_SIDE_LABELS,
   agentMoney,
   isAgentCard,
   partitionList,
-  splitList,
 } from "@/lib/agents";
 import { deleteAgentSaleAction } from "@/app/actions/agents";
 import { AgentProfileForm } from "@/components/forms/AgentProfileForm";
@@ -55,10 +53,6 @@ export default async function AgentDashboardPage() {
   }
 
   const profile = business.agentProfile;
-  const certifications = partitionList(
-    profile?.certifications ?? null,
-    AGENT_CERTIFICATIONS,
-  );
   const languages = partitionList(profile?.languages ?? null, AGENT_LANGUAGES);
 
   return (
@@ -67,7 +61,7 @@ export default async function AgentDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold">Real estate agent profile</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Service areas, licence, specialties, awards and closed sales — all
+            Brokerage, licence, MLS, languages, awards and closed sales — all
             shown on{" "}
             <Link
               href={`/b/${business.slug}`}
@@ -105,13 +99,10 @@ export default async function AgentDashboardPage() {
               licenseDocUrl: profile?.licenseDocUrl ?? "",
               mlsId: profile?.mlsId ?? "",
               mlsBoard: profile?.mlsBoard ?? "",
-              certifications: certifications.selected,
-              certificationsOther: certifications.other,
               languages: languages.selected,
               languagesOther: languages.other,
               designations: profile?.designations ?? "",
               awards: profile?.awards ?? "",
-              specialties: splitList(profile?.specialties ?? null),
               yearsExperience: number(profile?.yearsExperience ?? null),
               transactions: number(profile?.transactions ?? null),
               totalSales:

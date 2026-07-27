@@ -40,6 +40,19 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       </div>
 
+      {business.certifications.length || business.yearsExperience !== null ? (
+        <p className="text-xs font-semibold text-slate-500">
+          {[
+            business.yearsExperience !== null
+              ? `${business.yearsExperience} yrs experience`
+              : null,
+            business.certifications.slice(0, 3).join(" · ") || null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      ) : null}
+
       {business.specialties.length ? (
         <div className="flex flex-wrap gap-1.5">
           {business.featuredSpecialty ? (

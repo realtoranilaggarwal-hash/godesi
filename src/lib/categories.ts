@@ -294,9 +294,8 @@ export const CATEGORY_TREE: CategorySeed[] = [
     name: "Professionals & Experts",
     icon: "🎓",
     color: "cyan",
-    blurb: "Real estate agents, attorneys, accountants, advisors and consultants",
+    blurb: "Attorneys, accountants, advisors, consultants and other experts",
     children: [
-      "Real Estate Agents",
       "Attorneys",
       "Accountants",
       "Astrologers",
@@ -332,7 +331,6 @@ export const CATEGORY_TREE: CategorySeed[] = [
  */
 const SUBCATEGORY_SLUGS: Record<string, string> = {
   "real-estate:Real Estate Agents": "real-estate-property-dealers",
-  "professionals:Real Estate Agents": "professionals-realtors",
 };
 
 export function subcategorySlug(parentSlug: string, name: string) {

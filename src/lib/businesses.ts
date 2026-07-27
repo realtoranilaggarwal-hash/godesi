@@ -25,6 +25,8 @@ export type BusinessListItem = {
   /** Sub-services picked from the subcategory checklist, shown as tags. */
   specialties: string[];
   featuredSpecialty: string | null;
+  certifications: string[];
+  yearsExperience: number | null;
   plan: Plan;
   rating: number;
   reviewCount: number;
@@ -40,6 +42,8 @@ export type SearchFilters = {
   premiumOnly?: boolean;
   /** Sub-services the card must offer (all of them).  */
   specialties?: string[];
+  /** Certifications the card must hold (all of them). */
+  certifications?: string[];
   take?: number;
 };
 
@@ -54,6 +58,7 @@ export async function searchBusinesses(
     minRating = 0,
     premiumOnly = false,
     specialties,
+    certifications,
     take = 60,
   } = filters;
 
@@ -66,6 +71,9 @@ export async function searchBusinesses(
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
       ...(specialties?.length ? { specialties: { hasEvery: specialties } } : {}),
+      ...(certifications?.length
+        ? { certifications: { hasEvery: certifications } }
+        : {}),
       AND: [
         ...(categorySlugs?.length
           ? [
@@ -145,6 +153,8 @@ export async function searchBusinesses(
         featured: row.featured,
         specialties: row.specialties,
         featuredSpecialty: row.featuredSpecialty,
+        certifications: row.certifications,
+        yearsExperience: row.yearsExperience,
         plan: row.owner?.plan ?? "FREE",
         rating,
         reviewCount,

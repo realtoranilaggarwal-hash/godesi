@@ -27,7 +27,6 @@ const profileSchema = z.object({
   licenseDocUrl: z.string().trim().url("Re-upload the licence document").optional(),
   mlsId: z.string().trim().max(60).optional(),
   mlsBoard: z.string().trim().max(120).optional(),
-  certificationsOther: z.string().trim().max(160).optional(),
   designations: z.string().trim().max(300).optional(),
   awards: z.string().trim().max(300).optional(),
   yearsExperience: z.coerce.number().int().min(0).max(70).optional(),
@@ -75,7 +74,6 @@ export async function saveAgentProfileAction(
       licenseDocUrl: optional(formData, "licenseDocUrl"),
       mlsId: optional(formData, "mlsId"),
       mlsBoard: optional(formData, "mlsBoard"),
-      certificationsOther: optional(formData, "certificationsOther"),
       designations: optional(formData, "designations"),
       awards: optional(formData, "awards"),
       yearsExperience: optional(formData, "yearsExperience"),
@@ -86,11 +84,6 @@ export async function saveAgentProfileAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const specialties = joinList(formData.getAll("specialties").map(String));
-    const certifications = joinList([
-      ...formData.getAll("certifications").map(String),
-      ...(parsed.data.certificationsOther ?? "").split(","),
-    ]);
     const languages = joinList([
       ...formData.getAll("languages").map(String),
       ...(optional(formData, "languagesOther") ?? "").split(","),
@@ -107,11 +100,9 @@ export async function saveAgentProfileAction(
       licenseDocUrl: parsed.data.licenseDocUrl ?? null,
       mlsId: parsed.data.mlsId ?? null,
       mlsBoard: parsed.data.mlsBoard ?? null,
-      certifications,
       languages,
       designations: joinList((parsed.data.designations ?? "").split(",")),
       awards: joinList((parsed.data.awards ?? "").split(",")),
-      specialties,
       yearsExperience: parsed.data.yearsExperience ?? null,
       transactions: parsed.data.transactions ?? null,
       totalSalesMinor:

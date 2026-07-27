@@ -38,7 +38,12 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { city?: string; q?: string; service?: string | string[] };
+  searchParams: {
+    city?: string;
+    q?: string;
+    service?: string | string[];
+    cert?: string | string[];
+  };
 }) {
   const category = await getCategory(params.slug);
   if (!category) notFound();
@@ -53,6 +58,13 @@ export default async function CategoryPage({
         ? [searchParams.service]
         : [],
   );
+  const certOptions = services?.certifications?.options ?? [];
+  const certParam = Array.isArray(searchParams.cert)
+    ? searchParams.cert
+    : searchParams.cert
+      ? [searchParams.cert]
+      : [];
+  const selectedCerts = certOptions.filter((option) => certParam.includes(option));
   const guide = guideFor(category.parent?.slug ?? category.slug);
   /** Pre-selects this category (and subcategory) in the business card form. */
   const postQuery = new URLSearchParams({
@@ -70,6 +82,7 @@ export default async function CategoryPage({
       city: searchParams.city,
       q: searchParams.q,
       specialties: selectedServices,
+      certifications: selectedCerts,
     }),
     db.event.findMany({
       where: {
@@ -196,12 +209,37 @@ export default async function CategoryPage({
                     </label>
                   ))}
                 </div>
-                {selectedServices.length ? (
+                {services.certifications ? (
+                  <>
+                    <p className="mt-3 text-sm font-bold text-slate-900">
+                      {services.certifications.title}
+                    </p>
+                    <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {services.certifications.options.map((option) => (
+                        <label
+                          key={option}
+                          className="flex items-start gap-2 text-sm text-slate-700"
+                        >
+                          <input
+                            type="checkbox"
+                            name="cert"
+                            value={option}
+                            defaultChecked={selectedCerts.includes(option)}
+                            className="mt-0.5 h-4 w-4"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                ) : null}
+
+                {selectedServices.length || selectedCerts.length ? (
                   <Link
                     href={`/categories/${category.slug}`}
                     className="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline"
                   >
-                    Clear service filters
+                    Clear filters
                   </Link>
                 ) : null}
               </fieldset>

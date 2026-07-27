@@ -19,7 +19,7 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
-import { specialtySet } from "@/lib/specialties";
+import { CREDENTIALS_DISCLAIMER, specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
@@ -253,6 +253,46 @@ export default async function BusinessProfilePage({
                       </Link>
                     ))}
                 </div>
+              </div>
+            ) : null}
+
+            {business.certifications.length ||
+            business.licenseNumber ||
+            business.feeStructure ||
+            business.carriers ||
+            business.yearsExperience !== null ? (
+              <div className="mt-3 space-y-1 text-sm text-slate-700">
+                {business.yearsExperience !== null ? (
+                  <p>
+                    <span className="font-semibold">Experience:</span>{" "}
+                    {business.yearsExperience} years
+                  </p>
+                ) : null}
+                {business.licenseNumber ? (
+                  <p>
+                    <span className="font-semibold">Licence:</span>{" "}
+                    {business.licenseNumber}
+                  </p>
+                ) : null}
+                {business.certifications.length ? (
+                  <p>
+                    <span className="font-semibold">Certifications:</span>{" "}
+                    {business.certifications.join(", ")}
+                  </p>
+                ) : null}
+                {business.feeStructure ? (
+                  <p>
+                    <span className="font-semibold">Fees:</span>{" "}
+                    {business.feeStructure}
+                  </p>
+                ) : null}
+                {business.carriers ? (
+                  <p>
+                    <span className="font-semibold">Carriers:</span>{" "}
+                    {business.carriers}
+                  </p>
+                ) : null}
+                <p className="text-xs text-slate-500">{CREDENTIALS_DISCLAIMER}</p>
               </div>
             ) : null}
 
