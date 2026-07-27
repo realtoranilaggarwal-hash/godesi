@@ -13,6 +13,24 @@ export function formatUsd(value: number) {
   }).format(value);
 }
 
+/**
+ * Money is stored in the currency's minor unit (paise, cents) so fractional
+ * prices such as $5.99 survive a round trip through the database.
+ */
+export function toMinor(value: number) {
+  return Math.round(value * 100);
+}
+
+export function fromMinor(minor: number) {
+  return minor / 100;
+}
+
+export function formatMinor(minor: number, currency: string) {
+  return currency.toUpperCase() === "INR"
+    ? formatInr(fromMinor(minor))
+    : formatUsd(fromMinor(minor));
+}
+
 export function normalizeWhatsApp(input: string) {
   const digits = input.replace(/\D/g, "");
   if (digits.length === 10) return `91${digits}`;

@@ -8,7 +8,7 @@ import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { adPrice, durationOrThrow, placementOrThrow } from "@/lib/ads";
 import { requestCurrency } from "@/lib/currency";
-import { siteUrl } from "@/lib/format";
+import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 const PLACEHOLDER_CREATIVE =
@@ -46,7 +46,7 @@ export async function startAdCheckoutAction(formData: FormData) {
       bannerId: banner.id,
       slot: placement.slot,
       months,
-      amount: Math.round(amount),
+      amountMinor: toMinor(amount),
       currency,
     },
   });
@@ -61,7 +61,7 @@ export async function startAdCheckoutAction(formData: FormData) {
         quantity: 1,
         price_data: {
           currency: currency.toLowerCase(),
-          unit_amount: Math.round(amount * 100),
+          unit_amount: toMinor(amount),
           product_data: {
             name: `Godesi ${placement.name} — ${months} month${months > 1 ? "s" : ""}`,
             description: `${placement.size.width}x${placement.size.height} banner placement`,

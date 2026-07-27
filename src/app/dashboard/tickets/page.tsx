@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatInr } from "@/lib/format";
+import { formatMinor } from "@/lib/format";
 import { formatEventDate, seatsLeft } from "@/lib/events";
 import { cancelEventAction } from "@/app/actions/events";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
@@ -46,7 +46,7 @@ export default async function MyTicketsPage() {
                   <p className="text-sm text-slate-500">
                     {formatEventDate(ticket.event.startsAt)} · {ticket.event.city} ·{" "}
                     {ticket.quantity} seat(s) ·{" "}
-                    {ticket.amount ? formatInr(ticket.amount) : "Free"}
+                    {ticket.amountMinor ? formatMinor(ticket.amountMinor, ticket.currency) : "Free"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

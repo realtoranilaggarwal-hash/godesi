@@ -242,7 +242,7 @@ model Ticket {
   buyerEmail  String
   buyerPhone  String?
   quantity    Int          @default(1)
-  amount      Int          @default(0)
+  amountMinor Int          @default(0)
   currency    String       @default("INR")
   provider    String       @default("free")
   reference   String?      @unique
@@ -287,7 +287,7 @@ model AdOrder {
   banner    Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
   slot      BannerSlot
   months    Int           @default(1)
-  amount    Int
+  amountMinor Int
   currency  String        @default("INR")
   provider  String        @default("stripe")
   reference String?       @unique
@@ -362,7 +362,7 @@ model Payment {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan      Plan
-  amount    Int
+  amountMinor Int
   currency  String   @default("INR")
   provider  String   @default("mock")
   reference String?  @unique

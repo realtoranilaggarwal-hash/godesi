@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatInr } from "@/lib/format";
+import { formatMinor } from "@/lib/format";
 import { formatEventDate } from "@/lib/events";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 
@@ -49,7 +49,7 @@ export default async function TicketPage({ params }: { params: { code: string } 
           </p>
           <p>
             🎫 {ticket.quantity} seat(s) ·{" "}
-            {ticket.amount ? formatInr(ticket.amount) : "Free"}
+            {ticket.amountMinor ? formatMinor(ticket.amountMinor, ticket.currency) : "Free"}
           </p>
         </div>
 

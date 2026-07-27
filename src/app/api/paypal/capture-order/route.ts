@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { capturePayPalOrder, paypalEnabled } from "@/lib/paypal";
+import { toMinor } from "@/lib/format";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
       plan: assertPaidPlan(planId),
       provider: "paypal",
       reference: capture.id,
-      amount: Math.round(Number(capture.amount.value)),
+      amountMinor: toMinor(Number(capture.amount.value)),
       currency: capture.amount.currency_code,
     });
 

@@ -8,7 +8,7 @@ import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
-import { siteUrl } from "@/lib/format";
+import { siteUrl, toMinor } from "@/lib/format";
 
 const optionalUrl = z
   .string()
@@ -120,7 +120,7 @@ export async function bookTicketAction(
       return { error: `Only ${seatsLeft(event)} seat(s) left for this event.` };
     }
 
-    const amount = event.priceInr * parsed.data.quantity;
+    const amountMinor = toMinor(event.priceInr * parsed.data.quantity);
 
     const ticket = await db.ticket.create({
       data: {
@@ -131,7 +131,7 @@ export async function bookTicketAction(
         buyerEmail: parsed.data.buyerEmail,
         buyerPhone: parsed.data.buyerPhone || null,
         quantity: parsed.data.quantity,
-        amount,
+        amountMinor,
         currency: "INR",
         provider: event.priceInr === 0 ? "free" : "stripe",
       },
@@ -142,7 +142,7 @@ export async function bookTicketAction(
         ticketId: ticket.id,
         provider: "free",
         reference: `free_${ticket.id}`,
-        amount: 0,
+        amountMinor: 0,
         currency: "INR",
       });
       destination = `/tickets/${ticket.code}`;
@@ -161,7 +161,7 @@ export async function bookTicketAction(
             quantity: parsed.data.quantity,
             price_data: {
               currency: "inr",
-              unit_amount: event.priceInr * 100,
+              unit_amount: toMinor(event.priceInr),
               product_data: {
                 name: `${event.title} — ticket`,
                 description: `${event.venue}, ${event.city}`,

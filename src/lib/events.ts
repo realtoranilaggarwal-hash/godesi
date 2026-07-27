@@ -50,13 +50,14 @@ export async function confirmTicket({
   ticketId,
   provider,
   reference,
-  amount,
+  amountMinor,
   currency,
 }: {
   ticketId: string;
   provider: string;
   reference: string;
-  amount: number;
+  /** In the currency's minor unit (paise, cents). */
+  amountMinor: number;
   currency: string;
 }) {
   const existing = await db.ticket.findUnique({ where: { reference } });
@@ -75,7 +76,7 @@ export async function confirmTicket({
      */
     const claimed = await tx.ticket.updateMany({
       where: { id: current.id, status: "PENDING" },
-      data: { status: "CONFIRMED", provider, reference, amount, currency },
+      data: { status: "CONFIRMED", provider, reference, amountMinor, currency },
     });
     if (claimed.count === 0) {
       return tx.ticket.findUniqueOrThrow({ where: { id: current.id } });

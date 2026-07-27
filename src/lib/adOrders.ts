@@ -8,13 +8,14 @@ export async function confirmAdOrder({
   adOrderId,
   provider,
   reference,
-  amount,
+  amountMinor,
   currency,
 }: {
   adOrderId: string;
   provider: string;
   reference: string;
-  amount: number;
+  /** In the currency's minor unit (paise, cents). */
+  amountMinor: number;
   currency: string;
 }) {
   const order = await db.adOrder.findUnique({ where: { id: adOrderId } });
@@ -23,7 +24,7 @@ export async function confirmAdOrder({
 
   const claimed = await db.adOrder.updateMany({
     where: { id: order.id, status: "PENDING" },
-    data: { status: "PAID", provider, reference, amount, currency },
+    data: { status: "PAID", provider, reference, amountMinor, currency },
   });
   if (claimed.count === 0) return db.adOrder.findUnique({ where: { id: order.id } });
 

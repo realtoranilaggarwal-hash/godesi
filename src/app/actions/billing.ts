@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { activatePlan, downgradeToFree, planOrThrow } from "@/lib/billing";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
-import { siteUrl } from "@/lib/format";
+import { siteUrl, toMinor } from "@/lib/format";
 import { planPrice, requestCurrency, stripeUnitAmount } from "@/lib/currency";
 
 /**
@@ -73,7 +73,7 @@ export async function mockSubscribeAction(formData: FormData) {
     plan: plan.id,
     provider: "mock",
     reference: `mock_${user.id}_${Date.now()}`,
-    amount: planPrice(plan, mockCurrency),
+    amountMinor: toMinor(planPrice(plan, mockCurrency)),
     currency: mockCurrency,
   });
 

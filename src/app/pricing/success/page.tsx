@@ -41,7 +41,7 @@ export default async function CheckoutSuccessPage({
         plan: assertPaidPlan(plan),
         provider: "stripe",
         reference: session.id,
-        amount: Math.round((session.amount_total ?? 0) / 100),
+        amountMinor: session.amount_total ?? 0,
         currency: (session.currency ?? "inr").toUpperCase(),
       });
       granted = plan;

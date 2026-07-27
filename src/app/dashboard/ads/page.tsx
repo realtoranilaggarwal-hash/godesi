@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { AD_PLACEMENTS, formatCtr, formatMoney } from "@/lib/ads";
+import { AD_PLACEMENTS, formatCtr } from "@/lib/ads";
+import { formatMinor } from "@/lib/format";
 import { Alert, Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 import { AdCreativeForm } from "@/components/forms/AdCreativeForm";
-import type { Currency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My ads" };
@@ -66,9 +66,8 @@ export default async function AdvertiserDashboardPage({
   const totalClicks = banners.reduce((sum, b) => sum + b.clicks, 0);
   const spend = orders
     .filter((order) => order.status === "PAID")
-    .reduce((sum, order) => sum + order.amount, 0);
-  const spendCurrency = (orders.find((o) => o.status === "PAID")?.currency ??
-    "INR") as Currency;
+    .reduce((sum, order) => sum + order.amountMinor, 0);
+  const spendCurrency = orders.find((o) => o.status === "PAID")?.currency ?? "INR";
 
   return (
     <div className="space-y-5">
@@ -106,7 +105,7 @@ export default async function AdvertiserDashboardPage({
         />
         <Stat
           label="Total spend"
-          value={formatMoney(spend, spendCurrency)}
+          value={formatMinor(spend, spendCurrency)}
           tone="bg-fuchsia-50 text-fuchsia-700"
         />
       </div>
@@ -216,7 +215,7 @@ export default async function AdvertiserDashboardPage({
                       {order.months} month{order.months > 1 ? "s" : ""}
                     </td>
                     <td>
-                      {formatMoney(order.amount, order.currency as Currency)}
+                      {formatMinor(order.amountMinor, order.currency)}
                     </td>
                     <td>
                       <Badge tone={order.status === "PAID" ? "green" : "amber"}>

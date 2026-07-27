@@ -40,7 +40,7 @@ export async function POST(request: Request) {
           ticketId,
           provider: "stripe",
           reference: session.id,
-          amount: Math.round((session.amount_total ?? 0) / 100),
+          amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
         });
       } else if (session.metadata?.kind === "ad" && adOrderId) {
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
           adOrderId,
           provider: "stripe",
           reference: session.id,
-          amount: Math.round((session.amount_total ?? 0) / 100),
+          amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
         });
       } else if (userId && plan) {
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
           plan: assertPaidPlan(plan),
           provider: "stripe",
           reference: session.id,
-          amount: Math.round((session.amount_total ?? 0) / 100),
+          amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
         });
       }

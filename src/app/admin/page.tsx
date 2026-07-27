@@ -17,13 +17,12 @@ import {
 } from "@/app/actions/admin";
 import { BannerForm } from "@/components/forms/BannerForm";
 import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
-import { AD_PLACEMENTS, formatCtr, formatMoney } from "@/lib/ads";
-import type { Currency } from "@/lib/currency";
+import { AD_PLACEMENTS, formatCtr } from "@/lib/ads";
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
 import { formatEventDate } from "@/lib/events";
 import { Badge, Card } from "@/components/ui";
 import { PLAN_ORDER } from "@/lib/plans";
-import { formatInr, formatUsd } from "@/lib/format";
+import { formatMinor } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" };
@@ -350,7 +349,7 @@ export default async function AdminPage() {
                     <td>{order.user.email}</td>
                     <td>{AD_PLACEMENTS[order.slot].name}</td>
                     <td>{order.months}</td>
-                    <td>{formatMoney(order.amount, order.currency as Currency)}</td>
+                    <td>{formatMinor(order.amountMinor, order.currency)}</td>
                     <td>
                       <Badge tone={order.status === "PAID" ? "green" : "amber"}>
                         {order.status}
@@ -549,7 +548,7 @@ export default async function AdminPage() {
                   {payment.user.email} · {payment.plan}
                 </span>
                 <span className="text-slate-500">
-                  {payment.currency === "USD" ? formatUsd(payment.amount) : formatInr(payment.amount)}{" "}
+                  {formatMinor(payment.amountMinor, payment.currency)}{" "}
                   · {payment.createdAt.toLocaleDateString("en-IN")}
                 </span>
               </li>

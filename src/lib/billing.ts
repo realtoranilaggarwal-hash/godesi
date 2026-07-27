@@ -16,14 +16,15 @@ export async function activatePlan({
   plan,
   provider,
   reference,
-  amount,
+  amountMinor,
   currency,
 }: {
   userId: string;
   plan: Plan;
   provider: PaymentProvider;
   reference: string;
-  amount: number;
+  /** In the currency's minor unit (paise, cents). */
+  amountMinor: number;
   currency: string;
 }) {
   const existing = await db.payment.findUnique({ where: { reference } });
@@ -33,7 +34,7 @@ export async function activatePlan({
 
   const [payment] = await db.$transaction([
     db.payment.create({
-      data: { userId, plan, amount, currency, provider, reference },
+      data: { userId, plan, amountMinor, currency, provider, reference },
     }),
     db.user.update({
       where: { id: userId },
