@@ -1,0 +1,1 @@
+ALTER TYPE "BannerSlot" ADD VALUE 'HERO';

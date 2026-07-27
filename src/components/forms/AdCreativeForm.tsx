@@ -6,6 +6,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
+import { DesignHelp } from "@/components/DesignHelp";
 
 export function AdCreativeForm({
   id,
@@ -50,6 +51,8 @@ export function AdCreativeForm({
           />
         </Field>
       </div>
+
+      <DesignHelp size={size} />
 
       <SubmitButton>Save creative</SubmitButton>
     </form>

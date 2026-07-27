@@ -44,6 +44,7 @@ enum TicketStatus {
 
 enum BannerSlot {
   HEADER
+  HERO
   SIDEBAR
   SKYSCRAPER
 }
@@ -166,6 +167,9 @@ model User {
 
   coupons           Coupon[]           @relation("CouponCreator")
   couponRedemptions CouponRedemption[]
+
+  meetupProfile MeetupProfile?
+  meetupReports MeetupReport[]
 }
 
 enum ReferralStatus {
@@ -782,4 +786,56 @@ model CouponRedemption {
 
   @@unique([couponId, userId])
   @@index([couponId])
+}
+
+enum MeetupGender {
+  WOMAN
+  MAN
+  OTHER
+}
+
+enum MeetupMarital {
+  SINGLE
+  MARRIED
+  PREFER_NOT_SAY
+}
+
+/// Opt-in "Connect" profile for meeting people over business, coffee or a chat.
+/// Reviewed before it goes public; strictly non-dating (see `lib/moderation`).
+model MeetupProfile {
+  id            String        @id @default(cuid())
+  userId        String        @unique
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName   String
+  age           Int
+  gender        MeetupGender
+  marital       MeetupMarital @default(PREFER_NOT_SAY)
+  city          String
+  state         String?
+  /// Comma separated intents: business, coffee, chit-chat, community.
+  intents       String
+  bio           String
+  whatsappNumber String?
+  status        ListingStatus @default(PENDING)
+  visible       Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  reports MeetupReport[]
+
+  @@index([status, city])
+}
+
+/// Member-flagged profile, queued for admin review.
+model MeetupReport {
+  id         String        @id @default(cuid())
+  profileId  String
+  profile    MeetupProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  createdAt  DateTime      @default(now())
+
+  @@unique([profileId, reporterId])
+  @@index([profileId])
 }

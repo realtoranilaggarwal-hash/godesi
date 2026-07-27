@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   activeBanners,
   HEADER_SIZE,
+  HERO_SIZE,
   SIDEBAR_SIZE,
   SIDEBAR_SLOTS,
   SKYSCRAPER_SIZE,
@@ -133,6 +135,45 @@ export async function SidebarBanners() {
         ))}
       </div>
     </aside>
+  );
+}
+
+/**
+ * The homepage hero: a paid full-width creative when one is booked, otherwise our
+ * own artwork with an "advertise here" ribbon so the space still sells itself.
+ */
+export async function HeroBanner() {
+  const [banner] = await activeBanners("HERO", 1);
+
+  if (banner) {
+    return (
+      <BannerLink
+        banner={banner}
+        width={HERO_SIZE.width}
+        height={HERO_SIZE.height}
+        className="rounded-3xl"
+      />
+    );
+  }
+
+  return (
+    <Link
+      href="/advertise#placements"
+      className="group relative block overflow-hidden rounded-3xl"
+    >
+      <Image
+        src="/hero-banner.jpg"
+        alt="Godesi — your desi community directory: businesses, leads, events, news, connections"
+        width={1983}
+        height={793}
+        priority
+        sizes="100vw"
+        className="h-auto w-full"
+      />
+      <span className="absolute bottom-3 right-3 rounded-xl bg-slate-900/80 px-3 py-2 text-xs font-bold text-white group-hover:bg-indigo-600 sm:text-sm">
+        This banner space is for sale — advertise here →
+      </span>
+    </Link>
   );
 }
 

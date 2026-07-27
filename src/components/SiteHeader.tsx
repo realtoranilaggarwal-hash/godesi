@@ -19,6 +19,7 @@ const NAV = [
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
   { href: "/wedding", label: "Wedding", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
+  { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/news", label: "News", icon: "📰" },
 ];
 

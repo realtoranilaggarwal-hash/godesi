@@ -34,6 +34,23 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Best for brand launches and offers",
     ],
   },
+  HERO: {
+    slot: "HERO",
+    name: "Homepage hero banner",
+    size: { width: 1200, height: 480 },
+    slots: 3,
+    blurb:
+      "The huge banner at the top of the homepage — our most valuable space, shared by up to three advertisers in rotation.",
+    priceInr: 14999,
+    priceUsd: 179,
+    cpmInr: 480,
+    cpmUsd: 5.6,
+    highlights: [
+      "First thing every visitor sees",
+      "Full width on desktop and mobile",
+      "Rotates between three advertisers",
+    ],
+  },
   SIDEBAR: {
     slot: "SIDEBAR",
     name: "Sidebar medium rectangle",
@@ -68,7 +85,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   },
 };
 
-export const AD_SLOT_ORDER: BannerSlot[] = ["HEADER", "SIDEBAR", "SKYSCRAPER"];
+export const AD_SLOT_ORDER: BannerSlot[] = [
+  "HERO",
+  "HEADER",
+  "SIDEBAR",
+  "SKYSCRAPER",
+];
 
 export const AD_DURATIONS = [1, 3, 6, 12] as const;
 export type AdDuration = (typeof AD_DURATIONS)[number];

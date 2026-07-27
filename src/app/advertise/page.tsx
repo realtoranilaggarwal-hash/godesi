@@ -15,6 +15,7 @@ import {
 } from "@/lib/ads";
 import { requestCurrency } from "@/lib/currency";
 import { AdBookingForm } from "@/components/forms/AdBookingForm";
+import { DesignHelp } from "@/components/DesignHelp";
 import { Alert, Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -160,6 +161,17 @@ export default async function AdvertisePage({
           );
         })}
       </section>
+
+      <Card>
+        <h2 className="text-lg font-bold">Need your banner designed?</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          You do not need a designer. Copy the prompt below into ChatGPT, fill in your
+          details, download the image and upload it in your advertiser dashboard.
+        </p>
+        <div className="mt-3">
+          <DesignHelp size={AD_PLACEMENTS.SIDEBAR.size} />
+        </div>
+      </Card>
 
       <Card>
         <h2 className="text-lg font-bold">How it works</h2>

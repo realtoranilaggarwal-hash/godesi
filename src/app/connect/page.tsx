@@ -1,0 +1,305 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import type { Prisma } from "@prisma/client";
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { whatsappLink } from "@/lib/format";
+import {
+  GENDER_LABELS,
+  INTENT_LABELS,
+  MARITAL_LABELS,
+  MEETUP_INTENTS,
+  intentLabels,
+} from "@/lib/meetups";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { PostedBy } from "@/components/PostedBy";
+import { ReportMeetupForm } from "@/components/forms/ReportMeetupForm";
+import {
+  Alert,
+  Badge,
+  Card,
+  EmptyState,
+  LinkButton,
+  inputClass,
+} from "@/components/ui";
+
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Connect — meet desis near you",
+  description:
+    "Meet desis in your city for business networking, a coffee catch-up or friendly conversation. Strictly platonic, reviewed and moderated.",
+};
+
+type Filters = {
+  city?: string;
+  gender?: string;
+  marital?: string;
+  intent?: string;
+  minAge?: string;
+  maxAge?: string;
+};
+
+function ageRange(filters: Filters) {
+  const min = Number(filters.minAge);
+  const max = Number(filters.maxAge);
+  const range: Prisma.IntFilter = {};
+  if (Number.isInteger(min) && min >= 18) range.gte = min;
+  if (Number.isInteger(max) && max >= 18) range.lte = max;
+  return Object.keys(range).length ? range : undefined;
+}
+
+export default async function ConnectPage({
+  searchParams,
+}: {
+  searchParams: Filters;
+}) {
+  const user = await getCurrentUser();
+
+  const where: Prisma.MeetupProfileWhereInput = {
+    status: "APPROVED",
+    visible: true,
+    ...(searchParams.city
+      ? { city: { contains: searchParams.city, mode: "insensitive" } }
+      : {}),
+    ...(searchParams.gender === "WOMAN" ||
+    searchParams.gender === "MAN" ||
+    searchParams.gender === "OTHER"
+      ? { gender: searchParams.gender }
+      : {}),
+    ...(searchParams.marital === "SINGLE" ||
+    searchParams.marital === "MARRIED" ||
+    searchParams.marital === "PREFER_NOT_SAY"
+      ? { marital: searchParams.marital }
+      : {}),
+    ...(searchParams.intent && searchParams.intent in INTENT_LABELS
+      ? { intents: { contains: searchParams.intent } }
+      : {}),
+  };
+  const age = ageRange(searchParams);
+  if (age) where.age = age;
+
+  const [profiles, mine] = await Promise.all([
+    db.meetupProfile.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      take: 60,
+      include: {
+        user: { select: { name: true, username: true, avatarUrl: true } },
+      },
+    }),
+    user
+      ? db.meetupProfile.findUnique({ where: { userId: user.id } })
+      : Promise.resolve(null),
+  ]);
+
+  return (
+    <div className="flex gap-6">
+      <div className="min-w-0 flex-1 space-y-5">
+        <section className="rounded-3xl bg-gradient-to-r from-sky-500 via-cyan-500 to-emerald-500 px-5 py-8 text-white sm:px-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
+            Connect
+          </p>
+          <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+            Meet desis near you 🤝
+          </h1>
+          <p className="mt-3 max-w-2xl text-white/90">
+            For business networking, a coffee catch-up or simple friendly chit-chat —
+            students, professionals, singles and married folks all welcome. This is a
+            platonic community space: no dating, no adult content.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <LinkButton href="/connect/new" variant="secondary">
+              {mine ? "Edit my Connect profile" : "Create my Connect profile"}
+            </LinkButton>
+          </div>
+        </section>
+
+        {mine && mine.status === "PENDING" ? (
+          <Alert tone="info">
+            Your Connect profile is awaiting review — it will appear here once approved.
+          </Alert>
+        ) : null}
+        {mine && mine.status === "REJECTED" ? (
+          <Alert>
+            Your Connect profile was not approved. Please edit it to follow the
+            community rules and submit again.
+          </Alert>
+        ) : null}
+
+        <Card>
+          <form className="grid gap-3 sm:grid-cols-3">
+            <input
+              name="city"
+              defaultValue={searchParams.city ?? ""}
+              placeholder="City"
+              aria-label="City"
+              className={inputClass}
+            />
+            <select
+              name="intent"
+              defaultValue={searchParams.intent ?? ""}
+              aria-label="Open to"
+              className={inputClass}
+            >
+              <option value="">Any reason to meet</option>
+              {MEETUP_INTENTS.map((intent) => (
+                <option key={intent.id} value={intent.id}>
+                  {intent.label}
+                </option>
+              ))}
+            </select>
+            <select
+              name="gender"
+              defaultValue={searchParams.gender ?? ""}
+              aria-label="Gender"
+              className={inputClass}
+            >
+              <option value="">Anyone</option>
+              {Object.entries(GENDER_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <select
+              name="marital"
+              defaultValue={searchParams.marital ?? ""}
+              aria-label="Marital status"
+              className={inputClass}
+            >
+              <option value="">Any status</option>
+              {Object.entries(MARITAL_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                name="minAge"
+                type="number"
+                min={18}
+                defaultValue={searchParams.minAge ?? ""}
+                placeholder="Age from"
+                aria-label="Minimum age"
+                className={inputClass}
+              />
+              <input
+                name="maxAge"
+                type="number"
+                min={18}
+                defaultValue={searchParams.maxAge ?? ""}
+                placeholder="to"
+                aria-label="Maximum age"
+                className={inputClass}
+              />
+            </div>
+            <button
+              type="submit"
+              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+            >
+              Filter
+            </button>
+          </form>
+        </Card>
+
+        {profiles.length ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {profiles.map((profile) => (
+              <Card key={profile.id} className="flex flex-col gap-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-semibold">
+                      {profile.displayName}, {profile.age}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {profile.city}
+                      {profile.state ? `, ${profile.state}` : ""} ·{" "}
+                      {GENDER_LABELS[profile.gender]} ·{" "}
+                      {MARITAL_LABELS[profile.marital]}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1">
+                  {intentLabels(profile.intents).map((label) => (
+                    <Badge key={label} tone="slate">
+                      {label}
+                    </Badge>
+                  ))}
+                </div>
+
+                <p className="whitespace-pre-line break-words text-sm text-slate-700">
+                  {profile.bio}
+                </p>
+                <PostedBy user={profile.user} />
+
+                <div className="mt-auto space-y-2 pt-2">
+                  {user ? (
+                    profile.whatsappNumber ? (
+                      <a
+                        href={whatsappLink(
+                          profile.whatsappNumber,
+                          `Hi ${profile.displayName}, I found you on Godesi Connect.`,
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-emerald-700"
+                      >
+                        Say hello on WhatsApp
+                      </a>
+                    ) : (
+                      <p className="text-xs text-slate-500">
+                        No WhatsApp shared — reach out via their profile.
+                      </p>
+                    )
+                  ) : (
+                    <LinkButton
+                      href={`/login?next=${encodeURIComponent("/connect")}`}
+                      className="w-full"
+                    >
+                      Sign in to contact
+                    </LinkButton>
+                  )}
+                  {user && user.id !== profile.userId ? (
+                    <ReportMeetupForm profileId={profile.id} />
+                  ) : null}
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No Connect profiles match your filters yet"
+            body="Be the first in your city — create your profile and others will find you."
+            action={<LinkButton href="/connect/new">Create my profile</LinkButton>}
+          />
+        )}
+
+        <Card>
+          <h2 className="text-lg font-bold">House rules</h2>
+          <ul className="mt-2 space-y-1 text-sm text-slate-600">
+            <li>• 18+ only, and every profile is reviewed before it appears.</li>
+            <li>
+              • Business, coffee, community and friendly conversation only — no dating,
+              adult or sexual content. Such wording is blocked automatically.
+            </li>
+            <li>• Meet in public places and never send money to anyone.</li>
+            <li>
+              • Report anything uncomfortable — we review every report and remove
+              offenders. Questions?{" "}
+              <Link href="/contact" className="font-semibold text-indigo-600">
+                Contact us
+              </Link>
+              .
+            </li>
+          </ul>
+        </Card>
+
+        <InlineBanner />
+      </div>
+
+      <SidebarBanners />
+    </div>
+  );
+}
