@@ -4,18 +4,7 @@ import { z } from "zod";
 import { SITE } from "@/lib/site";
 import { sendEmail, shell } from "@/lib/email";
 import { type ActionState, fieldError } from "@/lib/actions";
-
-export const CONTACT_TOPICS = [
-  "List my business or profile",
-  "Claim an existing listing",
-  "Advertising, banners and links",
-  "Events and tickets",
-  "Payments, plans and refunds",
-  "Report content or a listing",
-  "Remove my listing or data",
-  "Partnership or bulk listings",
-  "Something else",
-] as const;
+import { CONTACT_TOPICS, SALES_TOPICS } from "@/lib/contact";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Tell us your name"),
@@ -43,11 +32,7 @@ export async function sendContactMessageAction(
   }
 
   const { name, email, phone, topic, message } = parsed.data;
-  const salesTopics = [
-    "Advertising, banners and links",
-    "Partnership or bulk listings",
-  ];
-  const to = salesTopics.includes(topic) ? SITE.salesEmail : SITE.supportEmail;
+  const to = SALES_TOPICS.includes(topic) ? SITE.salesEmail : SITE.supportEmail;
 
   try {
     const sent = await sendEmail({

@@ -1,10 +1,8 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import {
-  CONTACT_TOPICS,
-  sendContactMessageAction,
-} from "@/app/actions/contact";
+import { sendContactMessageAction } from "@/app/actions/contact";
+import { CONTACT_TOPICS } from "@/lib/contact";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
