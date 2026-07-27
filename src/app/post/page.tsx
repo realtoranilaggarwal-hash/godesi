@@ -3,16 +3,19 @@ import Link from "next/link";
 import { getCategoryTree } from "@/lib/directory";
 import { gradientFor } from "@/lib/categories";
 import { Card } from "@/components/ui";
+import { PostingSidebar } from "@/components/PostingSidebar";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Post your business or service",
-  description: "Add a business, a professional profile, an event, a property or a requirement.",
+  description:
+    "Add a business, a professional profile, an event, a property or a requirement.",
 };
 
 const PROFESSIONALS_SLUG = "professionals";
 
-type PostType = "business" | "professional" | "event" | "property" | "requirement";
+type PostType =
+  "business" | "professional" | "event" | "property" | "requirement";
 
 const TYPES: {
   id: PostType;
@@ -66,7 +69,15 @@ const PROPERTY_KINDS = [
   { kind: "MARKETPLACE", label: "Something to sell", icon: "🛍️" },
 ];
 
-function Step({ n, total, title }: { n: number; total: number; title: string }) {
+function Step({
+  n,
+  total,
+  title,
+}: {
+  n: number;
+  total: number;
+  title: string;
+}) {
   return (
     <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
       <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs text-white">
@@ -122,105 +133,116 @@ export default async function PostPage({
   const categories = await getCategoryTree();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Post on Godesi ✨</h1>
-        <p className="text-sm text-slate-600">
-          Free to post. Two quick steps and your listing is live for the community.
-        </p>
-      </div>
+    <div className="flex justify-center gap-6">
+      <div className="min-w-0 max-w-4xl flex-1 space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Post on Godesi ✨</h1>
+          <p className="text-sm text-slate-600">
+            Free to post. Two quick steps and your listing is live for the
+            community.
+          </p>
+        </div>
 
-      {!type ? (
-        <Card className="space-y-3">
-          <Step n={1} total={2} title="What are you posting?" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {TYPES.map((item) => (
-              <Tile
-                key={item.id}
-                href={`/post?type=${item.id}`}
-                icon={item.icon}
-                label={item.label}
-                blurb={item.blurb}
-                gradient={item.gradient}
-              />
-            ))}
-          </div>
-        </Card>
-      ) : (
-        <Card className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Step
-              n={2}
-              total={2}
-              title={
-                type === "property" ? "What kind of listing?" : "Pick the category"
-              }
-            />
-            <Link href="/post" className="text-sm font-semibold text-indigo-600 hover:underline">
-              ← Change type
-            </Link>
-          </div>
-
-          {type === "property" ? (
+        {!type ? (
+          <Card className="space-y-3">
+            <Step n={1} total={2} title="What are you posting?" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {PROPERTY_KINDS.map((item) => (
+              {TYPES.map((item) => (
                 <Tile
-                  key={item.kind}
-                  href={`/listings/new?kind=${item.kind}`}
+                  key={item.id}
+                  href={`/post?type=${item.id}`}
                   icon={item.icon}
                   label={item.label}
-                  gradient="from-emerald-500 to-teal-500"
+                  blurb={item.blurb}
+                  gradient={item.gradient}
                 />
               ))}
             </div>
-          ) : type === "professional" ? (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {(
-                categories.find((item) => item.slug === PROFESSIONALS_SLUG)?.children ?? []
-              ).map((child) => (
-                <Tile
-                  key={child.slug}
-                  href={`/dashboard/profile?type=professional&category=${PROFESSIONALS_SLUG}&subcategory=${child.slug}`}
-                  icon="🎓"
-                  label={child.name}
-                  gradient="from-cyan-500 to-sky-500"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((category) => (
-                <Tile
-                  key={category.slug}
-                  href={
-                    type === "event"
-                      ? `/events/new?category=${category.slug}`
-                      : type === "requirement"
-                        ? `/leads/new?category=${category.slug}`
-                        : `/dashboard/profile?type=business&category=${category.slug}`
-                  }
-                  icon={category.icon}
-                  label={category.name}
-                  gradient={gradientFor(category.color)}
-                />
-              ))}
-            </div>
-          )}
-
-          {type === "event" || type === "requirement" ? (
-            <p className="text-sm text-slate-500">
-              Not sure?{" "}
+          </Card>
+        ) : (
+          <Card className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Step
+                n={2}
+                total={2}
+                title={
+                  type === "property"
+                    ? "What kind of listing?"
+                    : "Pick the category"
+                }
+              />
               <Link
-                href={type === "event" ? "/events/new" : "/leads/new"}
-                className="font-semibold text-indigo-600 hover:underline"
+                href="/post"
+                className="text-sm font-semibold text-indigo-600 hover:underline"
               >
-                Skip and pick it in the form
+                ← Change type
               </Link>
-              .
-            </p>
-          ) : null}
-        </Card>
-      )}
+            </div>
+
+            {type === "property" ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {PROPERTY_KINDS.map((item) => (
+                  <Tile
+                    key={item.kind}
+                    href={`/listings/new?kind=${item.kind}`}
+                    icon={item.icon}
+                    label={item.label}
+                    gradient="from-emerald-500 to-teal-500"
+                  />
+                ))}
+              </div>
+            ) : type === "professional" ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {(
+                  categories.find((item) => item.slug === PROFESSIONALS_SLUG)
+                    ?.children ?? []
+                ).map((child) => (
+                  <Tile
+                    key={child.slug}
+                    href={`/dashboard/profile?type=professional&category=${PROFESSIONALS_SLUG}&subcategory=${child.slug}`}
+                    icon="🎓"
+                    label={child.name}
+                    gradient="from-cyan-500 to-sky-500"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {categories.map((category) => (
+                  <Tile
+                    key={category.slug}
+                    href={
+                      type === "event"
+                        ? `/events/new?category=${category.slug}`
+                        : type === "requirement"
+                          ? `/leads/new?category=${category.slug}`
+                          : `/dashboard/profile?type=business&category=${category.slug}`
+                    }
+                    icon={category.icon}
+                    label={category.name}
+                    gradient={gradientFor(category.color)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {type === "event" || type === "requirement" ? (
+              <p className="text-sm text-slate-500">
+                Not sure?{" "}
+                <Link
+                  href={type === "event" ? "/events/new" : "/leads/new"}
+                  className="font-semibold text-indigo-600 hover:underline"
+                >
+                  Skip and pick it in the form
+                </Link>
+                .
+              </p>
+            ) : null}
+          </Card>
+        )}
+      </div>
+
+      <PostingSidebar />
     </div>
   );
 }

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
+import { FeaturedEventStrip } from "@/components/FeaturedEvents";
+import { planRank } from "@/lib/plans";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
@@ -24,21 +26,33 @@ export default async function EventsPage({
   const scope = category
     ? [
         category,
-        ...(categories.find((item) => item.slug === category)?.children.map((c) => c.slug) ?? []),
+        ...(categories
+          .find((item) => item.slug === category)
+          ?.children.map((c) => c.slug) ?? []),
       ]
     : undefined;
 
   const events = await db.event.findMany({
     where: {
       status: "APPROVED",
-      ...(when === "past" ? { startsAt: { lt: new Date() } } : { startsAt: { gte: new Date() } }),
+      ...(when === "past"
+        ? { startsAt: { lt: new Date() } }
+        : { startsAt: { gte: new Date() } }),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(scope ? { categorySlug: { in: scope } } : {}),
     },
     orderBy: { startsAt: when === "past" ? "desc" : "asc" },
     take: 48,
-    include: { category: { select: { name: true, icon: true, color: true } } },
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      organizer: { select: { plan: true } },
+    },
   });
+
+  // Paid organisers rank above free ones, then by date.
+  events.sort(
+    (a, b) => planRank(b.organizer.plan) - planRank(a.organizer.plan),
+  );
 
   return (
     <div className="flex gap-6">
@@ -48,8 +62,8 @@ export default async function EventsPage({
         >
           <h1 className="text-3xl font-black">Events & tickets 🎟️</h1>
           <p className="mt-1 max-w-xl text-white/90">
-            Melas, workshops, expos, satsangs and weddings — book a seat in seconds and get a
-            QR ticket on your phone.
+            Melas, workshops, expos, satsangs and weddings — book a seat in
+            seconds and get a QR ticket on your phone.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/events/new" variant="secondary">
@@ -63,6 +77,8 @@ export default async function EventsPage({
             </Link>
           </div>
         </section>
+
+        <FeaturedEventStrip />
 
         <Card>
           <form className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
@@ -116,7 +132,7 @@ export default async function EventsPage({
           </Link>{" "}
           and sell tickets with QR check-in.
         </p>
-      <InlineBanner />
+        <InlineBanner />
       </div>
 
       <SidebarBanners />
