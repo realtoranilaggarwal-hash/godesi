@@ -45,6 +45,21 @@ enum TicketStatus {
 enum BannerSlot {
   HEADER
   SIDEBAR
+  SKYSCRAPER
+}
+
+enum BannerStatus {
+  DRAFT
+  PENDING
+  ACTIVE
+  REJECTED
+  EXPIRED
+}
+
+enum AdOrderStatus {
+  PENDING
+  PAID
+  CANCELLED
 }
 
 enum NewsStatus {
@@ -76,6 +91,8 @@ model User {
   events   Event[]
   tickets  Ticket[]
   news     NewsItem[]
+  banners  Banner[]
+  adOrders AdOrder[]
 }
 
 /// Multi-level taxonomy: top-level categories have `parentId = null`,
@@ -238,19 +255,46 @@ model Ticket {
 }
 
 model Banner {
-  id          String     @id @default(cuid())
-  slot        BannerSlot @default(SIDEBAR)
-  position    Int        @default(1)
+  id          String       @id @default(cuid())
+  slot        BannerSlot   @default(SIDEBAR)
+  position    Int?
   title       String
   imageUrl    String
   linkUrl     String
-  active      Boolean    @default(true)
-  impressions Int        @default(0)
-  clicks      Int        @default(0)
-  createdAt   DateTime   @default(now())
+  active      Boolean      @default(true)
+  status      BannerStatus @default(ACTIVE)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  impressions Int          @default(0)
+  clicks      Int          @default(0)
+  createdAt   DateTime     @default(now())
+
+  advertiserId String?
+  advertiser   User?    @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
+  orders       AdOrder[]
 
   @@unique([slot, position])
   @@index([slot, active])
+  @@index([advertiserId])
+}
+
+/// A paid advertising booking for one banner placement.
+model AdOrder {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bannerId  String?
+  banner    Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
+  slot      BannerSlot
+  months    Int           @default(1)
+  amount    Int
+  currency  String        @default("INR")
+  provider  String        @default("stripe")
+  reference String?       @unique
+  status    AdOrderStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+
+  @@index([userId, status])
 }
 
 model NewsFeed {

@@ -6,7 +6,7 @@ import type { ListingStatus, NewsStatus, Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { HEADER_SLOTS, SIDEBAR_SLOTS } from "@/lib/banners";
+import { slotCapacity } from "@/lib/banners";
 
 export async function setListingStatusAction(formData: FormData) {
   await requireRole("ADMIN");
@@ -42,7 +42,7 @@ export async function setUserPlanAction(formData: FormData) {
 }
 
 const bannerSchema = z.object({
-  slot: z.enum(["SIDEBAR", "HEADER"]),
+  slot: z.enum(["SIDEBAR", "HEADER", "SKYSCRAPER"]),
   position: z.coerce.number().int().min(1),
   title: z.string().trim().min(2, "Banner title is required"),
   imageUrl: z.string().trim().url("Enter a valid image URL"),
@@ -64,7 +64,7 @@ export async function saveBannerAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const limit = parsed.data.slot === "SIDEBAR" ? SIDEBAR_SLOTS : HEADER_SLOTS;
+    const limit = slotCapacity(parsed.data.slot);
     if (parsed.data.position > limit) {
       return { error: `${parsed.data.slot} has only ${limit} slot(s).` };
     }
@@ -72,8 +72,8 @@ export async function saveBannerAction(
     const { slot, position, ...rest } = parsed.data;
     await db.banner.upsert({
       where: { slot_position: { slot, position } },
-      create: { slot, position, ...rest },
-      update: { ...rest, active: true },
+      create: { slot, position, ...rest, status: "ACTIVE" },
+      update: { ...rest, active: true, status: "ACTIVE" },
     });
 
     revalidatePath("/admin");
@@ -97,6 +97,71 @@ export async function toggleBannerAction(formData: FormData) {
 export async function deleteBannerAction(formData: FormData) {
   await requireRole("ADMIN");
   await db.banner.delete({ where: { id: String(formData.get("id") ?? "") } });
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+/** Approves a paid ad: assigns it a free slot number and switches it live. */
+export async function approveBannerAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    await requireRole("ADMIN");
+    const id = String(formData.get("id") ?? "");
+    const requested = Number(formData.get("position") ?? 0);
+
+    const banner = await db.banner.findUnique({ where: { id } });
+    if (!banner) return { error: "Banner not found." };
+
+    const capacity = slotCapacity(banner.slot);
+    let position = Number.isInteger(requested) && requested > 0 ? requested : null;
+
+    if (position && position > capacity) {
+      return { error: `${banner.slot} has only ${capacity} slot(s).` };
+    }
+
+    if (!position) {
+      const used = await db.banner.findMany({
+        where: { slot: banner.slot, NOT: { id: banner.id }, position: { not: null } },
+        select: { position: true },
+      });
+      const taken = new Set(used.map((row) => row.position));
+      for (let candidate = 1; candidate <= capacity; candidate += 1) {
+        if (!taken.has(candidate)) {
+          position = candidate;
+          break;
+        }
+      }
+      if (!position) return { error: `All ${banner.slot} slots are occupied.` };
+    }
+
+    const occupant = await db.banner.findUnique({
+      where: { slot_position: { slot: banner.slot, position } },
+    });
+    if (occupant && occupant.id !== banner.id) {
+      return { error: `${banner.slot} slot ${position} is already taken.` };
+    }
+
+    await db.banner.update({
+      where: { id: banner.id },
+      data: { position, status: "ACTIVE", active: true },
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/");
+    return { success: `Ad approved in ${banner.slot} slot ${position}.` };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+export async function rejectBannerAction(formData: FormData) {
+  await requireRole("ADMIN");
+  await db.banner.update({
+    where: { id: String(formData.get("id") ?? "") },
+    data: { status: "REJECTED", active: false, position: null },
+  });
   revalidatePath("/admin");
   revalidatePath("/");
 }
@@ -156,6 +221,90 @@ export async function setEventStatusAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath(`/events/${event.slug}`);
+}
+
+const adminEventSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().trim().min(5, "Give the event a clear title"),
+  description: z.string().trim().min(20, "Describe the event (20+ characters)"),
+  date: z.string().trim().min(1, "Event date is required"),
+  time: z.string().trim().min(1, "Event time is required"),
+  venue: z.string().trim().min(3, "Venue is required"),
+  city: z.string().trim().min(2, "City is required"),
+  categorySlug: z.string().trim().optional(),
+  subcategorySlug: z.string().trim().optional(),
+  priceInr: z.coerce.number().int().min(0, "Price cannot be negative"),
+  seatsTotal: z.coerce.number().int().min(1, "At least 1 seat is required"),
+  imageUrl: z
+    .string()
+    .trim()
+    .url("Enter a valid image URL")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
+});
+
+/** Full admin edit of any event — dates, pricing, seats, artwork and status. */
+export async function adminUpdateEventAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    await requireRole("ADMIN");
+    const parsed = adminEventSchema.safeParse({
+      id: formData.get("id"),
+      title: formData.get("title"),
+      description: formData.get("description"),
+      date: formData.get("date"),
+      time: formData.get("time"),
+      venue: formData.get("venue"),
+      city: formData.get("city"),
+      categorySlug: formData.get("categorySlug"),
+      subcategorySlug: formData.get("subcategorySlug"),
+      priceInr: formData.get("priceInr") || 0,
+      seatsTotal: formData.get("seatsTotal") || 1,
+      imageUrl: formData.get("imageUrl"),
+      status: formData.get("status"),
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
+    if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
+
+    const existing = await db.event.findUnique({
+      where: { id: parsed.data.id },
+      select: { seatsBooked: true },
+    });
+    if (!existing) return { error: "Event not found." };
+    if (parsed.data.seatsTotal < existing.seatsBooked) {
+      return {
+        error: `${existing.seatsBooked} seats are already booked — seats cannot go below that.`,
+      };
+    }
+
+    const event = await db.event.update({
+      where: { id: parsed.data.id },
+      data: {
+        title: parsed.data.title,
+        description: parsed.data.description,
+        startsAt,
+        venue: parsed.data.venue,
+        city: parsed.data.city,
+        imageUrl: parsed.data.imageUrl ?? null,
+        priceInr: parsed.data.priceInr,
+        seatsTotal: parsed.data.seatsTotal,
+        status: parsed.data.status,
+        categorySlug: parsed.data.subcategorySlug || parsed.data.categorySlug || null,
+      },
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/events");
+    revalidatePath(`/events/${event.slug}`);
+    return { success: "Event updated." };
+  } catch (error) {
+    return fieldError(error);
+  }
 }
 
 export async function toggleFeaturedAction(formData: FormData) {

@@ -5,6 +5,7 @@ import { effectivePlan } from "@/lib/plans";
 import { getCategoryTree } from "@/lib/directory";
 import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
+import { CategoryStrip } from "@/components/CategoryStrip";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -43,6 +44,9 @@ export async function SiteHeader() {
           <Link href="/pricing" className="rounded-lg px-2.5 py-1.5 hover:bg-slate-100">
             Pricing
           </Link>
+          <Link href="/advertise" className="rounded-lg px-2.5 py-1.5 hover:bg-slate-100">
+            Advertise
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2 text-sm font-medium">
@@ -79,30 +83,45 @@ export async function SiteHeader() {
         </div>
       </div>
 
-      {/* Colourful category strip — the primary way around the directory. */}
-      <div className="border-t border-slate-100 bg-white">
-        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 text-xs font-semibold">
-          <div className="flex gap-2 md:hidden">
-            {NAV.slice(1).map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="whitespace-nowrap rounded-full bg-slate-900 px-3 py-1.5 text-white"
-              >
-                {item.icon} {item.label}
-              </Link>
-            ))}
-          </div>
-          {categories.map((category) => (
+      {/* Primary sections stay reachable on phones, where the nav is hidden. */}
+      <div className="border-t border-slate-100 bg-white md:hidden">
+        <div className="no-scrollbar mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 text-xs font-semibold">
+          {NAV.slice(1).map((item) => (
             <Link
-              key={category.slug}
-              href={`/categories/${category.slug}`}
-              className={`whitespace-nowrap rounded-full bg-gradient-to-r ${gradientFor(category.color)} px-3 py-1.5 text-white opacity-90 hover:opacity-100`}
+              key={item.href}
+              href={item.href}
+              className="whitespace-nowrap rounded-full bg-slate-900 px-3 py-1.5 text-white"
             >
-              {category.icon} {category.name}
+              {item.icon} {item.label}
             </Link>
           ))}
+          <Link
+            href="/advertise"
+            className="whitespace-nowrap rounded-full bg-slate-900 px-3 py-1.5 text-white"
+          >
+            📢 Advertise
+          </Link>
         </div>
+      </div>
+
+      {/* Colourful category strip — the primary way around the directory. */}
+      <div className="border-t border-slate-100 bg-white">
+        <CategoryStrip
+          items={[
+            ...categories.map((category) => ({
+              href: `/categories/${category.slug}`,
+              label: category.name,
+              icon: category.icon,
+              className: `bg-gradient-to-r ${gradientFor(category.color)} text-white opacity-90 hover:opacity-100`,
+            })),
+            {
+              href: "/categories",
+              label: "All categories",
+              icon: "🧭",
+              className: "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+            },
+          ]}
+        />
       </div>
     </header>
   );

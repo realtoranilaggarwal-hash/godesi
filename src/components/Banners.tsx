@@ -1,4 +1,10 @@
-import { activeBanners, HEADER_SIZE, SIDEBAR_SIZE } from "@/lib/banners";
+import Link from "next/link";
+import {
+  activeBanners,
+  HEADER_SIZE,
+  SIDEBAR_SIZE,
+  SKYSCRAPER_SIZE,
+} from "@/lib/banners";
 import { BannerImpression } from "@/components/BannerImpression";
 
 type BannerRow = {
@@ -41,17 +47,47 @@ function BannerLink({
   );
 }
 
-/** The 10-slot 300x250 sidebar rail. */
+/** Empty inventory is sold, not hidden: every free slot invites an advertiser. */
+function AdvertiseHere({
+  label,
+  height,
+  className = "",
+}: {
+  label: string;
+  height: number;
+  className?: string;
+}) {
+  return (
+    <Link
+      href="/advertise"
+      style={{ minHeight: height }}
+      className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/60 p-4 text-center transition hover:border-indigo-400 hover:bg-indigo-50 ${className}`}
+    >
+      <span className="text-sm font-bold text-indigo-700">Advertise here</span>
+      <span className="text-xs text-indigo-500">{label}</span>
+      <span className="mt-1 rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
+        See rates →
+      </span>
+    </Link>
+  );
+}
+
+/** The sponsored rail: 300x250 rectangles followed by 160x600 skyscrapers. */
 export async function SidebarBanners() {
-  const banners = await activeBanners("SIDEBAR");
-  if (!banners.length) return null;
+  const [rectangles, skyscrapers] = await Promise.all([
+    activeBanners("SIDEBAR"),
+    activeBanners("SKYSCRAPER"),
+  ]);
 
   return (
-    <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block" aria-label="Sponsored">
+    <aside
+      className="hidden w-[300px] shrink-0 space-y-4 lg:block"
+      aria-label="Sponsored"
+    >
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
         Sponsored
       </p>
-      {banners.map((banner) => (
+      {rectangles.map((banner) => (
         <BannerLink
           key={banner.id}
           banner={banner}
@@ -59,6 +95,21 @@ export async function SidebarBanners() {
           height={SIDEBAR_SIZE.height}
         />
       ))}
+      <AdvertiseHere label="300 × 250 sidebar banner" height={250} />
+      {skyscrapers.map((banner) => (
+        <BannerLink
+          key={banner.id}
+          banner={banner}
+          width={SKYSCRAPER_SIZE.width}
+          height={SKYSCRAPER_SIZE.height}
+          className="mx-auto w-[160px]"
+        />
+      ))}
+      <AdvertiseHere
+        label="160 × 600 skyscraper"
+        height={SKYSCRAPER_SIZE.height}
+        className="mx-auto w-[160px]"
+      />
     </aside>
   );
 }
@@ -66,7 +117,16 @@ export async function SidebarBanners() {
 /** The single full-width banner under the header. */
 export async function HeaderBanner() {
   const [banner] = await activeBanners("HEADER");
-  if (!banner) return null;
+
+  if (!banner) {
+    return (
+      <AdvertiseHere
+        label="970 × 90 header leaderboard"
+        height={90}
+        className="mb-4"
+      />
+    );
+  }
 
   return (
     <BannerLink

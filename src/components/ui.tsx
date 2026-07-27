@@ -123,11 +123,20 @@ export function Stars({ rating, size = 16 }: { rating: number; size?: number }) 
   );
 }
 
-export function EmptyState({ title, body }: { title: string; body?: string }) {
+export function EmptyState({
+  title,
+  body,
+  action,
+}: {
+  title: string;
+  body?: string;
+  action?: ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center">
       <p className="font-medium text-slate-700">{title}</p>
       {body ? <p className="mt-1 text-sm text-slate-500">{body}</p> : null}
+      {action ? <div className="mt-3 flex justify-center">{action}</div> : null}
     </div>
   );
 }

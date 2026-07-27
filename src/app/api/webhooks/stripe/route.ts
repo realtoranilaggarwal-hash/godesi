@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
 import { confirmTicket } from "@/lib/events";
+import { confirmAdOrder } from "@/lib/adOrders";
 
 export const dynamic = "force-dynamic";
 
@@ -30,12 +31,21 @@ export async function POST(request: Request) {
     const session = event.data.object;
     if (session.payment_status === "paid") {
       const ticketId = session.metadata?.ticketId;
+      const adOrderId = session.metadata?.adOrderId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
       if (session.metadata?.kind === "ticket" && ticketId) {
         await confirmTicket({
           ticketId,
+          provider: "stripe",
+          reference: session.id,
+          amount: Math.round((session.amount_total ?? 0) / 100),
+          currency: (session.currency ?? "inr").toUpperCase(),
+        });
+      } else if (session.metadata?.kind === "ad" && adOrderId) {
+        await confirmAdOrder({
+          adOrderId,
           provider: "stripe",
           reference: session.id,
           amount: Math.round((session.amount_total ?? 0) / 100),

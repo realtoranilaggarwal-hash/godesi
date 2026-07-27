@@ -13,8 +13,12 @@ import {
   setUserPlanAction,
   toggleBannerAction,
   toggleFeaturedAction,
+  rejectBannerAction,
 } from "@/app/actions/admin";
 import { BannerForm } from "@/components/forms/BannerForm";
+import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
+import { AD_PLACEMENTS, formatCtr, formatMoney } from "@/lib/ads";
+import type { Currency } from "@/lib/currency";
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
 import { formatEventDate } from "@/lib/events";
 import { Badge, Card } from "@/components/ui";
@@ -29,7 +33,17 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (user.role !== "ADMIN") redirect("/dashboard");
 
-  const [businesses, users, payments, leadCount, banners, events, newsItems, feeds] =
+  const [
+    businesses,
+    users,
+    payments,
+    leadCount,
+    banners,
+    events,
+    newsItems,
+    feeds,
+    adOrders,
+  ] =
     await Promise.all([
     db.business.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
@@ -42,7 +56,10 @@ export default async function AdminPage() {
       include: { user: { select: { email: true } } },
     }),
       db.lead.count(),
-      db.banner.findMany({ orderBy: [{ slot: "asc" }, { position: "asc" }] }),
+      db.banner.findMany({
+        orderBy: [{ slot: "asc" }, { position: "asc" }],
+        include: { advertiser: { select: { email: true, name: true } } },
+      }),
       db.event.findMany({
         orderBy: { startsAt: "desc" },
         take: 30,
@@ -53,7 +70,14 @@ export default async function AdminPage() {
       }),
       db.newsItem.findMany({ orderBy: { createdAt: "desc" }, take: 40 }),
       db.newsFeed.findMany({ orderBy: { createdAt: "asc" } }),
+      db.adOrder.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        include: { user: { select: { email: true } } },
+      }),
     ]);
+
+  const pendingAds = banners.filter((banner) => banner.status === "PENDING");
 
   const pending = businesses.filter((b) => b.status === "PENDING").length;
 
@@ -219,6 +243,12 @@ export default async function AdminPage() {
                   >
                     {event.status}
                   </Badge>
+                  <Link
+                    href={`/admin/events/${event.id}`}
+                    className="rounded-lg border border-indigo-200 px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
+                  >
+                    edit
+                  </Link>
                   {(["APPROVED", "REJECTED"] as const)
                     .filter((status) => status !== event.status)
                     .map((status) => (
@@ -243,10 +273,102 @@ export default async function AdminPage() {
       </Card>
 
       <Card>
+        <h2 className="mb-1 text-lg font-bold">Ads awaiting approval</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          Paid bookings whose creative needs a check. Approving assigns a free slot and puts
+          the ad live.
+        </p>
+        {pendingAds.length ? (
+          <ul className="divide-y divide-slate-100">
+            {pendingAds.map((banner) => (
+              <li key={banner.id} className="flex flex-wrap items-center gap-3 py-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={banner.imageUrl}
+                  alt={banner.title}
+                  className="h-16 w-28 rounded-lg border border-slate-200 object-cover"
+                />
+                <div className="min-w-[200px] flex-1">
+                  <p className="text-sm font-semibold">{banner.title}</p>
+                  <p className="text-xs text-slate-500">
+                    {AD_PLACEMENTS[banner.slot].name} ·{" "}
+                    {banner.advertiser?.email ?? "unassigned"} ·{" "}
+                    {banner.endsAt
+                      ? `until ${banner.endsAt.toLocaleDateString("en-IN")}`
+                      : "no end date"}
+                  </p>
+                  <a
+                    href={banner.linkUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-indigo-600"
+                  >
+                    {banner.linkUrl}
+                  </a>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <ApproveAdForm
+                    id={banner.id}
+                    capacity={AD_PLACEMENTS[banner.slot].slots}
+                  />
+                  <form action={rejectBannerAction}>
+                    <input type="hidden" name="id" value={banner.id} />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                    >
+                      reject
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-500">Nothing waiting for review.</p>
+        )}
+
+        {adOrders.length ? (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead className="text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="py-2">Date</th>
+                  <th>Advertiser</th>
+                  <th>Placement</th>
+                  <th>Months</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {adOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td className="py-2">
+                      {order.createdAt.toLocaleDateString("en-IN")}
+                    </td>
+                    <td>{order.user.email}</td>
+                    <td>{AD_PLACEMENTS[order.slot].name}</td>
+                    <td>{order.months}</td>
+                    <td>{formatMoney(order.amount, order.currency as Currency)}</td>
+                    <td>
+                      <Badge tone={order.status === "PAID" ? "green" : "amber"}>
+                        {order.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+      </Card>
+
+      <Card>
         <h2 className="mb-1 text-lg font-bold">Banners</h2>
         <p className="mb-3 text-sm text-slate-500">
-          10 sidebar slots (300×250) and 1 header slot. Saving a slot replaces whatever is in
-          it.
+          10 sidebar slots (300×250), 4 skyscrapers (160×600) and 1 header slot. Saving a slot
+          replaces whatever is in it.
         </p>
         <BannerForm />
 
@@ -266,7 +388,7 @@ export default async function AdminPage() {
               {banners.map((banner) => (
                 <tr key={banner.id}>
                   <td className="py-2 text-xs font-semibold">
-                    {banner.slot} #{banner.position}
+                    {banner.slot} {banner.position ? `#${banner.position}` : "(unassigned)"}
                   </td>
                   <td>
                     <a
@@ -278,14 +400,16 @@ export default async function AdminPage() {
                       {banner.title}
                     </a>
                     <div className="text-xs text-slate-400">
-                      {banner.active ? "active" : "paused"}
+                      {banner.status.toLowerCase()} ·{" "}
+                      {banner.active ? "running" : "paused"}
+                      {banner.advertiser ? ` · ${banner.advertiser.email}` : ""}
                     </div>
                   </td>
                   <td>{banner.impressions}</td>
                   <td>{banner.clicks}</td>
                   <td className="text-xs text-slate-500">
                     {banner.impressions
-                      ? `${((banner.clicks / banner.impressions) * 100).toFixed(1)}%`
+                      ? formatCtr(banner.impressions, banner.clicks)
                       : "—"}
                   </td>
                   <td>

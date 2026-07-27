@@ -3,7 +3,7 @@
 import { useFormState } from "react-dom";
 import { saveBannerAction } from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
-import { HEADER_SIZE, SIDEBAR_SIZE, SIDEBAR_SLOTS } from "@/lib/banners";
+import { AD_PLACEMENTS, AD_SLOT_ORDER } from "@/lib/ads";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 
@@ -16,21 +16,25 @@ export function BannerForm() {
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field
-          label="Slot"
-          hint={`Sidebar ${SIDEBAR_SIZE.width}x${SIDEBAR_SIZE.height} · Header ${HEADER_SIZE.width}x${HEADER_SIZE.height}`}
-        >
+        <Field label="Slot">
           <select name="slot" defaultValue="SIDEBAR" className={inputClass}>
-            <option value="SIDEBAR">Sidebar (10 slots)</option>
-            <option value="HEADER">Header (1 slot)</option>
+            {AD_SLOT_ORDER.map((slot) => {
+              const placement = AD_PLACEMENTS[slot];
+              return (
+                <option key={slot} value={slot}>
+                  {placement.name} — {placement.size.width}×{placement.size.height} (
+                  {placement.slots} slot{placement.slots > 1 ? "s" : ""})
+                </option>
+              );
+            })}
           </select>
         </Field>
-        <Field label="Position" hint={`1–${SIDEBAR_SLOTS} for sidebar, 1 for header`}>
+        <Field label="Position" hint="Sidebar 1–10 · skyscraper 1–4 · header 1">
           <input
             name="position"
             type="number"
             min={1}
-            max={SIDEBAR_SLOTS}
+            max={AD_PLACEMENTS.SIDEBAR.slots}
             defaultValue={1}
             required
             className={inputClass}

@@ -12,12 +12,30 @@ import { closeLeadAction } from "@/app/actions/leads";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({
+  label,
+  value,
+  icon,
+  tone,
+  hint,
+}: {
+  label: string;
+  value: number | string;
+  icon: string;
+  tone: string;
+  hint?: string;
+}) {
   return (
-    <Card className="text-center">
-      <p className="text-2xl font-black text-indigo-600">{value}</p>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
-    </Card>
+    <div className={`rounded-2xl p-4 ${tone}`}>
+      <p className="text-lg" aria-hidden>
+        {icon}
+      </p>
+      <p className="text-2xl font-black">{value}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
+        {label}
+      </p>
+      {hint ? <p className="mt-1 text-[11px] opacity-70">{hint}</p> : null}
+    </div>
   );
 }
 
@@ -37,7 +55,7 @@ export default async function DashboardPage({
     include: { reviews: { select: { rating: true } } },
   });
 
-  const [views, qrScans, whatsappClicks, unlocks, myLeads] = await Promise.all([
+  const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats] = await Promise.all([
     business
       ? db.analyticsEvent.count({ where: { businessId: business.id, type: "PROFILE_VIEW" } })
       : 0,
@@ -47,6 +65,11 @@ export default async function DashboardPage({
       : 0,
     db.leadUnlock.count({ where: { userId: user.id } }),
     db.lead.findMany({ where: { clientId: user.id }, orderBy: { createdAt: "desc" } }),
+    db.banner.aggregate({
+      where: { advertiserId: user.id },
+      _sum: { impressions: true, clicks: true },
+      _count: { _all: true },
+    }),
   ]);
 
   const reviewCount = business?.reviews.length ?? 0;
@@ -80,12 +103,53 @@ export default async function DashboardPage({
         <Alert tone="success">You are now on the {searchParams.upgraded} plan.</Alert>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Profile views" value={views} />
-        <Stat label="QR scans" value={qrScans} />
-        <Stat label="WhatsApp clicks" value={whatsappClicks} />
-        <Stat label="Leads unlocked" value={unlocks} />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <Stat
+          label="Profile views"
+          value={views}
+          icon="👁️"
+          tone="bg-indigo-50 text-indigo-700"
+        />
+        <Stat label="QR scans" value={qrScans} icon="📱" tone="bg-sky-50 text-sky-700" />
+        <Stat
+          label="Enquiries"
+          value={whatsappClicks}
+          icon="💬"
+          tone="bg-emerald-50 text-emerald-700"
+          hint="WhatsApp chats started"
+        />
+        <Stat
+          label="Reviews"
+          value={reviewCount}
+          icon="⭐"
+          tone="bg-amber-50 text-amber-700"
+          hint={reviewCount ? `${rating.toFixed(1)} average` : "No ratings yet"}
+        />
+        <Stat
+          label="Leads unlocked"
+          value={unlocks}
+          icon="🔓"
+          tone="bg-fuchsia-50 text-fuchsia-700"
+        />
       </div>
+
+      {adStats._count._all ? (
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold">Your ads</h2>
+              <p className="text-sm text-slate-600">
+                {(adStats._sum.impressions ?? 0).toLocaleString("en-IN")} impressions ·{" "}
+                {(adStats._sum.clicks ?? 0).toLocaleString("en-IN")} clicks across{" "}
+                {adStats._count._all} banner{adStats._count._all > 1 ? "s" : ""}
+              </p>
+            </div>
+            <LinkButton href="/dashboard/ads" variant="secondary">
+              Ad dashboard
+            </LinkButton>
+          </div>
+        </Card>
+      ) : null}
 
       {business ? (
         <div className="grid gap-5 lg:grid-cols-3">
@@ -130,6 +194,12 @@ export default async function DashboardPage({
               </LinkButton>
               <LinkButton href="/dashboard/leads" variant="secondary">
                 Unlocked leads
+              </LinkButton>
+              <LinkButton href="/dashboard/tickets" variant="secondary">
+                My tickets
+              </LinkButton>
+              <LinkButton href="/advertise" variant="secondary">
+                Advertise
               </LinkButton>
             </div>
           </Card>
