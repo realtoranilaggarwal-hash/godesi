@@ -514,6 +514,18 @@ model AgentProfile {
   /// Comma separated awards with the year, e.g. "2026 Top Agent".
   awards          String?
   brokerage       String?
+  brokerageAddress String?
+  brokerageWebsite String?
+  /// Salesperson / Broker / Broker Associate.
+  licenseType     String?
+  /// Uploaded licence document, reviewed manually before any verified badge.
+  licenseDocUrl   String?
+  mlsId           String?
+  mlsBoard        String?
+  /// Comma separated certifications, e.g. "Realtor® (NAR Member), CRS".
+  certifications  String?
+  /// Comma separated languages the agent speaks.
+  languages       String?
   yearsExperience Int?
   transactions    Int?
   totalSalesMinor Int?

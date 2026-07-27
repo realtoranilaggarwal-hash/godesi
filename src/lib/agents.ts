@@ -7,14 +7,39 @@ export const AGENT_SUBCATEGORIES = [
 ];
 
 export const AGENT_SPECIALTIES = [
-  "Sellers",
-  "Buyers",
-  "Rentals",
-  "Residential property",
-  "Commercial property",
-  "Investment property",
-  "First-time buyers",
-  "Relocation",
+  "Buyer Agent",
+  "Seller Agent",
+  "Rental Specialist",
+  "Commercial Real Estate",
+  "Investment Properties",
+  "Luxury Homes",
+  "First-time Buyers",
+];
+
+export const AGENT_LICENSE_TYPES = [
+  "Salesperson",
+  "Broker",
+  "Broker Associate",
+];
+
+export const AGENT_CERTIFICATIONS = [
+  "Realtor® (NAR Member)",
+  "CRS (Certified Residential Specialist)",
+  "ABR (Accredited Buyer's Representative)",
+  "CCIM (Commercial)",
+];
+
+export const AGENT_LANGUAGES = [
+  "English",
+  "Hindi",
+  "Gujarati",
+  "Punjabi",
+  "Spanish",
+  "Urdu",
+  "Tamil",
+  "Telugu",
+  "Bengali",
+  "Marathi",
 ];
 
 export const SALE_SIDE_LABELS = {
@@ -41,6 +66,15 @@ export function splitList(value: string | null) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+/** Splits a stored list into the known checkbox values and free-text extras. */
+export function partitionList(value: string | null, known: string[]) {
+  const items = splitList(value);
+  return {
+    selected: items.filter((item) => known.includes(item)),
+    other: items.filter((item) => !known.includes(item)).join(", "),
+  };
 }
 
 export function joinList(values: string[]) {

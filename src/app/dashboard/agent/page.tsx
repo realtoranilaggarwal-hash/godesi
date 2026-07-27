@@ -5,9 +5,12 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { fromMinor } from "@/lib/format";
 import {
+  AGENT_CERTIFICATIONS,
+  AGENT_LANGUAGES,
   SALE_SIDE_LABELS,
   agentMoney,
   isAgentCard,
+  partitionList,
   splitList,
 } from "@/lib/agents";
 import { deleteAgentSaleAction } from "@/app/actions/agents";
@@ -52,6 +55,11 @@ export default async function AgentDashboardPage() {
   }
 
   const profile = business.agentProfile;
+  const certifications = partitionList(
+    profile?.certifications ?? null,
+    AGENT_CERTIFICATIONS,
+  );
+  const languages = partitionList(profile?.languages ?? null, AGENT_LANGUAGES);
 
   return (
     <div className="flex justify-center gap-6">
@@ -88,9 +96,19 @@ export default async function AgentDashboardPage() {
           <AgentProfileForm
             defaults={{
               brokerage: profile?.brokerage ?? "",
+              brokerageAddress: profile?.brokerageAddress ?? "",
+              brokerageWebsite: profile?.brokerageWebsite ?? "",
               serviceAreas: profile?.serviceAreas ?? "",
               licenseNumber: profile?.licenseNumber ?? "",
               licenseState: profile?.licenseState ?? "",
+              licenseType: profile?.licenseType ?? "",
+              licenseDocUrl: profile?.licenseDocUrl ?? "",
+              mlsId: profile?.mlsId ?? "",
+              mlsBoard: profile?.mlsBoard ?? "",
+              certifications: certifications.selected,
+              certificationsOther: certifications.other,
+              languages: languages.selected,
+              languagesOther: languages.other,
               designations: profile?.designations ?? "",
               awards: profile?.awards ?? "",
               specialties: splitList(profile?.specialties ?? null),

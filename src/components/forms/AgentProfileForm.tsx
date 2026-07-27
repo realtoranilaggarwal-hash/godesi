@@ -3,15 +3,31 @@
 import { useFormState } from "react-dom";
 import { saveAgentProfileAction } from "@/app/actions/agents";
 import { emptyState } from "@/lib/actions";
-import { AGENT_SPECIALTIES } from "@/lib/agents";
+import {
+  AGENT_CERTIFICATIONS,
+  AGENT_LANGUAGES,
+  AGENT_LICENSE_TYPES,
+  AGENT_SPECIALTIES,
+} from "@/lib/agents";
+import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 
 export type AgentProfileDefaults = {
   brokerage: string;
+  brokerageAddress: string;
+  brokerageWebsite: string;
   serviceAreas: string;
   licenseNumber: string;
   licenseState: string;
+  licenseType: string;
+  licenseDocUrl: string;
+  mlsId: string;
+  mlsBoard: string;
+  certifications: string[];
+  certificationsOther: string;
+  languages: string[];
+  languagesOther: string;
   designations: string;
   awards: string;
   specialties: string[];
@@ -40,12 +56,49 @@ export function AgentProfileForm({ defaults }: { defaults: AgentProfileDefaults 
             <option value="INR">₹</option>
           </select>
         </Field>
-        <Field label="Licence number">
+        <Field label="Brokerage address" hint="Optional">
+          <input
+            name="brokerageAddress"
+            defaultValue={defaults.brokerageAddress}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Brokerage website" hint="Optional">
+          <input
+            name="brokerageWebsite"
+            type="url"
+            placeholder="https://"
+            defaultValue={defaults.brokerageWebsite}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Licence number" hint="Required — shown on your public profile">
           <input
             name="licenseNumber"
+            required
             defaultValue={defaults.licenseNumber}
             className={inputClass}
           />
+        </Field>
+        <Field label="Licence type">
+          <select
+            name="licenseType"
+            defaultValue={defaults.licenseType}
+            className={inputClass}
+          >
+            <option value="">Not specified</option>
+            {AGENT_LICENSE_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="MLS ID" hint="Optional but recommended">
+          <input name="mlsId" defaultValue={defaults.mlsId} className={inputClass} />
+        </Field>
+        <Field label="MLS board name" hint="Optional">
+          <input name="mlsBoard" defaultValue={defaults.mlsBoard} className={inputClass} />
         </Field>
         <Field label="Licensed in" hint="State or region">
           <input
@@ -140,6 +193,73 @@ export function AgentProfileForm({ defaults }: { defaults: AgentProfileDefaults 
           ))}
         </div>
       </fieldset>
+
+      <fieldset className="rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          Certifications &amp; memberships
+        </legend>
+        <div className="mt-1 grid gap-2 sm:grid-cols-2">
+          {AGENT_CERTIFICATIONS.map((certification) => (
+            <label key={certification} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="certifications"
+                value={certification}
+                defaultChecked={defaults.certifications.includes(certification)}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              {certification}
+            </label>
+          ))}
+        </div>
+        <div className="mt-3">
+          <Field label="Other certifications" hint="Comma separated">
+            <input
+              name="certificationsOther"
+              defaultValue={defaults.certificationsOther}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+      </fieldset>
+
+      <fieldset className="rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          Languages spoken
+        </legend>
+        <div className="mt-1 grid gap-2 sm:grid-cols-3">
+          {AGENT_LANGUAGES.map((language) => (
+            <label key={language} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="languages"
+                value={language}
+                defaultChecked={defaults.languages.includes(language)}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              {language}
+            </label>
+          ))}
+        </div>
+        <div className="mt-3">
+          <Field label="Other languages" hint="Comma separated">
+            <input
+              name="languagesOther"
+              defaultValue={defaults.languagesOther}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+      </fieldset>
+
+      <ImageField
+        name="licenseDocUrl"
+        label="Licence document"
+        purpose="gallery"
+        defaultValue={defaults.licenseDocUrl}
+        hint="Optional — a photo or scan of your licence. Only our review team sees it."
+        previewClassName="h-28 w-28 rounded-xl object-cover"
+      />
 
       <SubmitButton>Save agent profile</SubmitButton>
     </form>

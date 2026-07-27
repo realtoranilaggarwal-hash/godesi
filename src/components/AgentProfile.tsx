@@ -26,6 +26,13 @@ export type AgentProfileData = {
   specialties: string | null;
   awards: string | null;
   brokerage: string | null;
+  brokerageAddress: string | null;
+  brokerageWebsite: string | null;
+  licenseType: string | null;
+  mlsId: string | null;
+  mlsBoard: string | null;
+  certifications: string | null;
+  languages: string | null;
   yearsExperience: number | null;
   transactions: number | null;
   totalSalesMinor: number | null;
@@ -106,15 +113,41 @@ export function AgentDetails({
           {profile.brokerage ? (
             <p className="text-sm text-slate-700">
               <span className="font-semibold">Brokerage:</span> {profile.brokerage}
+              {profile.brokerageAddress ? ` · ${profile.brokerageAddress}` : ""}
+              {profile.brokerageWebsite ? (
+                <>
+                  {" · "}
+                  <a
+                    href={profile.brokerageWebsite}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-indigo-600 hover:underline"
+                  >
+                    website
+                  </a>
+                </>
+              ) : null}
             </p>
           ) : null}
 
-          {profile.licenseNumber || profile.licenseState ? (
+          {profile.licenseNumber || profile.licenseState || profile.licenseType ? (
             <p className="text-sm text-slate-700">
               <span className="font-semibold">Licence:</span>{" "}
-              {[profile.licenseNumber, profile.licenseState].filter(Boolean).join(" · ")}
+              {[profile.licenseNumber, profile.licenseType, profile.licenseState]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
           ) : null}
+
+          {profile.mlsId || profile.mlsBoard ? (
+            <p className="text-sm text-slate-700">
+              <span className="font-semibold">MLS:</span>{" "}
+              {[profile.mlsId, profile.mlsBoard].filter(Boolean).join(" · ")}
+            </p>
+          ) : null}
+
+          <List title="Certifications" items={splitList(profile.certifications)} />
+          <List title="Languages spoken" items={splitList(profile.languages)} />
 
           <List title="Service areas" items={splitList(profile.serviceAreas)} />
           <List title="Specialties" items={splitList(profile.specialties)} />
