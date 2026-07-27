@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { searchBusinesses, listCities } from "@/lib/businesses";
+import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessCard } from "@/components/BusinessCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
@@ -23,12 +24,18 @@ type SearchParams = {
   premium?: string;
 };
 
-export default async function SearchPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const minRating = Number(searchParams.minRating ?? 0) || 0;
   const premiumOnly = searchParams.premium === "1";
   const categories = await getCategoryTree();
 
-  const selected = categories.find((item) => item.slug === searchParams.category);
+  const selected = categories.find(
+    (item) => item.slug === searchParams.category,
+  );
   const categorySlugs = searchParams.sub
     ? [searchParams.sub]
     : selected
@@ -54,10 +61,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
         >
           <h1 className="text-3xl font-black">Businesses 🏪</h1>
           <p className="mt-1 text-white/90">
-            {categories.length} categories of verified desi businesses — filter by
-            subcategory, city and rating.
+            {categories.length} categories of verified desi businesses — filter
+            by subcategory, city and rating.
           </p>
         </section>
+
+        <FeaturedStrip categorySlugs={categorySlugs} />
 
         <Card>
           <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -159,7 +168,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
             body="Try a broader search or clear the filters."
           />
         )}
-      <InlineBanner />
+        <InlineBanner />
       </div>
 
       <SidebarBanners />

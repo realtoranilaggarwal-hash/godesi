@@ -33,7 +33,7 @@ const BENEFITS = [
     icon: "🏆",
     title: "Refer & earn points",
     body: "Invite others and earn points for every signup, profile and upgrade — spend them on ads and promotions.",
-    href: "/dashboard/referrals",
+    href: "/dashboard/rewards",
     cta: "Get your link",
   },
   {

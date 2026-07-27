@@ -8,6 +8,7 @@ import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { HeaderBanner } from "@/components/Banners";
 import { WhyGodesi } from "@/components/WhyGodesi";
+import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -115,6 +116,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <FeaturedStrip />
+
       <WhyGodesi />
 
       <div className="space-y-8">
@@ -129,7 +132,7 @@ export default async function HomePage() {
 
         <section>
           <SectionHeading
-            title="Featured businesses"
+            title="Latest businesses"
             href="/search"
             linkLabel="See all"
           />

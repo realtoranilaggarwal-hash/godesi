@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCategory, categoryScopeSlugs } from "@/lib/directory";
 import { searchBusinesses } from "@/lib/businesses";
+import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { gradientFor, softFor } from "@/lib/categories";
 import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
@@ -54,12 +55,22 @@ export default async function CategoryPage({
         : "business",
   }).toString();
   const [businesses, events] = await Promise.all([
-    searchBusinesses({ categorySlugs: scope, city: searchParams.city, q: searchParams.q }),
+    searchBusinesses({
+      categorySlugs: scope,
+      city: searchParams.city,
+      q: searchParams.q,
+    }),
     db.event.findMany({
-      where: { status: "APPROVED", startsAt: { gte: new Date() }, categorySlug: { in: scope } },
+      where: {
+        status: "APPROVED",
+        startsAt: { gte: new Date() },
+        categorySlug: { in: scope },
+      },
       orderBy: { startsAt: "asc" },
       take: 3,
-      include: { category: { select: { name: true, icon: true, color: true } } },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
     }),
   ]);
 
@@ -76,7 +87,10 @@ export default async function CategoryPage({
             {category.parent ? (
               <>
                 {" / "}
-                <Link href={`/categories/${category.parent.slug}`} className="hover:underline">
+                <Link
+                  href={`/categories/${category.parent.slug}`}
+                  className="hover:underline"
+                >
                   {category.parent.name}
                 </Link>
               </>
@@ -85,7 +99,9 @@ export default async function CategoryPage({
           <h1 className="mt-1 text-3xl font-black">
             <span aria-hidden>{category.icon}</span> {category.name}
           </h1>
-          {category.blurb ? <p className="mt-1 text-white/90">{category.blurb}</p> : null}
+          {category.blurb ? (
+            <p className="mt-1 text-white/90">{category.blurb}</p>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href={`/dashboard/profile?${postQuery}`}
@@ -101,6 +117,11 @@ export default async function CategoryPage({
             </Link>
           </div>
         </section>
+
+        <FeaturedStrip
+          categorySlugs={scope}
+          title={`Featured in ${category.name}`}
+        />
 
         {category.children.length ? (
           <section>
@@ -172,7 +193,9 @@ export default async function CategoryPage({
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Before you book</h3>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Before you book
+                </h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
                   {guide.checklist.map((item) => (
                     <li key={item}>✅ {item}</li>
@@ -180,7 +203,9 @@ export default async function CategoryPage({
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Questions to ask</h3>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Questions to ask
+                </h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
                   {guide.askVendors.map((item) => (
                     <li key={item}>❓ {item}</li>
@@ -203,7 +228,9 @@ export default async function CategoryPage({
 
         {events.length ? (
           <section>
-            <h2 className="mb-3 text-lg font-bold">Upcoming {category.name} events</h2>
+            <h2 className="mb-3 text-lg font-bold">
+              Upcoming {category.name} events
+            </h2>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} />
@@ -211,9 +238,9 @@ export default async function CategoryPage({
             </div>
           </section>
         ) : null}
-      <RecommendedLinks categorySlug={category.slug} />
+        <RecommendedLinks categorySlug={category.slug} />
 
-      <InlineBanner />
+        <InlineBanner />
       </div>
 
       <SidebarBanners />

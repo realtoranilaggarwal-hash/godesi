@@ -49,7 +49,9 @@ export async function searchBusinesses(
   const rows = await db.business.findMany({
     where: {
       status: "APPROVED",
-      ...(category ? { category: { equals: category, mode: "insensitive" } } : {}),
+      ...(category
+        ? { category: { equals: category, mode: "insensitive" } }
+        : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
       AND: [
@@ -68,10 +70,16 @@ export async function searchBusinesses(
               {
                 OR: [
                   { name: { contains: q, mode: "insensitive" as const } },
-                  { description: { contains: q, mode: "insensitive" as const } },
+                  {
+                    description: { contains: q, mode: "insensitive" as const },
+                  },
                   { category: { contains: q, mode: "insensitive" as const } },
                   { city: { contains: q, mode: "insensitive" as const } },
-                  { categoryRef: { name: { contains: q, mode: "insensitive" as const } } },
+                  {
+                    categoryRef: {
+                      name: { contains: q, mode: "insensitive" as const },
+                    },
+                  },
                   {
                     subcategoryRef: {
                       name: { contains: q, mode: "insensitive" as const },
@@ -147,4 +155,15 @@ export async function listCities() {
     orderBy: { city: "asc" },
   });
   return rows.map((r) => r.city);
+}
+
+/** Paid and admin-featured listings, for the promoted strip above free results. */
+export async function featuredBusinesses(
+  categorySlugs?: string[],
+  take = 12,
+): Promise<BusinessListItem[]> {
+  const rows = await searchBusinesses({ categorySlugs, take: 60 });
+  return rows
+    .filter((row) => row.featured || planRank(row.plan) > 0)
+    .slice(0, take);
 }
