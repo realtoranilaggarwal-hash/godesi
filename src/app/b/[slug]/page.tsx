@@ -15,6 +15,7 @@ import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { SidebarBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 
@@ -134,7 +135,8 @@ export default async function BusinessProfilePage({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="flex gap-6">
+      <div className="min-w-0 flex-1 space-y-5">
       <TrackVisit slug={business.slug} fromQr={searchParams.src === "qr"} />
       <script
         type="application/ld+json"
@@ -427,6 +429,9 @@ export default async function BusinessProfilePage({
           ) : null}
         </div>
       </div>
+      </div>
+
+      <SidebarBanners />
     </div>
   );
 }

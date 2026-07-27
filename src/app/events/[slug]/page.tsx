@@ -19,6 +19,7 @@ async function loadEvent(slug: string) {
   return db.event.findUnique({
     where: { slug },
     include: {
+      tiers: { orderBy: { sortOrder: "asc" } },
       category: { select: { slug: true, name: true, icon: true, color: true } },
       organizer: {
         select: { name: true, username: true, avatarUrl: true },
@@ -99,7 +100,14 @@ export default async function EventPage({
                 📍 {event.venue}, {event.city}
               </p>
               <p>
-                🎫 {event.price ? `${formatMoney(event.price, event.currency)} per seat` : "Free entry"}
+                🎫{" "}
+                {event.tiers.length
+                  ? `${event.tiers.length} ticket types from ${
+                      event.price ? formatMoney(event.price, event.currency) : "free"
+                    }`
+                  : event.price
+                    ? `${formatMoney(event.price, event.currency)} per seat`
+                    : "Free entry"}
               </p>
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>
@@ -114,6 +122,27 @@ export default async function EventPage({
             </div>
           </div>
         </div>
+
+        {event.tiers.length ? (
+          <Card>
+            <h2 className="font-bold">Ticket types</h2>
+            <ul className="mt-3 divide-y divide-slate-100">
+              {event.tiers.map((tier) => (
+                <li key={tier.id} className="flex items-center justify-between gap-3 py-2">
+                  <div>
+                    <p className="font-semibold">{tier.name}</p>
+                    <p className="text-sm text-slate-500">
+                      {seatsLeft(tier)} of {tier.seatsTotal} seats left
+                    </p>
+                  </div>
+                  <p className="font-bold">
+                    {tier.price ? formatMoney(tier.price, event.currency) : "Free"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
 
         <Card>
           <h2 className="font-bold">Organiser</h2>
@@ -156,8 +185,15 @@ export default async function EventPage({
               <TicketForm
                 eventId={event.id}
                 price={event.price}
+                currency={event.currency}
                 seatsLeft={left}
                 maxPerBooking={maxPerBooking}
+                tiers={event.tiers.map((tier) => ({
+                  id: tier.id,
+                  name: tier.name,
+                  price: tier.price,
+                  seatsLeft: seatsLeft(tier),
+                }))}
                 defaultName={user.name}
                 defaultEmail={user.email}
               />

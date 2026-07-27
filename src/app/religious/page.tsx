@@ -15,7 +15,7 @@ import {
 } from "@/lib/worship";
 import { WorshipCard } from "@/components/WorshipCard";
 import { NewsCard } from "@/components/NewsCard";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -211,6 +211,7 @@ export default async function ReligiousPage({
             </div>
           </div>
         ) : null}
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

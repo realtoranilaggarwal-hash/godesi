@@ -30,6 +30,9 @@ import {
   SeedListingForm,
   SeedListingImportForm,
 } from "@/components/forms/SeedListingForm";
+import { CouponForm } from "@/components/forms/CouponForms";
+import { toggleCouponAction } from "@/app/actions/coupons";
+import { describeCoupon } from "@/lib/coupons";
 import { getCategoryTree } from "@/lib/directory";
 import { FAITH_LABELS } from "@/lib/worship";
 import { BannerForm } from "@/components/forms/BannerForm";
@@ -65,6 +68,7 @@ export default async function AdminPage() {
     flaggedReferrals,
     openRedemptions,
     rewardPoints,
+    coupons,
   ] =
     await Promise.all([
     db.business.findMany({
@@ -129,6 +133,14 @@ export default async function AdminPage() {
         include: { user: { select: { email: true, name: true } } },
       }),
       pointValues(),
+      db.coupon.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        include: {
+          event: { select: { title: true } },
+          createdBy: { select: { email: true } },
+        },
+      }),
     ]);
 
   const pendingAds = banners.filter((banner) => banner.status === "PENDING");
@@ -606,6 +618,54 @@ export default async function AdminPage() {
           <h3 className="mb-2 font-semibold">Bulk import (CSV)</h3>
           <SeedListingImportForm />
         </div>
+      </Card>
+
+      <Card>
+        <h2 className="mb-1 text-lg font-bold">Discount coupons</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          Create codes to hand to clients — for plan upgrades, advertising or event
+          tickets. Organisers can also make their own codes for their events.
+        </p>
+        <CouponForm />
+        <ul className="mt-5 divide-y divide-slate-100 border-t border-slate-100 text-sm">
+          {coupons.map((coupon) => (
+            <li
+              key={coupon.id}
+              className="flex flex-wrap items-center justify-between gap-2 py-2"
+            >
+              <div>
+                <p className="font-semibold">
+                  {coupon.code}{" "}
+                  <Badge tone={coupon.active ? "green" : "slate"}>
+                    {coupon.active ? "active" : "off"}
+                  </Badge>
+                </p>
+                <p className="text-xs text-slate-400">
+                  {describeCoupon(coupon)} · {coupon.scope.toLowerCase()}
+                  {coupon.event ? ` · ${coupon.event.title}` : ""} ·{" "}
+                  {coupon.timesRedeemed}
+                  {coupon.maxRedemptions ? `/${coupon.maxRedemptions}` : ""} used
+                  {coupon.expiresAt
+                    ? ` · expires ${coupon.expiresAt.toLocaleDateString()}`
+                    : ""}
+                  {coupon.createdBy ? ` · by ${coupon.createdBy.email}` : ""}
+                </p>
+              </div>
+              <form action={toggleCouponAction}>
+                <input type="hidden" name="id" value={coupon.id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                >
+                  {coupon.active ? "switch off" : "switch on"}
+                </button>
+              </form>
+            </li>
+          ))}
+          {coupons.length === 0 ? (
+            <li className="py-2 text-slate-500">No coupons yet.</li>
+          ) : null}
+        </ul>
       </Card>
 
       <Card>

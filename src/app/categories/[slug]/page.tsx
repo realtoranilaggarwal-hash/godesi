@@ -8,7 +8,7 @@ import { gradientFor, softFor } from "@/lib/categories";
 import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 
@@ -210,6 +210,7 @@ export default async function CategoryPage({
             </div>
           </section>
         ) : null}
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
@@ -51,6 +52,18 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       <HeaderBanner />
+
+      <Link href="/about" className="block overflow-hidden rounded-3xl">
+        <Image
+          src="/hero-banner.jpg"
+          alt="Godesi — your desi community directory: businesses, leads, events, news, connections"
+          width={1983}
+          height={793}
+          priority
+          sizes="100vw"
+          className="h-auto w-full"
+        />
+      </Link>
 
       <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-10 text-white sm:px-10 sm:py-14">
         <p className="text-sm font-semibold uppercase tracking-widest text-white/80">

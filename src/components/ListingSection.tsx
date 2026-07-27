@@ -9,7 +9,7 @@ import {
 } from "@/lib/listings";
 import { ListingCard } from "@/components/ListingCard";
 import { ListingFilters } from "@/components/ListingFilters";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 
 /** Shared shell for /real-estate and /rooms — same query, different copy. */
@@ -76,6 +76,7 @@ export async function ListingSectionPage({
           </Link>{" "}
           — buyers reach you straight on WhatsApp.
         </p>
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

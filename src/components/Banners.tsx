@@ -5,6 +5,7 @@ import {
   SIDEBAR_SIZE,
   SIDEBAR_SLOTS,
   SKYSCRAPER_SIZE,
+  slotSoldCount,
 } from "@/lib/banners";
 import { BannerImpression } from "@/components/BannerImpression";
 
@@ -73,11 +74,16 @@ function AdvertiseHere({
   );
 }
 
-/** The sponsored rail: 300x250 rectangles followed by 160x600 skyscrapers. */
+/**
+ * The sponsored rail: two rotating 300x250 rectangles plus a pair of skyscrapers.
+ * Showing a couple per view lets ten advertisers share the slot and keeps each
+ * page view from burning everyone's impression quota at once.
+ */
 export async function SidebarBanners() {
-  const [rectangles, skyscrapers] = await Promise.all([
-    activeBanners("SIDEBAR"),
-    activeBanners("SKYSCRAPER"),
+  const [rectangles, skyscrapers, rectanglesSold] = await Promise.all([
+    activeBanners("SIDEBAR", 2),
+    activeBanners("SKYSCRAPER", 2),
+    slotSoldCount("SIDEBAR"),
   ]);
 
   return (
@@ -98,11 +104,11 @@ export async function SidebarBanners() {
       ))}
       {/* Show the first few unsold rectangles so the rail is visibly for sale. */}
       {Array.from({
-        length: Math.min(3, Math.max(SIDEBAR_SLOTS - rectangles.length, 0)),
+        length: Math.min(2, Math.max(SIDEBAR_SLOTS - rectanglesSold, 0)),
       }).map((_, index) => (
         <AdvertiseHere
           key={`sidebar-open-${index}`}
-          label={`300 × 250 sidebar banner · slot ${rectangles.length + index + 1}`}
+          label={`300 × 250 sidebar banner · slot ${rectanglesSold + index + 1}`}
           height={SIDEBAR_SIZE.height}
         />
       ))}
@@ -127,6 +133,52 @@ export async function SidebarBanners() {
         ))}
       </div>
     </aside>
+  );
+}
+
+/** Full-width leaderboard above the footer, so long pages end on inventory. */
+export async function FooterBanner() {
+  const [banner] = await activeBanners("HEADER");
+
+  if (!banner) {
+    return (
+      <AdvertiseHere
+        label="970 × 90 leaderboard — rotates with other advertisers"
+        height={90}
+      />
+    );
+  }
+
+  return (
+    <BannerLink
+      banner={banner}
+      width={HEADER_SIZE.width}
+      height={HEADER_SIZE.height}
+    />
+  );
+}
+
+/** A single in-content rectangle for narrow screens, where the rail is hidden. */
+export async function InlineBanner() {
+  const [banner] = await activeBanners("SIDEBAR", 1);
+
+  return (
+    <div className="lg:hidden" aria-label="Sponsored">
+      {banner ? (
+        <BannerLink
+          banner={banner}
+          width={SIDEBAR_SIZE.width}
+          height={SIDEBAR_SIZE.height}
+          className="mx-auto max-w-[300px]"
+        />
+      ) : (
+        <AdvertiseHere
+          label="300 × 250 sidebar banner"
+          height={SIDEBAR_SIZE.height}
+          className="mx-auto max-w-[300px]"
+        />
+      )}
+    </div>
   );
 }
 

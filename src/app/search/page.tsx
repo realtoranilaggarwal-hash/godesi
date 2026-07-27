@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { searchBusinesses, listCities } from "@/lib/businesses";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessCard } from "@/components/BusinessCard";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 
@@ -159,6 +159,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
             body="Try a broader search or clear the filters."
           />
         )}
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

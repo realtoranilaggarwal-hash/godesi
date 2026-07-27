@@ -11,6 +11,39 @@ import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/eve
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { checkCoupon } from "@/lib/coupons";
+
+/** Up to three seat types per event, e.g. Basic / Webinar / Premium. */
+const MAX_TIERS = 3;
+
+type TierInput = { name: string; price: number; seatsTotal: number };
+
+/**
+ * Reads the repeated tier rows off the event form. Rows without a name are
+ * ignored, so organisers can leave the tier block empty for a flat-priced event.
+ */
+function readTiers(formData: FormData): TierInput[] | { error: string } {
+  const names = formData.getAll("tierName").map((value) => String(value).trim());
+  const prices = formData.getAll("tierPrice").map((value) => String(value).trim());
+  const seats = formData.getAll("tierSeats").map((value) => String(value).trim());
+
+  const tiers: TierInput[] = [];
+  for (let index = 0; index < names.length && tiers.length < MAX_TIERS; index += 1) {
+    const name = names[index];
+    if (!name) continue;
+
+    const price = Number(prices[index] ?? 0);
+    const seatsTotal = Number(seats[index] ?? 0);
+    if (!Number.isFinite(price) || price < 0) {
+      return { error: `Enter a valid price for the "${name}" ticket.` };
+    }
+    if (!Number.isInteger(seatsTotal) || seatsTotal < 1) {
+      return { error: `Enter how many "${name}" seats are available.` };
+    }
+    tiers.push({ name, price: Math.round(price), seatsTotal });
+  }
+  return tiers;
+}
 
 const optionalUrl = z
   .string()
@@ -65,8 +98,19 @@ export async function createEventAction(
     const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
     if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
 
+    const tiers = readTiers(formData);
+    if ("error" in tiers) return { error: tiers.error };
+
     const business = await db.business.findUnique({ where: { ownerId: user.id } });
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
+
+    /** With tiers the event totals mirror the tiers, so seat counts stay in step. */
+    const seatsTotal = tiers.length
+      ? tiers.reduce((sum, tier) => sum + tier.seatsTotal, 0)
+      : parsed.data.seatsTotal;
+    const price = tiers.length
+      ? Math.min(...tiers.map((tier) => tier.price))
+      : parsed.data.price;
 
     await db.event.create({
       data: {
@@ -78,12 +122,22 @@ export async function createEventAction(
         city: parsed.data.city,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
-        price: parsed.data.price,
+        price,
         currency: parsed.data.currency ?? requestCurrency(),
-        seatsTotal: parsed.data.seatsTotal,
+        seatsTotal,
         organizerId: user.id,
         businessId: business?.id ?? null,
         categorySlug: parsed.data.subcategorySlug || parsed.data.categorySlug || null,
+        tiers: tiers.length
+          ? {
+              create: tiers.map((tier, index) => ({
+                name: tier.name,
+                price: tier.price,
+                seatsTotal: tier.seatsTotal,
+                sortOrder: index,
+              })),
+            }
+          : undefined,
       },
     });
   } catch (error) {
@@ -96,6 +150,8 @@ export async function createEventAction(
 
 const bookingSchema = z.object({
   eventId: z.string().min(1),
+  tierId: z.string().trim().optional(),
+  couponCode: z.string().trim().optional(),
   quantity: z.coerce.number().int().min(1, "Book at least 1 seat").max(10, "Maximum 10 seats"),
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
@@ -116,6 +172,8 @@ export async function bookTicketAction(
     const user = await requireUser();
     const parsed = bookingSchema.safeParse({
       eventId: formData.get("eventId"),
+      tierId: formData.get("tierId"),
+      couponCode: formData.get("couponCode"),
       quantity: formData.get("quantity") || 1,
       buyerName: formData.get("buyerName") || user.name,
       buyerEmail: formData.get("buyerEmail") || user.email,
@@ -123,20 +181,56 @@ export async function bookTicketAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const event = await db.event.findUnique({ where: { id: parsed.data.eventId } });
+    const event = await db.event.findUnique({
+      where: { id: parsed.data.eventId },
+      include: { tiers: { orderBy: { sortOrder: "asc" } } },
+    });
     if (!event) return { error: "This event no longer exists." };
     if (event.status !== "APPROVED") return { error: "This event is not open for booking." };
     if (event.startsAt.getTime() < Date.now()) return { error: "This event has already ended." };
-    if (seatsLeft(event) < parsed.data.quantity) {
-      return { error: `Only ${seatsLeft(event)} seat(s) left for this event.` };
+
+    const tier = event.tiers.length
+      ? event.tiers.find((candidate) => candidate.id === parsed.data.tierId)
+      : undefined;
+    if (event.tiers.length && !tier) return { error: "Choose a ticket type." };
+
+    const available = tier ? seatsLeft(tier) : seatsLeft(event);
+    if (available < parsed.data.quantity) {
+      return {
+        error: tier
+          ? `Only ${available} ${tier.name} seat(s) left.`
+          : `Only ${available} seat(s) left for this event.`,
+      };
     }
 
-    const amountMinor = toMinor(event.price * parsed.data.quantity);
+    const unitPrice = tier ? tier.price : event.price;
+    const subtotalMinor = toMinor(unitPrice * parsed.data.quantity);
+
+    let discountMinor = 0;
+    let couponId: string | null = null;
+    if (parsed.data.couponCode) {
+      const check = await checkCoupon({
+        code: parsed.data.couponCode,
+        scope: "TICKETS",
+        userId: user.id,
+        eventId: event.id,
+        subtotalMinor,
+        currency: event.currency,
+      });
+      if (!check.ok) return { error: check.error };
+      discountMinor = check.discountMinor;
+      couponId = check.coupon.id;
+    }
+
+    const amountMinor = Math.max(0, subtotalMinor - discountMinor);
 
     const ticket = await db.ticket.create({
       data: {
         code: ticketCode(),
         eventId: event.id,
+        tierId: tier?.id ?? null,
+        couponId,
+        discountMinor,
         userId: user.id,
         buyerName: parsed.data.buyerName,
         buyerEmail: parsed.data.buyerEmail,
@@ -144,11 +238,11 @@ export async function bookTicketAction(
         quantity: parsed.data.quantity,
         amountMinor,
         currency: event.currency,
-        provider: event.price === 0 ? "free" : "stripe",
+        provider: amountMinor === 0 ? "free" : "stripe",
       },
     });
 
-    if (event.price === 0) {
+    if (amountMinor === 0) {
       await confirmTicket({
         ticketId: ticket.id,
         provider: "free",
@@ -169,13 +263,16 @@ export async function bookTicketAction(
         metadata: { kind: "ticket", ticketId: ticket.id, eventId: event.id },
         line_items: [
           {
-            quantity: parsed.data.quantity,
+            quantity: 1,
             price_data: {
               currency: event.currency.toLowerCase(),
-              unit_amount: toMinor(event.price),
+              /** Charged as one line so a coupon discount is reflected exactly. */
+              unit_amount: amountMinor,
               product_data: {
-                name: `${event.title} — ticket`,
-                description: `${event.venue}, ${event.city}`,
+                name: `${event.title} — ${tier ? `${tier.name} × ` : ""}${parsed.data.quantity} seat(s)`,
+                description: `${event.venue}, ${event.city}${
+                  discountMinor ? " · coupon applied" : ""
+                }`,
               },
             },
           },

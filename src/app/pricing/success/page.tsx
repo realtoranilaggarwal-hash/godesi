@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
+import { recordCouponFromMetadata } from "@/lib/coupons";
 import { Alert, Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,12 @@ export default async function CheckoutSuccessPage({
         reference: session.id,
         amountMinor: session.amount_total ?? 0,
         currency: (session.currency ?? "inr").toUpperCase(),
+      });
+      await recordCouponFromMetadata({
+        metadata: session.metadata,
+        userId: user.id,
+        currency: (session.currency ?? "inr").toUpperCase(),
+        reference: session.id,
       });
       granted = plan;
     }

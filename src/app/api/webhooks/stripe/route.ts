@@ -4,6 +4,7 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
 import { confirmTicket } from "@/lib/events";
 import { confirmAdOrder } from "@/lib/adOrders";
+import { recordCouponFromMetadata } from "@/lib/coupons";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,16 @@ export async function POST(request: Request) {
           reference: session.id,
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
+        });
+      }
+
+      /** Ticket coupons are held on the ticket row; plan/ad ones ride the session. */
+      if (userId && session.metadata?.kind !== "ticket") {
+        await recordCouponFromMetadata({
+          metadata: session.metadata,
+          userId,
+          currency: (session.currency ?? "inr").toUpperCase(),
+          reference: session.id,
         });
       }
     }

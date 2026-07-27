@@ -25,6 +25,7 @@ const ERRORS: Record<string, string> = {
   stripe_unavailable: "Card payments are not configured yet. Please try PayPal.",
   stripe_session: "We could not start the card checkout. Please try again.",
   mock_disabled: "Please complete a real payment to upgrade.",
+  coupon: "That coupon code is not valid for plan upgrades.",
 };
 
 export default async function PricingPage({
@@ -124,8 +125,14 @@ export default async function PricingPage({
                 ) : (
                   <>
                     {stripeOn ? (
-                      <form action={startStripeCheckoutAction}>
+                      <form action={startStripeCheckoutAction} className="space-y-2">
                         <input type="hidden" name="plan" value={id} />
+                        <input
+                          name="couponCode"
+                          placeholder="Coupon code (optional)"
+                          aria-label="Coupon code"
+                          className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
+                        />
                         <button
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"

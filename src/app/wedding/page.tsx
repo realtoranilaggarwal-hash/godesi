@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CATEGORY_TREE, gradientFor, subcategorySlug } from "@/lib/categories";
 import { searchBusinesses } from "@/lib/businesses";
 import { BusinessCard } from "@/components/BusinessCard";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -113,6 +113,7 @@ export default async function WeddingPage({
             body="Are you a wedding vendor? List your services free and start receiving shaadi enquiries."
           />
         )}
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

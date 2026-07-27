@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { emailEnabled, sendEmail, ticketEmail } from "@/lib/email";
+import { recordCouponUse } from "@/lib/coupons";
 
 export async function uniqueEventSlug(title: string, city: string) {
   const base = slugify([title, city].filter(Boolean).join(" ")) || "event";
@@ -88,8 +89,25 @@ export async function confirmTicket({
       data: { seatsBooked: { increment: current.quantity } },
     });
 
+    if (current.tierId) {
+      await tx.ticketTier.update({
+        where: { id: current.tierId },
+        data: { seatsBooked: { increment: current.quantity } },
+      });
+    }
+
     return tx.ticket.findUniqueOrThrow({ where: { id: current.id } });
   });
+
+  if (ticket.couponId && ticket.discountMinor > 0 && ticket.userId) {
+    await recordCouponUse({
+      couponId: ticket.couponId,
+      userId: ticket.userId,
+      amountMinor: ticket.discountMinor,
+      currency: ticket.currency,
+      reference: `ticket_${ticket.id}`,
+    });
+  }
 
   await sendTicketConfirmation(ticket.id);
   return { alreadyProcessed: false as const, ticket };

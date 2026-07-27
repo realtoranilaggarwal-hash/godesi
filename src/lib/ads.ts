@@ -73,6 +73,10 @@ export const AD_SLOT_ORDER: BannerSlot[] = ["HEADER", "SIDEBAR", "SKYSCRAPER"];
 export const AD_DURATIONS = [1, 3, 6, 12] as const;
 export type AdDuration = (typeof AD_DURATIONS)[number];
 
+/** Impression packs, sold at the placement's CPM; the banner retires when used up. */
+export const AD_IMPRESSION_PACKS = [5_000, 10_000, 25_000, 50_000] as const;
+export type AdImpressionPack = (typeof AD_IMPRESSION_PACKS)[number];
+
 /** Longer bookings get a discount: 3 months −5%, 6 −10%, 12 −20%. */
 export function durationDiscount(months: number) {
   if (months >= 12) return 0.2;
@@ -88,6 +92,24 @@ export function adPrice(
 ) {
   const base = currency === "INR" ? placement.priceInr : placement.priceUsd;
   const gross = base * months * (1 - durationDiscount(months));
+  return currency === "INR" ? Math.round(gross) : Math.round(gross * 100) / 100;
+}
+
+/** Bigger packs get the same volume breaks as longer bookings. */
+export function packDiscount(impressions: number) {
+  if (impressions >= 50_000) return 0.2;
+  if (impressions >= 25_000) return 0.1;
+  if (impressions >= 10_000) return 0.05;
+  return 0;
+}
+
+export function adImpressionPrice(
+  placement: AdPlacement,
+  currency: Currency,
+  impressions: number,
+) {
+  const cpm = currency === "INR" ? placement.cpmInr : placement.cpmUsd;
+  const gross = (cpm * impressions) / 1000 * (1 - packDiscount(impressions));
   return currency === "INR" ? Math.round(gross) : Math.round(gross * 100) / 100;
 }
 
@@ -120,6 +142,21 @@ export function durationOrThrow(value: string): AdDuration {
   const match = AD_DURATIONS.find((item) => item === months);
   if (!match) throw new Error("Unknown ad duration");
   return match;
+}
+
+export function packOrThrow(value: string): AdImpressionPack {
+  const impressions = Number(value);
+  const match = AD_IMPRESSION_PACKS.find((item) => item === impressions);
+  if (!match) throw new Error("Unknown impression pack");
+  return match;
+}
+
+export function formatAdImpressionPrice(
+  placement: AdPlacement,
+  currency: Currency,
+  impressions: number,
+) {
+  return formatMoney(adImpressionPrice(placement, currency, impressions), currency);
 }
 
 export function ctr(impressions: number, clicks: number) {

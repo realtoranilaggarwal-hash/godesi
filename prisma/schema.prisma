@@ -56,6 +56,12 @@ enum BannerStatus {
   EXPIRED
 }
 
+/// Advertisers either book a slot for a period or buy a pack of views.
+enum AdPricing {
+  MONTHLY
+  IMPRESSIONS
+}
+
 enum AdOrderStatus {
   PENDING
   PAID
@@ -157,6 +163,9 @@ model User {
   referralsTracked Referral[] @relation("ReferralInviter")
 
   notifications Notification[]
+
+  coupons           Coupon[]           @relation("CouponCreator")
+  couponRedemptions CouponRedemption[]
 }
 
 enum ReferralStatus {
@@ -489,6 +498,9 @@ model Event {
   category     Category? @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
 
   tickets Ticket[]
+  /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
+  tiers   TicketTier[]
+  coupons Coupon[]
 
   @@index([startsAt])
   @@index([categorySlug])
@@ -515,7 +527,16 @@ model Ticket {
   checkedInAt DateTime?
   createdAt   DateTime     @default(now())
 
+  tierId String?
+  tier   TicketTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
+
+  /// Coupon held for this booking; only counted as used once payment confirms.
+  couponId      String?
+  coupon        Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  discountMinor Int     @default(0)
+
   @@index([eventId, status])
+  @@index([tierId])
   @@index([userId])
 }
 
@@ -532,6 +553,8 @@ model Banner {
   endsAt      DateTime?
   impressions Int          @default(0)
   clicks      Int          @default(0)
+  /// Impression-pack bookings expire once `impressions` reaches this cap.
+  impressionCap Int?
   createdAt   DateTime     @default(now())
 
   advertiserId String?
@@ -551,7 +574,10 @@ model AdOrder {
   bannerId    String?
   banner      Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
   slot        BannerSlot
+  pricing     AdPricing     @default(MONTHLY)
   months      Int           @default(1)
+  /// Impressions bought for an IMPRESSIONS booking.
+  impressions Int?
   amountMinor Int
   currency    String        @default("INR")
   provider    String        @default("stripe")
@@ -677,4 +703,83 @@ model BusinessClaim {
 
   @@unique([businessId, userId])
   @@index([status])
+}
+
+/// Basic / Webinar / Premium seat types for an event.
+model TicketTier {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  /// Price per seat in major units of the event's currency; 0 for free tiers.
+  price       Int      @default(0)
+  seatsTotal  Int
+  seatsBooked Int      @default(0)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  tickets Ticket[]
+
+  @@index([eventId])
+}
+
+enum CouponScope {
+  PLAN
+  ADS
+  TICKETS
+}
+
+enum DiscountKind {
+  PERCENT
+  FIXED
+}
+
+/// Discount code applied at checkout. Admin codes are platform-wide; organisers
+/// can create codes limited to one of their own events.
+model Coupon {
+  id           String       @id @default(cuid())
+  code         String       @unique
+  scope        CouponScope
+  discountKind DiscountKind @default(PERCENT)
+  /// Percent off (1-100) for PERCENT, or an amount in `currency` for FIXED.
+  amount       Int
+  /// Required for FIXED codes so the discount matches the buyer's currency.
+  currency     String?
+  /// Null for platform codes created in admin.
+  createdById  String?
+  createdBy    User?        @relation("CouponCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  /// Restricts a TICKETS code to a single event.
+  eventId      String?
+  event        Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  /// Total redemptions allowed across all users; null for unlimited.
+  maxRedemptions Int?
+  timesRedeemed  Int        @default(0)
+  expiresAt      DateTime?
+  active         Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+
+  redemptions CouponRedemption[]
+  tickets     Ticket[]
+
+  @@index([scope, active])
+  @@index([eventId])
+  @@index([createdById])
+}
+
+/// One row per successful use, which also caps a code to one use per member.
+model CouponRedemption {
+  id          String   @id @default(cuid())
+  couponId    String
+  coupon      Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Discount granted, in the currency's minor unit.
+  amountMinor Int
+  currency    String
+  /// Checkout session or ticket id, so a retry cannot double-count.
+  reference   String?  @unique
+  createdAt   DateTime @default(now())
+
+  @@unique([couponId, userId])
+  @@index([couponId])
 }

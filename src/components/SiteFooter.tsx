@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SITE, socialLinks } from "@/lib/site";
+import { FooterBanner } from "@/components/Banners";
 
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -49,11 +51,20 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
+      <div className="mx-auto w-full max-w-7xl px-4 pt-6">
+        <FooterBanner />
+      </div>
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5">
         <div>
-          <p className="bg-gradient-to-r from-orange-500 via-rose-500 to-fuchsia-600 bg-clip-text text-xl font-black text-transparent">
-            Godesi
-          </p>
+          <Link href="/" aria-label="Godesi home">
+            <Image
+              src="/logo-godesi.png"
+              alt="Godesi"
+              width={1355}
+              height={400}
+              className="h-9 w-auto"
+            />
+          </Link>
           <p className="mt-2 text-sm text-slate-600">
             The desi directory for businesses, buyer requirements, community events
             and daily news.

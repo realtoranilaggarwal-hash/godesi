@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
@@ -48,11 +49,15 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
-        <Link
-          href="/"
-          className="bg-gradient-to-r from-orange-500 via-rose-500 to-fuchsia-600 bg-clip-text text-xl font-black tracking-tight text-transparent"
-        >
-          Godesi
+        <Link href="/" className="shrink-0" aria-label="Godesi home">
+          <Image
+            src="/logo-godesi.png"
+            alt="Godesi"
+            width={1355}
+            height={400}
+            priority
+            className="h-8 w-auto sm:h-9"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 xl:flex">

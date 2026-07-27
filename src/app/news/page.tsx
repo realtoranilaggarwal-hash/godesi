@@ -5,7 +5,7 @@ import { effectivePlan } from "@/lib/plans";
 import { ingestIfStale } from "@/lib/news";
 import { NewsCard } from "@/components/NewsCard";
 import { NewsForm } from "@/components/forms/NewsForm";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 
@@ -70,6 +70,7 @@ export default async function NewsPage() {
             </div>
           )}
         </Card>
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

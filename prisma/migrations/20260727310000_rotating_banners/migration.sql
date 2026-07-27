@@ -1,0 +1,6 @@
+CREATE TYPE "AdPricing" AS ENUM ('MONTHLY', 'IMPRESSIONS');
+
+ALTER TABLE "Banner" ADD COLUMN "impressionCap" INTEGER;
+
+ALTER TABLE "AdOrder" ADD COLUMN "pricing" "AdPricing" NOT NULL DEFAULT 'MONTHLY';
+ALTER TABLE "AdOrder" ADD COLUMN "impressions" INTEGER;

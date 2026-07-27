@@ -30,13 +30,31 @@ export async function confirmAdOrder({
 
   if (order.bannerId) {
     const startsAt = new Date();
-    const endsAt = new Date(startsAt);
-    endsAt.setMonth(endsAt.getMonth() + order.months);
 
-    await db.banner.update({
-      where: { id: order.bannerId },
-      data: { status: "PENDING", startsAt, endsAt },
-    });
+    if (order.pricing === "IMPRESSIONS" && order.impressions) {
+      /** Impression packs run until the views are used up, not to a date. */
+      const banner = await db.banner.findUniqueOrThrow({
+        where: { id: order.bannerId },
+        select: { impressions: true },
+      });
+      await db.banner.update({
+        where: { id: order.bannerId },
+        data: {
+          status: "PENDING",
+          startsAt,
+          endsAt: null,
+          impressionCap: banner.impressions + order.impressions,
+        },
+      });
+    } else {
+      const endsAt = new Date(startsAt);
+      endsAt.setMonth(endsAt.getMonth() + order.months);
+
+      await db.banner.update({
+        where: { id: order.bannerId },
+        data: { status: "PENDING", startsAt, endsAt },
+      });
+    }
   }
 
   return db.adOrder.findUnique({ where: { id: order.id } });

@@ -229,6 +229,9 @@ export default async function DashboardPage({
               <LinkButton href="/dashboard/tickets" variant="secondary">
                 My tickets
               </LinkButton>
+              <LinkButton href="/dashboard/coupons" variant="secondary">
+                Event coupons
+              </LinkButton>
               <LinkButton href="/advertise" variant="secondary">
                 Advertise
               </LinkButton>

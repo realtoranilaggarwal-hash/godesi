@@ -3,7 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 
@@ -116,6 +116,7 @@ export default async function EventsPage({
           </Link>{" "}
           and sell tickets with QR check-in.
         </p>
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

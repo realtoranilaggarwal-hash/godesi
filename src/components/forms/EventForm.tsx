@@ -9,6 +9,9 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 
+/** Suggested seat types; organisers can rename them to anything. */
+const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
+
 export function EventForm({
   categories,
   defaultCurrency,
@@ -84,6 +87,43 @@ export function EventForm({
           />
         </Field>
       </div>
+
+      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          Ticket types (optional)
+        </legend>
+        <p className="text-xs text-slate-500">
+          Add Basic / Webinar / Premium seats with their own price and quantity. Leave
+          blank to sell all seats at the single price above.
+        </p>
+        {TIER_PRESETS.map((preset) => (
+          <div key={preset} className="grid gap-2 sm:grid-cols-3">
+            <input
+              name="tierName"
+              defaultValue=""
+              placeholder={`Name — e.g. ${preset}`}
+              className={inputClass}
+              aria-label={`Ticket type name (${preset})`}
+            />
+            <input
+              name="tierPrice"
+              type="number"
+              min={0}
+              placeholder="Price"
+              className={inputClass}
+              aria-label={`Ticket type price (${preset})`}
+            />
+            <input
+              name="tierSeats"
+              type="number"
+              min={1}
+              placeholder="Seats"
+              className={inputClass}
+              aria-label={`Ticket type seats (${preset})`}
+            />
+          </div>
+        ))}
+      </fieldset>
 
       <SubmitButton pendingLabel="Publishing...">Publish event</SubmitButton>
     </form>

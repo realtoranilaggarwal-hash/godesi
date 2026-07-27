@@ -12,7 +12,7 @@ import {
 import { Badge, Card } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
-import { SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { VideoEmbed } from "@/components/VideoEmbed";
 
 export const dynamic = "force-dynamic";
@@ -130,6 +130,7 @@ export default async function ListingPage({ params }: { params: { slug: string }
             {listing.description}
           </p>
         </Card>
+      <InlineBanner />
       </div>
 
       <SidebarBanners />

@@ -4,17 +4,18 @@ import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import {
   AD_DURATIONS,
+  AD_IMPRESSION_PACKS,
   AD_PLACEMENTS,
   AD_SLOT_ORDER,
   durationDiscount,
+  formatAdImpressionPrice,
   formatAdPrice,
   formatCpm,
+  packDiscount,
 } from "@/lib/ads";
 import { requestCurrency } from "@/lib/currency";
-import { startAdCheckoutAction } from "@/app/actions/ads";
+import { AdBookingForm } from "@/components/forms/AdBookingForm";
 import { Alert, Card, LinkButton } from "@/components/ui";
-import { SubmitButton } from "@/components/SubmitButton";
-import { inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -27,6 +28,7 @@ const ERRORS: Record<string, string> = {
   cancelled: "Checkout was cancelled — you have not been charged.",
   stripe_unavailable: "Card payments are not configured yet. Please email us.",
   stripe_session: "We could not start the checkout. Please try again.",
+  coupon: "That coupon code is not valid for advertising.",
 };
 
 export default async function AdvertisePage({
@@ -121,27 +123,31 @@ export default async function AdvertisePage({
               </div>
 
               {user ? (
-                <form action={startAdCheckoutAction} className="mt-4 space-y-2">
-                  <input type="hidden" name="slot" value={slot} />
-                  <label className="block text-sm">
-                    <span className="mb-1 block font-medium text-slate-700">
-                      Duration
-                    </span>
-                    <select name="months" defaultValue="1" className={inputClass}>
-                      {AD_DURATIONS.map((months) => {
-                        const discount = durationDiscount(months);
-                        return (
-                          <option key={months} value={months}>
-                            {months} month{months > 1 ? "s" : ""} —{" "}
-                            {formatAdPrice(placement, currency, months)}
-                            {discount ? ` (save ${Math.round(discount * 100)}%)` : ""}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </label>
-                  <SubmitButton className="w-full">Buy now</SubmitButton>
-                </form>
+                <AdBookingForm
+                  slot={slot}
+                  durations={AD_DURATIONS.map((months) => {
+                    const discount = durationDiscount(months);
+                    return {
+                      value: months,
+                      label: `${months} month${months > 1 ? "s" : ""} — ${formatAdPrice(
+                        placement,
+                        currency,
+                        months,
+                      )}${discount ? ` (save ${Math.round(discount * 100)}%)` : ""}`,
+                    };
+                  })}
+                  packs={AD_IMPRESSION_PACKS.map((impressions) => {
+                    const discount = packDiscount(impressions);
+                    return {
+                      value: impressions,
+                      label: `${impressions.toLocaleString()} views — ${formatAdImpressionPrice(
+                        placement,
+                        currency,
+                        impressions,
+                      )}${discount ? ` (save ${Math.round(discount * 100)}%)` : ""}`,
+                    };
+                  })}
+                />
               ) : (
                 <LinkButton
                   href={`/login?next=${encodeURIComponent("/advertise")}`}
@@ -159,8 +165,8 @@ export default async function AdvertisePage({
         <h2 className="text-lg font-bold">How it works</h2>
         <ol className="mt-2 space-y-2 text-sm text-slate-600">
           <li>
-            <strong>1. Book a slot.</strong> Pick a placement and duration and pay by
-            card. Longer bookings are discounted.
+            <strong>1. Book a slot.</strong> Pay monthly, or buy a pack of views and
+            only pay for the impressions you get. Bigger bookings are discounted.
           </li>
           <li>
             <strong>2. Upload your creative.</strong> Add your banner image and
@@ -172,7 +178,9 @@ export default async function AdvertisePage({
           </li>
           <li>
             <strong>4. Track performance.</strong> Impressions, clicks, CTR and days
-            remaining are updated live in your dashboard.
+            or views remaining are updated live in your dashboard. Banners sharing a
+            slot rotate on every page view, and a views pack retires itself once it is
+            fully delivered.
           </li>
         </ol>
         <p className="mt-3 text-xs text-slate-500">

@@ -7,6 +7,7 @@ import { unlockLeadAction } from "@/app/actions/leads";
 import { Alert, Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { formatInr } from "@/lib/format";
 import { PostedBy } from "@/components/PostedBy";
+import { InlineBanner, SidebarBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -55,7 +56,8 @@ export default async function LeadsPage({
   });
 
   return (
-    <div className="space-y-5">
+    <div className="flex gap-6">
+      <div className="min-w-0 flex-1 space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Lead marketplace</h1>
@@ -174,6 +176,11 @@ export default async function LeadsPage({
       ) : (
         <EmptyState title="No open requirements right now" body="Check back soon." />
       )}
+
+      <InlineBanner />
+      </div>
+
+      <SidebarBanners />
     </div>
   );
 }

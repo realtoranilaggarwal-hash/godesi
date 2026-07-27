@@ -6,10 +6,17 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { adPrice, durationOrThrow, placementOrThrow } from "@/lib/ads";
+import {
+  adImpressionPrice,
+  adPrice,
+  durationOrThrow,
+  packOrThrow,
+  placementOrThrow,
+} from "@/lib/ads";
 import { requestCurrency } from "@/lib/currency";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { checkCoupon, couponMetadata } from "@/lib/coupons";
 
 const PLACEHOLDER_CREATIVE =
   "https://placehold.co/300x250/6366f1/ffffff?text=Your+banner+here";
@@ -22,11 +29,33 @@ const PLACEHOLDER_CREATIVE =
 export async function startAdCheckoutAction(formData: FormData) {
   const user = await requireUser();
   const placement = placementOrThrow(String(formData.get("slot") ?? ""));
-  const months = durationOrThrow(String(formData.get("months") ?? ""));
   const currency = requestCurrency();
-  const amount = adPrice(placement, currency, months);
+
+  const byImpressions = String(formData.get("pricing") ?? "MONTHLY") === "IMPRESSIONS";
+  const months = byImpressions ? 1 : durationOrThrow(String(formData.get("months") ?? ""));
+  const impressions = byImpressions
+    ? packOrThrow(String(formData.get("impressions") ?? ""))
+    : null;
+  const amount = impressions
+    ? adImpressionPrice(placement, currency, impressions)
+    : adPrice(placement, currency, months);
 
   if (!stripeEnabled()) redirect("/advertise?error=stripe_unavailable");
+
+  const code = String(formData.get("couponCode") ?? "").trim();
+  const check = code
+    ? await checkCoupon({
+        code,
+        scope: "ADS",
+        userId: user.id,
+        subtotalMinor: toMinor(amount),
+        currency,
+      })
+    : null;
+  if (check && !check.ok) redirect("/advertise?error=coupon");
+
+  const discountMinor = check?.ok ? check.discountMinor : 0;
+  const chargeMinor = Math.max(0, toMinor(amount) - discountMinor);
 
   const banner = await db.banner.create({
     data: {
@@ -45,8 +74,10 @@ export async function startAdCheckoutAction(formData: FormData) {
       userId: user.id,
       bannerId: banner.id,
       slot: placement.slot,
+      pricing: impressions ? "IMPRESSIONS" : "MONTHLY",
       months,
-      amountMinor: toMinor(amount),
+      impressions,
+      amountMinor: chargeMinor,
       currency,
     },
   });
@@ -55,15 +86,23 @@ export async function startAdCheckoutAction(formData: FormData) {
     mode: "payment",
     customer_email: user.email,
     client_reference_id: user.id,
-    metadata: { kind: "ad", adOrderId: order.id, bannerId: banner.id },
+    metadata: {
+      kind: "ad",
+      adOrderId: order.id,
+      bannerId: banner.id,
+      userId: user.id,
+      ...couponMetadata(check?.ok ? check.coupon : null, discountMinor),
+    },
     line_items: [
       {
         quantity: 1,
         price_data: {
           currency: currency.toLowerCase(),
-          unit_amount: toMinor(amount),
+          unit_amount: chargeMinor,
           product_data: {
-            name: `Godesi ${placement.name} — ${months} month${months > 1 ? "s" : ""}`,
+            name: impressions
+              ? `Godesi ${placement.name} — ${impressions.toLocaleString()} views`
+              : `Godesi ${placement.name} — ${months} month${months > 1 ? "s" : ""}`,
             description: `${placement.size.width}x${placement.size.height} banner placement`,
           },
         },
