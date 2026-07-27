@@ -303,11 +303,13 @@ export async function HeaderBanner() {
   }
 
   return (
-    <BannerLink
-      banner={banner}
-      width={HEADER_SIZE.width}
-      height={HEADER_SIZE.height}
-      className="mb-4"
-    />
+    <div className="mb-4 space-y-1">
+      <BannerLink
+        banner={banner}
+        width={HEADER_SIZE.width}
+        height={HEADER_SIZE.height}
+      />
+      <BookThisSpot slot="HEADER" label="970 × 90 leaderboard" />
+    </div>
   );
 }
