@@ -29,6 +29,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
   {
     title: "Company",
     links: [
+      { href: "/find", label: "Search everything" },
       { href: "/about", label: "About us" },
       { href: "/sitemap", label: "Sitemap" },
       { href: "/faq", label: "FAQ" },

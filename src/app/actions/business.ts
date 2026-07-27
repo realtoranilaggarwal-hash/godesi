@@ -16,6 +16,77 @@ import { uniqueSlug } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewards";
 import { isSupportedVideoUrl } from "@/lib/video";
+import {
+  CONDITIONS,
+  FUEL_TYPES,
+  MILEAGE_UNITS,
+  OWNERSHIPS,
+  TRANSMISSIONS,
+  VEHICLE_DOCUMENTS,
+  VEHICLE_FEATURES,
+  VEHICLE_MAKES,
+  VEHICLE_TYPES,
+  isVehicleCard,
+  keepKnown,
+} from "@/lib/vehicles";
+
+const vehicleSchema = z.object({
+  vehicleType: z.enum(VEHICLE_TYPES, { message: "Pick the vehicle type" }),
+  make: z.string().trim().min(1, "Pick the make"),
+  model: z.string().trim().min(1, "Pick the model"),
+  year: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1),
+  mileage: z.coerce.number().int().min(0).max(2_000_000).optional(),
+  mileageUnit: z.enum(MILEAGE_UNITS).default("mi"),
+  fuelType: z.enum(FUEL_TYPES).optional(),
+  transmission: z.enum(TRANSMISSIONS).optional(),
+  ownership: z.enum(OWNERSHIPS).optional(),
+  condition: z.enum(CONDITIONS).optional(),
+  price: z.coerce.number().int().min(0).max(100_000_000).optional(),
+  currency: z.enum(["USD", "INR"]).default("USD"),
+});
+
+/** Reads the Cars & Bikes block; returns null when the card is not a vehicle. */
+function readVehicleForm(formData: FormData) {
+  const value = (key: string) => {
+    const raw = formData.get(key);
+    return typeof raw === "string" && raw ? raw : undefined;
+  };
+  const parsed = vehicleSchema.safeParse({
+    vehicleType: value("vehicleType"),
+    make: value("make"),
+    model: value("model"),
+    year: value("year"),
+    mileage: value("mileage"),
+    mileageUnit: value("mileageUnit") ?? "mi",
+    fuelType: value("fuelType"),
+    transmission: value("transmission"),
+    ownership: value("ownership"),
+    condition: value("condition"),
+    price: value("vehiclePrice"),
+    currency: value("vehicleCurrency") ?? "USD",
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message } as const;
+
+  const models = VEHICLE_MAKES[parsed.data.make];
+  if (!models?.includes(parsed.data.model)) {
+    return { error: "Pick a model that belongs to the chosen make." } as const;
+  }
+
+  return {
+    data: {
+      ...parsed.data,
+      mileage: parsed.data.mileage ?? null,
+      fuelType: parsed.data.fuelType ?? null,
+      transmission: parsed.data.transmission ?? null,
+      ownership: parsed.data.ownership ?? null,
+      condition: parsed.data.condition ?? null,
+      price: parsed.data.price ?? null,
+      negotiable: formData.get("negotiable") === "on",
+      features: keepKnown(VEHICLE_FEATURES, formData.getAll("vehicleFeatures").map(String)),
+      documents: keepKnown(VEHICLE_DOCUMENTS, formData.getAll("vehicleDocuments").map(String)),
+    },
+  } as const;
+}
 
 const optionalUrl = z
   .string()
@@ -216,19 +287,36 @@ export async function saveBusinessProfileAction(
       whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber),
     };
 
+    const isVehicle = isVehicleCard(subcategory?.slug);
+    const vehicle = isVehicle ? readVehicleForm(formData) : null;
+    if (vehicle && "error" in vehicle) return { error: vehicle.error };
+
     const existing = await db.business.findUnique({ where: { ownerId: user.id } });
+    let businessId: string;
     if (existing) {
       const updated = await db.business.update({
         where: { id: existing.id },
         data,
       });
       slug = updated.slug;
+      businessId = updated.id;
     } else {
       const created = await db.business.create({
         data: { ...data, ownerId: user.id, slug: await uniqueSlug(data.name, data.city) },
       });
       slug = created.slug;
+      businessId = created.id;
       await awardPoints({ userId: user.id, reason: "PROFILE_CREATED", once: true });
+    }
+
+    if (vehicle && "data" in vehicle) {
+      await db.vehicleDetails.upsert({
+        where: { businessId },
+        create: { businessId, ...vehicle.data },
+        update: vehicle.data,
+      });
+    } else if (!isVehicle) {
+      await db.vehicleDetails.deleteMany({ where: { businessId } });
     }
   } catch (error) {
     return fieldError(error);

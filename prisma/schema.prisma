@@ -386,65 +386,65 @@ model Category {
 }
 
 model Business {
-  id             String        @id @default(cuid())
-  slug           String        @unique
-  name           String
+  id                 String        @id @default(cuid())
+  slug               String        @unique
+  name               String
   /// A shop/company card versus an individual professional (realtor, attorney…).
-  profileType    ProfileType   @default(BUSINESS)
-  category       String
-  city           String
-  state          String?
-  description    String?
-  logoUrl        String?
-  websiteUrl     String?
-  whatsappNumber String?
-  phone          String?
-  publicEmail    String?
-  instagramUrl   String?
-  facebookUrl    String?
-  youtubeUrl     String?
-  linkedinUrl    String?
-  xUrl           String?
-  tiktokUrl      String?
-  threadsUrl     String?
-  telegramUrl    String?
-  pinterestUrl   String?
-  snapchatUrl    String?
+  profileType        ProfileType   @default(BUSINESS)
+  category           String
+  city               String
+  state              String?
+  description        String?
+  logoUrl            String?
+  websiteUrl         String?
+  whatsappNumber     String?
+  phone              String?
+  publicEmail        String?
+  instagramUrl       String?
+  facebookUrl        String?
+  youtubeUrl         String?
+  linkedinUrl        String?
+  xUrl               String?
+  tiktokUrl          String?
+  threadsUrl         String?
+  telegramUrl        String?
+  pinterestUrl       String?
+  snapchatUrl        String?
   /// Public WhatsApp channel or group invite (contact stays on whatsappNumber).
   whatsappChannelUrl String?
-  yelpUrl        String?
-  zillowUrl      String?
-  realtorUrl     String?
+  yelpUrl            String?
+  zillowUrl          String?
+  realtorUrl         String?
   /// Intro/showcase video pasted from YouTube or Vimeo.
-  videoUrl       String?
-  mapsUrl        String?
-  address        String?
+  videoUrl           String?
+  mapsUrl            String?
+  address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
-  startingPrice  Int?
-  priceCurrency  String?
+  startingPrice      Int?
+  priceCurrency      String?
   /// Invites enquiries when the vendor prices every job individually.
-  customQuote    Boolean       @default(false)
+  customQuote        Boolean       @default(false)
   /// Sub-services from the subcategory's checklist (e.g. an attorney's practice areas).
-  specialties    String[]      @default([])
+  specialties        String[]      @default([])
   /// Paid plans highlight one specialty as a badge; must be one of `specialties`.
-  featuredSpecialty String?
+  featuredSpecialty  String?
   /// Certifications, licences and designations from the subcategory checklist.
-  certifications String[]      @default([])
+  certifications     String[]      @default([])
   /// Professional licence / bar / CRD number where the profession has one.
-  licenseNumber  String?
+  licenseNumber      String?
   /// Consultation fee, pricing model or fee structure, per profession.
-  feeStructure   String?
+  feeStructure       String?
   /// Insurance carriers or partner companies represented.
-  carriers       String?
-  yearsExperience Int?
-  status         ListingStatus @default(PENDING)
-  featured       Boolean       @default(false)
+  carriers           String?
+  yearsExperience    Int?
+  status             ListingStatus @default(PENDING)
+  featured           Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.
-  source         String?
+  source             String?
   /// OpenStreetMap element id, so imports stay re-runnable without duplicates.
-  osmId          String?       @unique
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  osmId              String?       @unique
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
   /// Null for admin-seeded starter listings until somebody claims them.
   ownerId String? @unique
@@ -456,6 +456,7 @@ model Business {
   subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
 
   agentProfile  AgentProfile?
+  vehicle       VehicleDetails?
   media         Media[]
   claims        BusinessClaim[]
   packages      VendorPackage[]
@@ -509,39 +510,39 @@ enum SaleSide {
 
 /// The extra credentials a real estate agent shows on their public card.
 model AgentProfile {
-  id              String   @id @default(cuid())
-  businessId      String   @unique
-  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id               String   @id @default(cuid())
+  businessId       String   @unique
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   /// Comma separated towns/cities the agent covers.
-  serviceAreas    String?
-  licenseNumber   String?
-  licenseState    String?
+  serviceAreas     String?
+  licenseNumber    String?
+  licenseState     String?
   /// Comma separated designations, e.g. "Senior Real Estate Specialist".
-  designations    String?
+  designations     String?
   /// Comma separated specialities, e.g. "Buyers, Sellers, Commercial".
-  specialties     String?
+  specialties      String?
   /// Comma separated awards with the year, e.g. "2026 Top Agent".
-  awards          String?
-  brokerage       String?
+  awards           String?
+  brokerage        String?
   brokerageAddress String?
   brokerageWebsite String?
   /// Salesperson / Broker / Broker Associate.
-  licenseType     String?
+  licenseType      String?
   /// Uploaded licence document, reviewed manually before any verified badge.
-  licenseDocUrl   String?
-  mlsId           String?
-  mlsBoard        String?
+  licenseDocUrl    String?
+  mlsId            String?
+  mlsBoard         String?
   /// Comma separated certifications, e.g. "Realtor® (NAR Member), CRS".
-  certifications  String?
+  certifications   String?
   /// Comma separated languages the agent speaks.
-  languages       String?
-  yearsExperience Int?
-  transactions    Int?
-  totalSalesMinor Int?
-  avgPriceMinor   Int?
-  currency        String   @default("USD")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  languages        String?
+  yearsExperience  Int?
+  transactions     Int?
+  totalSalesMinor  Int?
+  avgPriceMinor    Int?
+  currency         String   @default("USD")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   sales AgentSale[]
 }
@@ -993,4 +994,33 @@ model ResourceOrder {
   createdAt   DateTime      @default(now())
 
   @@index([userId])
+}
+
+/// Cars & Bikes listing details; one row per business card in that subcategory.
+model VehicleDetails {
+  id           String   @id @default(cuid())
+  businessId   String   @unique
+  business     Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  vehicleType  String
+  make         String
+  model        String
+  year         Int
+  /// Distance driven, in `mileageUnit`.
+  mileage      Int?
+  mileageUnit  String   @default("mi")
+  fuelType     String?
+  transmission String?
+  ownership    String?
+  condition    String?
+  /// Asking price in whole currency units.
+  price        Int?
+  currency     String   @default("USD")
+  negotiable   Boolean  @default(false)
+  features     String[] @default([])
+  documents    String[] @default([])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([make, model])
+  @@index([vehicleType, year])
 }

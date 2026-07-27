@@ -11,10 +11,33 @@ import { ImageField } from "@/components/forms/ImageField";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
 import { specialtySet } from "@/lib/specialties";
+import { VehicleFields, type VehicleDefaults } from "@/components/forms/VehicleFields";
 import { useState } from "react";
+
+const EMPTY_VEHICLE: VehicleDefaults = {
+  vehicleType: "",
+  make: "",
+  model: "",
+  year: "",
+  mileage: "",
+  mileageUnit: "mi",
+  fuelType: "",
+  transmission: "",
+  ownership: "",
+  condition: "",
+  price: "",
+  currency: "USD",
+  negotiable: false,
+  features: [],
+  documents: [],
+};
+
+/** Individual sellers in Buy & Sell only need these — the rest is business clutter. */
+const PERSONAL_SOCIALS = ["websiteUrl", "instagramUrl", "facebookUrl"];
 
 export function BusinessProfileForm({
   business,
+  vehicle,
   categories,
   defaultCategory,
   defaultSubcategory,
@@ -22,6 +45,8 @@ export function BusinessProfileForm({
   canFeatureSpecialty = false,
 }: {
   business: Business | null;
+  /** Saved Cars & Bikes details, when the card already has them. */
+  vehicle?: VehicleDefaults;
   categories: CategoryOption[];
   /** Paid plans may highlight one specialisation as a badge. */
   canFeatureSpecialty?: boolean;
@@ -34,6 +59,17 @@ export function BusinessProfileForm({
   const [subcategory, setSubcategory] = useState(
     business?.subcategorySlug ?? defaultSubcategory ?? "",
   );
+  const [category, setCategory] = useState(
+    business?.categorySlug ?? defaultCategory ?? "",
+  );
+  const [profileType, setProfileType] = useState(
+    business?.profileType ?? defaultProfileType,
+  );
+  /** A private seller does not need 16 social buttons on a used-car ad. */
+  const personalSeller = category === "buy-sell" && profileType === "PROFESSIONAL";
+  const socials = personalSeller
+    ? BUSINESS_SOCIALS.filter((social) => PERSONAL_SOCIALS.includes(social.key))
+    : BUSINESS_SOCIALS;
   /** Saved certifications split back into checkbox values and free-text extras. */
   const offered = specialtySet(subcategory)?.certifications?.options ?? [];
   const saved = business?.certifications ?? [];
@@ -50,7 +86,8 @@ export function BusinessProfileForm({
         <Field label="This card is for">
           <select
             name="profileType"
-            defaultValue={business?.profileType ?? defaultProfileType}
+            value={profileType}
+            onChange={(event) => setProfileType(event.target.value)}
             className={inputClass}
           >
             <option value="BUSINESS">A business / shop</option>
@@ -65,6 +102,7 @@ export function BusinessProfileForm({
           defaultCategory={business?.categorySlug ?? defaultCategory}
           defaultSubcategory={business?.subcategorySlug ?? defaultSubcategory}
           onSubcategoryChange={setSubcategory}
+          onCategoryChange={setCategory}
         />
         <Field label="City">
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />
@@ -91,6 +129,12 @@ export function BusinessProfileForm({
               : String(business.yearsExperience),
         }}
         canFeature={canFeatureSpecialty}
+      />
+
+      <VehicleFields
+        key={`vehicle-${subcategory}`}
+        subcategorySlug={subcategory}
+        defaults={vehicle ?? EMPTY_VEHICLE}
       />
 
       <Field label="About your business">
@@ -185,11 +229,12 @@ export function BusinessProfileForm({
           Social &amp; profile links
         </summary>
         <p className="mt-1 text-xs text-slate-500">
-          Add every profile you have — each one appears as a button on your public
-          card. Leave the rest blank.
+          {personalSeller
+            ? "Optional — add a profile so buyers can see who they are dealing with."
+            : "Add every profile you have — each one appears as a button on your public card. Leave the rest blank."}
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {BUSINESS_SOCIALS.map((social) => (
+          {socials.map((social) => (
             <Field key={social.key} label={`${social.icon} ${social.label}`}>
               <input
                 name={social.key}

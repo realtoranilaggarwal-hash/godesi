@@ -40,6 +40,31 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       </div>
 
+      {business.vehicle ? (
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            String(business.vehicle.year),
+            business.vehicle.mileage !== null
+              ? `${business.vehicle.mileage.toLocaleString()} ${business.vehicle.mileageUnit}`
+              : null,
+            business.vehicle.fuelType,
+            business.vehicle.ownership,
+            business.vehicle.price !== null
+              ? `${business.vehicle.currency === "INR" ? "₹" : "$"}${business.vehicle.price.toLocaleString()}${business.vehicle.negotiable ? " (neg.)" : ""}`
+              : null,
+          ]
+            .filter((tag): tag is string => Boolean(tag))
+            .map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-lime-100 px-2 py-0.5 text-xs font-bold text-lime-900"
+              >
+                {tag}
+              </span>
+            ))}
+        </div>
+      ) : null}
+
       {business.certifications.length || business.yearsExperience !== null ? (
         <p className="text-xs font-semibold text-slate-500">
           {[

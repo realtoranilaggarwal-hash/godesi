@@ -68,6 +68,27 @@ export async function SiteHeader() {
             />
           </Link>
 
+          <form
+            action="/find"
+            role="search"
+            className="flex min-w-0 flex-1 items-center gap-1 sm:max-w-xs"
+          >
+            <input
+              name="q"
+              type="search"
+              placeholder="Search Godesi…"
+              aria-label="Search Godesi"
+              className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm outline-none focus:border-indigo-500"
+            />
+            <button
+              type="submit"
+              aria-label="Search"
+              className="rounded-xl bg-slate-900 px-2.5 py-1.5 text-sm text-white hover:bg-slate-700"
+            >
+              🔍
+            </button>
+          </form>
+
           <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 xl:flex">
             {NAV.map((item) => (
               <Link

@@ -19,6 +19,7 @@ export function CategorySelect({
   label = "Category",
   subLabel = "Subcategory",
   onSubcategoryChange,
+  onCategoryChange,
 }: {
   categories: CategoryOption[];
   defaultCategory?: string | null;
@@ -28,6 +29,7 @@ export function CategorySelect({
   subLabel?: string;
   /** Lets the form show fields that only apply to one subcategory. */
   onSubcategoryChange?: (slug: string) => void;
+  onCategoryChange?: (slug: string) => void;
 }) {
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [subcategory, setSubcategory] = useState(defaultSubcategory ?? "");
@@ -47,6 +49,7 @@ export function CategorySelect({
           value={category}
           onChange={(event) => {
             setCategory(event.target.value);
+            onCategoryChange?.(event.target.value);
             selectSubcategory("");
           }}
           className={inputClass}

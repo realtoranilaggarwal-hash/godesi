@@ -46,6 +46,7 @@ async function getBusiness(slug: string) {
       packages: { orderBy: { sortOrder: "asc" } },
       reviews: { orderBy: { createdAt: "desc" } },
       agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
+      vehicle: true,
     },
   });
 }
@@ -253,6 +254,59 @@ export default async function BusinessProfilePage({
                       </Link>
                     ))}
                 </div>
+              </div>
+            ) : null}
+
+            {business.vehicle ? (
+              <div className="mt-3 rounded-2xl border border-lime-300 bg-lime-50/60 p-4">
+                <h2 className="text-sm font-bold text-lime-900">Vehicle details</h2>
+                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-700 sm:grid-cols-3">
+                  {[
+                    ["Type", business.vehicle.vehicleType],
+                    ["Make & model", `${business.vehicle.make} ${business.vehicle.model}`],
+                    ["Year", String(business.vehicle.year)],
+                    [
+                      "Mileage",
+                      business.vehicle.mileage === null
+                        ? null
+                        : `${business.vehicle.mileage.toLocaleString()} ${business.vehicle.mileageUnit}`,
+                    ],
+                    ["Fuel", business.vehicle.fuelType],
+                    ["Transmission", business.vehicle.transmission],
+                    ["Ownership", business.vehicle.ownership],
+                    ["Condition", business.vehicle.condition],
+                    [
+                      "Price",
+                      business.vehicle.price === null
+                        ? null
+                        : `${business.vehicle.currency === "INR" ? "₹" : "$"}${business.vehicle.price.toLocaleString()}${business.vehicle.negotiable ? " (negotiable)" : ""}`,
+                    ],
+                  ]
+                    .filter((row): row is [string, string] => Boolean(row[1]))
+                    .map(([label, value]) => (
+                      <div key={label}>
+                        <dt className="text-xs font-semibold text-lime-900/70">{label}</dt>
+                        <dd className="font-semibold">{value}</dd>
+                      </div>
+                    ))}
+                </dl>
+                {business.vehicle.features.length ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {business.vehicle.features.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-lime-900"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {business.vehicle.documents.length ? (
+                  <p className="mt-2 text-xs font-semibold text-lime-900">
+                    ✅ {business.vehicle.documents.join(" · ")}
+                  </p>
+                ) : null}
               </div>
             ) : null}
 

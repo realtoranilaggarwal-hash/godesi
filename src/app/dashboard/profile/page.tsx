@@ -36,7 +36,10 @@ export default async function ProfileEditorPage({
   }
 
   const [business, categories] = await Promise.all([
-    db.business.findUnique({ where: { ownerId: user.id } }),
+    db.business.findUnique({
+      where: { ownerId: user.id },
+      include: { vehicle: true },
+    }),
     getCategoryTree(),
   ]);
 
@@ -47,8 +50,7 @@ export default async function ProfileEditorPage({
           {business ? "Edit your digital card" : "Create your digital card"}
         </h1>
         {isAgentCard(business?.subcategorySlug ?? null) ||
-        searchParams.subcategory === "real-estate-property-dealers" ||
-        searchParams.subcategory === "professionals-realtors" ? (
+        searchParams.subcategory === "real-estate-property-dealers" ? (
           <Card className="border-indigo-200 bg-indigo-50">
             <h2 className="text-base font-bold text-indigo-900">
               Real estate agent profile
@@ -66,6 +68,33 @@ export default async function ProfileEditorPage({
         <Card>
           <BusinessProfileForm
             business={business}
+            vehicle={
+              business?.vehicle
+                ? {
+                    vehicleType: business.vehicle.vehicleType,
+                    make: business.vehicle.make,
+                    model: business.vehicle.model,
+                    year: String(business.vehicle.year),
+                    mileage:
+                      business.vehicle.mileage === null
+                        ? ""
+                        : String(business.vehicle.mileage),
+                    mileageUnit: business.vehicle.mileageUnit,
+                    fuelType: business.vehicle.fuelType ?? "",
+                    transmission: business.vehicle.transmission ?? "",
+                    ownership: business.vehicle.ownership ?? "",
+                    condition: business.vehicle.condition ?? "",
+                    price:
+                      business.vehicle.price === null
+                        ? ""
+                        : String(business.vehicle.price),
+                    currency: business.vehicle.currency,
+                    negotiable: business.vehicle.negotiable,
+                    features: business.vehicle.features,
+                    documents: business.vehicle.documents,
+                  }
+                : undefined
+            }
             categories={categories}
             defaultCategory={searchParams.category}
             defaultSubcategory={searchParams.subcategory}

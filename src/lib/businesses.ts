@@ -27,6 +27,22 @@ export type BusinessListItem = {
   featuredSpecialty: string | null;
   certifications: string[];
   yearsExperience: number | null;
+  /** Cars & Bikes cards carry their vehicle spec for the tag row and filters. */
+  vehicle: {
+    vehicleType: string;
+    make: string;
+    model: string;
+    year: number;
+    mileage: number | null;
+    mileageUnit: string;
+    fuelType: string | null;
+    transmission: string | null;
+    ownership: string | null;
+    condition: string | null;
+    price: number | null;
+    currency: string;
+    negotiable: boolean;
+  } | null;
   plan: Plan;
   rating: number;
   reviewCount: number;
@@ -44,6 +60,22 @@ export type SearchFilters = {
   specialties?: string[];
   /** Certifications the card must hold (all of them). */
   certifications?: string[];
+  /** Cars & Bikes filters; all optional and combined with AND. */
+  vehicle?: {
+    vehicleType?: string;
+    make?: string;
+    model?: string;
+    fuelType?: string;
+    transmission?: string;
+    ownership?: string;
+    condition?: string;
+    minYear?: number;
+    maxYear?: number;
+    maxMileage?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    features?: string[];
+  };
   take?: number;
 };
 
@@ -59,6 +91,7 @@ export async function searchBusinesses(
     premiumOnly = false,
     specialties,
     certifications,
+    vehicle,
     take = 60,
   } = filters;
 
@@ -73,6 +106,43 @@ export async function searchBusinesses(
       ...(specialties?.length ? { specialties: { hasEvery: specialties } } : {}),
       ...(certifications?.length
         ? { certifications: { hasEvery: certifications } }
+        : {}),
+      ...(vehicle && Object.values(vehicle).some((value) => value !== undefined)
+        ? {
+            vehicle: {
+              is: {
+                ...(vehicle.vehicleType ? { vehicleType: vehicle.vehicleType } : {}),
+                ...(vehicle.make ? { make: vehicle.make } : {}),
+                ...(vehicle.model ? { model: vehicle.model } : {}),
+                ...(vehicle.fuelType ? { fuelType: vehicle.fuelType } : {}),
+                ...(vehicle.transmission ? { transmission: vehicle.transmission } : {}),
+                ...(vehicle.ownership ? { ownership: vehicle.ownership } : {}),
+                ...(vehicle.condition ? { condition: vehicle.condition } : {}),
+                ...(vehicle.minYear !== undefined || vehicle.maxYear !== undefined
+                  ? {
+                      year: {
+                        ...(vehicle.minYear !== undefined ? { gte: vehicle.minYear } : {}),
+                        ...(vehicle.maxYear !== undefined ? { lte: vehicle.maxYear } : {}),
+                      },
+                    }
+                  : {}),
+                ...(vehicle.maxMileage !== undefined
+                  ? { mileage: { lte: vehicle.maxMileage } }
+                  : {}),
+                ...(vehicle.minPrice !== undefined || vehicle.maxPrice !== undefined
+                  ? {
+                      price: {
+                        ...(vehicle.minPrice !== undefined ? { gte: vehicle.minPrice } : {}),
+                        ...(vehicle.maxPrice !== undefined ? { lte: vehicle.maxPrice } : {}),
+                      },
+                    }
+                  : {}),
+                ...(vehicle.features?.length
+                  ? { features: { hasEvery: vehicle.features } }
+                  : {}),
+              },
+            },
+          }
         : {}),
       AND: [
         ...(categorySlugs?.length
@@ -112,6 +182,7 @@ export async function searchBusinesses(
       ],
     },
     include: {
+      vehicle: true,
       owner: { select: { plan: true } },
       reviews: { select: { rating: true } },
       categoryRef: { select: { name: true, color: true, icon: true } },
@@ -155,6 +226,23 @@ export async function searchBusinesses(
         featuredSpecialty: row.featuredSpecialty,
         certifications: row.certifications,
         yearsExperience: row.yearsExperience,
+        vehicle: row.vehicle
+          ? {
+              vehicleType: row.vehicle.vehicleType,
+              make: row.vehicle.make,
+              model: row.vehicle.model,
+              year: row.vehicle.year,
+              mileage: row.vehicle.mileage,
+              mileageUnit: row.vehicle.mileageUnit,
+              fuelType: row.vehicle.fuelType,
+              transmission: row.vehicle.transmission,
+              ownership: row.vehicle.ownership,
+              condition: row.vehicle.condition,
+              price: row.vehicle.price,
+              currency: row.vehicle.currency,
+              negotiable: row.vehicle.negotiable,
+            }
+          : null,
         plan: row.owner?.plan ?? "FREE",
         rating,
         reviewCount,

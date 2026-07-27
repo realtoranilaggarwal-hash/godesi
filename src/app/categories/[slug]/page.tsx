@@ -14,6 +14,8 @@ import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 import { cleanSpecialties, specialtySet } from "@/lib/specialties";
+import { VehicleFilters } from "@/components/VehicleFilters";
+import { VEHICLE_FEATURES, isVehicleCard, keepKnown } from "@/lib/vehicles";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,18 @@ export default async function CategoryPage({
     q?: string;
     service?: string | string[];
     cert?: string | string[];
+    vtype?: string;
+    vmake?: string;
+    vmodel?: string;
+    vfuel?: string;
+    vtrans?: string;
+    vowner?: string;
+    vcond?: string;
+    vminyear?: string;
+    vmaxmiles?: string;
+    vminprice?: string;
+    vmaxprice?: string;
+    vfeature?: string | string[];
   };
 }) {
   const category = await getCategory(params.slug);
@@ -65,6 +79,35 @@ export default async function CategoryPage({
       ? [searchParams.cert]
       : [];
   const selectedCerts = certOptions.filter((option) => certParam.includes(option));
+  const vehicleCategory = isVehicleCard(category.slug);
+  const vehicleFeatures = keepKnown(
+    VEHICLE_FEATURES,
+    Array.isArray(searchParams.vfeature)
+      ? searchParams.vfeature
+      : searchParams.vfeature
+        ? [searchParams.vfeature]
+        : [],
+  );
+  const positive = (value?: string) => {
+    const parsed = Number(value);
+    return value && Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+  };
+  const vehicleFilters = vehicleCategory
+    ? {
+        vehicleType: searchParams.vtype || undefined,
+        make: searchParams.vmake || undefined,
+        model: searchParams.vmodel || undefined,
+        fuelType: searchParams.vfuel || undefined,
+        transmission: searchParams.vtrans || undefined,
+        ownership: searchParams.vowner || undefined,
+        condition: searchParams.vcond || undefined,
+        minYear: positive(searchParams.vminyear),
+        maxMileage: positive(searchParams.vmaxmiles),
+        minPrice: positive(searchParams.vminprice),
+        maxPrice: positive(searchParams.vmaxprice),
+        features: vehicleFeatures,
+      }
+    : undefined;
   const guide = guideFor(category.parent?.slug ?? category.slug);
   /** Pre-selects this category (and subcategory) in the business card form. */
   const postQuery = new URLSearchParams({
@@ -83,6 +126,7 @@ export default async function CategoryPage({
       q: searchParams.q,
       specialties: selectedServices,
       certifications: selectedCerts,
+      vehicle: vehicleFilters,
     }),
     db.event.findMany({
       where: {
@@ -186,6 +230,25 @@ export default async function CategoryPage({
             >
               Search
             </button>
+
+            {vehicleCategory ? (
+              <VehicleFilters
+                values={{
+                  vtype: searchParams.vtype ?? "",
+                  vmake: searchParams.vmake ?? "",
+                  vmodel: searchParams.vmodel ?? "",
+                  vfuel: searchParams.vfuel ?? "",
+                  vtrans: searchParams.vtrans ?? "",
+                  vowner: searchParams.vowner ?? "",
+                  vcond: searchParams.vcond ?? "",
+                  vminyear: searchParams.vminyear ?? "",
+                  vmaxmiles: searchParams.vmaxmiles ?? "",
+                  vminprice: searchParams.vminprice ?? "",
+                  vmaxprice: searchParams.vmaxprice ?? "",
+                  vfeature: vehicleFeatures,
+                }}
+              />
+            ) : null}
 
             {services ? (
               <fieldset className="sm:col-span-3">
