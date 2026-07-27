@@ -70,14 +70,69 @@ export default function TermsPage() {
         dashboard are our measurement of record.
       </p>
 
-      <h2>7. Payments</h2>
+      <h2>7. Claimed and unclaimed listings</h2>
+      <p>
+        Some listings are starter entries created from openly licensed public data or
+        added by our team, and are marked <strong>unclaimed</strong>. If a listing is
+        yours you can claim it; we verify ownership before transferring control. Claiming
+        a listing you do not own, or claiming on someone&apos;s behalf without authority,
+        will have the listing removed and the account suspended. Any business can ask us
+        to remove its listing entirely by emailing us.
+      </p>
+
+      <h2>8. Reviews</h2>
+      <p>
+        Reviews must describe your own genuine experience. Paying for reviews, reviewing
+        your own business or a competitor&apos;s, and posting abusive, defamatory or
+        off-topic content are all prohibited. We may remove reviews that break these
+        rules, but we do not remove a review simply because it is unfavourable.
+      </p>
+
+      <h2>9. Connect and community</h2>
+      <p>
+        Connect exists for networking, mentorship, cultural meetups and activities. It is
+        not a dating service. Adult, sexual, harassing or discriminatory content is
+        removed and the account blocked. Meet in public places and use your own judgement;
+        we do not run background checks on members.
+      </p>
+
+      <h2>10. Reward points and referrals</h2>
+      <p>
+        Points are a promotional benefit, not money: they have no cash value, cannot be
+        transferred or withdrawn, and may expire or be adjusted if a referral turns out to
+        be self-referred, duplicated or otherwise abusive. We may change point values and
+        redemption options at any time.
+      </p>
+
+      <h2>11. Payments</h2>
       <p>
         Card payments are processed by Stripe and wallet payments by PayPal. We do not
         store card details. Prices are shown in Indian rupees for visitors in India and
         in US dollars elsewhere.
       </p>
 
-      <h2>8. Liability</h2>
+      <h2>12. Refunds and cancellations</h2>
+      <p>
+        Memberships, advertising and link promotions are prepaid and non-refundable once
+        delivery has begun, except where the law requires otherwise or where we fail to
+        deliver the placement you bought. Event refunds are the organiser&apos;s
+        responsibility. Our{" "}
+        <Link href="/refunds" className="text-indigo-600 underline">
+          refund policy
+        </Link>{" "}
+        has the detail.
+      </p>
+
+      <h2>13. Intellectual property and takedowns</h2>
+      <p>
+        Godesi&apos;s name, design and software are ours. Starter listings drawn from
+        OpenStreetMap are used under the ODbL with attribution. We do not copy listing
+        data from other directories, and you must not copy, scrape or bulk-download
+        content from Godesi. If you believe content here infringes your rights, email us
+        with the URL, what is infringed and proof of ownership and we will act promptly.
+      </p>
+
+      <h2>14. Liability</h2>
       <p>
         Godesi is a directory and marketplace. We do not verify every business, event
         or requirement, and we are not a party to any transaction between users. To the
@@ -85,7 +140,22 @@ export default function TermsPage() {
         preceding three months.
       </p>
 
-      <h2>9. Changes and contact</h2>
+      <h2>15. Suspension and termination</h2>
+      <p>
+        You can delete your account at any time. We may suspend or remove an account,
+        listing, event or advertisement that breaks these terms, harms other users or
+        exposes us to legal risk. Fees for undelivered placements are refunded when we
+        remove content for reasons outside your control.
+      </p>
+
+      <h2>16. Governing law</h2>
+      <p>
+        These terms are governed by the laws of the State of New Jersey, USA, and the
+        courts located there have exclusive jurisdiction, unless local consumer law in
+        your country gives you a different right.
+      </p>
+
+      <h2>17. Changes and contact</h2>
       <p>
         We may update these terms; material changes will be posted on this page. Reach
         us at{" "}

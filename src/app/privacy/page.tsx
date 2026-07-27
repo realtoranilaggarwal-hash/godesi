@@ -64,6 +64,42 @@ export default function PrivacyPage() {
         your personal data.
       </p>
 
+      <h2>Advertising and analytics</h2>
+      <p>
+        We use Google AdSense to fill advertising space we have not sold directly. Google
+        and its partners may use cookies or device identifiers to show and measure ads;
+        you can control this at{" "}
+        <a
+          href="https://myadcenter.google.com"
+          target="_blank"
+          rel="noreferrer"
+          className="text-indigo-600 underline"
+        >
+          Google My Ad Center
+        </a>
+        . Site traffic is measured with Umami, which is cookie-free and does not build
+        personal profiles; a summary is public on our{" "}
+        <Link href="/about" className="text-indigo-600 underline">
+          about page
+        </Link>
+        . Banner and link impressions and clicks are counted in aggregate for advertisers.
+      </p>
+
+      <h2>Starter listings and claims</h2>
+      <p>
+        Some listings were created from openly licensed public data (OpenStreetMap, used
+        under the ODbL with attribution) and are marked unclaimed. They contain business
+        contact details, not personal data about consumers. If a listing is yours you can
+        claim it and edit it, or ask us to remove it — no account needed.
+      </p>
+
+      <h2>Fraud prevention</h2>
+      <p>
+        For referrals we record the IP address and a device fingerprint of the signup so
+        we can hold duplicate or self-referred accounts for review. This data is used only
+        to prevent abuse of reward points.
+      </p>
+
       <h2>Retention and your rights</h2>
       <p>
         We keep account and listing data while your account is active and transaction
@@ -82,6 +118,31 @@ export default function PrivacyPage() {
           cookie policy
         </Link>{" "}
         for the cookies we set and how to refuse the optional ones.
+      </p>
+
+      <h2>Your choices</h2>
+      <ul>
+        <li>Edit or unpublish your listing at any time from your dashboard.</li>
+        <li>Delete your account, which removes your listing, profile and Connect entry.</li>
+        <li>Unsubscribe from non-essential email; we still send transactional messages such as OTP codes and tickets.</li>
+        <li>
+          Ask for a copy of your data, correction or deletion — including under GDPR,
+          UK GDPR and the CCPA/CPRA where they apply to you.
+        </li>
+      </ul>
+
+      <h2>International transfers</h2>
+      <p>
+        Godesi is operated from the United States and our hosting, database and email
+        providers process data there. If you use Godesi from India, the EU, the UK or
+        elsewhere, your data is transferred to and stored in the US.
+      </p>
+
+      <h2>Security</h2>
+      <p>
+        Passwords are hashed, traffic is encrypted in transit, and payment card details
+        never reach our servers. No system is perfectly secure; tell us immediately if you
+        suspect a problem with your account.
       </p>
 
       <h2>Children</h2>
