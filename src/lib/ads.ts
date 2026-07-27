@@ -37,10 +37,10 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   HERO: {
     slot: "HERO",
     name: "Homepage hero banner",
-    size: { width: 1200, height: 480 },
+    size: { width: 1200, height: 150 },
     slots: 3,
     blurb:
-      "The huge banner at the top of the homepage — our most valuable space, shared by up to three advertisers in rotation.",
+      "The full-width strip at the top of the homepage — our most valuable space, shared by up to three advertisers in rotation.",
     priceInr: 14999,
     priceUsd: 179,
     cpmInr: 480,

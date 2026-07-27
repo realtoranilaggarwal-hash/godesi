@@ -206,7 +206,7 @@ export async function HeroBanner() {
         <AdSenseUnit
           client={client}
           slotId={adsenseSlot}
-          height={280}
+          height={HERO_SIZE.height}
           className="rounded-3xl"
         />
         <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
