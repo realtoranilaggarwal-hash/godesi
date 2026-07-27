@@ -8,6 +8,8 @@ import { formatEventDate, isPast, seatsLeft } from "@/lib/events";
 import { gradientFor } from "@/lib/categories";
 import { TicketForm } from "@/components/forms/TicketForm";
 import { SidebarBanners } from "@/components/Banners";
+import { PostedBy } from "@/components/PostedBy";
+import { ShareButtons } from "@/components/ShareButtons";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +19,9 @@ async function loadEvent(slug: string) {
     where: { slug },
     include: {
       category: { select: { slug: true, name: true, icon: true, color: true } },
-      organizer: { select: { name: true } },
+      organizer: {
+        select: { name: true, username: true, avatarUrl: true },
+      },
       business: { select: { slug: true, name: true, logoUrl: true, city: true } },
     },
   });
@@ -99,6 +103,13 @@ export default async function EventPage({
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>
             <p className="whitespace-pre-line text-slate-700">{event.description}</p>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+              <PostedBy user={event.organizer} />
+              <ShareButtons
+                url={`${siteUrl()}/events/${event.slug}`}
+                title={event.title}
+              />
+            </div>
           </div>
         </div>
 
@@ -123,7 +134,7 @@ export default async function EventPage({
               </div>
             </div>
           ) : (
-            <p className="mt-1 text-sm text-slate-600">{event.organizer.name}</p>
+            <PostedBy user={event.organizer} className="mt-1" />
           )}
         </Card>
 

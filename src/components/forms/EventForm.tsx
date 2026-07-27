@@ -6,6 +6,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
+import { ImageField } from "@/components/forms/ImageField";
 
 export function EventForm({ categories }: { categories: CategoryOption[] }) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
@@ -48,9 +49,12 @@ export function EventForm({ categories }: { categories: CategoryOption[] }) {
             className={inputClass}
           />
         </Field>
-        <Field label="Banner image URL">
-          <input name="imageUrl" className={inputClass} />
-        </Field>
+        <ImageField
+          name="imageUrl"
+          label="Event banner"
+          purpose="event"
+          previewClassName="h-24 w-40 rounded-xl object-cover"
+        />
       </div>
 
       <SubmitButton pendingLabel="Publishing...">Publish event</SubmitButton>

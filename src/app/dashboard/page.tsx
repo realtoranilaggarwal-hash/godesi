@@ -189,6 +189,9 @@ export default async function DashboardPage({
               <LinkButton href="/dashboard/profile" variant="secondary">
                 Edit profile
               </LinkButton>
+              <LinkButton href="/dashboard/me" variant="secondary">
+                My personal profile
+              </LinkButton>
               <LinkButton href="/dashboard/media" variant="secondary">
                 Manage gallery
               </LinkButton>

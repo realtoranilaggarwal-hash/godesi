@@ -106,20 +106,26 @@ export async function SidebarBanners() {
           height={SIDEBAR_SIZE.height}
         />
       ))}
-      {skyscrapers.map((banner) => (
-        <BannerLink
-          key={banner.id}
-          banner={banner}
-          width={SKYSCRAPER_SIZE.width}
-          height={SKYSCRAPER_SIZE.height}
-          className="mx-auto w-[160px]"
-        />
-      ))}
-      <AdvertiseHere
-        label="160 × 600 skyscraper"
-        height={SKYSCRAPER_SIZE.height}
-        className="mx-auto w-[160px]"
-      />
+      {/* Skyscrapers run two-up so the pair fills the same 300px rail width. */}
+      <div className="grid grid-cols-2 gap-3">
+        {skyscrapers.slice(0, 2).map((banner) => (
+          <BannerLink
+            key={banner.id}
+            banner={banner}
+            width={SKYSCRAPER_SIZE.width}
+            height={SKYSCRAPER_SIZE.height}
+          />
+        ))}
+        {Array.from({
+          length: Math.max(2 - Math.min(skyscrapers.length, 2), 0),
+        }).map((_, index) => (
+          <AdvertiseHere
+            key={`sky-open-${index}`}
+            label="160 × 600"
+            height={SKYSCRAPER_SIZE.height}
+          />
+        ))}
+      </div>
     </aside>
   );
 }

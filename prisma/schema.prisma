@@ -83,6 +83,12 @@ model User {
   planExpiresAt DateTime?
   createdAt     DateTime  @default(now())
 
+  /// Public handle powering godesi.com/<username> and the personal QR code.
+  username  String? @unique
+  avatarUrl String?
+  bio       String?
+  location  String?
+
   business Business?
   leads    Lead[]
   unlocks  LeadUnlock[]

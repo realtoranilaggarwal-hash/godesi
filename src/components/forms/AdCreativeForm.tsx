@@ -4,6 +4,7 @@ import { useFormState } from "react-dom";
 import { saveAdCreativeAction } from "@/app/actions/ads";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
+import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
 
 export function AdCreativeForm({
@@ -31,18 +32,14 @@ export function AdCreativeForm({
         <Field label="Ad title">
           <input name="title" defaultValue={title} required className={inputClass} />
         </Field>
-        <Field
-          label="Banner image URL"
+        <ImageField
+          name="imageUrl"
+          label="Banner creative"
+          purpose="banner"
+          defaultValue={imageUrl}
           hint={`Use exactly ${size.width} × ${size.height} px for a sharp result`}
-        >
-          <input
-            name="imageUrl"
-            type="url"
-            defaultValue={imageUrl}
-            required
-            className={inputClass}
-          />
-        </Field>
+          previewClassName="h-24 w-40 rounded-xl object-contain bg-slate-50"
+        />
         <Field label="Destination URL" hint="Where clicks should land">
           <input
             name="linkUrl"

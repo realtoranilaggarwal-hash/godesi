@@ -7,6 +7,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
+import { ImageField } from "@/components/forms/ImageField";
 
 export function BusinessProfileForm({
   business,
@@ -67,9 +68,13 @@ export function BusinessProfileForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Logo URL">
-          <input name="logoUrl" defaultValue={business?.logoUrl ?? ""} className={inputClass} />
-        </Field>
+        <ImageField
+          name="logoUrl"
+          label="Logo"
+          purpose="logo"
+          defaultValue={business?.logoUrl ?? ""}
+          hint="Square logos look best."
+        />
         <Field label="Website">
           <input
             name="websiteUrl"

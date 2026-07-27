@@ -6,6 +6,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
+import { ImageField } from "@/components/forms/ImageField";
 
 export type AdminEventValues = {
   id: string;
@@ -102,9 +103,13 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Banner image URL">
-          <input name="imageUrl" defaultValue={event.imageUrl} className={inputClass} />
-        </Field>
+        <ImageField
+          name="imageUrl"
+          label="Event banner"
+          purpose="event"
+          defaultValue={event.imageUrl}
+          previewClassName="h-24 w-40 rounded-xl object-cover"
+        />
         <Field label="Status">
           <select name="status" defaultValue={event.status} className={inputClass}>
             <option value="APPROVED">Approved (public)</option>

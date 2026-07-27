@@ -6,6 +6,7 @@ import { canUnlockLeads } from "@/lib/plans";
 import { unlockLeadAction } from "@/app/actions/leads";
 import { Alert, Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { formatInr } from "@/lib/format";
+import { PostedBy } from "@/components/PostedBy";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -46,7 +47,10 @@ export default async function LeadsPage({
         : {}),
     },
     orderBy: { createdAt: "desc" },
-    include: { unlocks: { where: { userId: user?.id ?? "" } } },
+    include: {
+      unlocks: { where: { userId: user?.id ?? "" } },
+      client: { select: { name: true, username: true, avatarUrl: true } },
+    },
     take: 60,
   });
 
@@ -124,6 +128,7 @@ export default async function LeadsPage({
                   {lead.city} · {budgetLabel(lead.budgetMin, lead.budgetMax)}
                 </p>
                 <p className="line-clamp-3 text-sm text-slate-700">{lead.description}</p>
+                <PostedBy user={lead.client} />
 
                 {unlocked ? (
                   <div className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900">

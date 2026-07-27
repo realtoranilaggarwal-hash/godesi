@@ -11,6 +11,8 @@ import { QrCard } from "@/components/QrCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { TrackVisit } from "@/components/TrackVisit";
 import { ReviewForm } from "@/components/ReviewForm";
+import { PostedBy } from "@/components/PostedBy";
+import { ShareButtons } from "@/components/ShareButtons";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,16 @@ async function getBusiness(slug: string) {
   return db.business.findUnique({
     where: { slug },
     include: {
-      owner: { select: { id: true, plan: true, planExpiresAt: true } },
+      owner: {
+        select: {
+          id: true,
+          plan: true,
+          planExpiresAt: true,
+          name: true,
+          username: true,
+          avatarUrl: true,
+        },
+      },
       categoryRef: { select: { slug: true, name: true, icon: true, color: true } },
       subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
@@ -179,6 +190,14 @@ export default async function BusinessProfilePage({
                 {business.description}
               </p>
             ) : null}
+
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              <PostedBy user={business.owner} prefix="Listed by" />
+              <ShareButtons
+                url={`${siteUrl()}/b/${business.slug}`}
+                title={business.name}
+              />
+            </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               <WhatsAppButton

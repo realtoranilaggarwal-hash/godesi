@@ -45,7 +45,7 @@ export default async function MediaPage() {
       </div>
 
       <Card>
-        <AddMediaForm />
+        <AddMediaForm used={business.media.length} limit={limit} />
       </Card>
 
       {business.media.length ? (

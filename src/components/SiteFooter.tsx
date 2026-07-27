@@ -89,8 +89,19 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-slate-100">
-        <div className="mx-auto max-w-7xl px-4 py-4 text-xs text-slate-500">
-          © {new Date().getFullYear()} Godesi. All rights reserved.
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
+          <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
+          <span>
+            Designed by{" "}
+            <a
+              href="https://socialdada.com"
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-slate-700 hover:text-slate-900"
+            >
+              SocialDada.com
+            </a>
+          </span>
         </div>
       </div>
     </footer>
