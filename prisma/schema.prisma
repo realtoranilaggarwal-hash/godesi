@@ -73,6 +73,43 @@ enum LeadStatus {
   CLOSED
 }
 
+/// Property, roommate and marketplace classifieds share one listing model.
+enum ListingKind {
+  PROPERTY_SALE
+  PROPERTY_RENT
+  ROOM_WANTED
+  ROOM_OFFERED
+  MARKETPLACE
+}
+
+enum Furnishing {
+  FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
+enum GenderPreference {
+  ANY
+  MALE
+  FEMALE
+}
+
+/// Why points were credited or spent, mirroring the published reward table.
+enum PointsReason {
+  REFERRAL_SIGNUP
+  PROFILE_CREATED
+  PAID_UPGRADE
+  LISTING_POSTED
+  REDEMPTION
+  ADJUSTMENT
+}
+
+enum RedemptionStatus {
+  REQUESTED
+  FULFILLED
+  REJECTED
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -101,6 +138,95 @@ model User {
   news     NewsItem[]
   banners  Banner[]
   adOrders AdOrder[]
+
+  listings    Listing[]
+  points      PointsEntry[]
+  redemptions Redemption[]
+
+  referredById String?
+  referredBy   User?   @relation("Referrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals    User[]  @relation("Referrals")
+}
+
+/// Real estate, roommate and buy/sell classifieds.
+model Listing {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  kind        ListingKind
+  title       String
+  description String
+  city        String
+  area        String?
+  priceInr    Int               @default(0)
+  /// Monthly rents and shared rooms are per month; sales and items are one-off.
+  perMonth    Boolean           @default(false)
+  bedrooms    Int?
+  furnishing  Furnishing?
+  genderPref  GenderPreference?
+  whatsapp    String
+  status      ListingStatus     @default(APPROVED)
+  featured    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  images ListingImage[]
+
+  @@index([kind, city])
+  @@index([kind, status, featured])
+}
+
+model ListingImage {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+}
+
+/// Vendor package/pricing tiers shown on wedding and service profiles.
+model VendorPackage {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name        String
+  priceInr    Int
+  description String?
+  sortOrder   Int      @default(0)
+
+  @@index([businessId])
+}
+
+/// Append-only rewards ledger: positive credits, negative redemptions.
+model PointsEntry {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points    Int
+  reason    PointsReason
+  note      String?
+  /// Set for one-per-user credits so the same award cannot be granted twice.
+  uniqueKey String?      @unique
+  createdAt DateTime     @default(now())
+
+  @@index([userId])
+}
+
+model Redemption {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward    String
+  points    Int
+  status    RedemptionStatus @default(REQUESTED)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
 }
 
 /// Multi-level taxonomy: top-level categories have `parentId = null`,
@@ -156,6 +282,7 @@ model Business {
   subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
 
   media         Media[]
+  packages      VendorPackage[]
   reviews       Review[]
   trackedEvents AnalyticsEvent[]
   eventListings Event[]
@@ -278,7 +405,7 @@ model Banner {
   createdAt   DateTime     @default(now())
 
   advertiserId String?
-  advertiser   User?    @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
+  advertiser   User?     @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
   orders       AdOrder[]
 
   @@unique([slot, position])
@@ -288,19 +415,19 @@ model Banner {
 
 /// A paid advertising booking for one banner placement.
 model AdOrder {
-  id        String        @id @default(cuid())
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bannerId  String?
-  banner    Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
-  slot      BannerSlot
-  months    Int           @default(1)
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bannerId    String?
+  banner      Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
+  slot        BannerSlot
+  months      Int           @default(1)
   amountMinor Int
-  currency  String        @default("INR")
-  provider  String        @default("stripe")
-  reference String?       @unique
-  status    AdOrderStatus @default(PENDING)
-  createdAt DateTime      @default(now())
+  currency    String        @default("INR")
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  status      AdOrderStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
 
   @@index([userId, status])
 }
@@ -379,13 +506,13 @@ model LeadUnlock {
 }
 
 model Payment {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan      Plan
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan        Plan
   amountMinor Int
-  currency  String   @default("INR")
-  provider  String   @default("mock")
-  reference String?  @unique
-  createdAt DateTime @default(now())
+  currency    String   @default("INR")
+  provider    String   @default("mock")
+  reference   String?  @unique
+  createdAt   DateTime @default(now())
 }

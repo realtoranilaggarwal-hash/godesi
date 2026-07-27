@@ -10,9 +10,21 @@ export type ParsedNewsItem = {
 };
 
 const DEFAULT_FEEDS = [
-  { name: "The Hindu — Business", url: "https://www.thehindu.com/business/feeder/default.rss" },
+  {
+    name: "Times of India — Top Stories",
+    url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+  },
   { name: "NDTV — India", url: "https://feeds.feedburner.com/ndtvnews-india-news" },
-  { name: "Times of India — Top Stories", url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms" },
+  {
+    name: "Economic Times — Top Stories",
+    url: "https://economictimes.indiatimes.com/rssfeedstopstories.cms",
+  },
+  { name: "Fibre2Fashion", url: "https://www.fibre2fashion.com/rss/textile-news.xml" },
+  { name: "Apparel Resources", url: "https://apparelresources.com/feed/" },
+  {
+    name: "The Hindu — Business",
+    url: "https://www.thehindu.com/business/feeder/default.rss",
+  },
 ];
 
 export async function ensureDefaultFeeds() {

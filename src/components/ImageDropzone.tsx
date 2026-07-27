@@ -31,7 +31,13 @@ async function compress(file: File) {
   });
 }
 
-export type UploadPurpose = "avatar" | "gallery" | "event" | "logo" | "banner";
+export type UploadPurpose =
+  | "avatar"
+  | "gallery"
+  | "event"
+  | "logo"
+  | "listing"
+  | "banner";
 
 export function ImageDropzone({
   purpose,

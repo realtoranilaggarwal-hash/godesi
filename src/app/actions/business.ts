@@ -9,6 +9,7 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { mediaLimit } from "@/lib/plans";
 import { uniqueSlug } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
+import { awardPoints } from "@/lib/rewards";
 
 const optionalUrl = z
   .string()
@@ -124,6 +125,7 @@ export async function saveBusinessProfileAction(
         data: { ...data, ownerId: user.id, slug: await uniqueSlug(data.name, data.city) },
       });
       slug = created.slug;
+      await awardPoints({ userId: user.id, reason: "PROFILE_CREATED", once: true });
     }
   } catch (error) {
     return fieldError(error);

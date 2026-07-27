@@ -1,6 +1,7 @@
 import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
+import { awardPoints } from "@/lib/rewards";
 
 export const PLAN_DURATION_DAYS = 30;
 
@@ -42,6 +43,24 @@ export async function activatePlan({
     }),
     db.business.updateMany({ where: { ownerId: userId }, data: { featured: true } }),
   ]);
+
+  await awardPoints({
+    userId,
+    reason: "PAID_UPGRADE",
+    note: `${plan} membership`,
+  });
+
+  const referrer = await db.user.findUnique({
+    where: { id: userId },
+    select: { referredById: true },
+  });
+  if (referrer?.referredById) {
+    await awardPoints({
+      userId: referrer.referredById,
+      reason: "PAID_UPGRADE",
+      note: "A member you referred upgraded",
+    });
+  }
 
   return { alreadyProcessed: false as const, payment };
 }

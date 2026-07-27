@@ -17,6 +17,7 @@ export const RESERVED_USERNAMES = new Set([
   "events",
   "favicon.ico",
   "leads",
+  "listings",
   "login",
   "logout",
   "me",

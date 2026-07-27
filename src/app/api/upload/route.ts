@@ -9,6 +9,7 @@ const FOLDERS = {
   gallery: "gallery",
   event: "events",
   logo: "listings",
+  listing: "classifieds",
   banner: "banners",
 } as const;
 

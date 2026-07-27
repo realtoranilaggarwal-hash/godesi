@@ -1,0 +1,71 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { db } from "@/lib/db";
+import { requireUser } from "@/lib/auth";
+import { type ActionState, fieldError } from "@/lib/actions";
+
+const MAX_PACKAGES = 8;
+
+const schema = z.object({
+  name: z.string().min(3, "Name your package"),
+  priceInr: z.coerce.number().int().min(0).max(50_000_000),
+  description: z.string().max(400).optional(),
+});
+
+export async function addPackageAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const business = await db.business.findUnique({ where: { ownerId: user.id } });
+    if (!business) return { error: "Create your business profile first." };
+
+    const parsed = schema.safeParse({
+      name: formData.get("name"),
+      priceInr: formData.get("priceInr") || 0,
+      description: formData.get("description") || undefined,
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    const count = await db.vendorPackage.count({ where: { businessId: business.id } });
+    if (count >= MAX_PACKAGES) {
+      return { error: `You can list up to ${MAX_PACKAGES} packages.` };
+    }
+
+    await db.vendorPackage.create({
+      data: {
+        businessId: business.id,
+        name: parsed.data.name,
+        priceInr: parsed.data.priceInr,
+        description: parsed.data.description ?? null,
+        sortOrder: count,
+      },
+    });
+
+    revalidatePath("/dashboard/packages");
+    revalidatePath(`/b/${business.slug}`);
+    return { success: "Package added." };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+export async function deletePackageAction(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  const item = await db.vendorPackage.findUnique({
+    where: { id },
+    include: { business: { select: { ownerId: true, slug: true } } },
+  });
+  if (!item) return;
+  if (item.business.ownerId !== user.id && user.role !== "ADMIN") {
+    throw new Error("FORBIDDEN");
+  }
+
+  await db.vendorPackage.delete({ where: { id } });
+  revalidatePath("/dashboard/packages");
+  revalidatePath(`/b/${item.business.slug}`);
+}

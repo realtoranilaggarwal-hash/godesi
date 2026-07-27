@@ -95,9 +95,15 @@ export default async function DashboardPage({
               : null}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <LinkButton href="/pricing" variant="secondary">
             Manage plan
+          </LinkButton>
+          <LinkButton href="/dashboard/listings" variant="secondary">
+            My listings
+          </LinkButton>
+          <LinkButton href="/dashboard/rewards" variant="secondary">
+            Rewards
           </LinkButton>
           <LinkButton href="/leads">Browse leads</LinkButton>
         </div>
@@ -210,6 +216,9 @@ export default async function DashboardPage({
               </LinkButton>
               <LinkButton href="/dashboard/media" variant="secondary">
                 Manage gallery
+              </LinkButton>
+              <LinkButton href="/dashboard/packages" variant="secondary">
+                Packages & pricing
               </LinkButton>
               <LinkButton href="/dashboard/leads" variant="secondary">
                 Unlocked leads

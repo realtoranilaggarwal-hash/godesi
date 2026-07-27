@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { siteUrl, whatsappLink } from "@/lib/format";
+import { formatInr, siteUrl, whatsappLink } from "@/lib/format";
 import { effectivePlan } from "@/lib/plans";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -33,6 +33,7 @@ async function getBusiness(slug: string) {
       categoryRef: { select: { slug: true, name: true, icon: true, color: true } },
       subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
+      packages: { orderBy: { sortOrder: "asc" } },
       reviews: { orderBy: { createdAt: "desc" } },
     },
   });
@@ -253,6 +254,28 @@ export default async function BusinessProfilePage({
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
+          {business.packages.length ? (
+            <Card>
+              <h2 className="mb-3 text-lg font-bold">Packages & pricing</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {business.packages.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-rose-50 p-4"
+                  >
+                    <p className="font-bold">{item.name}</p>
+                    <p className="text-xl font-black text-emerald-700">
+                      {formatInr(item.priceInr)}
+                    </p>
+                    {item.description ? (
+                      <p className="mt-1 text-sm text-slate-600">{item.description}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+
           {business.media.length ? (
             <Card>
               <h2 className="mb-3 text-lg font-bold">Gallery</h2>

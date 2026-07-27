@@ -12,6 +12,7 @@ import {
 import { type ActionState, fieldError } from "@/lib/actions";
 import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
+import { creditReferral } from "@/lib/referrals";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -48,6 +49,7 @@ export async function signupAction(
       },
     });
     await createSession(user.id);
+    await creditReferral(user.id);
 
     if (emailEnabled()) {
       await issueEmailOtp(email);
