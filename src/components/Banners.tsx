@@ -3,6 +3,7 @@ import {
   activeBanners,
   HEADER_SIZE,
   SIDEBAR_SIZE,
+  SIDEBAR_SLOTS,
   SKYSCRAPER_SIZE,
 } from "@/lib/banners";
 import { BannerImpression } from "@/components/BannerImpression";
@@ -95,7 +96,16 @@ export async function SidebarBanners() {
           height={SIDEBAR_SIZE.height}
         />
       ))}
-      <AdvertiseHere label="300 × 250 sidebar banner" height={250} />
+      {/* Show the first few unsold rectangles so the rail is visibly for sale. */}
+      {Array.from({
+        length: Math.min(3, Math.max(SIDEBAR_SLOTS - rectangles.length, 0)),
+      }).map((_, index) => (
+        <AdvertiseHere
+          key={`sidebar-open-${index}`}
+          label={`300 × 250 sidebar banner · slot ${rectangles.length + index + 1}`}
+          height={SIDEBAR_SIZE.height}
+        />
+      ))}
       {skyscrapers.map((banner) => (
         <BannerLink
           key={banner.id}

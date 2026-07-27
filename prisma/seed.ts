@@ -294,14 +294,8 @@ async function main() {
       imageUrl: "https://placehold.co/970x90/4f46e5/ffffff?text=Advertise+on+Godesi",
       linkUrl: "https://godesi-app.vercel.app/pricing",
     },
-    ...Array.from({ length: 3 }, (_, index) => ({
-      slot: "SIDEBAR" as const,
-      position: index + 1,
-      title: `Sponsored slot ${index + 1}`,
-      imageUrl: `https://placehold.co/300x250/f97316/ffffff?text=Sidebar+${index + 1}`,
-      linkUrl: "https://godesi-app.vercel.app/pricing",
-    })),
   ];
+  // Sidebar rectangles are left unsold on purpose so the rail advertises itself.
 
   for (const banner of sampleBanners) {
     const { slot, position, ...rest } = banner;
