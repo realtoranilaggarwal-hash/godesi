@@ -1,0 +1,12 @@
+-- Extra social/profile links businesses ask for.
+ALTER TABLE "Business" ADD COLUMN "linkedinUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "xUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "tiktokUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "threadsUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "telegramUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "pinterestUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "snapchatUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "whatsappChannelUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "yelpUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "zillowUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN "realtorUrl" TEXT;

@@ -7,9 +7,15 @@ import { BusinessProfileForm } from "@/components/forms/BusinessProfileForm";
 import { isAgentCard } from "@/lib/agents";
 import { Card, LinkButton } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
+import { ListingHelp } from "@/components/ListingHelp";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Edit business profile" };
+export const metadata: Metadata = {
+  title: "Edit your Godesi business card",
+  description:
+    "Update your Godesi digital business card: category, city, WhatsApp, photos, video, packages, starting price and every social profile you have.",
+  robots: { index: false },
+};
 
 export default async function ProfileEditorPage({
   searchParams,
@@ -69,7 +75,10 @@ export default async function ProfileEditorPage({
         </Card>
       </div>
 
-      <PostingSidebar />
+      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+        <ListingHelp username={user.username} />
+        <PostingSidebar />
+      </aside>
     </div>
   );
 }

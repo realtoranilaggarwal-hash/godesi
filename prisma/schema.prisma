@@ -403,6 +403,18 @@ model Business {
   instagramUrl   String?
   facebookUrl    String?
   youtubeUrl     String?
+  linkedinUrl    String?
+  xUrl           String?
+  tiktokUrl      String?
+  threadsUrl     String?
+  telegramUrl    String?
+  pinterestUrl   String?
+  snapchatUrl    String?
+  /// Public WhatsApp channel or group invite (contact stays on whatsappNumber).
+  whatsappChannelUrl String?
+  yelpUrl        String?
+  zillowUrl      String?
+  realtorUrl     String?
   /// Intro/showcase video pasted from YouTube or Vimeo.
   videoUrl       String?
   mapsUrl        String?

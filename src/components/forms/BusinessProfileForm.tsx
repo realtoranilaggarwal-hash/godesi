@@ -8,6 +8,7 @@ import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
+import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 
 export function BusinessProfileForm({
   business,
@@ -92,13 +93,6 @@ export function BusinessProfileForm({
           defaultValue={business?.logoUrl ?? ""}
           hint="Square logos look best."
         />
-        <Field label="Website">
-          <input
-            name="websiteUrl"
-            defaultValue={business?.websiteUrl ?? ""}
-            className={inputClass}
-          />
-        </Field>
         <Field
           label="Video link (YouTube or Vimeo)"
           hint="Paste a link like https://youtu.be/abc123 or https://vimeo.com/123456 — it plays on your page."
@@ -109,9 +103,6 @@ export function BusinessProfileForm({
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />
-        </Field>
-        <Field label="Google Maps link">
-          <input name="mapsUrl" defaultValue={business?.mapsUrl ?? ""} className={inputClass} />
         </Field>
         <Field
           label="Starting price"
@@ -147,31 +138,34 @@ export function BusinessProfileForm({
             I price every job individually — invite enquiries for a quote
           </label>
         </Field>
-        <Field label="Instagram">
-          <input
-            name="instagramUrl"
-            defaultValue={business?.instagramUrl ?? ""}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Facebook">
-          <input
-            name="facebookUrl"
-            defaultValue={business?.facebookUrl ?? ""}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="YouTube">
-          <input
-            name="youtubeUrl"
-            defaultValue={business?.youtubeUrl ?? ""}
-            className={inputClass}
-          />
-        </Field>
         <Field label="Address">
           <input name="address" defaultValue={business?.address ?? ""} className={inputClass} />
         </Field>
       </div>
+
+
+      <details className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4" open>
+        <summary className="cursor-pointer text-sm font-bold text-slate-900">
+          Social &amp; profile links
+        </summary>
+        <p className="mt-1 text-xs text-slate-500">
+          Add every profile you have — each one appears as a button on your public
+          card. Leave the rest blank.
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {BUSINESS_SOCIALS.map((social) => (
+            <Field key={social.key} label={`${social.icon} ${social.label}`}>
+              <input
+                name={social.key}
+                type="url"
+                defaultValue={business?.[social.key] ?? ""}
+                placeholder={social.placeholder}
+                className={inputClass}
+              />
+            </Field>
+          ))}
+        </div>
+      </details>
 
       <SubmitButton>{business ? "Save changes" : "Create my card"}</SubmitButton>
     </form>

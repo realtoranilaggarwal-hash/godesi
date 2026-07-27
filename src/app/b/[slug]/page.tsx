@@ -18,6 +18,7 @@ import { VideoEmbed } from "@/components/VideoEmbed";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
@@ -77,13 +78,7 @@ export async function generateMetadata({
   };
 }
 
-const socialLinks = [
-  { key: "websiteUrl", label: "Website" },
-  { key: "instagramUrl", label: "Instagram" },
-  { key: "facebookUrl", label: "Facebook" },
-  { key: "youtubeUrl", label: "YouTube" },
-  { key: "mapsUrl", label: "Google Maps" },
-] as const;
+
 
 export default async function BusinessProfilePage({
   params,
@@ -286,15 +281,16 @@ export default async function BusinessProfilePage({
                   Email
                 </a>
               ) : null}
-              {socialLinks.map(({ key, label }) =>
+              {BUSINESS_SOCIALS.map(({ key, label, icon }) =>
                 business[key] ? (
                   <a
                     key={key}
                     href={business[key] as string}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
                   >
+                    <span aria-hidden>{icon}</span>
                     {label}
                   </a>
                 ) : null,

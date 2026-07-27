@@ -6,10 +6,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { mediaLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
-import {
-  FairHousingNotice,
-  RoomSharingNotice,
-} from "@/components/FairHousingNotice";
 import { requestCurrency } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
@@ -61,11 +57,6 @@ export default async function NewListingPage({
           defaultCurrency={requestCurrency()}
         />
       </Card>
-
-      <FairHousingNotice />
-      {kind === "ROOM_OFFERED" || kind === "ROOM_WANTED" ? (
-        <RoomSharingNotice />
-      ) : null}
     </div>
   );
 }

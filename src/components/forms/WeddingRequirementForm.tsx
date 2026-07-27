@@ -22,6 +22,7 @@ export function WeddingRequirementForm({
   const [services, setServices] = useState<string[]>(
     defaultService ? [defaultService] : [],
   );
+  const [dateFlexible, setDateFlexible] = useState(false);
 
   const toggle = (service: string) =>
     setServices((current) =>
@@ -32,7 +33,7 @@ export function WeddingRequirementForm({
 
   const category = services.length
     ? `Wedding — ${services.join(", ")}`
-    : "Wedding services";
+    : "Wedding — not decided yet";
 
   return (
     <form action={formAction} className="space-y-4">
@@ -48,7 +49,15 @@ export function WeddingRequirementForm({
         </legend>
         <p className="text-xs text-slate-500">
           Tick everything you need — vendors in those services will see your post.
+          Not decided yet? Leave them all unticked and every wedding vendor will see
+          it.
         </p>
+        {services.length === 0 ? (
+          <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+            Nothing ticked — posting as “not decided yet”, open to all wedding
+            vendors.
+          </p>
+        ) : null}
         <input type="hidden" name="category" value={category} />
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           {WEDDING_GROUPS.map((group) => (
@@ -91,8 +100,23 @@ export function WeddingRequirementForm({
         <Field label="City">
           <input name="city" required className={inputClass} />
         </Field>
-        <Field label="Wedding / event date">
-          <input name="eventDate" type="date" className={inputClass} />
+        {dateFlexible ? <input type="hidden" name="eventDate" value="" /> : null}
+        <Field label="Wedding / event date" hint="Leave blank if the date is not fixed">
+          <input
+            name="eventDate"
+            type="date"
+            disabled={dateFlexible}
+            className={inputClass}
+          />
+          <label className="mt-2 flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={dateFlexible}
+              onChange={(event) => setDateFlexible(event.target.checked)}
+              className="h-4 w-4"
+            />
+            Date not decided yet / flexible
+          </label>
         </Field>
         <Field label="Budget from">
           <input name="budgetMin" type="number" min={0} className={inputClass} />

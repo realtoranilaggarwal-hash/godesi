@@ -8,6 +8,10 @@ import { Alert, Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
+import {
+  FairHousingNotice,
+  RoomSharingNotice,
+} from "@/components/FairHousingNotice";
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
 import type { ListingKind } from "@prisma/client";
 
@@ -178,6 +182,9 @@ export function ListingForm({
           ))}
         </div>
       </Field>
+
+      {isProperty || isRoom ? <FairHousingNotice /> : null}
+      {isRoom ? <RoomSharingNotice /> : null}
 
       <SubmitButton pendingLabel="Publishing...">Publish listing</SubmitButton>
     </form>
