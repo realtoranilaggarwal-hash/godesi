@@ -11,6 +11,10 @@ const reviewSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),
   authorName: z.string().trim().min(2, "Please enter your name"),
   comment: z.string().trim().max(1000).optional(),
+  localKnowledge: z.coerce.number().int().min(1).max(5).optional(),
+  processExpertise: z.coerce.number().int().min(1).max(5).optional(),
+  responsiveness: z.coerce.number().int().min(1).max(5).optional(),
+  negotiation: z.coerce.number().int().min(1).max(5).optional(),
 });
 
 export async function createReviewAction(
@@ -24,6 +28,10 @@ export async function createReviewAction(
       rating: formData.get("rating"),
       authorName: formData.get("authorName") || user?.name,
       comment: formData.get("comment"),
+      localKnowledge: formData.get("localKnowledge") || undefined,
+      processExpertise: formData.get("processExpertise") || undefined,
+      responsiveness: formData.get("responsiveness") || undefined,
+      negotiation: formData.get("negotiation") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -42,6 +50,10 @@ export async function createReviewAction(
         authorName: parsed.data.authorName,
         rating: parsed.data.rating,
         comment: parsed.data.comment || null,
+        localKnowledge: parsed.data.localKnowledge ?? null,
+        processExpertise: parsed.data.processExpertise ?? null,
+        responsiveness: parsed.data.responsiveness ?? null,
+        negotiation: parsed.data.negotiation ?? null,
       },
     });
     revalidatePath(`/b/${business.slug}`);

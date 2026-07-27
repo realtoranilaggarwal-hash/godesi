@@ -74,6 +74,12 @@ export const CATEGORY_TREE: CategorySeed[] = [
       "Carpenters",
       "AC Repair & Service",
       "Home Cleaning",
+      "Housekeeping & Maid Service",
+      "Car Wash & Detailing",
+      "Babysitting & Nanny",
+      "Elder Care",
+      "Snow Removal & Yard Work",
+      "Handyman & Odd Jobs",
       "Pest Control",
       "Painters",
       "Packers & Movers",
@@ -124,7 +130,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
     color: "orange",
     blurb: "Buy, sell, rent — agents, builders and home loans",
     children: [
-      "Property Dealers",
+      "Real Estate Agents",
       "Flats for Sale",
       "Flats for Rent",
       "Plots & Land",
@@ -205,6 +211,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
       "Cloud Kitchens",
       "Chaat & Street Food",
       "Cooks & Chefs",
+      "Cooking at Home",
     ],
   },
   {
@@ -215,6 +222,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
     blurb: "Agents, cabs, tempo travellers, hotels and visas",
     children: [
       "Travel Agents",
+      "Carpool & Rideshare",
       "Taxi & Cab Services",
       "Tempo Traveller & Bus",
       "Hotels & Resorts",
@@ -263,9 +271,9 @@ export const CATEGORY_TREE: CategorySeed[] = [
     name: "Professionals & Experts",
     icon: "🎓",
     color: "cyan",
-    blurb: "Realtors, attorneys, accountants, advisors and consultants",
+    blurb: "Real estate agents, attorneys, accountants, advisors and consultants",
     children: [
-      "Realtors",
+      "Real Estate Agents",
       "Attorneys",
       "Accountants",
       "Astrologers",
@@ -295,7 +303,19 @@ export const CATEGORY_TREE: CategorySeed[] = [
   },
 ];
 
+/**
+ * Subcategories keep their original slug when we rename the label, so existing
+ * cards, links and search filters keep working.
+ */
+const SUBCATEGORY_SLUGS: Record<string, string> = {
+  "real-estate:Real Estate Agents": "real-estate-property-dealers",
+  "professionals:Real Estate Agents": "professionals-realtors",
+};
+
 export function subcategorySlug(parentSlug: string, name: string) {
+  const override = SUBCATEGORY_SLUGS[`${parentSlug}:${name}`];
+  if (override) return override;
+
   return `${parentSlug}-${name
     .toLowerCase()
     .replace(/&/g, "and")

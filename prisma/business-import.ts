@@ -81,7 +81,7 @@ const TARGETS: Target[] = [
   { selector: '["office"="it"]', categorySlug: "business-services", subcategory: "Web & App Development", profileType: "BUSINESS" },
   { selector: '["office"="advertising_agency"]', categorySlug: "business-services", subcategory: "Digital Marketing", profileType: "BUSINESS" },
   // Real estate
-  { selector: '["office"="estate_agent"]', categorySlug: "real-estate", subcategory: "Property Dealers", profileType: "BUSINESS" },
+  { selector: '["office"="estate_agent"]', categorySlug: "real-estate", subcategory: "Real Estate Agents", profileType: "BUSINESS" },
   { selector: '["office"="property_management"]', categorySlug: "real-estate", subcategory: "Property Management", profileType: "BUSINESS" },
   // Professionals & experts
   { selector: '["office"="financial_advisor"]', categorySlug: "professionals", subcategory: "Financial Advisors", profileType: "PROFESSIONAL" },

@@ -17,6 +17,9 @@ import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
+import { isAgentCard } from "@/lib/agents";
+import { priceLabel } from "@/lib/listings";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +42,7 @@ async function getBusiness(slug: string) {
       media: { orderBy: { sortOrder: "asc" } },
       packages: { orderBy: { sortOrder: "asc" } },
       reviews: { orderBy: { createdAt: "desc" } },
+      agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
     },
   });
 }
@@ -93,6 +97,29 @@ export default async function BusinessProfilePage({
   ]);
   if (!business) notFound();
 
+  const agentListings =
+    business.ownerId && isAgentCard(business.subcategorySlug)
+      ? await db.listing.findMany({
+          where: {
+            ownerId: business.ownerId,
+            status: "APPROVED",
+            kind: { in: ["PROPERTY_SALE", "PROPERTY_RENT"] },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 6,
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            city: true,
+            area: true,
+            price: true,
+            currency: true,
+            perMonth: true,
+          },
+        })
+      : [];
+
   const isOwner = viewer?.id === business.ownerId;
   /**
    * Phone and email are only rendered for paid listings (or to the owner/admin), so a
@@ -103,6 +130,7 @@ export default async function BusinessProfilePage({
     isOwner ||
     viewer?.role === "ADMIN" ||
     (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
+  const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
     ? business.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
@@ -308,6 +336,49 @@ export default async function BusinessProfilePage({
         </Card>
       ) : null}
 
+      {isAgent && business.agentProfile ? (
+        <div className="space-y-5">
+          <AgentDetails
+            profile={business.agentProfile}
+            reviews={business.reviews}
+          />
+        </div>
+      ) : null}
+
+      {isAgent && isOwner && !business.agentProfile ? (
+        <Card className="border-indigo-200 bg-indigo-50">
+          <p className="text-sm text-indigo-900">
+            Add your licence, service areas, specialties and closed sales so buyers can see
+            you know their area.
+          </p>
+          <LinkButton href="/dashboard/agent" className="mt-2">
+            Complete my agent profile
+          </LinkButton>
+        </Card>
+      ) : null}
+
+      {isAgent && agentListings.length ? (
+        <Card>
+          <h2 className="mb-3 text-lg font-bold">Available listings</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {agentListings.map((listing) => (
+              <Link
+                key={listing.id}
+                href={`/listings/${listing.slug}`}
+                className="rounded-2xl border border-slate-200 p-3 transition hover:border-indigo-300 hover:bg-indigo-50/50"
+              >
+                <p className="font-semibold text-slate-900">{listing.title}</p>
+                <p className="text-sm text-emerald-700">{priceLabel(listing)}</p>
+                <p className="text-xs text-slate-500">
+                  {listing.city}
+                  {listing.area ? ` · ${listing.area}` : ""}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </Card>
+      ) : null}
+
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
           {business.packages.length ? (
@@ -386,7 +457,11 @@ export default async function BusinessProfilePage({
             {!isOwner ? (
               <div className="mt-5 border-t border-slate-100 pt-4">
                 <h3 className="mb-3 font-semibold">Leave a review</h3>
-                <ReviewForm businessId={business.id} defaultName={viewer?.name} />
+                <ReviewForm
+                  businessId={business.id}
+                  defaultName={viewer?.name}
+                  detailed={isAgent}
+                />
               </div>
             ) : null}
           </Card>
@@ -430,6 +505,14 @@ export default async function BusinessProfilePage({
           ) : null}
         </div>
       </div>
+
+      {isAgent && business.agentProfile ? (
+        <SimilarAgents
+          businessId={business.id}
+          city={business.city}
+          subcategorySlug={business.subcategorySlug ?? ""}
+        />
+      ) : null}
 
       <RecommendedLinks categorySlug={business.categoryRef?.slug ?? null} />
 

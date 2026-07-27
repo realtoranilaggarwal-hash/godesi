@@ -208,14 +208,14 @@ model RewardSetting {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
   body      String?
   href      String?
   readAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId, readAt])
 }
@@ -281,17 +281,17 @@ model VendorPackage {
 
 /// Append-only rewards ledger: positive credits, negative redemptions.
 model PointsEntry {
-  id        String       @id @default(cuid())
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  points    Int
-  reason    PointsReason
-  note      String?
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points     Int
+  reason     PointsReason
+  note       String?
   /// Set for one-per-user credits so the same award cannot be granted twice.
-  uniqueKey String?      @unique
+  uniqueKey  String?      @unique
   /// Set on inviter bonuses so a rejected referral can be reversed exactly.
   referralId String?
-  createdAt DateTime     @default(now())
+  createdAt  DateTime     @default(now())
 
   @@index([userId])
   @@index([referralId])
@@ -375,8 +375,8 @@ model Category {
   parent     Category?  @relation("CategoryTree", fields: [parentSlug], references: [slug], onDelete: Cascade)
   children   Category[] @relation("CategoryTree")
 
-  businesses    Business[] @relation("BusinessCategory")
-  subBusinesses Business[] @relation("BusinessSubcategory")
+  businesses    Business[]     @relation("BusinessCategory")
+  subBusinesses Business[]     @relation("BusinessSubcategory")
   eventListings Event[]
   resourceLinks ResourceLink[]
 
@@ -423,6 +423,7 @@ model Business {
   subcategorySlug String?
   subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
 
+  agentProfile  AgentProfile?
   media         Media[]
   claims        BusinessClaim[]
   packages      VendorPackage[]
@@ -450,17 +451,68 @@ model Media {
 }
 
 model Review {
-  id         String   @id @default(cuid())
-  businessId String
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  authorId   String?
-  author     User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  authorName String
-  rating     Int
-  comment    String?
-  createdAt  DateTime @default(now())
+  id               String   @id @default(cuid())
+  businessId       String
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  authorId         String?
+  author           User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName       String
+  rating           Int
+  comment          String?
+  /// Optional per-criteria scores, used on real estate agent profiles.
+  localKnowledge   Int?
+  processExpertise Int?
+  responsiveness   Int?
+  negotiation      Int?
+  createdAt        DateTime @default(now())
 
   @@index([businessId])
+}
+
+enum SaleSide {
+  BUYER
+  SELLER
+  BOTH
+}
+
+/// The extra credentials a real estate agent shows on their public card.
+model AgentProfile {
+  id              String   @id @default(cuid())
+  businessId      String   @unique
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  /// Comma separated towns/cities the agent covers.
+  serviceAreas    String?
+  licenseNumber   String?
+  licenseState    String?
+  /// Comma separated designations, e.g. "Senior Real Estate Specialist".
+  designations    String?
+  /// Comma separated specialities, e.g. "Buyers, Sellers, Commercial".
+  specialties     String?
+  /// Comma separated awards with the year, e.g. "2026 Top Agent".
+  awards          String?
+  brokerage       String?
+  yearsExperience Int?
+  transactions    Int?
+  totalSalesMinor Int?
+  avgPriceMinor   Int?
+  currency        String   @default("USD")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sales AgentSale[]
+}
+
+model AgentSale {
+  id         String       @id @default(cuid())
+  profileId  String
+  profile    AgentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  soldOn     DateTime
+  address    String
+  priceMinor Int
+  side       SaleSide     @default(SELLER)
+  createdAt  DateTime     @default(now())
+
+  @@index([profileId, soldOn])
 }
 
 /// Analytics counter rows (profile views, QR scans, WhatsApp clicks).
@@ -549,21 +601,21 @@ model Ticket {
 }
 
 model Banner {
-  id          String       @id @default(cuid())
-  slot        BannerSlot   @default(SIDEBAR)
-  position    Int?
-  title       String
-  imageUrl    String
-  linkUrl     String
-  active      Boolean      @default(true)
-  status      BannerStatus @default(ACTIVE)
-  startsAt    DateTime?
-  endsAt      DateTime?
-  impressions Int          @default(0)
-  clicks      Int          @default(0)
+  id            String       @id @default(cuid())
+  slot          BannerSlot   @default(SIDEBAR)
+  position      Int?
+  title         String
+  imageUrl      String
+  linkUrl       String
+  active        Boolean      @default(true)
+  status        BannerStatus @default(ACTIVE)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  impressions   Int          @default(0)
+  clicks        Int          @default(0)
   /// Impression-pack bookings expire once `impressions` reaches this cap.
   impressionCap Int?
-  createdAt   DateTime     @default(now())
+  createdAt     DateTime     @default(now())
 
   advertiserId String?
   advertiser   User?     @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
@@ -745,26 +797,26 @@ enum DiscountKind {
 /// Discount code applied at checkout. Admin codes are platform-wide; organisers
 /// can create codes limited to one of their own events.
 model Coupon {
-  id           String       @id @default(cuid())
-  code         String       @unique
-  scope        CouponScope
-  discountKind DiscountKind @default(PERCENT)
+  id             String       @id @default(cuid())
+  code           String       @unique
+  scope          CouponScope
+  discountKind   DiscountKind @default(PERCENT)
   /// Percent off (1-100) for PERCENT, or an amount in `currency` for FIXED.
-  amount       Int
+  amount         Int
   /// Required for FIXED codes so the discount matches the buyer's currency.
-  currency     String?
+  currency       String?
   /// Null for platform codes created in admin.
-  createdById  String?
-  createdBy    User?        @relation("CouponCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById    String?
+  createdBy      User?        @relation("CouponCreator", fields: [createdById], references: [id], onDelete: SetNull)
   /// Restricts a TICKETS code to a single event.
-  eventId      String?
-  event        Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId        String?
+  event          Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   /// Total redemptions allowed across all users; null for unlimited.
   maxRedemptions Int?
-  timesRedeemed  Int        @default(0)
+  timesRedeemed  Int          @default(0)
   expiresAt      DateTime?
-  active         Boolean    @default(true)
-  createdAt      DateTime   @default(now())
+  active         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
 
   redemptions CouponRedemption[]
   tickets     Ticket[]
@@ -807,23 +859,23 @@ enum MeetupMarital {
 /// Opt-in "Connect" profile for meeting people over business, coffee or a chat.
 /// Reviewed before it goes public; strictly non-dating (see `lib/moderation`).
 model MeetupProfile {
-  id            String        @id @default(cuid())
-  userId        String        @unique
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  displayName   String
-  age           Int
-  gender        MeetupGender
-  marital       MeetupMarital @default(PREFER_NOT_SAY)
-  city          String
-  state         String?
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName    String
+  age            Int
+  gender         MeetupGender
+  marital        MeetupMarital @default(PREFER_NOT_SAY)
+  city           String
+  state          String?
   /// Comma separated intents: business, coffee, chit-chat, community.
-  intents       String
-  bio           String
+  intents        String
+  bio            String
   whatsappNumber String?
-  status        ListingStatus @default(PENDING)
-  visible       Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  status         ListingStatus @default(PENDING)
+  visible        Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   reports MeetupReport[]
 

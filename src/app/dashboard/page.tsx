@@ -220,6 +220,9 @@ export default async function DashboardPage({
               <LinkButton href="/dashboard/media" variant="secondary">
                 Manage gallery
               </LinkButton>
+              <LinkButton href="/dashboard/agent" variant="secondary">
+                Agent credentials
+              </LinkButton>
               <LinkButton href="/dashboard/packages" variant="secondary">
                 Packages & pricing
               </LinkButton>

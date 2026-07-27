@@ -165,7 +165,7 @@ export const CATEGORY_GUIDES: Record<string, CategoryGuide> = {
   },
   professionals: {
     intro:
-      "Realtors, attorneys, CPAs and advisors are licensed — check the licence, then check the fit.",
+      "Real estate agents, attorneys, CPAs and advisors are licensed — check the licence, then check the fit.",
     checklist: [
       "Verify the licence/registration number with the state body",
       "Ask how they are paid: fee, commission or percentage of assets",

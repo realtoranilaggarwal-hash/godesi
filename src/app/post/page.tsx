@@ -32,7 +32,7 @@ const TYPES: {
     id: "professional",
     label: "Professional",
     icon: "🎓",
-    blurb: "Realtor, attorney, accountant, consultant…",
+    blurb: "Real estate agent, attorney, accountant, consultant…",
     gradient: "from-cyan-500 to-sky-500",
   },
   {
