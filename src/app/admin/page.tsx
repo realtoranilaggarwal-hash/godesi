@@ -465,7 +465,7 @@ export default async function AdminPage() {
         ) : null}
       </Card>
 
-      <Card>
+      <Card id="banners">
         <h2 className="mb-1 text-lg font-bold">Banners</h2>
         <p className="mb-3 text-sm text-slate-500">
           10 sidebar slots (300×250), 4 skyscrapers (160×600) and 1 header slot. Saving a slot
@@ -782,7 +782,7 @@ export default async function AdminPage() {
         ) : null}
       </Card>
 
-      <Card>
+      <Card id="resources">
         <h2 className="mb-3 text-lg font-bold">
           Resources — important links ({resourceLinks.length})
         </h2>

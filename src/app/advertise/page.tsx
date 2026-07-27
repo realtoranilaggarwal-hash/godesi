@@ -82,6 +82,16 @@ export default async function AdvertisePage({
       </section>
 
 
+      {user?.role === "ADMIN" ? (
+        <Alert tone="success">
+          Admin: add a banner to any slot without payment from{" "}
+          <Link href="/admin#banners" className="font-semibold underline">
+            Admin → Banners
+          </Link>
+          .
+        </Alert>
+      ) : null}
+
       {searchParams.error ? (
         <Alert>{ERRORS[searchParams.error] ?? "Something went wrong."}</Alert>
       ) : null}

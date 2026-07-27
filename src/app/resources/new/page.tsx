@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { requestCurrency } from "@/lib/currency";
 import { getCategoryTree } from "@/lib/directory";
@@ -38,6 +39,16 @@ export default async function AdvertiseLinkPage({
           those views are delivered.
         </p>
       </div>
+
+      {user.role === "ADMIN" ? (
+        <Alert tone="success">
+          Admin: publish links straight away, with no payment, from{" "}
+          <Link href="/admin#resources" className="font-semibold underline">
+            Admin → Resources
+          </Link>
+          .
+        </Alert>
+      ) : null}
 
       {searchParams.error ? (
         <Alert>{ERRORS[searchParams.error] ?? "Something went wrong."}</Alert>
