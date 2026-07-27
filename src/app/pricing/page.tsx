@@ -13,6 +13,7 @@ import { PayPalCheckout } from "@/components/PayPalCheckout";
 import { Alert, Badge, Card } from "@/components/ui";
 import { formatPlanPrice, requestCurrency } from "@/lib/currency";
 import { formatUsd } from "@/lib/format";
+import { WhyGodesi } from "@/components/WhyGodesi";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
 
 const ERRORS: Record<string, string> = {
   cancelled: "Checkout was cancelled — you have not been charged.",
-  stripe_unavailable: "Card payments are not configured yet. Please try PayPal.",
+  stripe_unavailable:
+    "Card payments are not configured yet. Please try PayPal.",
   stripe_session: "We could not start the card checkout. Please try again.",
   mock_disabled: "Please complete a real payment to upgrade.",
   coupon: "That coupon code is not valid for plan upgrades.",
@@ -47,7 +49,8 @@ export default async function PricingPage({
       <div className="text-center">
         <h1 className="text-3xl font-bold">Membership plans</h1>
         <p className="mt-1 text-slate-600">
-          Start free. Upgrade when you want featured placement and buyer contacts.
+          Start free. Upgrade when you want featured placement and buyer
+          contacts.
         </p>
       </div>
 
@@ -57,7 +60,9 @@ export default async function PricingPage({
         </Alert>
       ) : null}
       {searchParams.error ? (
-        <Alert>{ERRORS[searchParams.error] ?? "Something went wrong with checkout."}</Alert>
+        <Alert>
+          {ERRORS[searchParams.error] ?? "Something went wrong with checkout."}
+        </Alert>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -79,7 +84,9 @@ export default async function PricingPage({
                 <p className="mt-1 text-3xl font-black">
                   {isFree ? "Free" : formatPlanPrice(plan, currency)}
                   {isFree ? null : (
-                    <span className="text-sm font-medium text-slate-500">/month</span>
+                    <span className="text-sm font-medium text-slate-500">
+                      /month
+                    </span>
                   )}
                 </p>
                 {!isFree && paypalOn && currency === "INR" ? (
@@ -125,7 +132,10 @@ export default async function PricingPage({
                 ) : (
                   <>
                     {stripeOn ? (
-                      <form action={startStripeCheckoutAction} className="space-y-2">
+                      <form
+                        action={startStripeCheckoutAction}
+                        className="space-y-2"
+                      >
                         <input type="hidden" name="plan" value={id} />
                         <input
                           name="couponCode"
@@ -164,6 +174,8 @@ export default async function PricingPage({
           );
         })}
       </div>
+
+      <WhyGodesi />
 
       <p className="text-center text-xs text-slate-500">
         {providersOn

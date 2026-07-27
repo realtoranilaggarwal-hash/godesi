@@ -7,6 +7,7 @@ import { CategoryTiles } from "@/components/CategoryTiles";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { HeaderBanner } from "@/components/Banners";
+import { WhyGodesi } from "@/components/WhyGodesi";
 import { Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -113,6 +114,8 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+
+      <WhyGodesi />
 
       <div className="space-y-8">
         <section>
