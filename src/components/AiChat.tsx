@@ -20,7 +20,8 @@ function RichText({ text }: { text: string }) {
       {parts.map((part, index) => {
         const match = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
         if (!match) return <span key={index}>{part}</span>;
-        const [, label, href] = match;
+        const label = match[1];
+        const href = match[2].trim();
         const safe = href.startsWith("/") || href.startsWith("https://");
         return safe ? (
           <a
