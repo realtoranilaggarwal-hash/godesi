@@ -45,7 +45,23 @@ export function AiChat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [consentPending, setConsentPending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+
+  // The cookie banner sits at the bottom of the screen; lift the launcher above
+  // it on phones so it stays tappable until a choice is made.
+  useEffect(() => {
+    const read = () => {
+      try {
+        setConsentPending(!window.localStorage.getItem("godesi_cookie_consent"));
+      } catch {
+        setConsentPending(false);
+      }
+    };
+    read();
+    window.addEventListener("godesi:cookie-consent", read);
+    return () => window.removeEventListener("godesi:cookie-consent", read);
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
@@ -90,7 +106,9 @@ export function AiChat() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ask Godesi AI"
-        className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-3 text-sm font-bold text-white shadow-xl hover:brightness-110"
+        className={`fixed right-4 z-40 ${
+          consentPending ? "bottom-32 sm:bottom-4" : "bottom-4"
+        } flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-3 text-sm font-bold text-white shadow-xl hover:brightness-110`}
       >
         <span aria-hidden>✨</span> Ask Godesi
       </button>

@@ -26,6 +26,7 @@ export function CookieConsent() {
     } catch {
       // Ignore: the banner simply reappears next visit.
     }
+    window.dispatchEvent(new Event("godesi:cookie-consent"));
     setVisible(false);
   }
 

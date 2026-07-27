@@ -85,19 +85,19 @@ export async function SiteHeader() {
 
       {/* Primary sections stay reachable on phones, where the nav is hidden. */}
       <div className="border-t border-slate-100 bg-white md:hidden">
-        <div className="no-scrollbar mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 py-2 text-xs font-semibold">
+        <div className="mx-auto flex max-w-7xl flex-wrap gap-1.5 px-4 py-2 text-[11px] font-semibold">
           {NAV.slice(1).map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="whitespace-nowrap rounded-full bg-slate-900 px-3 py-1.5 text-white"
+              className="whitespace-nowrap rounded-full bg-slate-900 px-2.5 py-1 text-white"
             >
               {item.icon} {item.label}
             </Link>
           ))}
           <Link
             href="/advertise"
-            className="whitespace-nowrap rounded-full bg-slate-900 px-3 py-1.5 text-white"
+            className="whitespace-nowrap rounded-full bg-slate-900 px-2.5 py-1 text-white"
           >
             📢 Advertise
           </Link>

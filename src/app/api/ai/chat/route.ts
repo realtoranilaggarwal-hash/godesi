@@ -70,6 +70,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ reply, sources });
   } catch (error) {
     console.error("assistant failed", error);
+    // Gemini's own quota rejection reads as a wait, not a broken feature.
+    if (error instanceof Error && error.message.startsWith("Gemini 429")) {
+      return NextResponse.json(
+        { error: "The assistant is busy right now — please try again in a few minutes." },
+        { status: 429 },
+      );
+    }
     return NextResponse.json(
       { error: "The assistant is unavailable right now." },
       { status: 502 },

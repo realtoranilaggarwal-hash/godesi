@@ -4,7 +4,19 @@
  */
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
-export const AI_MODEL = process.env.GEMINI_MODEL ?? "gemini-flash-latest";
+/**
+ * Flash-lite spends no tokens on hidden "thinking", so the whole output budget
+ * goes to the answer and replies never get truncated mid-link.
+ */
+export const AI_MODEL = process.env.GEMINI_MODEL ?? "gemini-flash-lite-latest";
+
+/** Drops a trailing `[label](/pa` fragment so a cut-off reply cannot emit a broken link. */
+function dropIncompleteLink(text: string) {
+  const open = text.lastIndexOf("[");
+  if (open === -1) return text;
+  const tail = text.slice(open);
+  return /^\[[^\]]*\]\([^)]*\)/.test(tail) ? text : text.slice(0, open).trimEnd();
+}
 
 export function aiEnabled() {
   return Boolean(process.env.GEMINI_API_KEY);
@@ -34,7 +46,7 @@ export async function askGemini({
           role: turn.role === "user" ? "user" : "model",
           parts: [{ text: turn.content }],
         })),
-        generationConfig: { temperature: 0.3, maxOutputTokens: 700 },
+        generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
       }),
     },
   );
@@ -54,5 +66,5 @@ export async function askGemini({
     .map((part) => part.text ?? "")
     .join("")
     .trim();
-  return text || "";
+  return text ? dropIncompleteLink(text) : "";
 }
