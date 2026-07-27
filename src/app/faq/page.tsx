@@ -550,11 +550,18 @@ export default function FaqPage() {
         <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
       </p>
 
-      {FAQS.map((faq) => (
-        <div key={faq.q}>
-          <h2>{faq.q}</h2>
-          {faq.a}
-        </div>
+      {FAQS.map((faq, index) => (
+        <details
+          key={faq.q}
+          open={index === 0}
+          className="group rounded-xl border border-slate-200 open:bg-slate-50/60"
+        >
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-base font-bold text-slate-900">
+            {faq.q}
+            <span className="text-slate-400 transition group-open:rotate-180">▾</span>
+          </summary>
+          <div className="space-y-3 px-4 pb-4">{faq.a}</div>
+        </details>
       ))}
 
       <h2>🚀 Final thought</h2>
