@@ -55,13 +55,12 @@ export default async function EventsPage({
             <LinkButton href="/events/new" variant="secondary">
               Post your event
             </LinkButton>
-            <LinkButton
+            <Link
               href={when === "past" ? "/events" : "/events?when=past"}
-              variant="secondary"
-              className="bg-transparent text-white hover:bg-white/10"
+              className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
             >
               {when === "past" ? "Upcoming events" : "Past events"}
-            </LinkButton>
+            </Link>
           </div>
         </section>
 
