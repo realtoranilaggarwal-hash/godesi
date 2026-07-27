@@ -14,6 +14,8 @@ import {
   packDiscount,
 } from "@/lib/ads";
 import { requestCurrency } from "@/lib/currency";
+import { RESOURCE_CPM, RESOURCE_PACKS, formatResourcePrice } from "@/lib/resources";
+import { AdPreview } from "@/components/AdPreview";
 import { AdBookingForm } from "@/components/forms/AdBookingForm";
 import { DesignHelp } from "@/components/DesignHelp";
 import { Alert, Card, LinkButton } from "@/components/ui";
@@ -79,6 +81,7 @@ export default async function AdvertisePage({
         </div>
       </section>
 
+
       {searchParams.error ? (
         <Alert>{ERRORS[searchParams.error] ?? "Something went wrong."}</Alert>
       ) : null}
@@ -133,14 +136,11 @@ export default async function AdvertisePage({
                 </div>
               </div>
 
-              <div
-                className="mt-4 flex items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 text-xs font-semibold text-slate-400"
-                style={{
-                  aspectRatio: `${placement.size.width} / ${placement.size.height}`,
-                }}
-              >
-                {placement.size.width} × {placement.size.height}
-              </div>
+              <AdPreview
+                width={placement.size.width}
+                height={placement.size.height}
+                className="mt-4"
+              />
 
               <p className="mt-4 text-sm text-slate-600">{placement.blurb}</p>
 
@@ -198,6 +198,37 @@ export default async function AdvertisePage({
           );
         })}
       </section>
+
+      <Card id="text-links">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold">Text links &amp; resource links</h2>
+            <p className="mt-1 max-w-2xl text-sm text-slate-600">
+              No artwork needed. Your title sits in the &ldquo;Recommended links&rdquo; box
+              on category pages, business cards and property listings, labelled as
+              sponsored, and retires itself once your purchased views are delivered.
+            </p>
+          </div>
+          <LinkButton href="/resources/new">Advertise a link</LinkButton>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {RESOURCE_PACKS.map((pack) => (
+            <div key={pack} className="rounded-xl bg-slate-50 p-3">
+              <p className="text-sm font-bold">{pack.toLocaleString()} views</p>
+              <p className="text-xl font-black text-slate-900">
+                {formatResourcePrice(currency, pack)}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-3 text-sm text-slate-600">
+          {currency === "INR" ? "₹" : "$"}
+          {RESOURCE_CPM[currency].toLocaleString()} per 1,000 views · clicks and views
+          tracked · category targeted.
+        </p>
+      </Card>
 
       <Card>
         <h2 className="text-lg font-bold">Need your banner designed?</h2>
