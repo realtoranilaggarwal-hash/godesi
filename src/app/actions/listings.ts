@@ -10,6 +10,7 @@ import { requestCurrency } from "@/lib/currency";
 import { isMonthly, uniqueListingSlug } from "@/lib/listings";
 import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { isSupportedVideoUrl } from "@/lib/video";
 
 const schema = z.object({
   kind: z.enum(["PROPERTY_SALE", "PROPERTY_RENT", "ROOM_WANTED", "ROOM_OFFERED", "MARKETPLACE"]),
@@ -23,6 +24,14 @@ const schema = z.object({
   furnishing: z.enum(["FURNISHED", "SEMI_FURNISHED", "UNFURNISHED"]).optional(),
   genderPref: z.enum(["ANY", "MALE", "FEMALE"]).optional(),
   whatsapp: z.string().min(10, "Add a WhatsApp number so people can reach you"),
+  videoUrl: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (value) => !value || isSupportedVideoUrl(value),
+      "Paste a YouTube or Vimeo video link",
+    ),
 });
 
 export async function createListingAction(
@@ -44,6 +53,7 @@ export async function createListingAction(
       furnishing: formData.get("furnishing") || undefined,
       genderPref: formData.get("genderPref") || undefined,
       whatsapp: formData.get("whatsapp"),
+      videoUrl: formData.get("videoUrl") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -68,6 +78,7 @@ export async function createListingAction(
         furnishing: parsed.data.furnishing ?? null,
         genderPref: parsed.data.genderPref ?? null,
         whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
+        videoUrl: parsed.data.videoUrl ?? null,
         ownerId: user.id,
         images: {
           create: images.map((url, index) => ({ url, sortOrder: index })),

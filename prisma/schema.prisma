@@ -168,6 +168,8 @@ model Listing {
   furnishing  Furnishing?
   genderPref  GenderPreference?
   whatsapp    String
+  /// Walkthrough video pasted from YouTube or Vimeo.
+  videoUrl    String?
   status      ListingStatus     @default(APPROVED)
   featured    Boolean           @default(false)
   createdAt   DateTime          @default(now())
@@ -325,6 +327,8 @@ model Business {
   instagramUrl   String?
   facebookUrl    String?
   youtubeUrl     String?
+  /// Intro/showcase video pasted from YouTube or Vimeo.
+  videoUrl       String?
   mapsUrl        String?
   address        String?
   status         ListingStatus @default(PENDING)
@@ -404,6 +408,8 @@ model Event {
   venue       String
   city        String
   imageUrl    String?
+  /// Promo video pasted from YouTube or Vimeo.
+  videoUrl    String?
   price       Int           @default(0)
   /// ISO currency of `price`, chosen from the organiser's location.
   currency    String        @default("INR")

@@ -14,6 +14,7 @@ import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
+import { VideoEmbed } from "@/components/VideoEmbed";
 
 export const dynamic = "force-dynamic";
 
@@ -199,6 +200,12 @@ export default async function BusinessProfilePage({
               <p className="mt-3 whitespace-pre-line text-slate-700">
                 {business.description}
               </p>
+            ) : null}
+
+            {business.videoUrl ? (
+              <div className="mt-3">
+                <VideoEmbed url={business.videoUrl} title={business.name} />
+              </div>
             ) : null}
 
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">

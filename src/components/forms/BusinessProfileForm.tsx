@@ -99,6 +99,17 @@ export function BusinessProfileForm({
             className={inputClass}
           />
         </Field>
+        <Field
+          label="Video link (YouTube or Vimeo)"
+          hint="Paste a link like https://youtu.be/abc123 or https://vimeo.com/123456 — it plays on your page."
+        >
+          <input
+            name="videoUrl"
+            defaultValue={business?.videoUrl ?? ""}
+            placeholder="https://www.youtube.com/watch?v=..."
+            className={inputClass}
+          />
+        </Field>
         <Field label="Google Maps link">
           <input name="mapsUrl" defaultValue={business?.mapsUrl ?? ""} className={inputClass} />
         </Field>

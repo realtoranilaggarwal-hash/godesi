@@ -10,6 +10,7 @@ import { TicketForm } from "@/components/forms/TicketForm";
 import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -103,6 +104,7 @@ export default async function EventPage({
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>
             <p className="whitespace-pre-line text-slate-700">{event.description}</p>
+            <VideoEmbed url={event.videoUrl} title={event.title} />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
               <ShareButtons

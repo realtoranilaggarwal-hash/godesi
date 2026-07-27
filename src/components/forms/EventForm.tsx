@@ -72,6 +72,17 @@ export function EventForm({
           purpose="event"
           previewClassName="h-24 w-40 rounded-xl object-cover"
         />
+        <Field
+          label="Video link (YouTube or Vimeo)"
+          hint="Optional — paste a link like https://youtu.be/abc123 and it plays on the page."
+        >
+          <input
+            name="videoUrl"
+            defaultValue={""}
+            placeholder="https://www.youtube.com/watch?v=..."
+            className={inputClass}
+          />
+        </Field>
       </div>
 
       <SubmitButton pendingLabel="Publishing...">Publish event</SubmitButton>

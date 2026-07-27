@@ -10,6 +10,7 @@ import { mediaLimit } from "@/lib/plans";
 import { uniqueSlug } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewards";
+import { isSupportedVideoUrl } from "@/lib/video";
 
 const optionalUrl = z
   .string()
@@ -43,6 +44,10 @@ const profileSchema = z.object({
   instagramUrl: optionalUrl,
   facebookUrl: optionalUrl,
   youtubeUrl: optionalUrl,
+  videoUrl: optionalUrl.refine(
+    (value) => !value || isSupportedVideoUrl(value),
+    "Paste a YouTube or Vimeo video link",
+  ),
   mapsUrl: optionalUrl,
 });
 
@@ -68,6 +73,7 @@ function readProfileForm(formData: FormData) {
     instagramUrl: value("instagramUrl"),
     facebookUrl: value("facebookUrl"),
     youtubeUrl: value("youtubeUrl"),
+    videoUrl: value("videoUrl"),
     mapsUrl: value("mapsUrl"),
   });
 }
@@ -111,6 +117,7 @@ export async function saveBusinessProfileAction(
       instagramUrl: parsed.data.instagramUrl ?? null,
       facebookUrl: parsed.data.facebookUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,
+      videoUrl: parsed.data.videoUrl ?? null,
       mapsUrl: parsed.data.mapsUrl ?? null,
       whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber),
     };

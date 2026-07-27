@@ -24,6 +24,7 @@ export type AdminEventValues = {
   seatsTotal: number;
   seatsBooked: number;
   imageUrl: string;
+  videoUrl: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
 };
 
@@ -113,6 +114,17 @@ export function AdminEventForm({
           defaultValue={event.imageUrl}
           previewClassName="h-24 w-40 rounded-xl object-cover"
         />
+        <Field
+          label="Video link (YouTube or Vimeo)"
+          hint="Optional — paste a link like https://youtu.be/abc123 and it plays on the page."
+        >
+          <input
+            name="videoUrl"
+            defaultValue={event.videoUrl}
+            placeholder="https://www.youtube.com/watch?v=..."
+            className={inputClass}
+          />
+        </Field>
         <Field label="Status">
           <select name="status" defaultValue={event.status} className={inputClass}>
             <option value="APPROVED">Approved (public)</option>

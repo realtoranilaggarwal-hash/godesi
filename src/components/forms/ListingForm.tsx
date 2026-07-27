@@ -84,6 +84,16 @@ export function ListingForm({
           />
         </Field>
         <CurrencySelect defaultValue={defaultCurrency} />
+        <Field
+          label="Video link (YouTube or Vimeo)"
+          hint="Optional walkthrough — paste a link like https://youtu.be/abc123."
+        >
+          <input
+            name="videoUrl"
+            placeholder="https://www.youtube.com/watch?v=..."
+            className={inputClass}
+          />
+        </Field>
         <Field label="WhatsApp number" hint="Buyers message you directly here">
           <input
             name="whatsapp"

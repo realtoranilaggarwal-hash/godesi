@@ -88,6 +88,7 @@ export default async function AdminEditEventPage({
             seatsTotal: event.seatsTotal,
             seatsBooked: event.seatsBooked,
             imageUrl: event.imageUrl ?? "",
+            videoUrl: event.videoUrl ?? "",
             status: event.status,
           }}
         />

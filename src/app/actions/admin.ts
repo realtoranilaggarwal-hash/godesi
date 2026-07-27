@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { slotCapacity } from "@/lib/banners";
+import { isSupportedVideoUrl } from "@/lib/video";
 
 export async function setListingStatusAction(formData: FormData) {
   await requireRole("ADMIN");
@@ -242,6 +243,16 @@ const adminEventSchema = z.object({
     .url("Enter a valid image URL")
     .optional()
     .or(z.literal("").transform(() => undefined)),
+  videoUrl: z
+    .string()
+    .trim()
+    .url("Enter a valid video URL")
+    .optional()
+    .or(z.literal("").transform(() => undefined))
+    .refine(
+      (value) => !value || isSupportedVideoUrl(value),
+      "Paste a YouTube or Vimeo video link",
+    ),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
 });
 
@@ -266,6 +277,7 @@ export async function adminUpdateEventAction(
       currency: formData.get("currency") || "INR",
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl"),
+      videoUrl: formData.get("videoUrl"),
       status: formData.get("status"),
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -293,6 +305,7 @@ export async function adminUpdateEventAction(
         venue: parsed.data.venue,
         city: parsed.data.city,
         imageUrl: parsed.data.imageUrl ?? null,
+        videoUrl: parsed.data.videoUrl ?? null,
         price: parsed.data.price,
         currency: parsed.data.currency,
         seatsTotal: parsed.data.seatsTotal,

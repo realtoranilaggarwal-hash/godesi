@@ -10,6 +10,7 @@ import { requestCurrency } from "@/lib/currency";
 import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
+import { isSupportedVideoUrl } from "@/lib/video";
 
 const optionalUrl = z
   .string()
@@ -31,6 +32,10 @@ const eventSchema = z.object({
   currency: z.enum(["INR", "USD"]).optional(),
   seatsTotal: z.coerce.number().int().min(1, "At least 1 seat is required"),
   imageUrl: optionalUrl,
+  videoUrl: optionalUrl.refine(
+    (value) => !value || isSupportedVideoUrl(value),
+    "Paste a YouTube or Vimeo video link",
+  ),
 });
 
 export async function createEventAction(
@@ -53,6 +58,7 @@ export async function createEventAction(
       currency: formData.get("currency") || undefined,
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl"),
+      videoUrl: formData.get("videoUrl"),
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -71,6 +77,7 @@ export async function createEventAction(
         venue: parsed.data.venue,
         city: parsed.data.city,
         imageUrl: parsed.data.imageUrl ?? null,
+        videoUrl: parsed.data.videoUrl ?? null,
         price: parsed.data.price,
         currency: parsed.data.currency ?? requestCurrency(),
         seatsTotal: parsed.data.seatsTotal,
