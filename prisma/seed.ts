@@ -286,25 +286,7 @@ async function main() {
     });
   }
 
-  const sampleBanners = [
-    {
-      slot: "HEADER" as const,
-      position: 1,
-      title: "Godesi Premium — unlock buyer leads",
-      imageUrl: "https://placehold.co/970x90/4f46e5/ffffff?text=Advertise+on+Godesi",
-      linkUrl: "https://godesi-app.vercel.app/pricing",
-    },
-  ];
-  // Sidebar rectangles are left unsold on purpose so the rail advertises itself.
-
-  for (const banner of sampleBanners) {
-    const { slot, position, ...rest } = banner;
-    await db.banner.upsert({
-      where: { slot_position: { slot, position } },
-      update: rest,
-      create: { slot, position, ...rest },
-    });
-  }
+  // Banner slots start empty so every placement is sellable inventory.
 
   // eslint-disable-next-line no-console
   console.log("Seed complete. Admin:", admin.email, "/ password: password123");
