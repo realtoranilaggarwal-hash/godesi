@@ -25,3 +25,9 @@ export function formatPlanPrice(plan: PlanInfo, currency: Currency) {
 export function stripeUnitAmount(plan: PlanInfo, currency: Currency) {
   return Math.round(planPrice(plan, currency) * 100);
 }
+
+/** Default country for new listings: India for Indian traffic, USA otherwise. */
+export function requestCountry(): string {
+  const country = headers().get("x-vercel-ip-country");
+  return country === "IN" ? "India" : "USA";
+}

@@ -9,7 +9,7 @@ export type ParsedNewsItem = {
   publishedAt: Date;
 };
 
-const DEFAULT_FEEDS = [
+const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
   {
     name: "Times of India — Top Stories",
     url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
@@ -25,6 +25,21 @@ const DEFAULT_FEEDS = [
     name: "The Hindu — Business",
     url: "https://www.thehindu.com/business/feeder/default.rss",
   },
+  {
+    name: "Times of India — Astrology & Spirituality",
+    url: "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms",
+    topic: "faith",
+  },
+  {
+    name: "The Hindu — Faith",
+    url: "https://www.thehindu.com/society/faith/feeder/default.rss",
+    topic: "faith",
+  },
+  {
+    name: "Speaking Tree",
+    url: "https://www.speakingtree.in/rss/articles.cms",
+    topic: "faith",
+  },
 ];
 
 export async function ensureDefaultFeeds() {
@@ -32,8 +47,8 @@ export async function ensureDefaultFeeds() {
     // eslint-disable-next-line no-await-in-loop
     await db.newsFeed.upsert({
       where: { url: feed.url },
-      create: feed,
-      update: { name: feed.name },
+      create: { ...feed, topic: feed.topic ?? "general" },
+      update: { name: feed.name, topic: feed.topic ?? "general" },
     });
   }
 }
@@ -150,6 +165,7 @@ export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
             imageUrl: item.imageUrl,
             link: item.link,
             source: feed.name,
+            topic: feed.topic,
             publishedAt: item.publishedAt,
             status: "PUBLISHED",
           },

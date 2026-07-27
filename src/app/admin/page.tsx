@@ -15,6 +15,8 @@ import {
   toggleFeaturedAction,
   rejectBannerAction,
 } from "@/app/actions/admin";
+import { reviewWorshipAction } from "@/app/actions/worship";
+import { FAITH_LABELS } from "@/lib/worship";
 import { BannerForm } from "@/components/forms/BannerForm";
 import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS, formatCtr } from "@/lib/ads";
@@ -42,6 +44,7 @@ export default async function AdminPage() {
     newsItems,
     feeds,
     adOrders,
+    pendingWorship,
   ] =
     await Promise.all([
     db.business.findMany({
@@ -73,6 +76,12 @@ export default async function AdminPage() {
         orderBy: { createdAt: "desc" },
         take: 20,
         include: { user: { select: { email: true } } },
+      }),
+      db.worshipPlace.findMany({
+        where: { status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+        take: 30,
+        include: { submittedBy: { select: { email: true } } },
       }),
     ]);
 
@@ -536,6 +545,44 @@ export default async function AdminPage() {
             <li className="py-2 text-slate-500">No stories ingested yet.</li>
           ) : null}
         </ul>
+      </Card>
+
+      <Card>
+        <h2 className="mb-3 text-lg font-bold">Places of worship awaiting review</h2>
+        {pendingWorship.length ? (
+          <ul className="divide-y divide-slate-100 text-sm">
+            {pendingWorship.map((place) => (
+              <li
+                key={place.id}
+                className="flex flex-wrap items-center justify-between gap-2 py-2"
+              >
+                <div className="min-w-0">
+                  <p className="font-medium">{place.name}</p>
+                  <p className="text-xs text-slate-400">
+                    {FAITH_LABELS[place.faith]} · {place.city}, {place.country} ·{" "}
+                    {place.submittedBy?.email ?? "unknown"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(["approve", "reject"] as const).map((decision) => (
+                    <form key={decision} action={reviewWorshipAction}>
+                      <input type="hidden" name="id" value={place.id} />
+                      <input type="hidden" name="decision" value={decision} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                      >
+                        {decision}
+                      </button>
+                    </form>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-500">Nothing waiting for review.</p>
+        )}
       </Card>
 
       <Card>

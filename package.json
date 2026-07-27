@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
-    "db:categories": "tsx prisma/categories.ts"
+    "db:categories": "tsx prisma/categories.ts",
+    "db:worship": "tsx prisma/worship-import.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

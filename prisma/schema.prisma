@@ -140,6 +140,7 @@ model User {
   adOrders AdOrder[]
 
   listings    Listing[]
+  worship     WorshipPlace[]
   points      PointsEntry[]
   redemptions Redemption[]
 
@@ -230,6 +231,58 @@ model Redemption {
   createdAt DateTime         @default(now())
 
   @@index([userId])
+}
+
+enum Faith {
+  HINDU_TEMPLE
+  GURUDWARA
+  MOSQUE
+  CHURCH
+  JAIN_TEMPLE
+  BUDDHIST_TEMPLE
+  OTHER
+}
+
+/// Places of worship: imported from OpenStreetMap and grown by user submissions.
+model WorshipPlace {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  faith       Faith
+  name        String
+  description String?
+  address     String?
+  city        String
+  state       String?
+  country     String        @default("India")
+  latitude    Float?
+  longitude   Float?
+  whatsapp    String?
+  phone       String?
+  websiteUrl  String?
+  /// "osm" for imported rows, "user" for submissions.
+  source      String        @default("user")
+  osmId       String?       @unique
+  status      ListingStatus @default(APPROVED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  submittedById String?
+  submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+
+  images WorshipImage[]
+
+  @@index([faith, city])
+  @@index([status, city])
+}
+
+model WorshipImage {
+  id        String       @id @default(cuid())
+  placeId   String
+  place     WorshipPlace @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int          @default(0)
+
+  @@index([placeId])
 }
 
 /// Multi-level taxonomy: top-level categories have `parentId = null`,
@@ -441,6 +494,8 @@ model NewsFeed {
   id            String    @id @default(cuid())
   name          String
   url           String    @unique
+  /// "general" or "faith" — decides which section shows the stories.
+  topic         String    @default("general")
   active        Boolean   @default(true)
   lastFetchedAt DateTime?
   createdAt     DateTime  @default(now())
@@ -454,6 +509,7 @@ model NewsItem {
   imageUrl    String?
   link        String
   source      String
+  topic       String     @default("general")
   publishedAt DateTime   @default(now())
   status      NewsStatus @default(PUBLISHED)
   createdAt   DateTime   @default(now())
@@ -462,6 +518,7 @@ model NewsItem {
   submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
 
   @@index([status, publishedAt])
+  @@index([topic, status, publishedAt])
 }
 
 model Lead {
