@@ -33,6 +33,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/sitemap", label: "Sitemap" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contact us" },
+      { href: "/safety", label: "Trust & safety" },
+      { href: "/report", label: "Report an issue" },
     ],
   },
   {

@@ -8,6 +8,7 @@ import { unlockLeadAction } from "@/app/actions/leads";
 import { PostedBy } from "@/components/PostedBy";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import {
   Alert,
   Badge,
@@ -216,10 +217,15 @@ export default async function WeddingRequirementsPage({
           title="Recommended wedding links"
         />
 
+        <HiringChecklist />
+
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+        <NeedHelpBox />
+        <SidebarBanners />
+      </aside>
     </div>
   );
 }

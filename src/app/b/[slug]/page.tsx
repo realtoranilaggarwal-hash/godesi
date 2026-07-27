@@ -16,6 +16,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
@@ -535,10 +536,15 @@ export default async function BusinessProfilePage({
 
       <RecommendedLinks categorySlug={business.categoryRef?.slug ?? null} />
 
+      <HiringChecklist />
+
       <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+        <NeedHelpBox about={business.name} />
+        <SidebarBanners />
+      </aside>
     </div>
   );
 }

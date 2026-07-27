@@ -18,6 +18,7 @@ import {
   RoomSharingNotice,
 } from "@/components/FairHousingNotice";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
 import { VideoEmbed } from "@/components/VideoEmbed";
 
 export const dynamic = "force-dynamic";
@@ -144,10 +145,15 @@ export default async function ListingPage({ params }: { params: { slug: string }
       {isRoom || listing.kind.startsWith("PROPERTY") ? <FairHousingNotice /> : null}
       {isRoom ? <RoomSharingNotice /> : null}
 
+      <TradingTips />
+
       <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+        <NeedHelpBox about={listing.title} />
+        <SidebarBanners />
+      </aside>
     </div>
   );
 }

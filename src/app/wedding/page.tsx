@@ -13,6 +13,7 @@ import {
 import { VendorCard } from "@/components/VendorCard";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -306,10 +307,15 @@ export default async function WeddingPage({
           title="Recommended wedding links"
         />
 
+        <HiringChecklist />
+
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+        <NeedHelpBox />
+        <SidebarBanners />
+      </aside>
     </div>
   );
 }

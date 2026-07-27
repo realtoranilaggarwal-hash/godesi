@@ -15,6 +15,7 @@ import {
   RoomSharingNotice,
 } from "@/components/FairHousingNotice";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
+import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
 
 /** Shared shell for /real-estate and /rooms — same query, different copy. */
 export async function ListingSectionPage({
@@ -85,10 +86,16 @@ export async function ListingSectionPage({
       ) : null}
       {section === "rooms" ? <RoomSharingNotice /> : null}
 
+      <TradingTips />
+
       <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+        <TradingTips compact />
+        <NeedHelpBox />
+        <SidebarBanners />
+      </aside>
     </div>
   );
 }

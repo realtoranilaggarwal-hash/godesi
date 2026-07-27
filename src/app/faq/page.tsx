@@ -587,6 +587,34 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
       </>
     ),
   },
+  {
+    q: "🛡️ How do I hire safely, and what if something goes wrong?",
+    a: (
+      <>
+        <p>
+          Before hiring anyone: check their profile, images and reviews; speak
+          directly on WhatsApp or phone; ask for samples or references; get the
+          price, deliverables and timeline confirmed in writing; use a clear
+          agreement rather than a verbal promise; avoid paying the full amount in
+          advance and keep proof of every payment; read other members&apos; reviews;
+          and if something feels off, take your time before committing.
+        </p>
+        <p>
+          Buying or selling an item? Verify the seller, pay on collection, meet in a
+          busy public place, test the item, check documents for vehicles and
+          property, and treat prices far below market or pressure to decide
+          instantly as red flags.
+        </p>
+        <p>
+          Godesi is a listing platform and is not a party to any transaction — we
+          never hold money. We do review complaints and may warn, suspend or remove
+          accounts. Full guide:{" "}
+          <Link href="/safety">Trust &amp; safety</Link>. Something wrong?{" "}
+          <Link href="/report">Report an issue</Link>.
+        </p>
+      </>
+    ),
+  },
 ];
 
 export default function FaqPage() {
