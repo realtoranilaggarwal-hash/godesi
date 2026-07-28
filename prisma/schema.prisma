@@ -1209,3 +1209,32 @@ model VehicleDetails {
   @@index([make, model])
   @@index([vehicleType, year])
 }
+
+enum SocialPlatform {
+  X
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  YOUTUBE
+  THREADS
+}
+
+/// A real #godesi post an admin picked out, shown on the social wall. We keep a
+/// short quote and a link back, so attribution stays with the original author.
+model SocialPost {
+  id        String         @id @default(cuid())
+  platform  SocialPlatform @default(X)
+  url       String         @unique
+  author    String
+  handle    String?
+  avatarUrl String?
+  text      String
+  imageUrl  String?
+  postedAt  DateTime       @default(now())
+  active    Boolean        @default(true)
+  /// Lower numbers show first; ties fall back to postedAt.
+  position  Int?
+  createdAt DateTime       @default(now())
+
+  @@index([active, postedAt])
+}

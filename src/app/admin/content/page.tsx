@@ -15,6 +15,12 @@ import {
   toggleBlogPostAction,
 } from "@/app/actions/blog";
 import { BlogPostForm } from "@/components/forms/BlogPostForm";
+import { SocialPostForm } from "@/components/forms/SocialPostForm";
+import {
+  deleteSocialPostAction,
+  toggleSocialPostAction,
+} from "@/app/actions/social";
+import { PLATFORM_LABELS, SOCIAL_TAG } from "@/lib/social";
 import { formatEventDate } from "@/lib/events";
 import { Badge, Card } from "@/components/ui";
 
@@ -33,7 +39,7 @@ export default async function ContentDeskPage() {
     blog: can(user, "blog"),
   };
 
-  const [events, listings, newsItems, posts] = await Promise.all([
+  const [events, listings, newsItems, posts, socialPosts] = await Promise.all([
     db.event.findMany({
       orderBy: { createdAt: "desc" },
       take: 40,
@@ -59,6 +65,9 @@ export default async function ContentDeskPage() {
       },
     }),
     db.blogPost.findMany({ orderBy: { publishedAt: "desc" }, take: 40 }),
+    allowed.blog
+      ? db.socialPost.findMany({ orderBy: { postedAt: "desc" }, take: 30 })
+      : Promise.resolve([]),
   ]);
 
   return (
@@ -91,6 +100,68 @@ export default async function ContentDeskPage() {
           + Submit a resource link
         </Link>
       </div>
+
+      {allowed.blog ? (
+      <Card>
+        <h2 className="mb-1 text-lg font-bold">#{SOCIAL_TAG} social wall</h2>
+        <p className="mb-3 text-sm text-slate-600">
+          Paste a real public post that mentions #{SOCIAL_TAG} — it shows in the
+          sidebar rail and on{" "}
+          <Link href="/buzz" className="font-semibold text-indigo-600">
+            /buzz
+          </Link>
+          , linking back to the author.
+        </p>
+        <SocialPostForm />
+        <ul className="mt-4 divide-y divide-slate-100 text-sm">
+          {socialPosts.map((post) => (
+            <li
+              key={post.id}
+              className="flex flex-wrap items-center justify-between gap-2 py-2"
+            >
+              <div className="min-w-0">
+                <a
+                  href={post.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-indigo-600"
+                >
+                  {post.author}
+                  {post.handle ? ` ${post.handle}` : ""}
+                </a>
+                <p className="truncate text-xs text-slate-400">
+                  {PLATFORM_LABELS[post.platform]} ·{" "}
+                  {post.postedAt.toLocaleDateString("en-IN")} · {post.text}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge tone={post.active ? "green" : "slate"}>
+                  {post.active ? "live" : "hidden"}
+                </Badge>
+                <form action={toggleSocialPostAction}>
+                  <input type="hidden" name="id" value={post.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                  >
+                    {post.active ? "hide" : "show"}
+                  </button>
+                </form>
+                <form action={deleteSocialPostAction}>
+                  <input type="hidden" name="id" value={post.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    delete
+                  </button>
+                </form>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Card>
+      ) : null}
 
       {allowed.blog ? (
       <Card>

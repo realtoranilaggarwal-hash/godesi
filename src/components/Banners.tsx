@@ -11,6 +11,7 @@ import {
   slotSoldCount,
 } from "@/lib/banners";
 import { LiveVisitorMap } from "@/components/LiveVisitorMap";
+import { SocialWall } from "@/components/SocialWall";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { AdPreview } from "@/components/AdPreview";
@@ -133,6 +134,8 @@ export async function SidebarBanners() {
       aria-label="Sponsored"
     >
       <LiveVisitorMap compact />
+
+      <SocialWall />
 
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
         Sponsored

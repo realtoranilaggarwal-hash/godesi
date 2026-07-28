@@ -115,6 +115,24 @@ export default async function HomePage() {
           >
             Request a service
           </Link>
+          <Link
+            href="/connect"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            🤝 Meet someone local
+          </Link>
+          <Link
+            href="/journalists"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            🗞️ Become a journalist
+          </Link>
+          <Link
+            href="/rewards"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            🎁 Earn rewards
+          </Link>
         </div>
       </section>
 
