@@ -4,10 +4,36 @@
  * page and the tags on the cards — so a tag can never exist that nobody can
  * filter by, and a new profession is one entry away.
  */
+/** An extra tick-box or single-choice group, e.g. "Where do you work?". */
+export type ChoiceGroup = {
+  key: string;
+  title: string;
+  hint?: string;
+  options: string[];
+  mode: "multi" | "single";
+  /** Single-choice groups can be made mandatory, like spa service location. */
+  required?: boolean;
+};
+
+/** The three price boxes a service profession may ask for. */
+export type PriceField = {
+  key: "priceFrom" | "priceHourly" | "priceExtra";
+  label: string;
+  hint: string;
+};
+
 export type SpecialtySet = {
   title: string;
   hint: string;
   options: string[];
+  /** Extra option groups; every answer is filterable on the category page. */
+  choices?: ChoiceGroup[];
+  pricing?: PriceField[];
+  availability?: { label: string; hint: string };
+  /** Optional licence or certificate upload, reviewed before any verified badge. */
+  licenseDoc?: { label: string; hint: string };
+  /** Replaces the generic credentials notice where the trade needs its own. */
+  disclaimer?: string;
   certifications?: { title: string; options: string[] };
   /** Consultation fee or pricing model; `options` turns it into a dropdown. */
   fee?: { label: string; hint: string; options?: string[] };
@@ -20,7 +46,91 @@ export type SpecialtySet = {
 export const CREDENTIALS_DISCLAIMER =
   "Users must provide accurate credentials. Licence numbers and certifications are shown publicly and may be verified — false claims get the listing removed.";
 
+export const SPA_DISCLAIMER =
+  "Professional service only. Godesi lists licensed therapists and spas for therapeutic massage and wellness services — any other request is banned and gets the provider and the member removed. Providers must give accurate credentials and verify their ID.";
+
 export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
+  "beauty-lifestyle-spa-and-massage": {
+    title: "Select the treatments you offer",
+    hint: "Pick at least one — these show as tags on your card and let people filter for you.",
+    options: [
+      "Full Body Massage",
+      "Deep Tissue Massage",
+      "Swedish Massage",
+      "Thai Massage",
+      "Ayurvedic Massage",
+      "Reflexology (Foot)",
+      "Head / Scalp Massage",
+      "Neck & Shoulder Therapy",
+      "Sports Massage",
+      "Prenatal Massage",
+      "Couples Massage",
+    ],
+    choices: [
+      {
+        key: "location",
+        title: "Where do you provide the service?",
+        hint: "Members filter on this first — required.",
+        mode: "single",
+        required: true,
+        options: [
+          "At home (customer location)",
+          "At spa / clinic",
+          "Both home and spa",
+        ],
+      },
+      {
+        key: "focus",
+        title: "Body focus areas",
+        mode: "multi",
+        options: ["Neck", "Back", "Shoulder", "Foot", "Head", "Full body"],
+      },
+      {
+        key: "duration",
+        title: "Session lengths",
+        mode: "multi",
+        options: ["30 minutes", "60 minutes", "90 minutes", "120 minutes"],
+      },
+      {
+        key: "therapist",
+        title: "Therapist available",
+        mode: "multi",
+        options: ["Male therapist", "Female therapist", "No preference"],
+      },
+    ],
+    certifications: {
+      title: "Certifications & licences",
+      options: [
+        "Licensed Massage Therapist (LMT)",
+        "Certified Ayurvedic therapist",
+        "Certified Thai massage therapist",
+        "Certified reflexologist",
+        "Prenatal massage certified",
+        "Spa / clinic business licence",
+      ],
+    },
+    license: {
+      label: "Therapy licence number",
+      hint: "Shown on your public card so members can look you up",
+      required: false,
+    },
+    licenseDoc: {
+      label: "Licence or certificate",
+      hint: "Kept private for review — needed for the ✅ Verified provider badge",
+    },
+    pricing: [
+      { key: "priceFrom", label: "Starting price", hint: "e.g. $60 for 30 minutes" },
+      { key: "priceHourly", label: "Price per hour", hint: "e.g. $90 per hour" },
+      { key: "priceExtra", label: "Home visit extra fee", hint: "Optional, e.g. +$20" },
+    ],
+    availability: {
+      label: "Availability",
+      hint: "Days and times, e.g. Mon–Sat 9am–8pm, Sun by appointment",
+    },
+    disclaimer: SPA_DISCLAIMER,
+    experience: true,
+  },
+
   "professionals-attorneys": {
     title: "Select legal services",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
@@ -256,6 +366,36 @@ export function cleanSpecialties(
   const set = specialtySet(subcategorySlug);
   if (!set) return [];
   return set.options.filter((option) => values.includes(option));
+}
+
+/** Keeps only offered choice-group values; single-choice groups keep one answer. */
+export function cleanServiceOptions(
+  subcategorySlug: string | null | undefined,
+  values: string[],
+): string[] {
+  const groups = specialtySet(subcategorySlug)?.choices ?? [];
+  return groups.flatMap((group) => {
+    const picked = group.options.filter((option) => values.includes(option));
+    return group.mode === "single" ? picked.slice(0, 1) : picked;
+  });
+}
+
+/** Names the groups whose required answer is missing, for a clear error. */
+export function missingChoiceGroups(
+  subcategorySlug: string | null | undefined,
+  values: string[],
+): string[] {
+  const groups = specialtySet(subcategorySlug)?.choices ?? [];
+  return groups
+    .filter(
+      (group) =>
+        group.required && !group.options.some((option) => values.includes(option)),
+    )
+    .map((group) => group.title);
+}
+
+export function disclaimerFor(subcategorySlug?: string | null) {
+  return specialtySet(subcategorySlug)?.disclaimer ?? CREDENTIALS_DISCLAIMER;
 }
 
 /** Checkbox certifications are validated the same way; extras come from the free-text box. */

@@ -63,6 +63,7 @@ export default async function CategoryPage({
     vminprice?: string;
     vmaxprice?: string;
     vfeature?: string | string[];
+    opt?: string | string[];
   };
 }) {
   const category = await getCategory(params.slug);
@@ -85,6 +86,16 @@ export default async function CategoryPage({
       ? [searchParams.cert]
       : [];
   const selectedCerts = certOptions.filter((option) => certParam.includes(option));
+  const optParam = Array.isArray(searchParams.opt)
+    ? searchParams.opt
+    : searchParams.opt
+      ? [searchParams.opt]
+      : [];
+  /** One filter group per option group, so groups AND but values inside OR. */
+  const selectedOptionGroups = (services?.choices ?? []).map((group) =>
+    group.options.filter((option) => optParam.includes(option)),
+  );
+  const selectedOptions = selectedOptionGroups.flat();
   const vehicleCategory = isVehicleCard(category.slug);
   const vehicleFeatures = keepKnown(
     VEHICLE_FEATURES,
@@ -132,6 +143,7 @@ export default async function CategoryPage({
       q: searchParams.q,
       specialties: selectedServices,
       certifications: selectedCerts,
+      serviceOptionGroups: selectedOptionGroups,
       vehicle: vehicleFilters,
     }),
     db.event.findMany({
@@ -278,6 +290,29 @@ export default async function CategoryPage({
                     </label>
                   ))}
                 </div>
+                {services.choices?.map((group) => (
+                  <div key={group.key} className="mt-3">
+                    <p className="text-sm font-bold text-slate-900">{group.title}</p>
+                    <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {group.options.map((option) => (
+                        <label
+                          key={option}
+                          className="flex items-start gap-2 text-sm text-slate-700"
+                        >
+                          <input
+                            type="checkbox"
+                            name="opt"
+                            value={option}
+                            defaultChecked={selectedOptions.includes(option)}
+                            className="mt-0.5 h-4 w-4"
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
                 {services.certifications ? (
                   <>
                     <p className="mt-3 text-sm font-bold text-slate-900">
@@ -303,7 +338,9 @@ export default async function CategoryPage({
                   </>
                 ) : null}
 
-                {selectedServices.length || selectedCerts.length ? (
+                {selectedServices.length ||
+                selectedCerts.length ||
+                selectedOptions.length ? (
                   <Link
                     href={`/categories/${category.slug}`}
                     className="mt-2 inline-block text-xs font-semibold text-indigo-600 hover:underline"

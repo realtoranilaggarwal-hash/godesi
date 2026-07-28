@@ -13,6 +13,7 @@ import {
   setUserPlanAction,
   toggleBannerAction,
   toggleFeaturedAction,
+  toggleVerifiedProviderAction,
   rejectBannerAction,
 } from "@/app/actions/admin";
 import { reviewWorshipAction } from "@/app/actions/worship";
@@ -331,6 +332,15 @@ export default async function AdminPage() {
                   </td>
                   <td>
                     <div className="flex justify-end gap-2">
+                      <form action={toggleVerifiedProviderAction}>
+                        <input type="hidden" name="id" value={business.id} />
+                        <button
+                          type="submit"
+                          className="rounded-lg border border-emerald-300 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                        >
+                          {business.verifiedProvider ? "unverify" : "✅ verify"}
+                        </button>
+                      </form>
                       {(["APPROVED", "REJECTED", "PENDING"] as const)
                         .filter((status) => status !== business.status)
                         .map((status) => (

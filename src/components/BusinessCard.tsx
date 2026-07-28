@@ -65,6 +65,34 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       ) : null}
 
+      {business.serviceOptions.length || business.priceFrom || business.priceHourly ? (
+        <div className="flex flex-wrap gap-1.5">
+          {business.verifiedProvider ? (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
+              ✅ Verified provider
+            </span>
+          ) : null}
+          {[business.priceFrom, business.priceHourly]
+            .filter((tag): tag is string => Boolean(tag))
+            .map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-800"
+              >
+                {tag}
+              </span>
+            ))}
+          {business.serviceOptions.slice(0, 4).map((option) => (
+            <span
+              key={option}
+              className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-800"
+            >
+              {option}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
       {business.certifications.length || business.yearsExperience !== null ? (
         <p className="text-xs font-semibold text-slate-500">
           {[

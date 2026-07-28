@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Field, inputClass } from "@/components/ui";
-import { CREDENTIALS_DISCLAIMER, specialtySet } from "@/lib/specialties";
+import { disclaimerFor, specialtySet } from "@/lib/specialties";
+import { ImageField } from "@/components/forms/ImageField";
 import { isAgentCard } from "@/lib/agents";
 
 export type SpecialtyDefaults = {
@@ -15,6 +16,12 @@ export type SpecialtyDefaults = {
   feeStructure: string;
   carriers: string;
   yearsExperience: string;
+  serviceOptions: string[];
+  priceFrom: string;
+  priceHourly: string;
+  priceExtra: string;
+  availability: string;
+  licenseDocUrl: string;
 };
 
 /**
@@ -79,6 +86,73 @@ export function SpecialtyPicker({
         <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
           Pick at least one before saving.
         </p>
+      ) : null}
+
+      {set.choices?.map((group) => (
+        <div key={group.key} className="mt-4">
+          <p className="text-sm font-bold text-cyan-900">
+            {group.title}
+            {group.required ? <span className="text-rose-600"> *</span> : null}
+          </p>
+          {group.hint ? (
+            <p className="text-xs text-cyan-900/80">{group.hint}</p>
+          ) : null}
+          <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+            {group.options.map((option) => (
+              <label
+                key={option}
+                className="flex items-start gap-2 text-sm text-slate-700"
+              >
+                <input
+                  type={group.mode === "single" ? "radio" : "checkbox"}
+                  name={group.mode === "single" ? `choice-${group.key}` : "serviceOptions"}
+                  value={option}
+                  defaultChecked={defaults.serviceOptions.includes(option)}
+                  className="mt-0.5 h-4 w-4"
+                />
+                {option}
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {set.pricing ? (
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {set.pricing.map((price) => (
+            <Field key={price.key} label={price.label} hint={price.hint}>
+              <input
+                name={price.key}
+                defaultValue={defaults[price.key]}
+                className={inputClass}
+              />
+            </Field>
+          ))}
+        </div>
+      ) : null}
+
+      {set.availability ? (
+        <div className="mt-3">
+          <Field label={set.availability.label} hint={set.availability.hint}>
+            <input
+              name="availability"
+              defaultValue={defaults.availability}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+      ) : null}
+
+      {set.licenseDoc ? (
+        <div className="mt-3">
+          <ImageField
+            name="licenseDocUrl"
+            purpose="gallery"
+            label={set.licenseDoc.label}
+            hint={set.licenseDoc.hint}
+            defaultValue={defaults.licenseDocUrl}
+          />
+        </div>
       ) : null}
 
       {set.certifications ? (
@@ -217,7 +291,7 @@ export function SpecialtyPicker({
       ) : null}
 
       <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs text-slate-600">
-        {CREDENTIALS_DISCLAIMER}
+        {disclaimerFor(subcategorySlug)}
       </p>
     </details>
   );

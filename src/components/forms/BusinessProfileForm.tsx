@@ -127,6 +127,12 @@ export function BusinessProfileForm({
             business?.yearsExperience === null || business?.yearsExperience === undefined
               ? ""
               : String(business.yearsExperience),
+          serviceOptions: business?.serviceOptions ?? [],
+          priceFrom: business?.priceFrom ?? "",
+          priceHourly: business?.priceHourly ?? "",
+          priceExtra: business?.priceExtra ?? "",
+          availability: business?.availability ?? "",
+          licenseDocUrl: business?.licenseDocUrl ?? "",
         }}
         canFeature={canFeatureSpecialty}
         cardSaved={Boolean(business)}

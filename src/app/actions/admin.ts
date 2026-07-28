@@ -22,6 +22,20 @@ export async function setListingStatusAction(formData: FormData) {
   revalidatePath(`/b/${business.slug}`);
 }
 
+/** Verified badge — staff set it only after checking ID and licence documents. */
+export async function toggleVerifiedProviderAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const business = await db.business.findUnique({ where: { id } });
+  if (!business) throw new Error("Business not found");
+  await db.business.update({
+    where: { id },
+    data: { verifiedProvider: !business.verifiedProvider },
+  });
+  revalidatePath("/admin");
+  revalidatePath(`/b/${business.slug}`);
+}
+
 export async function setUserPlanAction(formData: FormData) {
   await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");

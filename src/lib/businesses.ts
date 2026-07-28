@@ -26,6 +26,11 @@ export type BusinessListItem = {
   specialties: string[];
   featuredSpecialty: string | null;
   certifications: string[];
+  /** Answers to the subcategory's option groups, e.g. "At home", "60 minutes". */
+  serviceOptions: string[];
+  priceFrom: string | null;
+  priceHourly: string | null;
+  verifiedProvider: boolean;
   yearsExperience: number | null;
   /** Cars & Bikes cards carry their vehicle spec for the tag row and filters. */
   vehicle: {
@@ -60,6 +65,8 @@ export type SearchFilters = {
   specialties?: string[];
   /** Certifications the card must hold (all of them). */
   certifications?: string[];
+  /** One entry per option group; the card must match at least one value in each. */
+  serviceOptionGroups?: string[][];
   /** Cars & Bikes filters; all optional and combined with AND. */
   vehicle?: {
     vehicleType?: string;
@@ -91,9 +98,12 @@ export async function searchBusinesses(
     premiumOnly = false,
     specialties,
     certifications,
+    serviceOptionGroups,
     vehicle,
     take = 60,
   } = filters;
+
+  const optionGroups = (serviceOptionGroups ?? []).filter((group) => group.length);
 
   const rows = await db.business.findMany({
     where: {
@@ -106,6 +116,13 @@ export async function searchBusinesses(
       ...(specialties?.length ? { specialties: { hasEvery: specialties } } : {}),
       ...(certifications?.length
         ? { certifications: { hasEvery: certifications } }
+        : {}),
+      ...(optionGroups.length
+        ? {
+            AND: optionGroups.map((group) => ({
+              serviceOptions: { hasSome: group },
+            })),
+          }
         : {}),
       ...(vehicle && Object.values(vehicle).some((value) => value !== undefined)
         ? {
@@ -225,6 +242,10 @@ export async function searchBusinesses(
         specialties: row.specialties,
         featuredSpecialty: row.featuredSpecialty,
         certifications: row.certifications,
+        serviceOptions: row.serviceOptions,
+        priceFrom: row.priceFrom,
+        priceHourly: row.priceHourly,
+        verifiedProvider: row.verifiedProvider,
         yearsExperience: row.yearsExperience,
         vehicle: row.vehicle
           ? {

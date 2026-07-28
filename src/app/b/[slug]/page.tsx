@@ -19,7 +19,7 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
-import { CREDENTIALS_DISCLAIMER, specialtySet } from "@/lib/specialties";
+import { disclaimerFor, specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
@@ -310,6 +310,51 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
+            {business.serviceOptions.length ||
+            business.priceFrom ||
+            business.priceHourly ||
+            business.priceExtra ||
+            business.availability ? (
+              <div className="mt-3 rounded-2xl border border-violet-200 bg-violet-50/60 p-4">
+                <h2 className="text-sm font-bold text-violet-900">
+                  Service details
+                </h2>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {business.verifiedProvider ? (
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                      ✅ Verified provider
+                    </span>
+                  ) : null}
+                  {business.serviceOptions.map((option) => (
+                    <Link
+                      key={option}
+                      href={`/categories/${business.subcategorySlug}?opt=${encodeURIComponent(option)}`}
+                      className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100"
+                    >
+                      {option}
+                    </Link>
+                  ))}
+                </div>
+                <dl className="mt-3 grid gap-x-4 gap-y-1 text-sm text-slate-700 sm:grid-cols-2">
+                  {[
+                    ["Starting price", business.priceFrom],
+                    ["Per hour", business.priceHourly],
+                    ["Home visit extra", business.priceExtra],
+                    ["Availability", business.availability],
+                  ]
+                    .filter((row): row is [string, string] => Boolean(row[1]))
+                    .map(([label, value]) => (
+                      <div key={label}>
+                        <dt className="text-xs font-semibold text-violet-900/70">
+                          {label}
+                        </dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                </dl>
+              </div>
+            ) : null}
+
             {business.certifications.length ||
             business.licenseNumber ||
             business.feeStructure ||
@@ -346,7 +391,9 @@ export default async function BusinessProfilePage({
                     {business.carriers}
                   </p>
                 ) : null}
-                <p className="text-xs text-slate-500">{CREDENTIALS_DISCLAIMER}</p>
+                <p className="text-xs text-slate-500">
+                  {disclaimerFor(business.subcategorySlug)}
+                </p>
               </div>
             ) : null}
 

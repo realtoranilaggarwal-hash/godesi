@@ -10,6 +10,8 @@ import { effectivePlan, mediaLimit } from "@/lib/plans";
 import {
   cleanCertifications,
   cleanSpecialties,
+  cleanServiceOptions,
+  missingChoiceGroups,
   specialtySet,
 } from "@/lib/specialties";
 import { uniqueSlug } from "@/lib/slug";
@@ -229,6 +231,21 @@ export async function saveBusinessProfileAction(
       formData.getAll("certifications").map(String),
       String(formData.get("certificationsOther") ?? ""),
     );
+    // Radio groups post under their own name so one answer wins per group.
+    const choiceValues = [
+      ...formData.getAll("serviceOptions").map(String),
+      ...(set?.choices ?? [])
+        .filter((group) => group.mode === "single")
+        .map((group) => String(formData.get(`choice-${group.key}`) ?? "")),
+    ].filter(Boolean);
+    const serviceOptions = cleanServiceOptions(subcategory?.slug, choiceValues);
+    const missing = missingChoiceGroups(subcategory?.slug, serviceOptions);
+    if (missing.length) {
+      return { error: `${missing[0]}: pick an option.` };
+    }
+
+    const detail = (field: string) => String(formData.get(field) ?? "").trim() || null;
+
     const licenseNumber = set ? String(formData.get("licenseNumber") ?? "").trim() : "";
     if (set?.license?.required && !licenseNumber) {
       return { error: `${set.license.label} is required.` };
@@ -253,6 +270,12 @@ export async function saveBusinessProfileAction(
       carriers: set?.carriers
         ? String(formData.get("carriers") ?? "").trim() || null
         : null,
+      serviceOptions,
+      priceFrom: set?.pricing ? detail("priceFrom") : null,
+      priceHourly: set?.pricing ? detail("priceHourly") : null,
+      priceExtra: set?.pricing ? detail("priceExtra") : null,
+      availability: set?.availability ? detail("availability") : null,
+      licenseDocUrl: set?.licenseDoc ? detail("licenseDocUrl") : null,
       yearsExperience,
       categorySlug: category.slug,
       subcategorySlug: subcategory?.slug ?? null,

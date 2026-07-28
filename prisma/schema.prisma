@@ -488,6 +488,18 @@ model Business {
   feeStructure       String?
   /// Insurance carriers or partner companies represented.
   carriers           String?
+  /// Answers to the subcategory's extra option groups, e.g. spa service location.
+  serviceOptions     String[]      @default([])
+  /// Starting price, hourly price and any travel surcharge, as entered.
+  priceFrom          String?
+  priceHourly        String?
+  priceExtra         String?
+  /// Days and hours the provider works.
+  availability       String?
+  /// Uploaded licence or certificate, kept private and reviewed by staff.
+  licenseDocUrl      String?
+  /// Set by staff after checking ID and licence documents.
+  verifiedProvider   Boolean       @default(false)
   yearsExperience    Int?
   status             ListingStatus @default(PENDING)
   featured           Boolean       @default(false)
