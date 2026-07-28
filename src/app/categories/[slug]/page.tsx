@@ -11,6 +11,7 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 import { cleanSpecialties, specialtySet } from "@/lib/specialties";
@@ -31,7 +32,12 @@ export async function generateMetadata({
     description:
       category.blurb ??
       `Find trusted ${category.name.toLowerCase()} businesses near you on Godesi.`,
-    alternates: { canonical: `${siteUrl()}/categories/${category.slug}` },
+    alternates: {
+      canonical: `${siteUrl()}/categories/${category.slug}`,
+      types: {
+        "application/rss+xml": `${siteUrl()}/categories/${category.slug}/rss.xml`,
+      },
+    },
   };
 }
 
@@ -384,6 +390,16 @@ export default async function CategoryPage({
           </section>
         ) : null}
         <RecommendedLinks categorySlug={category.slug} />
+
+        <CategoryNewsRail
+          categorySlug={category.slug}
+          categoryName={category.name}
+          topic={
+            (category.parent?.slug ?? category.slug) === "religious-services"
+              ? "faith"
+              : "general"
+          }
+        />
 
         <InlineBanner />
       </div>

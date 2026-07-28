@@ -181,6 +181,36 @@ export default async function PricingPage({
         })}
       </div>
 
+      <Card className="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-xl font-black text-slate-900">
+              Don&apos;t want to pay? Earn it instead 🎁
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-slate-700">
+              Share Godesi and collect points — every signup, profile, listing
+              and upgrade from your referral link adds up. Spend the points on a
+              month of Pro (400), a featured listing for 30 days (300), homepage
+              event promotion (250) or a 300 × 250 banner (500). No card needed.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm font-semibold">
+            <Link
+              href="/rewards"
+              className="rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-4 py-2 text-white hover:opacity-90"
+            >
+              How refer &amp; earn works
+            </Link>
+            <Link
+              href={user ? "/dashboard/rewards" : "/signup"}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              {user ? "Get my referral link" : "Join free"}
+            </Link>
+          </div>
+        </div>
+      </Card>
+
       <WhyGodesi />
 
       <p className="text-center text-xs text-slate-500">
