@@ -128,6 +128,8 @@ enum PointsReason {
   NEWS_PUBLISHED
   NEWS_UPVOTED
   NEWS_FEATURED
+  /// Reached a new local-journalist star level.
+  JOURNALIST_LEVEL
   REDEMPTION
   ADJUSTMENT
 }
@@ -149,6 +151,10 @@ model User {
   createdAt     DateTime  @default(now())
 
   emailVerifiedAt DateTime?
+
+  /// Opted into the local journalist programme, and the patch they cover.
+  journalistSince DateTime?
+  journalistBeat  String?
 
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique

@@ -9,6 +9,7 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { slotCapacity } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
+import { levelFor } from "@/lib/journalists";
 
 export async function setListingStatusAction(formData: FormData) {
   await requirePermission("listings");
@@ -205,9 +206,25 @@ export async function setNewsStatusAction(formData: FormData) {
       note: item.title,
       key: item.id,
     }).catch(() => null);
+    await creditJournalistLevel(item.submittedById).catch(() => null);
   }
   revalidatePath("/admin");
   revalidatePath("/news");
+}
+
+/** Pays a bonus the first time a contributor reaches each star level. */
+async function creditJournalistLevel(userId: string) {
+  const approved = await db.newsItem.count({
+    where: { submittedById: userId, status: "PUBLISHED" },
+  });
+  const level = levelFor(approved);
+  if (!level) return;
+  await awardPoints({
+    userId,
+    reason: "JOURNALIST_LEVEL",
+    note: `${level.stars} ${level.title} — ${approved} approved stories`,
+    key: `level-${level.level}`,
+  });
 }
 
 export async function deleteNewsAction(formData: FormData) {

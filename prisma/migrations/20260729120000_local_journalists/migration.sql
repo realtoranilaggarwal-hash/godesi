@@ -1,0 +1,4 @@
+ALTER TYPE "PointsReason" ADD VALUE 'JOURNALIST_LEVEL';
+
+ALTER TABLE "User" ADD COLUMN "journalistSince" TIMESTAMP(3);
+ALTER TABLE "User" ADD COLUMN "journalistBeat" TEXT;

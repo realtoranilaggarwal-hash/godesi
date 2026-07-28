@@ -61,6 +61,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     links: [
       { href: "/about", label: "About us" },
       { href: "/live", label: "Live visitor map" },
+      { href: "/journalists", label: "Become a local journalist" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contact us" },
       { href: "/terms", label: "Terms of service" },

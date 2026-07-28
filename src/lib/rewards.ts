@@ -16,6 +16,7 @@ export const POINTS: Record<EarnReason, number> = {
   NEWS_PUBLISHED: 10,
   NEWS_UPVOTED: 5,
   NEWS_FEATURED: 25,
+  JOURNALIST_LEVEL: 50,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {
@@ -29,6 +30,7 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   NEWS_PUBLISHED: "Your news story was approved",
   NEWS_UPVOTED: "Your news story is popular with members",
   NEWS_FEATURED: "Your story was picked as important news",
+  JOURNALIST_LEVEL: "You reached a new local journalist level",
   REDEMPTION: "Points redeemed",
   ADJUSTMENT: "Adjusted by the Godesi team",
 };

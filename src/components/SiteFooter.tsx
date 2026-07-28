@@ -33,6 +33,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     links: [
       { href: "/find", label: "Search everything" },
       { href: "/live", label: "Live visitor map" },
+      { href: "/journalists", label: "Become a local journalist" },
       { href: "/about", label: "About us" },
       { href: "/sitemap", label: "Sitemap" },
       { href: "/faq", label: "FAQ" },

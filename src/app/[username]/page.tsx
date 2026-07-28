@@ -10,6 +10,8 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, EmptyState, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
+import { JournalistBadge } from "@/components/JournalistBadge";
+import { journalistStats } from "@/lib/journalists";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +47,7 @@ export default async function PublicProfilePage({
   if (!profile) notFound();
 
   const { user, events, leads, reviews, listings } = profile;
+  const journalist = await journalistStats(user.id);
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
@@ -94,6 +97,12 @@ export default async function PublicProfilePage({
                   <Badge tone="green">✅ Open to work / projects</Badge>
                 ) : null}
                 {user.location ? <Badge>📍 {user.location}</Badge> : null}
+                {journalist?.level ? (
+                  <JournalistBadge
+                    level={journalist.level}
+                    beat={journalist.beat}
+                  />
+                ) : null}
                 {plan !== "FREE" ? <Badge tone="indigo">{plan} member</Badge> : null}
                 <Badge tone="green">
                   Member since {user.createdAt.getFullYear()}

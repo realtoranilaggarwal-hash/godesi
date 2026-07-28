@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { featureNewsAction, voteNewsAction } from "@/app/actions/newsVotes";
+import { JournalistBadge } from "@/components/JournalistBadge";
+import type { JournalistLevel } from "@/lib/journalists";
 
 export type NewsListItem = {
   id: string;
@@ -28,8 +30,10 @@ function timeAgo(date: Date) {
 
 function Poster({
   poster,
+  level,
 }: {
   poster: NonNullable<NewsListItem["submittedBy"]>;
+  level: JournalistLevel | null;
 }) {
   const avatar = poster.avatarUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
@@ -49,6 +53,7 @@ function Poster({
     <span className="flex items-center gap-1.5 text-xs text-slate-500">
       {avatar}
       <span className="font-semibold text-slate-600">{poster.name}</span>
+      <JournalistBadge level={level} />
     </span>
   );
 
@@ -118,12 +123,15 @@ export function NewsCard({
   vote = 0,
   canVote = false,
   canFeature = false,
+  posterLevel = null,
 }: {
   item: NewsListItem;
   /** This member's vote: 1, -1 or 0. */
   vote?: number;
   canVote?: boolean;
   canFeature?: boolean;
+  /** Star level of the member who submitted the story. */
+  posterLevel?: JournalistLevel | null;
 }) {
   return (
     <div
@@ -160,7 +168,7 @@ export function NewsCard({
       </a>
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
         {item.submittedBy ? (
-          <Poster poster={item.submittedBy} />
+          <Poster poster={item.submittedBy} level={posterLevel} />
         ) : (
           <span className="text-xs text-slate-400">Godesi news desk</span>
         )}
