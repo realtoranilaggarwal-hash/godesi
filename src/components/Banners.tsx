@@ -15,6 +15,7 @@ import { SocialWall } from "@/components/SocialWall";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { AdPreview } from "@/components/AdPreview";
+import { proxyImage } from "@/lib/proxyImage";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
@@ -36,13 +37,18 @@ function BannerLink({
   width,
   height,
   className = "",
+  sellSlot,
+  sellLabel,
 }: {
   banner: BannerRow;
   width: number;
   height: number;
   className?: string;
+  /** Adds a "post your banner here" line underneath, so filled spots still sell. */
+  sellSlot?: BannerSlot;
+  sellLabel?: string;
 }) {
-  return (
+  const creative = (
     <a
       href={`/api/banners/${banner.id}/click`}
       target="_blank"
@@ -53,7 +59,7 @@ function BannerLink({
       <BannerImpression id={banner.id} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={banner.imageUrl}
+        src={proxyImage(banner.imageUrl)}
         alt={banner.title}
         width={width}
         height={height}
@@ -61,6 +67,18 @@ function BannerLink({
         className="h-auto w-full object-cover"
       />
     </a>
+  );
+
+  if (!sellSlot) return creative;
+
+  return (
+    <div className="space-y-1">
+      {creative}
+      <BookThisSpot
+        slot={sellSlot}
+        label={sellLabel ?? "post your banner here"}
+      />
+    </div>
   );
 }
 
@@ -151,6 +169,8 @@ export async function SidebarBanners() {
           banner={banner}
           width={SIDEBAR_SIZE.width}
           height={SIDEBAR_SIZE.height}
+          sellSlot="SIDEBAR"
+          sellLabel="post your banner here — 300 × 250"
         />
       ))}
       {/* Show the first few unsold rectangles so the rail is visibly for sale. */}
@@ -173,6 +193,8 @@ export async function SidebarBanners() {
             banner={banner}
             width={SKYSCRAPER_SIZE.width}
             height={SKYSCRAPER_SIZE.height}
+            sellSlot="SKYSCRAPER"
+            sellLabel="your banner here"
           />
         ))}
         {Array.from({
@@ -290,6 +312,8 @@ export async function InlineBanner() {
           width={SIDEBAR_SIZE.width}
           height={SIDEBAR_SIZE.height}
           className="mx-auto max-w-[300px]"
+          sellSlot="SIDEBAR"
+          sellLabel="post your banner here — 300 × 250"
         />
       ) : (
         <AdvertiseHere

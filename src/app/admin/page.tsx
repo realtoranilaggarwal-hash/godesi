@@ -12,6 +12,7 @@ import {
   setNewsStatusAction,
   setUserPlanAction,
   toggleBannerAction,
+  updateBannerCreativeAction,
   toggleFeaturedAction,
   toggleVerifiedProviderAction,
   rejectBannerAction,
@@ -657,18 +658,55 @@ export default async function AdminPage() {
                     {banner.position ? `#${banner.position}` : "(unassigned)"}
                   </td>
                   <td>
-                    <a
-                      href={banner.linkUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-medium text-indigo-600"
-                    >
-                      {banner.title}
-                    </a>
-                    <div className="text-xs text-slate-400">
-                      {banner.status.toLowerCase()} ·{" "}
-                      {banner.active ? "running" : "paused"}
-                      {banner.advertiser ? ` · ${banner.advertiser.email}` : ""}
+                    <div className="flex items-start gap-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={banner.imageUrl}
+                        alt=""
+                        className="h-10 w-16 shrink-0 rounded border border-slate-200 object-contain"
+                        loading="lazy"
+                      />
+                      <div className="min-w-0">
+                        <a
+                          href={banner.linkUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-indigo-600"
+                        >
+                          {banner.title}
+                        </a>
+                        <div className="text-xs text-slate-400">
+                          {banner.status.toLowerCase()} ·{" "}
+                          {banner.active ? "running" : "paused"}
+                          {banner.advertiser
+                            ? ` · ${banner.advertiser.email}`
+                            : ""}
+                        </div>
+                        <form
+                          action={updateBannerCreativeAction}
+                          className="mt-1 flex flex-wrap items-center gap-1"
+                        >
+                          <input type="hidden" name="id" value={banner.id} />
+                          <input
+                            name="imageUrl"
+                            defaultValue={banner.imageUrl}
+                            placeholder="image URL"
+                            className="w-56 rounded border border-slate-200 px-2 py-1 text-[11px]"
+                          />
+                          <input
+                            name="linkUrl"
+                            defaultValue={banner.linkUrl}
+                            placeholder="destination URL"
+                            className="w-56 rounded border border-slate-200 px-2 py-1 text-[11px]"
+                          />
+                          <button
+                            type="submit"
+                            className="rounded border border-slate-300 px-2 py-1 text-[11px] font-semibold hover:bg-slate-50"
+                          >
+                            replace
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   </td>
                   <td>{banner.impressions}</td>

@@ -18,7 +18,10 @@ export async function setListingStatusAction(formData: FormData) {
   if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
     throw new Error("Invalid status");
   }
-  const business = await db.business.update({ where: { id }, data: { status } });
+  const business = await db.business.update({
+    where: { id },
+    data: { status },
+  });
   revalidatePath("/admin");
   revalidatePath(`/b/${business.slug}`);
 }
@@ -41,14 +44,17 @@ export async function setUserPlanAction(formData: FormData) {
   await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");
   const plan = String(formData.get("plan") ?? "") as Plan;
-  if (!["FREE", "PRO", "PREMIUM"].includes(plan)) throw new Error("Invalid plan");
+  if (!["FREE", "PRO", "PREMIUM"].includes(plan))
+    throw new Error("Invalid plan");
 
   await db.user.update({
     where: { id },
     data: {
       plan,
       planExpiresAt:
-        plan === "FREE" ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        plan === "FREE"
+          ? null
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     },
   });
   await db.business.updateMany({
@@ -122,9 +128,31 @@ export async function toggleBannerAction(formData: FormData) {
 
 export async function deleteBannerAction(formData: FormData) {
   await requireRole("ADMIN");
-  await db.banner.delete({ where: { id: String(formData.get("id") ?? "") } });
+  const id = String(formData.get("id") ?? "");
+  // Orders keep their history, so detach them before the banner disappears.
+  await db.adOrder.updateMany({
+    where: { bannerId: id },
+    data: { bannerId: null },
+  });
+  await db.banner.deleteMany({ where: { id } });
   revalidatePath("/admin");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
+}
+
+/** Fixes a wrong creative in place, including banners with no slot number. */
+export async function updateBannerCreativeAction(formData: FormData) {
+  await requireRole("ADMIN");
+  const id = String(formData.get("id") ?? "");
+  const imageUrl = String(formData.get("imageUrl") ?? "").trim();
+  const linkUrl = String(formData.get("linkUrl") ?? "").trim();
+  const data: { imageUrl?: string; linkUrl?: string } = {};
+  if (/^https?:\/\//i.test(imageUrl)) data.imageUrl = imageUrl;
+  if (/^https?:\/\//i.test(linkUrl)) data.linkUrl = linkUrl;
+  if (Object.keys(data).length) {
+    await db.banner.update({ where: { id }, data });
+  }
+  revalidatePath("/admin");
+  revalidatePath("/", "layout");
 }
 
 /** Approves a paid ad: assigns it a free slot number and switches it live. */
@@ -141,7 +169,8 @@ export async function approveBannerAction(
     if (!banner) return { error: "Banner not found." };
 
     const capacity = slotCapacity(banner.slot);
-    let position = Number.isInteger(requested) && requested > 0 ? requested : null;
+    let position =
+      Number.isInteger(requested) && requested > 0 ? requested : null;
 
     if (position && position > capacity) {
       return { error: `${banner.slot} has only ${capacity} slot(s).` };
@@ -149,7 +178,11 @@ export async function approveBannerAction(
 
     if (!position) {
       const used = await db.banner.findMany({
-        where: { slot: banner.slot, NOT: { id: banner.id }, position: { not: null } },
+        where: {
+          slot: banner.slot,
+          NOT: { id: banner.id },
+          position: { not: null },
+        },
         select: { position: true },
       });
       const taken = new Set(used.map((row) => row.position));
@@ -196,7 +229,8 @@ export async function setNewsStatusAction(formData: FormData) {
   await requirePermission("news");
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as NewsStatus;
-  if (!["PENDING", "PUBLISHED", "REJECTED"].includes(status)) throw new Error("Invalid status");
+  if (!["PENDING", "PUBLISHED", "REJECTED"].includes(status))
+    throw new Error("Invalid status");
   const item = await db.newsItem.update({ where: { id }, data: { status } });
 
   if (status === "PUBLISHED" && item.submittedById) {
@@ -243,7 +277,8 @@ export async function saveNewsFeedAction(
     const name = String(formData.get("name") ?? "").trim();
     const url = String(formData.get("url") ?? "").trim();
     if (name.length < 2) return { error: "Feed name is required." };
-    if (!z.string().url().safeParse(url).success) return { error: "Enter a valid feed URL." };
+    if (!z.string().url().safeParse(url).success)
+      return { error: "Enter a valid feed URL." };
 
     await db.newsFeed.upsert({
       where: { url },
@@ -267,7 +302,8 @@ export async function setEventStatusAction(formData: FormData) {
   await requirePermission("events");
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as ListingStatus;
-  if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) throw new Error("Invalid status");
+  if (!["PENDING", "APPROVED", "REJECTED"].includes(status))
+    throw new Error("Invalid status");
   const event = await db.event.update({ where: { id }, data: { status } });
   revalidatePath("/admin");
   revalidatePath("/events");
@@ -332,8 +368,11 @@ export async function adminUpdateEventAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
-    if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
+    const startsAt = new Date(
+      `${parsed.data.date}T${parsed.data.time}:00+05:30`,
+    );
+    if (Number.isNaN(startsAt.getTime()))
+      return { error: "Enter a valid date and time." };
 
     const existing = await db.event.findUnique({
       where: { id: parsed.data.id },
@@ -360,7 +399,8 @@ export async function adminUpdateEventAction(
         currency: parsed.data.currency,
         seatsTotal: parsed.data.seatsTotal,
         status: parsed.data.status,
-        categorySlug: parsed.data.subcategorySlug || parsed.data.categorySlug || null,
+        categorySlug:
+          parsed.data.subcategorySlug || parsed.data.categorySlug || null,
       },
     });
 
