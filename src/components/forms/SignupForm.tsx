@@ -22,7 +22,12 @@ export function SignupForm({
 
       <Field label="I am a">
         <select name="role" defaultValue={defaultRole} className={inputClass}>
-          <option value="BUSINESS">Business owner — I want a digital card</option>
+          <option value="BUSINESS">
+            Business owner — shop, restaurant or company
+          </option>
+          <option value="PROFESSIONAL">
+            Professional / freelancer — I work for clients, no shop
+          </option>
           <option value="CLIENT">Client — I want to post requirements</option>
         </select>
       </Field>

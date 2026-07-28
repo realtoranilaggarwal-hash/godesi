@@ -150,16 +150,16 @@ export async function createEventAction(
       eventType: formData.get("eventType"),
       mode: formData.get("mode") || "OFFLINE",
       frequency: formData.get("frequency") || "ONE_TIME",
-      recurrence: formData.get("recurrence"),
-      onlineUrl: formData.get("onlineUrl"),
-      tags: formData.get("tags"),
-      categorySlug: formData.get("categorySlug"),
-      subcategorySlug: formData.get("subcategorySlug"),
+      recurrence: formData.get("recurrence") ?? undefined,
+      onlineUrl: formData.get("onlineUrl") ?? undefined,
+      tags: formData.get("tags") ?? undefined,
+      categorySlug: formData.get("categorySlug") ?? undefined,
+      subcategorySlug: formData.get("subcategorySlug") ?? undefined,
       price: formData.get("price") || 0,
       currency: formData.get("currency") || undefined,
       seatsTotal: formData.get("seatsTotal") || 1,
-      imageUrl: formData.get("imageUrl"),
-      videoUrl: formData.get("videoUrl"),
+      imageUrl: formData.get("imageUrl") ?? undefined,
+      videoUrl: formData.get("videoUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 

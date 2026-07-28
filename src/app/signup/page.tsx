@@ -23,7 +23,11 @@ export default function SignupPage({
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
         <Card>
           <SignupForm
-            defaultRole={searchParams.role === "CLIENT" ? "CLIENT" : "BUSINESS"}
+            defaultRole={
+              searchParams.role === "CLIENT" || searchParams.role === "PROFESSIONAL"
+                ? searchParams.role
+                : "BUSINESS"
+            }
             next={searchParams.next}
           />
         </Card>

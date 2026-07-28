@@ -24,7 +24,8 @@ const signupSchema = z.object({
   name: z.string().min(2, "Please enter your name"),
   email: z.string().email("Enter a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["BUSINESS", "CLIENT"]),
+  /// PROFESSIONAL is a BUSINESS account whose card is an individual, not a shop.
+  role: z.enum(["BUSINESS", "PROFESSIONAL", "CLIENT"]),
 });
 
 export async function signupAction(
@@ -50,7 +51,7 @@ export async function signupAction(
       data: {
         name: parsed.data.name,
         email,
-        role: parsed.data.role,
+        role: parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS",
         passwordHash: await hashPassword(parsed.data.password),
       },
     });
@@ -61,9 +62,13 @@ export async function signupAction(
       await issueEmailOtp(email);
       target = "/verify-email";
     } else {
-      target =
-        safeNext(formData.get("next")) ??
-        (parsed.data.role === "CLIENT" ? "/leads/new" : "/dashboard/profile");
+      const home =
+        parsed.data.role === "CLIENT"
+          ? "/leads/new"
+          : parsed.data.role === "PROFESSIONAL"
+            ? "/dashboard/profile?type=professional"
+            : "/dashboard/profile";
+      target = safeNext(formData.get("next")) ?? home;
     }
   } catch (error) {
     return fieldError(error);
