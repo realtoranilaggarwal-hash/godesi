@@ -15,6 +15,7 @@ import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 import { cleanSpecialties, specialtySet } from "@/lib/specialties";
+import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { VehicleFilters } from "@/components/VehicleFilters";
 import { VEHICLE_FEATURES, isVehicleCard, keepKnown } from "@/lib/vehicles";
 
@@ -273,23 +274,34 @@ export default async function CategoryPage({
                 <legend className="text-sm font-bold text-slate-900">
                   {services.title}
                 </legend>
-                <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {services.options.map((option) => (
-                    <label
-                      key={option}
-                      className="flex items-start gap-2 text-sm text-slate-700"
-                    >
-                      <input
-                        type="checkbox"
-                        name="service"
-                        value={option}
-                        defaultChecked={selectedServices.includes(option)}
-                        className="mt-0.5 h-4 w-4"
-                      />
-                      {option}
-                    </label>
-                  ))}
-                </div>
+                {services.optionTabs ? (
+                  <div className="mt-2">
+                    <OptionSearchPicker
+                      name="service"
+                      tabs={services.optionTabs}
+                      bundles={services.bundles}
+                      defaultSelected={selectedServices}
+                    />
+                  </div>
+                ) : (
+                  <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {services.options.map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-start gap-2 text-sm text-slate-700"
+                      >
+                        <input
+                          type="checkbox"
+                          name="service"
+                          value={option}
+                          defaultChecked={selectedServices.includes(option)}
+                          className="mt-0.5 h-4 w-4"
+                        />
+                        {option}
+                      </label>
+                    ))}
+                  </div>
+                )}
                 {services.choices?.map((group) => (
                   <div key={group.key} className="mt-3">
                     <p className="text-sm font-bold text-slate-900">{group.title}</p>

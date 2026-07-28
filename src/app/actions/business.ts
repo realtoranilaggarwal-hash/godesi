@@ -9,6 +9,7 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { effectivePlan, mediaLimit } from "@/lib/plans";
 import {
   cleanCertifications,
+  cleanCustomOptions,
   cleanSpecialties,
   cleanServiceOptions,
   missingChoiceGroups,
@@ -213,10 +214,16 @@ export async function saveBusinessProfileAction(
     }
 
     const set = specialtySet(subcategory?.slug);
-    const specialties = cleanSpecialties(
-      subcategory?.slug,
-      formData.getAll("specialties").map(String),
-    );
+    const specialties = [
+      ...cleanSpecialties(
+        subcategory?.slug,
+        formData.getAll("specialties").map(String),
+      ),
+      ...cleanCustomOptions(
+        subcategory?.slug,
+        String(formData.get("specialtiesOther") ?? ""),
+      ),
+    ];
     if (set && specialties.length === 0) {
       return { error: `${set.title}: pick at least one.` };
     }

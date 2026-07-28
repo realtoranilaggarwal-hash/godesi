@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Field, inputClass } from "@/components/ui";
-import { disclaimerFor, specialtySet } from "@/lib/specialties";
+import { customOptionsOf, disclaimerFor, specialtySet } from "@/lib/specialties";
+import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { ImageField } from "@/components/forms/ImageField";
 import { isAgentCard } from "@/lib/agents";
 
@@ -66,21 +67,53 @@ export function SpecialtyPicker({
 
       <p className="mt-1 text-xs text-cyan-900/80">{set.hint}</p>
 
-      <div className="mt-3 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
-        {set.options.map((option) => (
-          <label key={option} className="flex items-start gap-2 text-sm text-slate-700">
+      {set.optionTabs ? (
+        <div className="mt-3">
+          <OptionSearchPicker
+            name="specialties"
+            tabs={set.optionTabs}
+            bundles={set.bundles}
+            defaultSelected={defaults.specialties.filter((option) =>
+              set.options.includes(option),
+            )}
+            onSelectionChange={(next) => {
+              setSelected(next);
+              if (featured && !next.includes(featured)) setFeatured("");
+            }}
+          />
+        </div>
+      ) : (
+        <div className="mt-3 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
+          {set.options.map((option) => (
+            <label key={option} className="flex items-start gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                name="specialties"
+                value={option}
+                checked={selected.includes(option)}
+                onChange={() => toggle(option)}
+                className="mt-0.5 h-4 w-4"
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+      )}
+
+      {set.customOption ? (
+        <div className="mt-3">
+          <Field label={set.customOption.label} hint={set.customOption.hint}>
             <input
-              type="checkbox"
-              name="specialties"
-              value={option}
-              checked={selected.includes(option)}
-              onChange={() => toggle(option)}
-              className="mt-0.5 h-4 w-4"
+              name="specialtiesOther"
+              defaultValue={customOptionsOf(
+                subcategorySlug,
+                defaults.specialties,
+              ).join(", ")}
+              className={inputClass}
             />
-            {option}
-          </label>
-        ))}
-      </div>
+          </Field>
+        </div>
+      ) : null}
 
       {selected.length === 0 ? (
         <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">

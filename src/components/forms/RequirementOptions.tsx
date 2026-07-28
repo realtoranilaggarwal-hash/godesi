@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { SpecialtySet } from "@/lib/specialties";
+import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 
 export type RequirementOptionSet = {
   slug: string;
@@ -61,8 +62,17 @@ export function RequirementOptions({
       ) : null}
 
       <div key={slug} className="grid gap-3 sm:grid-cols-2">
-        <div className={boxClass}>
+        <div className={`${boxClass} sm:col-span-2`}>
           <p className="text-sm font-bold text-slate-800">{active.set.title}</p>
+          {active.set.optionTabs ? (
+            <div className="mt-2">
+              <OptionSearchPicker
+                name="serviceOptions"
+                tabs={active.set.optionTabs}
+                bundles={active.set.bundles}
+              />
+            </div>
+          ) : (
           <div className="mt-2 space-y-1">
             {active.set.options.map((option) => (
               <label
@@ -79,6 +89,7 @@ export function RequirementOptions({
               </label>
             ))}
           </div>
+          )}
         </div>
 
         {(active.set.choices ?? []).map((group) => (

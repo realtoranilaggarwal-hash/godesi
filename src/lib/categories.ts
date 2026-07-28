@@ -101,6 +101,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
       "Dance Classes",
       "Language Classes",
       "Computer Training",
+      "IT Training & Career Services",
       "Study Abroad Consultants",
       "Sports Coaching",
     ],

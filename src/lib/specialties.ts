@@ -22,10 +22,24 @@ export type PriceField = {
   hint: string;
 };
 
+/** A tab of the searchable picker, e.g. "Cloud & DevOps" courses. */
+export type OptionTab = { title: string; options: string[] };
+
+/** One click selects a whole career path, e.g. "DevOps Engineer Path". */
+export type OptionBundle = { title: string; options: string[] };
+
 export type SpecialtySet = {
   title: string;
   hint: string;
   options: string[];
+  /**
+   * Splits a long option list into searchable tabs. Every option must also
+   * appear in `options`, which stays the single source of truth for filtering.
+   */
+  optionTabs?: OptionTab[];
+  bundles?: OptionBundle[];
+  /** Lets a provider add an option we do not list yet, e.g. a new course. */
+  customOption?: { label: string; hint: string };
   /** Extra option groups; every answer is filterable on the category page. */
   choices?: ChoiceGroup[];
   pricing?: PriceField[];
@@ -48,6 +62,225 @@ export const CREDENTIALS_DISCLAIMER =
 
 export const SPA_DISCLAIMER =
   "Professional service only. Godesi lists licensed therapists and spas for therapeutic massage and wellness services — any other request is banned and gets the provider and the member removed. Providers must give accurate credentials and verify their ID.";
+
+/** The IT training course master list, grouped into the picker's tabs. */
+const IT_COURSE_TABS: OptionTab[] = [
+  {
+    title: "Programming & Development",
+    options: [
+      "Java / J2EE",
+      "Python",
+      ".NET / C#",
+      "JavaScript",
+      "Node.js",
+      "React.js",
+      "Angular",
+      "Full Stack Development",
+      "Web Development",
+      "Mobile App Development (iOS / Android / Flutter)",
+    ],
+  },
+  {
+    title: "Cloud & DevOps",
+    options: [
+      "AWS",
+      "Microsoft Azure",
+      "Google Cloud Platform",
+      "DevOps",
+      "Docker",
+      "Kubernetes",
+      "CI/CD",
+    ],
+  },
+  {
+    title: "Data & AI",
+    options: [
+      "Data Science",
+      "Machine Learning",
+      "Artificial Intelligence",
+      "Data Analytics",
+      "Big Data / Hadoop",
+      "Power BI",
+      "Tableau",
+    ],
+  },
+  {
+    title: "Cyber Security",
+    options: [
+      "Cyber Security",
+      "Ethical Hacking",
+      "Penetration Testing",
+      "Information Security",
+    ],
+  },
+  {
+    title: "Enterprise Tools",
+    options: [
+      "SAP (All Modules)",
+      "Salesforce",
+      "ServiceNow",
+      "Workday",
+      "Oracle",
+    ],
+  },
+  {
+    title: "Networking & Infra",
+    options: [
+      "Networking",
+      "Cisco (CCNA / CCNP)",
+      "Linux / Unix",
+      "VMware",
+      "System Administration",
+    ],
+  },
+  {
+    title: "Business & QA",
+    options: [
+      "Business Analyst",
+      "QA / Testing",
+      "Automation Testing (Selenium)",
+      "Digital Marketing",
+      "Product Management",
+    ],
+  },
+  {
+    title: "Emerging Tech",
+    options: [
+      "Blockchain",
+      "Internet of Things (IoT)",
+      "AR / VR",
+      "Robotics",
+    ],
+  },
+];
+
+/**
+ * IT training institutes: courses plus the visa and career support students
+ * actually search on, so "Data Science + OPT + Online" is one query.
+ */
+const IT_TRAINING_SET: SpecialtySet = {
+  title: "Select the courses you teach",
+  hint: "Search or open a tab, tick everything you teach — students filter on these.",
+  options: IT_COURSE_TABS.flatMap((tab) => tab.options),
+  optionTabs: IT_COURSE_TABS,
+  bundles: [
+    {
+      title: "Full Stack Developer bundle",
+      options: [
+        "JavaScript",
+        "React.js",
+        "Node.js",
+        "Full Stack Development",
+        "Web Development",
+      ],
+    },
+    {
+      title: "Data Science career track",
+      options: [
+        "Python",
+        "Data Science",
+        "Machine Learning",
+        "Data Analytics",
+        "Power BI",
+      ],
+    },
+    {
+      title: "DevOps engineer path",
+      options: ["DevOps", "Docker", "Kubernetes", "CI/CD", "Linux / Unix"],
+    },
+    {
+      title: "Cloud architect path",
+      options: [
+        "AWS",
+        "Microsoft Azure",
+        "Google Cloud Platform",
+        "Networking",
+        "System Administration",
+      ],
+    },
+  ],
+  customOption: {
+    label: "Other courses you teach",
+    hint: "Comma separated, e.g. Snowflake Training, Databricks Advanced",
+  },
+  choices: [
+    {
+      key: "training",
+      title: "Training type",
+      options: [
+        "Classroom Training",
+        "Online Training",
+        "Hybrid Training",
+        "Corporate Training",
+        "One-to-One Training",
+        "Weekend Batches",
+        "Fast Track Courses",
+      ],
+      mode: "multi",
+    },
+    {
+      key: "visa",
+      title: "Visa & career support",
+      hint: "What students on F1, OPT, CPT or H1B get from you",
+      options: [
+        "OPT Training Support",
+        "CPT Training Support",
+        "Internship Placement",
+        "H1B Sponsorship Guidance",
+        "H1B Transfer Support",
+        "GC (Green Card) Processing Support",
+        "Resume Preparation",
+        "Mock Interviews",
+        "Job Placement Assistance",
+        "Real-Time Project Training",
+        "Client Interview Support",
+      ],
+      mode: "multi",
+    },
+    {
+      key: "mode",
+      title: "Delivery mode",
+      options: ["Online", "Offline (Classroom)", "Hybrid"],
+      mode: "multi",
+      required: true,
+    },
+    {
+      key: "level",
+      title: "Experience level you teach",
+      options: ["Beginner", "Intermediate", "Advanced", "Career Switch"],
+      mode: "multi",
+    },
+    {
+      key: "highlights",
+      title: "Highlights",
+      hint: "Only tick what you genuinely offer — false claims get the listing removed",
+      options: [
+        "⭐ Guaranteed Interview Calls",
+        "⭐ 100% Placement Assistance",
+        "⭐ Pay After Placement",
+        "⭐ Live Project Training",
+      ],
+      mode: "multi",
+    },
+  ],
+  pricing: [
+    {
+      key: "priceFrom",
+      label: "Course fee from",
+      hint: "Lowest course fee, e.g. $499",
+    },
+    {
+      key: "priceHourly",
+      label: "One-to-one rate",
+      hint: "Optional — per hour or per session",
+    },
+  ],
+  availability: {
+    label: "Batch timings",
+    hint: "e.g. Weekdays 7–9pm CST, weekend batches Sat–Sun 10am–1pm",
+  },
+  experience: true,
+};
 
 export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
   "beauty-lifestyle-spa-and-massage": {
@@ -317,6 +550,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
     },
     experience: true,
   },
+  "education-it-training-and-career-services": IT_TRAINING_SET,
 };
 
 /** Real estate agents share the engine; brokerage, MLS and sales live on /dashboard/agent. */
@@ -366,6 +600,37 @@ export function cleanSpecialties(
   const set = specialtySet(subcategorySlug);
   if (!set) return [];
   return set.options.filter((option) => values.includes(option));
+}
+
+/**
+ * Free-text extras for sets that allow them, e.g. a course we do not list yet.
+ * Capped so the tag row on a card stays readable.
+ */
+export function cleanCustomOptions(
+  subcategorySlug: string | null | undefined,
+  other: string,
+): string[] {
+  const set = specialtySet(subcategorySlug);
+  if (!set?.customOption) return [];
+  const known = new Set(set.options);
+  return Array.from(
+    new Set(
+      other
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value) => value.length > 1 && !known.has(value)),
+    ),
+  ).slice(0, 10);
+}
+
+/** Splits stored values back into listed options and the provider's own extras. */
+export function customOptionsOf(
+  subcategorySlug: string | null | undefined,
+  values: string[],
+): string[] {
+  const set = specialtySet(subcategorySlug);
+  if (!set?.customOption) return [];
+  return values.filter((value) => !set.options.includes(value));
 }
 
 /** Keeps only offered choice-group values; single-choice groups keep one answer. */
