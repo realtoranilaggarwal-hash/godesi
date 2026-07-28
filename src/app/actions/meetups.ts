@@ -7,7 +7,12 @@ import { requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { containsContactDetails, findBlockedTerm } from "@/lib/moderation";
-import { INTENT_LABELS, MEETUP_MAX_AGE, MEETUP_MIN_AGE } from "@/lib/meetups";
+import {
+  INTENT_LABELS,
+  MEETUP_MAX_AGE,
+  MEETUP_MIN_AGE,
+  roundCoord,
+} from "@/lib/meetups";
 
 const schema = z.object({
   displayName: z.string().trim().min(2, "What should people call you?").max(60),
@@ -96,6 +101,7 @@ export async function saveMeetupProfileAction(
       whatsappNumber: parsed.data.whatsapp
         ? normalizeWhatsApp(parsed.data.whatsapp)
         : null,
+      visiting: formData.get("visiting") === "on",
       status: "PENDING" as const,
     };
 
@@ -113,6 +119,66 @@ export async function saveMeetupProfileAction(
   } catch (error) {
     return fieldError(error);
   }
+}
+
+/**
+ * Stores the member's approximate location so travellers and newcomers can find
+ * people near them. Coordinates are rounded to roughly a kilometre and are only
+ * saved when the member asks for it.
+ */
+export async function shareMeetupLocationAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const latitude = Number(formData.get("latitude"));
+    const longitude = Number(formData.get("longitude"));
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      Math.abs(latitude) > 90 ||
+      Math.abs(longitude) > 180
+    ) {
+      return { error: "We could not read your location — please try again." };
+    }
+
+    const profile = await db.meetupProfile.findUnique({
+      where: { userId: user.id },
+    });
+    if (!profile) {
+      return {
+        error: "Create your Connect profile first, then share your location.",
+      };
+    }
+
+    await db.meetupProfile.update({
+      where: { id: profile.id },
+      data: {
+        latitude: roundCoord(latitude),
+        longitude: roundCoord(longitude),
+        locationSharedAt: new Date(),
+      },
+    });
+
+    revalidatePath("/connect");
+    return {
+      success:
+        "Shared. Members nearby can now see roughly how far away you are — never your exact address.",
+    };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+/** Turns "friends near me" off again and forgets the stored coordinates. */
+export async function stopSharingMeetupLocationAction() {
+  const user = await requireUser();
+  await db.meetupProfile.updateMany({
+    where: { userId: user.id },
+    data: { latitude: null, longitude: null, locationSharedAt: null },
+  });
+  revalidatePath("/connect");
 }
 
 /** Members can hide their own profile without deleting it. */

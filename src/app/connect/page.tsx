@@ -10,11 +10,14 @@ import {
   MARITAL_LABELS,
   MEETUP_INTENT_GROUPS,
   MEETUP_INTENT_NOTE,
+  distanceKm,
   intentLabels,
+  nearbyLabel,
 } from "@/lib/meetups";
 import { InlineBanner } from "@/components/Banners";
 import { SafetyResourcesRail } from "@/components/SafetyResourcesRail";
 import { PostedBy } from "@/components/PostedBy";
+import { NearMe } from "@/components/NearMe";
 import { ReportMeetupForm } from "@/components/forms/ReportMeetupForm";
 import {
   Alert,
@@ -39,6 +42,8 @@ type Filters = {
   intent?: string;
   minAge?: string;
   maxAge?: string;
+  lat?: string;
+  lng?: string;
 };
 
 function ageRange(filters: Filters) {
@@ -80,11 +85,20 @@ export default async function ConnectPage({
   const age = ageRange(searchParams);
   if (age) where.age = age;
 
-  const [profiles, mine] = await Promise.all([
+  const here = (() => {
+    const latitude = Number(searchParams.lat);
+    const longitude = Number(searchParams.lng);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+    if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
+    return { latitude, longitude };
+  })();
+  if (here) where.latitude = { not: null };
+
+  const [found, mine] = await Promise.all([
     db.meetupProfile.findMany({
       where,
       orderBy: { updatedAt: "desc" },
-      take: 60,
+      take: here ? 200 : 60,
       include: {
         user: { select: { name: true, username: true, avatarUrl: true } },
       },
@@ -93,6 +107,23 @@ export default async function ConnectPage({
       ? db.meetupProfile.findUnique({ where: { userId: user.id } })
       : Promise.resolve(null),
   ]);
+
+  const withDistance = found.map((profile) => ({
+    profile,
+    km:
+      here && profile.latitude !== null && profile.longitude !== null
+        ? distanceKm(here, {
+            latitude: profile.latitude,
+            longitude: profile.longitude,
+          })
+        : null,
+  }));
+  const profiles = here
+    ? withDistance
+        .filter((row) => row.km !== null)
+        .sort((a, b) => (a.km ?? 0) - (b.km ?? 0))
+        .slice(0, 60)
+    : withDistance;
 
   return (
     <div className="flex gap-6">
@@ -208,9 +239,23 @@ export default async function ConnectPage({
           </form>
         </Card>
 
+        <NearMe
+          canShare={Boolean(mine)}
+          sharing={Boolean(mine?.latitude && mine?.longitude)}
+        />
+
+        {here ? (
+          <Alert tone="info">
+            Showing members closest to you first — distances are approximate.{" "}
+            <Link href="/connect" className="font-semibold underline">
+              Clear
+            </Link>
+          </Alert>
+        ) : null}
+
         {profiles.length ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            {profiles.map((profile) => (
+            {profiles.map(({ profile, km }) => (
               <Card key={profile.id} className="flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -228,6 +273,12 @@ export default async function ConnectPage({
                 </div>
 
                 <div className="flex flex-wrap gap-1">
+                  {km !== null ? (
+                    <Badge tone="green">📍 {nearbyLabel(km)}</Badge>
+                  ) : null}
+                  {profile.visiting ? (
+                    <Badge tone="indigo">✈️ Visiting / new here</Badge>
+                  ) : null}
                   {intentLabels(profile.intents).map((label) => (
                     <Badge key={label} tone="slate">
                       {label}

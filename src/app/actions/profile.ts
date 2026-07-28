@@ -13,6 +13,7 @@ import {
   type PersonalSocialKey,
 } from "@/lib/personalProfile";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { institutionSlug, MIN_YEAR } from "@/lib/alumni";
 
 const optionalUrl = z
   .string()
@@ -88,6 +89,39 @@ export async function savePersonalProfileAction(
       return { error: "That username is already taken — try another." };
     }
 
+    const schools = formData.getAll("alumniInstitution").map(String);
+    const degrees = formData.getAll("alumniDegree").map(String);
+    const fields = formData.getAll("alumniField").map(String);
+    const cities = formData.getAll("alumniCity").map(String);
+    const years = formData.getAll("alumniYear").map(String);
+    const thisYear = new Date().getFullYear();
+    const alumni: {
+      institution: string;
+      slug: string;
+      degree: string | null;
+      fieldOfStudy: string | null;
+      city: string | null;
+      endYear: number | null;
+      current: boolean;
+    }[] = [];
+    for (let index = 0; index < schools.length; index += 1) {
+      const institution = schools[index].trim().slice(0, 120);
+      if (!institution) continue;
+      const year = Number.parseInt(years[index] ?? "", 10);
+      if (years[index] && (Number.isNaN(year) || year < MIN_YEAR || year > thisYear + 8)) {
+        return { error: `Check the year for ${institution}.` };
+      }
+      alumni.push({
+        institution,
+        slug: institutionSlug(institution),
+        degree: (degrees[index] ?? "").trim().slice(0, 80) || null,
+        fieldOfStudy: (fields[index] ?? "").trim().slice(0, 80) || null,
+        city: (cities[index] ?? "").trim().slice(0, 80) || null,
+        endYear: Number.isNaN(year) ? null : year,
+        current: Number.isNaN(year) ? true : year > thisYear,
+      });
+    }
+
     const previous = user.username;
     await db.user.update({
       where: { id: user.id },
@@ -110,7 +144,19 @@ export async function savePersonalProfileAction(
       },
     });
 
+    await db.$transaction([
+      db.alumniRecord.deleteMany({ where: { userId: user.id } }),
+      ...(alumni.length
+        ? [
+            db.alumniRecord.createMany({
+              data: alumni.map((entry) => ({ ...entry, userId: user.id })),
+            }),
+          ]
+        : []),
+    ]);
+
     revalidatePath("/dashboard/me");
+    revalidatePath("/alumni");
     revalidatePath(`/${username}`);
     if (previous && previous !== username) revalidatePath(`/${previous}`);
     return { success: `Saved. Your profile is live at godesi.com/${username}` };

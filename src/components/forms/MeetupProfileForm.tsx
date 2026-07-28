@@ -24,6 +24,7 @@ export type MeetupProfileDefaults = {
   intents: string[];
   bio: string;
   whatsappNumber: string;
+  visiting: boolean;
 };
 
 export function MeetupProfileForm({
@@ -147,6 +148,19 @@ export function MeetupProfileForm({
           className={inputClass}
         />
       </Field>
+
+      <label className="flex gap-2 rounded-2xl bg-cyan-50 p-3 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="visiting"
+          defaultChecked={defaults?.visiting}
+          className="mt-0.5 h-4 w-4 rounded border-slate-300"
+        />
+        <span>
+          I am travelling or new in this city — show a &ldquo;visiting / new
+          here&rdquo; tag so locals can say hello.
+        </span>
+      </label>
 
       <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
         <legend className="px-1 text-sm font-bold text-slate-900">

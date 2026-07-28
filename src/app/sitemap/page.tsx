@@ -63,6 +63,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/live", label: "Live visitor map" },
       { href: "/journalists", label: "Become a local journalist" },
       { href: "/buzz", label: "#godesi social wall" },
+      { href: "/alumni", label: "Find your batchmates" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contact us" },
       { href: "/terms", label: "Terms of service" },

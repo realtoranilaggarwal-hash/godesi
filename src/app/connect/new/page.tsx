@@ -52,6 +52,7 @@ export default async function ConnectProfilePage() {
                   intents: parseIntents(profile.intents),
                   bio: profile.bio,
                   whatsappNumber: profile.whatsappNumber ?? "",
+                  visiting: profile.visiting,
                 }
               : undefined
           }

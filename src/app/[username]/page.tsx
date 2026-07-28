@@ -12,6 +12,7 @@ import { VideoEmbed } from "@/components/VideoEmbed";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { journalistStats } from "@/lib/journalists";
+import { alumniFor } from "@/lib/alumni";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,7 @@ export default async function PublicProfilePage({
       .map((line) => line.trim())
       .filter(Boolean);
   const education = lines(user.education);
+  const schools = await alumniFor(user.id);
   const experience = lines(user.experience);
 
   return (
@@ -182,9 +184,48 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
 
+          {schools.length ? (
+            <Card>
+              <h2 className="text-lg font-bold">School &amp; college</h2>
+              <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                {schools.map((school) => (
+                  <li key={school.id} className="flex flex-wrap items-center gap-2">
+                    <span className="text-indigo-500">🎓</span>
+                    <Link
+                      href={`/alumni?institution=${encodeURIComponent(school.institution)}${school.endYear ? `&year=${school.endYear}` : ""}`}
+                      className="font-semibold text-indigo-700 underline"
+                    >
+                      {school.institution}
+                    </Link>
+                    {school.degree ? <span>· {school.degree}</span> : null}
+                    {school.fieldOfStudy ? <span>· {school.fieldOfStudy}</span> : null}
+                    {school.endYear ? (
+                      <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700">
+                        Batch of {school.endYear}
+                      </span>
+                    ) : school.current ? (
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                        Studying now
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs text-slate-500">
+                Looking for batchmates?{" "}
+                <Link
+                  href={`/alumni?institution=${encodeURIComponent(schools[0].institution)}`}
+                  className="font-semibold underline"
+                >
+                  Find everyone from {schools[0].institution}
+                </Link>
+              </p>
+            </Card>
+          ) : null}
+
           {education.length ? (
             <Card>
-              <h2 className="text-lg font-bold">Education</h2>
+              <h2 className="text-lg font-bold">Other education</h2>
               <ul className="mt-2 space-y-1 text-sm text-slate-700">
                 {education.map((item) => (
                   <li key={item} className="flex gap-2">

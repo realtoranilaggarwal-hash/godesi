@@ -9,6 +9,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
+import { AlumniFields } from "@/components/forms/AlumniFields";
+import type { AlumniEntry } from "@/lib/alumni";
 
 export type PersonalProfileValues = {
   name: string;
@@ -26,6 +28,7 @@ export type PersonalProfileValues = {
   openToWork: boolean;
   whatsappNumber: string | null;
   socials: Record<string, string | null>;
+  alumni: AlumniEntry[];
 };
 
 export function PersonalProfileForm({
@@ -154,13 +157,15 @@ export function PersonalProfileForm({
         Show an &ldquo;open to work / available for projects&rdquo; badge
       </label>
 
+      <AlumniFields defaults={profile.alumni} />
+
       <Field
-        label="Education"
-        hint="School, college, degrees or courses — one per line"
+        label="Other education"
+        hint="Certificates, workshops or anything else — one per line"
       >
         <textarea
           name="education"
-          rows={3}
+          rows={2}
           maxLength={800}
           defaultValue={profile.education ?? ""}
           className={inputClass}

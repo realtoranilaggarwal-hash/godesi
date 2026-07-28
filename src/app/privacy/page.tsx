@@ -30,6 +30,20 @@ export default function PrivacyPage() {
           these records are deleted after 24 hours.
         </li>
         <li>
+          <strong>&ldquo;Friends near me&rdquo; location (optional)</strong> — on
+          Connect you can ask your browser for your location. We use it to sort
+          nearby members by distance, and we only store it on your profile if you
+          tap &ldquo;Let others find me nearby&rdquo;. What we store is rounded to
+          roughly a kilometre, never a street address, other members see only an
+          approximate distance, and you can delete it any time with
+          &ldquo;Stop sharing my area&rdquo;.
+        </li>
+        <li>
+          <strong>School &amp; college details (optional)</strong> — the
+          institution, course, city and passing year you add to your profile are
+          public so batchmates can find you, and you can remove them any time.
+        </li>
+        <li>
           <strong>Google sign-in data</strong> — if you choose &ldquo;Sign in with
           Google&rdquo; we receive only your name, email address and profile picture from
           your Google account, and use them solely to create and identify your Godesi

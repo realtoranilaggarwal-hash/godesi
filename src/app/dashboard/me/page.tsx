@@ -7,6 +7,7 @@ import { PersonalProfileForm } from "@/components/forms/PersonalProfileForm";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
+import { alumniFor } from "@/lib/alumni";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My profile" };
@@ -17,6 +18,14 @@ export default async function PersonalProfilePage() {
 
   const suggested =
     user.username ?? (await suggestUsername(user.name, user.email));
+  const alumni = (await alumniFor(user.id)).map((row) => ({
+    institution: row.institution,
+    degree: row.degree ?? "",
+    fieldOfStudy: row.fieldOfStudy ?? "",
+    city: row.city ?? "",
+    endYear: row.endYear ? String(row.endYear) : "",
+    current: row.current,
+  }));
 
   return (
     <div className="flex justify-center gap-6">
@@ -66,6 +75,7 @@ export default async function PersonalProfilePage() {
               videoUrls: user.videoUrls,
               openToWork: user.openToWork,
               whatsappNumber: user.whatsappNumber,
+              alumni,
               socials: Object.fromEntries(
                 PERSONAL_SOCIALS.map((social) => [social.key, user[social.key]]),
               ),

@@ -83,6 +83,7 @@ export async function SiteHeader() {
     { href: "/blog", label: "Blog", icon: "✍️" },
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
+    { href: "/alumni", label: "Find batchmates", icon: "🎓" },
     { href: "/resources", label: "Resources", icon: "🔗" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
