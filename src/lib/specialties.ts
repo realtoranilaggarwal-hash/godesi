@@ -550,7 +550,17 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
     },
     experience: true,
   },
+  /** Every IT training subcategory shares one set: courses, visa and career support. */
   "education-it-training-and-career-services": IT_TRAINING_SET,
+  "it-training": IT_TRAINING_SET,
+  "it-training-it-training-institutes": IT_TRAINING_SET,
+  "it-training-online-bootcamps": IT_TRAINING_SET,
+  "it-training-opt-cpt-training": IT_TRAINING_SET,
+  "it-training-h1b-and-visa-support": IT_TRAINING_SET,
+  "it-training-corporate-training": IT_TRAINING_SET,
+  "it-training-interview-and-resume-prep": IT_TRAINING_SET,
+  "it-training-placement-assistance": IT_TRAINING_SET,
+  "it-training-staffing-and-consulting": IT_TRAINING_SET,
 };
 
 /** Real estate agents share the engine; brokerage, MLS and sales live on /dashboard/agent. */
