@@ -13,7 +13,7 @@ export function Card({
   return (
     <div
       id={id}
-      className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}
+      className={`scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}
     >
       {children}
     </div>
