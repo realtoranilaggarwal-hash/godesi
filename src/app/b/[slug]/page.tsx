@@ -9,6 +9,7 @@ import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { QrCard } from "@/components/QrCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { FoundingBadge } from "@/components/FoundingBadge";
 import { TrackVisit } from "@/components/TrackVisit";
 import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
@@ -38,6 +39,7 @@ async function getBusiness(slug: string) {
           name: true,
           username: true,
           avatarUrl: true,
+          foundingNumber: true,
         },
       },
       categoryRef: { select: { slug: true, name: true, icon: true, color: true } },
@@ -191,7 +193,11 @@ export default async function BusinessProfilePage({
               {business.owner && business.owner.plan !== "FREE" ? (
                 <Badge tone="indigo">{business.owner.plan}</Badge>
               ) : null}
-              {business.owner ? null : <Badge tone="slate">Unclaimed</Badge>}
+              {business.owner ? (
+                <FoundingBadge number={business.owner.foundingNumber} />
+              ) : (
+                <Badge tone="slate">Unclaimed</Badge>
+              )}
               {business.profileType === "PROFESSIONAL" ? (
                 <Badge tone="green">Professional</Badge>
               ) : null}

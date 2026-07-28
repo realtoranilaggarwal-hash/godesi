@@ -109,6 +109,7 @@ export async function publicProfile(username: string) {
       plan: true,
       planExpiresAt: true,
       createdAt: true,
+      foundingNumber: true,
       business: {
         select: {
           slug: true,

@@ -3,9 +3,12 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
 import { pointValues, REWARDS } from "@/lib/rewards";
+import { FOUNDING_LIMIT } from "@/lib/founding";
 import { Badge, Card } from "@/components/ui";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
+import { FoundingOffer } from "@/components/FoundingOffer";
+import { FoundingBadge } from "@/components/FoundingBadge";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -100,6 +103,20 @@ export default async function RewardsExplainerPage() {
             </Link>
           </div>
         </Card>
+
+        {user?.foundingNumber != null ? (
+          <Card className="border-amber-200 bg-amber-50">
+            <div className="flex flex-wrap items-center gap-2">
+              <FoundingBadge number={user.foundingNumber} />
+              <p className="text-sm font-semibold text-slate-800">
+                You are one of the first {FOUNDING_LIMIT} members — every reward
+                below pays you double.
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <FoundingOffer showCta={!user} />
+        )}
 
         <div className="grid gap-4 sm:grid-cols-3">
           {STEPS.map((step) => (

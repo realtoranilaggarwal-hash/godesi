@@ -1,6 +1,7 @@
 import type { PointsReason } from "@prisma/client";
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notifications";
+import { FOUNDING_WELCOME_POINTS } from "@/lib/founding";
 
 export type EarnReason = Exclude<PointsReason, "REDEMPTION" | "ADJUSTMENT">;
 
@@ -17,6 +18,9 @@ export const POINTS: Record<EarnReason, number> = {
   NEWS_UPVOTED: 5,
   NEWS_FEATURED: 25,
   JOURNALIST_LEVEL: 50,
+  FOUNDING_MEMBER: FOUNDING_WELCOME_POINTS,
+  /// Paid as a copy of whatever the member just earned, so it has no fixed value.
+  FOUNDING_BONUS: 0,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {
@@ -31,6 +35,8 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   NEWS_UPVOTED: "Your news story is popular with members",
   NEWS_FEATURED: "Your story was picked as important news",
   JOURNALIST_LEVEL: "You reached a new local journalist level",
+  FOUNDING_MEMBER: "Welcome, founding member 🏅",
+  FOUNDING_BONUS: "Founding member bonus — double points 🏅",
   REDEMPTION: "Points redeemed",
   ADJUSTMENT: "Adjusted by the Godesi team",
 };
@@ -138,7 +144,40 @@ export async function awardPoints({
   });
 
   if (!skipReferralBonus) await creditInviter(userId, reason);
+  await creditFoundingBonus({ userId, reason, points: value, uniqueKey });
   return entry;
+}
+
+/** Founding members earn double, paid as a matching bonus entry. */
+async function creditFoundingBonus({
+  userId,
+  reason,
+  points,
+  uniqueKey,
+}: {
+  userId: string;
+  reason: PointsReason;
+  points: number;
+  uniqueKey: string | null;
+}) {
+  if (reason === "FOUNDING_BONUS" || reason === "FOUNDING_MEMBER") return;
+  if (reason === "REDEMPTION" || reason === "ADJUSTMENT") return;
+
+  const member = await db.user.findUnique({
+    where: { id: userId },
+    select: { foundingNumber: true },
+  });
+  if (member?.foundingNumber == null) return;
+
+  await db.pointsEntry.create({
+    data: {
+      userId,
+      points,
+      reason: "FOUNDING_BONUS",
+      note: `Founding member bonus: ${REASON_LABELS[reason].toLowerCase()}`,
+      uniqueKey: uniqueKey ? `${uniqueKey}:founding` : null,
+    },
+  });
 }
 
 /** Pays the inviter when an approved referral hits a rewarded milestone. */

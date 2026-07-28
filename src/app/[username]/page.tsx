@@ -11,6 +11,7 @@ import { Badge, Card, EmptyState, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
+import { FoundingBadge } from "@/components/FoundingBadge";
 import { journalistStats } from "@/lib/journalists";
 import { alumniFor } from "@/lib/alumni";
 
@@ -99,6 +100,7 @@ export default async function PublicProfilePage({
                   <Badge tone="green">✅ Open to work / projects</Badge>
                 ) : null}
                 {user.location ? <Badge>📍 {user.location}</Badge> : null}
+                <FoundingBadge number={user.foundingNumber} />
                 {journalist?.level ? (
                   <JournalistBadge
                     level={journalist.level}

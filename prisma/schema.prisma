@@ -4,7 +4,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  /// Pooled (pgbouncer) connection — serverless functions would otherwise
+  /// exhaust the database's connection limit.
+  url       = env("DATABASE_URL")
+  /// Direct connection, used for migrations which pgbouncer cannot run.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -130,6 +134,10 @@ enum PointsReason {
   NEWS_FEATURED
   /// Reached a new local-journalist star level.
   JOURNALIST_LEVEL
+  /// Welcome bonus for one of the first 1000 members.
+  FOUNDING_MEMBER
+  /// A founding member's doubled share of a reward they earned.
+  FOUNDING_BONUS
   REDEMPTION
   ADJUSTMENT
 }
@@ -151,6 +159,10 @@ model User {
   createdAt     DateTime  @default(now())
 
   emailVerifiedAt DateTime?
+
+  /// 1..1000 for the first thousand members — powers the 🏅 Founding member
+  /// badge and their double reward points. Null once the spots are gone.
+  foundingNumber Int? @unique
 
   /// Opted into the local journalist programme, and the patch they cover.
   journalistSince DateTime?

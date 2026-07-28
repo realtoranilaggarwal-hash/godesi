@@ -13,6 +13,7 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
+import { welcomeFoundingMember } from "@/lib/founding";
 
 /** Only same-site paths may be used as a post-auth destination. */
 function safeNext(value: FormDataEntryValue | null) {
@@ -57,6 +58,7 @@ export async function signupAction(
     });
     await createSession(user.id);
     await creditReferral(user.id);
+    await welcomeFoundingMember(user.id);
 
     if (emailEnabled()) {
       await issueEmailOtp(email);

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { createSession, hashPassword } from "@/lib/auth";
 import { fetchGoogleProfile, googleAuthEnabled } from "@/lib/googleAuth";
 import { creditReferral } from "@/lib/referrals";
+import { welcomeFoundingMember } from "@/lib/founding";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,10 @@ export async function GET(request: Request) {
       },
     }));
 
-  if (!existing) await creditReferral(user.id);
+  if (!existing) {
+    await creditReferral(user.id);
+    await welcomeFoundingMember(user.id);
+  }
   if (existing && profile.emailVerified && !existing.emailVerifiedAt) {
     await db.user.update({
       where: { id: existing.id },
