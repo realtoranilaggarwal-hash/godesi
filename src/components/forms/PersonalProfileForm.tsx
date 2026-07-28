@@ -7,6 +7,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
+import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 
 export type PersonalProfileValues = {
   name: string;
@@ -14,6 +15,16 @@ export type PersonalProfileValues = {
   bio: string | null;
   location: string | null;
   avatarUrl: string | null;
+  headline: string | null;
+  lookingFor: string | null;
+  education: string | null;
+  experience: string | null;
+  skills: string[];
+  languages: string[];
+  videoUrls: string[];
+  openToWork: boolean;
+  whatsappNumber: string | null;
+  socials: Record<string, string | null>;
 };
 
 export function PersonalProfileForm({
@@ -88,7 +99,19 @@ export function PersonalProfileForm({
         />
       </Field>
 
-      <Field label="Bio" hint="A couple of lines about you — max 500 characters">
+      <Field
+        label="Headline"
+        hint="One line under your name — e.g. \u201cWedding photographer & drone pilot, Toronto\u201d"
+      >
+        <input
+          name="headline"
+          maxLength={120}
+          defaultValue={profile.headline ?? ""}
+          className={inputClass}
+        />
+      </Field>
+
+      <Field label="About me" hint="A couple of lines about you — max 500 characters">
         <textarea
           name="bio"
           rows={4}
@@ -96,6 +119,115 @@ export function PersonalProfileForm({
           className={inputClass}
         />
       </Field>
+
+      <Field
+        label="What I am looking for"
+        hint="Clients, a job, partners, a mentor, a room, community — say it plainly"
+      >
+        <textarea
+          name="lookingFor"
+          rows={3}
+          maxLength={500}
+          defaultValue={profile.lookingFor ?? ""}
+          className={inputClass}
+        />
+      </Field>
+
+      <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+        <input
+          type="checkbox"
+          name="openToWork"
+          defaultChecked={profile.openToWork}
+          className="h-4 w-4"
+        />
+        Show an &ldquo;open to work / available for projects&rdquo; badge
+      </label>
+
+      <Field
+        label="Education"
+        hint="School, college, degrees or courses — one per line"
+      >
+        <textarea
+          name="education"
+          rows={3}
+          maxLength={800}
+          defaultValue={profile.education ?? ""}
+          className={inputClass}
+        />
+      </Field>
+
+      <Field
+        label="Work & achievements"
+        hint="Roles, projects, awards — one per line"
+      >
+        <textarea
+          name="experience"
+          rows={4}
+          maxLength={1200}
+          defaultValue={profile.experience ?? ""}
+          className={inputClass}
+        />
+      </Field>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Skills & interests" hint="Comma separated">
+          <input
+            name="skills"
+            defaultValue={profile.skills.join(", ")}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Languages" hint="Comma separated">
+          <input
+            name="languages"
+            defaultValue={profile.languages.join(", ")}
+            className={inputClass}
+          />
+        </Field>
+      </div>
+
+      <Field
+        label="Videos"
+        hint="YouTube or Vimeo links, one per line — up to 3 play on your profile"
+      >
+        <textarea
+          name="videoUrls"
+          rows={3}
+          defaultValue={profile.videoUrls.join("\n")}
+          className={inputClass}
+        />
+      </Field>
+
+      <Field
+        label="WhatsApp number"
+        hint="Optional — shows a chat button. Leave empty to keep it private."
+      >
+        <input
+          name="whatsappNumber"
+          defaultValue={profile.whatsappNumber ?? ""}
+          placeholder="+1 416 555 0134"
+          className={inputClass}
+        />
+      </Field>
+
+      <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <summary className="cursor-pointer text-sm font-bold text-slate-800">
+          Social links ({PERSONAL_SOCIALS.length} options)
+        </summary>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {PERSONAL_SOCIALS.map((social) => (
+            <Field key={social.key} label={`${social.icon} ${social.label}`}>
+              <input
+                name={social.key}
+                type="url"
+                placeholder={social.placeholder}
+                defaultValue={profile.socials[social.key] ?? ""}
+                className={inputClass}
+              />
+            </Field>
+          ))}
+        </div>
+      </details>
 
       <SubmitButton pendingLabel="Saving...">Save my profile</SubmitButton>
     </form>

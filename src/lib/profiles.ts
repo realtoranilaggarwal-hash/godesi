@@ -85,6 +85,27 @@ export async function publicProfile(username: string) {
       avatarUrl: true,
       bio: true,
       location: true,
+      headline: true,
+      lookingFor: true,
+      education: true,
+      experience: true,
+      skills: true,
+      languages: true,
+      videoUrls: true,
+      openToWork: true,
+      whatsappNumber: true,
+      websiteUrl: true,
+      instagramUrl: true,
+      facebookUrl: true,
+      youtubeUrl: true,
+      linkedinUrl: true,
+      xUrl: true,
+      tiktokUrl: true,
+      threadsUrl: true,
+      telegramUrl: true,
+      pinterestUrl: true,
+      snapchatUrl: true,
+      githubUrl: true,
       plan: true,
       planExpiresAt: true,
       createdAt: true,
@@ -102,7 +123,7 @@ export async function publicProfile(username: string) {
   });
   if (!user) return null;
 
-  const [events, leads, reviews] = await Promise.all([
+  const [events, leads, reviews, listings] = await Promise.all([
     db.event.findMany({
       where: { organizerId: user.id, status: "APPROVED" },
       orderBy: { startsAt: "desc" },
@@ -127,9 +148,15 @@ export async function publicProfile(username: string) {
         business: { select: { slug: true, name: true } },
       },
     }),
+    db.listing.findMany({
+      where: { ownerId: user.id, status: "APPROVED" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: { slug: true, title: true, city: true, kind: true, price: true },
+    }),
   ]);
 
-  return { user, events, leads, reviews };
+  return { user, events, leads, reviews, listings };
 }
 
 export type PostedBy = {

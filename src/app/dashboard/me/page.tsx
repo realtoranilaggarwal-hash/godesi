@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { suggestUsername } from "@/lib/profiles";
 import { PersonalProfileForm } from "@/components/forms/PersonalProfileForm";
+import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 
@@ -56,6 +57,18 @@ export default async function PersonalProfilePage() {
               bio: user.bio,
               location: user.location,
               avatarUrl: user.avatarUrl,
+              headline: user.headline,
+              lookingFor: user.lookingFor,
+              education: user.education,
+              experience: user.experience,
+              skills: user.skills,
+              languages: user.languages,
+              videoUrls: user.videoUrls,
+              openToWork: user.openToWork,
+              whatsappNumber: user.whatsappNumber,
+              socials: Object.fromEntries(
+                PERSONAL_SOCIALS.map((social) => [social.key, user[social.key]]),
+              ),
             }}
             suggestedUsername={suggested}
           />

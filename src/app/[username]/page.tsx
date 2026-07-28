@@ -5,9 +5,11 @@ import { notFound } from "next/navigation";
 import { normalizeUsername, publicProfile, RESERVED_USERNAMES } from "@/lib/profiles";
 import { effectivePlan } from "@/lib/plans";
 import { formatEventDate } from "@/lib/events";
-import { siteUrl } from "@/lib/format";
+import { siteUrl, whatsappLink } from "@/lib/format";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, EmptyState, Stars } from "@/components/ui";
+import { VideoEmbed } from "@/components/VideoEmbed";
+import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +44,24 @@ export default async function PublicProfilePage({
   const profile = await load(params.username);
   if (!profile) notFound();
 
-  const { user, events, leads, reviews } = profile;
+  const { user, events, leads, reviews, listings } = profile;
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
-  const activity = events.length + leads.length + reviews.length;
+  const activity =
+    events.length + leads.length + reviews.length + listings.length;
+  const socialLinks = PERSONAL_SOCIALS.map((social) => ({
+    ...social,
+    url: user[social.key],
+  })).filter((social): social is typeof social & { url: string } =>
+    Boolean(social.url),
+  );
+  const lines = (value: string | null) =>
+    (value ?? "")
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  const education = lines(user.education);
+  const experience = lines(user.experience);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -67,8 +83,16 @@ export default async function PublicProfilePage({
             )}
             <div>
               <h1 className="text-2xl font-black text-slate-900">{user.name}</h1>
+              {user.headline ? (
+                <p className="text-sm font-semibold text-slate-700">
+                  {user.headline}
+                </p>
+              ) : null}
               <p className="text-sm text-slate-500">@{user.username}</p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
+                {user.openToWork ? (
+                  <Badge tone="green">✅ Open to work / projects</Badge>
+                ) : null}
                 {user.location ? <Badge>📍 {user.location}</Badge> : null}
                 {plan !== "FREE" ? <Badge tone="indigo">{plan} member</Badge> : null}
                 <Badge tone="green">
@@ -84,10 +108,104 @@ export default async function PublicProfilePage({
             {user.bio}
           </p>
         ) : null}
+
+        {socialLinks.length || user.whatsappNumber ? (
+          <div className="flex flex-wrap gap-2 border-t border-slate-100 px-5 py-4">
+            {user.whatsappNumber ? (
+              <a
+                href={whatsappLink(
+                  user.whatsappNumber,
+                  `Hi ${user.name}, I found you on Godesi.`,
+                )}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 rounded-xl bg-[#25D366] px-3 py-2 text-sm font-semibold text-white hover:brightness-95"
+              >
+                <span aria-hidden>💬</span> WhatsApp
+              </a>
+            ) : null}
+            {socialLinks.map((social) => (
+              <a
+                key={social.key}
+                href={social.url}
+                target="_blank"
+                rel="noreferrer nofollow"
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <span aria-hidden>{social.icon}</span> {social.label}
+              </a>
+            ))}
+          </div>
+        ) : null}
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          {user.lookingFor ? (
+            <Card className="bg-gradient-to-r from-amber-50 to-rose-50">
+              <h2 className="text-lg font-bold">What I am looking for</h2>
+              <p className="mt-1 whitespace-pre-line text-sm text-slate-700">
+                {user.lookingFor}
+              </p>
+            </Card>
+          ) : null}
+
+          {user.videoUrls.length ? (
+            <section className="space-y-3">
+              <h2 className="text-lg font-bold">Videos</h2>
+              {user.videoUrls.map((url) => (
+                <VideoEmbed key={url} url={url} title={`${user.name} video`} />
+              ))}
+            </section>
+          ) : null}
+
+          {experience.length ? (
+            <Card>
+              <h2 className="text-lg font-bold">Work & achievements</h2>
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                {experience.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-indigo-500">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+
+          {education.length ? (
+            <Card>
+              <h2 className="text-lg font-bold">Education</h2>
+              <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                {education.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-indigo-500">🎓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : null}
+
+          {listings.length ? (
+            <section className="space-y-2">
+              <h2 className="text-lg font-bold">Listings</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {listings.map((listing) => (
+                  <Link
+                    key={listing.slug}
+                    href={`/listings/${listing.slug}`}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <p className="font-bold text-slate-900">{listing.title}</p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      📍 {listing.city}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
           {user.business && user.business.status === "APPROVED" ? (
             <section className="space-y-2">
               <h2 className="text-lg font-bold">Business</h2>
@@ -193,6 +311,34 @@ export default async function PublicProfilePage({
         </div>
 
         <aside className="space-y-4">
+          {user.skills.length || user.languages.length ? (
+            <Card className="space-y-3">
+              {user.skills.length ? (
+                <div>
+                  <p className="text-sm font-bold text-slate-900">
+                    Skills & interests
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {user.skills.map((skill) => (
+                      <Badge key={skill} tone="indigo">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {user.languages.length ? (
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Languages</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {user.languages.map((language) => (
+                      <Badge key={language}>{language}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </Card>
+          ) : null}
           <Card className="space-y-3 text-center">
             <p className="text-sm font-bold text-slate-900">Personal QR code</p>
             <Image

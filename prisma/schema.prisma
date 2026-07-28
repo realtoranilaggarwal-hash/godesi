@@ -139,6 +139,35 @@ model User {
   bio       String?
   location  String?
 
+  /// One-line "who I am" shown under the name on the public profile.
+  headline    String?
+  /// What the member wants from the community — work, clients, partners, help.
+  lookingFor  String?
+  /// School, college and courses, one per line.
+  education   String?
+  /// Work history, projects and achievements, one per line.
+  experience  String?
+  skills      String[] @default([])
+  languages   String[] @default([])
+  /// YouTube/Vimeo links embedded on the profile.
+  videoUrls   String[] @default([])
+  openToWork  Boolean  @default(false)
+
+  websiteUrl     String?
+  instagramUrl   String?
+  facebookUrl    String?
+  youtubeUrl     String?
+  linkedinUrl    String?
+  xUrl           String?
+  tiktokUrl      String?
+  threadsUrl     String?
+  telegramUrl    String?
+  pinterestUrl   String?
+  snapchatUrl    String?
+  githubUrl      String?
+  /// Published on purpose by the member, unlike the private account phone.
+  whatsappNumber String?
+
   business Business?
   claims   BusinessClaim[]
   leads    Lead[]
