@@ -17,6 +17,7 @@ import { siteUrl } from "@/lib/format";
 import { closeLeadAction } from "@/app/actions/leads";
 import { emailEnabled } from "@/lib/email";
 import { SidebarBanners } from "@/components/Banners";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -134,6 +135,7 @@ export default async function DashboardPage({
               Notifications
             </LinkButton>
             <LinkButton href="/leads">Browse leads</LinkButton>
+            <SignOutButton />
           </div>
         </div>
 

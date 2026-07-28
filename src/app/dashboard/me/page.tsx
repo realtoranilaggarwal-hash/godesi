@@ -8,6 +8,7 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { alumniFor } from "@/lib/alumni";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My profile" };
@@ -30,12 +31,15 @@ export default async function PersonalProfilePage() {
   return (
     <div className="flex justify-center gap-6">
       <div className="min-w-0 max-w-3xl flex-1 space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold">My personal profile</h1>
-          <p className="text-sm text-slate-600">
-            This is the social side of Godesi — your photo, bio and everything
-            you have posted, all on one shareable page.
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">My personal profile</h1>
+            <p className="text-sm text-slate-600">
+              This is the social side of Godesi — your photo, bio and everything
+              you have posted, all on one shareable page.
+            </p>
+          </div>
+          <SignOutButton />
         </div>
 
         {user.username ? (
@@ -77,7 +81,10 @@ export default async function PersonalProfilePage() {
               whatsappNumber: user.whatsappNumber,
               alumni,
               socials: Object.fromEntries(
-                PERSONAL_SOCIALS.map((social) => [social.key, user[social.key]]),
+                PERSONAL_SOCIALS.map((social) => [
+                  social.key,
+                  user[social.key],
+                ]),
               ),
             }}
             suggestedUsername={suggested}

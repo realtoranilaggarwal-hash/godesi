@@ -10,6 +10,7 @@ import { PostingSidebar } from "@/components/PostingSidebar";
 import { ListingHelp } from "@/components/ListingHelp";
 import { effectivePlan } from "@/lib/plans";
 import { requestCountry } from "@/lib/currency";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -47,9 +48,12 @@ export default async function ProfileEditorPage({
   return (
     <div className="flex justify-center gap-6">
       <div className="min-w-0 max-w-3xl flex-1 space-y-4">
-        <h1 className="text-2xl font-bold">
-          {business ? "Edit your digital card" : "Create your digital card"}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold">
+            {business ? "Edit your digital card" : "Create your digital card"}
+          </h1>
+          <SignOutButton />
+        </div>
         {isAgentCard(business?.subcategorySlug ?? null) ||
         searchParams.subcategory === "real-estate-property-dealers" ? (
           <Card className="border-indigo-200 bg-indigo-50">
