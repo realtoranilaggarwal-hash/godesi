@@ -54,6 +54,7 @@ export async function SiteHeader() {
 
   return (
     <HeaderShell
+      items={categoryItems}
       bar={
         <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="shrink-0" aria-label="Godesi home">

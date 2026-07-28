@@ -84,7 +84,7 @@ export function MobileMenu({
             </div>
           )}
 
-          <div className="border-t border-slate-100 px-4 py-3">
+          <div className="border-t border-slate-100 px-4 py-3 lg:hidden">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
               Categories
             </p>
