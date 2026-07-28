@@ -19,6 +19,17 @@ enum Plan {
   PREMIUM
 }
 
+enum EventMode {
+  OFFLINE
+  ONLINE
+  HYBRID
+}
+
+enum EventFrequency {
+  ONE_TIME
+  RECURRING
+}
+
 enum ListingStatus {
   PENDING
   APPROVED
@@ -611,6 +622,17 @@ model Event {
   endsAt      DateTime?
   venue       String
   city        String
+  state       String?
+  country     String?
+  /// Conference, workshop, concert… drives the badge and the type filter.
+  eventType   String?
+  mode        EventMode      @default(OFFLINE)
+  /// Join link for online and hybrid events.
+  onlineUrl   String?
+  frequency   EventFrequency @default(ONE_TIME)
+  /// Plain-English schedule for recurring events, e.g. "Every Sunday 10am".
+  recurrence  String?
+  tags        String[]       @default([])
   imageUrl    String?
   /// Promo video pasted from YouTube or Vimeo.
   videoUrl    String?
@@ -630,7 +652,11 @@ model Event {
 
   categorySlug String?
   category     Category? @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
+  /// Every category the event should appear under, including the primary one.
+  categorySlugs String[] @default([])
 
+  speakers EventSpeaker[]
+  sessions EventSession[]
   tickets Ticket[]
   /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
   tiers   TicketTier[]
@@ -640,6 +666,33 @@ model Event {
   @@index([categorySlug])
   @@index([city])
   @@map("EventListing")
+}
+
+model EventSpeaker {
+  id        String  @id @default(cuid())
+  eventId   String
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name      String
+  photoUrl  String?
+  bio       String?
+  sortOrder Int     @default(0)
+
+  @@index([eventId])
+}
+
+/// One agenda row — a talk, workshop slot or stage on the event schedule.
+model EventSession {
+  id        String  @id @default(cuid())
+  eventId   String
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  title     String
+  stage     String?
+  speaker   String?
+  startTime String?
+  endTime   String?
+  sortOrder Int     @default(0)
+
+  @@index([eventId])
 }
 
 model Ticket {

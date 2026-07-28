@@ -12,6 +12,7 @@ import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
+import { eventModeIcon, eventModeLabel } from "@/lib/eventOptions";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ async function loadEvent(slug: string) {
     where: { slug },
     include: {
       tiers: { orderBy: { sortOrder: "asc" } },
+      speakers: { orderBy: { sortOrder: "asc" } },
+      sessions: { orderBy: { sortOrder: "asc" } },
       category: { select: { slug: true, name: true, icon: true, color: true } },
       organizer: {
         select: { name: true, username: true, avatarUrl: true },
@@ -89,6 +92,15 @@ export default async function EventPage({
                   </Badge>
                 </Link>
               ) : null}
+              {event.eventType ? <Badge tone="amber">{event.eventType}</Badge> : null}
+              <Badge>
+                {eventModeIcon(event.mode)} {eventModeLabel(event.mode)}
+              </Badge>
+              {event.frequency === "RECURRING" ? (
+                <Badge tone="green">
+                  🔁 {event.recurrence || "Recurring"}
+                </Badge>
+              ) : null}
               {past ? <Badge tone="slate">Finished</Badge> : null}
               {left === 0 && !past ? <Badge tone="red">Sold out</Badge> : null}
             </div>
@@ -98,7 +110,22 @@ export default async function EventPage({
               <p>📅 {formatEventDate(event.startsAt)}</p>
               <p>
                 📍 {event.venue}, {event.city}
+                {event.state ? `, ${event.state}` : ""}
+                {event.country ? `, ${event.country}` : ""}
               </p>
+              {event.onlineUrl ? (
+                <p>
+                  🔗{" "}
+                  <a
+                    href={event.onlineUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-indigo-600 hover:underline"
+                  >
+                    Join link
+                  </a>
+                </p>
+              ) : null}
               <p>
                 🎫{" "}
                 {event.tiers.length
@@ -112,6 +139,15 @@ export default async function EventPage({
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>
             <p className="whitespace-pre-line text-slate-700">{event.description}</p>
+            {event.tags.length ? (
+              <div className="flex flex-wrap gap-1.5">
+                {event.tags.map((tag) => (
+                  <Badge key={tag} tone="slate">
+                    #{tag}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
             <VideoEmbed url={event.videoUrl} title={event.title} />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
@@ -122,6 +158,59 @@ export default async function EventPage({
             </div>
           </div>
         </div>
+
+        {event.sessions.length ? (
+          <Card>
+            <h2 className="font-bold">Agenda</h2>
+            <ul className="mt-3 divide-y divide-slate-100">
+              {event.sessions.map((session) => (
+                <li key={session.id} className="flex flex-wrap gap-x-3 gap-y-1 py-2">
+                  <p className="w-28 shrink-0 text-sm font-semibold text-indigo-700">
+                    {session.startTime
+                      ? `${session.startTime}${session.endTime ? `–${session.endTime}` : ""}`
+                      : "—"}
+                  </p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900">{session.title}</p>
+                    <p className="text-sm text-slate-500">
+                      {[session.stage, session.speaker].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
+        {event.speakers.length ? (
+          <Card>
+            <h2 className="font-bold">Speakers & guests</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {event.speakers.map((speaker) => (
+                <div key={speaker.id} className="flex gap-3">
+                  {speaker.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={speaker.photoUrl}
+                      alt={speaker.name}
+                      className="h-14 w-14 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg font-black text-white">
+                      {speaker.name.slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900">{speaker.name}</p>
+                    {speaker.bio ? (
+                      <p className="text-sm text-slate-600">{speaker.bio}</p>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
 
         {event.tiers.length ? (
           <Card>

@@ -52,6 +52,58 @@ const optionalUrl = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
+type SpeakerInput = { name: string; bio: string | null; photoUrl: string | null };
+type SessionInput = {
+  title: string;
+  stage: string | null;
+  speaker: string | null;
+  startTime: string | null;
+  endTime: string | null;
+};
+
+const MAX_SPEAKERS = 12;
+const MAX_SESSIONS = 20;
+
+/** Repeated speaker rows; rows without a name are skipped. */
+function readSpeakers(formData: FormData): SpeakerInput[] {
+  const names = formData.getAll("speakerName").map((value) => String(value).trim());
+  const bios = formData.getAll("speakerBio").map((value) => String(value).trim());
+  const photos = formData.getAll("speakerPhoto").map((value) => String(value).trim());
+
+  const speakers: SpeakerInput[] = [];
+  for (let index = 0; index < names.length && speakers.length < MAX_SPEAKERS; index += 1) {
+    if (!names[index]) continue;
+    speakers.push({
+      name: names[index].slice(0, 120),
+      bio: bios[index]?.slice(0, 600) || null,
+      photoUrl: photos[index] || null,
+    });
+  }
+  return speakers;
+}
+
+/** Repeated agenda rows; rows without a title are skipped. */
+function readSessions(formData: FormData): SessionInput[] {
+  const titles = formData.getAll("sessionTitle").map((value) => String(value).trim());
+  const stages = formData.getAll("sessionStage").map((value) => String(value).trim());
+  const speakers = formData.getAll("sessionSpeaker").map((value) => String(value).trim());
+  const starts = formData.getAll("sessionStart").map((value) => String(value).trim());
+  const ends = formData.getAll("sessionEnd").map((value) => String(value).trim());
+
+  const sessions: SessionInput[] = [];
+  for (let index = 0; index < titles.length && sessions.length < MAX_SESSIONS; index += 1) {
+    if (!titles[index]) continue;
+    sessions.push({
+      title: titles[index].slice(0, 160),
+      stage: stages[index] || null,
+      speaker: speakers[index] || null,
+      startTime: starts[index] || null,
+      endTime: ends[index] || null,
+    });
+  }
+  return sessions;
+}
+
 const eventSchema = z.object({
   title: z.string().trim().min(5, "Give your event a clear title"),
   description: z.string().trim().min(20, "Describe the event (20+ characters)"),
@@ -59,6 +111,14 @@ const eventSchema = z.object({
   time: z.string().trim().min(1, "Event time is required"),
   venue: z.string().trim().min(3, "Venue is required"),
   city: z.string().trim().min(2, "City is required"),
+  state: z.string().trim().min(2, "State is required"),
+  country: z.string().trim().min(2, "Country is required"),
+  eventType: z.string().trim().min(2, "Pick an event type"),
+  mode: z.enum(["OFFLINE", "ONLINE", "HYBRID"]).default("OFFLINE"),
+  frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
+  recurrence: z.string().trim().max(120).optional(),
+  onlineUrl: optionalUrl,
+  tags: z.string().trim().max(300).optional(),
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
   price: z.coerce.number().int().min(0, "Price cannot be negative"),
@@ -85,6 +145,14 @@ export async function createEventAction(
       time: formData.get("time"),
       venue: formData.get("venue"),
       city: formData.get("city"),
+      state: formData.get("state"),
+      country: formData.get("country"),
+      eventType: formData.get("eventType"),
+      mode: formData.get("mode") || "OFFLINE",
+      frequency: formData.get("frequency") || "ONE_TIME",
+      recurrence: formData.get("recurrence"),
+      onlineUrl: formData.get("onlineUrl"),
+      tags: formData.get("tags"),
       categorySlug: formData.get("categorySlug"),
       subcategorySlug: formData.get("subcategorySlug"),
       price: formData.get("price") || 0,
@@ -100,6 +168,27 @@ export async function createEventAction(
 
     const tiers = readTiers(formData);
     if ("error" in tiers) return { error: tiers.error };
+
+    if (parsed.data.mode !== "OFFLINE" && !parsed.data.onlineUrl) {
+      return { error: "Add the join link for an online or hybrid event." };
+    }
+
+    const speakers = readSpeakers(formData);
+    const sessions = readSessions(formData);
+    const primaryCategory =
+      parsed.data.subcategorySlug || parsed.data.categorySlug || null;
+    const extraCategories = formData
+      .getAll("extraCategorySlugs")
+      .map((value) => String(value).trim())
+      .filter(Boolean);
+    const categorySlugs = Array.from(
+      new Set([primaryCategory, ...extraCategories].filter(Boolean) as string[]),
+    );
+    const tags = (parsed.data.tags ?? "")
+      .split(",")
+      .map((tag) => tag.trim().slice(0, 30))
+      .filter(Boolean)
+      .slice(0, 10);
 
     const business = await db.business.findUnique({ where: { ownerId: user.id } });
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
@@ -120,6 +209,17 @@ export async function createEventAction(
         startsAt,
         venue: parsed.data.venue,
         city: parsed.data.city,
+        state: parsed.data.state,
+        country: parsed.data.country,
+        eventType: parsed.data.eventType,
+        mode: parsed.data.mode,
+        onlineUrl: parsed.data.onlineUrl ?? null,
+        frequency: parsed.data.frequency,
+        recurrence:
+          parsed.data.frequency === "RECURRING"
+            ? parsed.data.recurrence || null
+            : null,
+        tags,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
         price,
@@ -127,7 +227,24 @@ export async function createEventAction(
         seatsTotal,
         organizerId: user.id,
         businessId: business?.id ?? null,
-        categorySlug: parsed.data.subcategorySlug || parsed.data.categorySlug || null,
+        categorySlug: primaryCategory,
+        categorySlugs,
+        speakers: speakers.length
+          ? {
+              create: speakers.map((speaker, index) => ({
+                ...speaker,
+                sortOrder: index,
+              })),
+            }
+          : undefined,
+        sessions: sessions.length
+          ? {
+              create: sessions.map((session, index) => ({
+                ...session,
+                sortOrder: index,
+              })),
+            }
+          : undefined,
         tiers: tiers.length
           ? {
               create: tiers.map((tier, index) => ({

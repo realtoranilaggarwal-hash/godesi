@@ -8,6 +8,7 @@ import { planRank } from "@/lib/plans";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
+import { EVENT_MODES, EVENT_TYPES } from "@/lib/eventOptions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -19,9 +20,16 @@ export const metadata: Metadata = {
 export default async function EventsPage({
   searchParams,
 }: {
-  searchParams: { city?: string; category?: string; when?: string };
+  searchParams: {
+    city?: string;
+    category?: string;
+    when?: string;
+    type?: string;
+    mode?: string;
+  };
 }) {
-  const { city, category, when } = searchParams;
+  const { city, category, when, type, mode } = searchParams;
+  const modeFilter = EVENT_MODES.find((option) => option.value === mode)?.value;
   const categories = await getCategoryTree();
   const scope = category
     ? [
@@ -39,7 +47,16 @@ export default async function EventsPage({
         ? { startsAt: { lt: new Date() } }
         : { startsAt: { gte: new Date() } }),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
-      ...(scope ? { categorySlug: { in: scope } } : {}),
+      ...(scope
+        ? {
+            OR: [
+              { categorySlug: { in: scope } },
+              { categorySlugs: { hasSome: scope } },
+            ],
+          }
+        : {}),
+      ...(type ? { eventType: type } : {}),
+      ...(modeFilter ? { mode: modeFilter } : {}),
     },
     orderBy: { startsAt: when === "past" ? "desc" : "asc" },
     take: 48,
@@ -81,7 +98,7 @@ export default async function EventsPage({
         <FeaturedEventStrip />
 
         <Card>
-          <form className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
             <input
               name="city"
               defaultValue={city ?? ""}
@@ -99,6 +116,32 @@ export default async function EventsPage({
               {categories.map((item) => (
                 <option key={item.slug} value={item.slug}>
                   {item.icon} {item.name}
+                </option>
+              ))}
+            </select>
+            <select
+              name="type"
+              defaultValue={type ?? ""}
+              className={inputClass}
+              aria-label="Event type"
+            >
+              <option value="">Any type</option>
+              {EVENT_TYPES.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+            <select
+              name="mode"
+              defaultValue={mode ?? ""}
+              className={inputClass}
+              aria-label="Event mode"
+            >
+              <option value="">Online or in person</option>
+              {EVENT_MODES.map((item) => (
+                <option key={item.value} value={item.value}>
+                  {item.icon} {item.label}
                 </option>
               ))}
             </select>
