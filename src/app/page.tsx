@@ -8,6 +8,7 @@ import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { HeaderBanner } from "@/components/Banners";
 import { WhyGodesi } from "@/components/WhyGodesi";
+import { AboutGodesi } from "@/components/AboutGodesi";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { Card, LinkButton } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
@@ -116,6 +117,8 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
+
+      <AboutGodesi />
 
       <FeaturedStrip />
 

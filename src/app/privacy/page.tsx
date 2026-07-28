@@ -23,6 +23,14 @@ export default function PrivacyPage() {
           store your password in readable form.
         </li>
         <li>
+          <strong>Google sign-in data</strong> — if you choose &ldquo;Sign in with
+          Google&rdquo; we receive only your name, email address and profile picture from
+          your Google account, and use them solely to create and identify your Godesi
+          account. We request no other Google data, never sell or share it with
+          advertisers, and you can remove Godesi&apos;s access at any time from your
+          Google account permissions.
+        </li>
+        <li>
           <strong>Listing data</strong> — everything you choose to publish: business
           name, description, city, address, phone, WhatsApp number, links and images.
         </li>
