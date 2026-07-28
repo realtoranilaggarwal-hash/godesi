@@ -308,6 +308,7 @@ export async function InlineBanner() {
 export async function HeaderBanner() {
   const [banner] = await activeBanners("HEADER");
 
+  /** Unsold, a 970×90 leaderboard is dead space above the fold on a phone. */
   if (!banner) {
     return (
       <AdvertiseHere
@@ -315,7 +316,7 @@ export async function HeaderBanner() {
         height={HEADER_SIZE.height}
         width={HEADER_SIZE.width}
         slot="HEADER"
-        className="mb-4"
+        className="mb-4 hidden sm:block"
       />
     );
   }
