@@ -1,7 +1,6 @@
 import type { PointsReason } from "@prisma/client";
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notifications";
-import { FOUNDING_WELCOME_POINTS } from "@/lib/founding";
 
 export type EarnReason = Exclude<PointsReason, "REDEMPTION" | "ADJUSTMENT">;
 
@@ -18,7 +17,7 @@ export const POINTS: Record<EarnReason, number> = {
   NEWS_UPVOTED: 5,
   NEWS_FEATURED: 25,
   JOURNALIST_LEVEL: 50,
-  FOUNDING_MEMBER: FOUNDING_WELCOME_POINTS,
+  FOUNDING_MEMBER: 50,
   /// Paid as a copy of whatever the member just earned, so it has no fixed value.
   FOUNDING_BONUS: 0,
 };

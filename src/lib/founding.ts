@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints, POINTS } from "@/lib/rewards";
 
 /** How many members get the 🏅 Founding member badge. */
 export const FOUNDING_LIMIT = 1000;
 
 /** Extra points a founding member gets simply for joining early. */
-export const FOUNDING_WELCOME_POINTS = 50;
+export const FOUNDING_WELCOME_POINTS = POINTS.FOUNDING_MEMBER;
 
 export const FOUNDING_PERKS = [
   "🏅 Permanent Founding member badge on your profile, card and listings",
