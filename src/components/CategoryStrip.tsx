@@ -19,7 +19,7 @@ export function CategoryStrip({ items }: { items: StripItem[] }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-2">
+    <div className="mx-auto max-w-screen-2xl px-4 py-2">
       <div
         className={`flex flex-wrap gap-1.5 text-[11px] font-semibold sm:text-xs ${
           expanded ? "" : "max-h-[3.6rem] overflow-hidden sm:max-h-none"

@@ -42,12 +42,7 @@ const BAR_NAV = [
   { href: "/events", label: "Events" },
   { href: "/real-estate", label: "Property" },
   { href: "/rooms", label: "Rooms" },
-  { href: "/wedding", label: "Wedding" },
-  { href: "/religious", label: "Temples" },
-  { href: "/connect", label: "Connect" },
   { href: "/news", label: "News" },
-  { href: "/blog", label: "Blog" },
-  { href: "/live", label: "🟢 Live" },
 ];
 
 /** Admins land on the full panel, moderators on the content desk. */
@@ -96,7 +91,7 @@ export async function SiteHeader() {
     <HeaderShell
       items={categoryItems}
       bar={
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+        <div className="relative mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
           <Link href="/" className="shrink-0" aria-label="Godesi home">
             <Image
               src="/logo-godesi.png"
@@ -129,8 +124,8 @@ export async function SiteHeader() {
             </button>
           </form>
 
-          {/* Fills the gap beside the search box on tablets and laptops. */}
-          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold lg:flex 2xl:hidden">
+          {/* Fills the gap beside the search box. */}
+          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold lg:flex">
             {QUICK_LINKS.map((item) => (
               <Link
                 key={item.href}

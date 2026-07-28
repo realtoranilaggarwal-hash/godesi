@@ -41,7 +41,7 @@ export function HeaderShell({
 
       {scrolled ? (
         <div className="relative hidden border-t border-slate-100 lg:block">
-          <div className="mx-auto max-w-7xl px-4">
+          <div className="mx-auto max-w-screen-2xl px-4">
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
