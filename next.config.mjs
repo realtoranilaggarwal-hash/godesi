@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    // Uploads live on Vercel Blob; without this the optimizer answers 400.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+        pathname: "/**",
+      },
+    ],
+  },
   async redirects() {
     return [
       {
