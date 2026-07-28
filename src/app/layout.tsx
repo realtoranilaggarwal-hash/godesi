@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CookieConsent } from "@/components/CookieConsent";
+import { RewardsNudge } from "@/components/RewardsNudge";
 import { AiChat } from "@/components/AiChat";
 import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
         <CookieConsent />
+        <RewardsNudge />
         {aiEnabled() && <AiChat />}
       </body>
     </html>

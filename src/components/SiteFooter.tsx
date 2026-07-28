@@ -21,6 +21,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     links: [
       { href: "/signup", label: "List your business free" },
       { href: "/pricing", label: "Membership plans" },
+      { href: "/rewards", label: "Refer & earn rewards" },
       { href: "/advertise", label: "Advertise on Godesi" },
       { href: "/events/new", label: "Post an event" },
       { href: "/dashboard", label: "Dashboard" },

@@ -50,6 +50,7 @@ export async function SiteHeader() {
     { href: "/resources", label: "Resources", icon: "🔗" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
+    { href: "/rewards", label: "Refer & earn", icon: "🎁" },
   ];
 
   return (
@@ -159,6 +160,24 @@ export async function SiteHeader() {
                       {unread > 9 ? "9+" : unread}
                     </span>
                   ) : null}
+                </Link>
+                <Link
+                  href="/dashboard/me"
+                  aria-label="My profile"
+                  className="shrink-0"
+                >
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.avatarUrl}
+                      alt=""
+                      className="h-8 w-8 rounded-full border border-slate-200 object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 via-rose-500 to-fuchsia-600 text-sm font-black text-white">
+                      {(user.name || user.email).slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
                 </Link>
                 <div className="hidden items-center gap-2 2xl:flex">
                   <Link
