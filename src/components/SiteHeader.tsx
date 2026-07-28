@@ -24,6 +24,14 @@ const NAV = [
   { href: "/news", label: "News", icon: "📰" },
 ];
 
+/** Chips beside the search box, for pages the main nav has no room for. */
+const QUICK_LINKS = [
+  { href: "/live", label: "Live", icon: "🟢" },
+  { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/blog", label: "Blog", icon: "✍️" },
+  { href: "/faq", label: "FAQ", icon: "❓" },
+];
+
 /**
  * Short labels for the one-line bar. Anything longer overflowed into the
  * search box on 1536–1800px screens, which made the row jump around.
@@ -38,6 +46,8 @@ const BAR_NAV = [
   { href: "/religious", label: "Temples" },
   { href: "/connect", label: "Connect" },
   { href: "/news", label: "News" },
+  { href: "/blog", label: "Blog" },
+  { href: "/live", label: "🟢 Live" },
 ];
 
 /** Admins land on the full panel, moderators on the content desk. */
@@ -86,7 +96,7 @@ export async function SiteHeader() {
     <HeaderShell
       items={categoryItems}
       bar={
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
+        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
           <Link href="/" className="shrink-0" aria-label="Godesi home">
             <Image
               src="/logo-godesi.png"
@@ -119,6 +129,22 @@ export async function SiteHeader() {
             </button>
           </form>
 
+          {/* Fills the gap beside the search box on tablets and laptops. */}
+          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold lg:flex 2xl:hidden">
+            {QUICK_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-full bg-slate-100 px-2.5 py-1.5 text-slate-700 hover:bg-slate-200"
+              >
+                <span aria-hidden className="mr-1">
+                  {item.icon}
+                </span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
           <nav className="hidden min-w-0 flex-1 items-center justify-end gap-0.5 overflow-hidden text-[13px] font-semibold text-slate-700 2xl:flex">
             {BAR_NAV.map((item) => (
               <Link
@@ -135,7 +161,7 @@ export async function SiteHeader() {
             <Link
               href="/find"
               aria-label="Search Godesi"
-              className="rounded-xl border border-slate-300 px-2.5 py-1.5 text-lg leading-none sm:hidden"
+              className="rounded-xl border border-slate-300 px-2 py-1.5 text-lg leading-none sm:hidden"
             >
               🔍
             </Link>
