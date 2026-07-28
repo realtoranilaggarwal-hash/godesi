@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { db } from "@/lib/db";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { blogSummary } from "@/lib/blog";
 import { Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
@@ -24,6 +25,7 @@ function postDate(value: Date) {
 }
 
 export default async function BlogPage() {
+  const user = await getCurrentUser();
   const [posts, updates] = await Promise.all([
     db.blogPost.findMany({
       where: { published: true, kind: "POST" },
@@ -51,12 +53,22 @@ export default async function BlogPage() {
             What we are building, how to get the most out of Godesi, and stories
             from the community.
           </p>
-          <a
-            href="/blog/rss.xml"
-            className="mt-4 inline-block rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/25"
-          >
-            📡 RSS feed
-          </a>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a
+              href="/blog/rss.xml"
+              className="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/25"
+            >
+              📡 RSS feed
+            </a>
+            {user && isStaff(user) ? (
+              <Link
+                href="/admin/content"
+                className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-white/90"
+              >
+                ✍️ Write a post
+              </Link>
+            ) : null}
+          </div>
         </section>
 
         {posts.length ? (
@@ -107,6 +119,10 @@ export default async function BlogPage() {
             body="Product updates and guides will appear here."
           />
         )}
+
+        <div className="lg:hidden">
+          <WhatsNew updates={updates} />
+        </div>
       </div>
 
       <aside className="hidden w-[320px] shrink-0 space-y-4 lg:block">
