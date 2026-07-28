@@ -67,7 +67,12 @@ export async function setUserPlanAction(formData: FormData) {
 const bannerSchema = z.object({
   slot: z.enum(["HERO", "SIDEBAR", "HEADER", "SKYSCRAPER"]),
   position: z.coerce.number().int().min(1),
-  title: z.string().trim().min(2, "Banner title is required"),
+  title: z
+    .string()
+    .trim()
+    .min(2, "Banner title is required")
+    // The title is a label in the admin table and the image alt text, not ad copy.
+    .max(120, "Keep the banner title under 120 characters"),
   imageUrl: z.string().trim().url("Enter a valid image URL"),
   linkUrl: z.string().trim().url("Enter a valid destination URL"),
   impressionCap: z.coerce.number().int().min(1).optional(),

@@ -643,8 +643,8 @@ export default async function AdminPage() {
           <table className="w-full min-w-[720px] text-sm">
             <thead className="text-left text-xs uppercase text-slate-500">
               <tr>
-                <th className="py-2">Slot</th>
-                <th>Banner</th>
+                <th className="w-24 py-2">Slot</th>
+                <th className="w-[420px]">Banner</th>
                 <th>Impressions</th>
                 <th>Clicks</th>
                 <th>CTR</th>
@@ -654,7 +654,7 @@ export default async function AdminPage() {
             <tbody className="divide-y divide-slate-100">
               {banners.map((banner) => (
                 <tr key={banner.id}>
-                  <td className="py-2 text-xs font-semibold">
+                  <td className="w-24 py-2 text-xs font-semibold">
                     {banner.slot}{" "}
                     {banner.position ? `#${banner.position}` : "(unassigned)"}
                   </td>
@@ -672,7 +672,8 @@ export default async function AdminPage() {
                           href={banner.linkUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-medium text-indigo-600"
+                          className="line-clamp-2 block break-words font-medium text-indigo-600"
+                          title={banner.title}
                         >
                           {banner.title}
                         </a>
@@ -710,20 +711,20 @@ export default async function AdminPage() {
                       </div>
                     </div>
                   </td>
-                  <td>{banner.impressions}</td>
-                  <td>{banner.clicks}</td>
+                  <td className="text-xs">{banner.impressions}</td>
+                  <td className="text-xs">{banner.clicks}</td>
                   <td className="text-xs text-slate-500">
                     {banner.impressions
                       ? formatCtr(banner.impressions, banner.clicks)
                       : "—"}
                   </td>
                   <td>
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-nowrap justify-end gap-2">
                       <form action={toggleBannerAction}>
                         <input type="hidden" name="id" value={banner.id} />
                         <button
                           type="submit"
-                          className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                          className="whitespace-nowrap rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
                         >
                           {banner.active ? "pause" : "activate"}
                         </button>
@@ -732,7 +733,7 @@ export default async function AdminPage() {
                         <input type="hidden" name="id" value={banner.id} />
                         <button
                           type="submit"
-                          className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                          className="whitespace-nowrap rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
                         >
                           delete
                         </button>
