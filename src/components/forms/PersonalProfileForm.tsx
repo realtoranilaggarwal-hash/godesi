@@ -101,7 +101,7 @@ export function PersonalProfileForm({
 
       <Field
         label="Headline"
-        hint="One line under your name — e.g. \u201cWedding photographer & drone pilot, Toronto\u201d"
+        hint="One line under your name — e.g. Wedding photographer & drone pilot, Toronto"
       >
         <input
           name="headline"
