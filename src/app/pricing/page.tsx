@@ -9,6 +9,8 @@ import {
 } from "@/app/actions/billing";
 import { stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
+import { upiEnabled, upiVpa } from "@/lib/upi";
+import { startUpiPaymentAction } from "@/app/actions/upi";
 import { PayPalCheckout } from "@/components/PayPalCheckout";
 import { Alert, Badge, Card } from "@/components/ui";
 import { formatPlanPrice, requestCurrency } from "@/lib/currency";
@@ -27,6 +29,7 @@ const ERRORS: Record<string, string> = {
     "Card payments are not configured yet. Please try PayPal.",
   stripe_session: "We could not start the card checkout. Please try again.",
   mock_disabled: "Please complete a real payment to upgrade.",
+  upi_unavailable: "UPI payments are not configured yet.",
   coupon: "That coupon code is not valid for plan upgrades.",
 };
 
@@ -41,7 +44,8 @@ export default async function PricingPage({
   const stripeOn = stripeEnabled();
   const paypalOn = paypalEnabled();
   const paypalClientId = process.env.PAYPAL_CLIENT_ID ?? "";
-  const providersOn = stripeOn || paypalOn;
+  const upiOn = upiEnabled();
+  const providersOn = stripeOn || paypalOn || upiOn;
   const currency = requestCurrency();
 
   return (
@@ -162,6 +166,29 @@ export default async function PricingPage({
                       <PayPalCheckout plan={id} clientId={paypalClientId} />
                     ) : null}
 
+                    {upiOn ? (
+                      <form action={startUpiPaymentAction} className="space-y-2">
+                        <input type="hidden" name="plan" value={id} />
+                        {stripeOn ? null : (
+                          <input
+                            name="couponCode"
+                            placeholder="Coupon code (optional)"
+                            aria-label="Coupon code"
+                            className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
+                          />
+                        )}
+                        <button
+                          type="submit"
+                          className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Pay by UPI — {formatPlanPrice(plan, "INR")}
+                        </button>
+                        <p className="text-center text-xs text-slate-500">
+                          PhonePe · Google Pay · Paytm · any bank app
+                        </p>
+                      </form>
+                    ) : null}
+
                     {!providersOn ? (
                       <form action={mockSubscribeAction}>
                         <input type="hidden" name="plan" value={id} />
@@ -215,8 +242,11 @@ export default async function PricingPage({
 
       <p className="text-center text-xs text-slate-500">
         {providersOn
-          ? "Payments are processed securely by Stripe and PayPal. Plans run for 30 days."
+          ? "Card and PayPal payments are processed securely by our providers. Plans run for 30 days."
           : "No payment provider is configured, so checkout runs in test mode."}
+        {upiOn
+          ? ` UPI payments go to ${upiVpa()} and are confirmed by our team, so activation is not instant.`
+          : ""}
       </p>
     </div>
   );

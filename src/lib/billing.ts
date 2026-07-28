@@ -5,7 +5,7 @@ import { awardPoints } from "@/lib/rewards";
 
 export const PLAN_DURATION_DAYS = 30;
 
-export type PaymentProvider = "stripe" | "paypal" | "mock";
+export type PaymentProvider = "stripe" | "paypal" | "upi" | "mock";
 
 /**
  * Activates a paid plan for a user and records the payment.

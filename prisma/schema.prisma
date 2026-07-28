@@ -223,6 +223,7 @@ model User {
   meetupProfile MeetupProfile?
   meetupReports MeetupReport[]
   alumni        AlumniRecord[]
+  upiRequests   UpiRequest[]
 
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
@@ -1267,4 +1268,32 @@ model AlumniRecord {
 
   @@index([slug, endYear])
   @@index([userId])
+}
+
+enum UpiRequestStatus {
+  PENDING
+  PAID
+  REJECTED
+}
+
+/// A "pay by UPI" request. UPI without a gateway gives us no callback, so the
+/// buyer pays into our VPA with this reference and staff confirm the credit.
+model UpiRequest {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan        Plan
+  amountMinor Int
+  currency    String           @default("INR")
+  /// Short code the buyer puts in the UPI note, e.g. GD7K3QF2.
+  reference   String           @unique
+  /// UPI transaction / UTR number the buyer pastes back after paying.
+  utr         String?
+  status      UpiRequestStatus @default(PENDING)
+  reviewedAt  DateTime?
+  reviewedById String?
+  note        String?
+  createdAt   DateTime         @default(now())
+
+  @@index([status, createdAt])
 }
