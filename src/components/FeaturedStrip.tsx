@@ -6,10 +6,34 @@ import { PLANS } from "@/lib/plans";
 /** How many cards the strip always shows, paid or not. */
 const STRIP_SIZE = 3;
 
+/** An unsold slot sells itself rather than leaving a hole in the row. */
+function SlotForSale({ index }: { index: number }) {
+  const pro = PLANS.PRO;
+
+  return (
+    <Link
+      href="/pricing"
+      className="flex min-h-[168px] flex-col justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white transition hover:brightness-110"
+    >
+      <span className="text-xs font-bold uppercase tracking-widest text-white/80">
+        Slot {index} of {STRIP_SIZE} · open
+      </span>
+      <span className="mt-1 text-base font-black leading-tight">
+        Show your business here
+      </span>
+      <span className="mt-1 text-sm text-white/90">
+        ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month — top of this strip
+        and above free listings in search.
+      </span>
+      <span className="mt-3 text-sm font-bold underline">Take this spot →</span>
+    </Link>
+  );
+}
+
 /**
- * Paid listings scroll along the top. Until the slots sell we keep the strip
- * full: recent listings run as a free spotlight and every unsold slot is
- * priced, so the space advertises itself instead of looking empty.
+ * Paid listings lead the strip. Until the slots sell we keep the row full:
+ * recent listings run as a free spotlight, and anything still empty becomes a
+ * priced "show your business here" slot instead of white space.
  */
 export async function FeaturedStrip({
   categorySlugs,
@@ -18,7 +42,10 @@ export async function FeaturedStrip({
   categorySlugs?: string[];
   title?: string;
 }) {
-  const businesses = await featuredBusinesses(categorySlugs);
+  const businesses = (await featuredBusinesses(categorySlugs)).slice(
+    0,
+    STRIP_SIZE,
+  );
 
   const openSlots = Math.max(STRIP_SIZE - businesses.length, 0);
   const fillers = openSlots
@@ -27,6 +54,7 @@ export async function FeaturedStrip({
         .slice(0, openSlots)
     : [];
 
+  const forSale = Math.max(STRIP_SIZE - businesses.length - fillers.length, 0);
   const pro = PLANS.PRO;
 
   return (
@@ -41,21 +69,13 @@ export async function FeaturedStrip({
         </Link>
       </div>
 
-      <div className="no-scrollbar -mx-1 mt-3 flex snap-x gap-3 overflow-x-auto px-1 pb-2">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {businesses.map((business) => (
-          <div
-            key={business.id}
-            className="w-[280px] shrink-0 snap-start sm:w-[320px]"
-          >
-            <BusinessCard business={business} />
-          </div>
+          <BusinessCard key={business.id} business={business} />
         ))}
 
         {fillers.map((business, index) => (
-          <div
-            key={business.id}
-            className="w-[280px] shrink-0 snap-start sm:w-[320px]"
-          >
+          <div key={business.id}>
             <BusinessCard business={business} />
             <Link
               href="/pricing"
@@ -68,24 +88,12 @@ export async function FeaturedStrip({
           </div>
         ))}
 
-        <Link
-          href="/pricing"
-          className="flex w-[280px] shrink-0 snap-start flex-col justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-5 text-white sm:w-[320px]"
-        >
-          <span className="text-2xl" aria-hidden>
-            ⭐
-          </span>
-          <span className="mt-2 text-base font-black leading-tight">
-            Show your business here
-          </span>
-          <span className="mt-1 text-sm text-white/90">
-            ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month puts your card
-            at the top of this strip and above free listings in search.
-          </span>
-          <span className="mt-3 text-sm font-bold underline">
-            Take this spot →
-          </span>
-        </Link>
+        {Array.from({ length: forSale }).map((_, index) => (
+          <SlotForSale
+            key={`for-sale-${index}`}
+            index={businesses.length + fillers.length + index + 1}
+          />
+        ))}
       </div>
     </section>
   );

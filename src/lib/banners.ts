@@ -25,17 +25,25 @@ type RotatingBanner = {
 };
 
 /**
- * Picks which of the eligible creatives to show, weighted towards the ones with
- * the most impressions still owed, so advertisers sharing a slot each get their
- * fair share of views rather than the same banner always winning.
+ * Picks which of the eligible creatives to show. Banners shown least so far get
+ * the heaviest weight, and an impression pack is weighted by the views it still
+ * has owing, so everyone sharing a slot gets a turn instead of one banner
+ * winning every page view.
  */
 function rotate(banners: RotatingBanner[], take: number) {
+  const mostShown = banners.reduce(
+    (max, banner) => Math.max(max, banner.impressions),
+    0,
+  );
+
   const weighted = banners.map((banner) => ({
     banner,
+    // +1 keeps a brand new banner (0 impressions) from being the only pick.
     weight:
-      banner.impressionCap === null
+      (mostShown - banner.impressions + 1) *
+      (banner.impressionCap === null
         ? 1
-        : Math.max(1, banner.impressionCap - banner.impressions),
+        : Math.max(1, banner.impressionCap - banner.impressions)),
   }));
 
   const picked: RotatingBanner[] = [];
@@ -86,7 +94,9 @@ export async function activeBanners(slot: BannerSlot, limit?: number) {
   });
 
   const withQuota = eligible.filter(
-    (banner) => banner.impressionCap === null || banner.impressions < banner.impressionCap,
+    (banner) =>
+      banner.impressionCap === null ||
+      banner.impressions < banner.impressionCap,
   );
 
   return rotate(withQuota, limit ?? slotCapacity(slot));

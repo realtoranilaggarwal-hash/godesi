@@ -39,14 +39,16 @@ export function BannerForm() {
             })}
           </select>
         </Field>
-        <Field label="Position" hint="Sidebar 1–10 · skyscraper 1–4 · header 1">
+        <Field
+          label="Position"
+          hint="Leave blank for the next free slot · sidebar 1–10 · skyscraper 1–4 · header 1"
+        >
           <input
             name="position"
             type="number"
             min={1}
             max={AD_PLACEMENTS.SIDEBAR.slots}
-            defaultValue={1}
-            required
+            placeholder="next free slot"
             className={inputClass}
           />
         </Field>
@@ -70,6 +72,12 @@ export function BannerForm() {
             className={inputClass}
           />
         </Field>
+        <Field
+          label="Advertiser email"
+          hint="Optional — links the banner to their account so views show in their dashboard"
+        >
+          <input name="advertiserEmail" type="email" className={inputClass} />
+        </Field>
         <Field label="Runs until" hint="Optional end date">
           <input name="endsAt" type="date" className={inputClass} />
         </Field>
@@ -77,7 +85,9 @@ export function BannerForm() {
 
       <p className="text-xs text-slate-500">
         Saved banners go live immediately — no payment step. Leave the views cap
-        and end date blank to run indefinitely.
+        and end date blank to run indefinitely. Banners sharing a slot type
+        rotate: the one shown least so far is served first, so every advertiser
+        gets a fair share of views.
       </p>
 
       <SubmitButton>Save banner</SubmitButton>

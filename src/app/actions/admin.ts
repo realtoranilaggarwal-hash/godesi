@@ -66,7 +66,9 @@ export async function setUserPlanAction(formData: FormData) {
 
 const bannerSchema = z.object({
   slot: z.enum(["HERO", "SIDEBAR", "HEADER", "SKYSCRAPER"]),
-  position: z.coerce.number().int().min(1),
+  /** Blank means "the next free slot", so several creatives can share a rotation. */
+  position: z.coerce.number().int().min(1).optional(),
+  advertiserEmail: z.string().trim().email("Enter a valid email").optional(),
   title: z
     .string()
     .trim()
@@ -87,7 +89,8 @@ export async function saveBannerAction(
     await requireRole("ADMIN");
     const parsed = bannerSchema.safeParse({
       slot: formData.get("slot"),
-      position: formData.get("position"),
+      position: formData.get("position") || undefined,
+      advertiserEmail: formData.get("advertiserEmail") || undefined,
       title: formData.get("title"),
       imageUrl: formData.get("imageUrl"),
       linkUrl: formData.get("linkUrl"),
@@ -97,11 +100,53 @@ export async function saveBannerAction(
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
     const limit = slotCapacity(parsed.data.slot);
-    if (parsed.data.position > limit) {
+    if (parsed.data.position && parsed.data.position > limit) {
       return { error: `${parsed.data.slot} has only ${limit} slot(s).` };
     }
 
-    const { slot, position, impressionCap, endsAt, ...rest } = parsed.data;
+    const {
+      slot,
+      position: requested,
+      advertiserEmail,
+      impressionCap,
+      endsAt,
+      ...rest
+    } = parsed.data;
+
+    let advertiserId: string | null = null;
+    if (advertiserEmail) {
+      const advertiser = await db.user.findUnique({
+        where: { email: advertiserEmail.toLowerCase() },
+        select: { id: true },
+      });
+      if (!advertiser) {
+        return {
+          error: `No member found with the email ${advertiserEmail}. Leave it blank to run the banner without an advertiser.`,
+        };
+      }
+      advertiserId = advertiser.id;
+    }
+
+    let position = requested;
+    if (!position) {
+      const used = new Set(
+        (
+          await db.banner.findMany({
+            where: { slot, position: { not: null } },
+            select: { position: true },
+          })
+        ).map((row) => row.position),
+      );
+      position = Array.from({ length: limit }, (_, index) => index + 1).find(
+        (candidate) => !used.has(candidate),
+      );
+      if (!position) {
+        return {
+          error: `All ${limit} ${slot} slot(s) are taken — pick a slot number to replace one.`,
+        };
+      }
+    }
+
     const schedule = {
       impressionCap: impressionCap ?? null,
       endsAt: endsAt ?? null,
@@ -109,8 +154,21 @@ export async function saveBannerAction(
     };
     await db.banner.upsert({
       where: { slot_position: { slot, position } },
-      create: { slot, position, ...rest, ...schedule, status: "ACTIVE" },
-      update: { ...rest, ...schedule, active: true, status: "ACTIVE" },
+      create: {
+        slot,
+        position,
+        advertiserId,
+        ...rest,
+        ...schedule,
+        status: "ACTIVE",
+      },
+      update: {
+        ...(advertiserId ? { advertiserId } : {}),
+        ...rest,
+        ...schedule,
+        active: true,
+        status: "ACTIVE",
+      },
     });
 
     revalidatePath("/admin");
