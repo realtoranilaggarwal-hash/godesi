@@ -47,7 +47,8 @@ export function EventPartnerProof({
         </p>
         <p className="text-xs text-amber-900">
           Upload the banner and standee photos before the event, and the ticket
-          sales screenshot after it, so your turnout earnings can be verified.
+          sales screenshot after it, so the Godesi team can verify the branding
+          and how the promotion performed.
         </p>
       </div>
 

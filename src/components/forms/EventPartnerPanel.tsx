@@ -70,11 +70,14 @@ export function EventPartnerPanel() {
               <li>Free promotion to the Godesi audience in your city</li>
               <li>Featured placement on the home page and /events</li>
               <li>A “Godesi Partner Event” badge on your listing</li>
-              <li>Earnings based on turnout — paid after the event on verified sales</li>
+              <li>
+                A WhatsApp and email blast to our desi database to help sell your
+                tickets
+              </li>
             </ul>
             <p className="mt-2 text-xs">
-              Godesi reviews every request; promotion and any payout start once the
-              team approves it and your branding photos are uploaded.
+              Godesi reviews every request; the promotion starts once the team
+              approves it and your branding photos are uploaded.
             </p>
           </div>
         </div>
