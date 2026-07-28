@@ -125,7 +125,7 @@ export async function SiteHeader() {
           </form>
 
           {/* Fills the gap beside the search box. */}
-          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold lg:flex">
+          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold xl:flex">
             {QUICK_LINKS.map((item) => (
               <Link
                 key={item.href}
@@ -140,7 +140,12 @@ export async function SiteHeader() {
             ))}
           </div>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-end gap-0.5 overflow-hidden text-[13px] font-semibold text-slate-700 2xl:flex">
+          {/* Signed-in members get dashboard chips here instead of the nav row. */}
+          <nav
+            className={`hidden min-w-0 flex-1 items-center justify-end gap-0.5 overflow-hidden text-[13px] font-semibold text-slate-700 ${
+              user ? "" : "2xl:flex"
+            }`}
+          >
             {BAR_NAV.map((item) => (
               <Link
                 key={item.href}
@@ -181,6 +186,27 @@ export async function SiteHeader() {
             </Link>
             {user ? (
               <>
+                {/* Always-visible way back to your own listings and content. */}
+                <Link
+                  href={staffHome(user)}
+                  className="hidden rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 sm:inline-flex"
+                >
+                  <span aria-hidden className="mr-1">
+                    📊
+                  </span>
+                  {staffLabel(user, "Admin", "Dashboard")}
+                </Link>
+                {user.role === "ADMIN" ? (
+                  <Link
+                    href="/admin/content"
+                    className="hidden rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 2xl:inline-flex"
+                  >
+                    <span aria-hidden className="mr-1">
+                      ✍️
+                    </span>
+                    Content desk
+                  </Link>
+                ) : null}
                 <Link
                   href="/dashboard/notifications"
                   className="relative rounded-lg px-2 py-1 hover:text-slate-900"
@@ -214,12 +240,6 @@ export async function SiteHeader() {
                   )}
                 </Link>
                 <div className="hidden items-center gap-2 2xl:flex">
-                  <Link
-                    href={staffHome(user)}
-                    className="rounded-lg px-2 py-1 hover:text-slate-900"
-                  >
-                    {staffLabel(user, "Admin", "Dashboard")}
-                  </Link>
                   <Badge
                     tone={effectivePlan(user) === "FREE" ? "slate" : "indigo"}
                   >
