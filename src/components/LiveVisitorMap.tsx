@@ -58,39 +58,42 @@ export function LiveVisitorMap({ compact = false }: { compact?: boolean }) {
         </p>
       </div>
 
-      <div className="relative aspect-[2/1] w-full bg-slate-100">
-        <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-          {TILES.map((tile) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={`${tile.x}-${tile.y}`}
-              src={`https://tile.openstreetmap.org/1/${tile.x}/${tile.y}.png`}
-              alt=""
-              loading="lazy"
-              className="h-full w-full object-cover opacity-90"
-            />
-          ))}
-        </div>
+      {/* Zoom-1 tiles are a square world; crop the empty polar bands. */}
+      <div className="relative aspect-[3/2] w-full overflow-hidden bg-slate-100">
+        <div className="absolute inset-x-0 top-[-16.7%] aspect-square w-full">
+          <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
+            {TILES.map((tile) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={`${tile.x}-${tile.y}`}
+                src={`https://tile.openstreetmap.org/1/${tile.x}/${tile.y}.png`}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover opacity-90"
+              />
+            ))}
+          </div>
 
-        {(data?.dots ?? []).map((dot) => {
-          const point = project(dot.lat, dot.lng);
-          const size = Math.min(18, 8 + dot.weight * 2);
-          return (
-            <span
-              key={`${dot.lat},${dot.lng}`}
-              title={`${dot.city} — ${dot.weight} viewing`}
-              className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500/70 ring-2 ring-white"
-              style={{
-                left: `${point.x}%`,
-                top: `${point.y}%`,
-                width: size,
-                height: size,
-              }}
-            >
-              <span className="absolute inset-0 animate-ping rounded-full bg-rose-400/60" />
-            </span>
-          );
-        })}
+          {(data?.dots ?? []).map((dot) => {
+            const point = project(dot.lat, dot.lng);
+            const size = Math.min(18, 8 + dot.weight * 2);
+            return (
+              <span
+                key={`${dot.lat},${dot.lng}`}
+                title={`${dot.city} — ${dot.weight} viewing`}
+                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500/70 ring-2 ring-white"
+                style={{
+                  left: `${point.x}%`,
+                  top: `${point.y}%`,
+                  width: size,
+                  height: size,
+                }}
+              >
+                <span className="absolute inset-0 animate-ping rounded-full bg-rose-400/60" />
+              </span>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-2 px-3 py-2">
