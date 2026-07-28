@@ -65,7 +65,24 @@ export function MobileMenu({
                 </button>
               </form>
             </div>
-          ) : null}
+          ) : (
+            <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-3 text-sm font-semibold sm:hidden">
+              <Link
+                href="/login"
+                onClick={close}
+                className="rounded-xl border border-slate-300 px-3 py-2 text-slate-700"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/signup"
+                onClick={close}
+                className="rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-3 py-2 text-white"
+              >
+                List free
+              </Link>
+            </div>
+          )}
 
           <div className="border-t border-slate-100 px-4 py-3">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">

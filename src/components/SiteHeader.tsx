@@ -182,7 +182,7 @@ export async function SiteHeader() {
                 </div>
               </>
             ) : (
-              <>
+              <div className="hidden items-center gap-2 sm:flex">
                 <Link
                   href="/login"
                   className="rounded-lg px-2 py-1 hover:text-slate-900"
@@ -195,7 +195,7 @@ export async function SiteHeader() {
                 >
                   List free
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
