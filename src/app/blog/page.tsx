@@ -6,6 +6,7 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { blogSummary } from "@/lib/blog";
 import { Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
+import { CategoryTreeCard } from "@/components/CategoryTreeCard";
 import { gradientFor } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
@@ -71,6 +72,25 @@ export default async function BlogPage() {
           </div>
         </section>
 
+        {user && isStaff(user) ? (
+          <Card>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-bold">Your post space ✍️</h2>
+                <p className="text-sm text-slate-600">
+                  Write an update for members — it appears right here at the top.
+                </p>
+              </div>
+              <Link
+                href="/admin/content"
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700"
+              >
+                Write a post
+              </Link>
+            </div>
+          </Card>
+        ) : null}
+
         {posts.length ? (
           <div className="space-y-4">
             {posts.map((post) => (
@@ -116,18 +136,16 @@ export default async function BlogPage() {
         ) : (
           <EmptyState
             title="No posts yet"
-            body="Product updates and guides will appear here."
+            body="Posts from the Godesi team will appear here. Product updates are listed below."
           />
         )}
 
-        <div className="lg:hidden">
-          <WhatsNew updates={updates} />
-        </div>
+        <WhatsNew updates={updates} />
       </div>
 
       <aside className="hidden w-[320px] shrink-0 space-y-4 lg:block">
-        <WhatsNew updates={updates} />
         <SidebarBanners />
+        <CategoryTreeCard />
       </aside>
     </div>
   );
@@ -136,28 +154,38 @@ export default async function BlogPage() {
 function WhatsNew({
   updates,
 }: {
-  updates: { id: string; slug: string; title: string; publishedAt: Date }[];
+  updates: {
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string | null;
+    body: string;
+    publishedAt: Date;
+  }[];
 }) {
   if (!updates.length) return null;
   return (
-    <Card>
-      <h2 className="text-base font-bold">What&apos;s new on Godesi 🚀</h2>
-      <p className="mt-1 text-xs text-slate-500">
-        Everything we have shipped, newest first.
-      </p>
-      <ul className="mt-3 space-y-3">
+    <section className="space-y-3">
+      <div>
+        <h2 className="text-xl font-black">What&apos;s new on Godesi 🚀</h2>
+        <p className="text-sm text-slate-500">
+          Everything we have shipped, newest first.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
         {updates.map((update) => (
-          <li key={update.id} className="border-l-2 border-indigo-200 pl-3">
+          <Card key={update.id}>
             <Link
               href={`/blog/${update.slug}`}
-              className="text-sm font-semibold text-slate-800 hover:text-indigo-600"
+              className="font-bold text-slate-900 hover:text-indigo-600"
             >
               {update.title}
             </Link>
             <p className="text-[11px] text-slate-400">{postDate(update.publishedAt)}</p>
-          </li>
+            <p className="mt-1 text-sm text-slate-600">{blogSummary(update)}</p>
+          </Card>
         ))}
-      </ul>
-    </Card>
+      </div>
+    </section>
   );
 }
