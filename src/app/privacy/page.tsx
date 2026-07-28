@@ -23,6 +23,13 @@ export default function PrivacyPage() {
           store your password in readable form.
         </li>
         <li>
+          <strong>Visitor location (city level)</strong> — to show the live
+          visitor map we record the approximate city, country and coordinates our
+          hosting provider derives from your connection, plus the page path. We do
+          not store IP addresses, device details or your account with it, and
+          these records are deleted after 24 hours.
+        </li>
+        <li>
           <strong>Google sign-in data</strong> — if you choose &ldquo;Sign in with
           Google&rdquo; we receive only your name, email address and profile picture from
           your Google account, and use them solely to create and identify your Godesi

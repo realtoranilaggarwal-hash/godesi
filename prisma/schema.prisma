@@ -636,6 +636,20 @@ model AnalyticsEvent {
   @@map("Event")
 }
 
+/// An anonymous page-view ping powering the live visitor map. No IPs stored.
+model VisitorPing {
+  id        String   @id @default(cuid())
+  path      String
+  city      String?
+  region    String?
+  country   String?
+  lat       Float?
+  lng       Float?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 /// A public event listing with ticket booking.
 model Event {
   id          String        @id @default(cuid())

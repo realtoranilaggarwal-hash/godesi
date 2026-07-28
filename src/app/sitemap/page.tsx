@@ -60,6 +60,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     title: "Company",
     links: [
       { href: "/about", label: "About us" },
+      { href: "/live", label: "Live visitor map" },
       { href: "/faq", label: "FAQ" },
       { href: "/contact", label: "Contact us" },
       { href: "/terms", label: "Terms of service" },

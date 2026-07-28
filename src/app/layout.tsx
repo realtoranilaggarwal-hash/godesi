@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { CookieConsent } from "@/components/CookieConsent";
 import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
+import { VisitorPinger } from "@/components/VisitorPinger";
 import { AiChat } from "@/components/AiChat";
 import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CookieConsent />
         <RewardsNudge />
         <LiveActivity />
+        <VisitorPinger />
         {aiEnabled() && <AiChat />}
       </body>
     </html>

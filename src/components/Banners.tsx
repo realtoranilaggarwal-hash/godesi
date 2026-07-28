@@ -10,6 +10,7 @@ import {
   SKYSCRAPER_SIZE,
   slotSoldCount,
 } from "@/lib/banners";
+import { LiveVisitorMap } from "@/components/LiveVisitorMap";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { AdPreview } from "@/components/AdPreview";
@@ -131,6 +132,8 @@ export async function SidebarBanners() {
       className="hidden w-[300px] shrink-0 space-y-4 lg:block"
       aria-label="Sponsored"
     >
+      <LiveVisitorMap compact />
+
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
         Sponsored
       </p>
