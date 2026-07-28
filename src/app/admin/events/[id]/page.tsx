@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { AdminEventForm } from "@/components/forms/AdminEventForm";
 import { Card } from "@/components/ui";
@@ -35,7 +35,7 @@ export default async function AdminEditEventPage({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
 
   const [event, categories] = await Promise.all([
     db.event.findUnique({

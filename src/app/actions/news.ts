@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { isStaff, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { effectivePlan } from "@/lib/plans";
 import { twoLineSummary } from "@/lib/news";
@@ -27,7 +27,7 @@ export async function submitNewsAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const isAdmin = user.role === "ADMIN";
+    const isAdmin = isStaff(user);
     if (!isAdmin && effectivePlan(user) === "FREE") {
       return { error: "News submission is available to Pro and Premium members." };
     }

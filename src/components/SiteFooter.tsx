@@ -14,6 +14,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/connect", label: "Connect" },
       { href: "/resources", label: "Resources" },
       { href: "/news", label: "News" },
+      { href: "/blog", label: "Blog" },
     ],
   },
   {

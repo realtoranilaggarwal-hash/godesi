@@ -61,6 +61,7 @@ export default async function DashboardPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role === "ADMIN") redirect("/admin");
+  if (user.role === "MODERATOR") redirect("/admin/content");
 
   const plan = effectivePlan(user);
 

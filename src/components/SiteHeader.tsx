@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Role } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
 import { effectivePlan } from "@/lib/plans";
@@ -22,6 +23,17 @@ const NAV = [
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/news", label: "News", icon: "📰" },
 ];
+
+/** Admins land on the full panel, moderators on the content desk. */
+function staffHome(user: { role: Role }) {
+  if (user.role === "ADMIN") return "/admin";
+  return user.role === "MODERATOR" ? "/admin/content" : "/dashboard";
+}
+
+function staffLabel(user: { role: Role }, staffText: string, memberText: string) {
+  if (user.role === "ADMIN") return staffText;
+  return user.role === "MODERATOR" ? "Content desk" : memberText;
+}
 
 export async function SiteHeader() {
   const [user, categories] = await Promise.all([
@@ -47,6 +59,7 @@ export async function SiteHeader() {
   ];
   const menuLinks = [
     ...NAV,
+    { href: "/blog", label: "Blog", icon: "✍️" },
     { href: "/resources", label: "Resources", icon: "🔗" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
@@ -131,9 +144,8 @@ export async function SiteHeader() {
               account={
                 user
                   ? {
-                      href: user.role === "ADMIN" ? "/admin" : "/dashboard",
-                      label:
-                        user.role === "ADMIN" ? "Admin panel" : "My dashboard",
+                      href: staffHome(user),
+                      label: staffLabel(user, "Admin panel", "My dashboard"),
                     }
                   : null
               }
@@ -181,10 +193,10 @@ export async function SiteHeader() {
                 </Link>
                 <div className="hidden items-center gap-2 2xl:flex">
                   <Link
-                    href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
+                    href={staffHome(user)}
                     className="rounded-lg px-2 py-1 hover:text-slate-900"
                   >
-                    {user.role === "ADMIN" ? "Admin" : "Dashboard"}
+                    {staffLabel(user, "Admin", "Dashboard")}
                   </Link>
                   <Badge
                     tone={effectivePlan(user) === "FREE" ? "slate" : "indigo"}

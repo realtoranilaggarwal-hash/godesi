@@ -4,13 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ListingStatus, NewsStatus, Plan } from "@prisma/client";
 import { db } from "@/lib/db";
-import { requireRole } from "@/lib/auth";
+import { requireRole, requireStaff } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { slotCapacity } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 
 export async function setListingStatusAction(formData: FormData) {
-  await requireRole("ADMIN");
+  await requireStaff();
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as ListingStatus;
   if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
@@ -177,7 +177,7 @@ export async function rejectBannerAction(formData: FormData) {
 }
 
 export async function setNewsStatusAction(formData: FormData) {
-  await requireRole("ADMIN");
+  await requireStaff();
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as NewsStatus;
   if (!["PENDING", "PUBLISHED", "REJECTED"].includes(status)) throw new Error("Invalid status");
@@ -187,7 +187,7 @@ export async function setNewsStatusAction(formData: FormData) {
 }
 
 export async function deleteNewsAction(formData: FormData) {
-  await requireRole("ADMIN");
+  await requireStaff();
   await db.newsItem.delete({ where: { id: String(formData.get("id") ?? "") } });
   revalidatePath("/admin");
   revalidatePath("/news");
@@ -223,7 +223,7 @@ export async function deleteNewsFeedAction(formData: FormData) {
 }
 
 export async function setEventStatusAction(formData: FormData) {
-  await requireRole("ADMIN");
+  await requireStaff();
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as ListingStatus;
   if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) throw new Error("Invalid status");
@@ -271,7 +271,7 @@ export async function adminUpdateEventAction(
   formData: FormData,
 ): Promise<ActionState> {
   try {
-    await requireRole("ADMIN");
+    await requireStaff();
     const parsed = adminEventSchema.safeParse({
       id: formData.get("id"),
       title: formData.get("title"),

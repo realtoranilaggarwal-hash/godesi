@@ -33,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/religious`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/events`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/news`, changeFrequency: "hourly", priority: 0.7 },
+    { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/categories`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/connect`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "weekly", priority: 0.5 },

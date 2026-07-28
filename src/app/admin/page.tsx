@@ -47,6 +47,8 @@ import { BannerForm } from "@/components/forms/BannerForm";
 import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS, formatCtr } from "@/lib/ads";
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
+import { ModeratorForm } from "@/components/forms/ModeratorForm";
+import { revokeModeratorAction } from "@/app/actions/team";
 import { formatEventDate } from "@/lib/events";
 import { Badge, Card } from "@/components/ui";
 import { PLAN_ORDER } from "@/lib/plans";
@@ -79,6 +81,7 @@ export default async function AdminPage() {
     coupons,
     pendingMeetups,
     reportedMeetups,
+    moderators,
     resourceLinks,
   ] =
     await Promise.all([
@@ -166,6 +169,11 @@ export default async function AdminPage() {
         profile: { include: { user: { select: { email: true } } } },
       },
     }),
+    db.user.findMany({
+      where: { role: "MODERATOR" },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, name: true, email: true },
+    }),
     db.resourceLink.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       take: 100,
@@ -197,6 +205,44 @@ export default async function AdminPage() {
           </Card>
         ))}
       </div>
+
+      <Card>
+        <h2 className="mb-1 text-lg font-bold">Team access</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          Moderators use the{" "}
+          <Link href="/admin/content" className="font-semibold text-indigo-600">
+            content desk
+          </Link>{" "}
+          to add and approve events, listings, news and blog posts. They cannot see
+          members, payments, ads or reward points.
+        </p>
+        <ModeratorForm />
+        <ul className="mt-3 divide-y divide-slate-100 text-sm">
+          {moderators.map((moderator) => (
+            <li
+              key={moderator.id}
+              className="flex items-center justify-between gap-2 py-2"
+            >
+              <div>
+                <p className="font-medium">{moderator.name ?? "Member"}</p>
+                <p className="text-xs text-slate-400">{moderator.email}</p>
+              </div>
+              <form action={revokeModeratorAction}>
+                <input type="hidden" name="id" value={moderator.id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                >
+                  remove access
+                </button>
+              </form>
+            </li>
+          ))}
+          {moderators.length === 0 ? (
+            <li className="py-2 text-slate-500">No moderators yet.</li>
+          ) : null}
+        </ul>
+      </Card>
 
       <Card>
         <h2 className="mb-3 text-lg font-bold">Listings</h2>
