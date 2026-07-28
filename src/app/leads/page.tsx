@@ -130,6 +130,18 @@ export default async function LeadsPage({
                   {lead.city} · {budgetLabel(lead.budgetMin, lead.budgetMax)}
                 </p>
                 <p className="line-clamp-3 text-sm text-slate-700">{lead.description}</p>
+                {lead.serviceOptions.length ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {lead.serviceOptions.slice(0, 5).map((option) => (
+                      <span
+                        key={option}
+                        className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700"
+                      >
+                        {option}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
                 <PostedBy user={lead.client} />
 
                 {unlocked ? (

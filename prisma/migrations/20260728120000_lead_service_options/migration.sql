@@ -1,0 +1,2 @@
+ALTER TABLE "Lead" ADD COLUMN "categorySlug" TEXT;
+ALTER TABLE "Lead" ADD COLUMN "serviceOptions" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

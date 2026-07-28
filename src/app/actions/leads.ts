@@ -7,6 +7,12 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { canUnlockLeads } from "@/lib/plans";
+import {
+  cleanServiceOptions,
+  cleanSpecialties,
+  missingChoiceGroups,
+  specialtySet,
+} from "@/lib/specialties";
 
 const leadSchema = z.object({
   title: z.string().trim().min(5, "Give your requirement a clear title"),
@@ -45,6 +51,22 @@ export async function createLeadAction(
       contactEmail: formData.get("contactEmail"),
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    const categorySlug = String(formData.get("categorySlug") ?? "") || null;
+    const set = specialtySet(categorySlug);
+    const picked = [
+      ...formData.getAll("serviceOptions").map(String),
+      ...(set?.choices ?? [])
+        .filter((group) => group.mode === "single")
+        .map((group) => String(formData.get(`choice-${group.key}`) ?? "")),
+    ].filter(Boolean);
+    const serviceOptions = [
+      ...cleanSpecialties(categorySlug, picked),
+      ...cleanServiceOptions(categorySlug, picked),
+    ];
+    const missing = missingChoiceGroups(categorySlug, serviceOptions);
+    if (missing.length) return { error: `${missing[0]}: pick an option.` };
+
     if (
       parsed.data.budgetMin !== undefined &&
       parsed.data.budgetMax !== undefined &&
@@ -59,6 +81,8 @@ export async function createLeadAction(
         title: parsed.data.title,
         description: parsed.data.description,
         category: parsed.data.category,
+        categorySlug: set ? categorySlug : null,
+        serviceOptions,
         city: parsed.data.city,
         budgetMin: parsed.data.budgetMin ?? null,
         budgetMax: parsed.data.budgetMax ?? null,

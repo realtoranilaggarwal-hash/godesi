@@ -51,6 +51,22 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
           </p>
         ) : null}
         <p className="whitespace-pre-line text-slate-700">{lead.description}</p>
+
+        {lead.serviceOptions.length ? (
+          <div>
+            <h2 className="text-sm font-bold text-slate-800">Looking for</h2>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {lead.serviceOptions.map((option) => (
+                <span
+                  key={option}
+                  className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700"
+                >
+                  {option}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </Card>
 
       <Card className="space-y-3">

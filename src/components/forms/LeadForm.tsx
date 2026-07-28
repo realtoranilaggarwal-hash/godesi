@@ -6,18 +6,27 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ServicePicker, type ServiceGroup } from "@/components/forms/ServicePicker";
+import {
+  RequirementOptions,
+  type RequirementOptionSet,
+} from "@/components/forms/RequirementOptions";
 
 export function LeadForm({
   defaultName,
   defaultEmail,
   defaultCategory,
   groups,
+  optionSets,
+  defaultOptionSlug,
 }: {
   defaultName?: string;
   defaultEmail?: string;
   defaultCategory?: string;
   /** Tick-box services; falls back to a plain text field when omitted. */
   groups?: ServiceGroup[];
+  /** Per-subcategory option groups, mirroring the posting form. */
+  optionSets?: RequirementOptionSet[];
+  defaultOptionSlug?: string;
 }) {
   const [state, formAction] = useFormState(createLeadAction, emptyState);
 
@@ -38,6 +47,13 @@ export function LeadForm({
           fallbackLabel={defaultCategory ?? "General requirement"}
           legend="What do you need?"
           hint="Tick everything you need — matching businesses will see your post."
+        />
+      ) : null}
+
+      {optionSets?.length ? (
+        <RequirementOptions
+          sets={optionSets}
+          defaultSlug={defaultOptionSlug}
         />
       ) : null}
 

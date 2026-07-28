@@ -857,6 +857,10 @@ model Lead {
   title        String
   description  String
   category     String
+  /// Subcategory slug the requirement was posted under, when known.
+  categorySlug String?
+  /// Answers to that subcategory's option groups, e.g. spa treatment and location.
+  serviceOptions String[] @default([])
   city         String
   budgetMin    Int?
   budgetMax    Int?

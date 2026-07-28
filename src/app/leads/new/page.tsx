@@ -6,6 +6,8 @@ import { CATEGORY_TREE } from "@/lib/categories";
 import { WEDDING_SLUG } from "@/lib/wedding";
 import type { ServiceGroup } from "@/components/forms/ServicePicker";
 import { LeadForm } from "@/components/forms/LeadForm";
+import type { RequirementOptionSet } from "@/components/forms/RequirementOptions";
+import { specialtySet } from "@/lib/specialties";
 import { Card } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 
@@ -39,6 +41,16 @@ export default async function NewLeadPage({
         items: entry.children,
       }));
 
+  const optionSources = category
+    ? category.children.length
+      ? category.children
+      : [category]
+    : [];
+  const optionSets: RequirementOptionSet[] = optionSources.flatMap((entry) => {
+    const set = specialtySet(entry.slug);
+    return set ? [{ slug: entry.slug, name: entry.name, set }] : [];
+  });
+
   return (
     <div className="flex justify-center gap-6">
       <div className="min-w-0 max-w-2xl flex-1 space-y-4">
@@ -55,6 +67,8 @@ export default async function NewLeadPage({
             defaultEmail={user.email}
             defaultCategory={category?.name}
             groups={groups.filter((group) => group.items.length)}
+            optionSets={optionSets}
+            defaultOptionSlug={category?.slug}
           />
         </Card>
       </div>
