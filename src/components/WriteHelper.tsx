@@ -96,7 +96,8 @@ export function WriteHelper({
       if (box instanceof HTMLTextAreaElement || box instanceof HTMLInputElement) {
         box.value = data.text;
         box.dispatchEvent(new Event("input", { bubbles: true }));
-        setNote("Draft added below — edit it so it sounds like you.");
+        box.scrollIntoView({ behavior: "smooth", block: "center" });
+        setNote("Draft added to the box above — edit it so it sounds like you.");
       }
     } catch {
       setNote("Could not draft that — try the ChatGPT prompt.");

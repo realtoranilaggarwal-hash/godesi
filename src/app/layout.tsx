@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     process.env.NEXT_PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js";
 
   return (
-    <html lang="en">
+    <html lang="en" className="overflow-x-hidden">
       {adsenseClient || umamiId ? (
         <head>
           {adsenseClient ? (
@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ) : null}
         </head>
       ) : null}
-      <body className={`${inter.className} min-h-screen bg-slate-50 text-slate-900`}>
+      <body className={`${inter.className} min-h-screen overflow-x-hidden bg-slate-50 pb-20 text-slate-900 sm:pb-0`}>
         <SiteHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />

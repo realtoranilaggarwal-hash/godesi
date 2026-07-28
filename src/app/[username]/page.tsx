@@ -72,22 +72,22 @@ export default async function PublicProfilePage({
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <Card className="overflow-hidden !p-0">
-        <div className="h-24 bg-gradient-to-r from-orange-400 via-rose-500 to-fuchsia-600" />
+        <div className="h-2 bg-gradient-to-r from-orange-400 via-rose-500 to-fuchsia-600" />
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-end gap-4">
+          <div className="flex items-start gap-4">
             {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatarUrl}
                 alt={user.name}
-                className="-mt-16 h-24 w-24 rounded-full border-4 border-white object-cover shadow"
+                className="h-20 w-20 shrink-0 rounded-full border-4 border-white object-cover shadow sm:h-24 sm:w-24"
               />
             ) : (
-              <div className="-mt-16 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-3xl font-black text-white shadow">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-white bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-3xl font-black text-white shadow sm:h-24 sm:w-24">
                 {user.name.slice(0, 1).toUpperCase()}
               </div>
             )}
-            <div>
+            <div className="min-w-0">
               <h1 className="text-2xl font-black text-slate-900">{user.name}</h1>
               {user.headline ? (
                 <p className="text-sm font-semibold text-slate-700">

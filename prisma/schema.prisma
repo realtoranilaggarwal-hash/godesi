@@ -466,6 +466,7 @@ model Business {
   category           String
   city               String
   state              String?
+  country            String?
   description        String?
   logoUrl            String?
   websiteUrl         String?

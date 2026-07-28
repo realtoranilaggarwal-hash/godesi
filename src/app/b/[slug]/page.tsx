@@ -151,6 +151,7 @@ export default async function BusinessProfilePage({
       streetAddress: business.address ?? undefined,
       addressLocality: business.city,
       addressRegion: business.state ?? undefined,
+      addressCountry: business.country ?? undefined,
     },
     ...(reviewCount
       ? {
@@ -206,6 +207,7 @@ export default async function BusinessProfilePage({
             <p className="text-slate-600">
               {business.category} · {business.city}
               {business.state ? `, ${business.state}` : ""}
+              {business.country ? `, ${business.country}` : ""}
             </p>
             {business.categoryRef ? (
               <div className="mt-2 flex flex-wrap gap-1.5">

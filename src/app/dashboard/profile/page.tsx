@@ -9,6 +9,7 @@ import { Card, LinkButton } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 import { ListingHelp } from "@/components/ListingHelp";
 import { effectivePlan } from "@/lib/plans";
+import { requestCountry } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -108,6 +109,7 @@ export default async function ProfileEditorPage({
             defaultProfileType={
               searchParams.type === "professional" ? "PROFESSIONAL" : "BUSINESS"
             }
+            defaultCountry={requestCountry()}
             canFeatureSpecialty={effectivePlan(user) !== "FREE"}
           />
         </Card>

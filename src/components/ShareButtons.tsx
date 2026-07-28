@@ -144,18 +144,9 @@ export function ShareButtons({
         >
           <span aria-hidden>🔗</span> {copied ? "Link copied!" : "Copy link"}
         </button>
-        {canNativeShare ? (
-          <button
-            type="button"
-            onClick={nativeShare}
-            className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            <span aria-hidden>📤</span> More apps
-          </button>
-        ) : null}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         {NETWORKS.map((network) => (
           <a
             key={network.key}
@@ -169,6 +160,15 @@ export function ShareButtons({
             <span aria-hidden>{network.glyph}</span>
           </a>
         ))}
+        {canNativeShare ? (
+          <button
+            type="button"
+            onClick={nativeShare}
+            className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            <span aria-hidden>📤</span> More apps
+          </button>
+        ) : null}
       </div>
     </div>
   );

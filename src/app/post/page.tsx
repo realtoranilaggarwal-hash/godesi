@@ -94,12 +94,15 @@ function Tile({
   label,
   blurb,
   gradient,
+  cta = "Continue",
 }: {
   href: string;
   icon: string;
   label: string;
   blurb?: string;
   gradient?: string;
+  /** Every tile says what tapping it does — the card alone reads as decoration. */
+  cta?: string;
 }) {
   return (
     <Link
@@ -116,6 +119,9 @@ function Tile({
       </span>
       <p className="mt-2 font-bold text-slate-900">{label}</p>
       {blurb ? <p className="text-sm text-slate-600">{blurb}</p> : null}
+      <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white">
+        {cta} →
+      </span>
     </Link>
   );
 }
@@ -155,9 +161,33 @@ export default async function PostPage({
                   label={item.label}
                   blurb={item.blurb}
                   gradient={item.gradient}
+                  cta={item.id === "requirement" ? "Post a requirement" : "Start"}
                 />
               ))}
             </div>
+            <p className="text-sm text-slate-500">
+              Know what you want?{" "}
+              <Link
+                href="/dashboard/profile"
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                Go straight to my business card form
+              </Link>{" "}
+              ·{" "}
+              <Link
+                href="/listings/new"
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                new listing
+              </Link>{" "}
+              ·{" "}
+              <Link
+                href="/events/new"
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                new event
+              </Link>
+            </p>
           </Card>
         ) : (
           <Card className="space-y-3">
@@ -187,6 +217,7 @@ export default async function PostPage({
                     href={`/listings/new?kind=${item.kind}`}
                     icon={item.icon}
                     label={item.label}
+                    cta="Post this"
                     gradient="from-emerald-500 to-teal-500"
                   />
                 ))}
@@ -202,6 +233,7 @@ export default async function PostPage({
                     href={`/dashboard/profile?type=professional&category=${PROFESSIONALS_SLUG}&subcategory=${child.slug}`}
                     icon="🎓"
                     label={child.name}
+                    cta="Create my profile"
                     gradient="from-cyan-500 to-sky-500"
                   />
                 ))}
@@ -220,6 +252,13 @@ export default async function PostPage({
                     }
                     icon={category.icon}
                     label={category.name}
+                    cta={
+                      type === "event"
+                        ? "Create event"
+                        : type === "requirement"
+                          ? "Post requirement"
+                          : "Create my card"
+                    }
                     gradient={gradientFor(category.color)}
                   />
                 ))}

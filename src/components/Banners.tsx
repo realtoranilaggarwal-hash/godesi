@@ -84,7 +84,12 @@ function AdvertiseHere({
   if (client && adsenseSlot) {
     return (
       <div className={className}>
-        <AdSenseUnit client={client} slotId={adsenseSlot} height={height} />
+        <AdSenseUnit
+          client={client}
+          slotId={adsenseSlot}
+          height={height}
+          fallback={<AdPreview width={width} height={height} />}
+        />
         <BookThisSpot slot={slot} label={label} />
       </div>
     );

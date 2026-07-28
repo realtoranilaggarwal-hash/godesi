@@ -105,6 +105,7 @@ const profileSchema = z.object({
   subcategorySlug: z.string().trim().optional(),
   city: z.string().trim().min(2, "City is required"),
   state: z.string().trim().optional(),
+  country: z.string().trim().max(60).optional(),
   description: z.string().trim().max(2000).optional(),
   whatsappNumber: z
     .string()
@@ -161,6 +162,7 @@ function readProfileForm(formData: FormData) {
     subcategorySlug: value("subcategorySlug"),
     city: value("city"),
     state: value("state"),
+    country: value("country"),
     description: value("description"),
     whatsappNumber: value("whatsappNumber"),
     phone: value("phone"),
@@ -289,6 +291,7 @@ export async function saveBusinessProfileAction(
       // Kept in sync for search snippets and legacy listings.
       category: subcategory?.name ?? category.name,
       state: parsed.data.state || null,
+      country: parsed.data.country || null,
       description: parsed.data.description || null,
       phone: parsed.data.phone || null,
       address: parsed.data.address || null,
