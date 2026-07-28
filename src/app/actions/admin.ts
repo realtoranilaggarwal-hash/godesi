@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { ListingStatus, NewsStatus, Plan } from "@prisma/client";
 import { db } from "@/lib/db";
-import { requireRole, requireStaff } from "@/lib/auth";
+import { requireRole, requirePermission } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { slotCapacity } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { awardPoints } from "@/lib/rewards";
 
 export async function setListingStatusAction(formData: FormData) {
-  await requireStaff();
+  await requirePermission("listings");
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as ListingStatus;
   if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
@@ -177,17 +178,26 @@ export async function rejectBannerAction(formData: FormData) {
 }
 
 export async function setNewsStatusAction(formData: FormData) {
-  await requireStaff();
+  await requirePermission("news");
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as NewsStatus;
   if (!["PENDING", "PUBLISHED", "REJECTED"].includes(status)) throw new Error("Invalid status");
-  await db.newsItem.update({ where: { id }, data: { status } });
+  const item = await db.newsItem.update({ where: { id }, data: { status } });
+
+  if (status === "PUBLISHED" && item.submittedById) {
+    await awardPoints({
+      userId: item.submittedById,
+      reason: "NEWS_PUBLISHED",
+      note: item.title,
+      key: item.id,
+    }).catch(() => null);
+  }
   revalidatePath("/admin");
   revalidatePath("/news");
 }
 
 export async function deleteNewsAction(formData: FormData) {
-  await requireStaff();
+  await requirePermission("news");
   await db.newsItem.delete({ where: { id: String(formData.get("id") ?? "") } });
   revalidatePath("/admin");
   revalidatePath("/news");
@@ -223,7 +233,7 @@ export async function deleteNewsFeedAction(formData: FormData) {
 }
 
 export async function setEventStatusAction(formData: FormData) {
-  await requireStaff();
+  await requirePermission("events");
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as ListingStatus;
   if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) throw new Error("Invalid status");
@@ -271,7 +281,7 @@ export async function adminUpdateEventAction(
   formData: FormData,
 ): Promise<ActionState> {
   try {
-    await requireStaff();
+    await requirePermission("events");
     const parsed = adminEventSchema.safeParse({
       id: formData.get("id"),
       title: formData.get("title"),

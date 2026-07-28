@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { getCurrentUser, isStaff } from "@/lib/auth";
+import { can, getCurrentUser, isStaff } from "@/lib/auth";
+import { featureNewsAction } from "@/app/actions/newsVotes";
 import {
   deleteNewsAction,
   setEventStatusAction,
@@ -25,6 +26,13 @@ export default async function ContentDeskPage() {
   if (!user) redirect("/login");
   if (!isStaff(user)) redirect("/dashboard");
 
+  const allowed = {
+    events: can(user, "events"),
+    listings: can(user, "listings"),
+    news: can(user, "news"),
+    blog: can(user, "blog"),
+  };
+
   const [events, listings, newsItems, posts] = await Promise.all([
     db.event.findMany({
       orderBy: { createdAt: "desc" },
@@ -43,7 +51,13 @@ export default async function ContentDeskPage() {
       take: 30,
       select: { id: true, slug: true, title: true, city: true, status: true },
     }),
-    db.newsItem.findMany({ orderBy: { publishedAt: "desc" }, take: 25 }),
+    db.newsItem.findMany({
+      orderBy: [{ status: "asc" }, { publishedAt: "desc" }],
+      take: 40,
+      include: {
+        submittedBy: { select: { name: true, email: true, avatarUrl: true } },
+      },
+    }),
     db.blogPost.findMany({ orderBy: { publishedAt: "desc" }, take: 40 }),
   ]);
 
@@ -78,6 +92,7 @@ export default async function ContentDeskPage() {
         </Link>
       </div>
 
+      {allowed.blog ? (
       <Card>
         <h2 className="mb-3 text-lg font-bold">Blog &amp; what&apos;s new</h2>
         <BlogPostForm />
@@ -135,7 +150,9 @@ export default async function ContentDeskPage() {
           ) : null}
         </ul>
       </Card>
+      ) : null}
 
+      {allowed.events ? (
       <Card>
         <h2 className="mb-3 text-lg font-bold">Events</h2>
         <ul className="divide-y divide-slate-100 text-sm">
@@ -195,7 +212,9 @@ export default async function ContentDeskPage() {
           ) : null}
         </ul>
       </Card>
+      ) : null}
 
+      {allowed.listings ? (
       <Card>
         <h2 className="mb-3 text-lg font-bold">Property, rooms &amp; items</h2>
         <ul className="divide-y divide-slate-100 text-sm">
@@ -239,9 +258,15 @@ export default async function ContentDeskPage() {
           ) : null}
         </ul>
       </Card>
+      ) : null}
 
+      {allowed.news ? (
       <Card>
         <h2 className="mb-3 text-lg font-bold">News</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          Member submissions wait as PENDING until you publish them. Publishing
+          rewards the contributor; ⭐ marks a story as important news.
+        </p>
         <ul className="divide-y divide-slate-100 text-sm">
           {newsItems.map((item) => (
             <li
@@ -257,7 +282,31 @@ export default async function ContentDeskPage() {
                 >
                   {item.title}
                 </a>
-                <p className="text-xs text-slate-400">{item.source}</p>
+                <p className="flex items-center gap-1.5 text-xs text-slate-400">
+                  {item.submittedBy ? (
+                    <>
+                      {item.submittedBy.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.submittedBy.avatarUrl}
+                          alt=""
+                          className="h-5 w-5 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                          {(item.submittedBy.name ?? item.submittedBy.email)
+                            .slice(0, 1)
+                            .toUpperCase()}
+                        </span>
+                      )}
+                      {item.submittedBy.name ?? item.submittedBy.email}
+                    </>
+                  ) : (
+                    item.source
+                  )}
+                  {" · "}
+                  {item.score} votes
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <Badge
@@ -285,6 +334,15 @@ export default async function ContentDeskPage() {
                       </button>
                     </form>
                   ))}
+                <form action={featureNewsAction}>
+                  <input type="hidden" name="id" value={item.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-amber-300 px-2 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-50"
+                  >
+                    {item.featured ? "unpin" : "⭐ important"}
+                  </button>
+                </form>
                 <form action={deleteNewsAction}>
                   <input type="hidden" name="id" value={item.id} />
                   <button
@@ -299,6 +357,7 @@ export default async function ContentDeskPage() {
           ))}
         </ul>
       </Card>
+      ) : null}
     </div>
   );
 }

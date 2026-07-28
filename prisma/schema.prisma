@@ -124,6 +124,10 @@ enum PointsReason {
   REFERRAL_PROFILE
   REFERRAL_UPGRADE
   REFERRAL_LISTING
+  /// Community news desk: first approved story, upvotes and editor's picks.
+  NEWS_PUBLISHED
+  NEWS_UPVOTED
+  NEWS_FEATURED
   REDEMPTION
   ADJUSTMENT
 }
@@ -217,6 +221,10 @@ model User {
   resourceOrders ResourceOrder[]
 
   blogPosts BlogPost[]
+  newsVotes NewsVote[]
+
+  /// What a MODERATOR may manage; ignored for other roles. See lib/permissions.
+  staffPermissions String[] @default([])
 }
 
 enum ReferralStatus {
@@ -806,8 +814,28 @@ model NewsItem {
   submittedById String?
   submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
 
+  /// Editor's pick, shown at the top of /news.
+  featured Boolean    @default(false)
+  score    Int        @default(0)
+  votes    NewsVote[]
+
   @@index([status, publishedAt])
   @@index([topic, status, publishedAt])
+}
+
+/// One up or down vote per member per story.
+model NewsVote {
+  id     String   @id @default(cuid())
+  newsId String
+  news   NewsItem @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 1 for up, -1 for down.
+  value     Int
+  createdAt DateTime @default(now())
+
+  @@unique([newsId, userId])
+  @@index([userId])
 }
 
 model Lead {

@@ -3,6 +3,9 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import type { Role, User } from "@prisma/client";
 import { db } from "@/lib/db";
+import { can, type StaffPermission } from "@/lib/permissions";
+
+export { can } from "@/lib/permissions";
 
 const COOKIE = "godesi_session";
 const MAX_AGE = 60 * 60 * 24 * 30;
@@ -67,6 +70,15 @@ export function isStaff(user: { role: Role }) {
 export async function requireStaff(): Promise<User> {
   const user = await requireUser();
   if (!isStaff(user)) throw new Error("FORBIDDEN");
+  return user;
+}
+
+/** Staff access narrowed to one area, e.g. only events or only news. */
+export async function requirePermission(
+  permission: StaffPermission,
+): Promise<User> {
+  const user = await requireStaff();
+  if (!can(user, permission)) throw new Error("FORBIDDEN");
   return user;
 }
 

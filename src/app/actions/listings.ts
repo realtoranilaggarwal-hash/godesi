@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isStaff, requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { requestCurrency } from "@/lib/currency";
 import { isMonthly, uniqueListingSlug } from "@/lib/listings";
@@ -106,7 +106,8 @@ export async function deleteListingAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const listing = await db.listing.findUnique({ where: { id } });
   if (!listing) return;
-  if (listing.ownerId !== user.id && !isStaff(user)) throw new Error("FORBIDDEN");
+  if (listing.ownerId !== user.id && !can(user, "listings"))
+    throw new Error("FORBIDDEN");
 
   await db.listing.delete({ where: { id } });
   revalidatePath("/real-estate");

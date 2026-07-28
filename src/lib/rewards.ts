@@ -13,6 +13,9 @@ export const POINTS: Record<EarnReason, number> = {
   REFERRAL_PROFILE: 20,
   REFERRAL_UPGRADE: 100,
   REFERRAL_LISTING: 15,
+  NEWS_PUBLISHED: 10,
+  NEWS_UPVOTED: 5,
+  NEWS_FEATURED: 25,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {
@@ -23,6 +26,9 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   REFERRAL_PROFILE: "Your referral completed their profile",
   REFERRAL_UPGRADE: "Your referral upgraded to a paid plan",
   REFERRAL_LISTING: "Your referral posted a listing or event",
+  NEWS_PUBLISHED: "Your news story was approved",
+  NEWS_UPVOTED: "Your news story is popular with members",
+  NEWS_FEATURED: "Your story was picked as important news",
   REDEMPTION: "Points redeemed",
   ADJUSTMENT: "Adjusted by the Godesi team",
 };
@@ -85,6 +91,7 @@ export async function awardPoints({
   reason,
   note,
   once = false,
+  key,
   points,
   skipReferralBonus = false,
   referralId,
@@ -93,6 +100,8 @@ export async function awardPoints({
   reason: PointsReason;
   note?: string;
   once?: boolean;
+  /** Pays at most once for this exact thing, e.g. one story reaching 5 upvotes. */
+  key?: string;
   points?: number;
   skipReferralBonus?: boolean;
   /** Links inviter bonuses to the referral that produced them. */
@@ -102,7 +111,7 @@ export async function awardPoints({
     points ?? (reason in POINTS ? await pointsFor(reason as EarnReason) : 0);
   if (!value) return null;
 
-  const uniqueKey = once ? `${userId}:${reason}` : null;
+  const uniqueKey = key ? `${userId}:${reason}:${key}` : once ? `${userId}:${reason}` : null;
   if (uniqueKey) {
     const existing = await db.pointsEntry.findUnique({ where: { uniqueKey } });
     if (existing) return existing;

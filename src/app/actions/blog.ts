@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/auth";
+import { requirePermission } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { uniqueBlogSlug } from "@/lib/blog";
 
@@ -37,7 +37,7 @@ export async function saveBlogPostAction(
   formData: FormData,
 ): Promise<ActionState> {
   try {
-    const user = await requireStaff();
+    const user = await requirePermission("blog");
 
     const parsed = postSchema.safeParse({
       title: formData.get("title"),
@@ -82,14 +82,14 @@ export async function saveBlogPostAction(
 }
 
 export async function deleteBlogPostAction(formData: FormData) {
-  await requireStaff();
+  await requirePermission("blog");
   await db.blogPost.delete({ where: { id: String(formData.get("id") ?? "") } });
   revalidatePath("/blog");
   revalidatePath("/admin");
 }
 
 export async function toggleBlogPostAction(formData: FormData) {
-  await requireStaff();
+  await requirePermission("blog");
   const id = String(formData.get("id") ?? "");
   const post = await db.blogPost.findUnique({ where: { id } });
   if (!post) return;

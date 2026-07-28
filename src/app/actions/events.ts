@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isStaff, requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
 import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
@@ -413,7 +413,7 @@ export async function cancelEventAction(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id") ?? "");
   const event = await db.event.findUnique({ where: { id } });
-  if (!event || (event.organizerId !== user.id && !isStaff(user))) {
+  if (!event || (event.organizerId !== user.id && !can(user, "events"))) {
     throw new Error("FORBIDDEN");
   }
   await db.event.update({ where: { id }, data: { status: "REJECTED" } });

@@ -48,7 +48,11 @@ import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS, formatCtr } from "@/lib/ads";
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
 import { ModeratorForm } from "@/components/forms/ModeratorForm";
-import { revokeModeratorAction } from "@/app/actions/team";
+import {
+  revokeModeratorAction,
+  updateModeratorPermissionsAction,
+} from "@/app/actions/team";
+import { STAFF_PERMISSIONS } from "@/lib/permissions";
 import { formatEventDate } from "@/lib/events";
 import { Badge, Card } from "@/components/ui";
 import { PLAN_ORDER } from "@/lib/plans";
@@ -172,7 +176,12 @@ export default async function AdminPage() {
     db.user.findMany({
       where: { role: "MODERATOR" },
       orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, email: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        staffPermissions: true,
+      },
     }),
     db.resourceLink.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
@@ -223,9 +232,37 @@ export default async function AdminPage() {
               key={moderator.id}
               className="flex items-center justify-between gap-2 py-2"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="font-medium">{moderator.name ?? "Member"}</p>
                 <p className="text-xs text-slate-400">{moderator.email}</p>
+                <form
+                  action={updateModeratorPermissionsAction}
+                  className="mt-1 flex flex-wrap items-center gap-2"
+                >
+                  <input type="hidden" name="id" value={moderator.id} />
+                  {STAFF_PERMISSIONS.map((permission) => (
+                    <label
+                      key={permission.key}
+                      className="flex items-center gap-1 text-xs text-slate-600"
+                    >
+                      <input
+                        type="checkbox"
+                        name="permissions"
+                        value={permission.key}
+                        defaultChecked={moderator.staffPermissions.includes(
+                          permission.key,
+                        )}
+                      />
+                      {permission.label}
+                    </label>
+                  ))}
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-indigo-200 px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
+                  >
+                    save
+                  </button>
+                </form>
               </div>
               <form action={revokeModeratorAction}>
                 <input type="hidden" name="id" value={moderator.id} />

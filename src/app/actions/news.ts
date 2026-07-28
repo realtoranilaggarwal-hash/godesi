@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isStaff, requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { effectivePlan } from "@/lib/plans";
 import { twoLineSummary } from "@/lib/news";
 
 const newsSchema = z.object({
@@ -20,17 +19,14 @@ const newsSchema = z.object({
     .or(z.literal("").transform(() => undefined)),
 });
 
-/** Admins publish directly; Pro/Premium members submit for review. */
+/** News staff publish directly; every other member submits for review. */
 export async function submitNewsAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const isAdmin = isStaff(user);
-    if (!isAdmin && effectivePlan(user) === "FREE") {
-      return { error: "News submission is available to Pro and Premium members." };
-    }
+    const isAdmin = can(user, "news");
 
     const parsed = newsSchema.safeParse({
       title: formData.get("title"),

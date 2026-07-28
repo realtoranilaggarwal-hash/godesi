@@ -4,6 +4,14 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { isStaffPermission } from "@/lib/permissions";
+
+function pickPermissions(formData: FormData) {
+  return formData
+    .getAll("permissions")
+    .map((value) => String(value))
+    .filter(isStaffPermission);
+}
 
 /** Grants content-desk access to an existing member by email. */
 export async function grantModeratorAction(
@@ -23,12 +31,35 @@ export async function grantModeratorAction(
     }
     if (member.role === "ADMIN") return { error: "That account is already an admin." };
 
-    await db.user.update({ where: { id: member.id }, data: { role: "MODERATOR" } });
+    const permissions = pickPermissions(formData);
+    if (!permissions.length) {
+      return { error: "Tick at least one thing they are allowed to manage." };
+    }
+
+    await db.user.update({
+      where: { id: member.id },
+      data: { role: "MODERATOR", staffPermissions: permissions },
+    });
     revalidatePath("/admin");
-    return { success: `${member.name ?? email} can now use the content desk.` };
+    return {
+      success: `${member.name ?? email} can now manage ${permissions.length} area(s) from the content desk.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
+}
+
+/** Updates an existing moderator's tick boxes. */
+export async function updateModeratorPermissionsAction(formData: FormData) {
+  await requireRole("ADMIN");
+  const id = String(formData.get("id") ?? "");
+  const member = await db.user.findUnique({ where: { id } });
+  if (!member || member.role !== "MODERATOR") return;
+  await db.user.update({
+    where: { id },
+    data: { staffPermissions: pickPermissions(formData) },
+  });
+  revalidatePath("/admin");
 }
 
 export async function revokeModeratorAction(formData: FormData) {
@@ -36,6 +67,9 @@ export async function revokeModeratorAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const member = await db.user.findUnique({ where: { id } });
   if (!member || member.role !== "MODERATOR") return;
-  await db.user.update({ where: { id }, data: { role: "BUSINESS" } });
+  await db.user.update({
+    where: { id },
+    data: { role: "BUSINESS", staffPermissions: [] },
+  });
   revalidatePath("/admin");
 }

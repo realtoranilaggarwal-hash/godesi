@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requestCountry } from "@/lib/currency";
-import { isStaff, requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { FAITHS, uniqueWorshipSlug } from "@/lib/worship";
 import { type ActionState, fieldError } from "@/lib/actions";
@@ -56,7 +56,7 @@ export async function submitWorshipAction(
       .filter((value) => value.startsWith("https://"))
       .slice(0, 10);
 
-    const isAdmin = isStaff(user);
+    const isAdmin = can(user, "worship");
     const place = await db.worshipPlace.create({
       data: {
         slug: await uniqueWorshipSlug(parsed.data.name, parsed.data.city),
@@ -92,7 +92,7 @@ export async function submitWorshipAction(
 
 export async function reviewWorshipAction(formData: FormData) {
   const user = await requireUser();
-  if (!isStaff(user)) throw new Error("FORBIDDEN");
+  if (!can(user, "worship")) throw new Error("FORBIDDEN");
 
   const id = String(formData.get("id") ?? "");
   const approve = String(formData.get("decision") ?? "") === "approve";
