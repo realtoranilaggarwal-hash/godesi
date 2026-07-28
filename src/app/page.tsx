@@ -13,6 +13,7 @@ import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { Card, LinkButton } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
+import { SpaSpotlight } from "@/components/SpaSpotlight";
 
 export const dynamic = "force-dynamic";
 
@@ -39,38 +40,52 @@ function SectionHeading({
 }
 
 export default async function HomePage() {
-  const [categories, counts, businesses, events, news, members, memberCount] =
-    await Promise.all([
-      getCategoryTree(),
-      getCategoryCounts(),
-      searchBusinesses({ take: 6 }),
-      db.event.findMany({
-        where: { status: "APPROVED", startsAt: { gte: new Date() } },
-        orderBy: { startsAt: "asc" },
-        take: 3,
-        include: {
-          category: { select: { name: true, icon: true, color: true } },
-        },
-      }),
-      db.newsItem.findMany({
-        where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-        orderBy: { publishedAt: "desc" },
-        take: 4,
-      }),
-      db.user.findMany({
-        where: { emailVerifiedAt: { not: null } },
-        orderBy: { createdAt: "desc" },
-        take: 18,
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          avatarUrl: true,
-          location: true,
-        },
-      }),
-      db.user.count(),
-    ]);
+  const [
+    categories,
+    counts,
+    businesses,
+    events,
+    news,
+    members,
+    memberCount,
+    spaCount,
+  ] = await Promise.all([
+    getCategoryTree(),
+    getCategoryCounts(),
+    searchBusinesses({ take: 6 }),
+    db.event.findMany({
+      where: { status: "APPROVED", startsAt: { gte: new Date() } },
+      orderBy: { startsAt: "asc" },
+      take: 3,
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
+    }),
+    db.newsItem.findMany({
+      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+      orderBy: { publishedAt: "desc" },
+      take: 4,
+    }),
+    db.user.findMany({
+      where: { emailVerifiedAt: { not: null } },
+      orderBy: { createdAt: "desc" },
+      take: 18,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        avatarUrl: true,
+        location: true,
+      },
+    }),
+    db.user.count(),
+    db.business.count({
+      where: {
+        status: "APPROVED",
+        subcategorySlug: "beauty-lifestyle-spa-and-massage",
+      },
+    }),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -239,7 +254,11 @@ export default async function HomePage() {
             href="/categories"
             linkLabel="All categories"
           />
-          <CategoryTiles categories={categories.slice(6)} counts={counts} />
+          <CategoryTiles
+            categories={categories.slice(6)}
+            counts={counts}
+            extra={<SpaSpotlight listings={spaCount} />}
+          />
         </section>
       </div>
     </div>

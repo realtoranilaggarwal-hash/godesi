@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { gradientFor, softFor } from "@/lib/categories";
 
 export type TileCategory = {
@@ -13,9 +14,12 @@ export type TileCategory = {
 export function CategoryTiles({
   categories,
   counts,
+  extra,
 }: {
   categories: TileCategory[];
   counts?: Map<string, number>;
+  /** Fills the leftover cell when the categories don't divide by three. */
+  extra?: ReactNode;
 }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -61,6 +65,7 @@ export function CategoryTiles({
           </div>
         </Link>
       ))}
+      {extra}
     </div>
   );
 }
