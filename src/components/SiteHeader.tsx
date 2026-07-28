@@ -88,7 +88,7 @@ export async function SiteHeader() {
             </button>
           </form>
 
-          <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 xl:flex">
+          <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 2xl:flex">
             {NAV.map((item) => (
               <Link
                 key={item.href}
@@ -159,7 +159,7 @@ export async function SiteHeader() {
                     </span>
                   ) : null}
                 </Link>
-                <div className="hidden items-center gap-2 xl:flex">
+                <div className="hidden items-center gap-2 2xl:flex">
                   <Link
                     href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
                     className="rounded-lg px-2 py-1 hover:text-slate-900"
