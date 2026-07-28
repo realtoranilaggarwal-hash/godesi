@@ -16,7 +16,7 @@ import { Alert, Field, inputClass } from "@/components/ui";
 
 export type MeetupProfileDefaults = {
   displayName: string;
-  age: number;
+  age: number | null;
   gender: string;
   marital: string;
   city: string;
@@ -47,14 +47,17 @@ export function MeetupProfileForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Age" hint="18+ only">
+        <Field
+          label="Age"
+          hint="Optional — leave it blank if you would rather not share it"
+        >
           <input
             name="age"
             type="number"
-            required
             min={MEETUP_MIN_AGE}
             max={MEETUP_MAX_AGE}
-            defaultValue={defaults?.age}
+            defaultValue={defaults?.age ?? ""}
+            placeholder="Prefer not to share"
             className={inputClass}
           />
         </Field>
@@ -144,6 +147,40 @@ export function MeetupProfileForm({
           className={inputClass}
         />
       </Field>
+
+      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          Before you publish
+        </legend>
+        <label className="flex gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            name="adult"
+            required
+            defaultChecked={Boolean(defaults)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300"
+          />
+          <span>
+            I confirm I am {MEETUP_MIN_AGE} or older. Sharing my exact age is
+            optional.
+          </span>
+        </label>
+        <label className="flex gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            name="risk"
+            required
+            defaultChecked={Boolean(defaults)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-300"
+          />
+          <span>
+            I understand that I meet or greet other members entirely at my own
+            risk. Godesi does not verify members, is not part of any meeting and
+            I will do my own due diligence — meet in public places and never send
+            money.
+          </span>
+        </label>
+      </fieldset>
 
       <SubmitButton pendingLabel="Saving…">Save my Connect profile</SubmitButton>
       <p className="text-xs text-slate-500">

@@ -1087,7 +1087,12 @@ model MeetupProfile {
   userId         String        @unique
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   displayName    String
-  age            Int
+  /// Optional: members may confirm 18+ without publishing their age.
+  age            Int?
+  /// When the member ticked the 18+ confirmation.
+  adultConfirmedAt DateTime?
+  /// When the member accepted the meet-at-your-own-risk notice.
+  riskAcceptedAt   DateTime?
   gender         MeetupGender
   marital        MeetupMarital @default(PREFER_NOT_SAY)
   city           String

@@ -15,7 +15,8 @@ const schema = z.object({
     .number()
     .int()
     .min(MEETUP_MIN_AGE, "Connect is for adults 18 and over")
-    .max(MEETUP_MAX_AGE, "Enter a valid age"),
+    .max(MEETUP_MAX_AGE, "Enter a valid age")
+    .optional(),
   gender: z.enum(["WOMAN", "MAN", "OTHER"]),
   marital: z.enum(["SINGLE", "MARRIED", "PREFER_NOT_SAY"]),
   city: z.string().trim().min(2, "Which city are you in?").max(80),
@@ -40,7 +41,7 @@ export async function saveMeetupProfileAction(
     const user = await requireUser();
     const parsed = schema.safeParse({
       displayName: formData.get("displayName"),
-      age: formData.get("age"),
+      age: formData.get("age") || undefined,
       gender: formData.get("gender"),
       marital: formData.get("marital"),
       city: formData.get("city"),
@@ -49,6 +50,16 @@ export async function saveMeetupProfileAction(
       whatsapp: formData.get("whatsapp") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    if (formData.get("adult") !== "on") {
+      return { error: "Please confirm you are 18 or older." };
+    }
+    if (formData.get("risk") !== "on") {
+      return {
+        error:
+          "Please accept that you meet people at your own risk and will do your own checks.",
+      };
+    }
 
     const intents = formData
       .getAll("intents")
@@ -73,7 +84,9 @@ export async function saveMeetupProfileAction(
 
     const data = {
       displayName: parsed.data.displayName,
-      age: parsed.data.age,
+      age: parsed.data.age ?? null,
+      adultConfirmedAt: new Date(),
+      riskAcceptedAt: new Date(),
       gender: parsed.data.gender,
       marital: parsed.data.marital,
       city: parsed.data.city,

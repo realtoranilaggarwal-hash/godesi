@@ -215,7 +215,8 @@ export default async function ConnectPage({
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold">
-                      {profile.displayName}, {profile.age}
+                      {profile.displayName}
+                      {profile.age ? `, ${profile.age}` : ""}
                     </p>
                     <p className="text-sm text-slate-500">
                       {profile.city}
