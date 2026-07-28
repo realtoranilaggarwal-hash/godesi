@@ -1040,7 +1040,10 @@ model ResourceLink {
   /// Category slug this link is relevant to; null shows it everywhere.
   categorySlug  String?
   category      Category?     @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
-  tag           String?
+  /// One-line summary shown beside the link.
+  description   String?
+  /// Topic tags powering the resources tag cloud.
+  tags          String[]      @default([])
   /// Named rail this link belongs to (see RESOURCE_PLACEMENTS), e.g. connect safety tools.
   placement     String?
   kind          ResourceKind  @default(SPONSORED)

@@ -33,17 +33,30 @@ const linkSchema = z.object({
       "Only http:// and https:// links are allowed",
     ),
   categorySlug: z.string().trim().optional(),
-  tag: z.string().trim().max(30).optional(),
+  description: z.string().trim().max(140).optional(),
+  tags: z.string().trim().max(200).optional(),
   kind: z.enum(["AFFILIATE", "SPONSORED", "EDITORIAL"]),
   placement: z.string().trim().optional(),
 });
+
+/** Comma separated tags become a clean, lower-case list for the tag cloud. */
+function readTags(value?: string) {
+  const seen = new Set<string>();
+  for (const raw of (value ?? "").split(",")) {
+    const tag = raw.trim().replace(/^#/, "").slice(0, 30).toLowerCase();
+    if (tag) seen.add(tag);
+    if (seen.size >= 8) break;
+  }
+  return Array.from(seen);
+}
 
 function parseLink(formData: FormData) {
   return linkSchema.safeParse({
     title: formData.get("title"),
     url: formData.get("url"),
     categorySlug: formData.get("categorySlug") || undefined,
-    tag: formData.get("tag") || undefined,
+    description: formData.get("description") || undefined,
+    tags: formData.get("tags") || undefined,
     kind: formData.get("kind") ?? "SPONSORED",
     placement: formData.get("placement") || undefined,
   });
@@ -72,7 +85,8 @@ export async function startLinkCheckoutAction(formData: FormData) {
       title: parsed.data.title,
       url: parsed.data.url,
       categorySlug: parsed.data.categorySlug || null,
-      tag: parsed.data.tag ?? null,
+      description: parsed.data.description ?? null,
+      tags: readTags(parsed.data.tags),
       kind: parsed.data.kind,
       status: "PENDING",
       active: false,
@@ -138,7 +152,8 @@ export async function saveResourceLinkAction(
       title: parsed.data.title,
       url: parsed.data.url,
       categorySlug: parsed.data.categorySlug || null,
-      tag: parsed.data.tag ?? null,
+      description: parsed.data.description ?? null,
+      tags: readTags(parsed.data.tags),
       kind: parsed.data.kind,
       placement: knownPlacement(parsed.data.placement),
       impressionCap,

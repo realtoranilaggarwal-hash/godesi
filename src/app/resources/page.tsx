@@ -9,6 +9,8 @@ import {
   formatResourcePrice,
 } from "@/lib/resources";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { TagCloud } from "@/components/TagCloud";
+import { formatEventDate } from "@/lib/events";
 import { Alert, Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -21,17 +23,30 @@ export const metadata: Metadata = {
 export default async function ResourcesPage({
   searchParams,
 }: {
-  searchParams: { paid?: string };
+  searchParams: { paid?: string; tag?: string };
 }) {
   const currency = requestCurrency();
-  const [links, categories] = await Promise.all([
+  const tag = searchParams.tag?.trim().toLowerCase() || null;
+  const [links, categories, taggedEvents] = await Promise.all([
     db.resourceLink.findMany({
-      where: { status: "APPROVED", active: true },
+      where: {
+        status: "APPROVED",
+        active: true,
+        ...(tag ? { tags: { has: tag } } : {}),
+      },
       orderBy: [{ categorySlug: "asc" }, { createdAt: "desc" }],
       take: 200,
       include: { category: { select: { name: true, icon: true } } },
     }),
     getCategoryTree(),
+    tag
+      ? db.event.findMany({
+          where: { status: "APPROVED", tags: { has: tag }, startsAt: { gte: new Date() } },
+          orderBy: { startsAt: "asc" },
+          take: 6,
+          select: { id: true, slug: true, title: true, city: true, startsAt: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const grouped = new Map<string, typeof links>();
@@ -62,6 +77,49 @@ export default async function ResourcesPage({
           </div>
         </section>
 
+        {tag ? (
+          <Card className="flex flex-wrap items-center justify-between gap-3 bg-indigo-50/60">
+            <p className="text-sm font-semibold text-indigo-900">
+              Showing everything tagged <span className="font-black">#{tag}</span>{" "}
+              — {links.length} link{links.length === 1 ? "" : "s"}
+              {taggedEvents.length
+                ? ` and ${taggedEvents.length} event${taggedEvents.length === 1 ? "" : "s"}`
+                : ""}
+            </p>
+            <Link
+              href="/resources"
+              className="text-sm font-semibold text-indigo-700 underline"
+            >
+              Show all resources
+            </Link>
+          </Card>
+        ) : null}
+
+        <div className="lg:hidden">
+          <TagCloud active={tag ?? undefined} />
+        </div>
+
+        {taggedEvents.length ? (
+          <Card>
+            <h2 className="text-lg font-bold">Events tagged #{tag}</h2>
+            <ul className="mt-2 divide-y divide-slate-100">
+              {taggedEvents.map((event) => (
+                <li key={event.id} className="py-2">
+                  <Link
+                    href={`/events/${event.slug}`}
+                    className="text-sm font-semibold text-indigo-700 hover:underline"
+                  >
+                    {event.title}
+                  </Link>
+                  <p className="text-xs text-slate-500">
+                    {formatEventDate(event.startsAt)} · {event.city}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
         {searchParams.paid ? (
           <Alert tone="success">
             Payment received — your link goes live as soon as we review it.
@@ -76,22 +134,36 @@ export default async function ResourcesPage({
                 {groupLinks.map((link) => (
                   <li
                     key={link.id}
-                    className="flex flex-wrap items-center justify-between gap-2 py-2"
+                    className="flex flex-wrap items-start justify-between gap-2 py-2"
                   >
-                    <a
-                      href={`/api/links/${link.id}/click`}
-                      target="_blank"
-                      rel="noreferrer sponsored nofollow"
-                      className="min-w-0 break-words text-sm font-medium text-indigo-700 hover:underline"
-                    >
-                      {link.title}
-                    </a>
-                    <div className="flex items-center gap-2">
-                      {link.tag ? <Badge tone="slate">{link.tag}</Badge> : null}
-                      <Badge tone={link.kind === "EDITORIAL" ? "slate" : "amber"}>
-                        {RESOURCE_KIND_LABELS[link.kind]}
-                      </Badge>
+                    <div className="min-w-0">
+                      <a
+                        href={`/api/links/${link.id}/click`}
+                        target="_blank"
+                        rel="noreferrer sponsored nofollow"
+                        className="break-words text-sm font-semibold text-indigo-700 hover:underline"
+                      >
+                        {link.title}
+                      </a>
+                      {link.description ? (
+                        <span className="text-sm text-slate-600">
+                          {" "}
+                          — {link.description}
+                        </span>
+                      ) : null}
+                      {link.tags.length ? (
+                        <p className="mt-1 flex flex-wrap gap-1.5">
+                          {link.tags.map((item) => (
+                            <Link key={item} href={`/resources?tag=${encodeURIComponent(item)}`}>
+                              <Badge tone="indigo">#{item}</Badge>
+                            </Link>
+                          ))}
+                        </p>
+                      ) : null}
                     </div>
+                    <Badge tone={link.kind === "EDITORIAL" ? "slate" : "amber"}>
+                      {RESOURCE_KIND_LABELS[link.kind]}
+                    </Badge>
                   </li>
                 ))}
               </ul>
@@ -135,7 +207,12 @@ export default async function ResourcesPage({
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <aside className="hidden w-[300px] shrink-0 lg:block">
+        <div className="sticky top-24 space-y-4">
+          <TagCloud active={tag ?? undefined} />
+          <SidebarBanners />
+        </div>
+      </aside>
     </div>
   );
 }

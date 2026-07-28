@@ -103,8 +103,22 @@ export default async function AdvertiseLinkPage({
                   ))}
                 </select>
               </Field>
-              <Field label="Tag" hint="Optional short label, e.g. “Travel”">
-                <input name="tag" maxLength={30} className={inputClass} />
+              <Field
+                label="Tags"
+                hint="Comma separated, e.g. travel, visa — people browse by tag"
+              >
+                <input
+                  name="tags"
+                  maxLength={200}
+                  placeholder="travel, visa"
+                  className={inputClass}
+                />
+              </Field>
+              <Field
+                label="One-line description"
+                hint="Shown next to your link — max 140 characters"
+              >
+                <input name="description" maxLength={140} className={inputClass} />
               </Field>
               <Field label="Link type">
                 <select

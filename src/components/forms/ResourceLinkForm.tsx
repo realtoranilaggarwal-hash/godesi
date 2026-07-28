@@ -36,8 +36,19 @@ export function ResourceLinkForm({
             ))}
           </select>
         </Field>
-        <Field label="Tag" hint="Optional">
-          <input name="tag" maxLength={30} className={inputClass} />
+        <Field label="Tags" hint="Comma separated — these build the tag cloud">
+          <input
+            name="tags"
+            maxLength={200}
+            placeholder="visa, immigration, jobs"
+            className={inputClass}
+          />
+        </Field>
+        <Field
+          label="One-line description"
+          hint="Shown next to the link — max 140 characters"
+        >
+          <input name="description" maxLength={140} className={inputClass} />
         </Field>
         <Field label="Type">
           <select name="kind" defaultValue="EDITORIAL" className={inputClass}>

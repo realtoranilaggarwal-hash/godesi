@@ -816,7 +816,7 @@ export default async function AdminPage() {
                   <p className="break-all text-xs text-slate-400">{link.url}</p>
                   <p className="text-xs text-slate-500">
                     {link.category?.name ?? "All categories"}
-                    {link.tag ? ` · ${link.tag}` : ""} · {link.impressions.toLocaleString()}{" "}
+                    {link.tags.length ? ` · ${link.tags.join(", ")}` : ""} · {link.impressions.toLocaleString()}{" "}
                     views · {link.clicks.toLocaleString()} clicks
                     {remaining === null
                       ? " · unlimited"

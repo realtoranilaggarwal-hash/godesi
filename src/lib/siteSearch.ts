@@ -123,7 +123,7 @@ export async function siteSearch(
       db.resourceLink.findMany({
         where: { status: "APPROVED", active: true, title: like },
         take: 5,
-        select: { id: true, title: true, url: true, tag: true },
+        select: { id: true, title: true, url: true, tags: true, description: true },
       }),
     ]);
 
@@ -169,7 +169,7 @@ export async function siteSearch(
     resources: resources.map((row) => ({
       href: row.url,
       title: row.title,
-      subtitle: row.tag ?? "Recommended link",
+      subtitle: row.description || row.tags.join(", ") || "Recommended link",
       badge: "Resource",
     })),
     total: 0,

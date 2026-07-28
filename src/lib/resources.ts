@@ -44,10 +44,45 @@ export function formatResourcePrice(currency: Currency, impressions: number) {
   return formatMoney(resourcePrice(currency, impressions), currency);
 }
 
+export type TagCount = { tag: string; count: number };
+
+/**
+ * Tag counts across everything that carries tags — resource links and events —
+ * so one tag surfaces every kind of content filed under it.
+ */
+export async function tagCloud(limit = 40): Promise<TagCount[]> {
+  const [links, events] = await Promise.all([
+    db.resourceLink.findMany({
+      where: { status: "APPROVED", active: true },
+      select: { tags: true },
+      take: 500,
+    }),
+    db.event.findMany({
+      where: { status: "APPROVED" },
+      select: { tags: true },
+      take: 500,
+    }),
+  ]);
+
+  const counts = new Map<string, number>();
+  for (const row of [...links, ...events]) {
+    for (const tag of row.tags) {
+      const key = tag.trim().toLowerCase();
+      if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+
+  return Array.from(counts.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag))
+    .slice(0, limit);
+}
+
 type LinkRow = {
   id: string;
   title: string;
-  tag: string | null;
+  description: string | null;
+  tags: string[];
   kind: ResourceKind;
   impressions: number;
   impressionCap: number | null;
@@ -110,7 +145,8 @@ export async function recommendedLinks(
     select: {
       id: true,
       title: true,
-      tag: true,
+      description: true,
+      tags: true,
       kind: true,
       categorySlug: true,
       impressions: true,

@@ -33,9 +33,12 @@ export async function SafetyResourcesRail() {
                   >
                     {link.title}
                   </a>
+                  {link.description ? (
+                    <p className="text-xs text-teal-800">{link.description}</p>
+                  ) : null}
                   <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-teal-700/70">
                     <span>{RESOURCE_KIND_LABELS[link.kind]}</span>
-                    {link.tag ? <span>· {link.tag}</span> : null}
+                    {link.tags.length ? <span>· {link.tags.join(", ")}</span> : null}
                   </p>
                 </li>
               ))}
