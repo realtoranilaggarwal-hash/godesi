@@ -25,10 +25,13 @@ export function SpecialtyPicker({
   subcategorySlug,
   defaults,
   canFeature,
+  cardSaved,
 }: {
   subcategorySlug: string;
   defaults: SpecialtyDefaults;
   canFeature: boolean;
+  /** Agent extras live on their own page, which needs a saved card to attach to. */
+  cardSaved: boolean;
 }) {
   const set = specialtySet(subcategorySlug);
   const [selected, setSelected] = useState<string[]>(defaults.specialties);
@@ -170,7 +173,7 @@ export function SpecialtyPicker({
           hint={
             canFeature
               ? "Shown as a highlighted badge on your card and in search."
-              : "Available on paid plans — upgrade to highlight one service."
+              : "Available on Pro and Premium — highlight one service on your card."
           }
         >
           <select
@@ -188,14 +191,29 @@ export function SpecialtyPicker({
             ))}
           </select>
         </Field>
+        {canFeature ? null : (
+          <Link
+            href="/pricing?reason=featured"
+            className="mt-2 inline-block rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-3 py-1.5 text-xs font-bold text-white hover:opacity-90"
+          >
+            ⭐ Upgrade to Pro or Premium →
+          </Link>
+        )}
       </div>
 
       {isAgentCard(subcategorySlug) ? (
-        <p className="mt-3 text-xs font-semibold text-cyan-900">
-          <Link href="/dashboard/agent" className="underline">
-            Add brokerage, MLS, languages and closed sales →
-          </Link>
-        </p>
+        cardSaved ? (
+          <p className="mt-3 text-xs font-semibold text-cyan-900">
+            <Link href="/dashboard/agent" className="underline">
+              Add brokerage, MLS, languages and closed sales →
+            </Link>
+          </p>
+        ) : (
+          <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+            Save this business card first. Brokerage, MLS, languages and closed
+            sales open on the agent page straight after you save.
+          </p>
+        )
       ) : null}
 
       <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs text-slate-600">

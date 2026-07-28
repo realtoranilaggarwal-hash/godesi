@@ -59,6 +59,12 @@ export default async function PricingPage({
           Unlocking lead contact details requires the Premium plan.
         </Alert>
       ) : null}
+      {searchParams.reason === "featured" ? (
+        <Alert tone="info">
+          The ⭐ featured specialisation badge comes with Pro and Premium — pick
+          a plan below and the picker unlocks on your card.
+        </Alert>
+      ) : null}
       {searchParams.error ? (
         <Alert>
           {ERRORS[searchParams.error] ?? "Something went wrong with checkout."}

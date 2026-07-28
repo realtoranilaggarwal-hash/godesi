@@ -37,14 +37,26 @@ export default async function AgentDashboardPage() {
 
   if (!business) {
     return (
-      <Card>
-        <p className="text-sm text-slate-600">
-          Create your business card first, then come back to add your agent
-          credentials.
+      <Card className="space-y-3">
+        <h1 className="text-xl font-bold">Real estate agent profile</h1>
+        <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+          Step 1 comes first: your agent credentials attach to a business card,
+          and you do not have one yet. Nothing typed on this page can be saved
+          until the card exists.
         </p>
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-slate-700">
+          <li>
+            Create your card — name, city and subcategory{" "}
+            <span className="font-semibold">Real Estate Agents</span>, then save.
+          </li>
+          <li>
+            Come back here for brokerage, licence, MLS, languages, awards and
+            closed sales.
+          </li>
+        </ol>
         <Link
-          href="/dashboard/profile"
-          className="mt-2 inline-block text-sm font-semibold text-indigo-600"
+          href="/dashboard/profile?category=real-estate&subcategory=real-estate-property-dealers"
+          className="inline-block rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           Create my card →
         </Link>

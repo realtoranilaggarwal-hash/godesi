@@ -129,6 +129,7 @@ export function BusinessProfileForm({
               : String(business.yearsExperience),
         }}
         canFeature={canFeatureSpecialty}
+        cardSaved={Boolean(business)}
       />
 
       <VehicleFields

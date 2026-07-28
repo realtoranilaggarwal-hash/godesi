@@ -59,9 +59,16 @@ export default async function ProfileEditorPage({
               Service areas, licence, specialties, awards, closed sales and
               detailed client ratings live on their own page.
             </p>
-            <LinkButton href="/dashboard/agent" className="mt-3">
-              Add my agent credentials
-            </LinkButton>
+            {business ? (
+              <LinkButton href="/dashboard/agent" className="mt-3">
+                Add my agent credentials
+              </LinkButton>
+            ) : (
+              <p className="mt-3 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-indigo-900">
+                Fill in and save the card below first — the agent page opens as
+                soon as it exists.
+              </p>
+            )}
           </Card>
         ) : null}
 
