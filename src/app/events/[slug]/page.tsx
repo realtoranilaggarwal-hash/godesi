@@ -11,8 +11,13 @@ import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { EventPartnerProof } from "@/components/forms/EventPartnerProof";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
-import { eventModeIcon, eventModeLabel } from "@/lib/eventOptions";
+import {
+  eventFeatureIcon,
+  eventModeIcon,
+  eventModeLabel,
+} from "@/lib/eventOptions";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +106,9 @@ export default async function EventPage({
                   🔁 {event.recurrence || "Recurring"}
                 </Badge>
               ) : null}
+              {event.partnerStatus === "APPROVED" ? (
+                <Badge tone="amber">🔥 Godesi Partner Event</Badge>
+              ) : null}
               {past ? <Badge tone="slate">Finished</Badge> : null}
               {left === 0 && !past ? <Badge tone="red">Sold out</Badge> : null}
             </div>
@@ -109,10 +117,25 @@ export default async function EventPage({
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>📅 {formatEventDate(event.startsAt)}</p>
               <p>
-                📍 {event.venue}, {event.city}
+                📍 {event.venue}
+                {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
                 {event.state ? `, ${event.state}` : ""}
                 {event.country ? `, ${event.country}` : ""}
               </p>
+              {event.address ? <p>🏠 {event.address}</p> : null}
+              {event.mapsUrl ? (
+                <p>
+                  🗺️{" "}
+                  <a
+                    href={event.mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-indigo-600 hover:underline"
+                  >
+                    Open the venue in maps
+                  </a>
+                </p>
+              ) : null}
               {event.onlineUrl ? (
                 <p>
                   🔗{" "}
@@ -138,6 +161,19 @@ export default async function EventPage({
               </p>
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>
+
+            {event.features.length ? (
+              <div className="flex flex-wrap gap-1.5">
+                {event.features.map((feature) => (
+                  <span
+                    key={feature}
+                    className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
+                  >
+                    {eventFeatureIcon(feature)} {feature}
+                  </span>
+                ))}
+              </div>
+            ) : null}
             <p className="whitespace-pre-line text-slate-700">{event.description}</p>
             {event.tags.length ? (
               <div className="flex flex-wrap gap-1.5">
@@ -158,6 +194,16 @@ export default async function EventPage({
             </div>
           </div>
         </div>
+
+        {user?.id === event.organizerId && event.partnerStatus !== "NONE" ? (
+          <EventPartnerProof
+            eventId={event.id}
+            status={event.partnerStatus}
+            bannerUrl={event.partnerBannerUrl}
+            standeeUrl={event.partnerStandeeUrl}
+            salesUrl={event.partnerSalesUrl}
+          />
+        ) : null}
 
         {event.sessions.length ? (
           <Card>

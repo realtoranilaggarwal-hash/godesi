@@ -3,6 +3,7 @@ import { formatMoney } from "@/lib/format";
 import { formatEventDate, seatsLeft } from "@/lib/events";
 import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
+import { eventFeatureIcon } from "@/lib/eventOptions";
 
 export type EventListItem = {
   id: string;
@@ -10,7 +11,10 @@ export type EventListItem = {
   title: string;
   startsAt: Date;
   venue: string;
+  hallName?: string | null;
   city: string;
+  features?: string[];
+  partnerStatus?: string;
   imageUrl: string | null;
   price: number;
   currency: string;
@@ -53,13 +57,29 @@ export function EventCard({ event }: { event: EventListItem }) {
               {event.category.icon} {event.category.name}
             </Badge>
           ) : null}
+          {event.partnerStatus === "APPROVED" ? (
+            <Badge tone="amber">🔥 Partner event</Badge>
+          ) : null}
           {left === 0 ? <Badge tone="red">Sold out</Badge> : null}
         </div>
         <h3 className="font-bold leading-snug group-hover:text-indigo-600">{event.title}</h3>
         <p className="text-sm text-slate-600">📅 {formatEventDate(event.startsAt)}</p>
         <p className="text-sm text-slate-600">
-          📍 {event.venue}, {event.city}
+          📍 {event.venue}
+          {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
         </p>
+        {event.features?.length ? (
+          <div className="flex flex-wrap gap-1">
+            {event.features.slice(0, 4).map((feature) => (
+              <span
+                key={feature}
+                className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600"
+              >
+                {eventFeatureIcon(feature)} {feature}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="font-bold text-indigo-600">
             {event.price ? formatMoney(event.price, event.currency) : "Free entry"}

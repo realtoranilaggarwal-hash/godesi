@@ -12,6 +12,8 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { checkCoupon } from "@/lib/coupons";
+import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
+import { rememberVenue } from "@/lib/venues";
 
 /** Up to three seat types per event, e.g. Basic / Webinar / Premium. */
 const MAX_TIERS = 3;
@@ -110,6 +112,9 @@ const eventSchema = z.object({
   date: z.string().trim().min(1, "Event date is required"),
   time: z.string().trim().min(1, "Event time is required"),
   venue: z.string().trim().min(3, "Venue is required"),
+  hallName: z.string().trim().max(120).optional(),
+  address: z.string().trim().max(300).optional(),
+  mapsUrl: optionalUrl,
   city: z.string().trim().min(2, "City is required"),
   state: z.string().trim().min(2, "State is required"),
   country: z.string().trim().min(2, "Country is required"),
@@ -144,6 +149,9 @@ export async function createEventAction(
       date: formData.get("date"),
       time: formData.get("time"),
       venue: formData.get("venue"),
+      hallName: formData.get("hallName") ?? undefined,
+      address: formData.get("address") ?? undefined,
+      mapsUrl: formData.get("mapsUrl") ?? undefined,
       city: formData.get("city"),
       state: formData.get("state"),
       country: formData.get("country"),
@@ -175,6 +183,22 @@ export async function createEventAction(
 
     const speakers = readSpeakers(formData);
     const sessions = readSessions(formData);
+    const features = formData
+      .getAll("features")
+      .map((value) => String(value))
+      .filter((value) => EVENT_FEATURES.includes(value));
+
+    /** The deal only counts when every branding commitment is ticked. */
+    const wantsPartnership = formData.get("partnerRequested") === "yes";
+    const commitmentsMade = PARTNER_COMMITMENTS.every(
+      (item) => formData.get(item.name) === "on",
+    );
+    if (wantsPartnership && !commitmentsMade) {
+      return {
+        error:
+          "Tick all four branding commitments to join the Godesi promotion partnership, or choose “No thanks”.",
+      };
+    }
     const primaryCategory =
       parsed.data.subcategorySlug || parsed.data.categorySlug || null;
     const extraCategories = formData
@@ -193,6 +217,19 @@ export async function createEventAction(
     const business = await db.business.findUnique({ where: { ownerId: user.id } });
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
 
+    const venueRef =
+      parsed.data.mode === "ONLINE"
+        ? null
+        : await rememberVenue({
+            name: parsed.data.venue,
+            city: parsed.data.city,
+            state: parsed.data.state,
+            country: parsed.data.country,
+            address: parsed.data.address ?? null,
+            mapsUrl: parsed.data.mapsUrl ?? null,
+            hall: parsed.data.hallName ?? null,
+          });
+
     /** With tiers the event totals mirror the tiers, so seat counts stay in step. */
     const seatsTotal = tiers.length
       ? tiers.reduce((sum, tier) => sum + tier.seatsTotal, 0)
@@ -208,6 +245,13 @@ export async function createEventAction(
         description: parsed.data.description,
         startsAt,
         venue: parsed.data.venue,
+        hallName: parsed.data.hallName || null,
+        address: parsed.data.address || null,
+        mapsUrl: parsed.data.mapsUrl ?? null,
+        venueRefId: venueRef?.id ?? null,
+        features,
+        partnerStatus: wantsPartnership ? "REQUESTED" : "NONE",
+        partnerAgreedAt: wantsPartnership ? new Date() : null,
         city: parsed.data.city,
         state: parsed.data.state,
         country: parsed.data.country,
@@ -407,6 +451,85 @@ export async function bookTicketAction(
 
   revalidatePath("/events");
   redirect(destination);
+}
+
+const proofSchema = z.object({
+  eventId: z.string().min(1),
+  partnerBannerUrl: optionalUrl,
+  partnerStandeeUrl: optionalUrl,
+  partnerSalesUrl: optionalUrl,
+});
+
+/**
+ * Organiser evidence for the promotion partnership: the banner and standee in
+ * place, plus a ticket-sales screenshot. Uploading resets the request to
+ * REQUESTED so staff re-check it before the event is featured again.
+ */
+export async function submitPartnerProofAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const parsed = proofSchema.safeParse({
+      eventId: formData.get("eventId"),
+      partnerBannerUrl: formData.get("partnerBannerUrl") ?? undefined,
+      partnerStandeeUrl: formData.get("partnerStandeeUrl") ?? undefined,
+      partnerSalesUrl: formData.get("partnerSalesUrl") ?? undefined,
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    const event = await db.event.findUnique({ where: { id: parsed.data.eventId } });
+    if (!event) return { error: "This event no longer exists." };
+    if (event.organizerId !== user.id && !can(user, "events")) {
+      return { error: "Only the organiser can upload proof for this event." };
+    }
+    if (event.partnerStatus === "NONE") {
+      return { error: "Join the Godesi promotion partnership first." };
+    }
+    if (!parsed.data.partnerBannerUrl && !parsed.data.partnerStandeeUrl) {
+      return { error: "Add at least the banner or standee photo." };
+    }
+
+    await db.event.update({
+      where: { id: event.id },
+      data: {
+        partnerBannerUrl: parsed.data.partnerBannerUrl ?? event.partnerBannerUrl,
+        partnerStandeeUrl: parsed.data.partnerStandeeUrl ?? event.partnerStandeeUrl,
+        partnerSalesUrl: parsed.data.partnerSalesUrl ?? event.partnerSalesUrl,
+        partnerProofAt: new Date(),
+        partnerStatus: event.partnerStatus === "APPROVED" ? "APPROVED" : "REQUESTED",
+      },
+    });
+  } catch (error) {
+    return fieldError(error);
+  }
+
+  revalidatePath("/events");
+  return { success: "Thanks — the Godesi team will verify your photos." };
+}
+
+/** Staff decision on a partnership request; approval turns the promotion on. */
+export async function reviewPartnerAction(formData: FormData) {
+  const user = await requireUser();
+  if (!can(user, "events")) throw new Error("FORBIDDEN");
+
+  const id = String(formData.get("id") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  if (decision !== "APPROVED" && decision !== "REJECTED") {
+    throw new Error("Unknown decision");
+  }
+
+  await db.event.update({
+    where: { id },
+    data: {
+      partnerStatus: decision,
+      partnerNote: String(formData.get("partnerNote") ?? "").slice(0, 500) || null,
+    },
+  });
+
+  revalidatePath("/events");
+  revalidatePath(`/admin/events/${id}`);
 }
 
 export async function cancelEventAction(formData: FormData) {

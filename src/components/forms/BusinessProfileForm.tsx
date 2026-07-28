@@ -15,6 +15,7 @@ import { specialtySet } from "@/lib/specialties";
 import { VehicleFields, type VehicleDefaults } from "@/components/forms/VehicleFields";
 import { useState } from "react";
 import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
+import { COUNTRIES } from "@/lib/countries";
 import { FormError } from "@/components/forms/FormError";
 
 const EMPTY_VEHICLE: VehicleDefaults = {
@@ -45,6 +46,7 @@ export function BusinessProfileForm({
   defaultCategory,
   defaultSubcategory,
   defaultProfileType = "BUSINESS",
+  defaultCountry = "",
   canFeatureSpecialty = false,
 }: {
   business: Business | null;
@@ -57,6 +59,8 @@ export function BusinessProfileForm({
   defaultCategory?: string;
   defaultSubcategory?: string;
   defaultProfileType?: string;
+  /** Guessed from the visitor's country so the field starts filled in. */
+  defaultCountry?: string;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -112,6 +116,21 @@ export function BusinessProfileForm({
         </Field>
         <Field label="State">
           <input name="state" defaultValue={business?.state ?? ""} className={inputClass} />
+        </Field>
+        <Field label="Country" required>
+          <input
+            name="country"
+            list="godesi-countries"
+            required
+            defaultValue={business?.country ?? defaultCountry}
+            placeholder="Start typing…"
+            className={inputClass}
+          />
+          <datalist id="godesi-countries">
+            {COUNTRIES.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
         </Field>
       </div>
 

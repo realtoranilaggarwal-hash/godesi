@@ -5,7 +5,8 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { AdminEventForm } from "@/components/forms/AdminEventForm";
-import { Card } from "@/components/ui";
+import { Card, inputClass } from "@/components/ui";
+import { reviewPartnerAction } from "@/app/actions/events";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Edit event" };
@@ -93,6 +94,75 @@ export default async function AdminEditEventPage({
           }}
         />
       </Card>
+
+      {event.partnerStatus === "NONE" ? null : (
+        <Card>
+          <h2 className="font-bold">🤝 Godesi promotion partnership</h2>
+          <p className="text-sm text-slate-600">
+            Status: <strong>{event.partnerStatus}</strong>
+            {event.partnerAgreedAt
+              ? ` · organiser agreed ${event.partnerAgreedAt.toLocaleDateString()}`
+              : ""}
+            {event.partnerProofAt
+              ? ` · proof uploaded ${event.partnerProofAt.toLocaleDateString()}`
+              : " · no proof uploaded yet"}
+          </p>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Banner", url: event.partnerBannerUrl },
+              { label: "Standee", url: event.partnerStandeeUrl },
+              { label: "Ticket sales", url: event.partnerSalesUrl },
+            ].map((proof) => (
+              <div key={proof.label}>
+                <p className="text-xs font-bold uppercase text-slate-500">
+                  {proof.label}
+                </p>
+                {proof.url ? (
+                  <a href={proof.url} target="_blank" rel="noreferrer">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={proof.url}
+                      alt={`${proof.label} proof`}
+                      className="mt-1 h-24 w-full rounded-xl border border-slate-200 object-cover"
+                    />
+                  </a>
+                ) : (
+                  <p className="mt-1 text-sm text-slate-400">Not uploaded</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <form action={reviewPartnerAction} className="mt-3 space-y-2">
+            <input type="hidden" name="id" value={event.id} />
+            <input
+              name="partnerNote"
+              defaultValue={event.partnerNote ?? ""}
+              placeholder="Internal note (optional)"
+              className={inputClass}
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                name="decision"
+                value="APPROVED"
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
+              >
+                Approve — feature &amp; promote
+              </button>
+              <button
+                type="submit"
+                name="decision"
+                value="REJECTED"
+                className="rounded-xl border border-red-300 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-50"
+              >
+                Reject
+              </button>
+            </div>
+          </form>
+        </Card>
+      )}
     </div>
   );
 }

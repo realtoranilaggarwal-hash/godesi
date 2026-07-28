@@ -680,9 +680,26 @@ model Event {
   startsAt    DateTime
   endsAt      DateTime?
   venue       String
+  /// Hall, banquet room or ground inside a venue that has several.
+  hallName    String?
+  address     String?
+  mapsUrl     String?
   city        String
   state       String?
   country     String?
+  /// Reused venue record, so the next organiser can pick the same place.
+  venueRefId  String?
+  venueRef    Venue?  @relation(fields: [venueRefId], references: [id], onDelete: SetNull)
+  /// Facilities, food, crowd and ticketing ticks — also the /events filters.
+  features    String[]      @default([])
+  /// Godesi promotion partnership: branding at the venue in return for reach.
+  partnerStatus     EventPartnerStatus @default(NONE)
+  partnerAgreedAt   DateTime?
+  partnerBannerUrl  String?
+  partnerStandeeUrl String?
+  partnerSalesUrl   String?
+  partnerProofAt    DateTime?
+  partnerNote       String?
   /// Conference, workshop, concert… drives the badge and the type filter.
   eventType   String?
   mode        EventMode      @default(OFFLINE)
@@ -724,7 +741,36 @@ model Event {
   @@index([startsAt])
   @@index([categorySlug])
   @@index([city])
+  @@index([venueRefId])
   @@map("EventListing")
+}
+
+/// Whether the organiser has signed up to — and delivered — the branding deal.
+enum EventPartnerStatus {
+  NONE
+  REQUESTED
+  APPROVED
+  REJECTED
+}
+
+/// A place events happen at. Saved once so later organisers reuse it with its halls.
+model Venue {
+  id        String   @id @default(cuid())
+  name      String
+  city      String
+  state     String?
+  country   String?
+  address   String?
+  mapsUrl   String?
+  /// Every hall/room organisers have used at this venue.
+  halls     String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events Event[]
+
+  @@unique([name, city])
+  @@index([city])
 }
 
 model EventSpeaker {

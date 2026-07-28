@@ -5,7 +5,8 @@ import { getCategoryTree } from "@/lib/directory";
 import { EventForm } from "@/components/forms/EventForm";
 import { Card } from "@/components/ui";
 import { FeaturedEventRail } from "@/components/FeaturedEvents";
-import { requestCurrency } from "@/lib/currency";
+import { requestCountry, requestCurrency } from "@/lib/currency";
+import { venueSuggestions } from "@/lib/venues";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -22,7 +23,10 @@ export default async function NewEventPage({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/events/new");
-  const categories = await getCategoryTree();
+  const [categories, venues] = await Promise.all([
+    getCategoryTree(),
+    venueSuggestions(),
+  ]);
 
   return (
     <div className="flex justify-center gap-6">
@@ -40,6 +44,8 @@ export default async function NewEventPage({
             defaultCurrency={requestCurrency()}
             defaultCategory={searchParams.category}
             defaultSubcategory={searchParams.subcategory}
+            defaultCountry={requestCountry()}
+            venues={venues}
           />
         </Card>
       </div>

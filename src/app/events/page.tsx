@@ -8,7 +8,12 @@ import { planRank } from "@/lib/plans";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
-import { EVENT_MODES, EVENT_TYPES } from "@/lib/eventOptions";
+import {
+  EVENT_FEATURE_FILTERS,
+  EVENT_MODES,
+  EVENT_TYPES,
+  eventFeatureIcon,
+} from "@/lib/eventOptions";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -26,9 +31,35 @@ export default async function EventsPage({
     when?: string;
     type?: string;
     mode?: string;
+    feature?: string | string[];
   };
 }) {
   const { city, category, when, type, mode } = searchParams;
+  const selectedFeatures = (
+    Array.isArray(searchParams.feature)
+      ? searchParams.feature
+      : searchParams.feature
+        ? [searchParams.feature]
+        : []
+  ).filter((value) =>
+    EVENT_FEATURE_FILTERS.includes(value as (typeof EVENT_FEATURE_FILTERS)[number]),
+  );
+
+  /** Toggling a chip keeps every other filter in the query string. */
+  const featureHref = (feature: string) => {
+    const params = new URLSearchParams();
+    if (city) params.set("city", city);
+    if (category) params.set("category", category);
+    if (when) params.set("when", when);
+    if (type) params.set("type", type);
+    if (mode) params.set("mode", mode);
+    for (const value of selectedFeatures) {
+      if (value !== feature) params.append("feature", value);
+    }
+    if (!selectedFeatures.includes(feature)) params.append("feature", feature);
+    const query = params.toString();
+    return query ? `/events?${query}` : "/events";
+  };
   const modeFilter = EVENT_MODES.find((option) => option.value === mode)?.value;
   const categories = await getCategoryTree();
   const scope = category
@@ -57,6 +88,7 @@ export default async function EventsPage({
         : {}),
       ...(type ? { eventType: type } : {}),
       ...(modeFilter ? { mode: modeFilter } : {}),
+      ...(selectedFeatures.length ? { features: { hasEvery: selectedFeatures } } : {}),
     },
     orderBy: { startsAt: when === "past" ? "desc" : "asc" },
     take: 48,
@@ -66,9 +98,12 @@ export default async function EventsPage({
     },
   });
 
-  // Paid organisers rank above free ones, then by date.
+  // Partner events first, then paid organisers, then by date.
+  const partnerRank = (status: string) => (status === "APPROVED" ? 1 : 0);
   events.sort(
-    (a, b) => planRank(b.organizer.plan) - planRank(a.organizer.plan),
+    (a, b) =>
+      partnerRank(b.partnerStatus) - partnerRank(a.partnerStatus) ||
+      planRank(b.organizer.plan) - planRank(a.organizer.plan),
   );
 
   return (
@@ -146,6 +181,9 @@ export default async function EventsPage({
               ))}
             </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
+            {selectedFeatures.map((feature) => (
+              <input key={feature} type="hidden" name="feature" value={feature} />
+            ))}
             <button
               type="submit"
               className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
@@ -153,6 +191,30 @@ export default async function EventsPage({
               Filter
             </button>
           </form>
+
+          <div className="mt-3 border-t border-slate-100 pt-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Parking · food · crowd · vendors
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {EVENT_FEATURE_FILTERS.map((feature) => {
+                const active = selectedFeatures.includes(feature);
+                return (
+                  <Link
+                    key={feature}
+                    href={featureHref(feature)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                        : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {eventFeatureIcon(feature)} {feature}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </Card>
 
         {events.length ? (

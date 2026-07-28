@@ -11,11 +11,17 @@ import { WriteHelper } from "@/components/WriteHelper";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import {
+  EVENT_FEATURE_GROUPS,
   EVENT_FREQUENCIES,
   EVENT_MODES,
   EVENT_TYPES,
 } from "@/lib/eventOptions";
 import { FormError } from "@/components/forms/FormError";
+import {
+  EventVenueFields,
+  type VenueOption,
+} from "@/components/forms/EventVenueFields";
+import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 
 /** Suggested seat types; organisers can rename them to anything. */
 const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
@@ -25,11 +31,16 @@ export function EventForm({
   defaultCurrency,
   defaultCategory,
   defaultSubcategory,
+  defaultCountry,
+  venues,
 }: {
   categories: CategoryOption[];
   defaultCurrency: string;
   defaultCategory?: string;
   defaultSubcategory?: string;
+  defaultCountry: string;
+  /** Venues already used on Godesi, offered as suggestions. */
+  venues: VenueOption[];
 }) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
   const [mode, setMode] = useState<string>("OFFLINE");
@@ -46,7 +57,7 @@ export function EventForm({
     );
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} name="event-form" className="space-y-4">
       <FormError>{state.error}</FormError>
 
       <Field label="Event title" hint="e.g. Diwali Mela 2026 — food stalls & live music">
@@ -97,12 +108,7 @@ export function EventForm({
             ))}
           </select>
         </Field>
-        <Field
-          label="Venue"
-          hint={mode === "ONLINE" ? "e.g. Zoom, YouTube Live" : undefined}
-        >
-          <input name="venue" required className={inputClass} />
-        </Field>
+        <EventVenueFields venues={venues} online={mode === "ONLINE"} />
         {mode === "OFFLINE" ? null : (
           <Field label="Join link" hint="Zoom, Meet or stream URL">
             <input
@@ -119,7 +125,12 @@ export function EventForm({
           <input name="state" required className={inputClass} />
         </Field>
         <Field label="Country">
-          <input name="country" required defaultValue="India" className={inputClass} />
+          <input
+            name="country"
+            required
+            defaultValue={defaultCountry}
+            className={inputClass}
+          />
         </Field>
         <Field label="How often?">
           <select
@@ -181,6 +192,43 @@ export function EventForm({
           />
         </Field>
       </div>
+
+      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          What does your event offer?
+        </legend>
+        <p className="text-xs text-slate-500">
+          Tick everything that applies — these become the filters people search
+          with, like parking, food and family friendly.
+        </p>
+        {EVENT_FEATURE_GROUPS.map((group) => (
+          <div key={group.key}>
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              {group.label}
+            </p>
+            <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
+              {group.options.map((option) => (
+                <label
+                  key={option.value}
+                  className="flex items-center gap-2 text-sm text-slate-700"
+                >
+                  <input
+                    type="checkbox"
+                    name="features"
+                    value={option.value}
+                    className="h-4 w-4"
+                  />
+                  <span>
+                    {option.icon} {option.value}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </fieldset>
+
+      <EventPartnerPanel />
 
       <fieldset className="space-y-2 rounded-2xl border border-slate-200 p-4">
         <legend className="px-1 text-sm font-bold text-slate-900">
