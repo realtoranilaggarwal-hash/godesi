@@ -24,6 +24,22 @@ const NAV = [
   { href: "/news", label: "News", icon: "📰" },
 ];
 
+/**
+ * Short labels for the one-line bar. Anything longer overflowed into the
+ * search box on 1536–1800px screens, which made the row jump around.
+ */
+const BAR_NAV = [
+  { href: "/search", label: "Businesses" },
+  { href: "/leads", label: "Leads" },
+  { href: "/events", label: "Events" },
+  { href: "/real-estate", label: "Property" },
+  { href: "/rooms", label: "Rooms" },
+  { href: "/wedding", label: "Wedding" },
+  { href: "/religious", label: "Temples" },
+  { href: "/connect", label: "Connect" },
+  { href: "/news", label: "News" },
+];
+
 /** Admins land on the full panel, moderators on the content desk. */
 function staffHome(user: { role: Role }) {
   if (user.role === "ADMIN") return "/admin";
@@ -85,7 +101,7 @@ export async function SiteHeader() {
           <form
             action="/find"
             role="search"
-            className="hidden min-w-0 flex-1 items-center gap-1 sm:flex sm:max-w-xs"
+            className="hidden shrink-0 items-center gap-1 sm:flex sm:w-44 xl:w-56"
           >
             <input
               name="q"
@@ -103,31 +119,16 @@ export async function SiteHeader() {
             </button>
           </form>
 
-          <nav className="hidden items-center gap-1 text-sm font-semibold text-slate-700 2xl:flex">
-            {NAV.map((item) => (
+          <nav className="hidden min-w-0 flex-1 items-center justify-end gap-0.5 overflow-hidden text-[13px] font-semibold text-slate-700 2xl:flex">
+            {BAR_NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-lg px-2.5 py-1.5 hover:bg-slate-100 hover:text-slate-900"
+                className="whitespace-nowrap rounded-lg px-2 py-1.5 hover:bg-slate-100 hover:text-slate-900"
               >
-                <span aria-hidden className="mr-1">
-                  {item.icon}
-                </span>
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/pricing"
-              className="rounded-lg px-2.5 py-1.5 hover:bg-slate-100"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/advertise"
-              className="rounded-lg px-2.5 py-1.5 hover:bg-slate-100"
-            >
-              Advertise
-            </Link>
           </nav>
 
           <div className="flex items-center gap-2 text-sm font-medium">

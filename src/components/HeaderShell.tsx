@@ -18,10 +18,13 @@ export function HeaderShell({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    /** Hysteresis: collapsing shortens the header, so a single threshold flickered. */
     const onScroll = () => {
-      const past = window.scrollY > 120;
-      setScrolled(past);
-      if (!past) setOpen(false);
+      setScrolled((past) => {
+        const next = past ? window.scrollY > 80 : window.scrollY > 200;
+        if (!next) setOpen(false);
+        return next;
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -31,7 +34,7 @@ export function HeaderShell({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div
-        className={scrolled ? "[&_img]:!h-7 [&>div]:!py-1.5" : "transition-all"}
+        className={scrolled ? "[&_img]:!h-7" : undefined}
       >
         {bar}
       </div>
