@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { formatMoney, siteUrl } from "@/lib/format";
+import { Money } from "@/components/Money";
 import { formatEventDate, isPast, seatsLeft } from "@/lib/events";
 import { gradientFor } from "@/lib/categories";
 import { TicketForm } from "@/components/forms/TicketForm";
@@ -151,13 +152,19 @@ export default async function EventPage({
               ) : null}
               <p>
                 🎫{" "}
-                {event.tiers.length
-                  ? `${event.tiers.length} ticket types from ${
-                      event.price ? formatMoney(event.price, event.currency) : "free"
-                    }`
-                  : event.price
-                    ? `${formatMoney(event.price, event.currency)} per seat`
-                    : "Free entry"}
+                {event.price ? (
+                  <>
+                    {event.tiers.length
+                      ? `${event.tiers.length} ticket types from `
+                      : null}
+                    <Money value={event.price} currency={event.currency} />
+                    {event.tiers.length ? null : " per seat"}
+                  </>
+                ) : event.tiers.length ? (
+                  `${event.tiers.length} ticket types from free`
+                ) : (
+                  "Free entry"
+                )}
               </p>
               <p>🪑 {left} of {event.seatsTotal} seats available</p>
             </div>

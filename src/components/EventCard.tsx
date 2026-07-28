@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { formatMoney } from "@/lib/format";
 import { formatEventDate, seatsLeft } from "@/lib/events";
+import { Money } from "@/components/Money";
 import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
@@ -82,7 +82,11 @@ export function EventCard({ event }: { event: EventListItem }) {
         ) : null}
         <div className="mt-auto flex items-center justify-between pt-2">
           <span className="font-bold text-indigo-600">
-            {event.price ? formatMoney(event.price, event.currency) : "Free entry"}
+            {event.price ? (
+              <Money value={event.price} currency={event.currency} />
+            ) : (
+              "Free entry"
+            )}
           </span>
           <span className="text-xs text-slate-500">{left} seats left</span>
         </div>

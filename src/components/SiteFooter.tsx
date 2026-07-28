@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE, socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
+import { LocalePicker } from "@/components/LocalePicker";
+import { displayCurrency } from "@/lib/displayCurrency";
 
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -135,6 +137,7 @@ export function SiteFooter() {
       <div className="border-t border-slate-100">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
           <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
+          <LocalePicker currency={displayCurrency()} open />
           <span>
             Designed by{" "}
             <a

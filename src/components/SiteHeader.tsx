@@ -10,6 +10,8 @@ import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { HeaderShell } from "@/components/HeaderShell";
 import { MobileMenu } from "@/components/MobileMenu";
+import { LocalePicker } from "@/components/LocalePicker";
+import { displayCurrency } from "@/lib/displayCurrency";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -181,6 +183,9 @@ export async function SiteHeader() {
               }
               signOut={logoutAction}
             />
+            <div className="hidden sm:block">
+              <LocalePicker currency={displayCurrency()} />
+            </div>
             <Link
               href="/post"
               className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-3 py-1.5 font-semibold text-white hover:opacity-90"

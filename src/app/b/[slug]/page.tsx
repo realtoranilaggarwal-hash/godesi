@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatMoney, siteUrl, whatsappLink } from "@/lib/format";
+import { siteUrl, whatsappLink } from "@/lib/format";
+import { Money } from "@/components/Money";
 import { effectivePlan } from "@/lib/plans";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -413,9 +414,17 @@ export default async function BusinessProfilePage({
 
             {business.startingPrice !== null || business.customQuote ? (
               <p className="mt-3 text-sm font-bold text-emerald-700">
-                {business.startingPrice !== null
-                  ? `Packages from ${formatMoney(business.startingPrice, business.priceCurrency ?? "USD")}`
-                  : "Custom quote for every booking"}
+                {business.startingPrice !== null ? (
+                  <>
+                    Packages from{" "}
+                    <Money
+                      value={business.startingPrice}
+                      currency={business.priceCurrency ?? "USD"}
+                    />
+                  </>
+                ) : (
+                  "Custom quote for every booking"
+                )}
               </p>
             ) : null}
 
@@ -573,7 +582,7 @@ export default async function BusinessProfilePage({
                   >
                     <p className="font-bold">{item.name}</p>
                     <p className="text-xl font-black text-emerald-700">
-                      {formatMoney(item.price, item.currency)}
+                      <Money value={item.price} currency={item.currency} />
                     </p>
                     {item.description ? (
                       <p className="mt-1 text-sm text-slate-600">{item.description}</p>
