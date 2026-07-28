@@ -20,8 +20,10 @@ export default function AppError({
   useEffect(() => {
     if (!isStaleBuild(error)) return;
     const key = "godesi-reloaded-for-build";
-    if (sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, "1");
+    const last = Number(sessionStorage.getItem(key) ?? 0);
+    // One reload per minute: recovers after every deploy without looping.
+    if (Date.now() - last < 60_000) return;
+    sessionStorage.setItem(key, String(Date.now()));
     window.location.reload();
   }, [error]);
 
@@ -32,6 +34,9 @@ export default function AppError({
         The page failed to load. Try again — if it keeps happening, tell us and we will fix
         it.
       </p>
+      {error.digest ? (
+        <p className="mt-1 text-xs text-slate-400">Reference: {error.digest}</p>
+      ) : null}
       <div className="mt-5 flex justify-center gap-3">
         <button
           type="button"

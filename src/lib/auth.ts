@@ -59,6 +59,17 @@ export async function requireUser(): Promise<User> {
   return user;
 }
 
+/** Admins plus moderators — everyone allowed on the content desk. */
+export function isStaff(user: { role: Role }) {
+  return user.role === "ADMIN" || user.role === "MODERATOR";
+}
+
+export async function requireStaff(): Promise<User> {
+  const user = await requireUser();
+  if (!isStaff(user)) throw new Error("FORBIDDEN");
+  return user;
+}
+
 export async function requireRole(role: Role): Promise<User> {
   const user = await requireUser();
   if (user.role !== role) throw new Error("FORBIDDEN");

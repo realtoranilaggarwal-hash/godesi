@@ -16,8 +16,9 @@ export default function GlobalError({
         `${error.name} ${error.message}`,
       );
     const key = "godesi-reloaded-for-build";
-    if (!stale || sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, "1");
+    const last = Number(sessionStorage.getItem(key) ?? 0);
+    if (!stale || Date.now() - last < 60_000) return;
+    sessionStorage.setItem(key, String(Date.now()));
     window.location.reload();
   }, [error]);
 

@@ -10,6 +10,8 @@ datasource db {
 enum Role {
   BUSINESS
   CLIENT
+  /// Content-desk access: events, listings, news and blog, but no member or money data.
+  MODERATOR
   ADMIN
 }
 
@@ -213,6 +215,8 @@ model User {
 
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
+
+  blogPosts BlogPost[]
 }
 
 enum ReferralStatus {
@@ -869,6 +873,33 @@ model Payment {
 enum ProfileType {
   BUSINESS
   PROFESSIONAL
+}
+
+/// Editorial posts versus "what's new on Godesi" changelog entries.
+enum BlogKind {
+  POST
+  UPDATE
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  /// One-line summary for cards, meta description and RSS.
+  excerpt     String?
+  body        String
+  coverUrl    String?
+  tags        String[] @default([])
+  kind        BlogKind @default(POST)
+  published   Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([published, publishedAt])
 }
 
 enum ClaimStatus {
