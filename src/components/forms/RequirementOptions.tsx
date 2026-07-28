@@ -63,7 +63,9 @@ export function RequirementOptions({
 
       <div key={slug} className="grid gap-3 sm:grid-cols-2">
         <div className={`${boxClass} sm:col-span-2`}>
-          <p className="text-sm font-bold text-slate-800">{active.set.title}</p>
+          <p className="text-sm font-bold text-slate-800">
+            {active.set.clientTitle ?? active.set.title}
+          </p>
           {active.set.optionTabs ? (
             <div className="mt-2">
               <OptionSearchPicker
@@ -95,7 +97,7 @@ export function RequirementOptions({
         {(active.set.choices ?? []).map((group) => (
           <div key={group.key} className={boxClass}>
             <p className="text-sm font-bold text-slate-800">
-              {group.title}
+              {group.clientTitle ?? group.title}
               {group.required ? " *" : ""}
             </p>
             {group.hint ? (

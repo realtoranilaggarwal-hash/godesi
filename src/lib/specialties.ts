@@ -8,6 +8,8 @@
 export type ChoiceGroup = {
   key: string;
   title: string;
+  /** Wording for the requirement form, where the client is the one asking. */
+  clientTitle?: string;
   hint?: string;
   options: string[];
   mode: "multi" | "single";
@@ -30,6 +32,8 @@ export type OptionBundle = { title: string; options: string[] };
 
 export type SpecialtySet = {
   title: string;
+  /** Wording for the requirement form, e.g. "What should the agent handle?". */
+  clientTitle?: string;
   hint: string;
   options: string[];
   /**
@@ -160,6 +164,7 @@ const IT_COURSE_TABS: OptionTab[] = [
  */
 const IT_TRAINING_SET: SpecialtySet = {
   title: "Select the courses you teach",
+  clientTitle: "Which courses are you looking for?",
   hint: "Search or open a tab, tick everything you teach — students filter on these.",
   options: IT_COURSE_TABS.flatMap((tab) => tab.options),
   optionTabs: IT_COURSE_TABS,
@@ -207,6 +212,7 @@ const IT_TRAINING_SET: SpecialtySet = {
     {
       key: "training",
       title: "Training type",
+      clientTitle: "Training type you want",
       options: [
         "Classroom Training",
         "Online Training",
@@ -221,6 +227,7 @@ const IT_TRAINING_SET: SpecialtySet = {
     {
       key: "visa",
       title: "Visa & career support",
+      clientTitle: "Visa & career support you need",
       hint: "What students on F1, OPT, CPT or H1B get from you",
       options: [
         "OPT Training Support",
@@ -240,6 +247,7 @@ const IT_TRAINING_SET: SpecialtySet = {
     {
       key: "mode",
       title: "Delivery mode",
+      clientTitle: "Preferred delivery mode",
       options: ["Online", "Offline (Classroom)", "Hybrid"],
       mode: "multi",
       required: true,
@@ -247,12 +255,14 @@ const IT_TRAINING_SET: SpecialtySet = {
     {
       key: "level",
       title: "Experience level you teach",
+      clientTitle: "Your experience level",
       options: ["Beginner", "Intermediate", "Advanced", "Career Switch"],
       mode: "multi",
     },
     {
       key: "highlights",
       title: "Highlights",
+      clientTitle: "Must-haves",
       hint: "Only tick what you genuinely offer — false claims get the listing removed",
       options: [
         "⭐ Guaranteed Interview Calls",
@@ -285,6 +295,7 @@ const IT_TRAINING_SET: SpecialtySet = {
 export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
   "beauty-lifestyle-spa-and-massage": {
     title: "Select the treatments you offer",
+    clientTitle: "Which treatments do you want?",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
     options: [
       "Full Body Massage",
@@ -303,6 +314,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
       {
         key: "location",
         title: "Where do you provide the service?",
+        clientTitle: "Where do you want the service?",
         hint: "Members filter on this first — required.",
         mode: "single",
         required: true,
@@ -327,6 +339,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
       {
         key: "therapist",
         title: "Therapist available",
+        clientTitle: "Therapist preference",
         mode: "multi",
         options: ["Male therapist", "Female therapist", "No preference"],
       },
@@ -366,6 +379,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
 
   "professionals-attorneys": {
     title: "Select legal services",
+    clientTitle: "What legal help do you need?",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
     options: [
       "Family Law (Divorce, Custody)",
@@ -395,6 +409,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
 
   "professionals-astrologers": {
     title: "Select astrology services",
+    clientTitle: "What do you need help with?",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
     options: [
       "Vedic astrology",
@@ -426,6 +441,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
 
   "professionals-consultants": {
     title: "Select consulting areas",
+    clientTitle: "What do you need consulting on?",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
     options: [
       "Business strategy",
@@ -467,6 +483,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
 
   "professionals-insurance-agents": {
     title: "Select insurance types",
+    clientTitle: "Which insurance do you need?",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
     options: [
       "Life insurance",
@@ -504,6 +521,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
 
   "professionals-financial-advisors": {
     title: "Select advisory services",
+    clientTitle: "What financial help do you need?",
     hint: "Pick at least one — these show as tags on your card and let people filter for you.",
     options: [
       "Investment planning",
@@ -566,6 +584,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
 /** Real estate agents share the engine; brokerage, MLS and sales live on /dashboard/agent. */
 const AGENT_SET: SpecialtySet = {
   title: "Select what you handle",
+  clientTitle: "What do you want the professional to handle?",
   hint: "Pick at least one — these show as tags on your card and let people filter for you.",
   options: [
     "Buyer Agent",
@@ -575,6 +594,13 @@ const AGENT_SET: SpecialtySet = {
     "Investment Properties",
     "Luxury Homes",
     "First-time Buyers",
+    "Property Management",
+    "Property Photography",
+    "Videography & Drone Shoots",
+    "3D Virtual Tours / 3D Maps",
+    "2D Floor Plans",
+    "Home Staging",
+    "Property Valuation",
   ],
   certifications: {
     title: "Certifications & memberships",
