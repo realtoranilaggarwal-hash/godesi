@@ -54,7 +54,6 @@ export async function SiteHeader() {
 
   return (
     <HeaderShell
-      items={categoryItems}
       bar={
         <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="shrink-0" aria-label="Godesi home">
@@ -71,7 +70,7 @@ export async function SiteHeader() {
           <form
             action="/find"
             role="search"
-            className="flex min-w-0 flex-1 items-center gap-1 sm:max-w-xs"
+            className="hidden min-w-0 flex-1 items-center gap-1 sm:flex sm:max-w-xs"
           >
             <input
               name="q"
@@ -117,6 +116,13 @@ export async function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-2 text-sm font-medium">
+            <Link
+              href="/find"
+              aria-label="Search Godesi"
+              className="rounded-xl border border-slate-300 px-2.5 py-1.5 text-lg leading-none sm:hidden"
+            >
+              🔍
+            </Link>
             <MobileMenu
               links={menuLinks}
               categories={categoryItems}

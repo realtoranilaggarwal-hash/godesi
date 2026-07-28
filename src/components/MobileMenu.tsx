@@ -7,8 +7,8 @@ import type { StripItem } from "@/components/CategoryStrip";
 export type MenuLink = { href: string; label: string; icon: string };
 
 /**
- * Phone navigation: everything lives behind one button and rolls down on tap,
- * so the header stays a single line like a native app.
+ * One menu button holds the whole site: pages, account and every category, so the
+ * header stays a single uncluttered line on phone and desktop alike.
  */
 export function MobileMenu({
   links,
@@ -25,7 +25,7 @@ export function MobileMenu({
   const close = () => setOpen(false);
 
   return (
-    <div className="xl:hidden">
+    <div>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -67,17 +67,17 @@ export function MobileMenu({
             </div>
           ) : null}
 
-          <div className="border-t border-slate-100 px-4 py-3 md:hidden">
+          <div className="border-t border-slate-100 px-4 py-3">
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
               Categories
             </p>
-            <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold">
+            <div className="grid grid-cols-1 gap-1.5 text-xs font-semibold sm:grid-cols-2 lg:grid-cols-3">
               {categories.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={close}
-                  className={`whitespace-nowrap rounded-full px-2.5 py-1 ${item.className}`}
+                  className={`rounded-xl px-3 py-2 ${item.className}`}
                 >
                   {item.icon} {item.label}
                 </Link>

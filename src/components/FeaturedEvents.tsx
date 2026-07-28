@@ -39,7 +39,7 @@ export async function FeaturedEventStrip({ take = 12 }: { take?: number }) {
         </Link>
       </div>
 
-      <div className="-mx-1 mt-3 flex snap-x gap-3 overflow-x-auto px-1 pb-2">
+      <div className="no-scrollbar -mx-1 mt-3 flex snap-x gap-3 overflow-x-auto px-1 pb-2">
         {events.map((event) => (
           <div
             key={event.id}

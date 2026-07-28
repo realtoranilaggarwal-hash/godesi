@@ -108,7 +108,7 @@ export default async function WeddingPage({
                 Feature your business →
               </Link>
             </div>
-            <div className="mt-3 flex gap-4 overflow-x-auto pb-2">
+            <div className="no-scrollbar mt-3 flex gap-4 overflow-x-auto pb-2">
               {featured.map((vendor) => (
                 <div key={vendor.id} className="w-64 shrink-0">
                   <VendorCard vendor={vendor} />
