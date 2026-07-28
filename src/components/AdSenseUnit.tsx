@@ -10,11 +10,14 @@ declare global {
   }
 }
 
+const ADSENSE_TIMEOUT_MS = 2500;
+
 /**
  * Fills an unsold placement with a Google AdSense unit, so empty inventory still
  * earns. The slot keeps the exact placement height — a responsive unit with no
  * ad to show would otherwise leave a tall blank band at the top of the page —
- * and falls back to our own artwork when Google has nothing to serve.
+ * and falls back to our own artwork when Google has nothing to serve, including
+ * when the AdSense script never answers at all (new site, or blocked).
  */
 export function AdSenseUnit({
   client,
@@ -51,9 +54,20 @@ export function AdSenseUnit({
     };
 
     const status = new MutationObserver(() => {
-      if (element.getAttribute("data-ad-status") === "unfilled") setUnfilled(true);
+      if (element.getAttribute("data-ad-status") === "unfilled")
+        setUnfilled(true);
     });
-    status.observe(element, { attributes: true, attributeFilter: ["data-ad-status"] });
+    status.observe(element, {
+      attributes: true,
+      attributeFilter: ["data-ad-status"],
+    });
+
+    // A brand new or blocked account never sets data-ad-status, so an unanswered
+    // slot would sit there as a blank box. Treat silence as unfilled.
+    const giveUp = window.setTimeout(() => {
+      if (element.getAttribute("data-ad-status") !== "filled")
+        setUnfilled(true);
+    }, ADSENSE_TIMEOUT_MS);
 
     let size: ResizeObserver | undefined;
     if (!fill()) {
@@ -64,6 +78,7 @@ export function AdSenseUnit({
     }
 
     return () => {
+      window.clearTimeout(giveUp);
       status.disconnect();
       size?.disconnect();
     };
@@ -72,7 +87,10 @@ export function AdSenseUnit({
   if (unfilled && fallback) return <>{fallback}</>;
 
   return (
-    <div style={{ height, overflow: "hidden" }} className={unfilled ? "hidden" : undefined}>
+    <div
+      style={{ height, overflow: "hidden" }}
+      className={unfilled ? "hidden" : undefined}
+    >
       <ins
         ref={slot}
         className={`adsbygoogle block ${className}`}

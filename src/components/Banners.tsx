@@ -245,6 +245,9 @@ export async function HeroBanner() {
           slotId={adsenseSlot}
           height={HERO_SIZE.height}
           className="rounded-3xl"
+          fallback={
+            <AdPreview width={HERO_SIZE.width} height={HERO_SIZE.height} />
+          }
         />
         <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
       </div>
