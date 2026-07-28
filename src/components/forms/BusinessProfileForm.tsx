@@ -4,7 +4,7 @@ import { useFormState } from "react-dom";
 import type { Business } from "@prisma/client";
 import { saveBusinessProfileAction } from "@/app/actions/business";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
@@ -14,6 +14,8 @@ import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
 import { specialtySet } from "@/lib/specialties";
 import { VehicleFields, type VehicleDefaults } from "@/components/forms/VehicleFields";
 import { useState } from "react";
+import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
+import { FormError } from "@/components/forms/FormError";
 
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
@@ -81,7 +83,7 @@ export function BusinessProfileForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="This card is for">
@@ -95,7 +97,7 @@ export function BusinessProfileForm({
             <option value="PROFESSIONAL">An individual professional</option>
           </select>
         </Field>
-        <Field label="Business or professional name">
+        <Field label="Business or professional name" required>
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
         <CategorySelect
@@ -105,7 +107,7 @@ export function BusinessProfileForm({
           onSubcategoryChange={setSubcategory}
           onCategoryChange={setCategory}
         />
-        <Field label="City">
+        <Field label="City" required>
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />
         </Field>
         <Field label="State">
@@ -166,16 +168,24 @@ export function BusinessProfileForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="WhatsApp number" hint="10-digit mobile or full number with country code">
+        <Field label="WhatsApp number" hint={PHONE_PATTERN_HINT} required>
           <input
             name="whatsappNumber"
             required
+            inputMode="tel"
+            pattern={PHONE_PATTERN}
+            title={PHONE_PATTERN_HINT}
             defaultValue={business?.whatsappNumber ?? ""}
             className={inputClass}
           />
         </Field>
         <Field label="Phone">
-          <input name="phone" defaultValue={business?.phone ?? ""} className={inputClass} />
+          <input
+            name="phone"
+            inputMode="tel"
+            defaultValue={business?.phone ?? ""}
+            className={inputClass}
+          />
         </Field>
         <Field label="Public email">
           <input

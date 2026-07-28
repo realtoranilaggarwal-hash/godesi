@@ -5,6 +5,7 @@ import { joinJournalistAction } from "@/app/actions/journalist";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function JournalistJoinForm({
   beat,
@@ -17,7 +18,7 @@ export function JournalistJoinForm({
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field

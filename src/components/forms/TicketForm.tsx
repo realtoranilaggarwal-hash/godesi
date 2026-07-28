@@ -5,8 +5,9 @@ import { useFormState } from "react-dom";
 import { bookTicketAction } from "@/app/actions/events";
 import { emptyState } from "@/lib/actions";
 import { formatMoney } from "@/lib/format";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export type TicketTierOption = {
   id: string;
@@ -45,7 +46,7 @@ export function TicketForm({
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       <input type="hidden" name="eventId" value={eventId} />
 
       {bookable.length ? (

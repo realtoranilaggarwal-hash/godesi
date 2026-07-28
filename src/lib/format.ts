@@ -36,6 +36,12 @@ export function formatMinor(minor: number, currency: string) {
     : formatUsd(fromMinor(minor));
 }
 
+/** Ten or more digits, ignoring spaces, dashes and brackets — matches normalizeWhatsApp. */
+export const PHONE_PATTERN = "(?:\\D*\\d){10,}\\D*";
+
+export const PHONE_PATTERN_HINT =
+  "Enter at least 10 digits — a 10-digit mobile, or the full number with country code.";
+
 export function normalizeWhatsApp(input: string) {
   const digits = input.replace(/\D/g, "");
   if (digits.length === 10) return `91${digits}`;

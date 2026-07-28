@@ -6,6 +6,7 @@ import { claimBusinessAction } from "@/app/actions/claims";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
+import { FormError } from "@/components/forms/FormError";
 
 /** Shown on unowned starter listings so the real business can take them over. */
 export function ClaimBusinessForm({
@@ -34,7 +35,7 @@ export function ClaimBusinessForm({
     <form action={formAction} className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
       <input type="hidden" name="businessId" value={businessId} />
       <p className="text-sm font-semibold text-amber-900">Claim this listing</p>
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="How are you connected to this business?">

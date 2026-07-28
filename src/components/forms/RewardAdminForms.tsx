@@ -9,6 +9,7 @@ import { emptyState } from "@/lib/actions";
 import { REASON_LABELS } from "@/lib/rewards";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 /** Admin editor for the published point values. */
 export function RewardPointsForm({ values }: { values: Record<string, number> }) {
@@ -16,7 +17,7 @@ export function RewardPointsForm({ values }: { values: Record<string, number> })
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -44,7 +45,7 @@ export function PointsAdjustForm() {
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-3">

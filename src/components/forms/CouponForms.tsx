@@ -5,6 +5,7 @@ import { createCouponAction, createEventCouponAction } from "@/app/actions/coupo
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
+import { FormError } from "@/components/forms/FormError";
 
 function DiscountFields({ withCurrency }: { withCurrency: boolean }) {
   return (
@@ -42,7 +43,7 @@ export function CouponForm() {
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -79,7 +80,7 @@ export function EventCouponForm({
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">

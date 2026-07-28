@@ -5,8 +5,10 @@ import { useFormState } from "react-dom";
 import { createLeadAction } from "@/app/actions/leads";
 import { emptyState } from "@/lib/actions";
 import { WEDDING_GROUPS } from "@/lib/wedding";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
+import { FormError } from "@/components/forms/FormError";
 
 /** Couples post here; only Premium vendors can unlock the contact details. */
 export function WeddingRequirementForm({
@@ -37,7 +39,7 @@ export function WeddingRequirementForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
 
       <Field label="What do you need?" hint="e.g. Need a wedding photographer in NJ">
         <input name="title" required className={inputClass} />
@@ -135,8 +137,15 @@ export function WeddingRequirementForm({
             className={inputClass}
           />
         </Field>
-        <Field label="WhatsApp / phone" hint="Only Premium vendors can see this">
-          <input name="contactPhone" required className={inputClass} />
+        <Field label="WhatsApp / phone" hint="Only Premium vendors can see this" required>
+          <input
+            name="contactPhone"
+            required
+            inputMode="tel"
+            pattern={PHONE_PATTERN}
+            title={PHONE_PATTERN_HINT}
+            className={inputClass}
+          />
         </Field>
         <Field label="Email">
           <input

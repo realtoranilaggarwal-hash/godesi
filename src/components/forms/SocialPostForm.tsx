@@ -6,6 +6,7 @@ import { emptyState } from "@/lib/actions";
 import { SOCIAL_TAG } from "@/lib/social";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 /** Staff paste a public post link; we store a quote and link, never a copy. */
 export function SocialPostForm() {
@@ -13,7 +14,7 @@ export function SocialPostForm() {
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field

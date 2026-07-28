@@ -6,13 +6,14 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function PackageForm({ defaultCurrency }: { defaultCurrency: string }) {
   const [state, formAction] = useFormState(addPackageAction, emptyState);
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">

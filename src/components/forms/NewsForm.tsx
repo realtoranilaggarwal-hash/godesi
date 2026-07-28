@@ -5,13 +5,14 @@ import { submitNewsAction } from "@/app/actions/news";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function NewsForm({ isAdmin }: { isAdmin: boolean }) {
   const [state, formAction] = useFormState(submitNewsAction, emptyState);
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="Headline">

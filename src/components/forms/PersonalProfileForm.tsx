@@ -11,6 +11,7 @@ import { ImageDropzone } from "@/components/ImageDropzone";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { AlumniFields } from "@/components/forms/AlumniFields";
 import type { AlumniEntry } from "@/lib/alumni";
+import { FormError } from "@/components/forms/FormError";
 
 export type PersonalProfileValues = {
   name: string;
@@ -43,7 +44,7 @@ export function PersonalProfileForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">

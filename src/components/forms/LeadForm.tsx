@@ -3,7 +3,7 @@
 import { useFormState } from "react-dom";
 import { createLeadAction } from "@/app/actions/leads";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ServicePicker, type ServiceGroup } from "@/components/forms/ServicePicker";
@@ -11,6 +11,8 @@ import {
   RequirementOptions,
   type RequirementOptionSet,
 } from "@/components/forms/RequirementOptions";
+import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
+import { FormError } from "@/components/forms/FormError";
 
 export function LeadForm({
   defaultName,
@@ -33,7 +35,7 @@ export function LeadForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
 
       <Field label="Title" hint="e.g. Need 500 wedding invitation cards printed">
         <input name="title" required className={inputClass} />
@@ -98,8 +100,15 @@ export function LeadForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Contact phone">
-          <input name="contactPhone" required className={inputClass} />
+        <Field label="Contact phone" required>
+          <input
+            name="contactPhone"
+            required
+            inputMode="tel"
+            pattern={PHONE_PATTERN}
+            title={PHONE_PATTERN_HINT}
+            className={inputClass}
+          />
         </Field>
         <Field label="Contact email">
           <input

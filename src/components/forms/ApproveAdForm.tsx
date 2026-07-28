@@ -5,6 +5,7 @@ import { approveBannerAction } from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
 import { Alert } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function ApproveAdForm({ id, capacity }: { id: string; capacity: number }) {
   const [state, formAction] = useFormState(approveBannerAction, emptyState);
@@ -26,7 +27,7 @@ export function ApproveAdForm({ id, capacity }: { id: string; capacity: number }
       <SubmitButton className="!px-3 !py-1 !text-xs" pendingLabel="Approving...">
         Approve
       </SubmitButton>
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
     </form>
   );

@@ -6,13 +6,14 @@ import { emptyState } from "@/lib/actions";
 import { STAFF_PERMISSIONS } from "@/lib/permissions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function ModeratorForm() {
   const [state, formAction] = useFormState(grantModeratorAction, emptyState);
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="Member email" hint="They must have a Godesi account already">

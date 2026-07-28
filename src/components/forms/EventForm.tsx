@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useFormState } from "react-dom";
 import { createEventAction } from "@/app/actions/events";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
@@ -15,6 +15,7 @@ import {
   EVENT_MODES,
   EVENT_TYPES,
 } from "@/lib/eventOptions";
+import { FormError } from "@/components/forms/FormError";
 
 /** Suggested seat types; organisers can rename them to anything. */
 const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
@@ -46,7 +47,7 @@ export function EventForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
 
       <Field label="Event title" hint="e.g. Diwali Mela 2026 — food stalls & live music">
         <input name="title" required className={inputClass} />

@@ -8,6 +8,7 @@ import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
+import { FormError } from "@/components/forms/FormError";
 
 export type AdminEventValues = {
   id: string;
@@ -40,7 +41,7 @@ export function AdminEventForm({
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="id" value={event.id} />
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="Event title">

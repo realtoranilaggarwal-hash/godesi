@@ -7,6 +7,7 @@ import { REPORT_ISSUE_TYPES } from "@/lib/safety";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function ReportIssueForm({
   defaultName,
@@ -23,7 +24,7 @@ export function ReportIssueForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Your name">

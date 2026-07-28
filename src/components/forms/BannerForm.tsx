@@ -6,13 +6,14 @@ import { emptyState } from "@/lib/actions";
 import { AD_PLACEMENTS, AD_SLOT_ORDER } from "@/lib/ads";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function BannerForm() {
   const [state, formAction] = useFormState(saveBannerAction, emptyState);
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">

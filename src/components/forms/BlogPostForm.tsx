@@ -6,6 +6,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageField } from "@/components/forms/ImageField";
+import { FormError } from "@/components/forms/FormError";
 
 export type BlogPostDraft = {
   id: string;
@@ -23,7 +24,7 @@ export function BlogPostForm({ post }: { post?: BlogPostDraft }) {
 
   return (
     <form action={formAction} className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
       {post ? <input type="hidden" name="id" value={post.id} /> : null}
 

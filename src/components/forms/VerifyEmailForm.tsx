@@ -6,6 +6,7 @@ import { sendEmailOtpAction, verifyEmailOtpAction } from "@/app/actions/verify";
 import { emptyState, type ActionState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function VerifyEmailForm({ email }: { email: string }) {
   const [state, formAction] = useFormState(verifyEmailOtpAction, emptyState);
@@ -19,7 +20,7 @@ export function VerifyEmailForm({ email }: { email: string }) {
         it below to verify your account.
       </p>
 
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {resend.error ? <Alert>{resend.error}</Alert> : null}
       {resend.success ? <Alert tone="success">{resend.success}</Alert> : null}
 

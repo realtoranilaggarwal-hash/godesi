@@ -42,7 +42,7 @@ export function CategorySelect({
 
   return (
     <>
-      <Field label={label}>
+      <Field label={label} required={required}>
         <select
           name="categorySlug"
           required={required}
@@ -63,7 +63,11 @@ export function CategorySelect({
         </select>
       </Field>
 
-      <Field label={subLabel} hint={category ? undefined : "Pick a category first"}>
+      <Field
+        label={subLabel}
+        required={required && children.length > 0}
+        hint={category ? undefined : "Pick a category first"}
+      >
         <select
           name="subcategorySlug"
           required={required && children.length > 0}

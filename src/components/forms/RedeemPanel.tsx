@@ -6,13 +6,14 @@ import { emptyState } from "@/lib/actions";
 import { REWARDS } from "@/lib/rewards";
 import { Alert } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/forms/FormError";
 
 export function RedeemPanel({ balance }: { balance: number }) {
   const [state, formAction] = useFormState(redeemPointsAction, emptyState);
 
   return (
     <div className="space-y-3">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <ul className="space-y-2">

@@ -4,17 +4,19 @@ import { useState } from "react";
 import { useFormState } from "react-dom";
 import { createListingAction } from "@/app/actions/listings";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
+import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import {
   FairHousingNotice,
   RoomSharingNotice,
 } from "@/components/FairHousingNotice";
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
 import type { ListingKind } from "@prisma/client";
+import { FormError } from "@/components/forms/FormError";
 
 const KINDS: ListingKind[] = [
   "PROPERTY_SALE",
@@ -45,7 +47,7 @@ export function ListingForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
 
       <Field label="What are you listing?">
         <select
@@ -110,10 +112,13 @@ export function ListingForm({
             className={inputClass}
           />
         </Field>
-        <Field label="WhatsApp number" hint="Buyers message you directly here">
+        <Field label="WhatsApp number" hint="Buyers message you directly here" required>
           <input
             name="whatsapp"
             required
+            inputMode="tel"
+            pattern={PHONE_PATTERN}
+            title={PHONE_PATTERN_HINT}
             defaultValue={defaultWhatsapp}
             className={inputClass}
           />

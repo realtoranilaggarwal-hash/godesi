@@ -7,6 +7,7 @@ import { Alert, Field, inputClass } from "@/components/ui";
 import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
 import { DesignHelp } from "@/components/DesignHelp";
+import { FormError } from "@/components/forms/FormError";
 
 export function AdCreativeForm({
   id,
@@ -26,7 +27,7 @@ export function AdCreativeForm({
   return (
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="id" value={id} />
-      {state.error ? <Alert>{state.error}</Alert> : null}
+      <FormError>{state.error}</FormError>
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
