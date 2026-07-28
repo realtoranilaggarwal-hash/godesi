@@ -62,6 +62,7 @@ import { PLAN_ORDER } from "@/lib/plans";
 import { formatMinor } from "@/lib/format";
 import { reviewUpiPaymentAction } from "@/app/actions/upi";
 import { upiEnabled, upiVpa } from "@/lib/upi";
+import { proxyImage } from "@/lib/proxyImage";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" };
@@ -661,7 +662,7 @@ export default async function AdminPage() {
                     <div className="flex items-start gap-2">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={banner.imageUrl}
+                        src={proxyImage(banner.imageUrl)}
                         alt=""
                         className="h-10 w-16 shrink-0 rounded border border-slate-200 object-contain"
                         loading="lazy"
