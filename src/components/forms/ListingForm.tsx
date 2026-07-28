@@ -7,6 +7,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
+import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import {
   FairHousingNotice,
@@ -66,6 +67,17 @@ export function ListingForm({
       </Field>
       <Field label="Description" hint="Amenities, house rules, what's included">
         <textarea name="description" rows={5} required className={inputClass} />
+        <WriteHelper
+          kind="listing"
+          target="description"
+          fields={{
+            kind: "Listing type",
+            title: "Title",
+            city: "City",
+            area: "Area",
+            price: "Price",
+          }}
+        />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">

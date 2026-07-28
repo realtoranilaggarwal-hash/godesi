@@ -7,6 +7,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
+import { WriteHelper } from "@/components/WriteHelper";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import {
@@ -52,6 +53,16 @@ export function EventForm({
       </Field>
       <Field label="Description">
         <textarea name="description" rows={4} required className={inputClass} />
+        <WriteHelper
+          kind="event"
+          target="description"
+          fields={{
+            title: "Event title",
+            city: "City",
+            venue: "Venue",
+            startsAt: "Date and time",
+          }}
+        />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">

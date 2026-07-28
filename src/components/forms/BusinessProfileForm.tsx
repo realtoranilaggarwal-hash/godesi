@@ -8,6 +8,7 @@ import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
+import { WriteHelper } from "@/components/WriteHelper";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
 import { specialtySet } from "@/lib/specialties";
@@ -150,6 +151,17 @@ export function BusinessProfileForm({
           rows={4}
           defaultValue={business?.description ?? ""}
           className={inputClass}
+        />
+        <WriteHelper
+          kind="business"
+          target="description"
+          fields={{
+            name: "Business name",
+            city: "City",
+            state: "State",
+            category: "Category",
+            subcategory: "Service",
+          }}
         />
       </Field>
 

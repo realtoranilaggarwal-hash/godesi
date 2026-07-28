@@ -124,10 +124,10 @@ export const CATEGORY_TREE: CategorySeed[] = [
   },
   {
     slug: "business-services",
-    name: "Business & IT Services",
+    name: "Business & Professional Services",
     icon: "💼",
     color: "emerald",
-    blurb: "CAs, lawyers, printing, IT, marketing and consultants",
+    blurb: "CAs, lawyers, printing, web, marketing and consultants",
     children: [
       "Chartered Accountants",
       "GST & Tax Consultants",

@@ -44,9 +44,15 @@ export function ListingHelp({ username }: { username?: string | null }) {
         <h2 className="text-base font-bold text-amber-900">How to get a coupon</h2>
         <ul className="mt-2 space-y-1 text-sm text-amber-900/90">
           <li>• Invite businesses with your link and redeem the points you earn</li>
-          <li>• Watch the pricing page for seasonal codes</li>
           <li>
-            • Running an event? Create your own codes in{" "}
+            • Watch the{" "}
+            <Link href="/pricing" className="font-semibold underline">
+              pricing page
+            </Link>{" "}
+            for seasonal codes — enter them at checkout
+          </li>
+          <li>
+            • Running an event or a group offer? Create your own codes in{" "}
             <Link href="/dashboard/coupons" className="font-semibold underline">
               Coupons
             </Link>

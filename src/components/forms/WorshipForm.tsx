@@ -7,6 +7,7 @@ import { submitWorshipAction } from "@/app/actions/worship";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { FAITHS, FAITH_LABELS } from "@/lib/worship";
 
@@ -65,6 +66,11 @@ export function WorshipForm({
 
       <Field label="About" hint="Timings, aarti/namaz/mass schedule, langar, facilities">
         <textarea name="description" rows={4} className={inputClass} />
+        <WriteHelper
+          kind="worship"
+          target="description"
+          fields={{ name: "Name", faith: "Faith", city: "City" }}
+        />
       </Field>
 
       <Field label="Photos" hint={`Drag & drop up to ${imageLimit} photos.`}>

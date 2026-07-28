@@ -6,6 +6,7 @@ import { savePersonalProfileAction } from "@/app/actions/profile";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 
@@ -117,6 +118,16 @@ export function PersonalProfileForm({
           rows={4}
           defaultValue={profile.bio ?? ""}
           className={inputClass}
+        />
+        <WriteHelper
+          kind="profile"
+          target="bio"
+          photoTarget={false}
+          fields={{
+            headline: "Headline",
+            location: "City",
+            lookingFor: "Looking for",
+          }}
         />
       </Field>
 

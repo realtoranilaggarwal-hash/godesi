@@ -623,6 +623,207 @@ const AGENT_SET: SpecialtySet = {
 SPECIALTY_SETS["real-estate-property-dealers"] = AGENT_SET;
 SPECIALTY_SETS["professionals-realtors"] = AGENT_SET;
 
+/** Shared shape for the business-services trades: what you do, how and for whom. */
+function businessSet({
+  hint,
+  options,
+  extra = [],
+}: {
+  hint: string;
+  options: string[];
+  extra?: ChoiceGroup[];
+}): SpecialtySet {
+  return {
+    title: "Select what you offer",
+    clientTitle: "What do you need help with?",
+    hint,
+    options,
+    choices: [
+      ...extra,
+      {
+        key: "mode",
+        title: "How do you work?",
+        clientTitle: "How do you want to work with them?",
+        options: ["Remote / online", "At your office", "At our office", "Hybrid"],
+        mode: "multi",
+      },
+      {
+        key: "clients",
+        title: "Who you work with",
+        clientTitle: "This is for",
+        options: [
+          "Individuals",
+          "Startups",
+          "Small businesses",
+          "Mid-size companies",
+          "Enterprises",
+          "Non-profits",
+        ],
+        mode: "multi",
+      },
+    ],
+    pricing: [
+      { key: "priceFrom", label: "Starting price", hint: "Smallest job you take on" },
+      { key: "priceHourly", label: "Hourly rate", hint: "Optional" },
+    ],
+    availability: { label: "Working hours", hint: "e.g. Mon–Sat 9am–7pm, same-day replies" },
+    experience: true,
+  };
+}
+
+SPECIALTY_SETS["business-services-chartered-accountants"] = businessSet({
+  hint: "Pick everything you handle — these become tags on your card and filters for clients.",
+  options: [
+    "Individual tax returns",
+    "Business tax returns",
+    "Bookkeeping",
+    "Payroll",
+    "Company formation",
+    "Audit & assurance",
+    "GST / VAT / sales tax filing",
+    "ITIN & tax ID help",
+    "FBAR / foreign income",
+    "Tax planning",
+    "IRS / notice representation",
+    "CFO / advisory services",
+    "QuickBooks / Xero setup",
+    "Non-profit accounting",
+  ],
+  extra: [
+    {
+      key: "software",
+      title: "Software you work in",
+      clientTitle: "Software you use",
+      options: ["QuickBooks", "Xero", "Tally", "Zoho Books", "Sage", "NetSuite"],
+      mode: "multi",
+    },
+  ],
+});
+
+SPECIALTY_SETS["business-services-gst-and-tax-consultants"] =
+  SPECIALTY_SETS["business-services-chartered-accountants"];
+
+/** Legal and insurance already have full sets under Professionals — reuse them. */
+SPECIALTY_SETS["business-services-lawyers-and-legal"] =
+  SPECIALTY_SETS["professionals-attorneys"];
+SPECIALTY_SETS["business-services-insurance-agents"] =
+  SPECIALTY_SETS["professionals-insurance-agents"];
+
+SPECIALTY_SETS["business-services-printing-and-signage"] = businessSet({
+  hint: "Pick everything you print or fabricate.",
+  options: [
+    "Business cards",
+    "Flyers & brochures",
+    "Banners & backdrops",
+    "Yard & lawn signs",
+    "Vehicle wraps",
+    "Shop signage & light boxes",
+    "Wedding invitations",
+    "Stickers & labels",
+    "T-shirts & apparel printing",
+    "Mugs & gifting",
+    "Large format / posters",
+    "Menus & packaging",
+    "Design services",
+    "Same-day printing",
+  ],
+});
+
+SPECIALTY_SETS["business-services-web-and-app-development"] = businessSet({
+  hint: "Pick the work you take on — clients filter by these.",
+  options: [
+    "Website design",
+    "WordPress",
+    "Shopify / e-commerce",
+    "Custom web apps",
+    "Mobile apps (iOS / Android)",
+    "React / Next.js",
+    "Node.js / backend APIs",
+    "PHP / Laravel",
+    "Python / Django",
+    "AI & chatbot integration",
+    "Website maintenance",
+    "Hosting & migration",
+    "Website speed & SEO fixes",
+    "Payment gateway integration",
+    "CRM & ERP integration",
+    "UI / UX design",
+    "Booking & appointment systems",
+    "Landing pages",
+  ],
+  extra: [
+    {
+      key: "engagement",
+      title: "Engagement type",
+      clientTitle: "How you want to hire",
+      options: ["Fixed price project", "Hourly", "Monthly retainer", "Dedicated team"],
+      mode: "multi",
+    },
+  ],
+});
+
+SPECIALTY_SETS["business-services-digital-marketing"] = businessSet({
+  hint: "Pick the channels you run for clients.",
+  options: [
+    "SEO",
+    "Local SEO & Google Business Profile",
+    "Google Ads",
+    "Meta ads (Facebook / Instagram)",
+    "Social media management",
+    "Content writing",
+    "Email marketing",
+    "WhatsApp marketing",
+    "Influencer marketing",
+    "Video & reels production",
+    "Graphic design",
+    "Branding & logo design",
+    "Website analytics & tracking",
+    "Lead generation",
+    "Amazon / marketplace listings",
+    "YouTube channel growth",
+  ],
+});
+
+SPECIALTY_SETS["business-services-courier-and-logistics"] = businessSet({
+  hint: "Pick what you move and where.",
+  options: [
+    "Local courier",
+    "Same-day delivery",
+    "Domestic parcels",
+    "International shipping",
+    "Air freight",
+    "Sea freight",
+    "Document shipping",
+    "Food & groceries delivery",
+    "Furniture & bulky items",
+    "Cold chain",
+    "Warehousing",
+    "Customs clearance",
+    "Packers & movers",
+    "Pharmacy & medical shipments",
+  ],
+});
+
+SPECIALTY_SETS["business-services-staffing-and-hr"] = businessSet({
+  hint: "Pick the hiring and HR work you handle.",
+  options: [
+    "Permanent hiring",
+    "Contract / C2C staffing",
+    "Contract-to-hire",
+    "IT recruitment",
+    "Healthcare recruitment",
+    "Hospitality & retail staffing",
+    "Executive search",
+    "Payroll services",
+    "HR compliance",
+    "Background verification",
+    "Visa & immigration support",
+    "Employee handbook & policies",
+    "Training & onboarding",
+    "Offshore / global teams",
+  ],
+});
+
 export function specialtySet(subcategorySlug?: string | null): SpecialtySet | null {
   if (!subcategorySlug) return null;
   return SPECIALTY_SETS[subcategorySlug] ?? null;

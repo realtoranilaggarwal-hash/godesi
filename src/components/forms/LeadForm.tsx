@@ -5,6 +5,7 @@ import { createLeadAction } from "@/app/actions/leads";
 import { emptyState } from "@/lib/actions";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { WriteHelper } from "@/components/WriteHelper";
 import { ServicePicker, type ServiceGroup } from "@/components/forms/ServicePicker";
 import {
   RequirementOptions,
@@ -38,6 +39,12 @@ export function LeadForm({
         <input name="title" required className={inputClass} />
       </Field>
       <Field label="Description">
+        <WriteHelper
+          kind="requirement"
+          target="description"
+          photoTarget={false}
+          fields={{ title: "What I need", city: "City", budget: "Budget" }}
+        />
         <textarea name="description" rows={4} required className={inputClass} />
       </Field>
 
