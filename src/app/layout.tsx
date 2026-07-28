@@ -10,6 +10,7 @@ import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
 import { VisitorPinger } from "@/components/VisitorPinger";
 import { AiChat } from "@/components/AiChat";
+import { BackToTop } from "@/components/BackToTop";
 import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
 
@@ -31,7 +32,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   const umamiId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   const umamiSrc =
@@ -59,7 +64,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ) : null}
         </head>
       ) : null}
-      <body className={`${inter.className} min-h-screen overflow-x-hidden bg-slate-50 pb-20 text-slate-900 sm:pb-0`}>
+      <body
+        className={`${inter.className} min-h-screen overflow-x-hidden bg-slate-50 pb-20 text-slate-900 sm:pb-0`}
+      >
         <SiteHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
@@ -68,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LiveActivity />
         <VisitorPinger />
         <GoogleTranslate />
+        <BackToTop />
         {aiEnabled() && <AiChat />}
       </body>
     </html>
