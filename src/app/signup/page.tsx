@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SignupForm } from "@/components/forms/SignupForm";
 import { Card } from "@/components/ui";
 import { JoinBenefits } from "@/components/JoinBenefits";
+import { GoogleSignIn } from "@/components/GoogleSignIn";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function SignupPage({
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
         <Card>
+          <GoogleSignIn next={searchParams.next} label="Sign up with Google" />
           <SignupForm
             defaultRole={
               searchParams.role === "CLIENT" || searchParams.role === "PROFESSIONAL"
