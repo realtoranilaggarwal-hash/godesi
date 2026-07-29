@@ -201,6 +201,9 @@ export async function createEventAction(
       videoUrl: formData.get("videoUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+    if (formData.get("acceptPayoutTerms") !== "on") {
+      return { error: "Please confirm you understand how ticket money and fees work." };
+    }
 
     const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
     if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
@@ -291,6 +294,7 @@ export async function createEventAction(
         onlineUrl: parsed.data.onlineUrl ?? null,
         websiteUrl: parsed.data.websiteUrl ?? null,
         bonusNote: String(formData.get("bonusNote") ?? "").trim().slice(0, 200) || null,
+        payoutTermsAt: new Date(),
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"
@@ -382,7 +386,12 @@ export async function bookTicketAction(
       include: {
         tiers: { orderBy: { sortOrder: "asc" } },
         organizer: {
-          select: { stripeAccountId: true, stripePayoutsEnabled: true },
+          select: {
+            stripeAccountId: true,
+            stripePayoutsEnabled: true,
+            plan: true,
+            planExpiresAt: true,
+          },
         },
       },
     });
@@ -424,6 +433,8 @@ export async function bookTicketAction(
     }
 
     const amountMinor = Math.max(0, subtotalMinor - discountMinor);
+    /** Free organisers pay Godesi's service fee; paid plans keep the whole ticket. */
+    const feeMinor = platformFeeMinor(amountMinor, event.organizer);
 
     const ticket = await db.ticket.create({
       data: {
@@ -439,6 +450,7 @@ export async function bookTicketAction(
         quantity: parsed.data.quantity,
         amountMinor,
         currency: event.currency,
+        platformFeeMinor: feeMinor,
         provider: amountMinor === 0 ? "free" : "stripe",
       },
     });
@@ -470,7 +482,7 @@ export async function bookTicketAction(
         ...(destinationAccount
           ? {
               payment_intent_data: {
-                application_fee_amount: platformFeeMinor(amountMinor),
+                ...(feeMinor > 0 ? { application_fee_amount: feeMinor } : {}),
                 transfer_data: { destination: destinationAccount },
               },
             }

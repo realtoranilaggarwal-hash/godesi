@@ -6,6 +6,7 @@ import { ReportForm } from "@/components/forms/ReportForm";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { SidebarBanners } from "@/components/Banners";
 import { Card, LinkButton } from "@/components/ui";
+import { newsQuotaLeft } from "@/lib/news";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 export default async function ReportNewsPage() {
   const user = await getCurrentUser();
   const stats = user ? await journalistStats(user.id) : null;
+  const quota = user ? await newsQuotaLeft(user) : null;
 
   return (
     <div className="flex gap-6">
@@ -40,7 +42,23 @@ export default async function ReportNewsPage() {
 
         <Card>
           {user ? (
-            <ReportForm defaultCity={user.location ?? ""} />
+            <>
+              {quota ? (
+                <p className="mb-3 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+                  {quota.left
+                    ? `${quota.left} of ${quota.allowance} report${
+                        quota.allowance === 1 ? "" : "s"
+                      } left this week on your plan.`
+                    : "You have used this week’s reports."}{" "}
+                  {quota.allowance === 1 ? (
+                    <Link href="/pricing" className="font-semibold text-indigo-600">
+                      Paid members file 10 a week.
+                    </Link>
+                  ) : null}
+                </p>
+              ) : null}
+              <ReportForm defaultCity={user.location ?? ""} />
+            </>
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-slate-600">

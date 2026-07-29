@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl } from "@/lib/format";
 import { syncConnectStatus } from "@/lib/connect";
+import { canReceiveDirectPayouts } from "@/lib/plans";
 
 /**
  * Sends an organiser to Stripe to connect (or finish connecting) the account
@@ -14,6 +15,7 @@ import { syncConnectStatus } from "@/lib/connect";
 export async function startConnectOnboardingAction() {
   const user = await requireUser();
   if (!stripeEnabled()) redirect("/dashboard/payouts?error=stripe_unavailable");
+  if (!canReceiveDirectPayouts(user)) redirect("/dashboard/payouts?error=premium_only");
 
   let accountId = user.stripeAccountId;
   if (!accountId) {

@@ -767,6 +767,8 @@ model Event {
   websiteUrl        String?
   /// Extra the organiser throws in, e.g. "Parents get 2 free yoga classes".
   bonusNote         String?
+  /// When the organiser accepted how ticket money and fees are handled.
+  payoutTermsAt     DateTime?
   frequency         EventFrequency     @default(ONE_TIME)
   /// Plain-English schedule for recurring events, e.g. "Every Sunday 10am".
   recurrence        String?
@@ -883,6 +885,9 @@ model Ticket {
 
   tierId String?
   tier   TicketTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
+
+  /// Godesi's service fee on this booking; zero for paid organisers.
+  platformFeeMinor Int @default(0)
 
   /// Coupon held for this booking; only counted as used once payment confirms.
   couponId      String?

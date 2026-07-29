@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { twoLineSummary } from "@/lib/news";
+import { newsQuotaLeft, twoLineSummary } from "@/lib/news";
 import {
   REPORT_CATEGORIES,
   REPORT_DECLARATIONS,
@@ -75,6 +75,15 @@ export async function submitReportAction(
         .slice(0, MAX_PHOTOS),
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    const quota = await newsQuotaLeft(user);
+    if (quota.left === 0) {
+      return {
+        error: `Your plan covers ${quota.allowance} news post${
+          quota.allowance === 1 ? "" : "s"
+        } a week — upgrade for 10 a week, or report again in a few days.`,
+      };
+    }
 
     const data = parsed.data;
     if (data.happenedAt.getTime() > Date.now() + 60 * 60 * 1000) {

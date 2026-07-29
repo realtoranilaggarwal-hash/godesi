@@ -1,4 +1,6 @@
+import type { User } from "@prisma/client";
 import { db } from "@/lib/db";
+import { newsPostsPerWeek } from "@/lib/plans";
 
 export type ParsedNewsItem = {
   guid: string;
@@ -252,4 +254,21 @@ export async function ingestIfStale(maxAgeMinutes = 30) {
   if (!stale) return null;
 
   return ingestNews();
+}
+
+/**
+ * How many more stories a member may file this week. Free members get one a
+ * week so the feed stays curated; paid plans get a journalist's allowance.
+ */
+export async function newsQuotaLeft(
+  user: Pick<User, "id" | "plan" | "planExpiresAt">,
+) {
+  const allowance = newsPostsPerWeek(user);
+  const used = await db.newsItem.count({
+    where: {
+      submittedById: user.id,
+      createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+    },
+  });
+  return { allowance, used, left: Math.max(0, allowance - used) };
 }

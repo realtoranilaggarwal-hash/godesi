@@ -7,6 +7,7 @@ import { Card } from "@/components/ui";
 import { FeaturedEventRail } from "@/components/FeaturedEvents";
 import { requestCountry, requestCurrency } from "@/lib/currency";
 import { venueSuggestions } from "@/lib/venues";
+import { organiserPaysFee, platformFeePercent } from "@/lib/connect";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -46,6 +47,8 @@ export default async function NewEventPage({
             defaultSubcategory={searchParams.subcategory}
             defaultCountry={requestCountry()}
             venues={venues}
+            feePercent={platformFeePercent()}
+            feeWaived={!organiserPaysFee(user)}
           />
         </Card>
       </div>

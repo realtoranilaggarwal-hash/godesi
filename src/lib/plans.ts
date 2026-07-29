@@ -7,6 +7,8 @@ export type PlanInfo = {
   /** PayPal cannot settle INR, so paid plans are also priced in USD. */
   priceUsd: number;
   mediaLimit: number;
+  /** Local news reports a member may publish in a rolling week. */
+  newsPostsPerWeek: number;
   features: string[];
 };
 
@@ -17,11 +19,16 @@ export const PLANS: Record<Plan, PlanInfo> = {
     priceInr: 0,
     priceUsd: 0,
     mediaLimit: 5,
+    newsPostsPerWeek: 1,
     features: [
       "Digital business card profile",
       "Unique QR code + download",
       "WhatsApp click-to-chat button",
       "Up to 5 uploaded images",
+      "One category only",
+      "Phone, email and links hidden in your description",
+      "Post events and sell tickets (Godesi keeps a 2% service fee)",
+      "1 news story a week",
     ],
   },
   PRO: {
@@ -30,12 +37,15 @@ export const PLANS: Record<Plan, PlanInfo> = {
     priceInr: 499,
     priceUsd: 5.99,
     mediaLimit: 20,
+    newsPostsPerWeek: 10,
     features: [
       "Everything in Free",
       "Featured listing badge",
       "Up to 20 uploaded images",
       "Phone and email shown on your listing",
       "List under 2 extra categories",
+      "No Godesi service fee on ticket sales",
+      "10 news stories a week",
       "Higher search ranking than Free",
     ],
   },
@@ -45,10 +55,12 @@ export const PLANS: Record<Plan, PlanInfo> = {
     priceInr: 999,
     priceUsd: 11.99,
     mediaLimit: 20,
+    newsPostsPerWeek: 10,
     features: [
       "Everything in Pro",
       "Unlock lead contact details",
       "List under 5 extra categories",
+      "Get ticket money paid straight into your own Stripe account",
       "Analytics dashboard",
       "Priority ranking in search",
       "Up to 20 uploaded images",
@@ -78,6 +90,15 @@ export function canUnlockLeads(user: Pick<User, "plan" | "planExpiresAt">) {
 
 export function mediaLimit(user: Pick<User, "plan" | "planExpiresAt">) {
   return PLANS[effectivePlan(user)].mediaLimit;
+}
+
+export function newsPostsPerWeek(user: Pick<User, "plan" | "planExpiresAt">) {
+  return PLANS[effectivePlan(user)].newsPostsPerWeek;
+}
+
+/** Direct Stripe payouts are the top-tier perk; everyone else is settled by Godesi. */
+export function canReceiveDirectPayouts(user: Pick<User, "plan" | "planExpiresAt">) {
+  return effectivePlan(user) === "PREMIUM";
 }
 
 /**

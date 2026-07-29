@@ -33,6 +33,8 @@ export function EventForm({
   defaultSubcategory,
   defaultCountry,
   venues,
+  feePercent,
+  feeWaived,
 }: {
   categories: CategoryOption[];
   defaultCurrency: string;
@@ -41,6 +43,10 @@ export function EventForm({
   defaultCountry: string;
   /** Venues already used on Godesi, offered as suggestions. */
   venues: VenueOption[];
+  /** Godesi's service fee on paid tickets, as a percentage. */
+  feePercent: number;
+  /** True when this organiser's plan means Godesi takes nothing. */
+  feeWaived: boolean;
 }) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
   const [mode, setMode] = useState<string>("OFFLINE");
@@ -399,6 +405,46 @@ export function EventForm({
             />
           </div>
         ))}
+      </fieldset>
+
+      <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          How ticket money reaches you
+        </legend>
+        <ul className="list-disc space-y-1 pl-5 text-slate-700">
+          <li>Buyers pay by card on Godesi and get a QR ticket instantly.</li>
+          <li>
+            Godesi collects the money and sends it to you after the event, minus the
+            card processor&apos;s charge (Stripe/PayPal, roughly 3%).
+          </li>
+          <li>
+            {feeWaived ? (
+              <span className="font-semibold text-emerald-700">
+                Your paid plan means Godesi takes no service fee — you keep the rest.
+              </span>
+            ) : (
+              <>
+                Godesi keeps a {feePercent}% service fee on the free plan.{" "}
+                <a href="/pricing" className="font-semibold text-indigo-600">
+                  Paid members pay no Godesi fee.
+                </a>
+              </>
+            )}
+          </li>
+          <li>
+            Refunds and attendee disputes are yours to decide — Godesi is not a party
+            to the sale and does not hold your money in escrow.
+          </li>
+        </ul>
+        <label className="flex items-start gap-2 font-semibold text-slate-800">
+          <input
+            type="checkbox"
+            name="acceptPayoutTerms"
+            required
+            className="mt-0.5"
+          />
+          <span>I understand how ticket money and fees are handled.</span>
+        </label>
       </fieldset>
 
       <fieldset className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">

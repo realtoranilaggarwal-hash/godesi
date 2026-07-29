@@ -1,22 +1,39 @@
+import type { User } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import { canReceiveDirectPayouts, effectivePlan } from "@/lib/plans";
 
-/** Godesi's cut of every ticket sold through a connected organiser account. */
+/** Godesi's cut of a ticket sold by an organiser on the free plan. */
 export const PLATFORM_FEE_BPS = 200;
-
-export function platformFeeMinor(amountMinor: number) {
-  return Math.round((amountMinor * PLATFORM_FEE_BPS) / 10_000);
-}
 
 export function platformFeePercent() {
   return PLATFORM_FEE_BPS / 100;
 }
 
-/** The connected account ticket money should land in, or null to bill Godesi directly. */
-export function payoutAccount(organizer: {
-  stripeAccountId: string | null;
-  stripePayoutsEnabled: boolean;
-}) {
+/** Paid members keep everything except the card processor's own charge. */
+export function organiserPaysFee(organizer: Pick<User, "plan" | "planExpiresAt">) {
+  return effectivePlan(organizer) === "FREE";
+}
+
+export function platformFeeMinor(
+  amountMinor: number,
+  organizer: Pick<User, "plan" | "planExpiresAt">,
+) {
+  if (!organiserPaysFee(organizer)) return 0;
+  return Math.round((amountMinor * PLATFORM_FEE_BPS) / 10_000);
+}
+
+/**
+ * The connected account ticket money should land in, or null when Godesi collects
+ * and settles. Direct payout is a Premium benefit, so a lapsed plan falls back.
+ */
+export function payoutAccount(
+  organizer: Pick<User, "plan" | "planExpiresAt"> & {
+    stripeAccountId: string | null;
+    stripePayoutsEnabled: boolean;
+  },
+) {
+  if (!canReceiveDirectPayouts(organizer)) return null;
   return organizer.stripePayoutsEnabled ? organizer.stripeAccountId : null;
 }
 

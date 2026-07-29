@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { twoLineSummary } from "@/lib/news";
+import { newsQuotaLeft, twoLineSummary } from "@/lib/news";
 
 const newsSchema = z.object({
   title: z.string().trim().min(8, "Give the story a headline"),
@@ -38,6 +38,17 @@ export async function submitNewsAction(
 
     const duplicate = await db.newsItem.findUnique({ where: { guid: parsed.data.link } });
     if (duplicate) return { error: "That story has already been submitted." };
+
+    if (!isAdmin) {
+      const quota = await newsQuotaLeft(user);
+      if (quota.left === 0) {
+        return {
+          error: `Your plan covers ${quota.allowance} news post${
+            quota.allowance === 1 ? "" : "s"
+          } a week — upgrade for 10 a week, or post again in a few days.`,
+        };
+      }
+    }
 
     await db.newsItem.create({
       data: {
