@@ -26,7 +26,11 @@ export async function GET(
   const businesses = await db.business.findMany({
     where: {
       status: "APPROVED",
-      OR: [{ categorySlug: { in: scope } }, { subcategorySlug: { in: scope } }],
+      OR: [
+        { categorySlug: { in: scope } },
+        { subcategorySlug: { in: scope } },
+        { extraCategorySlugs: { hasSome: scope } },
+      ],
     },
     orderBy: { createdAt: "desc" },
     take: 30,

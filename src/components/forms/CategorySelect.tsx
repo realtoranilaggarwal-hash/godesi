@@ -21,6 +21,9 @@ export function CategorySelect({
   subLabel = "Subcategory",
   onSubcategoryChange,
   onCategoryChange,
+  extraLimit = 0,
+  defaultExtras = [],
+  foundingMember = false,
 }: {
   categories: CategoryOption[];
   defaultCategory?: string | null;
@@ -31,10 +34,15 @@ export function CategorySelect({
   /** Lets the form show fields that only apply to one subcategory. */
   onSubcategoryChange?: (slug: string) => void;
   onCategoryChange?: (slug: string) => void;
+  /** How many extra categories this member's plan allows; 0 shows the upsell. */
+  extraLimit?: number;
+  defaultExtras?: string[];
+  foundingMember?: boolean;
 }) {
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [subcategory, setSubcategory] = useState(defaultSubcategory ?? "");
   const [trade, setTrade] = useState("");
+  const [extras, setExtras] = useState<string[]>(defaultExtras);
   const children = categories.find((item) => item.slug === category)?.children ?? [];
   const suggestions = useMemo(
     () => suggestCategories(trade, categories),
@@ -134,6 +142,75 @@ export function CategorySelect({
           ))}
         </select>
       </Field>
+
+      <Field
+        label="Also list under (extra categories)"
+        hint={
+          extraLimit
+            ? foundingMember
+              ? `Founding member perk — included free. Up to ${extraLimit}.`
+              : `Your plan includes up to ${extraLimit}.`
+            : "Paid feature — upgrade to appear under more than one category. Free for founding members."
+        }
+        className="sm:col-span-2"
+      >
+        {extras.map((slug) => (
+          <input key={slug} type="hidden" name="extraCategorySlugs" value={slug} />
+        ))}
+        {extras.length ? (
+          <div className="mb-2 flex flex-wrap gap-2">
+            {extras.map((slug) => (
+              <button
+                key={slug}
+                type="button"
+                onClick={() => setExtras(extras.filter((item) => item !== slug))}
+                className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+              >
+                {subcategoryName(categories, slug)} ×
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <select
+          value=""
+          disabled={!extraLimit || extras.length >= extraLimit}
+          onChange={(event) => {
+            const slug = event.target.value;
+            if (slug && !extras.includes(slug)) setExtras([...extras, slug]);
+          }}
+          className={inputClass}
+          aria-label="Add an extra category"
+        >
+          <option value="">
+            {!extraLimit
+              ? "Upgrade to add extra categories"
+              : extras.length >= extraLimit
+                ? `Limit reached (${extraLimit})`
+                : "Add another category…"}
+          </option>
+          {categories.map((item) => (
+            <optgroup key={item.slug} label={`${item.icon} ${item.name}`}>
+              {item.children
+                .filter(
+                  (child) => child.slug !== subcategory && !extras.includes(child.slug),
+                )
+                .map((child) => (
+                  <option key={child.slug} value={child.slug}>
+                    {child.name}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </select>
+      </Field>
     </>
   );
+}
+
+function subcategoryName(categories: CategoryOption[], slug: string) {
+  for (const item of categories) {
+    const child = item.children.find((entry) => entry.slug === slug);
+    if (child) return `${item.icon} ${child.name}`;
+  }
+  return slug;
 }

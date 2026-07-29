@@ -150,6 +150,19 @@ export default async function EventPage({
                   </a>
                 </p>
               ) : null}
+              {event.websiteUrl ? (
+                <p>
+                  🌐{" "}
+                  <a
+                    href={event.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer nofollow"
+                    className="font-semibold text-indigo-600 hover:underline"
+                  >
+                    Event website
+                  </a>
+                </p>
+              ) : null}
               <p>
                 🎫{" "}
                 {event.price ? (

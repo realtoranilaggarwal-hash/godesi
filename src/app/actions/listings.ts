@@ -14,6 +14,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { effectivePlan } from "@/lib/plans";
 import { contactDetailKind } from "@/lib/moderation";
 import { autoShareInBackground } from "@/lib/autoShare";
+import { titleCase } from "@/lib/titlecase";
 
 const schema = z.object({
   kind: z.enum(["PROPERTY_SALE", "PROPERTY_RENT", "ROOM_WANTED", "ROOM_OFFERED", "MARKETPLACE"]),
@@ -79,7 +80,7 @@ export async function createListingAction(
       data: {
         slug: await uniqueListingSlug(parsed.data.title, parsed.data.city),
         kind: parsed.data.kind,
-        title: parsed.data.title,
+        title: titleCase(parsed.data.title),
         description: parsed.data.description,
         city: parsed.data.city,
         area: parsed.data.area ?? null,

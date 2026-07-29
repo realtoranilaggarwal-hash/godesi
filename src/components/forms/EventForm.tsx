@@ -118,6 +118,17 @@ export function EventForm({
             />
           </Field>
         )}
+        <Field
+          label="Event website"
+          hint="Your own page or booking site — shown as a link, so no need to type it in the description"
+        >
+          <input
+            name="websiteUrl"
+            type="url"
+            placeholder="https://www.example.org"
+            className={inputClass}
+          />
+        </Field>
         <Field label="City">
           <input name="city" required className={inputClass} />
         </Field>

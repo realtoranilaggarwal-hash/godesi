@@ -48,6 +48,8 @@ export function BusinessProfileForm({
   defaultProfileType = "BUSINESS",
   defaultCountry = "",
   canFeatureSpecialty = false,
+  extraCategoryLimit = 0,
+  foundingMember = false,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -61,6 +63,9 @@ export function BusinessProfileForm({
   defaultProfileType?: string;
   /** Guessed from the visitor's country so the field starts filled in. */
   defaultCountry?: string;
+  /** Extra categories the member's plan (or founding seat) allows. */
+  extraCategoryLimit?: number;
+  foundingMember?: boolean;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -110,6 +115,9 @@ export function BusinessProfileForm({
           defaultSubcategory={business?.subcategorySlug ?? defaultSubcategory}
           onSubcategoryChange={setSubcategory}
           onCategoryChange={setCategory}
+          extraLimit={extraCategoryLimit}
+          defaultExtras={business?.extraCategorySlugs ?? []}
+          foundingMember={foundingMember}
         />
         <Field label="City" required>
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />

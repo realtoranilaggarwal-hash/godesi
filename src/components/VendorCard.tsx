@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { BusinessListItem } from "@/lib/businesses";
 import { Badge, Stars } from "@/components/ui";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { PlaceLink } from "@/components/PlaceLink";
 import { formatMoney, whatsappLink } from "@/lib/format";
 
 function priceLabel(vendor: BusinessListItem) {
@@ -58,7 +59,8 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
         </div>
 
         <p className="text-xs font-semibold text-slate-500">
-          {vendor.subcategoryName ?? vendor.category} · 📍 {vendor.city}
+          {vendor.subcategoryName ?? vendor.category} · 📍{" "}
+          <PlaceLink city={vendor.city} country={vendor.country} />
         </p>
 
         <div className="flex items-center gap-2 text-xs text-slate-500">

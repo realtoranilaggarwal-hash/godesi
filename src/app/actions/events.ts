@@ -14,6 +14,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { checkCoupon } from "@/lib/coupons";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
 import { rememberVenue } from "@/lib/venues";
+import { titleCase } from "@/lib/titlecase";
 
 /** Up to three seat types per event, e.g. Basic / Webinar / Premium. */
 const MAX_TIERS = 3;
@@ -123,6 +124,7 @@ const eventSchema = z.object({
   frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
   recurrence: z.string().trim().max(120).optional(),
   onlineUrl: optionalUrl,
+  websiteUrl: optionalUrl,
   tags: z.string().trim().max(300).optional(),
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
@@ -160,6 +162,7 @@ export async function createEventAction(
       frequency: formData.get("frequency") || "ONE_TIME",
       recurrence: formData.get("recurrence") ?? undefined,
       onlineUrl: formData.get("onlineUrl") ?? undefined,
+      websiteUrl: formData.get("websiteUrl") ?? undefined,
       tags: formData.get("tags") ?? undefined,
       categorySlug: formData.get("categorySlug") ?? undefined,
       subcategorySlug: formData.get("subcategorySlug") ?? undefined,
@@ -241,7 +244,7 @@ export async function createEventAction(
     await db.event.create({
       data: {
         slug,
-        title: parsed.data.title,
+        title: titleCase(parsed.data.title),
         description: parsed.data.description,
         startsAt,
         venue: parsed.data.venue,
@@ -258,6 +261,7 @@ export async function createEventAction(
         eventType: parsed.data.eventType,
         mode: parsed.data.mode,
         onlineUrl: parsed.data.onlineUrl ?? null,
+        websiteUrl: parsed.data.websiteUrl ?? null,
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"

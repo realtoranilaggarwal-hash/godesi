@@ -13,6 +13,7 @@ export type BusinessListItem = {
   categoryIcon: string | null;
   subcategoryName: string | null;
   city: string;
+  country: string | null;
   description: string | null;
   logoUrl: string | null;
   /** First gallery image, used by the image-heavy marketplace cards. */
@@ -59,6 +60,7 @@ export type SearchFilters = {
   /** Matches the taxonomy: a top-level slug also matches its subcategories. */
   categorySlugs?: string[];
   city?: string;
+  country?: string;
   minRating?: number;
   premiumOnly?: boolean;
   /** Sub-services the card must offer (all of them).  */
@@ -96,6 +98,7 @@ export async function searchBusinesses(
     category,
     categorySlugs,
     city,
+    country,
     minRating = 0,
     premiumOnly = false,
     specialties,
@@ -115,6 +118,7 @@ export async function searchBusinesses(
         ? { category: { equals: category, mode: "insensitive" } }
         : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
+      ...(country ? { country: { equals: country, mode: "insensitive" } } : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
       ...(specialties?.length ? { specialties: { hasEvery: specialties } } : {}),
       ...(certifications?.length
@@ -171,6 +175,8 @@ export async function searchBusinesses(
                 OR: [
                   { categorySlug: { in: categorySlugs } },
                   { subcategorySlug: { in: categorySlugs } },
+                  // Paid cards may also appear under extra categories they picked.
+                  { extraCategorySlugs: { hasSome: categorySlugs } },
                 ],
               },
             ]
@@ -236,6 +242,7 @@ export async function searchBusinesses(
         categoryIcon: row.categoryRef?.icon ?? null,
         subcategoryName: row.subcategoryRef?.name ?? null,
         city: row.city,
+        country: row.country,
         description: row.description,
         logoUrl: row.logoUrl,
         coverUrl: row.media[0]?.url ?? null,
@@ -304,6 +311,16 @@ export async function listCities() {
     orderBy: { city: "asc" },
   });
   return rows.map((r) => r.city);
+}
+
+export async function listCountries() {
+  const rows = await db.business.findMany({
+    where: { status: "APPROVED", country: { not: null } },
+    select: { country: true },
+    distinct: ["country"],
+    orderBy: { country: "asc" },
+  });
+  return rows.flatMap((row) => (row.country ? [row.country] : []));
 }
 
 /** Paid and admin-featured listings, for the promoted strip above free results. */

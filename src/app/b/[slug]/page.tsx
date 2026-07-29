@@ -15,6 +15,7 @@ import { FoundingBadge } from "@/components/FoundingBadge";
 import { TrackVisit } from "@/components/TrackVisit";
 import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
+import { PlaceLink } from "@/components/PlaceLink";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
@@ -101,6 +102,14 @@ export default async function BusinessProfilePage({
     getCurrentUser(),
   ]);
   if (!business) notFound();
+
+  const extraCategories = business.extraCategorySlugs.length
+    ? await db.category.findMany({
+        where: { slug: { in: business.extraCategorySlugs } },
+        select: { slug: true, name: true },
+        orderBy: { name: "asc" },
+      })
+    : [];
 
   const agentListings =
     business.ownerId && isAgentCard(business.subcategorySlug)
@@ -217,9 +226,12 @@ export default async function BusinessProfilePage({
               {business.featured ? <Badge tone="amber">Featured</Badge> : null}
             </div>
             <p className="text-slate-600">
-              {business.category} · {business.city}
-              {business.state ? `, ${business.state}` : ""}
-              {business.country ? `, ${business.country}` : ""}
+              {business.category} ·{" "}
+              <PlaceLink
+                city={business.city}
+                state={business.state}
+                country={business.country}
+              />
             </p>
             {business.categoryRef ? (
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -237,6 +249,15 @@ export default async function BusinessProfilePage({
                     {business.subcategoryRef.name}
                   </Link>
                 ) : null}
+                {extraCategories.map((extra) => (
+                  <Link
+                    key={extra.slug}
+                    href={`/categories/${extra.slug}`}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef?.color ?? "indigo")}`}
+                  >
+                    {extra.name}
+                  </Link>
+                ))}
               </div>
             ) : null}
             <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">

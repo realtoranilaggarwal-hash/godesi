@@ -35,6 +35,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Featured listing badge",
       "Up to 20 uploaded images",
       "Phone and email shown on your listing",
+      "List under 2 extra categories",
       "Higher search ranking than Free",
     ],
   },
@@ -47,6 +48,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
     features: [
       "Everything in Pro",
       "Unlock lead contact details",
+      "List under 5 extra categories",
       "Analytics dashboard",
       "Priority ranking in search",
       "Up to 20 uploaded images",
@@ -77,3 +79,20 @@ export function canUnlockLeads(user: Pick<User, "plan" | "planExpiresAt">) {
 export function mediaLimit(user: Pick<User, "plan" | "planExpiresAt">) {
   return PLANS[effectivePlan(user)].mediaLimit;
 }
+
+/**
+ * Extra categories a card may appear under beyond its primary one. Paid perk, and
+ * founding members keep it for free as part of their seat.
+ */
+export function extraCategoryLimit(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber">,
+) {
+  if (user.foundingNumber !== null) return EXTRA_CATEGORY_LIMITS.PREMIUM;
+  return EXTRA_CATEGORY_LIMITS[effectivePlan(user)];
+}
+
+const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
+  FREE: 0,
+  PRO: 2,
+  PREMIUM: 5,
+};

@@ -64,7 +64,11 @@ export async function ListingSectionPage({
         {listings.length ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                cityBase={`/${section}`}
+              />
             ))}
           </div>
         ) : (

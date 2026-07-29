@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { searchBusinesses, listCities } from "@/lib/businesses";
+import { searchBusinesses, listCities, listCountries } from "@/lib/businesses";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessCard } from "@/components/BusinessCard";
@@ -20,6 +20,7 @@ type SearchParams = {
   category?: string;
   sub?: string;
   city?: string;
+  country?: string;
   minRating?: string;
   premium?: string;
 };
@@ -42,15 +43,17 @@ export default async function SearchPage({
       ? [selected.slug, ...selected.children.map((child) => child.slug)]
       : undefined;
 
-  const [results, cities] = await Promise.all([
+  const [results, cities, countries] = await Promise.all([
     searchBusinesses({
       q: searchParams.q?.trim() || undefined,
       categorySlugs,
       city: searchParams.city || undefined,
+      country: searchParams.country || undefined,
       minRating,
       premiumOnly,
     }),
     listCities(),
+    listCountries(),
   ]);
 
   return (
@@ -117,6 +120,19 @@ export default async function SearchPage({
               {cities.map((c) => (
                 <option key={c} value={c}>
                   {c}
+                </option>
+              ))}
+            </select>
+            <select
+              name="country"
+              defaultValue={searchParams.country ?? ""}
+              className={inputClass}
+              aria-label="Country"
+            >
+              <option value="">All countries</option>
+              {countries.map((item) => (
+                <option key={item} value={item}>
+                  {item}
                 </option>
               ))}
             </select>

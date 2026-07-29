@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { BusinessListItem } from "@/lib/businesses";
 import { Badge, Card, Stars } from "@/components/ui";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { PlaceLink } from "@/components/PlaceLink";
 import { whatsappLink } from "@/lib/format";
 
 export function BusinessCard({ business }: { business: BusinessListItem }) {
@@ -27,7 +28,8 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
             ) : null}
           </div>
           <p className="text-sm text-slate-500">
-            {business.category} · {business.city}
+            {business.category} ·{" "}
+            <PlaceLink city={business.city} country={business.country} />
           </p>
           <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
             <Stars rating={business.rating} />

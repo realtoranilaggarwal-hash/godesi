@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { effectivePlan, mediaLimit } from "@/lib/plans";
+import { effectivePlan, extraCategoryLimit, mediaLimit } from "@/lib/plans";
 import { contactDetailKind } from "@/lib/moderation";
 import {
   cleanCertifications,
@@ -20,6 +20,7 @@ import { uniqueSlug } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewards";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { titleCase } from "@/lib/titlecase";
 import {
   CONDITIONS,
   FUEL_TYPES,
@@ -225,6 +226,26 @@ export async function saveBusinessProfileAction(
       return { error: "That subcategory does not belong to the chosen category." };
     }
 
+    const extraLimit = extraCategoryLimit(user);
+    const wantedExtras = Array.from(
+      new Set(formData.getAll("extraCategorySlugs").map(String).filter(Boolean)),
+    ).filter((slug) => slug !== category.slug && slug !== subcategory?.slug);
+    if (wantedExtras.length > extraLimit) {
+      return {
+        error: extraLimit
+          ? `Your plan covers ${extraLimit} extra categor${extraLimit === 1 ? "y" : "ies"} — remove ${wantedExtras.length - extraLimit}.`
+          : "Extra categories are a paid feature — upgrade to list under more than one category.",
+      };
+    }
+    const extraCategorySlugs = wantedExtras.length
+      ? (
+          await db.category.findMany({
+            where: { slug: { in: wantedExtras }, parentSlug: { not: null } },
+            select: { slug: true },
+          })
+        ).map((row) => row.slug)
+      : [];
+
     const set = specialtySet(subcategory?.slug);
     const specialties = [
       ...cleanSpecialties(
@@ -279,6 +300,8 @@ export async function saveBusinessProfileAction(
 
     const data = {
       ...parsed.data,
+      name: titleCase(parsed.data.name),
+      city: titleCase(parsed.data.city),
       specialties,
       featuredSpecialty,
       certifications,
@@ -298,6 +321,7 @@ export async function saveBusinessProfileAction(
       yearsExperience,
       categorySlug: category.slug,
       subcategorySlug: subcategory?.slug ?? null,
+      extraCategorySlugs,
       // Kept in sync for search snippets and legacy listings.
       category: subcategory?.name ?? category.name,
       state: parsed.data.state || null,

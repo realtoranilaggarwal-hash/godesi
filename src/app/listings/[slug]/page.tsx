@@ -11,6 +11,7 @@ import {
 } from "@/lib/listings";
 import { Badge, Card } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
+import { PlaceLink } from "@/components/PlaceLink";
 import { ShareButtons } from "@/components/ShareButtons";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import {
@@ -57,6 +58,7 @@ export default async function ListingPage({ params }: { params: { slug: string }
   if (!listing) notFound();
 
   const isRoom = listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED";
+  const sectionHref = isRoom ? "/rooms" : "/real-estate";
   const description =
     listing.owner && effectivePlan(listing.owner) !== "FREE"
       ? listing.description
@@ -83,7 +85,7 @@ export default async function ListingPage({ params }: { params: { slug: string }
             <h1 className="text-2xl font-black sm:text-3xl">{listing.title}</h1>
             <p className="text-sm text-slate-600">
               📍 {listing.area ? `${listing.area}, ` : ""}
-              {listing.city}
+              <PlaceLink city={listing.city} base={sectionHref} />
             </p>
           </div>
           <p className="text-2xl font-black text-emerald-700">{priceLabel(listing)}</p>

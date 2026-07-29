@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
+import { PlaceLink } from "@/components/PlaceLink";
 import {
   FURNISHING_LABELS,
   GENDER_LABELS,
@@ -26,7 +27,14 @@ export type ListingCardItem = {
   owner: { name: string; username: string | null; avatarUrl: string | null };
 };
 
-export function ListingCard({ listing }: { listing: ListingCardItem }) {
+export function ListingCard({
+  listing,
+  cityBase = "/real-estate",
+}: {
+  listing: ListingCardItem;
+  /** Section the city link should filter, e.g. "/rooms" or "/marketplace". */
+  cityBase?: string;
+}) {
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link href={`/listings/${listing.slug}`} className="block">
@@ -65,7 +73,7 @@ export function ListingCard({ listing }: { listing: ListingCardItem }) {
         </Link>
         <p className="text-sm text-slate-600">
           📍 {listing.area ? `${listing.area}, ` : ""}
-          {listing.city}
+          <PlaceLink city={listing.city} base={cityBase} />
           {listing.bedrooms ? ` · ${listing.bedrooms} BHK` : ""}
         </p>
         <p className="text-lg font-black text-emerald-700">{priceLabel(listing)}</p>

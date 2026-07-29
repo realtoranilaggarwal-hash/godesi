@@ -552,6 +552,8 @@ model Business {
   categoryRef     Category? @relation("BusinessCategory", fields: [categorySlug], references: [slug], onDelete: SetNull)
   subcategorySlug String?
   subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
+  /// Extra subcategory slugs the card also appears under; a paid (or founding) perk.
+  extraCategorySlugs String[] @default([])
 
   agentProfile  AgentProfile?
   vehicle       VehicleDetails?
@@ -718,6 +720,8 @@ model Event {
   mode              EventMode          @default(OFFLINE)
   /// Join link for online and hybrid events.
   onlineUrl         String?
+  /// The organiser's own website or booking page, shown as a button.
+  websiteUrl        String?
   frequency         EventFrequency     @default(ONE_TIME)
   /// Plain-English schedule for recurring events, e.g. "Every Sunday 10am".
   recurrence        String?

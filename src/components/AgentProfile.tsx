@@ -9,6 +9,7 @@ import {
   splitList,
 } from "@/lib/agents";
 import { Badge, Card } from "@/components/ui";
+import { PlaceLink } from "@/components/PlaceLink";
 
 type AgentSaleRow = {
   id: string;
@@ -247,8 +248,7 @@ export async function SimilarAgents({
               {agent.name}
             </Link>
             <p className="text-xs text-slate-500">
-              {agent.city}
-              {agent.state ? `, ${agent.state}` : ""}
+              <PlaceLink city={agent.city} state={agent.state} />
             </p>
           </li>
         ))}
