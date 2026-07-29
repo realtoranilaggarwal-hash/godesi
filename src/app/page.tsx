@@ -7,8 +7,6 @@ import { CategoryTiles } from "@/components/CategoryTiles";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { HeaderBanner } from "@/components/Banners";
-import { WhyGodesi } from "@/components/WhyGodesi";
-import { AboutGodesi } from "@/components/AboutGodesi";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { Card, LinkButton } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
@@ -53,7 +51,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     getCategoryTree(),
     getCategoryCounts(),
-    searchBusinesses({ take: 6 }),
+    searchBusinesses({ take: 6, sort: "recent" }),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
@@ -179,11 +177,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <AboutGodesi />
-
       <FeaturedStrip />
-
-      <WhyGodesi />
 
       <div className="space-y-8">
         <section>

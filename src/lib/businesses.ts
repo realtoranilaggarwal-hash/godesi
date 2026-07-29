@@ -84,6 +84,8 @@ export type SearchFilters = {
     features?: string[];
   };
   take?: number;
+  /** "recent" keeps newest-first; the default ranks paid and better-rated cards higher. */
+  sort?: "ranked" | "recent";
 };
 
 export async function searchBusinesses(
@@ -101,6 +103,7 @@ export async function searchBusinesses(
     serviceOptionGroups,
     vehicle,
     take = 60,
+    sort = "ranked",
   } = filters;
 
   const optionGroups = (serviceOptionGroups ?? []).filter((group) => group.length);
@@ -211,6 +214,8 @@ export async function searchBusinesses(
         select: { url: true },
       },
     },
+    // Without an order the database picks arbitrary rows, so new cards never surface.
+    orderBy: { createdAt: "desc" },
     take,
   });
 
@@ -270,13 +275,14 @@ export async function searchBusinesses(
       };
     })
     .filter((row) => row.rating >= minRating)
-    .sort(
-      (a, b) =>
-        planRank(b.plan) - planRank(a.plan) ||
-        Number(b.featured) - Number(a.featured) ||
-        b.rating - a.rating ||
-        b.reviewCount - a.reviewCount ||
-        a.name.localeCompare(b.name),
+    .sort((a, b) =>
+      sort === "recent"
+        ? 0
+        : planRank(b.plan) - planRank(a.plan) ||
+          Number(b.featured) - Number(a.featured) ||
+          b.rating - a.rating ||
+          b.reviewCount - a.reviewCount ||
+          a.name.localeCompare(b.name),
     );
 }
 

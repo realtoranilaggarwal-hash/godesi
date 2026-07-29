@@ -78,15 +78,17 @@ export function Field({
   label,
   hint,
   required,
+  className = "",
   children,
 }: {
   label: string;
   hint?: string;
   required?: boolean;
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <label className="block text-sm">
+    <label className={`block text-sm ${className}`}>
       <span className="mb-1 block font-medium text-slate-700">
         {label}
         {required ? (

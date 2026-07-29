@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Field, inputClass } from "@/components/ui";
+import { suggestCategories } from "@/lib/categorySuggest";
 
 export type CategoryOption = {
   slug: string;
@@ -33,23 +34,70 @@ export function CategorySelect({
 }) {
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [subcategory, setSubcategory] = useState(defaultSubcategory ?? "");
+  const [trade, setTrade] = useState("");
   const children = categories.find((item) => item.slug === category)?.children ?? [];
+  const suggestions = useMemo(
+    () => suggestCategories(trade, categories),
+    [trade, categories],
+  );
 
   const selectSubcategory = (slug: string) => {
     setSubcategory(slug);
     onSubcategoryChange?.(slug);
   };
 
+  const selectCategory = (slug: string) => {
+    setCategory(slug);
+    onCategoryChange?.(slug);
+  };
+
   return (
     <>
+      <Field
+        label="Not sure which category? Describe what you do"
+        hint="e.g. financial planning, mortgage loans, tiffin service, mehndi"
+        className="sm:col-span-2"
+      >
+        <input
+          value={trade}
+          onChange={(event) => setTrade(event.target.value)}
+          placeholder="Type what your business does"
+          className={inputClass}
+        />
+        {suggestions.length ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion.subcategorySlug}
+                type="button"
+                onClick={() => {
+                  selectCategory(suggestion.categorySlug);
+                  selectSubcategory(suggestion.subcategorySlug);
+                  setTrade("");
+                }}
+                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+              >
+                {suggestion.categoryIcon} {suggestion.subcategoryName}
+                <span className="ml-1 font-normal text-indigo-500">
+                  in {suggestion.categoryName}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : trade.trim().length > 2 ? (
+          <p className="mt-2 text-xs text-slate-500">
+            No match yet — try another word, or pick the category below.
+          </p>
+        ) : null}
+      </Field>
+
       <Field label={label} required={required}>
         <select
           name="categorySlug"
           required={required}
           value={category}
           onChange={(event) => {
-            setCategory(event.target.value);
-            onCategoryChange?.(event.target.value);
+            selectCategory(event.target.value);
             selectSubcategory("");
           }}
           className={inputClass}
