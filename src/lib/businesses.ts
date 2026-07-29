@@ -210,7 +210,7 @@ export async function searchBusinesses(
     include: {
       vehicle: true,
       owner: { select: { plan: true } },
-      reviews: { select: { rating: true } },
+      reviews: { where: { hidden: false }, select: { rating: true } },
       categoryRef: { select: { name: true, color: true, icon: true } },
       subcategoryRef: { select: { name: true } },
       media: {

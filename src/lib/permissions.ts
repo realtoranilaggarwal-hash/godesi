@@ -9,6 +9,11 @@ export const STAFF_PERMISSIONS = [
     hint: "Approve or reject business cards, property, rooms and items",
   },
   { key: "news", label: "News", hint: "Approve, reject, feature and delete stories" },
+  {
+    key: "reviews",
+    label: "Reviews",
+    hint: "Hide or delete reviews and decide takedown requests",
+  },
   { key: "blog", label: "Blog & updates", hint: "Write and publish blog posts" },
   { key: "resources", label: "Resource links", hint: "Approve and manage recommended links" },
   { key: "worship", label: "Temples & places of worship", hint: "Approve submitted places" },

@@ -71,6 +71,23 @@ export function ReviewForm({
         <textarea name="comment" rows={3} className={inputClass} />
       </Field>
 
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+        <p className="font-bold">Before you post — please read</p>
+        <p className="mt-1">
+          Write only about your own genuine experience. A review you know to be false can
+          be defamation under the laws of your country and the business may take legal
+          action against you. Godesi may share your account details if a court or lawful
+          authority requires it, and removes reviews that are fake, abusive or paid for.
+        </p>
+        <label className="mt-2 flex items-start gap-2 font-semibold">
+          <input type="checkbox" name="acceptTerms" required className="mt-0.5" />
+          <span>
+            This is my honest first-hand experience and I understand the legal
+            consequences of posting something false.
+          </span>
+        </label>
+      </div>
+
       <SubmitButton pendingLabel="Posting...">Post review</SubmitButton>
     </form>
   );

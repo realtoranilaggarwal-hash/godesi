@@ -36,12 +36,12 @@ export function EventCard({ event }: { event: EventListItem }) {
         <img
           src={event.imageUrl}
           alt={event.title}
-          className="h-40 w-full object-cover"
+          className="h-32 w-full object-cover"
           loading="lazy"
         />
       ) : (
         <div
-          className={`flex h-40 items-center justify-center bg-gradient-to-br ${gradientFor(
+          className={`flex h-32 items-center justify-center bg-gradient-to-br ${gradientFor(
             event.category?.color ?? "rose",
           )} text-5xl`}
           aria-hidden
@@ -50,7 +50,7 @@ export function EventCard({ event }: { event: EventListItem }) {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
         <div className="flex items-center gap-2">
           {event.category ? (
             <Badge tone="indigo">
@@ -62,15 +62,17 @@ export function EventCard({ event }: { event: EventListItem }) {
           ) : null}
           {left === 0 ? <Badge tone="red">Sold out</Badge> : null}
         </div>
-        <h3 className="font-bold leading-snug group-hover:text-indigo-600">{event.title}</h3>
+        <h3 className="line-clamp-2 font-bold leading-snug group-hover:text-indigo-600">
+          {event.title}
+        </h3>
         <p className="text-sm text-slate-600">📅 {formatEventDate(event.startsAt)}</p>
-        <p className="text-sm text-slate-600">
+        <p className="line-clamp-1 text-sm text-slate-600">
           📍 {event.venue}
           {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
         </p>
         {event.features?.length ? (
           <div className="flex flex-wrap gap-1">
-            {event.features.slice(0, 4).map((feature) => (
+            {event.features.slice(0, 3).map((feature) => (
               <span
                 key={feature}
                 className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600"

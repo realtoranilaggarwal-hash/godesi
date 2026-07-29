@@ -35,6 +35,7 @@ export default async function ContentDeskPage() {
     listings: can(user, "listings"),
     news: can(user, "news"),
     blog: can(user, "blog"),
+    reviews: can(user, "reviews"),
   };
 
   const [events, listings, newsItems, posts, socialPosts] = await Promise.all([
@@ -97,6 +98,14 @@ export default async function ContentDeskPage() {
         >
           + Submit a resource link
         </Link>
+        {allowed.reviews ? (
+          <Link
+            href="/admin/reviews"
+            className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-slate-50"
+          >
+            Review desk
+          </Link>
+        ) : null}
       </div>
 
       <AdminTabs

@@ -6,6 +6,7 @@ import { confirmTicket } from "@/lib/events";
 import { confirmAdOrder } from "@/lib/adOrders";
 import { confirmResourceOrder } from "@/lib/resourceOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
+import { confirmReviewDispute } from "@/lib/reviewDisputes";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       const ticketId = session.metadata?.ticketId;
       const adOrderId = session.metadata?.adOrderId;
       const resourceOrderId = session.metadata?.resourceOrderId;
+      const reviewDisputeId = session.metadata?.reviewDisputeId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
@@ -62,6 +64,8 @@ export async function POST(request: Request) {
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
         });
+      } else if (session.metadata?.kind === "review-dispute" && reviewDisputeId) {
+        await confirmReviewDispute({ disputeId: reviewDisputeId, reference: session.id });
       } else if (userId && plan) {
         await activatePlan({
           userId,

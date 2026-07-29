@@ -49,7 +49,7 @@ async function getBusiness(slug: string) {
       subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
       packages: { orderBy: { sortOrder: "asc" } },
-      reviews: { orderBy: { createdAt: "desc" } },
+      reviews: { where: { hidden: false }, orderBy: { createdAt: "desc" } },
       agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
       vehicle: true,
     },

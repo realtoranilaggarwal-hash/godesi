@@ -68,7 +68,7 @@ export default async function DashboardPage({
 
   const business = await db.business.findUnique({
     where: { ownerId: user.id },
-    include: { reviews: { select: { rating: true } } },
+    include: { reviews: { where: { hidden: false }, select: { rating: true } } },
   });
 
   const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats] =
@@ -279,6 +279,9 @@ export default async function DashboardPage({
                 </LinkButton>
                 <LinkButton href="/dashboard/leads" variant="secondary">
                   Unlocked leads
+                </LinkButton>
+                <LinkButton href="/dashboard/reviews" variant="secondary">
+                  Reviews on my card
                 </LinkButton>
                 <LinkButton href="/dashboard/tickets" variant="secondary">
                   My tickets

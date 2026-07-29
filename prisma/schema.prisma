@@ -215,17 +215,18 @@ model User {
   /// Published on purpose by the member, unlike the private account phone.
   whatsappNumber String?
 
-  business Business?
-  claims   BusinessClaim[]
-  leads    Lead[]
-  unlocks  LeadUnlock[]
-  payments Payment[]
-  reviews  Review[]
-  events   Event[]
-  tickets  Ticket[]
-  news     NewsItem[]
-  banners  Banner[]
-  adOrders AdOrder[]
+  business       Business?
+  claims         BusinessClaim[]
+  leads          Lead[]
+  unlocks        LeadUnlock[]
+  payments       Payment[]
+  reviews        Review[]
+  reviewDisputes ReviewDispute[]
+  events         Event[]
+  tickets        Ticket[]
+  news           NewsItem[]
+  banners        Banner[]
+  adOrders       AdOrder[]
 
   listings    Listing[]
   worship     WorshipPlace[]
@@ -548,12 +549,12 @@ model Business {
   ownerId String? @unique
   owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  categorySlug    String?
-  categoryRef     Category? @relation("BusinessCategory", fields: [categorySlug], references: [slug], onDelete: SetNull)
-  subcategorySlug String?
-  subcategoryRef  Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
+  categorySlug       String?
+  categoryRef        Category? @relation("BusinessCategory", fields: [categorySlug], references: [slug], onDelete: SetNull)
+  subcategorySlug    String?
+  subcategoryRef     Category? @relation("BusinessSubcategory", fields: [subcategorySlug], references: [slug], onDelete: SetNull)
   /// Extra subcategory slugs the card also appears under; a paid (or founding) perk.
-  extraCategorySlugs String[] @default([])
+  extraCategorySlugs String[]  @default([])
 
   agentProfile  AgentProfile?
   vehicle       VehicleDetails?
@@ -597,9 +598,46 @@ model Review {
   processExpertise Int?
   responsiveness   Int?
   negotiation      Int?
+  /// Taken down by staff (fake, abusive or successfully disputed) but kept for audit.
+  hidden           Boolean  @default(false)
+  hiddenReason     String?
   createdAt        DateTime @default(now())
 
+  disputes ReviewDispute[]
+
   @@index([businessId])
+}
+
+/// A paid request from a card owner asking staff to take a review down.
+model ReviewDispute {
+  id           String        @id @default(cuid())
+  reviewId     String
+  review       Review        @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  raisedById   String
+  raisedBy     User          @relation(fields: [raisedById], references: [id], onDelete: Cascade)
+  /// Why the owner believes the review is false or breaks the rules.
+  reason       String
+  status       DisputeStatus @default(AWAITING_PAYMENT)
+  feeMinor     Int
+  feeCurrency  String
+  paidAt       DateTime?
+  paymentRef   String?
+  /// What staff decided, shown back to the owner.
+  decisionNote String?
+  decidedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([reviewId])
+  @@index([status])
+}
+
+/// Lifecycle of a review takedown request; the fee is charged before staff look.
+enum DisputeStatus {
+  AWAITING_PAYMENT
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum SaleSide {
@@ -1381,16 +1419,16 @@ enum ShareStatus {
 /// One attempt to broadcast a new post to a channel, so failures are visible
 /// in /admin instead of disappearing into a log file.
 model ShareLog {
-  id       String      @id @default(cuid())
+  id      String      @id @default(cuid())
   /// "FACEBOOK" or "TELEGRAM".
-  channel  String
+  channel String
   /// Content type plus its id, e.g. "event:clx…".
-  subject  String
-  title    String
-  url      String
-  status   ShareStatus @default(SENT)
+  subject String
+  title   String
+  url     String
+  status  ShareStatus @default(SENT)
   /// Post id at the network, or the error we got back.
-  detail   String?
+  detail  String?
 
   createdAt DateTime @default(now())
 
