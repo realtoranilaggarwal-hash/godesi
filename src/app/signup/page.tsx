@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SignupForm } from "@/components/forms/SignupForm";
 import { Card } from "@/components/ui";
 import { JoinBenefits } from "@/components/JoinBenefits";
-import { GoogleSignIn } from "@/components/GoogleSignIn";
+import { SocialSignIn } from "@/components/SocialSignIn";
 import { FoundingOffer } from "@/components/FoundingOffer";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function SignupPage({
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
         <FoundingOffer showCta={false} />
         <Card>
-          <GoogleSignIn next={searchParams.next} label="Sign up with Google" />
+          <SocialSignIn next={searchParams.next} verb="Sign up" />
           <SignupForm
             defaultRole={
               searchParams.role === "CLIENT" || searchParams.role === "PROFESSIONAL"
