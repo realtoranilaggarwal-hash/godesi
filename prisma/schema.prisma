@@ -1359,6 +1359,41 @@ model SocialPost {
   @@index([active, postedAt])
 }
 
+/// Which kinds of new content are broadcast to our own social channels, and
+/// where to. Tokens live in environment variables, never in the database.
+model AutoShareSetting {
+  /// "business", "listing", "event" or "news".
+  key       String   @id
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+enum ShareStatus {
+  SENT
+  FAILED
+  SKIPPED
+}
+
+/// One attempt to broadcast a new post to a channel, so failures are visible
+/// in /admin instead of disappearing into a log file.
+model ShareLog {
+  id       String      @id @default(cuid())
+  /// "FACEBOOK" or "TELEGRAM".
+  channel  String
+  /// Content type plus its id, e.g. "event:clx…".
+  subject  String
+  title    String
+  url      String
+  status   ShareStatus @default(SENT)
+  /// Post id at the network, or the error we got back.
+  detail   String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([channel, subject])
+  @@index([createdAt])
+}
+
 /// One school, college or course a member studied, kept structured so batchmates
 /// can find each other by institution and passing year.
 model AlumniRecord {

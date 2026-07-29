@@ -10,6 +10,13 @@ import { slotCapacity } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
 import { levelFor } from "@/lib/journalists";
+import { formatEventDate } from "@/lib/events";
+import {
+  SHARE_KINDS,
+  autoShare,
+  autoShareInBackground,
+  payloadForSubject,
+} from "@/lib/autoShare";
 
 export async function setListingStatusAction(formData: FormData) {
   await requirePermission("listings");
@@ -21,7 +28,24 @@ export async function setListingStatusAction(formData: FormData) {
   const business = await db.business.update({
     where: { id },
     data: { status },
+    include: {
+      media: { where: { type: "IMAGE" }, take: 1, select: { url: true } },
+    },
   });
+  if (status === "APPROVED") {
+    autoShareInBackground({
+      kind: "business",
+      id: business.id,
+      title: `🏪 ${business.name}`,
+      body: [business.category, business.city, business.description]
+        .filter(Boolean)
+        .join(" · ")
+        .slice(0, 400),
+      path: `/b/${business.slug}`,
+      imageUrl: business.logoUrl ?? business.media[0]?.url ?? null,
+      tags: [business.city, "desibusiness"],
+    });
+  }
   revalidatePath("/admin");
   revalidatePath(`/b/${business.slug}`);
 }
@@ -79,6 +103,31 @@ export async function revokePressCardAction(formData: FormData) {
   });
   revalidatePath("/admin");
   revalidatePath("/journalists");
+}
+
+/** Switches auto-sharing on or off for one content type. */
+export async function setAutoShareAction(formData: FormData) {
+  await requireRole("ADMIN");
+  const key = String(formData.get("key") ?? "");
+  if (!SHARE_KINDS.some((kind) => kind.key === key)) return;
+  const enabled = String(formData.get("enabled") ?? "") === "on";
+
+  await db.autoShareSetting.upsert({
+    where: { key },
+    create: { key, enabled },
+    update: { enabled },
+  });
+  revalidatePath("/admin");
+}
+
+/** Retries one broadcast after fixing a token or an image. */
+export async function retryShareAction(formData: FormData) {
+  await requireRole("ADMIN");
+  const subject = String(formData.get("subject") ?? "");
+  const payload = await payloadForSubject(subject);
+  if (!payload) return;
+  await autoShare(payload, true);
+  revalidatePath("/admin");
 }
 
 export async function setUserPlanAction(formData: FormData) {
@@ -346,6 +395,17 @@ export async function setNewsStatusAction(formData: FormData) {
     }).catch(() => null);
     await creditJournalistLevel(item.submittedById).catch(() => null);
   }
+  if (status === "PUBLISHED") {
+    autoShareInBackground({
+      kind: "news",
+      id: item.id,
+      title: item.title,
+      body: item.summary,
+      path: item.link.startsWith("/") ? item.link : `/news/${item.id}`,
+      imageUrl: item.imageUrl,
+      tags: [item.city ?? "", item.category ?? "news"].filter(Boolean),
+    });
+  }
   revalidatePath("/admin");
   revalidatePath("/news");
 }
@@ -409,6 +469,17 @@ export async function setEventStatusAction(formData: FormData) {
   if (!["PENDING", "APPROVED", "REJECTED"].includes(status))
     throw new Error("Invalid status");
   const event = await db.event.update({ where: { id }, data: { status } });
+  if (status === "APPROVED") {
+    autoShareInBackground({
+      kind: "event",
+      id: event.id,
+      title: `🎟️ ${event.title}`,
+      body: `${formatEventDate(event.startsAt)} · ${event.venue}, ${event.city}`,
+      path: `/events/${event.slug}`,
+      imageUrl: event.imageUrl,
+      tags: [event.city, "desievents"],
+    });
+  }
   revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath(`/events/${event.slug}`);

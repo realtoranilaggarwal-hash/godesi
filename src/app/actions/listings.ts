@@ -11,6 +11,7 @@ import { isMonthly, uniqueListingSlug } from "@/lib/listings";
 import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { autoShareInBackground } from "@/lib/autoShare";
 
 const schema = z.object({
   kind: z.enum(["PROPERTY_SALE", "PROPERTY_RENT", "ROOM_WANTED", "ROOM_OFFERED", "MARKETPLACE"]),
@@ -91,6 +92,18 @@ export async function createListingAction(
       reason: "LISTING_POSTED",
       note: `Listing ${listing.slug}`,
     });
+
+    if (listing.status === "APPROVED") {
+      autoShareInBackground({
+        kind: "listing",
+        id: listing.id,
+        title: `🏠 ${listing.title}`,
+        body: `${listing.city}${listing.area ? `, ${listing.area}` : ""} · ${listing.description.slice(0, 300)}`,
+        path: `/listings/${listing.slug}`,
+        imageUrl: images[0] ?? null,
+        tags: [listing.city, "desihousing"],
+      });
+    }
 
     revalidatePath("/real-estate");
     revalidatePath("/rooms");
