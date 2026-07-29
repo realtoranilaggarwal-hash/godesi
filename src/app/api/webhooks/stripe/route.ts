@@ -7,6 +7,7 @@ import { confirmAdOrder } from "@/lib/adOrders";
 import { confirmResourceOrder } from "@/lib/resourceOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
+import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +88,19 @@ export async function POST(request: Request) {
         });
       }
     }
+  }
+
+  /** Keeps the organiser's "can take payments" flag in step with Stripe Connect. */
+  if (event.type === "account.updated") {
+    const account = event.data.object;
+    await db.user.updateMany({
+      where: { stripeAccountId: account.id },
+      data: {
+        stripePayoutsEnabled: Boolean(
+          account.charges_enabled && account.payouts_enabled,
+        ),
+      },
+    });
   }
 
   return NextResponse.json({ received: true });

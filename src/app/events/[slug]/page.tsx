@@ -150,6 +150,9 @@ export default async function EventPage({
                   </a>
                 </p>
               ) : null}
+              {event.bonusNote ? (
+                <p className="font-semibold text-emerald-700">🎁 {event.bonusNote}</p>
+              ) : null}
               {event.websiteUrl ? (
                 <p>
                   🌐{" "}

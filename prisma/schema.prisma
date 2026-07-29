@@ -257,6 +257,11 @@ model User {
   newsVotes         NewsVote[]
   newsVerifications NewsVerification[]
 
+  /// Stripe Connect account tickets are paid into, so organisers get the money direct.
+  stripeAccountId      String?
+  /// True once Stripe says the connected account can take payments.
+  stripePayoutsEnabled Boolean @default(false)
+
   /// What a MODERATOR may manage; ignored for other roles. See lib/permissions.
   staffPermissions String[] @default([])
 }
@@ -760,6 +765,8 @@ model Event {
   onlineUrl         String?
   /// The organiser's own website or booking page, shown as a button.
   websiteUrl        String?
+  /// Extra the organiser throws in, e.g. "Parents get 2 free yoga classes".
+  bonusNote         String?
   frequency         EventFrequency     @default(ONE_TIME)
   /// Plain-English schedule for recurring events, e.g. "Every Sunday 10am".
   recurrence        String?

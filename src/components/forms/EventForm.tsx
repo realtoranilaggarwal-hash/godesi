@@ -365,7 +365,12 @@ export function EventForm({
         </legend>
         <p className="text-xs text-slate-500">
           Add Basic / Webinar / Premium seats with their own price and quantity. Leave
-          blank to sell all seats at the single price above.
+          blank to sell all seats at the single price above. Connect your own Stripe
+          account under{" "}
+          <a href="/dashboard/payouts" className="font-semibold text-indigo-600">
+            Ticket payouts
+          </a>{" "}
+          and buyers pay you directly.
         </p>
         {TIER_PRESETS.map((preset) => (
           <div key={preset} className="grid gap-2 sm:grid-cols-3">
@@ -394,6 +399,50 @@ export function EventForm({
             />
           </div>
         ))}
+      </fieldset>
+
+      <fieldset className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+        <legend className="px-1 text-sm font-bold text-amber-900">
+          Coupon or bonus (optional)
+        </legend>
+        <p className="text-xs text-amber-900">
+          Offering something extra or a discount? Put it here instead of inside the
+          description, and let people book with the ticket button — typing “call me to
+          register” loses you the sale and hides your seats from search.
+        </p>
+        <Field label="Bonus included" hint="e.g. Parents get 2 free yoga classes">
+          <input
+            name="bonusNote"
+            maxLength={200}
+            placeholder="What every attendee also gets"
+            className={inputClass}
+          />
+        </Field>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <input
+            name="couponCode"
+            placeholder="Coupon code — EARLYBIRD"
+            className={inputClass}
+            aria-label="Coupon code"
+          />
+          <input
+            name="couponPercent"
+            type="number"
+            min={1}
+            max={100}
+            placeholder="% off"
+            className={inputClass}
+            aria-label="Coupon percent off"
+          />
+          <input
+            name="couponMaxRedemptions"
+            type="number"
+            min={1}
+            placeholder="Max uses (optional)"
+            className={inputClass}
+            aria-label="Coupon maximum redemptions"
+          />
+        </div>
       </fieldset>
 
       <SubmitButton pendingLabel="Publishing...">Publish event</SubmitButton>

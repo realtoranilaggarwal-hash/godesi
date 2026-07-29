@@ -11,10 +11,11 @@ import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/eve
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
-import { checkCoupon } from "@/lib/coupons";
+import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
 import { rememberVenue } from "@/lib/venues";
 import { titleCase } from "@/lib/titlecase";
+import { payoutAccount, platformFeeMinor } from "@/lib/connect";
 
 /** Up to three seat types per event, e.g. Basic / Webinar / Premium. */
 const MAX_TIERS = 3;
@@ -138,6 +139,33 @@ const eventSchema = z.object({
   ),
 });
 
+/**
+ * Turns the optional coupon box on the event form into a live TICKETS code. A
+ * clashing or malformed code is skipped rather than losing the whole event.
+ */
+async function createLaunchCoupon(eventId: string, userId: string, formData: FormData) {
+  const code = normalizeCouponCode(String(formData.get("couponCode") ?? ""));
+  const percent = Number(formData.get("couponPercent") ?? 0);
+  if (!code || !/^[A-Z0-9-]{3,24}$/.test(code)) return;
+  if (!Number.isInteger(percent) || percent < 1 || percent > 100) return;
+
+  const clash = await db.coupon.findUnique({ where: { code } });
+  if (clash) return;
+
+  const maxRedemptions = Number(formData.get("couponMaxRedemptions") ?? 0);
+  await db.coupon.create({
+    data: {
+      code,
+      scope: "TICKETS",
+      discountKind: "PERCENT",
+      amount: percent,
+      eventId,
+      createdById: userId,
+      maxRedemptions: maxRedemptions > 0 ? maxRedemptions : null,
+    },
+  });
+}
+
 export async function createEventAction(
   _prev: ActionState,
   formData: FormData,
@@ -241,7 +269,7 @@ export async function createEventAction(
       ? Math.min(...tiers.map((tier) => tier.price))
       : parsed.data.price;
 
-    await db.event.create({
+    const created = await db.event.create({
       data: {
         slug,
         title: titleCase(parsed.data.title),
@@ -262,6 +290,7 @@ export async function createEventAction(
         mode: parsed.data.mode,
         onlineUrl: parsed.data.onlineUrl ?? null,
         websiteUrl: parsed.data.websiteUrl ?? null,
+        bonusNote: String(formData.get("bonusNote") ?? "").trim().slice(0, 200) || null,
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"
@@ -305,6 +334,8 @@ export async function createEventAction(
           : undefined,
       },
     });
+
+    await createLaunchCoupon(created.id, user.id, formData);
   } catch (error) {
     return fieldError(error);
   }
@@ -348,7 +379,12 @@ export async function bookTicketAction(
 
     const event = await db.event.findUnique({
       where: { id: parsed.data.eventId },
-      include: { tiers: { orderBy: { sortOrder: "asc" } } },
+      include: {
+        tiers: { orderBy: { sortOrder: "asc" } },
+        organizer: {
+          select: { stripeAccountId: true, stripePayoutsEnabled: true },
+        },
+      },
     });
     if (!event) return { error: "This event no longer exists." };
     if (event.status !== "APPROVED") return { error: "This event is not open for booking." };
@@ -421,11 +457,24 @@ export async function bookTicketAction(
         return { error: "Ticket payments are not configured yet. Please try later." };
       }
 
+      /**
+       * When the organiser has connected Stripe, the buyer pays them directly and
+       * Godesi keeps its service fee; otherwise the charge stays on Godesi.
+       */
+      const destinationAccount = payoutAccount(event.organizer);
       const session = await getStripe().checkout.sessions.create({
         mode: "payment",
         customer_email: parsed.data.buyerEmail,
         client_reference_id: user.id,
         metadata: { kind: "ticket", ticketId: ticket.id, eventId: event.id },
+        ...(destinationAccount
+          ? {
+              payment_intent_data: {
+                application_fee_amount: platformFeeMinor(amountMinor),
+                transfer_data: { destination: destinationAccount },
+              },
+            }
+          : {}),
         line_items: [
           {
             quantity: 1,

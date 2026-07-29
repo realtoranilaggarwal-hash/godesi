@@ -27,14 +27,38 @@ export default async function NewsPage() {
   // Refreshes the feed if the last crawl is older than 30 minutes.
   await ingestIfStale(30).catch(() => null);
 
-  const items = await db.newsItem.findMany({
-    where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-    orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-    take: 40,
-    include: {
-      submittedBy: { select: { name: true, username: true, avatarUrl: true } },
-    },
-  });
+  /**
+   * Wire feeds publish dozens of stories an hour and would bury the community's
+   * own reporting, so member stories are queried separately and pinned on top.
+   */
+  const [memberStories, wireStories] = await Promise.all([
+    db.newsItem.findMany({
+      where: {
+        status: "PUBLISHED",
+        submittedById: { not: null },
+        publishedAt: { gte: freshNewsCutoff() },
+      },
+      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+      take: 12,
+      include: {
+        submittedBy: { select: { name: true, username: true, avatarUrl: true } },
+      },
+    }),
+    db.newsItem.findMany({
+      where: {
+        status: "PUBLISHED",
+        submittedById: null,
+        publishedAt: { gte: freshNewsCutoff() },
+      },
+      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+      take: 40,
+      include: {
+        submittedBy: { select: { name: true, username: true, avatarUrl: true } },
+      },
+    }),
+  ]);
+
+  const items = [...memberStories, ...wireStories].slice(0, 40);
 
   const myVotes = user
     ? await db.newsVote.findMany({
