@@ -21,10 +21,14 @@ export async function GET(request: Request) {
   cookies().delete("facebook_oauth");
   const [state, next = ""] = stored.split("|");
   const code = url.searchParams.get("code");
+  // Facebook sends the member back with an error when they cancel the dialog.
+  if (url.searchParams.get("error")) return failure;
   if (!code || !state || url.searchParams.get("state") !== state) return failure;
 
   const profile = await fetchFacebookProfile(code);
-  if (!profile) return failure;
+  if (!profile) {
+    return NextResponse.redirect(new URL("/login?error=facebook-email", url));
+  }
 
   const existing = await db.user.findUnique({ where: { email: profile.email } });
   const user =

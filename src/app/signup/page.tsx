@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 import { SignupForm } from "@/components/forms/SignupForm";
 import { Card } from "@/components/ui";
 import { JoinBenefits } from "@/components/JoinBenefits";
@@ -19,6 +21,13 @@ export default async function SignupPage({
 }: {
   searchParams: { role?: string; next?: string };
 }) {
+  const user = await getCurrentUser();
+  if (user) {
+    redirect(
+      searchParams.next || (user.role === "ADMIN" ? "/admin" : "/dashboard"),
+    );
+  }
+
   return (
     <div className="flex justify-center gap-8 py-6">
       <div className="w-full max-w-md space-y-4">
