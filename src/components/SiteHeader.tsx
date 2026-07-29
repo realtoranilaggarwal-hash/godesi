@@ -249,16 +249,18 @@ export async function SiteHeader() {
                     </span>
                   )}
                 </Link>
-                <div className="hidden items-center gap-2 2xl:flex">
-                  <Badge
-                    tone={effectivePlan(user) === "FREE" ? "slate" : "indigo"}
-                  >
-                    {effectivePlan(user)}
-                  </Badge>
+                <div className="hidden items-center gap-2 sm:flex">
+                  <span className="hidden 2xl:inline-flex">
+                    <Badge
+                      tone={effectivePlan(user) === "FREE" ? "slate" : "indigo"}
+                    >
+                      {effectivePlan(user)}
+                    </Badge>
+                  </span>
                   <form action={logoutAction}>
                     <button
                       type="submit"
-                      className="rounded-lg px-2 py-1 hover:text-slate-900"
+                      className="rounded-lg px-2 py-1 font-semibold hover:text-slate-900"
                     >
                       Sign out
                     </button>
