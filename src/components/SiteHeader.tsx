@@ -53,7 +53,11 @@ function staffHome(user: { role: Role }) {
   return user.role === "MODERATOR" ? "/admin/content" : "/dashboard";
 }
 
-function staffLabel(user: { role: Role }, staffText: string, memberText: string) {
+function staffLabel(
+  user: { role: Role },
+  staffText: string,
+  memberText: string,
+) {
   if (user.role === "ADMIN") return staffText;
   return user.role === "MODERATOR" ? "Content desk" : memberText;
 }
@@ -183,9 +187,7 @@ export async function SiteHeader() {
               }
               signOut={logoutAction}
             />
-            <div className="hidden sm:block">
-              <LocalePicker currency={displayCurrency()} />
-            </div>
+            <LocalePicker currency={displayCurrency()} />
             <Link
               href="/post"
               className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-3 py-1.5 font-semibold text-white hover:opacity-90"

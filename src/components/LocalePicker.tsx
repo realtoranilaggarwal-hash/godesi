@@ -67,7 +67,8 @@ export function LocalePicker({
   useEffect(() => {
     if (!open) return;
     const close = (event: MouseEvent) => {
-      if (box.current && !box.current.contains(event.target as Node)) setOpen(false);
+      if (box.current && !box.current.contains(event.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
@@ -87,9 +88,11 @@ export function LocalePicker({
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label="Change language or currency"
-        className="rounded-full bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+        className="whitespace-nowrap rounded-full bg-slate-100 px-2 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 sm:px-2.5"
       >
-        🌐 {language.toUpperCase()} · {symbol} {currency}
+        🌐 {language.toUpperCase()} {symbol}
+        {/* The currency code is the first thing to drop on a narrow phone bar. */}
+        <span className="hidden sm:inline"> {currency}</span>
       </button>
 
       {open ? (
@@ -136,8 +139,8 @@ export function LocalePicker({
             </select>
           </form>
           <p className="mt-1 text-[11px] text-slate-500">
-            Prices stay in the currency the seller posted; we show an approximate
-            conversion beside them.
+            Prices stay in the currency the seller posted; we show an
+            approximate conversion beside them.
           </p>
         </div>
       ) : null}
