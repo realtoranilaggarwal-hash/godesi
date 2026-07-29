@@ -11,6 +11,8 @@ import { isMonthly, uniqueListingSlug } from "@/lib/listings";
 import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { effectivePlan } from "@/lib/plans";
+import { contactDetailKind } from "@/lib/moderation";
 import { autoShareInBackground } from "@/lib/autoShare";
 
 const schema = z.object({
@@ -57,6 +59,15 @@ export async function createListingAction(
       videoUrl: formData.get("videoUrl") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    if (effectivePlan(user) === "FREE") {
+      const kind = contactDetailKind(parsed.data.description);
+      if (kind) {
+        return {
+          error: `Please remove the ${kind} from the description — free listings are contacted on WhatsApp. Upgrade to Pro to show your phone, email and website.`,
+        };
+      }
+    }
 
     const images = formData
       .getAll("images")

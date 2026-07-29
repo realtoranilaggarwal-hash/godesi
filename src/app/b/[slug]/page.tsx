@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
 import { effectivePlan } from "@/lib/plans";
+import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { QrCard } from "@/components/QrCard";
@@ -131,6 +132,13 @@ export default async function BusinessProfilePage({
     isOwner ||
     viewer?.role === "ADMIN" ||
     (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
+  // Free listings agreed to WhatsApp-only contact, so details typed into the
+  // description are masked rather than left as a paid-field workaround.
+  const description = business.description
+    ? contactVisible
+      ? business.description
+      : maskContactDetails(business.description)
+    : null;
   const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
@@ -234,9 +242,9 @@ export default async function BusinessProfilePage({
                 {reviewCount ? `${rating.toFixed(1)} (${reviewCount} reviews)` : "No reviews yet"}
               </span>
             </div>
-            {business.description ? (
+            {description ? (
               <p className="mt-3 whitespace-pre-line text-slate-700">
-                {business.description}
+                {description}
               </p>
             ) : null}
 

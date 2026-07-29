@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { effectivePlan, mediaLimit } from "@/lib/plans";
+import { contactDetailKind } from "@/lib/moderation";
 import {
   cleanCertifications,
   cleanCustomOptions,
@@ -201,6 +202,15 @@ export async function saveBusinessProfileAction(
     const user = await requireUser();
     const parsed = readProfileForm(formData);
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    if (effectivePlan(user) === "FREE" && parsed.data.description) {
+      const kind = contactDetailKind(parsed.data.description);
+      if (kind) {
+        return {
+          error: `Free listings cannot show a ${kind} in the description — customers reach you on WhatsApp. Upgrade to Pro to display your phone, email and website.`,
+        };
+      }
+    }
 
     const category = await db.category.findUnique({
       where: { slug: parsed.data.categorySlug },

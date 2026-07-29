@@ -113,5 +113,13 @@ export function listingWhere(
 
 export const LISTING_INCLUDE = {
   images: { orderBy: { sortOrder: "asc" } },
-  owner: { select: { name: true, username: true, avatarUrl: true } },
+  owner: {
+    select: {
+      name: true,
+      username: true,
+      avatarUrl: true,
+      plan: true,
+      planExpiresAt: true,
+    },
+  },
 } satisfies Prisma.ListingInclude;

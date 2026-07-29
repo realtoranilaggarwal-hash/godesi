@@ -10,6 +10,18 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        // Stale service workers must be revalidated so the kill switch reaches browsers.
+        source: "/:file(sw.js|service-worker.js|superpwa-sw.js)",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

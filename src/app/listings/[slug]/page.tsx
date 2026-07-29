@@ -20,6 +20,8 @@ import {
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { effectivePlan } from "@/lib/plans";
+import { maskContactDetails } from "@/lib/moderation";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +57,10 @@ export default async function ListingPage({ params }: { params: { slug: string }
   if (!listing) notFound();
 
   const isRoom = listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED";
+  const description =
+    listing.owner && effectivePlan(listing.owner) !== "FREE"
+      ? listing.description
+      : maskContactDetails(listing.description);
 
   const facts = [
     ["Type", KIND_LABELS[listing.kind]],
@@ -135,7 +141,7 @@ export default async function ListingPage({ params }: { params: { slug: string }
         <Card>
           <h2 className="mb-2 font-bold">About this listing</h2>
           <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">
-            {listing.description}
+            {description}
           </p>
         </Card>
       <RecommendedLinks

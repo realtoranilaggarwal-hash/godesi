@@ -11,6 +11,7 @@ import { LiveActivity } from "@/components/LiveActivity";
 import { VisitorPinger } from "@/components/VisitorPinger";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
+import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
 
@@ -67,6 +68,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen overflow-x-hidden bg-slate-50 pb-20 text-slate-900 sm:pb-0`}
       >
+        <UnregisterServiceWorkers />
         <SiteHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
