@@ -40,6 +40,47 @@ export async function toggleVerifiedProviderAction(formData: FormData) {
   revalidatePath(`/b/${business.slug}`);
 }
 
+/**
+ * The news desk confirms a reporter's mobile number (a WhatsApp message to the
+ * number on file) or an ID check before a press card can be issued.
+ */
+export async function verifyJournalistAction(formData: FormData) {
+  await requirePermission("news");
+  const id = String(formData.get("id") ?? "");
+  const field = String(formData.get("field") ?? "");
+  if (field !== "phone" && field !== "kyc") return;
+
+  const member = await db.user.findUnique({
+    where: { id },
+    select: { phoneVerifiedAt: true, kycVerifiedAt: true },
+  });
+  if (!member) return;
+
+  const now = new Date();
+  await db.user.update({
+    where: { id },
+    data:
+      field === "phone"
+        ? { phoneVerifiedAt: member.phoneVerifiedAt ? null : now }
+        : { kycVerifiedAt: member.kycVerifiedAt ? null : now },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/journalists");
+}
+
+/** Pulls a press card back, e.g. after repeated fake reports. */
+export async function revokePressCardAction(formData: FormData) {
+  await requirePermission("news");
+  const id = String(formData.get("id") ?? "");
+  await db.user.update({
+    where: { id },
+    data: { pressCardIssuedAt: null, pressCardExpiresAt: null },
+  });
+  revalidatePath("/admin");
+  revalidatePath("/journalists");
+}
+
 export async function setUserPlanAction(formData: FormData) {
   await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");

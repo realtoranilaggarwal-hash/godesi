@@ -4,9 +4,16 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   JOURNALIST_LEVELS,
   JOURNALIST_RULES,
+  PRESS_CARD_LEVEL,
   journalistStats,
+  pressCardEligibility,
   topJournalists,
 } from "@/lib/journalists";
+import { PressCard } from "@/components/PressCard";
+import {
+  ClaimPressCardForm,
+  JournalistPhoneForm,
+} from "@/components/forms/PressCardPanel";
 import { POINTS } from "@/lib/rewards";
 import { JournalistJoinForm } from "@/components/forms/JournalistJoinForm";
 import { JournalistBadge } from "@/components/JournalistBadge";
@@ -89,8 +96,36 @@ export default async function JournalistsPage() {
                     community.
                   </p>
                 )}
+                <div className="rounded-2xl bg-slate-50 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-slate-700">
+                      Trust score
+                    </p>
+                    <p className="text-sm font-black text-slate-800">
+                      {stats.trust.score}/100
+                    </p>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className={`h-full rounded-full ${
+                        stats.trust.score >= 70
+                          ? "bg-emerald-500"
+                          : stats.trust.score >= 40
+                            ? "bg-amber-500"
+                            : "bg-red-500"
+                      }`}
+                      style={{ width: `${stats.trust.score}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">
+                    ✔ {stats.trust.confirmed} confirmed · ⚠{" "}
+                    {stats.trust.doubted} doubted · ✖ {stats.trust.fake} flagged
+                    fake by readers
+                  </p>
+                </div>
+
                 <div className="flex flex-wrap items-center gap-3">
-                  <LinkButton href="/news#post">Post a story</LinkButton>
+                  <LinkButton href="/news/report">Report news</LinkButton>
                   <form action={leaveJournalistAction}>
                     <button
                       type="submit"
@@ -132,6 +167,61 @@ export default async function JournalistsPage() {
             </div>
           )}
         </Card>
+
+        {user && stats?.joined ? (
+          <Card>
+            <h2 className="text-lg font-bold">Godesi press card 🎫</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Reach{" "}
+              {
+                JOURNALIST_LEVELS.find(
+                  (level) => level.level === PRESS_CARD_LEVEL,
+                )?.title
+              }{" "}
+              level with a verified account and a clean record, and we issue you
+              a numbered Godesi press card — valid for a year, with a QR anyone
+              can scan to check it.
+            </p>
+
+            {stats.pressCard && !stats.pressCard.expired ? (
+              <div className="mt-3 max-w-md">
+                <PressCard card={stats.pressCard} />
+              </div>
+            ) : (
+              <div className="mt-3 space-y-4">
+                <ul className="grid gap-2 sm:grid-cols-2">
+                  {[
+                    { label: "Email verified", done: stats.checks.email },
+                    { label: "Mobile verified", done: stats.checks.phone },
+                    { label: "No fake history", done: stats.checks.cleanRecord },
+                    { label: "ID check (optional)", done: stats.checks.kyc },
+                  ].map((check) => (
+                    <li
+                      key={check.label}
+                      className={`rounded-xl border px-3 py-2 text-sm font-semibold ${
+                        check.done
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {check.done ? "✔" : "☐"} {check.label}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="border-t border-slate-100 pt-3">
+                  <JournalistPhoneForm phone={user.phone} />
+                </div>
+
+                <div className="border-t border-slate-100 pt-3">
+                  <ClaimPressCardForm
+                    missing={pressCardEligibility(stats).missing}
+                  />
+                </div>
+              </div>
+            )}
+          </Card>
+        ) : null}
 
         <Card>
           <h2 className="text-lg font-bold">Stars you can earn ⭐</h2>
@@ -236,6 +326,14 @@ export default async function JournalistsPage() {
                       </span>
                     ) : null}
                   </span>
+                  {leader.pressCard ? (
+                    <span
+                      title="Holds a Godesi press card"
+                      className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white"
+                    >
+                      🎫 PRESS
+                    </span>
+                  ) : null}
                   <JournalistBadge level={leader.level} />
                   <span className="w-16 text-right text-xs font-bold text-slate-500">
                     {leader.approved}{" "}

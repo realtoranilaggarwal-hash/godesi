@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   /// Pooled (pgbouncer) connection — serverless functions would otherwise
   /// exhaust the database's connection limit.
   url       = env("DATABASE_URL")
@@ -168,6 +168,18 @@ model User {
   journalistSince DateTime?
   journalistBeat  String?
 
+  /// Phone kept for journalist verification; never shown publicly.
+  phone           String?
+  phoneVerifiedAt DateTime?
+  /// Optional ID check an editor has sighted, e.g. "Passport", "Aadhaar".
+  kycVerifiedAt   DateTime?
+  kycNote         String?
+
+  /// Godesi press card, issued at Editor level and valid for a year.
+  pressCardId        String?   @unique
+  pressCardIssuedAt  DateTime?
+  pressCardExpiresAt DateTime?
+
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
   avatarUrl String?
@@ -175,18 +187,18 @@ model User {
   location  String?
 
   /// One-line "who I am" shown under the name on the public profile.
-  headline    String?
+  headline   String?
   /// What the member wants from the community — work, clients, partners, help.
-  lookingFor  String?
+  lookingFor String?
   /// School, college and courses, one per line.
-  education   String?
+  education  String?
   /// Work history, projects and achievements, one per line.
-  experience  String?
-  skills      String[] @default([])
-  languages   String[] @default([])
+  experience String?
+  skills     String[] @default([])
+  languages  String[] @default([])
   /// YouTube/Vimeo links embedded on the profile.
-  videoUrls   String[] @default([])
-  openToWork  Boolean  @default(false)
+  videoUrls  String[] @default([])
+  openToWork Boolean  @default(false)
 
   websiteUrl     String?
   instagramUrl   String?
@@ -240,8 +252,9 @@ model User {
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
 
-  blogPosts BlogPost[]
-  newsVotes NewsVote[]
+  blogPosts         BlogPost[]
+  newsVotes         NewsVote[]
+  newsVerifications NewsVerification[]
 
   /// What a MODERATOR may manage; ignored for other roles. See lib/permissions.
   staffPermissions String[] @default([])
@@ -673,25 +686,25 @@ model VisitorPing {
 
 /// A public event listing with ticket booking.
 model Event {
-  id          String        @id @default(cuid())
-  slug        String        @unique
-  title       String
-  description String
-  startsAt    DateTime
-  endsAt      DateTime?
-  venue       String
+  id                String             @id @default(cuid())
+  slug              String             @unique
+  title             String
+  description       String
+  startsAt          DateTime
+  endsAt            DateTime?
+  venue             String
   /// Hall, banquet room or ground inside a venue that has several.
-  hallName    String?
-  address     String?
-  mapsUrl     String?
-  city        String
-  state       String?
-  country     String?
+  hallName          String?
+  address           String?
+  mapsUrl           String?
+  city              String
+  state             String?
+  country           String?
   /// Reused venue record, so the next organiser can pick the same place.
-  venueRefId  String?
-  venueRef    Venue?  @relation(fields: [venueRefId], references: [id], onDelete: SetNull)
+  venueRefId        String?
+  venueRef          Venue?             @relation(fields: [venueRefId], references: [id], onDelete: SetNull)
   /// Facilities, food, crowd and ticketing ticks — also the /events filters.
-  features    String[]      @default([])
+  features          String[]           @default([])
   /// Godesi promotion partnership: branding at the venue in return for reach.
   partnerStatus     EventPartnerStatus @default(NONE)
   partnerAgreedAt   DateTime?
@@ -701,42 +714,42 @@ model Event {
   partnerProofAt    DateTime?
   partnerNote       String?
   /// Conference, workshop, concert… drives the badge and the type filter.
-  eventType   String?
-  mode        EventMode      @default(OFFLINE)
+  eventType         String?
+  mode              EventMode          @default(OFFLINE)
   /// Join link for online and hybrid events.
-  onlineUrl   String?
-  frequency   EventFrequency @default(ONE_TIME)
+  onlineUrl         String?
+  frequency         EventFrequency     @default(ONE_TIME)
   /// Plain-English schedule for recurring events, e.g. "Every Sunday 10am".
-  recurrence  String?
-  tags        String[]       @default([])
-  imageUrl    String?
+  recurrence        String?
+  tags              String[]           @default([])
+  imageUrl          String?
   /// Promo video pasted from YouTube or Vimeo.
-  videoUrl    String?
-  price       Int           @default(0)
+  videoUrl          String?
+  price             Int                @default(0)
   /// ISO currency of `price`, chosen from the organiser's location.
-  currency    String        @default("INR")
-  seatsTotal  Int
-  seatsBooked Int           @default(0)
-  status      ListingStatus @default(APPROVED)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  currency          String             @default("INR")
+  seatsTotal        Int
+  seatsBooked       Int                @default(0)
+  status            ListingStatus      @default(APPROVED)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   organizerId String
   organizer   User      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   businessId  String?
   business    Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
 
-  categorySlug String?
-  category     Category? @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
+  categorySlug  String?
+  category      Category? @relation(fields: [categorySlug], references: [slug], onDelete: SetNull)
   /// Every category the event should appear under, including the primary one.
-  categorySlugs String[] @default([])
+  categorySlugs String[]  @default([])
 
   speakers EventSpeaker[]
   sessions EventSession[]
-  tickets Ticket[]
+  tickets  Ticket[]
   /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
-  tiers   TicketTier[]
-  coupons Coupon[]
+  tiers    TicketTier[]
+  coupons  Coupon[]
 
   @@index([startsAt])
   @@index([categorySlug])
@@ -907,10 +920,27 @@ model NewsItem {
   submittedById String?
   submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
 
+  /// Local, Business, Event, Alert or Other — set on member reports.
+  category   String?
+  city       String?
+  state      String?
+  country    String?
+  /// When the thing being reported happened, not when it was posted.
+  happenedAt DateTime?
+  /// Self, WhatsApp, Facebook, News or Other.
+  sourceType String?
+  /// Where the reporter saw it, when they have a link to show.
+  sourceUrl  String?
+  photoUrls  String[]  @default([])
+  videoUrl   String?
+  /// Every truth declaration was ticked when the report was filed.
+  declaredAt DateTime?
+
   /// Editor's pick, shown at the top of /news.
-  featured Boolean    @default(false)
-  score    Int        @default(0)
-  votes    NewsVote[]
+  featured      Boolean            @default(false)
+  score         Int                @default(0)
+  votes         NewsVote[]
+  verifications NewsVerification[]
 
   @@index([status, publishedAt])
   @@index([topic, status, publishedAt])
@@ -918,11 +948,11 @@ model NewsItem {
 
 /// One up or down vote per member per story.
 model NewsVote {
-  id     String   @id @default(cuid())
-  newsId String
-  news   NewsItem @relation(fields: [newsId], references: [id], onDelete: Cascade)
-  userId String
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  newsId    String
+  news      NewsItem @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// 1 for up, -1 for down.
   value     Int
   createdAt DateTime @default(now())
@@ -931,27 +961,49 @@ model NewsVote {
   @@index([userId])
 }
 
+enum NewsVerdict {
+  CONFIRMED
+  DOUBTED
+  FAKE
+}
+
+/// Readers vouch for or challenge a member report; this drives the trust score.
+model NewsVerification {
+  id      String      @id @default(cuid())
+  newsId  String
+  news    NewsItem    @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verdict NewsVerdict
+  note    String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([newsId, userId])
+  @@index([newsId, verdict])
+}
+
 model Lead {
-  id           String     @id @default(cuid())
-  clientId     String
-  client       User       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  title        String
-  description  String
-  category     String
+  id             String     @id @default(cuid())
+  clientId       String
+  client         User       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  category       String
   /// Subcategory slug the requirement was posted under, when known.
-  categorySlug String?
+  categorySlug   String?
   /// Answers to that subcategory's option groups, e.g. spa treatment and location.
-  serviceOptions String[] @default([])
-  city         String
-  budgetMin    Int?
-  budgetMax    Int?
+  serviceOptions String[]   @default([])
+  city           String
+  budgetMin      Int?
+  budgetMax      Int?
   /// Wedding/event date the requirement is for.
-  eventDate    DateTime?
-  contactName  String
-  contactPhone String
-  contactEmail String?
-  status       LeadStatus @default(OPEN)
-  createdAt    DateTime   @default(now())
+  eventDate      DateTime?
+  contactName    String
+  contactPhone   String
+  contactEmail   String?
+  status         LeadStatus @default(OPEN)
+  createdAt      DateTime   @default(now())
 
   unlocks LeadUnlock[]
 
@@ -1144,12 +1196,12 @@ enum MeetupMarital {
 /// Opt-in "Connect" profile for meeting people over business, coffee or a chat.
 /// Reviewed before it goes public; strictly non-dating (see `lib/moderation`).
 model MeetupProfile {
-  id             String        @id @default(cuid())
-  userId         String        @unique
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  displayName    String
+  id               String        @id @default(cuid())
+  userId           String        @unique
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName      String
   /// Optional: members may confirm 18+ without publishing their age.
-  age            Int?
+  age              Int?
   /// When the member ticked the 18+ confirmation.
   adultConfirmedAt DateTime?
   /// When the member accepted the meet-at-your-own-risk notice.
@@ -1160,19 +1212,19 @@ model MeetupProfile {
   /// When the member last shared their approximate location.
   locationSharedAt DateTime?
   /// Travellers and newcomers get a "visiting / new here" flag on their card.
-  visiting         Boolean @default(false)
-  gender         MeetupGender
-  marital        MeetupMarital @default(PREFER_NOT_SAY)
-  city           String
-  state          String?
+  visiting         Boolean       @default(false)
+  gender           MeetupGender
+  marital          MeetupMarital @default(PREFER_NOT_SAY)
+  city             String
+  state            String?
   /// Comma separated intents: business, coffee, chit-chat, community.
-  intents        String
-  bio            String
-  whatsappNumber String?
-  status         ListingStatus @default(PENDING)
-  visible        Boolean       @default(true)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  intents          String
+  bio              String
+  whatsappNumber   String?
+  status           ListingStatus @default(PENDING)
+  visible          Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   reports MeetupReport[]
 
@@ -1314,16 +1366,16 @@ model AlumniRecord {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  institution String
+  institution  String
   /// Normalised institution name used for matching, e.g. "nit-trichy".
-  slug        String
-  degree      String?
+  slug         String
+  degree       String?
   fieldOfStudy String?
-  city        String?
+  city         String?
   /// Year the member passed out; null while still studying.
-  endYear     Int?
-  current     Boolean @default(false)
-  createdAt   DateTime @default(now())
+  endYear      Int?
+  current      Boolean  @default(false)
+  createdAt    DateTime @default(now())
 
   @@index([slug, endYear])
   @@index([userId])
@@ -1338,21 +1390,21 @@ enum UpiRequestStatus {
 /// A "pay by UPI" request. UPI without a gateway gives us no callback, so the
 /// buyer pays into our VPA with this reference and staff confirm the credit.
 model UpiRequest {
-  id          String           @id @default(cuid())
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan        Plan
-  amountMinor Int
-  currency    String           @default("INR")
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan         Plan
+  amountMinor  Int
+  currency     String           @default("INR")
   /// Short code the buyer puts in the UPI note, e.g. GD7K3QF2.
-  reference   String           @unique
+  reference    String           @unique
   /// UPI transaction / UTR number the buyer pastes back after paying.
-  utr         String?
-  status      UpiRequestStatus @default(PENDING)
-  reviewedAt  DateTime?
+  utr          String?
+  status       UpiRequestStatus @default(PENDING)
+  reviewedAt   DateTime?
   reviewedById String?
-  note        String?
-  createdAt   DateTime         @default(now())
+  note         String?
+  createdAt    DateTime         @default(now())
 
   @@index([status, createdAt])
 }

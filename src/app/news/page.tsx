@@ -94,10 +94,16 @@ export default async function NewsPage() {
               🗞️ Become a local journalist
             </Link>
             <Link
+              href="/news/report"
+              className="rounded-xl bg-white/95 px-3 py-1.5 text-sky-700 hover:bg-white"
+            >
+              📰 Report local news
+            </Link>
+            <Link
               href="#post"
               className="rounded-xl bg-white/20 px-3 py-1.5 text-white hover:bg-white/30"
             >
-              ✍️ Post a story
+              ✍️ Share a link
             </Link>
           </div>
         </section>
@@ -211,6 +217,16 @@ export default async function NewsPage() {
 
         <Card id="post">
           <h2 className="font-bold">Share a story ✍️</h2>
+          <p className="mt-1 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            Saw it yourself? File a{" "}
+            <Link
+              href="/news/report"
+              className="font-bold underline"
+            >
+              full report with photos
+            </Link>{" "}
+            instead — this box is for sharing someone else&rsquo;s article.
+          </p>
           {user ? (
             <>
               <p className="mt-1 text-sm text-slate-600">

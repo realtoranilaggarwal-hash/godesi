@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCategoryTree } from "@/lib/directory";
 import { gradientFor } from "@/lib/categories";
 import { Card } from "@/components/ui";
@@ -15,7 +16,12 @@ export const metadata: Metadata = {
 const PROFESSIONALS_SLUG = "professionals";
 
 type PostType =
-  "business" | "professional" | "event" | "property" | "requirement";
+  | "business"
+  | "professional"
+  | "event"
+  | "property"
+  | "requirement"
+  | "report";
 
 const TYPES: {
   id: PostType;
@@ -58,6 +64,13 @@ const TYPES: {
     icon: "📋",
     blurb: "Tell vendors what you need and get quotes",
     gradient: "from-indigo-500 to-violet-500",
+  },
+  {
+    id: "report",
+    label: "News / Report",
+    icon: "📰",
+    blurb: "Report local news from your area as a Godesi journalist",
+    gradient: "from-amber-500 to-orange-600",
   },
 ];
 
@@ -136,6 +149,8 @@ export default async function PostPage({
   searchParams: { type?: string; category?: string };
 }) {
   const type = TYPES.find((item) => item.id === searchParams.type)?.id;
+  if (type === "report") redirect("/news/report");
+
   const categories = await getCategoryTree();
 
   return (
@@ -161,7 +176,13 @@ export default async function PostPage({
                   label={item.label}
                   blurb={item.blurb}
                   gradient={item.gradient}
-                  cta={item.id === "requirement" ? "Post a requirement" : "Start"}
+                  cta={
+                    item.id === "requirement"
+                      ? "Post a requirement"
+                      : item.id === "report"
+                        ? "Report news"
+                        : "Start"
+                  }
                 />
               ))}
             </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { featureNewsAction, voteNewsAction } from "@/app/actions/newsVotes";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import type { JournalistLevel } from "@/lib/journalists";
+import { proxyImage } from "@/lib/proxyImage";
 
 export type NewsListItem = {
   id: string;
@@ -13,6 +14,9 @@ export type NewsListItem = {
   publishedAt: Date;
   featured?: boolean;
   score?: number;
+  /** Set on member reports filed from the ground, not feed articles. */
+  category?: string | null;
+  city?: string | null;
   submittedBy?: {
     name: string;
     username: string | null;
@@ -63,6 +67,28 @@ function Poster({
     </Link>
   ) : (
     label
+  );
+}
+
+/** Member reports open on Godesi; feed articles open at the publisher. */
+function Story({
+  link,
+  children,
+}: {
+  link: string;
+  children: React.ReactNode;
+}) {
+  if (link.startsWith("/")) {
+    return (
+      <Link href={link} className="flex gap-3">
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <a href={link} target="_blank" rel="noreferrer" className="flex gap-3">
+      {children}
+    </a>
   );
 }
 
@@ -139,11 +165,11 @@ export function NewsCard({
         item.featured ? "border-amber-300 ring-1 ring-amber-200" : "border-slate-200"
       }`}
     >
-      <a href={item.link} target="_blank" rel="noreferrer" className="flex gap-3">
+      <Story link={item.link}>
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={item.imageUrl}
+            src={proxyImage(item.imageUrl)}
             alt=""
             className="h-20 w-28 shrink-0 rounded-xl object-cover"
             loading="lazy"
@@ -162,10 +188,16 @@ export function NewsCard({
           <h3 className="line-clamp-2 font-semibold leading-snug">{item.title}</h3>
           <p className="mt-1 line-clamp-2 text-sm text-slate-600">{item.summary}</p>
           <p className="mt-1 text-xs text-slate-400">
+            {item.category ? (
+              <span className="font-semibold text-amber-600">
+                📍 {item.category}
+                {item.city ? ` · ${item.city}` : ""} ·{" "}
+              </span>
+            ) : null}
             {item.source} · {timeAgo(item.publishedAt)}
           </p>
         </div>
-      </a>
+      </Story>
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
         {item.submittedBy ? (
           <Poster poster={item.submittedBy} level={posterLevel} />

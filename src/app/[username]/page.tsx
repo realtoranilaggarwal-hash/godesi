@@ -11,6 +11,7 @@ import { Badge, Card, EmptyState, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
+import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
 import { journalistStats } from "@/lib/journalists";
 import { alumniFor } from "@/lib/alumni";
@@ -160,6 +161,51 @@ export default async function PublicProfilePage({
               <p className="mt-1 whitespace-pre-line text-sm text-slate-700">
                 {user.lookingFor}
               </p>
+            </Card>
+          ) : null}
+
+          {journalist?.joined ? (
+            <Card>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-lg font-bold">Local journalist 🗞️</h2>
+                <JournalistBadge
+                  level={journalist.level}
+                  beat={journalist.beat}
+                />
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  { label: "Trust score", value: `${journalist.trust.score}` },
+                  { label: "Stories", value: `${journalist.approved}` },
+                  {
+                    label: "Level",
+                    value: journalist.level?.title ?? "Contributor",
+                  },
+                  { label: "Confirmed", value: `${journalist.trust.confirmed}` },
+                ].map((cell) => (
+                  <div
+                    key={cell.label}
+                    className="rounded-2xl bg-slate-50 px-3 py-2"
+                  >
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      {cell.label}
+                    </dt>
+                    <dd className="truncate text-base font-black text-slate-800">
+                      {cell.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              {journalist.beat ? (
+                <p className="mt-2 text-sm text-slate-600">
+                  Coverage area: <strong>{journalist.beat}</strong>
+                </p>
+              ) : null}
+              {journalist.pressCard && !journalist.pressCard.expired ? (
+                <div className="mt-3 max-w-md">
+                  <PressCard card={journalist.pressCard} />
+                </div>
+              ) : null}
             </Card>
           ) : null}
 
