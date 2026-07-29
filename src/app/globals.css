@@ -47,3 +47,33 @@ blockquote {
     display: none;
   }
 }
+
+/* Live #godesi wall: the column drifts upward on its own and stops on hover
+   or for anyone who asked for less motion. */
+.wall-track {
+  animation: wall-drift 60s linear infinite;
+}
+
+.wall-scroller:hover .wall-track,
+.wall-scroller:focus-within .wall-track {
+  animation-play-state: paused;
+}
+
+@keyframes wall-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall-track {
+    animation: none;
+  }
+
+  .wall-scroller {
+    overflow-y: auto;
+  }
+}

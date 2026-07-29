@@ -14,6 +14,7 @@ import { Card, LinkButton } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
+import { ActivityWall } from "@/components/ActivityWall";
 
 export const dynamic = "force-dynamic";
 
@@ -233,20 +234,27 @@ export default async function HomePage() {
           </section>
         ) : null}
 
-        {news.length ? (
-          <section>
-            <SectionHeading
-              title="Desi news 📰"
-              href="/news"
-              linkLabel="All news"
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              {news.map((item) => (
-                <NewsCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        ) : null}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {news.length ? (
+            <section className="lg:col-span-2">
+              <SectionHeading
+                title="Desi news 📰"
+                href="/news"
+                linkLabel="All news"
+              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                {news.map((item) => (
+                  <NewsCard key={item.id} item={item} />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <ActivityWall
+            limit={16}
+            className={news.length ? "" : "lg:col-span-3"}
+          />
+        </div>
 
         <section>
           <SectionHeading

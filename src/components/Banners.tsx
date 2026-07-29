@@ -11,7 +11,7 @@ import {
   slotSoldCount,
 } from "@/lib/banners";
 import { LiveVisitorMap } from "@/components/LiveVisitorMap";
-import { SocialWall } from "@/components/SocialWall";
+import { ActivityWall } from "@/components/ActivityWall";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { AdPreview } from "@/components/AdPreview";
@@ -158,7 +158,7 @@ export async function SidebarBanners() {
     >
       <LiveVisitorMap compact />
 
-      <SocialWall />
+      <ActivityWall />
 
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
         Sponsored
