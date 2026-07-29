@@ -8,6 +8,7 @@ import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { HeaderBanner } from "@/components/Banners";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
+import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card, LinkButton } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
@@ -262,6 +263,8 @@ export default async function HomePage() {
             extra={<SpaSpotlight listings={spaCount} />}
           />
         </section>
+
+        <AboutGodesi />
       </div>
     </div>
   );

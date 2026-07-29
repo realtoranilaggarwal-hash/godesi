@@ -68,7 +68,10 @@ export async function generateMetadata({
 
   const title = `${business.name} — ${business.category} in ${business.city}`;
   const description =
-    business.description?.slice(0, 160) ??
+    (business.description ? maskContactDetails(business.description) : null)?.slice(
+      0,
+      160,
+    ) ??
     `${business.name} is a ${business.category} in ${business.city}. Chat on WhatsApp, see reviews and scan the QR card on Godesi.`;
 
   return {
@@ -149,7 +152,7 @@ export default async function BusinessProfilePage({
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: business.name,
-    description: business.description ?? undefined,
+    description: description ?? undefined,
     image: business.logoUrl ?? undefined,
     url: `${siteUrl()}/b/${business.slug}`,
     ...(contactVisible && (business.phone || business.whatsappNumber)
