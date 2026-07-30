@@ -27,6 +27,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/resources", label: "Resources & important links" },
       { href: "/news", label: "News" },
       { href: "/desi-elite", label: "GoDesi Elite — recognised leaders" },
+      { href: "/live-radio", label: "Live desi radio" },
+      { href: "/live-tv", label: "Live desi TV" },
     ],
   },
   {

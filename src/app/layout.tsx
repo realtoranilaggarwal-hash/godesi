@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { RewardsNudge } from "@/components/RewardsNudge";
@@ -72,6 +73,7 @@ export default function RootLayout({
         <SiteHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
+        <LiveMediaPlayer />
         <CookieConsent />
         <RewardsNudge />
         <LiveActivity />

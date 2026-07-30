@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { CategoryStrip, type StripItem } from "@/components/CategoryStrip";
+import { LiveMediaLinks } from "@/components/LiveMediaButtons";
 
 /**
  * Wide screens get the full category strip; once you scroll it folds into a
@@ -33,6 +35,18 @@ export function HeaderShell({
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="bg-gradient-to-r from-slate-900 to-indigo-900">
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-1 sm:px-4">
+          <LiveMediaLinks />
+          <Link
+            href="/live-tv"
+            className="hidden text-xs font-semibold text-white/80 underline hover:text-white sm:block"
+          >
+            TV channels
+          </Link>
+        </div>
+      </div>
+
       <div
         className={scrolled ? "[&_img]:!h-7" : undefined}
       >

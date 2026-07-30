@@ -38,6 +38,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     links: [
       { href: "/find", label: "Search everything" },
       { href: "/live", label: "Live visitor map" },
+      { href: "/live-radio", label: "🎧 Listen live — desi radio" },
+      { href: "/live-tv", label: "📺 Watch live — desi TV" },
       { href: "/journalists", label: "Become a local journalist" },
       { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
       { href: "/news/report", label: "Share news" },
