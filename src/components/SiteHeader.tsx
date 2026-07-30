@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui";
 import { HeaderShell } from "@/components/HeaderShell";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
+import { LiveMediaChips } from "@/components/LiveMediaButtons";
 import { displayCurrency } from "@/lib/displayCurrency";
 
 const NAV = [
@@ -134,6 +135,8 @@ export async function SiteHeader() {
               🔍
             </button>
           </form>
+
+          <LiveMediaChips className="hidden sm:flex" />
 
           {/* Fills the gap beside the search box. */}
           <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold xl:flex">

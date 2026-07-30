@@ -40,6 +40,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/live", label: "Live visitor map" },
       { href: "/live-radio", label: "🎧 Listen live — desi radio" },
       { href: "/live-tv", label: "📺 Watch live — desi TV" },
+      { href: "/live/submit", label: "Add your radio or TV channel" },
       { href: "/journalists", label: "Become a local journalist" },
       { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
       { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },

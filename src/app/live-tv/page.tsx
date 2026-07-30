@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card } from "@/components/ui";
+import { Card, LinkButton } from "@/components/ui";
 import { LiveEmbedCard } from "@/components/LiveEmbedCard";
-import { TV_CHANNELS, tvEmbedUrl } from "@/lib/liveMedia";
+import { TV_CHANNELS } from "@/lib/liveMedia";
 import { liveVideoId } from "@/lib/liveTv";
+import { tvEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 
 export const metadata: Metadata = {
   title: "Live desi TV — Hindi and English news channels | Godesi",
@@ -11,15 +12,15 @@ export const metadata: Metadata = {
     "Watch live desi TV news: NDTV, Aaj Tak, ABP News, India Today and DD News, streamed through their official YouTube live channels.",
 };
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function LiveTvPage() {
-  const channels = await Promise.all(
-    TV_CHANNELS.map(async (channel) => ({
-      channel,
-      videoId: await liveVideoId(channel),
-    })),
+  const resolved = await Promise.all(
+    TV_CHANNELS.map(
+      async (channel) => [channel.id, await liveVideoId(channel)] as const,
+    ),
   );
+  const channels = await tvEntries(new Map(resolved));
 
   return (
     <div className="space-y-4">
@@ -30,23 +31,35 @@ export default async function LiveTvPage() {
           streams. Channels start muted — tap the sound icon in the player to
           listen.
         </p>
-        <Link
-          href="/live-radio"
-          className="mt-3 inline-block text-sm font-bold text-rose-800 underline"
-        >
-          🎧 Listen to live radio instead →
-        </Link>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <LinkButton href="/live/submit">➕ Submit your channel</LinkButton>
+          <Link
+            href="/live-radio"
+            className="text-sm font-bold text-rose-800 underline"
+          >
+            🎧 Listen to live radio instead →
+          </Link>
+        </div>
+        <p className="mt-2 text-xs text-slate-600">
+          Carriage is ${LIVE_CHANNEL_MONTHLY_USD}/month, free for charities and
+          non-profits. Something not playing? Use 🚩 Not working on the channel.
+        </p>
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {channels.map(({ channel, videoId }) => (
+        {channels.map((channel) => (
           <LiveEmbedCard
-            key={channel.id}
+            key={channel.key}
             kind="tv"
-            id={channel.id}
+            id={channel.key}
             name={channel.name}
             place={channel.place}
-            src={tvEmbedUrl(channel, { videoId })}
+            src={channel.src}
+            featured={channel.featured}
+            about={channel.about}
+            websiteUrl={channel.websiteUrl}
+            nonProfit={channel.nonProfit}
+            submitted={channel.submitted}
           />
         ))}
       </div>

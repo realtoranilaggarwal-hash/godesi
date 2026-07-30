@@ -247,12 +247,20 @@ export default async function AdminPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Admin panel</h1>
-        <Link
-          href="/admin/desi-elite"
-          className="text-sm font-semibold text-indigo-600 hover:underline"
-        >
-          🏆 GoDesi Elite desk →
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/admin/desi-elite"
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            🏆 GoDesi Elite desk →
+          </Link>
+          <Link
+            href="/admin/live-channels"
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            🎧📺 Live radio & TV desk →
+          </Link>
+        </div>
       </div>
 
       <AdminTabs

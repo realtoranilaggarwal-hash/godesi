@@ -255,6 +255,10 @@ model User {
   eliteEntries EliteEntry[]
   eliteOrders  EliteOrder[]
 
+  liveChannels       LiveChannel[]
+  liveChannelOrders  LiveChannelOrder[]
+  liveChannelReports LiveChannelReport[]
+
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
 
@@ -1584,10 +1588,10 @@ model EliteEntry {
   badge  EliteBadge  @default(BASIC)
 
   /// Professional and business awards, shown beside the photo.
-  awards       String[] @default([])
+  awards     String[] @default([])
   /// Set when this entry was honoured at a GoDesi Elite Awards ceremony.
-  awardTitle   String?
-  awardYear    Int?
+  awardTitle String?
+  awardYear  Int?
 
   /// Paid the one-time interview + short video fee.
   interviewPaid Boolean @default(false)
@@ -1611,4 +1615,88 @@ model EliteEntry {
 
   @@index([status, badge, publishedAt])
   @@index([userId])
+}
+
+enum LiveMediaKind {
+  RADIO
+  TV
+}
+
+enum LiveChannelStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// A station or channel a member asked us to carry. Godesi still only embeds the
+/// official player, so all we keep is the provider's own id.
+model LiveChannel {
+  id         String        @id @default(cuid())
+  slug       String        @unique
+  kind       LiveMediaKind
+  name       String
+  place      String
+  about      String?
+  /// TuneIn guide id (s123456) for radio, YouTube channel id for TV.
+  embedId    String
+  websiteUrl String?
+
+  contactName  String?
+  contactPhone String?
+  contactEmail String?
+
+  submittedById String?
+  submittedBy   User?   @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+
+  status    LiveChannelStatus @default(PENDING)
+  /// Charities and non-profit suggestions are carried free of charge.
+  nonProfit Boolean           @default(false)
+  featured  Boolean           @default(false)
+  /// Paid carriage runs month to month; null means unpaid or free.
+  paidUntil DateTime?
+
+  adminNote  String?
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  orders LiveChannelOrder[]
+
+  @@index([status, kind, featured])
+}
+
+/// Monthly carriage payment for a member-submitted station or channel.
+model LiveChannelOrder {
+  id          String        @id @default(cuid())
+  channelId   String
+  channel     LiveChannel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  months      Int           @default(1)
+  amountMinor Int
+  currency    String
+  status      AdOrderStatus @default(PENDING)
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  createdAt   DateTime      @default(now())
+
+  @@index([channelId])
+  @@index([userId])
+}
+
+/// "This stream isn't working" from a visitor. Covers both the built-in stations
+/// (keyed by their code) and member-submitted ones (keyed by row id).
+model LiveChannelReport {
+  id         String        @id @default(cuid())
+  channelKey String
+  kind       LiveMediaKind
+  label      String
+  note       String?
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  resolved   Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+
+  @@index([resolved, createdAt])
+  @@index([channelKey])
 }

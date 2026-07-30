@@ -123,9 +123,17 @@ export function findTv(id: string) {
 /** Header, footer and page buttons all speak to the mini player through this event. */
 export const LIVE_MEDIA_EVENT = "godesi:live-media";
 
-export type LiveMediaRequest =
-  | { kind: "radio"; id: string }
-  | { kind: "tv"; id: string };
+/**
+ * `src`/`name` are carried for member-submitted stations, which live in the
+ * database rather than the lists above; built-in ones are found by id.
+ */
+export type LiveMediaRequest = {
+  /** `stream` is a direct audio URL from the open station directory. */
+  kind: "radio" | "tv" | "stream";
+  id: string;
+  name?: string;
+  src?: string;
+};
 
 export function openLiveMedia(request: LiveMediaRequest) {
   window.dispatchEvent(
