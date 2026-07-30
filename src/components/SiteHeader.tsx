@@ -26,12 +26,14 @@ const NAV = [
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/news", label: "News", icon: "📰" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
+  { href: "/leaderboard", label: "Top contributors", icon: "🏅" },
 ];
 
 /** Chips beside the search box, for pages the main nav has no room for. */
 const QUICK_LINKS = [
   { href: "/live", label: "Live", icon: "🟢" },
   { href: "/desi-elite", label: "Elite", icon: "🏆" },
+  { href: "/leaderboard", label: "Top 100", icon: "🏅" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/blog", label: "Blog", icon: "✍️" },
   { href: "/faq", label: "FAQ", icon: "❓" },

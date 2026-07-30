@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 const SUGGESTIONS = [
+  "top contributors",
   "photographer",
   "caterer",
   "attorney",
@@ -119,6 +120,7 @@ export default async function FindPage({
             <p className="text-sm text-slate-500">
               {results.total} result{results.total === 1 ? "" : "s"} for “{q}”
             </p>
+            <Group title="Godesi pages" hits={results.pages} />
             <Group title="Businesses & professionals" hits={results.businesses} />
             <Group title="Events" hits={results.events} />
             <Group title="Property, rooms & items" hits={results.listings} />
