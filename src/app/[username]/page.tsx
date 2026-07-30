@@ -15,6 +15,8 @@ import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
 import { journalistStats } from "@/lib/journalists";
 import { alumniFor } from "@/lib/alumni";
+import { wallet } from "@/lib/rewards";
+import { ContributionScore } from "@/components/ContributionScore";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +53,7 @@ export default async function PublicProfilePage({
 
   const { user, events, leads, reviews, listings } = profile;
   const journalist = await journalistStats(user.id);
+  const points = await wallet(user.id);
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
@@ -112,6 +115,9 @@ export default async function PublicProfilePage({
                 <Badge tone="green">
                   Member since {user.createdAt.getFullYear()}
                 </Badge>
+              </div>
+              <div className="mt-3 max-w-sm">
+                <ContributionScore earned={points.earned} plan={plan} />
               </div>
             </div>
           </div>

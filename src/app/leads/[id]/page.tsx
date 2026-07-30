@@ -4,7 +4,11 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { canUnlockLeads } from "@/lib/plans";
-import { unlockLeadAction } from "@/app/actions/leads";
+import {
+  unlockLeadAction,
+  unlockLeadWithPointsAction,
+} from "@/app/actions/leads";
+import { UNLOCK_LEAD_POINTS, wallet } from "@/lib/rewards";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 import { formatInr } from "@/lib/format";
 
@@ -20,13 +24,13 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
 
   const isOwner = user?.id === lead.clientId;
   const premium = user ? canUnlockLeads(user) : false;
-  const unlocked =
-    isOwner ||
-    (premium &&
-      user !== null &&
-      (await db.leadUnlock.findUnique({
-        where: { leadId_userId: { leadId: lead.id, userId: user.id } },
-      })) !== null);
+  const paidWithPoints =
+    user !== null &&
+    (await db.leadUnlock.findUnique({
+      where: { leadId_userId: { leadId: lead.id, userId: user.id } },
+    })) !== null;
+  const unlocked = isOwner || paidWithPoints || (premium && paidWithPoints);
+  const points = user ? (await wallet(user.id)).balance : 0;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -105,12 +109,37 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
                 </button>
               </form>
             ) : (
-              <Alert tone="info">
-                Contact details are available on the Premium plan.{" "}
-                <Link href="/pricing" className="font-semibold underline">
-                  See plans
-                </Link>
-              </Alert>
+              <div className="space-y-2">
+                <Alert tone="info">
+                  Contact details come with the Premium plan.{" "}
+                  <Link href="/pricing" className="font-semibold underline">
+                    See plans
+                  </Link>
+                </Alert>
+                {points >= UNLOCK_LEAD_POINTS ? (
+                  <form action={unlockLeadWithPointsAction}>
+                    <input type="hidden" name="leadId" value={lead.id} />
+                    <button
+                      type="submit"
+                      className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                      Unlock with {UNLOCK_LEAD_POINTS} points ({points}{" "}
+                      available)
+                    </button>
+                  </form>
+                ) : (
+                  <p className="text-xs text-slate-500">
+                    Or spend {UNLOCK_LEAD_POINTS} Godesi points — you have{" "}
+                    {points}.{" "}
+                    <Link
+                      href="/dashboard/rewards"
+                      className="font-semibold underline"
+                    >
+                      Earn points →
+                    </Link>
+                  </p>
+                )}
+              </div>
             )}
           </div>
         )}

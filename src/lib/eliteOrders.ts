@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { ELITE_PACKAGES, type ElitePackageId } from "@/lib/elite";
 import { notify } from "@/lib/notifications";
+import { awardSpendPoints } from "@/lib/rewards";
 
 /**
  * Marks an Elite purchase paid and applies it to the profile: the interview fee
@@ -41,6 +42,14 @@ export async function confirmEliteOrder({
       ...(item?.kind === "INTERVIEW" ? { interviewPaid: true } : {}),
       ...(item?.kind === "VIDEO" ? { videoPackage: "PRO" } : {}),
     },
+  });
+
+  await awardSpendPoints({
+    userId: order.userId,
+    amountMinor,
+    currency,
+    note: item?.label ?? "GoDesi Elite package",
+    reference,
   });
 
   await notify({

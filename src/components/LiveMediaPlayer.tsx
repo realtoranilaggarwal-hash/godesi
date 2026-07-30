@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   LIVE_MEDIA_EVENT,
@@ -208,6 +209,15 @@ export function LiveMediaPlayer() {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold">
+        <Link href="/live-radio" className="text-indigo-700 hover:underline">
+          🎧 All radio stations
+        </Link>
+        <Link href="/live-tv" className="text-indigo-700 hover:underline">
+          📺 All TV channels
+        </Link>
       </div>
     </div>
   );

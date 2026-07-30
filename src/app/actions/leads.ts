@@ -13,6 +13,7 @@ import {
   missingChoiceGroups,
   specialtySet,
 } from "@/lib/specialties";
+import { spendPoints, UNLOCK_LEAD_POINTS } from "@/lib/rewards";
 
 const leadSchema = z.object({
   title: z.string().trim().min(5, "Give your requirement a clear title"),
@@ -114,6 +115,31 @@ export async function unlockLeadAction(formData: FormData) {
     create: { leadId, userId: user.id },
     update: {},
   });
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
+}
+
+/** Free members can open one requirement's contact details with points instead. */
+export async function unlockLeadWithPointsAction(formData: FormData) {
+  const user = await requireUser();
+  const leadId = String(formData.get("leadId") ?? "");
+  const lead = await db.lead.findUnique({ where: { id: leadId } });
+  if (!lead) throw new Error("Lead not found");
+
+  const already = await db.leadUnlock.findUnique({
+    where: { leadId_userId: { leadId, userId: user.id } },
+  });
+  if (!already) {
+    const spent = await spendPoints({
+      userId: user.id,
+      points: UNLOCK_LEAD_POINTS,
+      note: `Unlocked contact details for "${lead.title}"`,
+      uniqueKey: `${user.id}:lead-unlock:${leadId}`,
+    });
+    if (!spent) redirect("/dashboard/rewards?needPoints=1");
+    await db.leadUnlock.create({ data: { leadId, userId: user.id } });
+  }
+
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);
 }

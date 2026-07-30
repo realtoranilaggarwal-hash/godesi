@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LiveVisitorMap } from "@/components/LiveVisitorMap";
+import { GlobalChat } from "@/components/GlobalChat";
+import { getCurrentUser } from "@/lib/auth";
+import { recentChat } from "@/lib/chat";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Live visitors | Godesi",
@@ -8,7 +13,10 @@ export const metadata: Metadata = {
     "See where people are browsing Godesi right now — anonymous, city-level only.",
 };
 
-export default function LivePage() {
+export default async function LivePage() {
+  const user = await getCurrentUser();
+  const messages = await recentChat(user?.id ?? null);
+
   return (
     <div className="mx-auto max-w-3xl space-y-4 px-4 py-8">
       <div>
@@ -22,6 +30,8 @@ export default function LivePage() {
       </div>
 
       <LiveVisitorMap />
+
+      <GlobalChat initial={messages} signedIn={user !== null} />
 
       <p className="text-sm text-slate-600">
         Want your business in front of them?{" "}

@@ -4,7 +4,14 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
-import { pointValues, referralStats, wallet } from "@/lib/rewards";
+import {
+  pointValues,
+  referralStats,
+  wallet,
+  UNLOCK_LEAD_POINTS,
+} from "@/lib/rewards";
+import { ContributionScore } from "@/components/ContributionScore";
+import { effectivePlan } from "@/lib/plans";
 import { Badge, Card } from "@/components/ui";
 import { ShareButtons } from "@/components/ShareButtons";
 import { RedeemPanel } from "@/components/forms/RedeemPanel";
@@ -42,6 +49,7 @@ export default async function RewardsPage() {
     ["Your referral posts a listing or event", points.REFERRAL_LISTING],
     ["You complete your business profile", points.PROFILE_CREATED],
     ["You post a listing or an event", points.LISTING_POSTED],
+    ["You review a business", points.REVIEW_POSTED],
   ];
 
   return (
@@ -51,8 +59,18 @@ export default async function RewardsPage() {
           <h1 className="text-2xl font-bold">Referrals & rewards 🎁</h1>
           <p className="text-sm text-slate-600">
             Invite desi businesses to Godesi and spend the points on ads,
-            featured listings or membership.
+            featured listings, membership or unlocking a requirement&apos;s
+            contact details.{" "}
+            <Link href="/leaderboard" className="font-semibold underline">
+              See the top contributors →
+            </Link>
           </p>
+          <div className="mt-3 max-w-sm">
+            <ContributionScore
+              earned={balance.earned}
+              plan={effectivePlan(user)}
+            />
+          </div>
         </div>
 
         <Card className="space-y-3 bg-gradient-to-r from-orange-50 via-rose-50 to-fuchsia-50">
@@ -110,6 +128,15 @@ export default async function RewardsPage() {
           <Card>
             <h2 className="mb-2 font-bold">Spend your points</h2>
             <RedeemPanel balance={balance.balance} />
+            <p className="mt-3 text-xs text-slate-500">
+              You can also spend {UNLOCK_LEAD_POINTS} points on any requirement
+              to unlock the contact details, straight from the{" "}
+              <Link href="/leads" className="font-semibold underline">
+                requirements board
+              </Link>
+              . Every $1 you spend with Godesi earns 1 point back. Points are a
+              rewards programme only and have no cash value.
+            </p>
           </Card>
         </div>
 

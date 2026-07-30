@@ -10,6 +10,7 @@ import { requestCurrency } from "@/lib/currency";
 import { disputeFee } from "@/lib/reviewDisputes";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { awardPoints } from "@/lib/rewards";
 
 const reviewSchema = z.object({
   businessId: z.string().min(1),
@@ -54,7 +55,7 @@ export async function createReviewAction(
       return { error: "You cannot review your own business." };
     }
 
-    await db.review.create({
+    const review = await db.review.create({
       data: {
         businessId: business.id,
         authorId: user?.id ?? null,
@@ -67,6 +68,15 @@ export async function createReviewAction(
         negotiation: parsed.data.negotiation ?? null,
       },
     });
+    if (user) {
+      await awardPoints({
+        userId: user.id,
+        reason: "REVIEW_POSTED",
+        note: `Review of ${business.name}`,
+        key: review.id,
+      });
+    }
+
     revalidatePath(`/b/${business.slug}`);
     return { success: "Thanks for your review!" };
   } catch (error) {

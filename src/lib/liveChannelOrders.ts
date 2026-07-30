@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notifications";
+import { awardSpendPoints } from "@/lib/rewards";
 
 const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -53,6 +54,14 @@ export async function confirmLiveChannelOrder({
       href: "/live/submit",
     });
   }
+
+  await awardSpendPoints({
+    userId: order.userId,
+    amountMinor,
+    currency,
+    note: "Live radio / TV carriage",
+    reference,
+  });
 
   return db.liveChannelOrder.findUnique({ where: { id: order.id } });
 }

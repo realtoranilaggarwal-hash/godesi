@@ -1,7 +1,7 @@
 import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints, awardSpendPoints } from "@/lib/rewards";
 
 export const PLAN_DURATION_DAYS = 30;
 
@@ -48,6 +48,13 @@ export async function activatePlan({
     userId,
     reason: "PAID_UPGRADE",
     note: `${plan} membership`,
+  });
+  await awardSpendPoints({
+    userId,
+    amountMinor,
+    currency,
+    note: `${plan} membership`,
+    reference,
   });
 
   const referrer = await db.user.findUnique({

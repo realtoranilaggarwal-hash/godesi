@@ -138,6 +138,10 @@ enum PointsReason {
   FOUNDING_MEMBER
   /// A founding member's doubled share of a reward they earned.
   FOUNDING_BONUS
+  /// Left a review on a business.
+  REVIEW_POSTED
+  /// One point per US dollar spent with Godesi.
+  PAYMENT_SPEND
   REDEMPTION
   ADJUSTMENT
 }
@@ -258,6 +262,7 @@ model User {
   liveChannels       LiveChannel[]
   liveChannelOrders  LiveChannelOrder[]
   liveChannelReports LiveChannelReport[]
+  chatMessages       ChatMessage[]
 
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
@@ -1700,3 +1705,21 @@ model LiveChannelReport {
   @@index([resolved, createdAt])
   @@index([channelKey])
 }
+
+/// Global chit-chat room on the live visitors page. Text only, no attachments,
+/// and every line is attributable to a signed-in member so it can be moderated.
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  /// City the member has on their profile, shown beside their name.
+  place     String?
+  hidden    Boolean  @default(false)
+  reports   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([hidden, createdAt])
+  @@index([userId, createdAt])
+}
+

@@ -20,6 +20,34 @@ function slugify(question: string) {
     .replace(/\s+/g, "-");
 }
 
+/** Every answer is useful only if the visitor can act on it straight away. */
+const ACTIONS: { href: string; label: string }[] = [
+  { href: "/signup", label: "📇 List your business free" },
+  { href: "/listings/new", label: "🛍 Post a listing (sell anything)" },
+  { href: "/leads/new", label: "🎯 Post a requirement / hire someone" },
+  { href: "/leads", label: "🔎 Browse buyer requirements" },
+  { href: "/events/new", label: "🎉 Post an event & sell tickets" },
+  { href: "/real-estate", label: "🏠 Property, rentals & roommates" },
+  { href: "/wedding", label: "💍 Find or offer wedding services" },
+  { href: "/religious/new", label: "🛕 Add a temple or religious service" },
+  { href: "/news/report", label: "📰 Share news as a member" },
+  { href: "/journalists", label: "🎙 Become a local journalist" },
+  { href: "/desi-elite/apply", label: "🏆 Apply for GoDesi Elite" },
+  { href: "/live/submit", label: "🎧 Add your radio or TV channel" },
+  { href: "/live-radio", label: "🎧 Listen to desi radio" },
+  { href: "/live-tv", label: "📺 Watch desi TV" },
+  { href: "/dashboard/rewards", label: "🪙 Your points wallet" },
+  { href: "/leaderboard", label: "🏅 Top contributors" },
+  { href: "/advertise", label: "📢 Advertise on Godesi" },
+  { href: "/website", label: "🌐 Get a website for $99" },
+  { href: "/connect", label: "🤝 Connect & meet-ups" },
+  { href: "/live", label: "💬 Global chat & live visitors" },
+  { href: "/alumni", label: "🎓 Find your batchmates" },
+  { href: "/resources", label: "🔗 Useful resources" },
+  { href: "/pricing", label: "💎 Membership plans" },
+  { href: "/report", label: "🛡 Report an issue" },
+];
+
 const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
   {
     q: "🌍 What is Godesi?",
@@ -264,24 +292,115 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
-    q: "🏆 What are reward points?",
+    q: "🏆 How do Godesi points work?",
     a: (
       <>
-        <p>Godesi includes a Refer &amp; Earn system. You earn points when:</p>
+        <p>
+          Points are Godesi&apos;s recognition and rewards programme. They are not
+          money and have no cash value — they simply reward the people who build
+          the community.
+        </p>
+        <p>You earn points when:</p>
         <ul>
-          <li>Someone joins using your referral link</li>
-          <li>They create a profile</li>
-          <li>They upgrade or post</li>
+          <li>Someone joins using your referral link (+5)</li>
+          <li>You post a listing or an event (+2)</li>
+          <li>You review a business (+1)</li>
+          <li>Your referral completes a profile, upgrades or posts</li>
+          <li>You spend money with Godesi — 1 point for every $1</li>
         </ul>
-        <p>You can use points to:</p>
+        <p>You can spend points on:</p>
         <ul>
-          <li>Buy banner ads</li>
-          <li>Upgrade your listing</li>
-          <li>Promote your business or event</li>
+          <li>Featuring your listing</li>
+          <li>Unlocking a buyer&apos;s contact details on a requirement</li>
+          <li>Banner ads and promotion</li>
         </ul>
         <p>
-          👉 Turn your network into growth —{" "}
-          <Link href="/dashboard/rewards">Refer &amp; Earn</Link>.
+          Your profile shows a <strong>Contribution Score</strong> bar with your
+          Elite / Premium / Member badge, and the biggest contributors appear on
+          the leaderboard.
+        </p>
+        <p>
+          👉 <Link href="/dashboard/rewards">Your points wallet</Link> ·{" "}
+          <Link href="/leaderboard">Top contributors</Link> ·{" "}
+          <Link href="/rewards">Refer &amp; earn</Link>
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🎧 How do Live Radio and Live TV work?",
+    a: (
+      <>
+        <p>
+          Godesi plays desi radio stations and news channels through the
+          broadcasters&apos; own official players, so the audio keeps going in the
+          floating mini player while you browse. Nothing is hosted or
+          re-streamed by Godesi.
+        </p>
+        <ul>
+          <li>
+            <Link href="/live-radio">🎧 Listen live</Link> — 20 built-in stations
+            (Hindi, Punjabi, Tamil, Gurbani, UK and US desi radio) plus a free
+            search across thousands more that play inside Godesi
+          </li>
+          <li>
+            <Link href="/live-tv">📺 Watch live</Link> — desi news channels in
+            Hindi, English, Marathi, Malayalam, Kannada and Tamil
+          </li>
+          <li>
+            Every card has a <strong>🚩 Not working?</strong> button — tell us and
+            we fix or remove it
+          </li>
+        </ul>
+        <p>
+          Own a station or channel?{" "}
+          <Link href="/live/submit">Submit it here</Link> — $50/month carriage,{" "}
+          <strong>free</strong> for charity, non-profit and community stations,
+          and a premium package if you want to be featured at the top. Our team
+          approves everything before it appears.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🏆 What is GoDesi Elite?",
+    a: (
+      <>
+        <p>
+          GoDesi Elite is our recognition directory for outstanding desi
+          business owners and professionals. You can apply yourself or nominate
+          someone you admire, our team interviews you, and your profile is
+          published with a video and your business awards.
+        </p>
+        <ul>
+          <li>$50 one-time interview fee including a 30–60 second video</li>
+          <li>$500 three-minute professional film from the content you supply</li>
+          <li>$100 / $250 / $500 placement boosts — higher spend ranks higher</li>
+          <li>Every nominee is invited to the annual GoDesi Elite Awards</li>
+        </ul>
+        <p>
+          👉 <Link href="/desi-elite">Elite Directory</Link> ·{" "}
+          <Link href="/desi-elite/apply">Apply or nominate</Link> ·{" "}
+          <Link href="/desi-elite/awards">🏆 Awards ceremony</Link>
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "💬 Can I chat with other desis?",
+    a: (
+      <>
+        <p>
+          Yes — the <Link href="/live">live visitor page</Link> has a global chat
+          room where members online right now can chit-chat. Sign in to post,
+          keep it friendly, and use the 🚩 button on any message that breaks the
+          rules; our team reviews reports and can remove messages and accounts.
+        </p>
+        <p>
+          Links are stripped from chat messages to keep spam out. For business
+          conversations use{" "}
+          <Link href="/connect">Connect</Link> or WhatsApp the member directly
+          from their profile.
         </p>
       </>
     ),
@@ -626,6 +745,20 @@ export default function FaqPage() {
             Still stuck? Write to{" "}
             <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
           </p>
+
+          <h2>⚡ Do it now — direct links</h2>
+          <div className="not-prose grid gap-2 sm:grid-cols-2">
+            {ACTIONS.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50"
+              >
+                {action.label}
+              </Link>
+            ))}
+          </div>
+
 
           {FAQS.map((faq, index) => {
             const anchor = faq.id ?? slugify(faq.q);

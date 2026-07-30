@@ -5,6 +5,7 @@ import { FooterBanner } from "@/components/Banners";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
 
+/** Five roughly equal columns, so no single list runs far past the others. */
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: "Directory",
@@ -13,11 +14,10 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/search", label: "Businesses" },
       { href: "/leads", label: "Leads" },
       { href: "/events", label: "Events" },
-      { href: "/connect", label: "Connect" },
       { href: "/resources", label: "Resources" },
       { href: "/news", label: "News" },
-      { href: "/desi-elite", label: "GoDesi Elite" },
       { href: "/blog", label: "Blog" },
+      { href: "/find", label: "Search everything" },
     ],
   },
   {
@@ -27,7 +27,6 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/why-list", label: "Why list on Godesi?" },
       { href: "/pricing", label: "Membership plans" },
       { href: "/website", label: "Get a website for $99" },
-      { href: "/rewards", label: "Refer & earn rewards" },
       { href: "/advertise", label: "Advertise on Godesi" },
       { href: "/events/new", label: "Post an event" },
       { href: "/dashboard", label: "Dashboard" },
@@ -36,18 +35,26 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
   {
     title: "Community",
     links: [
-      { href: "/find", label: "Search everything" },
-      { href: "/live", label: "Live visitor map" },
+      { href: "/connect", label: "Connect" },
+      { href: "/alumni", label: "Find your batchmates" },
+      { href: "/buzz", label: "#godesi social wall" },
+      { href: "/news/report", label: "Share news" },
+      { href: "/journalists", label: "Become a local journalist" },
+      { href: "/rewards", label: "Refer & earn rewards" },
+      { href: "/leaderboard", label: "🏅 Top contributors" },
+      { href: "/safety", label: "Trust & safety" },
+    ],
+  },
+  {
+    title: "Live & media",
+    links: [
       { href: "/live-radio", label: "🎧 Listen live — desi radio" },
       { href: "/live-tv", label: "📺 Watch live — desi TV" },
       { href: "/live/submit", label: "Add your radio or TV channel" },
-      { href: "/journalists", label: "Become a local journalist" },
+      { href: "/live", label: "Live visitor map" },
+      { href: "/desi-elite", label: "GoDesi Elite" },
       { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
       { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
-      { href: "/news/report", label: "Share news" },
-      { href: "/buzz", label: "#godesi social wall" },
-      { href: "/alumni", label: "Find your batchmates" },
-      { href: "/safety", label: "Trust & safety" },
     ],
   },
   {
@@ -76,7 +83,7 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-7xl px-4 pt-6">
         <FooterBanner />
       </div>
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
         <div>
           <Link href="/" aria-label="Godesi home">
             <Image
@@ -126,7 +133,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              {section.title === "Community" && statsUrl ? (
+              {section.title === "Live & media" && statsUrl ? (
                 <li>
                   <a
                     href={statsUrl}
