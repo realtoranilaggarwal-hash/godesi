@@ -7,6 +7,8 @@ import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
   const [state, formAction] = useFormState(
@@ -26,8 +28,8 @@ export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
         <Field label="Email" hint="We reply here">
           <input name="email" type="email" required className={inputClass} />
         </Field>
-        <Field label="Phone or WhatsApp" hint="Optional">
-          <input name="phone" maxLength={30} className={inputClass} />
+        <Field label="Phone or WhatsApp" hint={`Optional. ${DIAL_CODE_HINT}`}>
+          <PhoneInput name="phone" />
         </Field>
         <Field label="What is this about?">
           <select

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SITE, socialLinks } from "@/lib/site";
+import { socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
@@ -33,24 +33,25 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
     ],
   },
   {
-    title: "Company",
+    title: "Community",
     links: [
       { href: "/find", label: "Search everything" },
       { href: "/live", label: "Live visitor map" },
       { href: "/journalists", label: "Become a local journalist" },
+      { href: "/news/report", label: "Share news" },
       { href: "/buzz", label: "#godesi social wall" },
       { href: "/alumni", label: "Find your batchmates" },
-      { href: "/about", label: "About us" },
-      { href: "/sitemap", label: "Sitemap" },
-      { href: "/faq", label: "FAQ" },
-      { href: "/contact", label: "Contact us" },
       { href: "/safety", label: "Trust & safety" },
-      { href: "/report", label: "Report an issue" },
     ],
   },
   {
-    title: "Legal",
+    title: "Company",
     links: [
+      { href: "/about", label: "About us" },
+      { href: "/contact", label: "Contact us" },
+      { href: "/faq", label: "FAQ" },
+      { href: "/sitemap", label: "Sitemap" },
+      { href: "/report", label: "Report an issue" },
       { href: "/terms", label: "Terms of service" },
       { href: "/privacy", label: "Privacy policy" },
       { href: "/cookies", label: "Cookie policy" },
@@ -85,9 +86,9 @@ export function SiteFooter() {
             and daily news.
           </p>
           <p className="mt-3 text-sm text-slate-600">
-            <a href={`mailto:${SITE.supportEmail}`} className="hover:text-slate-900">
-              {SITE.supportEmail}
-            </a>
+            <Link href="/contact" className="font-semibold hover:text-slate-900">
+              Contact us →
+            </Link>
           </p>
           {socials.length ? (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -119,7 +120,7 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              {section.title === "Company" && statsUrl ? (
+              {section.title === "Community" && statsUrl ? (
                 <li>
                   <a
                     href={statsUrl}

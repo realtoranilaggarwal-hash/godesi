@@ -11,8 +11,10 @@ import {
   RequirementOptions,
   type RequirementOptionSet,
 } from "@/components/forms/RequirementOptions";
-import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { LocationScopeField } from "@/components/forms/LocationScopeField";
 
 export function LeadForm({
   defaultName,
@@ -77,9 +79,7 @@ export function LeadForm({
             />
           </Field>
         )}
-        <Field label="City">
-          <input name="city" required className={inputClass} />
-        </Field>
+        <LocationScopeField />
         <Field label="Budget from (₹)">
           <input name="budgetMin" type="number" min={0} className={inputClass} />
         </Field>
@@ -100,15 +100,8 @@ export function LeadForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Contact phone" required>
-          <input
-            name="contactPhone"
-            required
-            inputMode="tel"
-            pattern={PHONE_PATTERN}
-            title={PHONE_PATTERN_HINT}
-            className={inputClass}
-          />
+        <Field label="Contact phone" hint={DIAL_CODE_HINT} required>
+          <PhoneInput name="contactPhone" required />
         </Field>
         <Field label="Contact email">
           <input

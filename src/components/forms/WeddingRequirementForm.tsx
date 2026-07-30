@@ -9,6 +9,7 @@ import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import { FormError } from "@/components/forms/FormError";
+import { LocationScopeField } from "@/components/forms/LocationScopeField";
 
 /** Couples post here; only Premium vendors can unlock the contact details. */
 export function WeddingRequirementForm({
@@ -99,9 +100,7 @@ export function WeddingRequirementForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="City">
-          <input name="city" required className={inputClass} />
-        </Field>
+        <LocationScopeField />
         {dateFlexible ? <input type="hidden" name="eventDate" value="" /> : null}
         <Field label="Wedding / event date" hint="Leave blank if the date is not fixed">
           <input

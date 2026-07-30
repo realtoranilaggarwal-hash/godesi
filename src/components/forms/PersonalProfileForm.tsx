@@ -12,6 +12,8 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { AlumniFields } from "@/components/forms/AlumniFields";
 import type { AlumniEntry } from "@/lib/alumni";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 export type PersonalProfileValues = {
   name: string;
@@ -217,13 +219,11 @@ export function PersonalProfileForm({
 
       <Field
         label="WhatsApp number"
-        hint="Optional — shows a chat button. Leave empty to keep it private."
+        hint={`Optional — shows a chat button. Leave empty to keep it private. ${DIAL_CODE_HINT}`}
       >
-        <input
+        <PhoneInput
           name="whatsappNumber"
           defaultValue={profile.whatsappNumber ?? ""}
-          placeholder="+1 416 555 0134"
-          className={inputClass}
         />
       </Field>
 

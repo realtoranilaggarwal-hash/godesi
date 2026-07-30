@@ -7,6 +7,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER_PAGE_PROMPTS } from "@/lib/websiteOffer";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 export function WebsiteRequestForm({
   defaultBusinessName,
@@ -48,17 +50,14 @@ export function WebsiteRequestForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Phone">
-          <input
-            name="phone"
-            required
-            maxLength={30}
-            defaultValue={defaultPhone ?? ""}
-            className={inputClass}
-          />
+        <Field label="Phone" hint={DIAL_CODE_HINT}>
+          <PhoneInput name="phone" required defaultValue={defaultPhone ?? ""} />
         </Field>
-        <Field label="WhatsApp" hint="Optional — if different from your phone">
-          <input name="whatsapp" maxLength={30} className={inputClass} />
+        <Field
+          label="WhatsApp"
+          hint={`Optional — if different from your phone. ${DIAL_CODE_HINT}`}
+        >
+          <PhoneInput name="whatsapp" />
         </Field>
         <Field label="City">
           <input

@@ -6,9 +6,11 @@ import {
   saveJournalistPhoneAction,
 } from "@/app/actions/journalist";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Alert, Field } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 export function JournalistPhoneForm({ phone }: { phone: string | null }) {
   const [state, formAction] = useFormState(
@@ -22,14 +24,9 @@ export function JournalistPhoneForm({ phone }: { phone: string | null }) {
       {state.success ? <Alert tone="success">{state.success}</Alert> : null}
       <Field
         label="Mobile number"
-        hint="Country code included, e.g. +91 98765 43210 — never shown publicly"
+        hint={`Never shown publicly. ${DIAL_CODE_HINT}`}
       >
-        <input
-          name="phone"
-          type="tel"
-          defaultValue={phone ?? ""}
-          className={inputClass}
-        />
+        <PhoneInput name="phone" defaultValue={phone ?? ""} />
       </Field>
       <SubmitButton pendingLabel="Saving…">Save number</SubmitButton>
     </form>

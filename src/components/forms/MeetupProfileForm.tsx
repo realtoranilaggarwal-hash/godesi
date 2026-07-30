@@ -14,6 +14,8 @@ import {
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 export type MeetupProfileDefaults = {
   displayName: string;
@@ -141,13 +143,11 @@ export function MeetupProfileForm({
         />
       </Field>
 
-      <Field label="WhatsApp number" hint="Optional — shown to signed-in members only">
-        <input
-          name="whatsapp"
-          defaultValue={defaults?.whatsappNumber}
-          placeholder="+1 555 123 4567"
-          className={inputClass}
-        />
+      <Field
+        label="WhatsApp number"
+        hint={`Optional — shown to signed-in members only. ${DIAL_CODE_HINT}`}
+      >
+        <PhoneInput name="whatsapp" defaultValue={defaults?.whatsappNumber} />
       </Field>
 
       <label className="flex gap-2 rounded-2xl bg-cyan-50 p-3 text-sm text-slate-700">

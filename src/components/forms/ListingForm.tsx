@@ -9,7 +9,6 @@ import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
-import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import {
   FairHousingNotice,
   RoomSharingNotice,
@@ -18,6 +17,8 @@ import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
 import type { ListingKind } from "@prisma/client";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 const KINDS: ListingKind[] = [
   "PROPERTY_SALE",
@@ -113,16 +114,12 @@ export function ListingForm({
             className={inputClass}
           />
         </Field>
-        <Field label="WhatsApp number" hint="Buyers message you directly here" required>
-          <input
-            name="whatsapp"
-            required
-            inputMode="tel"
-            pattern={PHONE_PATTERN}
-            title={PHONE_PATTERN_HINT}
-            defaultValue={defaultWhatsapp}
-            className={inputClass}
-          />
+        <Field
+          label="WhatsApp number"
+          hint={`Buyers message you directly here. ${DIAL_CODE_HINT}`}
+          required
+        >
+          <PhoneInput name="whatsapp" required defaultValue={defaultWhatsapp} />
         </Field>
 
         {isProperty ? (

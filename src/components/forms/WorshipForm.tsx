@@ -11,6 +11,8 @@ import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { FAITHS, FAITH_LABELS } from "@/lib/worship";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 export function WorshipForm({
   imageLimit,
@@ -54,11 +56,14 @@ export function WorshipForm({
         <Field label="Country">
           <input name="country" defaultValue={defaultCountry} required className={inputClass} />
         </Field>
-        <Field label="WhatsApp number" hint="Shown as a “Contact / join” button">
-          <input name="whatsapp" className={inputClass} />
+        <Field
+          label="WhatsApp number"
+          hint={`Shown as a “Contact / join” button. ${DIAL_CODE_HINT}`}
+        >
+          <PhoneInput name="whatsapp" />
         </Field>
-        <Field label="Phone">
-          <input name="phone" className={inputClass} />
+        <Field label="Phone" hint={DIAL_CODE_HINT}>
+          <PhoneInput name="phone" />
         </Field>
         <Field label="Website">
           <input name="websiteUrl" type="url" placeholder="https://" className={inputClass} />

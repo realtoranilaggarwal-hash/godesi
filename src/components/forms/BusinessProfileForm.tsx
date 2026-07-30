@@ -14,10 +14,11 @@ import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
 import { specialtySet } from "@/lib/specialties";
 import { VehicleFields, type VehicleDefaults } from "@/components/forms/VehicleFields";
 import { useState } from "react";
-import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import { COUNTRIES } from "@/lib/countries";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
@@ -120,7 +121,11 @@ export function BusinessProfileForm({
           defaultExtras={business?.extraCategorySlugs ?? []}
           foundingMember={foundingMember}
         />
-        <Field label="City" required>
+        <Field
+          label="City"
+          hint="Work online or serve many areas? Type “Online”, “Anywhere” or your main base."
+          required
+        >
           <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />
         </Field>
         <Field label="State">
@@ -196,24 +201,15 @@ export function BusinessProfileForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="WhatsApp number" hint={PHONE_PATTERN_HINT} required>
-          <input
+        <Field label="WhatsApp number" hint={DIAL_CODE_HINT} required>
+          <PhoneInput
             name="whatsappNumber"
             required
-            inputMode="tel"
-            pattern={PHONE_PATTERN}
-            title={PHONE_PATTERN_HINT}
             defaultValue={business?.whatsappNumber ?? ""}
-            className={inputClass}
           />
         </Field>
-        <Field label="Phone">
-          <input
-            name="phone"
-            inputMode="tel"
-            defaultValue={business?.phone ?? ""}
-            className={inputClass}
-          />
+        <Field label="Phone" hint={DIAL_CODE_HINT}>
+          <PhoneInput name="phone" defaultValue={business?.phone ?? ""} />
         </Field>
         <Field label="Public email">
           <input

@@ -7,6 +7,8 @@ import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { PhoneInput } from "@/components/forms/PhoneInput";
+import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
 /** Shown on unowned starter listings so the real business can take them over. */
 export function ClaimBusinessForm({
@@ -47,8 +49,11 @@ export function ClaimBusinessForm({
           className={inputClass}
         />
       </Field>
-      <Field label="Contact number" hint="So we can verify with you">
-        <input name="phone" className={inputClass} />
+      <Field
+        label="Contact number"
+        hint={`So we can verify with you. ${DIAL_CODE_HINT}`}
+      >
+        <PhoneInput name="phone" />
       </Field>
 
       <SubmitButton pendingLabel="Sending...">Submit claim</SubmitButton>
