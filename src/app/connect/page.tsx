@@ -19,6 +19,8 @@ import { SafetyResourcesRail } from "@/components/SafetyResourcesRail";
 import { PostedBy } from "@/components/PostedBy";
 import { NearMe } from "@/components/NearMe";
 import { ReportMeetupForm } from "@/components/forms/ReportMeetupForm";
+import { GlobalChat } from "@/components/GlobalChat";
+import { recentChat } from "@/lib/chat";
 import {
   Alert,
   Badge,
@@ -61,6 +63,7 @@ export default async function ConnectPage({
   searchParams: Filters;
 }) {
   const user = await getCurrentUser();
+  const chat = await recentChat(user?.id ?? null);
 
   const where: Prisma.MeetupProfileWhereInput = {
     status: "APPROVED",
@@ -352,6 +355,9 @@ export default async function ConnectPage({
             </li>
           </ul>
         </Card>
+
+        {/* Same moderated room as the live page, so meet-ups can be arranged here. */}
+        <GlobalChat initial={chat} signedIn={user !== null} />
 
         <InlineBanner />
       </div>
