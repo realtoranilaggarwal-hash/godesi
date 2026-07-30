@@ -104,7 +104,7 @@ export async function ActivityWall({
         </Link>
       </div>
 
-      <div className="wall-scroller mt-2 h-[420px] overflow-hidden">
+      <div className="wall-scroller mt-2 h-[420px]">
         <div className="wall-track space-y-2">
           {items.map((item) => (
             <WallCard key={item.id} item={item} />

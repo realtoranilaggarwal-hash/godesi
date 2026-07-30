@@ -49,9 +49,29 @@ blockquote {
 }
 
 /* Live #godesi wall: the column drifts upward on its own and stops on hover
-   or for anyone who asked for less motion. */
+   or for anyone who asked for less motion. A slim scrollbar stays visible so it
+   reads as scrollable content rather than a cropped box. */
 .wall-track {
   animation: wall-drift 60s linear infinite;
+}
+
+.wall-scroller {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.wall-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wall-scroller::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.wall-scroller::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .wall-scroller:hover .wall-track,

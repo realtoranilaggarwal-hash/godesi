@@ -15,15 +15,19 @@ import { proxyImage } from "@/lib/proxyImage";
 export async function SponsoredCard({
   categorySlug,
   className = "",
+  index = 0,
 }: {
   categorySlug?: string | null;
   className?: string;
+  /** Two rails on one page each show a different creative and set of links. */
+  index?: number;
 }) {
   const [banners, links] = await Promise.all([
-    activeBanners("SIDEBAR", 1),
+    activeBanners("SIDEBAR", index + 1),
     recommendedLinks(categorySlug ?? null),
   ]);
-  const banner = banners[0];
+  const banner = banners[index] ?? banners[0];
+  const shown = links.slice(index * 5, index * 5 + 5);
 
   return (
     <aside
@@ -56,11 +60,11 @@ export async function SponsoredCard({
           </a>
         ) : null}
 
-        {links.length ? (
+        {shown.length ? (
           <div>
-            <LinkImpressions ids={links.map((link) => link.id)} />
+            <LinkImpressions ids={shown.map((link) => link.id)} />
             <ul className="divide-y divide-slate-100">
-              {links.slice(0, 5).map((link) => (
+              {shown.map((link) => (
                 <li key={link.id} className="py-1.5">
                   <a
                     href={`/api/links/${link.id}/click`}
@@ -79,7 +83,7 @@ export async function SponsoredCard({
           </div>
         ) : null}
 
-        {banner || links.length ? null : <InArticleAd />}
+        {banner || shown.length ? null : <InArticleAd />}
       </div>
 
       <p className="text-xs text-slate-500">
