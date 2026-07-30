@@ -9,7 +9,7 @@ import { NewsCard } from "@/components/NewsCard";
 import { HeaderBanner } from "@/components/Banners";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { AboutGodesi } from "@/components/AboutGodesi";
-import { Card, LinkButton } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
@@ -148,15 +148,18 @@ export default async function HomePage() {
               </button>
             </form>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              <LinkButton href="/add-business" variant="secondary">
+            <div className="mt-5 flex flex-wrap items-center gap-1.5">
+              <Link
+                href="/add-business"
+                className="rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-900 hover:bg-slate-100"
+              >
                 Add your business free
-              </LinkButton>
+              </Link>
               {HERO_ACTIONS.map((action) => (
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+                  className="rounded-full border border-white/60 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10"
                 >
                   {action.label}
                 </Link>
