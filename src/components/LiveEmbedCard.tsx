@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui";
 import { openLiveMedia } from "@/lib/liveMedia";
 import { LiveReportButton } from "@/components/LiveReportButton";
+import { LiveVoteButton } from "@/components/LiveVoteButton";
+import { LiveShareButton } from "@/components/LiveShareButton";
 
 /**
  * Nothing is fetched from TuneIn or YouTube until the visitor presses play,
@@ -22,6 +25,7 @@ export function LiveEmbedCard({
   nonProfit = false,
   /** Member-submitted streams carry their embed to the floating player. */
   submitted = false,
+  votes = 0,
 }: {
   kind: "radio" | "tv";
   id: string;
@@ -35,8 +39,16 @@ export function LiveEmbedCard({
   websiteUrl?: string | null;
   nonProfit?: boolean;
   submitted?: boolean;
+  /** Community votes already recorded for this stream. */
+  votes?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const params = useSearchParams();
+
+  // A shared "?play=<id>" link starts that stream as soon as the page loads.
+  useEffect(() => {
+    if (params.get("play") === id) setOpen(true);
+  }, [params, id]);
 
   return (
     <Card
@@ -112,7 +124,20 @@ export function LiveEmbedCard({
         </button>
       )}
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <LiveVoteButton
+            channelKey={id}
+            kind={kind}
+            label={name}
+            votes={votes}
+          />
+          <LiveShareButton
+            path={`${kind === "radio" ? "/live-radio" : "/live-tv"}?play=${id}`}
+            label={name}
+            kind={kind}
+          />
+        </div>
         <LiveReportButton channelKey={id} kind={kind} label={name} />
       </div>
     </Card>

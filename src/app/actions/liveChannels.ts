@@ -128,6 +128,29 @@ export async function reportLiveChannelAction(formData: FormData) {
   revalidatePath("/admin/live-channels");
 }
 
+/** One vote per member per station; anonymous votes are counted once per browser. */
+export async function voteLiveChannelAction(formData: FormData) {
+  const user = await getCurrentUser();
+  const channelKey = String(formData.get("channelKey") ?? "").slice(0, 120);
+  const label = String(formData.get("label") ?? "").slice(0, 160);
+  const kind: LiveMediaKind = formData.get("kind") === "TV" ? "TV" : "RADIO";
+  if (!channelKey) return;
+
+  if (user) {
+    await db.liveChannelVote.upsert({
+      where: { channelKey_userId: { channelKey, userId: user.id } },
+      create: { channelKey, kind, label: label || channelKey, userId: user.id },
+      update: {},
+    });
+  } else {
+    await db.liveChannelVote.create({
+      data: { channelKey, kind, label: label || channelKey, userId: null },
+    });
+  }
+
+  revalidatePath(kind === "TV" ? "/live-tv" : "/live-radio");
+}
+
 /** Monthly carriage payment; extends the paid-until date on approval. */
 export async function startLiveChannelCheckoutAction(formData: FormData) {
   const user = await requireUser();

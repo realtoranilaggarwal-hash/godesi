@@ -20,14 +20,14 @@ export default async function LivePage() {
   const messages = await recentChat(user?.id ?? null);
 
   return (
-    <div className="mx-auto flex max-w-7xl gap-4 px-4 py-8">
-      {/* Advertising rails flank the map instead of leaving dead space. */}
-      <div className="hidden w-[300px] shrink-0 space-y-4 xl:block">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 xl:flex-row">
+      {/* Advertising sits in one rail only; the chat gets the other side. */}
+      <div className="order-2 space-y-4 xl:order-1 xl:w-[300px] xl:shrink-0">
         <SponsoredCard />
         <ActivityWall limit={10} />
       </div>
 
-      <div className="min-w-0 flex-1 space-y-4">
+      <div className="order-1 min-w-0 flex-1 space-y-4 xl:order-2">
         <div>
           <h1 className="text-2xl font-black text-slate-900">
             Live visitors on Godesi
@@ -39,13 +39,6 @@ export default async function LivePage() {
         </div>
 
         <LiveVisitorMap />
-
-        <GlobalChat initial={messages} signedIn={user !== null} />
-
-        {/* Phones and tablets get the same inventory, stacked. */}
-        <div className="xl:hidden">
-          <SponsoredCard />
-        </div>
 
         <p className="text-sm text-slate-600">
           Want your business in front of them?{" "}
@@ -66,8 +59,8 @@ export default async function LivePage() {
         </p>
       </div>
 
-      <div className="hidden w-[300px] shrink-0 space-y-4 lg:block">
-        <SponsoredCard index={1} />
+      <div className="order-3 xl:w-[360px] xl:shrink-0">
+        <GlobalChat initial={messages} signedIn={user !== null} />
       </div>
     </div>
   );

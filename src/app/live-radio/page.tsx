@@ -6,6 +6,7 @@ import { radioEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { searchStations } from "@/lib/radioBrowser";
 import { RadioBrowserSearch } from "@/components/RadioBrowserSearch";
 import { SponsoredCard } from "@/components/SponsoredCard";
+import { liveVoteCounts } from "@/lib/liveVotes";
 
 export const metadata: Metadata = {
   title: "Live desi radio — Hindi, Punjabi and Bollywood stations | Godesi",
@@ -16,9 +17,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LiveRadioPage() {
-  const [stations, browsed] = await Promise.all([
+  const [stations, browsed, votes] = await Promise.all([
     radioEntries(),
     searchStations({ country: "IN" }),
+    liveVoteCounts(),
   ]);
 
   return (
@@ -60,6 +62,7 @@ export default async function LiveRadioPage() {
             websiteUrl={station.websiteUrl}
             nonProfit={station.nonProfit}
             submitted={station.submitted}
+            votes={votes[station.key] ?? 0}
           />
         ))}
         <SponsoredCard />

@@ -262,6 +262,7 @@ model User {
   liveChannels       LiveChannel[]
   liveChannelOrders  LiveChannelOrder[]
   liveChannelReports LiveChannelReport[]
+  liveChannelVotes   LiveChannelVote[]
   chatMessages       ChatMessage[]
 
   resourceLinks  ResourceLink[]
@@ -1687,6 +1688,21 @@ model LiveChannelOrder {
 
   @@index([channelId])
   @@index([userId])
+}
+
+/// A visitor "vote" for a station or channel, so the most-loved streams can be
+/// ranked and members can see what the community listens to.
+model LiveChannelVote {
+  id         String        @id @default(cuid())
+  channelKey String
+  kind       LiveMediaKind
+  label      String
+  userId     String?
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt  DateTime      @default(now())
+
+  @@unique([channelKey, userId])
+  @@index([channelKey])
 }
 
 /// "This stream isn't working" from a visitor. Covers both the built-in stations

@@ -6,6 +6,10 @@ import { TV_CHANNELS } from "@/lib/liveMedia";
 import { liveVideoId } from "@/lib/liveTv";
 import { tvEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { SponsoredCard } from "@/components/SponsoredCard";
+import { GlobalChat } from "@/components/GlobalChat";
+import { liveVoteCounts } from "@/lib/liveVotes";
+import { getCurrentUser } from "@/lib/auth";
+import { recentChat } from "@/lib/chat";
 
 export const metadata: Metadata = {
   title: "Live desi TV — Hindi and English news channels | Godesi",
@@ -21,7 +25,12 @@ export default async function LiveTvPage() {
       async (channel) => [channel.id, await liveVideoId(channel)] as const,
     ),
   );
-  const channels = await tvEntries(new Map(resolved));
+  const [channels, votes, user] = await Promise.all([
+    tvEntries(new Map(resolved)),
+    liveVoteCounts(),
+    getCurrentUser(),
+  ]);
+  const messages = await recentChat(user?.id ?? null);
 
   return (
     <div className="space-y-4">
@@ -61,10 +70,14 @@ export default async function LiveTvPage() {
             websiteUrl={channel.websiteUrl}
             nonProfit={channel.nonProfit}
             submitted={channel.submitted}
+            votes={votes[channel.key] ?? 0}
           />
         ))}
         <SponsoredCard />
       </div>
+
+      {/* Watching together: the same global room as the live visitors page. */}
+      <GlobalChat initial={messages} signedIn={user !== null} />
 
       <p className="text-xs text-slate-500">
         Every stream is the broadcaster&apos;s own YouTube live channel. Godesi
