@@ -15,6 +15,7 @@ export type SiteSearchResults = {
   leads: SiteSearchHit[];
   categories: SiteSearchHit[];
   resources: SiteSearchHit[];
+  venues: SiteSearchHit[];
   pages: SiteSearchHit[];
   total: number;
 };
@@ -106,6 +107,12 @@ const SITE_PAGES: {
     keywords: ["pricing", "plans", "membership", "premium", "upgrade", "cost"],
   },
   {
+    href: "/venues",
+    title: "📍 Event venues",
+    subtitle: "Banquet halls, temples and grounds hosting desi events",
+    keywords: ["venue", "venues", "hall", "banquet", "ground", "location"],
+  },
+  {
     href: "/faq",
     title: "❓ FAQ",
     subtitle: "How everything on Godesi works",
@@ -156,6 +163,7 @@ export async function siteSearch(
     leads: [],
     categories: [],
     resources: [],
+    venues: [],
     pages: [],
     total: 0,
   };
@@ -164,8 +172,16 @@ export async function siteSearch(
   const like = { contains: q, mode: "insensitive" as const };
   const cityFilter = city ? { city: { contains: city, mode: "insensitive" as const } } : {};
 
-  const [businesses, events, listings, worship, leads, categories, resources] =
-    await Promise.all([
+  const [
+    businesses,
+    events,
+    listings,
+    worship,
+    leads,
+    categories,
+    resources,
+    venues,
+  ] = await Promise.all([
       db.business.findMany({
         where: {
           status: "APPROVED",
@@ -239,6 +255,21 @@ export async function siteSearch(
         take: 5,
         select: { id: true, title: true, url: true, tags: true, description: true },
       }),
+      db.venue.findMany({
+        where: {
+          ...cityFilter,
+          OR: [{ name: like }, { address: like }],
+        },
+        orderBy: { name: "asc" },
+        take: 5,
+        select: {
+          id: true,
+          name: true,
+          city: true,
+          halls: true,
+          _count: { select: { events: { where: { status: "APPROVED" } } } },
+        },
+      }),
     ]);
 
   const results: SiteSearchResults = {
@@ -286,6 +317,18 @@ export async function siteSearch(
       subtitle: row.description || row.tags.join(", ") || "Recommended link",
       badge: "Resource",
     })),
+    venues: venues.map((row) => ({
+      href: `/events?venue=${encodeURIComponent(row.name)}`,
+      title: row.name,
+      subtitle: [
+        row.city,
+        row.halls.length ? `${row.halls.length} halls` : null,
+        `${row._count.events} events`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      badge: "Venue",
+    })),
     pages: pageHits(q),
     total: 0,
   };
@@ -298,6 +341,7 @@ export async function siteSearch(
     results.leads.length +
     results.categories.length +
     results.resources.length +
+    results.venues.length +
     results.pages.length;
 
   return results;

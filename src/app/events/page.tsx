@@ -31,10 +31,11 @@ export default async function EventsPage({
     when?: string;
     type?: string;
     mode?: string;
+    venue?: string;
     feature?: string | string[];
   };
 }) {
-  const { city, category, when, type, mode } = searchParams;
+  const { city, category, when, type, mode, venue } = searchParams;
   const selectedFeatures = (
     Array.isArray(searchParams.feature)
       ? searchParams.feature
@@ -53,6 +54,7 @@ export default async function EventsPage({
     if (when) params.set("when", when);
     if (type) params.set("type", type);
     if (mode) params.set("mode", mode);
+    if (venue) params.set("venue", venue);
     for (const value of selectedFeatures) {
       if (value !== feature) params.append("feature", value);
     }
@@ -86,6 +88,7 @@ export default async function EventsPage({
             ],
           }
         : {}),
+      ...(venue ? { venue: { contains: venue, mode: "insensitive" } } : {}),
       ...(type ? { eventType: type } : {}),
       ...(modeFilter ? { mode: modeFilter } : {}),
       ...(selectedFeatures.length ? { features: { hasEvery: selectedFeatures } } : {}),

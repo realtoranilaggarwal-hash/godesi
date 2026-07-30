@@ -14,7 +14,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
 import { rememberVenue } from "@/lib/venues";
-import { titleCase } from "@/lib/titlecase";
+import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
 
 /** Up to three seat types per event, e.g. Basic / Webinar / Premium. */
@@ -276,9 +276,9 @@ export async function createEventAction(
       data: {
         slug,
         title: titleCase(parsed.data.title),
-        description: parsed.data.description,
+        description: sentenceCase(parsed.data.description),
         startsAt,
-        venue: parsed.data.venue,
+        venue: titleCase(parsed.data.venue),
         hallName: parsed.data.hallName || null,
         address: parsed.data.address || null,
         mapsUrl: parsed.data.mapsUrl ?? null,
@@ -286,7 +286,7 @@ export async function createEventAction(
         features,
         partnerStatus: wantsPartnership ? "REQUESTED" : "NONE",
         partnerAgreedAt: wantsPartnership ? new Date() : null,
-        city: parsed.data.city,
+        city: titleCase(parsed.data.city),
         state: parsed.data.state,
         country: parsed.data.country,
         eventType: parsed.data.eventType,

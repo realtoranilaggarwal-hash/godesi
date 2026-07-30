@@ -11,6 +11,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
 import { levelFor } from "@/lib/journalists";
 import { formatEventDate } from "@/lib/events";
+import { sentenceCase, titleCase } from "@/lib/titlecase";
 import {
   SHARE_KINDS,
   autoShare,
@@ -495,6 +496,13 @@ const adminEventSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
+  eventType: z.string().trim().max(60).optional(),
+  websiteUrl: z
+    .string()
+    .trim()
+    .url("Enter a full website URL starting with https://")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   price: z.coerce.number().int().min(0, "Price cannot be negative"),
   currency: z.enum(["INR", "USD"]),
   seatsTotal: z.coerce.number().int().min(1, "At least 1 seat is required"),
@@ -534,6 +542,8 @@ export async function adminUpdateEventAction(
       city: formData.get("city"),
       categorySlug: formData.get("categorySlug"),
       subcategorySlug: formData.get("subcategorySlug"),
+      eventType: formData.get("eventType") ?? undefined,
+      websiteUrl: formData.get("websiteUrl") ?? undefined,
       price: formData.get("price") || 0,
       currency: formData.get("currency") || "INR",
       seatsTotal: formData.get("seatsTotal") || 1,
@@ -563,11 +573,13 @@ export async function adminUpdateEventAction(
     const event = await db.event.update({
       where: { id: parsed.data.id },
       data: {
-        title: parsed.data.title,
-        description: parsed.data.description,
+        title: titleCase(parsed.data.title),
+        description: sentenceCase(parsed.data.description),
         startsAt,
-        venue: parsed.data.venue,
-        city: parsed.data.city,
+        venue: titleCase(parsed.data.venue),
+        city: titleCase(parsed.data.city),
+        eventType: parsed.data.eventType || null,
+        websiteUrl: parsed.data.websiteUrl ?? null,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
         price: parsed.data.price,

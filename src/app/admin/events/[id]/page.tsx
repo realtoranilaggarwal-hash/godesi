@@ -84,6 +84,8 @@ export default async function AdminEditEventPage({
             city: event.city,
             categorySlug: parentSlug,
             subcategorySlug: subSlug,
+            eventType: event.eventType ?? "",
+            websiteUrl: event.websiteUrl ?? "",
             price: event.price,
             currency: event.currency,
             seatsTotal: event.seatsTotal,

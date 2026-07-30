@@ -87,3 +87,16 @@ export function titleCase(value: string) {
     .map((word, index) => fixWord(word, index === 0 || index === words.length - 1))
     .join(" ");
 }
+
+/**
+ * Sentence-cases member-typed prose: the first letter of every sentence and of
+ * every new line is capitalised, and nothing else about the text is touched.
+ */
+export function sentenceCase(value: string) {
+  return value
+    .trim()
+    .replace(
+      /(^|[.!?]\s+|\n\s*)([a-z])/g,
+      (_match, lead: string, letter: string) => `${lead}${letter.toUpperCase()}`,
+    );
+}

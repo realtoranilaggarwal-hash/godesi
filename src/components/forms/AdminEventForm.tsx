@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import { FormError } from "@/components/forms/FormError";
+import { EVENT_TYPES } from "@/lib/eventOptions";
 
 export type AdminEventValues = {
   id: string;
@@ -20,6 +21,8 @@ export type AdminEventValues = {
   city: string;
   categorySlug: string;
   subcategorySlug: string;
+  eventType: string;
+  websiteUrl: string;
   price: number;
   currency: string;
   seatsTotal: number;
@@ -88,6 +91,31 @@ export function AdminEventForm({
           defaultCategory={event.categorySlug}
           defaultSubcategory={event.subcategorySlug}
         />
+        <Field label="Event type">
+          <select
+            name="eventType"
+            defaultValue={event.eventType}
+            className={inputClass}
+          >
+            <option value="">Not set</option>
+            {EVENT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field
+          label="Website or booking link"
+          hint="Optional — shown as a button on the event page."
+        >
+          <input
+            name="websiteUrl"
+            defaultValue={event.websiteUrl}
+            placeholder="https://www.iacfnj.org"
+            className={inputClass}
+          />
+        </Field>
         <Field label="Ticket price" hint="0 for a free event">
           <input
             name="price"

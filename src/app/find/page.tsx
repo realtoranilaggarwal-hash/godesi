@@ -123,6 +123,7 @@ export default async function FindPage({
             <Group title="Godesi pages" hits={results.pages} />
             <Group title="Businesses & professionals" hits={results.businesses} />
             <Group title="Events" hits={results.events} />
+            <Group title="Venues" hits={results.venues} />
             <Group title="Property, rooms & items" hits={results.listings} />
             <Group title="Temples & places of worship" hits={results.worship} />
             <Group title="Open requirements" hits={results.leads} />
