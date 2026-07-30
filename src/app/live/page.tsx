@@ -24,7 +24,6 @@ export default async function LivePage() {
       {/* Advertising sits in one rail only; the chat gets the other side. */}
       <div className="order-2 space-y-4 xl:order-1 xl:w-[300px] xl:shrink-0">
         <SponsoredCard />
-        <ActivityWall limit={10} />
       </div>
 
       <div className="order-1 min-w-0 flex-1 space-y-4 xl:order-2">
@@ -59,8 +58,9 @@ export default async function LivePage() {
         </p>
       </div>
 
-      <div className="order-3 xl:w-[360px] xl:shrink-0">
+      <div className="order-3 space-y-4 xl:w-[360px] xl:shrink-0">
         <GlobalChat initial={messages} signedIn={user !== null} />
+        <ActivityWall limit={10} />
       </div>
     </div>
   );
