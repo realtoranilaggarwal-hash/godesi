@@ -22,6 +22,7 @@ import {
   type VenueOption,
 } from "@/components/forms/EventVenueFields";
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 /** Suggested seat types; organisers can rename them to anything. */
 const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
@@ -134,6 +135,13 @@ export function EventForm({
             placeholder="https://www.example.org"
             className={inputClass}
           />
+          <p className="mt-1 text-xs text-slate-500">
+            No website?{" "}
+            <a href="/website" target="_blank" className="font-semibold text-indigo-600">
+              Godesi can build you one for ${WEBSITE_OFFER.priceUsd}
+            </a>
+            .
+          </p>
         </Field>
         <Field label="City">
           <input name="city" required className={inputClass} />

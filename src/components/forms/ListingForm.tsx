@@ -17,6 +17,7 @@ import {
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
 import type { ListingKind } from "@prisma/client";
 import { FormError } from "@/components/forms/FormError";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 const KINDS: ListingKind[] = [
   "PROPERTY_SALE",
@@ -202,6 +203,15 @@ export function ListingForm({
 
       {isProperty || isRoom ? <FairHousingNotice /> : null}
       {isRoom ? <RoomSharingNotice /> : null}
+
+      <p className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
+        <strong>Selling or renting regularly?</strong> Godesi builds you a{" "}
+        {WEBSITE_OFFER.pages}-page website for ${WEBSITE_OFFER.priceUsd} with{" "}
+        {WEBSITE_OFFER.partner}.{" "}
+        <a href="/website" target="_blank" className="font-bold underline">
+          See what you get →
+        </a>
+      </p>
 
       <SubmitButton pendingLabel="Publishing...">Publish listing</SubmitButton>
     </form>

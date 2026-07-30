@@ -17,6 +17,7 @@ import { useState } from "react";
 import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import { COUNTRIES } from "@/lib/countries";
 import { FormError } from "@/components/forms/FormError";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
@@ -302,6 +303,18 @@ export function BusinessProfileForm({
             </Field>
           ))}
         </div>
+        <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
+          <strong>No website yet?</strong> Godesi builds you a {WEBSITE_OFFER.pages}-page
+          mobile-friendly site for ${WEBSITE_OFFER.priceUsd} with our partner{" "}
+          {WEBSITE_OFFER.partner}.{" "}
+          <a
+            href="/website"
+            target="_blank"
+            className="font-bold underline"
+          >
+            See what you get and send your details →
+          </a>
+        </p>
       </details>
 
       <SubmitButton>{business ? "Save changes" : "Create my card"}</SubmitButton>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { effectivePlan, PLANS } from "@/lib/plans";
 import {
   Alert,
@@ -260,6 +261,17 @@ export default async function DashboardPage({
                   /b/{business.slug}
                 </Link>
               </p>
+
+              {business.websiteUrl ? null : (
+                <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
+                  <strong>No website yet?</strong> We build you a{" "}
+                  {WEBSITE_OFFER.pages}-page site for ${WEBSITE_OFFER.priceUsd} with{" "}
+                  {WEBSITE_OFFER.partner}.{" "}
+                  <Link href="/website" className="font-bold underline">
+                    See what you get →
+                  </Link>
+                </p>
+              )}
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <LinkButton href="/dashboard/profile" variant="secondary">
