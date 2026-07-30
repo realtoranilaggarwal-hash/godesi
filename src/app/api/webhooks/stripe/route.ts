@@ -5,6 +5,7 @@ import { activatePlan, assertPaidPlan } from "@/lib/billing";
 import { confirmTicket } from "@/lib/events";
 import { confirmAdOrder } from "@/lib/adOrders";
 import { confirmResourceOrder } from "@/lib/resourceOrders";
+import { confirmEliteOrder } from "@/lib/eliteOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
 import { db } from "@/lib/db";
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
       const adOrderId = session.metadata?.adOrderId;
       const resourceOrderId = session.metadata?.resourceOrderId;
       const reviewDisputeId = session.metadata?.reviewDisputeId;
+      const eliteOrderId = session.metadata?.eliteOrderId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
@@ -64,6 +66,14 @@ export async function POST(request: Request) {
           reference: session.id,
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
+        });
+      } else if (session.metadata?.kind === "elite" && eliteOrderId) {
+        await confirmEliteOrder({
+          eliteOrderId,
+          provider: "stripe",
+          reference: session.id,
+          amountMinor: session.amount_total ?? 0,
+          currency: (session.currency ?? "usd").toUpperCase(),
         });
       } else if (session.metadata?.kind === "review-dispute" && reviewDisputeId) {
         await confirmReviewDispute({ disputeId: reviewDisputeId, reference: session.id });

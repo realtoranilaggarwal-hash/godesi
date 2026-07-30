@@ -9,6 +9,7 @@ import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
+import { InArticleAd } from "@/components/InArticleAd";
 import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -147,6 +148,8 @@ export default async function ReportPage({
           <p className="whitespace-pre-line text-[15px] leading-relaxed text-slate-700">
             {report.summary}
           </p>
+
+          <InArticleAd />
 
           {report.photoUrls.length ? (
             <div className="grid gap-2 sm:grid-cols-2">

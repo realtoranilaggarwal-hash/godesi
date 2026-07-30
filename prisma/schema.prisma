@@ -253,6 +253,7 @@ model User {
   /// Answer to the "want to be in GoDesi Elite?" prompt: SELF, OTHER or LATER.
   elitePrompt  String?
   eliteEntries EliteEntry[]
+  eliteOrders  EliteOrder[]
 
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
@@ -1341,6 +1342,27 @@ model ResourceLink {
   @@index([status, active, categorySlug])
 }
 
+/// One-time Elite purchases: the interview fee, the professional film and
+/// placement boosts. Kept separate from memberships, which renew monthly.
+model EliteOrder {
+  id          String        @id @default(cuid())
+  entryId     String
+  entry       EliteEntry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// INTERVIEW, VIDEO_PRO or BOOST_*.
+  packageId   String
+  amountMinor Int
+  currency    String
+  status      AdOrderStatus @default(PENDING)
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  createdAt   DateTime      @default(now())
+
+  @@index([entryId])
+  @@index([userId])
+}
+
 /// Checkout for a resource link view pack.
 model ResourceOrder {
   id          String        @id @default(cuid())
@@ -1560,6 +1582,22 @@ model EliteEntry {
 
   status EliteStatus @default(PENDING)
   badge  EliteBadge  @default(BASIC)
+
+  /// Professional and business awards, shown beside the photo.
+  awards       String[] @default([])
+  /// Set when this entry was honoured at a GoDesi Elite Awards ceremony.
+  awardTitle   String?
+  awardYear    Int?
+
+  /// Paid the one-time interview + short video fee.
+  interviewPaid Boolean @default(false)
+  /// NONE, BASIC (30-60s edit) or PRO (3-minute professional film).
+  videoPackage  String  @default("NONE")
+  /// Everything this member has paid towards their Elite profile, in cents.
+  /// Higher spend ranks the profile above others in its section.
+  paidCents     Int     @default(0)
+
+  orders EliteOrder[]
 
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?

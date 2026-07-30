@@ -3,7 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { Card, LinkButton, inputClass } from "@/components/ui";
 import { EliteCard } from "@/components/EliteCard";
-import { ELITE_CATEGORIES, eliteWhere } from "@/lib/elite";
+import { ELITE_CATEGORIES, ELITE_ORDER, eliteWhere } from "@/lib/elite";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default async function EliteDirectoryPage({
   const where = eliteWhere(searchParams);
   const entries = await db.eliteEntry.findMany({
     where,
-    orderBy: [{ badge: "desc" }, { publishedAt: "desc" }],
+    orderBy: [{ badge: "desc" }, ...ELITE_ORDER],
     take: 200,
   });
 
@@ -44,6 +44,12 @@ export default async function EliteDirectoryPage({
             className="bg-white text-slate-900 ring-1 ring-slate-300"
           >
             Nominate someone
+          </LinkButton>
+          <LinkButton
+            href="/desi-elite/awards"
+            className="bg-white text-slate-900 ring-1 ring-slate-300"
+          >
+            🏆 Elite Awards
           </LinkButton>
           <Link
             href="/desi-elite/rss"

@@ -8,6 +8,7 @@ import { Alert, Badge, Card, EmptyState, LinkButton, inputClass } from "@/compon
 import { formatInr } from "@/lib/format";
 import { PostedBy } from "@/components/PostedBy";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { InArticleAd } from "@/components/InArticleAd";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -188,6 +189,8 @@ export default async function LeadsPage({
       ) : (
         <EmptyState title="No open requirements right now" body="Check back soon." />
       )}
+
+      <InArticleAd />
 
       <InlineBanner />
       </div>

@@ -42,6 +42,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/live-tv", label: "📺 Watch live — desi TV" },
       { href: "/journalists", label: "Become a local journalist" },
       { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
+      { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
       { href: "/news/report", label: "Share news" },
       { href: "/buzz", label: "#godesi social wall" },
       { href: "/alumni", label: "Find your batchmates" },

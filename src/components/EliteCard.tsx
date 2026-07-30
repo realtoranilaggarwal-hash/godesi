@@ -53,6 +53,18 @@ export function EliteCard({
           <p className="text-xs text-slate-500">
             {entry.category} · <PlaceLink city={entry.city} country={entry.country} />
           </p>
+          {entry.awardTitle ? (
+            <p className="mt-1 inline-block rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2 py-0.5 text-[11px] font-black text-white">
+              🏆 {entry.awardTitle}
+              {entry.awardYear ? ` ${entry.awardYear}` : ""}
+            </p>
+          ) : null}
+          {entry.awards.length ? (
+            <p className="mt-1 truncate text-[11px] font-semibold text-amber-800">
+              🏅 {entry.awards.slice(0, 2).join(" · ")}
+              {entry.awards.length > 2 ? ` +${entry.awards.length - 2}` : ""}
+            </p>
+          ) : null}
         </div>
       </div>
 

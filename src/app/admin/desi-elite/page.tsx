@@ -111,6 +111,11 @@ export default async function EliteAdminPage({
                 {ELITE_STATUS_LABELS[entry.status]}
               </p>
               <p className="text-slate-500">{ELITE_BADGES[entry.badge].label}</p>
+              <p className="text-slate-500">
+                Paid ${(entry.paidCents / 100).toLocaleString()}
+                {entry.interviewPaid ? " · interview" : ""}
+                {entry.videoPackage === "PRO" ? " · 3-min film" : ""}
+              </p>
               {entry.status === "PUBLISHED" ? (
                 <Link
                   href={`/desi-elite/${entry.slug}`}
@@ -185,6 +190,35 @@ export default async function EliteAdminPage({
             >
               Save
             </button>
+            <textarea
+              name="awards"
+              defaultValue={entry.awards.join("\n")}
+              placeholder="Awards, one per line"
+              rows={2}
+              className={`${inputClass} sm:col-span-2`}
+            />
+            <input
+              name="awardTitle"
+              defaultValue={entry.awardTitle ?? ""}
+              placeholder="Ceremony award title"
+              className={`${inputClass} sm:col-span-2`}
+            />
+            <input
+              name="awardYear"
+              type="number"
+              defaultValue={entry.awardYear ?? ""}
+              placeholder="Award year"
+              className={inputClass}
+            />
+            <select
+              name="videoPackage"
+              defaultValue={entry.videoPackage}
+              className={inputClass}
+            >
+              <option value="NONE">No video package</option>
+              <option value="BASIC">Basic 30–60s</option>
+              <option value="PRO">3-minute film</option>
+            </select>
             <input
               name="adminNote"
               defaultValue={entry.adminNote ?? ""}

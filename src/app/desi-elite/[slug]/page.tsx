@@ -84,6 +84,24 @@ export default async function EliteProfilePage({
                 ? ` · ${entry.yearsExperience} yrs experience`
                 : ""}
             </p>
+            {entry.awardTitle ? (
+              <p className="mt-1 inline-block rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-3 py-0.5 text-xs font-black text-white">
+                🏆 {entry.awardTitle}
+                {entry.awardYear ? ` ${entry.awardYear}` : ""}
+              </p>
+            ) : null}
+            {entry.awards.length ? (
+              <ul className="mt-1 flex flex-wrap gap-1">
+                {entry.awards.map((award) => (
+                  <li
+                    key={award}
+                    className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900"
+                  >
+                    🏅 {award}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             {entry.user?.username ? (
               <Link
                 href={`/${entry.user.username}`}

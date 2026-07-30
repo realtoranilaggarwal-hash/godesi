@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { EliteBadge, EliteStatus } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -13,8 +14,10 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import {
   INTERVIEW_TYPES,
   ELITE_CATEGORIES,
+  elitePackageOrThrow,
   uniqueEliteSlug,
 } from "@/lib/elite";
+import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 const optionalUrl = z
   .string()
@@ -196,6 +199,64 @@ export async function submitEliteAction(
 }
 
 /** Dismisses (or records) the "want to be featured?" prompt. */
+/**
+ * Elite fees are one-time purchases in USD: the interview, the professional
+ * film and placement boosts. Stripe confirms them through the webhook.
+ */
+export async function startEliteCheckoutAction(formData: FormData) {
+  const user = await requireUser();
+  const entryId = String(formData.get("entryId") ?? "");
+  const item = elitePackageOrThrow(String(formData.get("packageId") ?? ""));
+
+  const entry = await db.eliteEntry.findFirst({
+    where: { id: entryId, userId: user.id },
+    select: { id: true, fullName: true },
+  });
+  if (!entry) redirect("/desi-elite/apply?error=not_found");
+  if (!stripeEnabled()) redirect("/desi-elite/apply?error=stripe_unavailable");
+
+  const amountMinor = item.usd * 100;
+  const order = await db.eliteOrder.create({
+    data: {
+      entryId: entry.id,
+      userId: user.id,
+      packageId: item.id,
+      amountMinor,
+      currency: "USD",
+    },
+  });
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    client_reference_id: user.id,
+    metadata: {
+      kind: "elite",
+      eliteOrderId: order.id,
+      entryId: entry.id,
+      userId: user.id,
+    },
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "usd",
+          unit_amount: amountMinor,
+          product_data: {
+            name: `GoDesi Elite — ${item.label}`,
+            description: entry.fullName,
+          },
+        },
+      },
+    ],
+    success_url: `${siteUrl()}/desi-elite/apply?paid={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl()}/desi-elite/apply?error=cancelled`,
+  });
+
+  if (!session.url) redirect("/desi-elite/apply?error=stripe_session");
+  redirect(session.url);
+}
+
 export async function elitePromptAction(formData: FormData) {
   const user = await requireUser();
   const answer = String(formData.get("answer") ?? "");
@@ -215,6 +276,14 @@ export async function updateEliteAction(formData: FormData) {
   const assignedTo = String(formData.get("assignedTo") ?? "").trim();
   const adminNote = String(formData.get("adminNote") ?? "").trim();
   const videoUrl = String(formData.get("videoUrl") ?? "").trim();
+  const awards = String(formData.get("awards") ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+  const awardTitle = String(formData.get("awardTitle") ?? "").trim();
+  const awardYearRaw = String(formData.get("awardYear") ?? "").trim();
+  const videoPackage = String(formData.get("videoPackage") ?? "").trim();
 
   const entry = await db.eliteEntry.findUnique({ where: { id } });
   if (!entry) throw new Error("Entry not found");
@@ -228,6 +297,10 @@ export async function updateEliteAction(formData: FormData) {
       assignedTo: assignedTo || null,
       adminNote: adminNote || null,
       videoUrl: videoUrl || entry.videoUrl,
+      awards,
+      awardTitle: awardTitle || null,
+      awardYear: awardYearRaw ? Number(awardYearRaw) : null,
+      videoPackage: videoPackage || entry.videoPackage,
       reviewedAt: new Date(),
       publishedAt:
         status === "PUBLISHED" ? (entry.publishedAt ?? new Date()) : entry.publishedAt,

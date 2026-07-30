@@ -58,6 +58,69 @@ export const ELITE_CATEGORIES = [
   "Other",
 ];
 
+export type ElitePackageId =
+  | "INTERVIEW"
+  | "VIDEO_PRO"
+  | "BOOST_100"
+  | "BOOST_250"
+  | "BOOST_500";
+
+/**
+ * Elite is paid-for recognition: the interview fee covers the shoot and a short
+ * edit, the film is produced from material the member supplies, and a boost
+ * simply lifts the profile higher inside its section.
+ */
+export const ELITE_PACKAGES: Record<
+  ElitePackageId,
+  { label: string; usd: number; blurb: string; kind: "INTERVIEW" | "VIDEO" | "BOOST" }
+> = {
+  INTERVIEW: {
+    label: "Elite interview + 30–60 second video",
+    usd: 50,
+    blurb:
+      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live and publishes your Elite profile with a 30–60 second video.",
+    kind: "INTERVIEW",
+  },
+  VIDEO_PRO: {
+    label: "3-minute professional film",
+    usd: 500,
+    blurb:
+      "A professionally produced three-minute film built from the photos, footage and story you provide, embedded at the top of your profile.",
+    kind: "VIDEO",
+  },
+  BOOST_100: {
+    label: "Placement boost — $100",
+    usd: 100,
+    blurb: "Moves your profile above others in your section.",
+    kind: "BOOST",
+  },
+  BOOST_250: {
+    label: "Placement boost — $250",
+    usd: 250,
+    blurb: "Higher placement than the $100 boost.",
+    kind: "BOOST",
+  },
+  BOOST_500: {
+    label: "Placement boost — $500",
+    usd: 500,
+    blurb: "Top of your section, ahead of smaller boosts.",
+    kind: "BOOST",
+  },
+};
+
+export function elitePackageOrThrow(value: string) {
+  const id = value as ElitePackageId;
+  const item = ELITE_PACKAGES[id];
+  if (!item) throw new Error("Unknown Elite package");
+  return { id, ...item };
+}
+
+/** Spend first, then badge, then newest — so paying members sit on top. */
+export const ELITE_ORDER: Prisma.EliteEntryOrderByWithRelationInput[] = [
+  { paidCents: "desc" },
+  { publishedAt: "desc" },
+];
+
 export type EliteFilters = {
   category?: string;
   city?: string;

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { blogBlocks, blogSummary } from "@/lib/blog";
 import { Card } from "@/components/ui";
+import { InArticleAd } from "@/components/InArticleAd";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { siteUrl } from "@/lib/format";
@@ -108,6 +109,8 @@ export default async function BlogPostPage({
               ))}
             </p>
           ) : null}
+
+          <InArticleAd className="mt-5" />
 
           <div className="mt-5 border-t border-slate-100 pt-4">
             <ShareButtons
