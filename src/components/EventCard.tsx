@@ -4,6 +4,7 @@ import { Money } from "@/components/Money";
 import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
+import { StaffEditLink } from "@/components/StaffEditLink";
 
 export type EventListItem = {
   id: string;
@@ -36,9 +37,15 @@ export function EventCard({
   const posterHeight = compact ? "h-24" : "h-32";
 
   return (
-    <Link
+    <div className="relative flex">
+      <StaffEditLink
+        href={`/admin/events/${event.id}`}
+        className="absolute right-2 top-2 z-10 shadow"
+        label="✏️ Edit"
+      />
+      <Link
       href={`/events/${event.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
       {event.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -102,6 +109,7 @@ export function EventCard({
           <span className="text-xs text-slate-500">{left} seats left</span>
         </div>
       </div>
-    </Link>
+      </Link>
+    </div>
   );
 }

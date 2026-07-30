@@ -4,6 +4,7 @@ import { Badge, Card, Stars } from "@/components/ui";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { whatsappLink } from "@/lib/format";
+import { StaffEditLink } from "@/components/StaffEditLink";
 
 /**
  * `premium` frames a paid or hand-picked card with a ribbon so it reads as an
@@ -169,6 +170,12 @@ export function BusinessCard({
           {business.description}
         </p>
       ) : null}
+
+      <StaffEditLink
+        href={`/admin/business/${business.slug}`}
+        className="absolute right-3 top-3"
+        label="✏️ Edit"
+      />
 
       <div className="mt-auto flex gap-2">
         <Link

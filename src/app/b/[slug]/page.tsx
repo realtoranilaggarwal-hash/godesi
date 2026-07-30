@@ -27,6 +27,7 @@ import { disclaimerFor, specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
+import { StaffEditLink } from "@/components/StaffEditLink";
 
 export const dynamic = "force-dynamic";
 
@@ -212,6 +213,7 @@ export default async function BusinessProfilePage({
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
+              <StaffEditLink href={`/admin/business/${business.slug}`} />
               {business.owner && business.owner.plan !== "FREE" ? (
                 <Badge tone="indigo">{business.owner.plan}</Badge>
               ) : null}

@@ -52,6 +52,7 @@ export function BusinessProfileForm({
   canFeatureSpecialty = false,
   extraCategoryLimit = 0,
   foundingMember = false,
+  staffEdit = false,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -68,6 +69,8 @@ export function BusinessProfileForm({
   /** Extra categories the member's plan (or founding seat) allows. */
   extraCategoryLimit?: number;
   foundingMember?: boolean;
+  /** Staff editing somebody else's card: posts the id and skips plan limits. */
+  staffEdit?: boolean;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -95,6 +98,15 @@ export function BusinessProfileForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
+      {staffEdit && business ? (
+        <>
+          <input type="hidden" name="businessId" value={business.id} />
+          <p className="rounded-xl bg-rose-50 p-3 text-sm font-semibold text-rose-900">
+            Staff edit — you are changing “{business.name}” on behalf of its
+            owner.
+          </p>
+        </>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="This card is for">

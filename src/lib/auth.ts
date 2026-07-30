@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
@@ -61,6 +62,9 @@ export async function requireUser(): Promise<User> {
   if (!user) throw new Error("UNAUTHORIZED");
   return user;
 }
+
+/** Per-request cached lookup, so card grids can each check staff cheaply. */
+export const cachedCurrentUser = cache(getCurrentUser);
 
 /** Admins plus moderators — everyone allowed on the content desk. */
 export function isStaff(user: { role: Role }) {

@@ -19,6 +19,7 @@ import {
   eventModeIcon,
   eventModeLabel,
 } from "@/lib/eventOptions";
+import { StaffEditLink } from "@/components/StaffEditLink";
 
 export const dynamic = "force-dynamic";
 
@@ -114,7 +115,10 @@ export default async function EventPage({
               {left === 0 && !past ? <Badge tone="red">Sold out</Badge> : null}
             </div>
 
-            <h1 className="text-2xl font-black sm:text-3xl">{event.title}</h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-black sm:text-3xl">{event.title}</h1>
+              <StaffEditLink href={`/admin/events/${event.id}`} />
+            </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>📅 {formatEventDate(event.startsAt)}</p>
               <p>

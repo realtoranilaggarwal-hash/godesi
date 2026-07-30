@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { isStaff, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { effectivePlan, extraCategoryLimit, mediaLimit } from "@/lib/plans";
 import { contactDetailKind } from "@/lib/moderation";
@@ -199,12 +199,22 @@ export async function saveBusinessProfileAction(
   formData: FormData,
 ): Promise<ActionState> {
   let slug: string;
+  let staffEdit = false;
   try {
     const user = await requireUser();
     const parsed = readProfileForm(formData);
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    if (effectivePlan(user) === "FREE" && parsed.data.description) {
+    // Staff may edit any card straight from its page by posting its id.
+    const targetId = String(formData.get("businessId") ?? "").trim();
+    staffEdit = Boolean(targetId) && isStaff(user);
+    if (targetId && !staffEdit) return { error: "You cannot edit that listing." };
+    const target = staffEdit
+      ? await db.business.findUnique({ where: { id: targetId } })
+      : null;
+    if (staffEdit && !target) return { error: "Listing not found." };
+
+    if (!staffEdit && effectivePlan(user) === "FREE" && parsed.data.description) {
       const kind = contactDetailKind(parsed.data.description);
       if (kind) {
         return {
@@ -226,7 +236,7 @@ export async function saveBusinessProfileAction(
       return { error: "That subcategory does not belong to the chosen category." };
     }
 
-    const extraLimit = extraCategoryLimit(user);
+    const extraLimit = staffEdit ? 20 : extraCategoryLimit(user);
     const wantedExtras = Array.from(
       new Set(formData.getAll("extraCategorySlugs").map(String).filter(Boolean)),
     ).filter((slug) => slug !== category.slug && slug !== subcategory?.slug);
@@ -262,7 +272,8 @@ export async function saveBusinessProfileAction(
     }
     const wantedBadge = String(formData.get("featuredSpecialty") ?? "");
     const featuredSpecialty =
-      effectivePlan(user) !== "FREE" && specialties.includes(wantedBadge)
+      (staffEdit || effectivePlan(user) !== "FREE") &&
+      specialties.includes(wantedBadge)
         ? wantedBadge
         : null;
 
@@ -358,7 +369,8 @@ export async function saveBusinessProfileAction(
     const vehicle = isVehicle ? readVehicleForm(formData) : null;
     if (vehicle && "error" in vehicle) return { error: vehicle.error };
 
-    const existing = await db.business.findUnique({ where: { ownerId: user.id } });
+    const existing =
+      target ?? (await db.business.findUnique({ where: { ownerId: user.id } }));
     let businessId: string;
     if (existing) {
       const updated = await db.business.update({
@@ -390,7 +402,7 @@ export async function saveBusinessProfileAction(
   }
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
-  redirect("/dashboard?saved=1");
+  redirect(staffEdit ? `/b/${slug}?saved=1` : "/dashboard?saved=1");
 }
 
 export async function addMediaAction(
