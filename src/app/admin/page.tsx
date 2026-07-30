@@ -367,7 +367,11 @@ export default async function AdminPage() {
       </Card>
 
       <Card id="listings">
-        <h2 className="mb-3 text-lg font-bold">Listings</h2>
+        <h2 className="text-lg font-bold">Listings</h2>
+        <p className="mb-3 text-xs text-slate-500">
+          Featured cards appear in the ⭐ Premium strip on the homepage and in
+          their category, whatever plan the owner is on.
+        </p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
             <thead className="text-left text-xs uppercase text-slate-500">

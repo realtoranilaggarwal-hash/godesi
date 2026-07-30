@@ -5,15 +5,41 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { whatsappLink } from "@/lib/format";
 
-export function BusinessCard({ business }: { business: BusinessListItem }) {
+/**
+ * `premium` frames a paid or hand-picked card with a ribbon so it reads as an
+ * upgrade; `compact` trims the body so free rows sit visually below it.
+ */
+export function BusinessCard({
+  business,
+  variant = "default",
+}: {
+  business: BusinessListItem;
+  variant?: "default" | "compact" | "premium";
+}) {
+  const premium = variant === "premium";
+  const compact = variant === "compact";
+
   return (
-    <Card className="flex flex-col gap-3">
-      <div className="flex items-start gap-3">
+    <Card
+      className={`relative flex flex-col ${compact ? "gap-2" : "gap-3"} ${
+        premium
+          ? "border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-white to-white shadow-md"
+          : ""
+      }`}
+    >
+      {premium ? (
+        <span className="absolute -top-2.5 left-4 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white shadow">
+          ⭐ Premium
+        </span>
+      ) : null}
+      <div className={`flex items-start gap-3 ${premium ? "pt-2" : ""}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={business.logoUrl ?? "/placeholder-logo.svg"}
           alt=""
-          className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 object-cover"
+          className={`${
+            compact ? "h-10 w-10" : "h-12 w-12"
+          } shrink-0 rounded-xl border border-slate-200 object-cover`}
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -25,6 +51,9 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
             </Link>
             {business.plan !== "FREE" ? (
               <Badge tone="indigo">{business.plan}</Badge>
+            ) : null}
+            {premium && business.verifiedProvider ? (
+              <Badge tone="green">✅ Verified</Badge>
             ) : null}
           </div>
           <p className="text-sm text-slate-500">
@@ -42,7 +71,7 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       </div>
 
-      {business.vehicle ? (
+      {business.vehicle && !compact ? (
         <div className="flex flex-wrap gap-1.5">
           {[
             String(business.vehicle.year),
@@ -67,7 +96,8 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       ) : null}
 
-      {business.serviceOptions.length || business.priceFrom || business.priceHourly ? (
+      {!compact &&
+      (business.serviceOptions.length || business.priceFrom || business.priceHourly) ? (
         <div className="flex flex-wrap gap-1.5">
           {business.verifiedProvider ? (
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
@@ -95,7 +125,8 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </div>
       ) : null}
 
-      {business.certifications.length || business.yearsExperience !== null ? (
+      {!compact &&
+      (business.certifications.length || business.yearsExperience !== null) ? (
         <p className="text-xs font-semibold text-slate-500">
           {[
             business.yearsExperience !== null
@@ -108,7 +139,7 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
         </p>
       ) : null}
 
-      {business.specialties.length ? (
+      {business.specialties.length && !compact ? (
         <div className="flex flex-wrap gap-1.5">
           {business.featuredSpecialty ? (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
@@ -130,7 +161,13 @@ export function BusinessCard({ business }: { business: BusinessListItem }) {
       ) : null}
 
       {business.description ? (
-        <p className="line-clamp-2 text-sm text-slate-600">{business.description}</p>
+        <p
+          className={`${
+            compact ? "line-clamp-1" : "line-clamp-2"
+          } text-sm text-slate-600`}
+        >
+          {business.description}
+        </p>
       ) : null}
 
       <div className="mt-auto flex gap-2">

@@ -197,9 +197,13 @@ export default async function HomePage() {
             linkLabel="See all"
           />
           {businesses.length ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {businesses.map((business) => (
-                <BusinessCard key={business.id} business={business} />
+                <BusinessCard
+                  key={business.id}
+                  business={business}
+                  variant="compact"
+                />
               ))}
             </div>
           ) : (
@@ -221,9 +225,9 @@ export default async function HomePage() {
               href="/events"
               linkLabel="All events"
             />
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {events.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard key={event.id} event={event} variant="compact" />
               ))}
             </div>
           </section>
@@ -237,6 +241,17 @@ export default async function HomePage() {
                 href="/news"
                 linkLabel="All news"
               />
+              <p className="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+                🗞️ Are you a journalist, or have news to share? Post it and your
+                story shows right here.{" "}
+                <Link href="/news/report" className="font-bold underline">
+                  Share news
+                </Link>{" "}
+                ·{" "}
+                <Link href="/journalists" className="font-bold underline">
+                  Become a journalist
+                </Link>
+              </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {news.map((item) => (
                   <NewsCard key={item.id} item={item} />

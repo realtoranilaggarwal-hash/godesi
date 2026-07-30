@@ -37,7 +37,7 @@ function SlotForSale({ index }: { index: number }) {
  */
 export async function FeaturedStrip({
   categorySlugs,
-  title = "Featured businesses",
+  title = "Premium businesses",
 }: {
   categorySlugs?: string[];
   title?: string;
@@ -60,23 +60,28 @@ export async function FeaturedStrip({
   return (
     <section aria-label={title}>
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-lg font-black text-slate-900">⭐ {title}</h2>
+        <div>
+          <h2 className="text-lg font-black text-slate-900">⭐ {title}</h2>
+          <p className="text-xs text-slate-500">
+            Verified paid members — they appear here and above free listings.
+          </p>
+        </div>
         <Link
           href="/pricing"
           className="text-sm font-semibold text-rose-600 hover:underline"
         >
-          Feature your business →
+          Feature your business here →
         </Link>
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {businesses.map((business) => (
-          <BusinessCard key={business.id} business={business} />
+          <BusinessCard key={business.id} business={business} variant="premium" />
         ))}
 
         {fillers.map((business, index) => (
           <div key={business.id}>
-            <BusinessCard business={business} />
+            <BusinessCard business={business} variant="compact" />
             <Link
               href="/pricing"
               className="mt-1 block text-center text-[11px] font-semibold text-slate-400 hover:text-rose-600"

@@ -23,8 +23,17 @@ export type EventListItem = {
   category: { name: string; icon: string; color: string } | null;
 };
 
-export function EventCard({ event }: { event: EventListItem }) {
+/** `compact` shrinks the poster and hides feature chips so rows stay even. */
+export function EventCard({
+  event,
+  variant = "default",
+}: {
+  event: EventListItem;
+  variant?: "default" | "compact";
+}) {
   const left = seatsLeft(event);
+  const compact = variant === "compact";
+  const posterHeight = compact ? "h-24" : "h-32";
 
   return (
     <Link
@@ -36,12 +45,12 @@ export function EventCard({ event }: { event: EventListItem }) {
         <img
           src={event.imageUrl}
           alt={event.title}
-          className="h-32 w-full object-cover"
+          className={`${posterHeight} w-full object-cover`}
           loading="lazy"
         />
       ) : (
         <div
-          className={`flex h-32 items-center justify-center bg-gradient-to-br ${gradientFor(
+          className={`flex ${posterHeight} items-center justify-center bg-gradient-to-br ${gradientFor(
             event.category?.color ?? "rose",
           )} text-5xl`}
           aria-hidden
@@ -50,7 +59,7 @@ export function EventCard({ event }: { event: EventListItem }) {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-1.5 p-4">
+      <div className={`flex flex-1 flex-col gap-1.5 ${compact ? "p-3" : "p-4"}`}>
         <div className="flex items-center gap-2">
           {event.category ? (
             <Badge tone="indigo">
@@ -70,7 +79,7 @@ export function EventCard({ event }: { event: EventListItem }) {
           📍 {event.venue}
           {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
         </p>
-        {event.features?.length ? (
+        {event.features?.length && !compact ? (
           <div className="flex flex-wrap gap-1">
             {event.features.slice(0, 3).map((feature) => (
               <span
