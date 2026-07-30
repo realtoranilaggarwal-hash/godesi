@@ -250,6 +250,10 @@ model User {
   alumni        AlumniRecord[]
   upiRequests   UpiRequest[]
 
+  /// Answer to the "want to be in GoDesi Elite?" prompt: SELF, OTHER or LATER.
+  elitePrompt  String?
+  eliteEntries EliteEntry[]
+
   resourceLinks  ResourceLink[]
   resourceOrders ResourceOrder[]
 
@@ -1496,4 +1500,77 @@ model UpiRequest {
   createdAt    DateTime         @default(now())
 
   @@index([status, createdAt])
+}
+
+enum EliteStatus {
+  PENDING
+  APPROVED
+  INTERVIEW_PENDING
+  INTERVIEW_COMPLETED
+  PUBLISHED
+  REJECTED
+}
+
+/// Featured (gold) tops the directory, Premium (blue) shows contact details,
+/// Basic (grey) is the free listing.
+enum EliteBadge {
+  BASIC
+  PREMIUM
+  FEATURED
+}
+
+/// A "GoDesi Elite" recognition application — self-applied or nominated.
+model EliteEntry {
+  id     String  @id @default(cuid())
+  slug   String  @unique
+  /// Applicant when they hold an account; null for staff-entered nominations.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  fullName     String
+  businessName String?
+  category     String
+  city         String
+  state        String?
+  country      String?
+  profileUrl   String?
+
+  shortBio        String
+  achievements    String?
+  yearsExperience Int?
+  websiteUrl      String?
+  socialLinks     String[] @default([])
+  photoUrl        String?
+  /// YouTube/Vimeo link shown on the published profile.
+  videoUrl        String?
+  /// Certificates, awards and press proof the applicant uploaded or linked.
+  proofUrls       String[] @default([])
+
+  /// Phone, WhatsApp, Facebook Live, Zoom or Skip.
+  interviewTypes String[] @default([])
+  contactPhone   String?
+  contactEmail   String?
+
+  /// SELF or OTHER — nominations invite the nominee to complete their profile.
+  nominationType String  @default("SELF")
+  nomineeName    String?
+  nomineeContact String?
+  /// Member who nominated somebody else, for the viral loop credit.
+  nominatedById  String?
+
+  status EliteStatus @default(PENDING)
+  badge  EliteBadge  @default(BASIC)
+
+  /// Staff notes, interview recording/stream link and the reviewer trail.
+  adminNote    String?
+  interviewUrl String?
+  assignedTo   String?
+  reviewedAt   DateTime?
+  publishedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, badge, publishedAt])
+  @@index([userId])
 }

@@ -245,7 +245,15 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Admin panel</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">Admin panel</h1>
+        <Link
+          href="/admin/desi-elite"
+          className="text-sm font-semibold text-indigo-600 hover:underline"
+        >
+          🏆 GoDesi Elite desk →
+        </Link>
+      </div>
 
       <AdminTabs
         tabs={[

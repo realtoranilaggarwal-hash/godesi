@@ -21,14 +21,18 @@ export function PhoneInput({
   const [code, setCode] = useState(parsed.code);
   const [local, setLocal] = useState(parsed.rest);
 
+  // `inputClass` carries w-full, which beats w-32 in Tailwind's output and used
+  // to stretch the picker across the row, hiding the number box.
+  const boxClass = inputClass.replace("w-full ", "");
+
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       <select
         aria-label="Country code"
         required={required || Boolean(local)}
         value={code}
         onChange={(event) => setCode(event.target.value)}
-        className={`${inputClass} w-32 shrink-0`}
+        className={`${boxClass} w-28 shrink-0`}
       >
         <option value="">Country code</option>
         {DIAL_CODES.map((entry) => (
@@ -46,8 +50,8 @@ export function PhoneInput({
         onChange={(event) =>
           setLocal(event.target.value.replace(/[^\d\s-]/g, ""))
         }
-        placeholder="Number without country code"
-        className={inputClass}
+        placeholder="Phone number"
+        className={`${boxClass} min-w-0 flex-1 basis-32`}
       />
       <input
         type="hidden"

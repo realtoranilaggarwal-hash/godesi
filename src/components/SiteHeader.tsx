@@ -24,11 +24,13 @@ const NAV = [
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/news", label: "News", icon: "📰" },
+  { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
 ];
 
 /** Chips beside the search box, for pages the main nav has no room for. */
 const QUICK_LINKS = [
   { href: "/live", label: "Live", icon: "🟢" },
+  { href: "/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/blog", label: "Blog", icon: "✍️" },
   { href: "/faq", label: "FAQ", icon: "❓" },

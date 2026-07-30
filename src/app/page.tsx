@@ -218,6 +218,34 @@ export default async function HomePage() {
           )}
         </section>
 
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-black text-slate-900">
+                🏆 GoDesi Elite
+              </h2>
+              <p className="text-sm text-slate-700">
+                Recognition for desi founders, professionals and community
+                leaders — apply or nominate someone who deserves it.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/desi-elite"
+                className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-bold text-white"
+              >
+                Elite directory
+              </Link>
+              <Link
+                href="/desi-elite/apply"
+                className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800"
+              >
+                Apply for GoDesi Elite
+              </Link>
+            </div>
+          </div>
+        </Card>
+
         {events.length ? (
           <section>
             <SectionHeading

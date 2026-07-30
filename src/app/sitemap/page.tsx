@@ -26,6 +26,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/connect", label: "Connect — meet desis near you" },
       { href: "/resources", label: "Resources & important links" },
       { href: "/news", label: "News" },
+      { href: "/desi-elite", label: "GoDesi Elite — recognised leaders" },
     ],
   },
   {

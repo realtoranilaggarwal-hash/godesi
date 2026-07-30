@@ -30,6 +30,12 @@ const nextConfig = {
         destination: "/categories/it-training",
         permanent: true,
       },
+      {
+        // Desi Who's Who was renamed GoDesi Elite before launch.
+        source: "/desi-whos-who/:path*",
+        destination: "/desi-elite/:path*",
+        permanent: true,
+      },
     ];
   },
 };

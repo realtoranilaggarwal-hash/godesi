@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { ElitePrompt } from "@/components/ElitePrompt";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { effectivePlan, PLANS } from "@/lib/plans";
 import {
@@ -200,6 +201,8 @@ export default async function DashboardPage({
             tone="bg-fuchsia-50 text-fuchsia-700"
           />
         </div>
+
+        <ElitePrompt userId={user.id} answered={user.elitePrompt} />
 
         {adStats._count._all ? (
           <Card>
