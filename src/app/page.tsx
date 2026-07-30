@@ -39,6 +39,22 @@ function SectionHeading({
   );
 }
 
+/** Hero call-to-action chips, newest services included. */
+const HERO_ACTIONS: { href: string; label: string }[] = [
+  { href: "/events/new", label: "Post an event" },
+  { href: "/leads/new", label: "Request a service" },
+  { href: "/desi-elite/apply", label: "🏆 Apply for GoDesi Elite" },
+  { href: "/live/submit", label: "🎧 Host your radio or TV channel" },
+  { href: "/live-radio", label: "🎧 Listen live" },
+  { href: "/live-tv", label: "📺 Watch live TV" },
+  { href: "/leaderboard", label: "🏅 Top contributors" },
+  { href: "/connect", label: "🤝 Meet someone local" },
+  { href: "/journalists", label: "🗞️ Become a journalist" },
+  { href: "/rewards", label: "🎁 Earn points" },
+  { href: "/alumni", label: "🎓 Find batchmates" },
+  { href: "/website", label: "🌐 Get a website" },
+];
+
 export default async function HomePage() {
   const [
     categories,
@@ -136,42 +152,15 @@ export default async function HomePage() {
               <LinkButton href="/add-business" variant="secondary">
                 Add your business free
               </LinkButton>
-              <Link
-                href="/events/new"
-                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                Post an event
-              </Link>
-              <Link
-                href="/leads/new"
-                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                Request a service
-              </Link>
-              <Link
-                href="/connect"
-                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                🤝 Meet someone local
-              </Link>
-              <Link
-                href="/journalists"
-                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                🗞️ Become a journalist
-              </Link>
-              <Link
-                href="/rewards"
-                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                🎁 Earn rewards
-              </Link>
-              <Link
-                href="/alumni"
-                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-              >
-                🎓 Find batchmates
-              </Link>
+              {HERO_ACTIONS.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  {action.label}
+                </Link>
+              ))}
             </div>
           </div>
           <MemberBubbles members={members} total={memberCount} />
