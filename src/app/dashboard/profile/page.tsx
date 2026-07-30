@@ -121,7 +121,7 @@ export default async function ProfileEditorPage({
         </Card>
       </div>
 
-      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+      <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">
         <ListingHelp username={user.username} />
         <PostingSidebar />
       </aside>

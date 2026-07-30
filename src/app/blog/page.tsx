@@ -143,7 +143,7 @@ export default async function BlogPage() {
         <WhatsNew updates={updates} />
       </div>
 
-      <aside className="hidden w-[320px] shrink-0 space-y-4 lg:block">
+      <aside className="hidden w-[280px] shrink-0 space-y-4 lg:order-first lg:block">
         <CategoryTreeCard />
         <SidebarBanners />
       </aside>

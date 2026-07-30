@@ -207,7 +207,7 @@ export default async function ResourcesPage({
         <InlineBanner />
       </div>
 
-      <aside className="hidden w-[300px] shrink-0 lg:block">
+      <aside className="hidden w-[260px] shrink-0 lg:order-first lg:block">
         <div className="sticky top-24 space-y-4">
           <TagCloud active={tag ?? undefined} />
           <SidebarBanners />

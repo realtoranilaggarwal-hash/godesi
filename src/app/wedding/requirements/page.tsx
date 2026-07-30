@@ -222,7 +222,7 @@ export default async function WeddingRequirementsPage({
         <InlineBanner />
       </div>
 
-      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+      <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">
         <NeedHelpBox />
         <SidebarBanners />
       </aside>

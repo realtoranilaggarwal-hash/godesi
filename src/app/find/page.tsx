@@ -133,7 +133,7 @@ export default async function FindPage({
         )}
       </div>
 
-      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+      <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">
         <SidebarBanners />
       </aside>
     </div>

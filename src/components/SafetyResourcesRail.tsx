@@ -11,7 +11,7 @@ export async function SafetyResourcesRail() {
   const links = await recommendedLinks(null, 6, "connect-safety");
 
   return (
-    <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+    <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">
       <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4">
         <h2 className="text-base font-bold text-teal-900">🛡️ Safety tools & tips</h2>
         <p className="mt-1 text-xs text-teal-800">

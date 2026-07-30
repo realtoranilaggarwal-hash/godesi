@@ -153,7 +153,7 @@ export async function SidebarBanners() {
 
   return (
     <aside
-      className="hidden w-[300px] shrink-0 space-y-4 lg:block"
+      className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
       aria-label="Sponsored"
     >
       <LiveVisitorMap compact />

@@ -136,7 +136,7 @@ export default async function BlogPostPage({
         </Card>
       </article>
 
-      <aside className="hidden w-[320px] shrink-0 space-y-4 lg:block">
+      <aside className="hidden w-[280px] shrink-0 space-y-4 lg:order-first lg:block">
         <SidebarBanners />
       </aside>
     </div>

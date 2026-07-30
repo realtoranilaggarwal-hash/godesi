@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
+import { ChatPanel } from "@/components/ChatPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -150,6 +151,8 @@ export default async function VenuesPage({
           ))}
         </div>
       )}
+
+      <ChatPanel />
     </div>
   );
 }
