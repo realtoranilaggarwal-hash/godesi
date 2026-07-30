@@ -5,6 +5,7 @@ import { LiveEmbedCard } from "@/components/LiveEmbedCard";
 import { TV_CHANNELS } from "@/lib/liveMedia";
 import { liveVideoId } from "@/lib/liveTv";
 import { tvEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
+import { SponsoredCard } from "@/components/SponsoredCard";
 
 export const metadata: Metadata = {
   title: "Live desi TV — Hindi and English news channels | Godesi",
@@ -62,6 +63,7 @@ export default async function LiveTvPage() {
             submitted={channel.submitted}
           />
         ))}
+        <SponsoredCard />
       </div>
 
       <p className="text-xs text-slate-500">

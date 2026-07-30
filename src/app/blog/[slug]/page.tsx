@@ -82,7 +82,22 @@ export default async function BlogPostPage({
 
           <div className="mt-5 space-y-4 text-[15px] leading-7 text-slate-700">
             {blocks.map((block, index) =>
-              block.type === "list" ? (
+              block.type === "image" ? (
+                <figure key={index} className="space-y-1">
+                  <Image
+                    src={block.src}
+                    alt={block.caption}
+                    width={1280}
+                    height={900}
+                    className="w-full rounded-2xl border border-slate-200"
+                  />
+                  {block.caption ? (
+                    <figcaption className="text-xs text-slate-500">
+                      {block.caption}
+                    </figcaption>
+                  ) : null}
+                </figure>
+              ) : block.type === "list" ? (
                 <ul key={index} className="list-disc space-y-1 pl-5">
                   {block.items.map((item, itemIndex) => (
                     <li key={itemIndex}>{item}</li>

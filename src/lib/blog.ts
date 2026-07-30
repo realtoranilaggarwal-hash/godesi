@@ -10,7 +10,10 @@ export async function uniqueBlogSlug(title: string) {
   return slug;
 }
 
-/** Posts are plain text; blank lines separate paragraphs and "- " makes a bullet. */
+/**
+ * Posts are plain text; blank lines separate paragraphs, "- " makes a bullet and
+ * a line of "![caption](/path.png)" becomes a screenshot.
+ */
 export function blogBlocks(body: string) {
   return body
     .split(/\n{2,}/)
@@ -18,6 +21,14 @@ export function blogBlocks(body: string) {
     .filter(Boolean)
     .map((block) => {
       const lines = block.split("\n").map((line) => line.trim());
+      const image = block.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+      if (image) {
+        return {
+          type: "image" as const,
+          caption: image[1],
+          src: image[2],
+        };
+      }
       const bullets = lines.every((line) => line.startsWith("- "));
       return bullets
         ? { type: "list" as const, items: lines.map((line) => line.slice(2)) }

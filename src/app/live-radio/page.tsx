@@ -5,6 +5,7 @@ import { LiveEmbedCard } from "@/components/LiveEmbedCard";
 import { radioEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { searchStations } from "@/lib/radioBrowser";
 import { RadioBrowserSearch } from "@/components/RadioBrowserSearch";
+import { SponsoredCard } from "@/components/SponsoredCard";
 
 export const metadata: Metadata = {
   title: "Live desi radio — Hindi, Punjabi and Bollywood stations | Godesi",
@@ -61,6 +62,7 @@ export default async function LiveRadioPage() {
             submitted={station.submitted}
           />
         ))}
+        <SponsoredCard />
       </div>
 
       <RadioBrowserSearch initial={browsed} />
