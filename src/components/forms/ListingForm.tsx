@@ -206,8 +206,8 @@ export function ListingForm({
 
       <p className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
         <strong>Selling or renting regularly?</strong> Godesi builds you a{" "}
-        {WEBSITE_OFFER.pages}-page website for ${WEBSITE_OFFER.priceUsd} with{" "}
-        {WEBSITE_OFFER.partner}.{" "}
+        {WEBSITE_OFFER.pages}-page website for ${WEBSITE_OFFER.priceUsd}, then $
+        {WEBSITE_OFFER.monthlyUsd}/month with domain and hosting included.{" "}
         <a href="/website" target="_blank" className="font-bold underline">
           See what you get →
         </a>

@@ -4,12 +4,13 @@
  */
 export const WEBSITE_OFFER = {
   priceUsd: 99,
+  /** Monthly charge that keeps the domain and hosting running. */
+  monthlyUsd: 10,
   pages: 5,
   partner: "SocialDada",
   partnerUrl: "https://socialdada.com",
+  /** Internal inbox the briefs are emailed to; never shown to members. */
   email: "godesibiz@gmail.com",
-  /** Digits only, for wa.me links. */
-  whatsapp: process.env.NEXT_PUBLIC_WEBSITE_OFFER_WHATSAPP ?? "",
 };
 
 /** What the $99 build covers, shown on the offer page and in the nudge. */
@@ -20,6 +21,7 @@ export const WEBSITE_OFFER_INCLUDES = [
   "Contact form that emails you",
   "Google Business Profile and Godesi card linked in",
   "Basic on-page SEO so your name is findable on Google",
+  "Domain and hosting included in the $10 monthly charge",
 ];
 
 /** Prompts for the page-by-page details we ask the owner for up front. */
@@ -30,11 +32,3 @@ export const WEBSITE_OFFER_PAGE_PROMPTS = [
   { name: "page4", label: "Page 4 — Gallery / Work", hint: "Photos, projects, before-after" },
   { name: "page5", label: "Page 5 — Contact", hint: "Phone, WhatsApp, email, address, hours" },
 ];
-
-/** Falls back to Godesi's public WhatsApp link when no dedicated number is set. */
-export function whatsappOfferLink(message: string) {
-  if (WEBSITE_OFFER.whatsapp) {
-    return `https://wa.me/${WEBSITE_OFFER.whatsapp}?text=${encodeURIComponent(message)}`;
-  }
-  return process.env.NEXT_PUBLIC_SOCIAL_WHATSAPP?.trim() || null;
-}

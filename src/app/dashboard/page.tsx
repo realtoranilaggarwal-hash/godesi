@@ -265,8 +265,8 @@ export default async function DashboardPage({
               {business.websiteUrl ? null : (
                 <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
                   <strong>No website yet?</strong> We build you a{" "}
-                  {WEBSITE_OFFER.pages}-page site for ${WEBSITE_OFFER.priceUsd} with{" "}
-                  {WEBSITE_OFFER.partner}.{" "}
+                  {WEBSITE_OFFER.pages}-page site for ${WEBSITE_OFFER.priceUsd}, then $
+                  {WEBSITE_OFFER.monthlyUsd}/month with domain and hosting included.{" "}
                   <Link href="/website" className="font-bold underline">
                     See what you get →
                   </Link>

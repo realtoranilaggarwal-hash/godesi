@@ -4,11 +4,7 @@ import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
 import { WebsiteRequestForm } from "@/components/forms/WebsiteRequestForm";
 import { SidebarBanners } from "@/components/Banners";
-import {
-  WEBSITE_OFFER,
-  WEBSITE_OFFER_INCLUDES,
-  whatsappOfferLink,
-} from "@/lib/websiteOffer";
+import { WEBSITE_OFFER, WEBSITE_OFFER_INCLUDES } from "@/lib/websiteOffer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -25,9 +21,6 @@ export default async function WebsiteOfferPage() {
         select: { name: true, city: true, phone: true },
       })
     : null;
-  const whatsapp = whatsappOfferLink(
-    `Hi Godesi, I would like the $${WEBSITE_OFFER.priceUsd} website for my business.`,
-  );
 
   return (
     <div className="flex gap-6">
@@ -47,29 +40,10 @@ export default async function WebsiteOfferPage() {
             >
               {WEBSITE_OFFER.partner}
             </a>
-            . One-time ${WEBSITE_OFFER.priceUsd} — no monthly fee to us. Fill the form
-            below and we reply within one business day.
+            . ${WEBSITE_OFFER.priceUsd} to build it, then ${WEBSITE_OFFER.monthlyUsd} a
+            month — domain and hosting included. Fill the form below and we reply
+            within one business day.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-sm font-semibold">
-            <a
-              href={`mailto:${WEBSITE_OFFER.email}?subject=${encodeURIComponent(
-                `$${WEBSITE_OFFER.priceUsd} website enquiry`,
-              )}`}
-              className="rounded-xl bg-white px-4 py-2 text-indigo-700"
-            >
-              ✉️ {WEBSITE_OFFER.email}
-            </a>
-            {whatsapp ? (
-              <a
-                href={whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-xl bg-emerald-500 px-4 py-2 text-white"
-              >
-                💬 Ask on WhatsApp
-              </a>
-            ) : null}
-          </div>
         </section>
 
         <Card>
@@ -83,17 +57,16 @@ export default async function WebsiteOfferPage() {
             ))}
           </ul>
           <p className="mt-3 text-xs text-slate-500">
-            Domain and hosting are billed by the provider, usually $10–$30 a year, and
-            stay in your name. Extra pages, online payments or a booking system are
-            quoted separately.
+            ${WEBSITE_OFFER.priceUsd} one-time build, then ${WEBSITE_OFFER.monthlyUsd} a
+            month covering your domain, hosting and small text or photo updates. Extra
+            pages, online payments or a booking system are quoted separately.
           </p>
         </Card>
 
         <Card>
           <h2 className="text-lg font-bold">Tell us about your website</h2>
           <p className="mb-4 text-sm text-slate-600">
-            Everything here goes straight to the Godesi desk at{" "}
-            {WEBSITE_OFFER.email}. Nothing is published on Godesi.
+            Everything here goes straight to our team — nothing is published on Godesi.
           </p>
           <WebsiteRequestForm
             defaultBusinessName={business?.name}

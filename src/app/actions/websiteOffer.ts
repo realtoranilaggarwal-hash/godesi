@@ -86,7 +86,8 @@ export async function requestWebsiteAction(
 
     if (!sent) {
       return {
-        error: `We could not send that right now — please email ${WEBSITE_OFFER.email} directly.`,
+        error:
+          "We could not send that right now — please try again in a few minutes.",
       };
     }
 

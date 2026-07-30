@@ -305,8 +305,8 @@ export function BusinessProfileForm({
         </div>
         <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
           <strong>No website yet?</strong> Godesi builds you a {WEBSITE_OFFER.pages}-page
-          mobile-friendly site for ${WEBSITE_OFFER.priceUsd} with our partner{" "}
-          {WEBSITE_OFFER.partner}.{" "}
+          mobile-friendly site for ${WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}
+          /month with domain and hosting included.{" "}
           <a
             href="/website"
             target="_blank"
