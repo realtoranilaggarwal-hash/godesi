@@ -4,7 +4,11 @@ import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
 import { WebsiteRequestForm } from "@/components/forms/WebsiteRequestForm";
 import { SidebarBanners } from "@/components/Banners";
-import { WEBSITE_OFFER, WEBSITE_OFFER_INCLUDES } from "@/lib/websiteOffer";
+import {
+  WEBSITE_OFFER,
+  WEBSITE_OFFER_INCLUDES,
+  whatsappOfferLink,
+} from "@/lib/websiteOffer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -21,6 +25,7 @@ export default async function WebsiteOfferPage() {
         select: { name: true, city: true, phone: true },
       })
     : null;
+  const whatsapp = whatsappOfferLink();
 
   return (
     <div className="flex gap-6">
@@ -44,6 +49,16 @@ export default async function WebsiteOfferPage() {
             month — domain and hosting included. Fill the form below and we reply
             within one business day.
           </p>
+          {whatsapp ? (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white"
+            >
+              💬 Ask on WhatsApp
+            </a>
+          ) : null}
         </section>
 
         <Card>

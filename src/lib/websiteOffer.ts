@@ -11,6 +11,8 @@ export const WEBSITE_OFFER = {
   partnerUrl: "https://socialdada.com",
   /** Internal inbox the briefs are emailed to; never shown to members. */
   email: "godesibiz@gmail.com",
+  /** Digits only, in international format, for wa.me links. */
+  whatsapp: process.env.NEXT_PUBLIC_WEBSITE_OFFER_WHATSAPP ?? "17329837958",
 };
 
 /** What the $99 build covers, shown on the offer page and in the nudge. */
@@ -32,3 +34,10 @@ export const WEBSITE_OFFER_PAGE_PROMPTS = [
   { name: "page4", label: "Page 4 — Gallery / Work", hint: "Photos, projects, before-after" },
   { name: "page5", label: "Page 5 — Contact", hint: "Phone, WhatsApp, email, address, hours" },
 ];
+
+/** Pre-filled WhatsApp enquiry for the website offer, or null if no number is set. */
+export function whatsappOfferLink() {
+  if (!WEBSITE_OFFER.whatsapp) return null;
+  const message = `Hi Godesi, I would like the $${WEBSITE_OFFER.priceUsd} website for my business.`;
+  return `https://wa.me/${WEBSITE_OFFER.whatsapp}?text=${encodeURIComponent(message)}`;
+}
