@@ -10,6 +10,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
+import { SocialEmbed, isEmbeddable } from "@/components/SocialEmbed";
 import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -167,14 +168,11 @@ export default async function ReportPage({
           ) : null}
 
           {report.videoUrl ? (
-            <a
-              href={report.videoUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-block rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold hover:bg-slate-50"
-            >
-              ▶ Watch the video
-            </a>
+            <SocialEmbed url={report.videoUrl} label="Watch the video" />
+          ) : null}
+
+          {report.sourceUrl && isEmbeddable(report.sourceUrl) ? (
+            <SocialEmbed url={report.sourceUrl} label="See the original post" />
           ) : null}
 
           <dl className="grid gap-2 rounded-2xl bg-slate-50 p-3 text-sm sm:grid-cols-2">

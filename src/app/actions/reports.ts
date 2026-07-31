@@ -7,11 +7,8 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { newsQuotaLeft, twoLineSummary } from "@/lib/news";
-import {
-  REPORT_CATEGORIES,
-  REPORT_DECLARATIONS,
-  REPORT_SOURCES,
-} from "@/lib/journalists";
+import { REPORT_DECLARATIONS, REPORT_SOURCES } from "@/lib/journalists";
+import { REPORT_TOPIC_OPTIONS, topicSlug } from "@/lib/newsTopics";
 
 const MAX_PHOTOS = 8;
 
@@ -24,7 +21,7 @@ const optionalUrl = z
 
 const reportSchema = z.object({
   title: z.string().trim().min(8, "Give the report a headline"),
-  category: z.enum(REPORT_CATEGORIES),
+  topic: z.string().trim().min(2, "Pick a topic"),
   city: z.string().trim().min(2, "Where did this happen?"),
   state: z.string().trim().optional(),
   country: z.string().trim().optional(),
@@ -59,7 +56,7 @@ export async function submitReportAction(
 
     const parsed = reportSchema.safeParse({
       title: formData.get("title"),
-      category: formData.get("category"),
+      topic: formData.get("topic"),
       city: formData.get("city"),
       state: formData.get("state") || undefined,
       country: formData.get("country") || undefined,
@@ -99,7 +96,10 @@ export async function submitReportAction(
         source: user.name,
         submittedById: user.id,
         status: "PENDING",
-        category: data.category,
+        topic: topicSlug(data.topic),
+        category:
+          REPORT_TOPIC_OPTIONS.find((option) => option.slug === topicSlug(data.topic))
+            ?.label ?? "General",
         city: data.city,
         state: data.state ?? null,
         country: data.country ?? null,

@@ -248,6 +248,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
       "Bakers & Cakes",
       "Sweet Shops",
       "Restaurants",
+      "Grocery & Indian Stores",
       "Cloud Kitchens",
       "Chaat & Street Food",
       "Cooks & Chefs",

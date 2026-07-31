@@ -13,6 +13,7 @@ import { JournalistBadge } from "@/components/JournalistBadge";
 import { JOURNALIST_RULES, levelFor, topJournalists } from "@/lib/journalists";
 import { gradientFor } from "@/lib/categories";
 import { freshNewsCutoff } from "@/lib/news";
+import { NEWS_TOPICS, topicSlug } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -21,8 +22,28 @@ export const metadata: Metadata = {
     "Community, business and India headlines, refreshed every 30 minutes.",
 };
 
-export default async function NewsPage() {
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams: { topic?: string };
+}) {
   const user = await getCurrentUser();
+  const topic = searchParams.topic ? topicSlug(searchParams.topic) : null;
+  // Older stories were filed before topics existed, so a filter also matches
+  // the free-text category the reporter picked back then.
+  const topicWhere = topic
+    ? {
+        OR: [
+          { topic },
+          {
+            category: {
+              equals: NEWS_TOPICS.find((row) => row.slug === topic)?.label,
+              mode: "insensitive" as const,
+            },
+          },
+        ],
+      }
+    : {};
   const isNewsStaff = user ? can(user, "news") : false;
 
   // Refreshes the feed if the last crawl is older than 30 minutes.
@@ -38,6 +59,7 @@ export default async function NewsPage() {
         status: "PUBLISHED",
         submittedById: { not: null },
         publishedAt: { gte: freshNewsCutoff() },
+        ...topicWhere,
       },
       orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
       take: 12,
@@ -50,6 +72,7 @@ export default async function NewsPage() {
         status: "PUBLISHED",
         submittedById: null,
         publishedAt: { gte: freshNewsCutoff() },
+        ...topicWhere,
       },
       orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
       take: 40,
@@ -133,6 +156,32 @@ export default async function NewsPage() {
           </div>
         </section>
 
+        <div className="flex flex-wrap gap-1.5 text-xs font-semibold">
+          <Link
+            href="/news"
+            className={`rounded-full px-3 py-1 ${
+              topic
+                ? "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                : "bg-slate-900 text-white"
+            }`}
+          >
+            All news
+          </Link>
+          {NEWS_TOPICS.map((row) => (
+            <Link
+              key={row.slug}
+              href={`/news?topic=${row.slug}`}
+              className={`rounded-full px-3 py-1 ${
+                topic === row.slug
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {row.emoji} {row.label}
+            </Link>
+          ))}
+        </div>
+
         {user && !user.journalistSince ? (
           <Card className="border-amber-200 bg-amber-50">
             <h2 className="font-bold">
@@ -167,8 +216,12 @@ export default async function NewsPage() {
           </div>
         ) : (
           <EmptyState
-            title="No stories yet"
-            body="The news crawler runs every 30 minutes — check back shortly."
+            title={topic ? "Nothing on this topic yet" : "No stories yet"}
+            body={
+              topic
+                ? "Be the first — file a report and pick this topic."
+                : "The news crawler runs every 30 minutes — check back shortly."
+            }
           />
         )}
 

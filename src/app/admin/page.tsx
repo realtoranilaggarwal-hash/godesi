@@ -260,6 +260,12 @@ export default async function AdminPage() {
           >
             🎧📺 Live radio & TV desk →
           </Link>
+          <Link
+            href="/admin/outreach"
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            📣 Owner outreach →
+          </Link>
         </div>
       </div>
 

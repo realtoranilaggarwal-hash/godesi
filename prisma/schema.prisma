@@ -566,6 +566,11 @@ model Business {
   source             String?
   /// OpenStreetMap element id, so imports stay re-runnable without duplicates.
   osmId              String?       @unique
+  /// Owner-invite outreach on unclaimed starter listings: when we last reached
+  /// out, how (whatsapp/email/phone) and what came back.
+  invitedAt          DateTime?
+  inviteChannel      String?
+  inviteNote         String?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 

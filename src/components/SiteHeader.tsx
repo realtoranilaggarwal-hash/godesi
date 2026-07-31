@@ -138,10 +138,11 @@ export async function SiteHeader() {
             </button>
           </form>
 
-          <LiveMediaChips className="hidden sm:flex" />
+          <LiveMediaChips className="hidden lg:flex" />
 
-          {/* Fills the gap beside the search box. */}
-          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold xl:flex">
+          {/* Fills the gap beside the search box, but only once there is room:
+              below this the row used to overflow and clip the account buttons. */}
+          <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold 2xl:flex">
             {QUICK_LINKS.map((item) => (
               <Link
                 key={item.href}
@@ -173,7 +174,7 @@ export async function SiteHeader() {
             ))}
           </nav>
 
-          <div className="flex min-w-0 items-center gap-1 text-sm font-medium sm:gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-1 text-sm font-medium sm:gap-2">
             <Link
               href="/find"
               aria-label="Search Godesi"

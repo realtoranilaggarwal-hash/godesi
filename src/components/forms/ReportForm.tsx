@@ -6,11 +6,11 @@ import { submitReportAction } from "@/app/actions/reports";
 import { emptyState } from "@/lib/actions";
 import {
   FAKE_MEDIA_CHECKS,
-  REPORT_CATEGORIES,
   REPORT_DECLARATIONS,
   REPORT_SOURCES,
   REVERSE_IMAGE_SEARCH_URL,
 } from "@/lib/journalists";
+import { REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
 import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -101,11 +101,11 @@ export function ReportForm({
       </Field>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Category">
-          <select name="category" required className={inputClass}>
-            {REPORT_CATEGORIES.map((option) => (
-              <option key={option} value={option}>
-                {option}
+        <Field label="Topic" hint="Readers filter the news page by this">
+          <select name="topic" required defaultValue="community" className={inputClass}>
+            {REPORT_TOPIC_OPTIONS.map((option) => (
+              <option key={option.slug} value={option.slug}>
+                {option.emoji} {option.label}
               </option>
             ))}
           </select>
@@ -223,7 +223,10 @@ export function ReportForm({
         ) : null}
       </div>
 
-      <Field label="Video link" hint="Optional — YouTube, Instagram or Drive link">
+      <Field
+        label="Video or social post link"
+        hint="YouTube, Instagram, Facebook or X — it plays inside the story"
+      >
         <input name="videoUrl" type="url" className={inputClass} />
       </Field>
 
