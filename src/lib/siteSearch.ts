@@ -89,6 +89,12 @@ const SITE_PAGES: {
     keywords: ["advertise", "ads", "banner", "sponsor", "promotion"],
   },
   {
+    href: "/badge",
+    title: "🏅 “Listed on Godesi” badge",
+    subtitle: "Free badge and link for your own website",
+    keywords: ["badge", "widget", "embed", "logo", "link", "backlink"],
+  },
+  {
     href: "/website",
     title: "🌐 Get a website",
     subtitle: "Five-page site with domain and hosting",

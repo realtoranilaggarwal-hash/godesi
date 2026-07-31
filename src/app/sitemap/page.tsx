@@ -44,6 +44,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/connect/new", label: "Create a Connect profile" },
       { href: "/resources/new", label: "Advertise a link" },
       { href: "/advertise", label: "Advertise on Godesi" },
+      { href: "/badge", label: "“Listed on Godesi” badge" },
       { href: "/pricing", label: "Membership plans" },
     ],
   },

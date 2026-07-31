@@ -17,6 +17,7 @@ import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
 import { PlaceLink } from "@/components/PlaceLink";
 import { ShareButtons } from "@/components/ShareButtons";
+import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
@@ -724,6 +725,19 @@ export default async function BusinessProfilePage({
                   Open in Google Maps
                 </a>
               ) : null}
+            </Card>
+          ) : null}
+
+          {isOwner ? (
+            <Card>
+              <h2 className="font-bold">Show it off on your website 🏅</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Paste this badge on your own site — customers can jump straight
+                to your Godesi page.
+              </p>
+              <div className="mt-3">
+                <BadgeEmbed listingUrl={`${siteUrl()}/b/${business.slug}`} />
+              </div>
             </Card>
           ) : null}
 

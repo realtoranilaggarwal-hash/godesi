@@ -28,6 +28,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/why-list", label: "Why list on Godesi?" },
       { href: "/pricing", label: "Membership plans" },
       { href: "/website", label: "Get a website for $99" },
+      { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
       { href: "/advertise", label: "Advertise on Godesi" },
       { href: "/events/new", label: "Post an event" },
       { href: "/dashboard", label: "Dashboard" },
