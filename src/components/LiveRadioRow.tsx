@@ -6,6 +6,7 @@ import { openLiveMedia } from "@/lib/liveMedia";
 import { LiveReportButton } from "@/components/LiveReportButton";
 import { LiveVoteButton } from "@/components/LiveVoteButton";
 import { LiveShareButton } from "@/components/LiveShareButton";
+import { LiveFavoriteButton } from "@/components/LiveFavoriteButton";
 
 /**
  * Slim station row. Radio has nothing to look at, so the embed lives in the
@@ -23,6 +24,8 @@ export function LiveRadioRow({
   websiteUrl = null,
   nonProfit = false,
   votes = 0,
+  saved = false,
+  signedIn = false,
 }: {
   id: string;
   name: string;
@@ -34,6 +37,8 @@ export function LiveRadioRow({
   websiteUrl?: string | null;
   nonProfit?: boolean;
   votes?: number;
+  saved?: boolean;
+  signedIn?: boolean;
 }) {
   const params = useSearchParams();
   const kind = stream ? "stream" : "radio";
@@ -75,6 +80,13 @@ export function LiveRadioRow({
 
       <div className="flex flex-wrap items-center gap-1.5">
         <LiveVoteButton channelKey={id} kind="radio" label={name} votes={votes} />
+        <LiveFavoriteButton
+          channelKey={id}
+          kind="radio"
+          label={name}
+          saved={saved}
+          signedIn={signedIn}
+        />
         <LiveShareButton
           path={`/live-radio?play=${id}`}
           label={name}

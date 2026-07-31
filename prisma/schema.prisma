@@ -267,6 +267,7 @@ model User {
   liveChannelOrders  LiveChannelOrder[]
   liveChannelReports LiveChannelReport[]
   liveChannelVotes   LiveChannelVote[]
+  liveFavorites      LiveChannelFavorite[]
   chatMessages       ChatMessage[]
 
   resourceLinks  ResourceLink[]
@@ -1712,6 +1713,21 @@ model LiveChannelVote {
 
   @@unique([channelKey, userId])
   @@index([channelKey])
+}
+
+/// A member's saved station or channel, so their own list opens first on the
+/// radio and TV pages. Signed-in only — it is the reason to make an account.
+model LiveChannelFavorite {
+  id         String        @id @default(cuid())
+  channelKey String
+  kind       LiveMediaKind
+  label      String
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime      @default(now())
+
+  @@unique([channelKey, userId])
+  @@index([userId, kind])
 }
 
 /// "This stream isn't working" from a visitor. Covers both the built-in stations

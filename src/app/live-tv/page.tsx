@@ -11,6 +11,8 @@ import { GlobalChat } from "@/components/GlobalChat";
 import { liveVoteCounts } from "@/lib/liveVotes";
 import { getCurrentUser } from "@/lib/auth";
 import { recentChat } from "@/lib/chat";
+import { liveFavoriteKeys } from "@/lib/liveFavorites";
+import { LiveSignupNudge } from "@/components/LiveSignupNudge";
 
 export const metadata: Metadata = {
   title: "Live desi TV — Hindi and English news channels | Godesi",
@@ -38,7 +40,10 @@ export default async function LiveTvPage() {
     liveVoteCounts(),
     getCurrentUser(),
   ]);
-  const messages = await recentChat(user?.id ?? null);
+  const [messages, favorites] = await Promise.all([
+    recentChat(user?.id ?? null),
+    liveFavoriteKeys(user?.id ?? null),
+  ]);
 
   const liveNow = channels.filter((channel) => channel.live);
   const offAir = channels.filter((channel) => !channel.live);
@@ -58,7 +63,8 @@ export default async function LiveTvPage() {
         <p className="mt-2 max-w-3xl text-sm text-slate-700">
           Hindi and English news channels, live from their official YouTube
           streams. Channels start muted — tap the sound icon in the player to
-          listen.
+          listen. Free to watch, no account needed — sign up only if you want to
+          save favourites.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <LinkButton href="/live/submit">➕ Submit your channel</LinkButton>
@@ -96,6 +102,8 @@ export default async function LiveTvPage() {
                   nonProfit={channel.nonProfit}
                   submitted={channel.submitted}
                   votes={votes[channel.key] ?? 0}
+                  saved={favorites.has(channel.key)}
+                  signedIn={user !== null}
                 />
               ))}
               {index === 0 ? <SponsoredCard /> : null}
@@ -131,6 +139,8 @@ export default async function LiveTvPage() {
 
       {/* Watching together: the same global room as the live visitors page. */}
       <GlobalChat initial={messages} signedIn={user !== null} />
+
+      {user ? null : <LiveSignupNudge kind="tv" />}
 
       <p className="text-xs text-slate-500">
         Every stream is the broadcaster&apos;s own YouTube live channel. Godesi

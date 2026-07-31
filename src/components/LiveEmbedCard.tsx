@@ -7,6 +7,7 @@ import { openLiveMedia } from "@/lib/liveMedia";
 import { LiveReportButton } from "@/components/LiveReportButton";
 import { LiveVoteButton } from "@/components/LiveVoteButton";
 import { LiveShareButton } from "@/components/LiveShareButton";
+import { LiveFavoriteButton } from "@/components/LiveFavoriteButton";
 
 /**
  * Nothing is fetched from TuneIn or YouTube until the visitor presses play,
@@ -26,6 +27,8 @@ export function LiveEmbedCard({
   /** Member-submitted streams carry their embed to the floating player. */
   submitted = false,
   votes = 0,
+  saved = false,
+  signedIn = false,
 }: {
   kind: "radio" | "tv";
   id: string;
@@ -41,6 +44,8 @@ export function LiveEmbedCard({
   submitted?: boolean;
   /** Community votes already recorded for this stream. */
   votes?: number;
+  saved?: boolean;
+  signedIn?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const params = useSearchParams();
@@ -131,6 +136,13 @@ export function LiveEmbedCard({
             kind={kind}
             label={name}
             votes={votes}
+          />
+          <LiveFavoriteButton
+            channelKey={id}
+            kind={kind}
+            label={name}
+            saved={saved}
+            signedIn={signedIn}
           />
           <LiveShareButton
             path={`${kind === "radio" ? "/live-radio" : "/live-tv"}?play=${id}`}

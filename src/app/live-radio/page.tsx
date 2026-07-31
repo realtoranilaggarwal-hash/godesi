@@ -7,6 +7,9 @@ import { searchStations } from "@/lib/radioBrowser";
 import { RadioBrowserSearch } from "@/components/RadioBrowserSearch";
 import { SponsoredCard } from "@/components/SponsoredCard";
 import { liveVoteCounts } from "@/lib/liveVotes";
+import { liveFavoriteKeys } from "@/lib/liveFavorites";
+import { getCurrentUser } from "@/lib/auth";
+import { LiveSignupNudge } from "@/components/LiveSignupNudge";
 
 export const metadata: Metadata = {
   title: "Live desi radio — Hindi, Punjabi and Bollywood stations | Godesi",
@@ -17,11 +20,21 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function LiveRadioPage() {
-  const [stations, browsed, votes] = await Promise.all([
+  const user = await getCurrentUser();
+  const [stations, browsed, votes, favorites] = await Promise.all([
     radioEntries(),
     searchStations({ country: "IN" }),
     liveVoteCounts(),
+    liveFavoriteKeys(user?.id ?? null),
   ]);
+
+  // A member's own stations open first; everyone else sees the usual order.
+  const ordered = favorites.size
+    ? [...stations].sort(
+        (a, b) =>
+          Number(favorites.has(b.key)) - Number(favorites.has(a.key)),
+      )
+    : stations;
 
   return (
     <div className="space-y-4">
@@ -31,6 +44,8 @@ export default async function LiveRadioPage() {
           Bollywood, Hindi, Punjabi and news stations from India and the USA.
           Press play on any station — or tap &ldquo;keep playing while I
           browse&rdquo; and it follows you around Godesi in a mini player.
+          Free to listen, no account needed — sign up only if you want to save
+          favourites.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <LinkButton href="/live/submit">➕ Submit your station</LinkButton>
@@ -49,7 +64,7 @@ export default async function LiveRadioPage() {
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <ul className="grid gap-2 sm:grid-cols-2">
-          {stations.map((station) => (
+          {ordered.map((station) => (
             <LiveRadioRow
               key={station.key}
               id={station.key}
@@ -62,6 +77,8 @@ export default async function LiveRadioPage() {
               websiteUrl={station.websiteUrl}
               nonProfit={station.nonProfit}
               votes={votes[station.key] ?? 0}
+              saved={favorites.has(station.key)}
+              signedIn={Boolean(user)}
             />
           ))}
         </ul>
@@ -93,6 +110,8 @@ export default async function LiveRadioPage() {
           </Link>
         </div>
       </Card>
+
+      {user ? null : <LiveSignupNudge kind="radio" />}
 
       <p className="text-xs text-slate-500">
         Audio comes straight from each broadcaster&apos;s own public stream.

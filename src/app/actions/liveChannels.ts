@@ -151,6 +151,34 @@ export async function voteLiveChannelAction(formData: FormData) {
   revalidatePath(kind === "TV" ? "/live-tv" : "/live-radio");
 }
 
+/**
+ * Saves or unsaves a station for the member. Listening stays free for everyone;
+ * keeping a favourites list is what an account buys.
+ */
+export async function toggleLiveFavoriteAction(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const channelKey = String(formData.get("channelKey") ?? "").slice(0, 120);
+  const label = String(formData.get("label") ?? "").slice(0, 160);
+  const kind: LiveMediaKind = formData.get("kind") === "TV" ? "TV" : "RADIO";
+  if (!channelKey) return;
+
+  const existing = await db.liveChannelFavorite.findUnique({
+    where: { channelKey_userId: { channelKey, userId: user.id } },
+  });
+
+  if (existing) {
+    await db.liveChannelFavorite.delete({ where: { id: existing.id } });
+  } else {
+    await db.liveChannelFavorite.create({
+      data: { channelKey, kind, label: label || channelKey, userId: user.id },
+    });
+  }
+
+  revalidatePath(kind === "TV" ? "/live-tv" : "/live-radio");
+}
+
 /** Monthly carriage payment; extends the paid-until date on approval. */
 export async function startLiveChannelCheckoutAction(formData: FormData) {
   const user = await requireUser();
