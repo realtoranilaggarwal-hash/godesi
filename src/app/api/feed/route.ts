@@ -156,20 +156,45 @@ export async function GET(request: Request) {
       where: {
         status: "OPEN",
         ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
-        ...(category ? { categorySlug: { in: category.split(",") } } : {}),
-        ...(query
-          ? {
-              OR: [
-                { title: { contains: query, mode: "insensitive" as const } },
+        AND: [
+          // Older requirements carry only the display category, so match either.
+          ...(category
+            ? [
                 {
-                  description: {
-                    contains: query,
-                    mode: "insensitive" as const,
-                  },
+                  OR: [
+                    // Requirements store the subcategory slug ("jobs-drivers"),
+                    // so a parent slug matches by prefix.
+                    ...category.split(",").map((slug) => ({
+                      categorySlug: { startsWith: slug },
+                    })),
+                    {
+                      category: {
+                        in: category.split(","),
+                        mode: "insensitive" as const,
+                      },
+                    },
+                  ],
                 },
-              ],
-            }
-          : {}),
+              ]
+            : []),
+          ...(query
+            ? [
+                {
+                  OR: [
+                    {
+                      title: { contains: query, mode: "insensitive" as const },
+                    },
+                    {
+                      description: {
+                        contains: query,
+                        mode: "insensitive" as const,
+                      },
+                    },
+                  ],
+                },
+              ]
+            : []),
+        ],
       },
       orderBy: { createdAt: "desc" },
       take: limit,
