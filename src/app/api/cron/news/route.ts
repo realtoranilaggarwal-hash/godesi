@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ensureDefaultFeeds, ingestNews } from "@/lib/news";
 import { expireFoundingFeatures } from "@/lib/founding";
+import { submitSitemapToIndexNow } from "@/lib/indexNow";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -20,7 +21,8 @@ async function run() {
   await ensureDefaultFeeds();
   const result = await ingestNews();
   const foundingFeaturesExpired = await expireFoundingFeatures();
-  return NextResponse.json({ ok: true, ...result, foundingFeaturesExpired });
+  const indexNow = await submitSitemapToIndexNow();
+  return NextResponse.json({ ok: true, ...result, foundingFeaturesExpired, indexNow });
 }
 
 export async function GET(request: Request) {
