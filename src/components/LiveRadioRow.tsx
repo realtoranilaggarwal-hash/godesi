@@ -17,6 +17,7 @@ export function LiveRadioRow({
   name,
   place,
   src,
+  stream = false,
   featured = false,
   about = null,
   websiteUrl = null,
@@ -27,6 +28,7 @@ export function LiveRadioRow({
   name: string;
   place: string;
   src: string;
+  stream?: boolean;
   featured?: boolean;
   about?: string | null;
   websiteUrl?: string | null;
@@ -34,10 +36,11 @@ export function LiveRadioRow({
   votes?: number;
 }) {
   const params = useSearchParams();
+  const kind = stream ? "stream" : "radio";
 
   useEffect(() => {
-    if (params.get("play") === id) openLiveMedia({ kind: "radio", id, name, src });
-  }, [params, id, name, src]);
+    if (params.get("play") === id) openLiveMedia({ kind, id, name, src });
+  }, [params, kind, id, name, src]);
 
   return (
     <li
@@ -47,7 +50,7 @@ export function LiveRadioRow({
     >
       <button
         type="button"
-        onClick={() => openLiveMedia({ kind: "radio", id, name, src })}
+        onClick={() => openLiveMedia({ kind, id, name, src })}
         title={`Play ${name}`}
         className="shrink-0 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
       >

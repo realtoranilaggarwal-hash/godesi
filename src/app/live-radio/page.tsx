@@ -11,7 +11,7 @@ import { liveVoteCounts } from "@/lib/liveVotes";
 export const metadata: Metadata = {
   title: "Live desi radio — Hindi, Punjabi and Bollywood stations | Godesi",
   description:
-    "Listen to live desi radio: Bollywood, Hindi, Punjabi and news stations from India and the USA, streamed through their official TuneIn players.",
+    "Listen to live desi radio: Bollywood, Hindi, Punjabi and news stations from India and the USA, played straight from each broadcaster's own public stream.",
 };
 
 export const dynamic = "force-dynamic";
@@ -56,6 +56,7 @@ export default async function LiveRadioPage() {
               name={station.name}
               place={station.place}
               src={station.src}
+              stream={station.stream}
               featured={station.featured}
               about={station.about}
               websiteUrl={station.websiteUrl}
@@ -94,7 +95,7 @@ export default async function LiveRadioPage() {
       </Card>
 
       <p className="text-xs text-slate-500">
-        Streams are played through each broadcaster&apos;s own TuneIn player.
+        Audio comes straight from each broadcaster&apos;s own public stream.
         Godesi does not host, record or re-stream any audio.
       </p>
     </div>

@@ -30,6 +30,8 @@ export type LiveEntry = {
   live: boolean;
   /** TV only: groups the grid by language. */
   language: string | null;
+  /** Radio only: src is the broadcaster's audio stream, not an embed page. */
+  stream: boolean;
 };
 
 function fromRadio(station: RadioStation): LiveEntry {
@@ -39,6 +41,7 @@ function fromRadio(station: RadioStation): LiveEntry {
     name: station.name,
     place: station.place,
     src: radioEmbedUrl(station),
+    stream: Boolean(station.streamUrl),
     featured: false,
     about: null,
     websiteUrl: null,
@@ -56,6 +59,7 @@ function fromTv(channel: TvChannel, videoId: string | null): LiveEntry {
     name: channel.name,
     place: channel.place,
     src: tvEmbedUrl(channel, { videoId }),
+    stream: false,
     featured: false,
     about: null,
     websiteUrl: `https://www.youtube.com/channel/${channel.youtubeChannelId}/live`,
@@ -90,6 +94,7 @@ export function fromChannel(channel: LiveChannel): LiveEntry {
           },
           {},
         ),
+    stream: false,
     featured: channel.featured,
     about: channel.about,
     websiteUrl: channel.websiteUrl,
