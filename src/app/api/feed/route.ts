@@ -1,0 +1,202 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { siteUrl } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
+
+const KINDS = ["news", "events", "businesses"] as const;
+type Kind = (typeof KINDS)[number];
+
+function isKind(value: string | null): value is Kind {
+  return KINDS.includes((value ?? "") as Kind);
+}
+
+/** Teaser length: enough to sell the story, short enough not to replace it. */
+function teaser(text: string, length = 220) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length > length ? `${clean.slice(0, length - 1)}…` : clean;
+}
+
+/**
+ * Public read-only feed powering Godesi's own niche sites (desinewspaper.com,
+ * diwali.cc, indianbusinessassociation.com). Teasers plus canonical links back
+ * to godesi.com — never the full record, so the satellites stay complementary.
+ */
+export async function GET(request: Request) {
+  const params = new URL(request.url).searchParams;
+  const kind: Kind = isKind(params.get("kind")) ? (params.get("kind") as Kind) : "news";
+  const limit = Math.min(Number(params.get("limit") ?? 24) || 24, 60);
+  const city = params.get("city")?.trim() || undefined;
+  const topic = params.get("topic")?.trim() || undefined;
+  const category = params.get("category")?.trim() || undefined;
+  const eventType = params.get("type")?.trim() || undefined;
+  const query = params.get("q")?.trim() || undefined;
+  const base = siteUrl();
+
+  const headers = {
+    "access-control-allow-origin": "*",
+    "cache-control": "public, s-maxage=600, stale-while-revalidate=3600",
+  };
+
+  if (kind === "news") {
+    const items = await db.newsItem.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(topic ? { topic } : {}),
+        ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
+        ...(query
+          ? {
+              OR: [
+                { title: { contains: query, mode: "insensitive" as const } },
+                { summary: { contains: query, mode: "insensitive" as const } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        imageUrl: true,
+        topic: true,
+        city: true,
+        state: true,
+        country: true,
+        source: true,
+        publishedAt: true,
+        submittedById: true,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        kind,
+        items: items.map((item) => ({
+          id: item.id,
+          title: item.title,
+          teaser: teaser(item.summary),
+          imageUrl: item.imageUrl,
+          topic: item.topic,
+          city: item.city,
+          state: item.state,
+          country: item.country,
+          source: item.submittedById ? "Godesi member" : item.source,
+          publishedAt: item.publishedAt,
+          url: `${base}/news/${item.id}`,
+        })),
+      },
+      { headers },
+    );
+  }
+
+  if (kind === "events") {
+    const items = await db.event.findMany({
+      where: {
+        status: "APPROVED",
+        startsAt: { gte: new Date() },
+        ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
+        ...(eventType ? { eventType } : {}),
+        ...(query
+          ? {
+              OR: [
+                { title: { contains: query, mode: "insensitive" as const } },
+                { description: { contains: query, mode: "insensitive" as const } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { startsAt: "asc" },
+      take: limit,
+      select: {
+        slug: true,
+        title: true,
+        description: true,
+        imageUrl: true,
+        startsAt: true,
+        endsAt: true,
+        venue: true,
+        city: true,
+        state: true,
+        country: true,
+        eventType: true,
+        categorySlug: true,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        kind,
+        items: items.map((item) => ({
+          slug: item.slug,
+          title: item.title,
+          teaser: teaser(item.description),
+          imageUrl: item.imageUrl,
+          startsAt: item.startsAt,
+          endsAt: item.endsAt,
+          venue: item.venue,
+          city: item.city,
+          state: item.state,
+          country: item.country,
+          eventType: item.eventType,
+          categorySlug: item.categorySlug,
+          url: `${base}/events/${item.slug}`,
+        })),
+      },
+      { headers },
+    );
+  }
+
+  const items = await db.business.findMany({
+    where: {
+      status: "APPROVED",
+      ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
+      ...(category ? { categorySlug: category } : {}),
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" as const } },
+              { description: { contains: query, mode: "insensitive" as const } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+    take: limit,
+    select: {
+      slug: true,
+      name: true,
+      description: true,
+      logoUrl: true,
+      city: true,
+      state: true,
+      country: true,
+      categorySlug: true,
+      subcategorySlug: true,
+      ownerId: true,
+      featured: true,
+    },
+  });
+
+  return NextResponse.json(
+    {
+      kind,
+      items: items.map((item) => ({
+        slug: item.slug,
+        name: item.name,
+        teaser: teaser(item.description ?? "", 160),
+        logoUrl: item.logoUrl,
+        city: item.city,
+        state: item.state,
+        country: item.country,
+        categorySlug: item.categorySlug,
+        subcategory: item.subcategorySlug,
+        claimed: Boolean(item.ownerId),
+        featured: item.featured,
+        url: `${base}/b/${item.slug}`,
+      })),
+    },
+    { headers },
+  );
+}
