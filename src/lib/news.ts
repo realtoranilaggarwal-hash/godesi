@@ -89,8 +89,8 @@ function attr(block: string, name: string, attribute: string) {
   return match ? match[1] : null;
 }
 
-/** Two lines of summary, as the brief asks for. */
-export function twoLineSummary(input: string, limit = 180) {
+/** Trimmed summary: a couple of lines on cards, a few paragraphs on the story. */
+export function twoLineSummary(input: string, limit = 700) {
   const clean = decode(input);
   if (clean.length <= limit) return clean;
   return `${clean.slice(0, limit).replace(/\s+\S*$/, "")}…`;
@@ -120,11 +120,10 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
     const link = tag(block, "link") || attr(block, "link", "href");
     if (!title || !link) continue;
 
+    const encoded = tag(block, "content:encoded");
+    const brief = tag(block, "description") ?? tag(block, "summary");
     const description =
-      tag(block, "description") ??
-      tag(block, "content:encoded") ??
-      tag(block, "summary") ??
-      "";
+      encoded && encoded.length > (brief?.length ?? 0) ? encoded : brief ?? "";
     const dateText =
       tag(block, "pubDate") ??
       tag(block, "published") ??

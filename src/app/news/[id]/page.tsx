@@ -62,7 +62,7 @@ export default async function ReportPage({
   const isAuthor = report.submittedById === user?.id;
   if (report.status !== "PUBLISHED" && !isStaff && !isAuthor) notFound();
 
-  const [counts, mine, approved] = await Promise.all([
+  const [counts, mine, approved, related] = await Promise.all([
     db.newsVerification.groupBy({
       by: ["verdict"],
       where: { newsId: report.id },
@@ -79,6 +79,26 @@ export default async function ReportPage({
           where: { submittedById: report.submittedById, status: "PUBLISHED" },
         })
       : 0,
+    db.newsItem.findMany({
+      where: {
+        status: "PUBLISHED",
+        id: { not: params.id },
+        OR: [
+          { topic: report.topic },
+          ...(report.city ? [{ city: report.city }] : []),
+        ],
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 6,
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        imageUrl: true,
+        source: true,
+        publishedAt: true,
+      },
+    }),
   ]);
 
   const count = (verdict: "CONFIRMED" | "DOUBTED" | "FAKE") =>
@@ -87,6 +107,9 @@ export default async function ReportPage({
   const place = [report.city, report.state, report.country]
     .filter(Boolean)
     .join(", ");
+
+  /** Member reports carry their own photos; feed stories only the one image. */
+  const hero = report.photoUrls.length ? null : report.imageUrl;
 
   return (
     <div className="flex gap-6">
@@ -117,6 +140,19 @@ export default async function ReportPage({
           </div>
 
           <h1 className="text-2xl font-black leading-tight">{report.title}</h1>
+
+          <p className="text-sm text-slate-500">
+            {report.source} · {when(report.publishedAt)}
+          </p>
+
+          {hero ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={hero}
+              alt={report.title}
+              className="max-h-[26rem] w-full rounded-2xl object-cover"
+            />
+          ) : null}
 
           {report.submittedBy ? (
             <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
@@ -151,6 +187,17 @@ export default async function ReportPage({
           </p>
 
           <InArticleAd />
+
+          {report.link && report.link !== report.sourceUrl ? (
+            <a
+              href={report.link}
+              target="_blank"
+              rel="noreferrer nofollow"
+              className="inline-block rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700"
+            >
+              Read the full story at {report.source} →
+            </a>
+          ) : null}
 
           {report.photoUrls.length ? (
             <div className="grid gap-2 sm:grid-cols-2">
@@ -245,6 +292,68 @@ export default async function ReportPage({
             </Link>
             .
           </p>
+        </Card>
+
+        {related.length ? (
+          <Card className="space-y-3">
+            <h2 className="text-lg font-black">More desi news</h2>
+            <div className="grid gap-3 sm:grid-cols-2 [&>*]:min-w-0">
+              {related.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/news/${item.id}`}
+                  className="flex gap-3 rounded-2xl border border-slate-200 p-2 transition hover:border-indigo-300 hover:shadow-sm"
+                >
+                  {item.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      loading="lazy"
+                      className="h-16 w-20 shrink-0 rounded-xl object-cover"
+                    />
+                  ) : null}
+                  <span className="min-w-0">
+                    <span className="line-clamp-2 block text-sm font-bold text-slate-900">
+                      {item.title}
+                    </span>
+                    <span className="mt-1 block truncate text-xs text-slate-500">
+                      {item.source}
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </Card>
+        ) : null}
+
+        <Card className="space-y-2">
+          <h2 className="text-lg font-black">📣 Seen something in your city?</h2>
+          <p className="text-sm text-slate-700">
+            Godesi runs on what the community reports — a temple event, a new
+            shop, a scam warning, a school win. Post it and your story appears on
+            Godesi and across the desi network.
+          </p>
+          <div className="flex flex-wrap gap-2 text-sm font-bold">
+            <Link
+              href="/news/report"
+              className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+            >
+              Report local news
+            </Link>
+            <Link
+              href="/events"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Desi events near you
+            </Link>
+            <Link
+              href="/businesses"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-slate-700 hover:bg-slate-50"
+            >
+              Find a desi business
+            </Link>
+          </div>
         </Card>
 
         <Link

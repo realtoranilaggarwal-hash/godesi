@@ -253,7 +253,7 @@ export default async function HomePage() {
           </section>
         ) : null}
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
           {news.length ? (
             <section className="lg:col-span-2">
               <SectionHeading

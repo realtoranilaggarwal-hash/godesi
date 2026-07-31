@@ -86,7 +86,7 @@ export async function ActivityWall({
 
   return (
     <section
-      className={`rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`}
+      className={`min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`}
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-1.5 text-sm font-black text-slate-900">
