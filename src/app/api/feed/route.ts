@@ -97,7 +97,7 @@ export async function GET(request: Request) {
         status: "APPROVED",
         startsAt: { gte: new Date() },
         ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
-        ...(eventType ? { eventType } : {}),
+        ...(eventType ? { eventType: { in: eventType.split(",") } } : {}),
         ...(query
           ? {
               OR: [
