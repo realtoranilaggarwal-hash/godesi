@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     images: [{ url: "/og-godesi.jpg", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },
+  verification: { other: { "msvalidate.01": "9AC0C1E8C5BEEC4E0EF93C0575F608AE" } },
 };
 
 export default function RootLayout({
