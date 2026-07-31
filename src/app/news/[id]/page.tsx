@@ -11,6 +11,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
 import { SocialEmbed, isEmbeddable } from "@/components/SocialEmbed";
+import { proxyImage } from "@/lib/proxyImage";
 import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -148,7 +149,7 @@ export default async function ReportPage({
           {hero ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={hero}
+              src={proxyImage(hero)}
               alt={report.title}
               className="max-h-[26rem] w-full rounded-2xl object-cover"
             />
@@ -307,7 +308,7 @@ export default async function ReportPage({
                   {item.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={item.imageUrl}
+                      src={proxyImage(item.imageUrl)}
                       alt=""
                       loading="lazy"
                       className="h-16 w-20 shrink-0 rounded-xl object-cover"
