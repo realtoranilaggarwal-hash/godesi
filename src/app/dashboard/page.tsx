@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { ElitePrompt } from "@/components/ElitePrompt";
+import { FoundingFeatureOffer } from "@/components/FoundingFeatureOffer";
+import { FOUNDING_FEATURE_DAYS, foundingFeatureActive } from "@/lib/founding";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { effectivePlan, PLANS } from "@/lib/plans";
 import {
@@ -201,6 +203,17 @@ export default async function DashboardPage({
             tone="bg-fuchsia-50 text-fuchsia-700"
           />
         </div>
+
+        {user.foundingNumber !== null ? (
+          <FoundingFeatureOffer
+            days={FOUNDING_FEATURE_DAYS}
+            activeUntil={
+              foundingFeatureActive(user) && user.foundingFeatureUntil
+                ? user.foundingFeatureUntil.toDateString()
+                : null
+            }
+          />
+        ) : null}
 
         <ElitePrompt userId={user.id} answered={user.elitePrompt} />
 

@@ -173,7 +173,7 @@ export async function SiteHeader() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 text-sm font-medium">
+          <div className="flex min-w-0 items-center gap-1 text-sm font-medium sm:gap-2">
             <Link
               href="/find"
               aria-label="Search Godesi"
@@ -194,7 +194,9 @@ export async function SiteHeader() {
               }
               signOut={logoutAction}
             />
-            <LocalePicker currency={displayCurrency()} />
+            <span className="max-[380px]:hidden">
+              <LocalePicker currency={displayCurrency()} />
+            </span>
             <Link
               href="/post"
               className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-3 py-1.5 font-semibold text-white hover:opacity-90"

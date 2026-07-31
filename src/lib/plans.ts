@@ -92,7 +92,14 @@ export function mediaLimit(user: Pick<User, "plan" | "planExpiresAt">) {
   return PLANS[effectivePlan(user)].mediaLimit;
 }
 
-export function newsPostsPerWeek(user: Pick<User, "plan" | "planExpiresAt">) {
+/**
+ * Founding members post without a weekly cap while we are still filling the
+ * site with content; everyone else gets their plan's allowance.
+ */
+export function newsPostsPerWeek(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber">,
+) {
+  if (user.foundingNumber !== null) return Number.POSITIVE_INFINITY;
   return PLANS[effectivePlan(user)].newsPostsPerWeek;
 }
 

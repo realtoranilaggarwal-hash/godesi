@@ -168,6 +168,10 @@ model User {
   /// badge and their double reward points. Null once the spots are gone.
   foundingNumber Int? @unique
 
+  /// Founding members may switch on 90 days of free featured placement once;
+  /// this is when that free run ends.
+  foundingFeatureUntil DateTime?
+
   /// Opted into the local journalist programme, and the patch they cover.
   journalistSince DateTime?
   journalistBeat  String?

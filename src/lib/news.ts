@@ -261,14 +261,22 @@ export async function ingestIfStale(maxAgeMinutes = 30) {
  * week so the feed stays curated; paid plans get a journalist's allowance.
  */
 export async function newsQuotaLeft(
-  user: Pick<User, "id" | "plan" | "planExpiresAt">,
+  user: Pick<User, "id" | "plan" | "planExpiresAt" | "foundingNumber">,
 ) {
   const allowance = newsPostsPerWeek(user);
+  if (!Number.isFinite(allowance)) {
+    return { allowance, used: 0, left: allowance, unlimited: true };
+  }
   const used = await db.newsItem.count({
     where: {
       submittedById: user.id,
       createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
     },
   });
-  return { allowance, used, left: Math.max(0, allowance - used) };
+  return {
+    allowance,
+    used,
+    left: Math.max(0, allowance - used),
+    unlimited: false,
+  };
 }

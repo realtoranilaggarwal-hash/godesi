@@ -12,6 +12,7 @@ import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { effectivePlan } from "@/lib/plans";
+import { foundingFeatureActive } from "@/lib/founding";
 import { contactDetailKind } from "@/lib/moderation";
 import { autoShareInBackground } from "@/lib/autoShare";
 import { titleCase } from "@/lib/titlecase";
@@ -92,6 +93,7 @@ export async function createListingAction(
         genderPref: parsed.data.genderPref ?? null,
         whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
         videoUrl: parsed.data.videoUrl ?? null,
+        featured: foundingFeatureActive(user),
         ownerId: user.id,
         images: {
           create: images.map((url, index) => ({ url, sortOrder: index })),

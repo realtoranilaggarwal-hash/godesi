@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, LinkButton } from "@/components/ui";
-import { LiveEmbedCard } from "@/components/LiveEmbedCard";
+import { LiveRadioRow } from "@/components/LiveRadioRow";
 import { radioEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { searchStations } from "@/lib/radioBrowser";
 import { RadioBrowserSearch } from "@/components/RadioBrowserSearch";
@@ -47,28 +47,51 @@ export default async function LiveRadioPage() {
         </p>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {stations.map((station) => (
-          <LiveEmbedCard
-            key={station.key}
-            kind="radio"
-            id={station.key}
-            name={station.name}
-            place={station.place}
-            src={station.src}
-            height={100}
-            featured={station.featured}
-            about={station.about}
-            websiteUrl={station.websiteUrl}
-            nonProfit={station.nonProfit}
-            submitted={station.submitted}
-            votes={votes[station.key] ?? 0}
-          />
-        ))}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {stations.map((station) => (
+            <LiveRadioRow
+              key={station.key}
+              id={station.key}
+              name={station.name}
+              place={station.place}
+              src={station.src}
+              featured={station.featured}
+              about={station.about}
+              websiteUrl={station.websiteUrl}
+              nonProfit={station.nonProfit}
+              votes={votes[station.key] ?? 0}
+            />
+          ))}
+        </ul>
         <SponsoredCard />
       </div>
 
       <RadioBrowserSearch initial={browsed} />
+
+      <Card className="border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-amber-50">
+        <h2 className="text-lg font-black">📣 Godesi is looking for you</h2>
+        <p className="mt-1 max-w-3xl text-sm text-slate-700">
+          Are you a radio jockey, podcaster or a journalist? Host a show for the
+          desi community, or report what is happening in your city — we give you
+          the audience, the page and the credit.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <LinkButton href="/live/submit">🎙 Host a show or channel</LinkButton>
+          <Link
+            href="/journalists"
+            className="rounded-xl border border-fuchsia-300 px-4 py-2 text-sm font-bold text-fuchsia-800 hover:bg-fuchsia-50"
+          >
+            🗞️ Become a Godesi journalist
+          </Link>
+          <Link
+            href="/contact"
+            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+          >
+            Talk to us
+          </Link>
+        </div>
+      </Card>
 
       <p className="text-xs text-slate-500">
         Streams are played through each broadcaster&apos;s own TuneIn player.

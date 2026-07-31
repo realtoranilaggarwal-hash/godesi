@@ -98,9 +98,9 @@ export function RadioBrowserSearch({ initial }: { initial: BrowsedStation[] }) {
           {stations.map((station) => (
             <li
               key={station.id}
-              className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 p-2"
+              className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 p-2"
             >
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1 basis-32">
                 <p className="truncate text-sm font-bold text-slate-900">
                   {station.name}
                 </p>

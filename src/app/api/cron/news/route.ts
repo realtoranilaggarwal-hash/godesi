@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ensureDefaultFeeds, ingestNews } from "@/lib/news";
+import { expireFoundingFeatures } from "@/lib/founding";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -18,7 +19,8 @@ function authorized(request: Request) {
 async function run() {
   await ensureDefaultFeeds();
   const result = await ingestNews();
-  return NextResponse.json({ ok: true, ...result });
+  const foundingFeaturesExpired = await expireFoundingFeatures();
+  return NextResponse.json({ ok: true, ...result, foundingFeaturesExpired });
 }
 
 export async function GET(request: Request) {

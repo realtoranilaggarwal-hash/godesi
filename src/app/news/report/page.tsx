@@ -45,12 +45,14 @@ export default async function ReportNewsPage() {
             <>
               {quota ? (
                 <p className="mb-3 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-                  {quota.left
-                    ? `${quota.left} of ${quota.allowance} report${
-                        quota.allowance === 1 ? "" : "s"
-                      } left this week on your plan.`
-                    : "You have used this week’s reports."}{" "}
-                  {quota.allowance === 1 ? (
+                  {quota.unlimited
+                    ? "🏅 Founding member — no weekly cap, report as often as you like."
+                    : quota.left
+                      ? `${quota.left} of ${quota.allowance} report${
+                          quota.allowance === 1 ? "" : "s"
+                        } left this week on your plan.`
+                      : "You have used this week’s reports."}{" "}
+                  {!quota.unlimited && quota.allowance === 1 ? (
                     <Link href="/pricing" className="font-semibold text-indigo-600">
                       Paid members file 10 a week.
                     </Link>
