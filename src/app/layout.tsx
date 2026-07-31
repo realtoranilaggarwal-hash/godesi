@@ -70,6 +70,54 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen overflow-x-hidden bg-slate-50 pb-20 text-slate-900 sm:pb-0`}
       >
+        {/* Brand identity for Google: "Godesi" the directory, distinct from the
+            other Desi brands, plus the search box shown under the result. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Godesi",
+                alternateName: ["GoDesi.com", "Godesi.com"],
+                url: siteUrl(),
+                logo: `${siteUrl()}/logo-godesi.png`,
+                description:
+                  "Godesi is a desi directory and community marketplace: business listings, buyer requirements, events, jobs, news, live radio and TV.",
+                address: {
+                  "@type": "PostalAddress",
+                  streetAddress: "1 Austin Avenue, Suite C",
+                  addressLocality: "Iselin",
+                  addressRegion: "NJ",
+                  postalCode: "08830",
+                  addressCountry: "US",
+                },
+                sameAs: [
+                  "https://www.facebook.com/godesicom/",
+                  "https://www.instagram.com/godesicom/",
+                  "https://www.youtube.com/@Godesibiz",
+                  "https://x.com/godesi",
+                  "https://www.linkedin.com/company/100483662/",
+                ],
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Godesi",
+                url: siteUrl(),
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate: `${siteUrl()}/find?q={search_term_string}`,
+                  },
+                  "query-input": "required name=search_term_string",
+                },
+              },
+            ]),
+          }}
+        />
         <UnregisterServiceWorkers />
         <SiteHeader />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
