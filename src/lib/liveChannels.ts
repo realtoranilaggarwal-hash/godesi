@@ -26,6 +26,10 @@ export type LiveEntry = {
   /** Built-in stations are editorial; the rest were submitted by members. */
   submitted: boolean;
   nonProfit: boolean;
+  /** TV only: false when the broadcaster is not streaming right now. */
+  live: boolean;
+  /** TV only: groups the grid by language. */
+  language: string | null;
 };
 
 function fromRadio(station: RadioStation): LiveEntry {
@@ -40,6 +44,8 @@ function fromRadio(station: RadioStation): LiveEntry {
     websiteUrl: null,
     submitted: false,
     nonProfit: false,
+    live: true,
+    language: null,
   };
 }
 
@@ -52,9 +58,11 @@ function fromTv(channel: TvChannel, videoId: string | null): LiveEntry {
     src: tvEmbedUrl(channel, { videoId }),
     featured: false,
     about: null,
-    websiteUrl: null,
+    websiteUrl: `https://www.youtube.com/channel/${channel.youtubeChannelId}/live`,
     submitted: false,
     nonProfit: false,
+    live: videoId !== null,
+    language: channel.language,
   };
 }
 
@@ -77,6 +85,7 @@ export function fromChannel(channel: LiveChannel): LiveEntry {
             id: channel.id,
             name: channel.name,
             place: channel.place,
+            language: "Desi",
             youtubeChannelId: channel.embedId,
           },
           {},
@@ -86,6 +95,8 @@ export function fromChannel(channel: LiveChannel): LiveEntry {
     websiteUrl: channel.websiteUrl,
     submitted: true,
     nonProfit: channel.nonProfit,
+    live: true,
+    language: radio ? null : "Desi",
   };
 }
 

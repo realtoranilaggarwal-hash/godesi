@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Card, LinkButton } from "@/components/ui";
 import { LiveEmbedCard } from "@/components/LiveEmbedCard";
 import { TV_CHANNELS } from "@/lib/liveMedia";
-import { liveVideoId } from "@/lib/liveTv";
+import { liveVideoIds } from "@/lib/liveTv";
+import { LiveOffAirRow } from "@/components/LiveOffAirRow";
 import { tvEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { SponsoredCard } from "@/components/SponsoredCard";
 import { GlobalChat } from "@/components/GlobalChat";
@@ -19,18 +20,36 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
+/** Grid order: the biggest audiences first, then the regional channels. */
+const LANGUAGE_ORDER = [
+  "Hindi",
+  "English",
+  "Marathi",
+  "Malayalam",
+  "Tamil",
+  "Kannada",
+  "Desi",
+];
+
 export default async function LiveTvPage() {
-  const resolved = await Promise.all(
-    TV_CHANNELS.map(
-      async (channel) => [channel.id, await liveVideoId(channel)] as const,
-    ),
-  );
+  const resolved = await liveVideoIds(TV_CHANNELS);
   const [channels, votes, user] = await Promise.all([
-    tvEntries(new Map(resolved)),
+    tvEntries(resolved),
     liveVoteCounts(),
     getCurrentUser(),
   ]);
   const messages = await recentChat(user?.id ?? null);
+
+  const liveNow = channels.filter((channel) => channel.live);
+  const offAir = channels.filter((channel) => !channel.live);
+  // Same language together, so the grid reads as a channel guide.
+  const groups = LANGUAGE_ORDER.map((language) => ({
+    language,
+    channels: liveNow.filter((channel) => (channel.language ?? "Desi") === language),
+  })).filter((group) => group.channels.length);
+  const ungrouped = liveNow.filter(
+    (channel) => !LANGUAGE_ORDER.includes(channel.language ?? "Desi"),
+  );
 
   return (
     <div className="space-y-4">
@@ -56,25 +75,59 @@ export default async function LiveTvPage() {
         </p>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {channels.map((channel) => (
-          <LiveEmbedCard
-            key={channel.key}
-            kind="tv"
-            id={channel.key}
-            name={channel.name}
-            place={channel.place}
-            src={channel.src}
-            featured={channel.featured}
-            about={channel.about}
-            websiteUrl={channel.websiteUrl}
-            nonProfit={channel.nonProfit}
-            submitted={channel.submitted}
-            votes={votes[channel.key] ?? 0}
-          />
-        ))}
-        <SponsoredCard />
-      </div>
+      {[...groups, ...(ungrouped.length ? [{ language: "More channels", channels: ungrouped }] : [])].map(
+        (group, index) => (
+          <section key={group.language} className="space-y-3">
+            <h2 className="text-lg font-black">
+              {group.language} <span className="text-slate-400">· live now</span>
+            </h2>
+            <div className="grid gap-4 lg:grid-cols-2">
+              {group.channels.map((channel) => (
+                <LiveEmbedCard
+                  key={channel.key}
+                  kind="tv"
+                  id={channel.key}
+                  name={channel.name}
+                  place={channel.place}
+                  src={channel.src}
+                  featured={channel.featured}
+                  about={channel.about}
+                  websiteUrl={channel.websiteUrl}
+                  nonProfit={channel.nonProfit}
+                  submitted={channel.submitted}
+                  votes={votes[channel.key] ?? 0}
+                />
+              ))}
+              {index === 0 ? <SponsoredCard /> : null}
+            </div>
+          </section>
+        ),
+      )}
+
+      {offAir.length ? (
+        <Card className="space-y-3">
+          <div>
+            <h2 className="text-lg font-black">😴 Off air right now</h2>
+            <p className="text-xs text-slate-600">
+              These broadcasters are not streaming live at the moment, so we do
+              not load a dead player. They come back into the grid the minute
+              their live show starts.
+            </p>
+          </div>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {offAir.map((channel) => (
+              <LiveOffAirRow
+                key={channel.key}
+                id={channel.key}
+                name={channel.name}
+                place={channel.place}
+                websiteUrl={channel.websiteUrl}
+                votes={votes[channel.key] ?? 0}
+              />
+            ))}
+          </ul>
+        </Card>
+      ) : null}
 
       {/* Watching together: the same global room as the live visitors page. */}
       <GlobalChat initial={messages} signedIn={user !== null} />

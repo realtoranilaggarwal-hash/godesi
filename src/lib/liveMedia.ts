@@ -15,6 +15,8 @@ export type TvChannel = {
   id: string;
   name: string;
   place: string;
+  /** Groups the TV grid so the same language sits together. */
+  language: string;
   /** YouTube channel id — the official live_stream embed always plays the current live show. */
   youtubeChannelId: string;
 };
@@ -139,108 +141,126 @@ export const RADIO_STATIONS: RadioStation[] = [
 export const TV_CHANNELS: TvChannel[] = [
   {
     id: "ndtv",
+    language: "English",
     name: "NDTV Live",
     place: "English news · India",
     youtubeChannelId: "UCZFMm1mMw0F81Z37aaEzTUA",
   },
   {
     id: "aaj-tak",
+    language: "Hindi",
     name: "Aaj Tak Live",
     place: "Hindi news · India",
     youtubeChannelId: "UCt4t-jeY85JegMlZ-E5UWtA",
   },
   {
     id: "abp-news",
+    language: "Hindi",
     name: "ABP News Live",
     place: "Hindi news · India",
     youtubeChannelId: "UCRWFSbif-RFENbBrSiez1DA",
   },
   {
     id: "india-today-tv",
+    language: "English",
     name: "India Today Live",
     place: "English news · India",
     youtubeChannelId: "UCYPvAwZP8pZhSMW8qs7cVCw",
   },
   {
     id: "dd-news",
+    language: "Hindi",
     name: "DD News Live",
     place: "Public broadcaster · India",
     youtubeChannelId: "UCeMQiXmFNTtN3IjvHUBKTgg",
   },
   {
     id: "ndtv-india",
+    language: "Hindi",
     name: "NDTV India Live",
     place: "Hindi news · India",
     youtubeChannelId: "UC9CYT9gSNLevX5ey2_6CK0Q",
   },
   {
     id: "zee-news",
+    language: "Hindi",
     name: "Zee News Live",
     place: "Hindi news · India",
     youtubeChannelId: "UCIvaYmXn910QMdemBG3v1pQ",
   },
   {
     id: "news18-india",
+    language: "Hindi",
     name: "News18 India Live",
     place: "Hindi news · India",
     youtubeChannelId: "UCPP3etACgdUWvizcES1dJ8Q",
   },
   {
     id: "india-tv",
+    language: "Hindi",
     name: "India TV Live",
     place: "Hindi news · India",
     youtubeChannelId: "UCttspZesZIDEwwpVIgoZtWQ",
   },
   {
     id: "tv9-bharatvarsh",
+    language: "Hindi",
     name: "TV9 Bharatvarsh Live",
     place: "Hindi news · India",
     youtubeChannelId: "UCOutOIcn_oho8pyVN3Ng-Pg",
   },
   {
     id: "times-now",
+    language: "English",
     name: "Times Now Live",
     place: "English news · India",
     youtubeChannelId: "UC_51NqeUwENzkezNGYlqiog",
   },
   {
     id: "wion",
+    language: "English",
     name: "WION Live",
     place: "World news · India",
     youtubeChannelId: "UCWEIPvoxRwn6llPOIn555rQ",
   },
   {
     id: "dd-india",
+    language: "English",
     name: "DD India Live",
     place: "Public broadcaster · global",
     youtubeChannelId: "UCGDQNvybfDDeGTf4GtigXaw",
   },
   {
     id: "abp-majha",
+    language: "Marathi",
     name: "ABP Majha Live",
     place: "Marathi news · India",
     youtubeChannelId: "UCH7nv1A9xIrAifZJNvt7cgA",
   },
   {
     id: "asianet-news",
+    language: "Malayalam",
     name: "Asianet News Live",
     place: "Malayalam news · Kerala",
     youtubeChannelId: "UCf8w5m0YsRa8MHQ5bwSGmbw",
   },
   {
     id: "manorama-news",
+    language: "Malayalam",
     name: "Manorama News Live",
     place: "Malayalam news · Kerala",
     youtubeChannelId: "UCP0uG-mcMImgKnJz-VjJZmQ",
   },
   {
     id: "public-tv",
+    language: "Kannada",
     name: "Public TV Live",
     place: "Kannada news · Karnataka",
     youtubeChannelId: "UCl-OodciBGZ0k8K8rBZGe4w",
   },
   {
     id: "puthiya-thalaimurai",
+    language: "Tamil",
     name: "Puthiya Thalaimurai Live",
     place: "Tamil news · Tamil Nadu",
     youtubeChannelId: "UCmyKnNRH0wH-r8I-ceP-dsg",
