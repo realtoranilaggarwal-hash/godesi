@@ -17,7 +17,8 @@ export type CartItemKey =
   | "banner-leaderboard"
   | "banner-incontent"
   | "banner-halfpage"
-  | "banner-mobile";
+  | "banner-mobile"
+  | "banner-fullbanner";
 
 export type CartItem = {
   key: CartItemKey;
@@ -70,6 +71,7 @@ export const CART_ITEMS: CartItem[] = [
   bannerItem("banner-incontent", "INCONTENT", false),
   bannerItem("banner-halfpage", "HALFPAGE", false),
   bannerItem("banner-mobile", "MOBILE", false),
+  bannerItem("banner-fullbanner", "FULLBANNER", false),
 ];
 
 /** Thrown in with the membership at no extra charge. */

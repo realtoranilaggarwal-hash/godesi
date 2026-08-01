@@ -154,6 +154,23 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Good for offers with a lot to say",
     ],
   },
+  FULLBANNER: {
+    slot: "FULLBANNER",
+    name: "Full banner",
+    size: { width: 468, height: 60 },
+    slots: 6,
+    blurb:
+      "The classic 468x60 full banner — the size most affiliate networks hand you — dropped between listings, news and events.",
+    priceInr: 2499,
+    priceUsd: 29,
+    cpmInr: 170,
+    cpmUsd: 2,
+    highlights: [
+      "The size most affiliate creatives come in",
+      "Sits inside the results, not beside them",
+      "Six advertisers share the rotation",
+    ],
+  },
   MOBILE: {
     slot: "MOBILE",
     name: "Mobile banner",
@@ -179,6 +196,7 @@ export const AD_SLOT_ORDER: BannerSlot[] = [
   "HEADER",
   "LEADERBOARD",
   "INCONTENT",
+  "FULLBANNER",
   "SIDEBAR",
   "HALFPAGE",
   "SKYSCRAPER",

@@ -28,6 +28,7 @@ const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
   LEADERBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
   INCONTENT: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
   MOBILE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
+  FULLBANNER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
   BILLBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HERO,
   HALFPAGE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
 };
@@ -333,18 +334,33 @@ export async function FooterBanner() {
 export async function InContentBanner({
   size = "leaderboard",
 }: {
-  /** "rectangle" swaps the desktop unit for the 336x280 large rectangle. */
-  size?: "leaderboard" | "rectangle";
+  /** Swaps the desktop unit for the 336x280 rectangle or the 468x60 banner. */
+  size?: "leaderboard" | "rectangle" | "full";
 }) {
-  const desktopSlot: BannerSlot =
-    size === "rectangle" ? "INCONTENT" : "LEADERBOARD";
-  const desktop = AD_PLACEMENTS[desktopSlot].size;
+  const bySize: Record<typeof size & string, BannerSlot> = {
+    leaderboard: "LEADERBOARD",
+    rectangle: "INCONTENT",
+    full: "FULLBANNER",
+  };
+  const desktopSlot = bySize[size];
+  // A 468x60 booking fills the leaderboard spot too, since affiliate creatives
+  // mostly come in that size and the wider unit would otherwise sit empty.
+  const fallbackSlot: BannerSlot | null =
+    desktopSlot === "LEADERBOARD" ? "FULLBANNER" : null;
   const mobile = AD_PLACEMENTS.MOBILE.size;
 
-  const [wide, phone] = await Promise.all([
+  const [primary, fallback, phone] = await Promise.all([
     activeBanners(desktopSlot, 1),
+    fallbackSlot ? activeBanners(fallbackSlot, 1) : Promise.resolve([]),
     activeBanners("MOBILE", 1),
   ]);
+
+  const wide = primary.length ? primary : fallback;
+  const wideSlot =
+    !primary.length && fallback.length && fallbackSlot
+      ? fallbackSlot
+      : desktopSlot;
+  const desktop = AD_PLACEMENTS[wideSlot].size;
 
   return (
     <div className="my-4" aria-label="Sponsored">
@@ -355,7 +371,7 @@ export async function InContentBanner({
             width={desktop.width}
             height={desktop.height}
             className="mx-auto"
-            sellSlot={desktopSlot}
+            sellSlot={wideSlot}
             sellLabel={`${desktop.width} × ${desktop.height}, shown in rotation`}
           />
         ) : (
@@ -363,7 +379,7 @@ export async function InContentBanner({
             label={`${desktop.width} × ${desktop.height} in-content banner`}
             width={desktop.width}
             height={desktop.height}
-            slot={desktopSlot}
+            slot={wideSlot}
             className="mx-auto"
           />
         )}
