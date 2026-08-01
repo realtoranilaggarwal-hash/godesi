@@ -43,14 +43,19 @@ export default async function ReviewDeskPage() {
       <div>
         <h1 className="text-2xl font-black">Review desk</h1>
         <p className="text-sm text-slate-600">
-          Paid takedown requests and the latest reviews. Hide fake, abusive or paid-for
-          reviews; keep honest criticism, even when the owner dislikes it.
+          Paid takedown requests and the latest reviews. Hide fake, abusive or
+          paid-for reviews; keep honest criticism, even when the owner dislikes
+          it.
         </p>
       </div>
 
       <AdminTabs
         tabs={[
-          { id: "requests", label: "Takedown requests", count: disputes.length },
+          {
+            id: "requests",
+            label: "Takedown requests",
+            count: disputes.length,
+          },
           { id: "latest", label: "Latest reviews" },
         ]}
       />
@@ -58,7 +63,10 @@ export default async function ReviewDeskPage() {
       <Card id="requests">
         <h2 className="mb-3 text-lg font-bold">Takedown requests</h2>
         {disputes.length === 0 ? (
-          <EmptyState title="Nothing waiting" body="Paid requests will appear here." />
+          <EmptyState
+            title="Nothing waiting"
+            body="Paid requests will appear here."
+          />
         ) : (
           <div className="space-y-4">
             {disputes.map((dispute) => (
@@ -73,8 +81,12 @@ export default async function ReviewDeskPage() {
                   >
                     {dispute.review.business.name}
                   </Link>
-                  <Badge tone={dispute.status === "PENDING" ? "amber" : "slate"}>
-                    {dispute.status === "PENDING" ? "Fee paid" : "Awaiting payment"}
+                  <Badge
+                    tone={dispute.status === "PENDING" ? "amber" : "slate"}
+                  >
+                    {dispute.status === "PENDING"
+                      ? "Fee paid"
+                      : "Awaiting payment"}
                   </Badge>
                   <span className="text-xs text-slate-500">
                     {formatMinor(dispute.feeMinor, dispute.feeCurrency)} ·{" "}
@@ -83,15 +95,20 @@ export default async function ReviewDeskPage() {
                 </div>
                 <p className="rounded-xl bg-slate-50 p-3 text-sm">
                   <span className="font-semibold">
-                    {"★".repeat(dispute.review.rating)} {dispute.review.authorName}:
+                    {"★".repeat(dispute.review.rating)}{" "}
+                    {dispute.review.authorName}:
                   </span>{" "}
                   {dispute.review.comment ?? "(no comment)"}
                 </p>
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold">Owner says:</span> {dispute.reason}
+                  <span className="font-semibold">Owner says:</span>{" "}
+                  {dispute.reason}
                 </p>
                 {dispute.status === "PENDING" ? (
-                  <form action={decideReviewDisputeAction} className="space-y-2">
+                  <form
+                    action={decideReviewDisputeAction}
+                    className="space-y-2"
+                  >
                     <input type="hidden" name="disputeId" value={dispute.id} />
                     <input
                       name="note"
@@ -142,11 +159,14 @@ export default async function ReviewDeskPage() {
                   </Link>
                   <Badge tone="amber">{"★".repeat(review.rating)}</Badge>
                   <span className="text-xs text-slate-500">
-                    {review.authorName} · {review.createdAt.toLocaleDateString("en-IN")}
+                    {review.authorName} ·{" "}
+                    {review.createdAt.toLocaleDateString("en-IN")}
                   </span>
                   {review.hidden ? <Badge tone="slate">Hidden</Badge> : null}
                 </div>
-                <p className="mt-1 text-slate-700">{review.comment ?? "(no comment)"}</p>
+                <p className="mt-1 text-slate-700">
+                  {review.comment ?? "(no comment)"}
+                </p>
                 {review.hiddenReason ? (
                   <p className="mt-1 text-xs text-slate-500">
                     Reason: {review.hiddenReason}
@@ -156,7 +176,11 @@ export default async function ReviewDeskPage() {
               <div className="flex flex-wrap gap-2">
                 <form action={setReviewHiddenAction} className="flex gap-2">
                   <input type="hidden" name="reviewId" value={review.id} />
-                  <input type="hidden" name="hidden" value={review.hidden ? "0" : "1"} />
+                  <input
+                    type="hidden"
+                    name="hidden"
+                    value={review.hidden ? "0" : "1"}
+                  />
                   {review.hidden ? null : (
                     <input
                       name="reason"

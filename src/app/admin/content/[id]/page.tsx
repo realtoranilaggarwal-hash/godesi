@@ -23,7 +23,10 @@ export default async function EditBlogPostPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <Link href="/admin/content" className="text-sm font-semibold text-indigo-600">
+      <Link
+        href="/admin/content"
+        className="text-sm font-semibold text-indigo-600"
+      >
         ← Content desk
       </Link>
       <Card>

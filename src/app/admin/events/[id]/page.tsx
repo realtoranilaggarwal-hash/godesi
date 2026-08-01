@@ -22,7 +22,8 @@ function istParts(date: Date) {
     minute: "2-digit",
     hour12: false,
   }).formatToParts(date);
-  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
   return {
     date: `${get("year")}-${get("month")}-${get("day")}`,
     time: `${get("hour")}:${get("minute")}`,
@@ -62,7 +63,8 @@ export default async function AdminEditEventPage({
           <h1 className="text-2xl font-bold">Edit event</h1>
           <p className="text-sm text-slate-600">
             Organiser {event.organizer.name} ({event.organizer.email}) ·{" "}
-            {event._count.tickets} bookings · {event.seatsBooked}/{event.seatsTotal} seats
+            {event._count.tickets} bookings · {event.seatsBooked}/
+            {event.seatsTotal} seats
           </p>
         </div>
         <div className="flex gap-3 text-sm font-semibold text-indigo-600">

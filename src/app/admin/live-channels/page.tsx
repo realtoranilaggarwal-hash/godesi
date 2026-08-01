@@ -10,13 +10,18 @@ import {
 } from "@/app/actions/liveChannels";
 import { LIVE_CHANNEL_MONTHS } from "@/lib/liveChannels";
 
-export const metadata: Metadata = { title: "Live radio & TV desk | Godesi admin" };
+export const metadata: Metadata = {
+  title: "Live radio & TV desk | Godesi admin",
+};
 export const dynamic = "force-dynamic";
 
 const STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const;
 
 function when(date: Date) {
-  return date.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  return date.toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 export default async function AdminLiveChannelsPage() {
@@ -25,7 +30,9 @@ export default async function AdminLiveChannelsPage() {
   const [channels, reports] = await Promise.all([
     db.liveChannel.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
-      include: { submittedBy: { select: { name: true, email: true, plan: true } } },
+      include: {
+        submittedBy: { select: { name: true, email: true, plan: true } },
+      },
       take: 200,
     }),
     db.liveChannelReport.findMany({
@@ -121,7 +128,8 @@ export default async function AdminLiveChannelsPage() {
                 <p className="text-xs text-slate-500">
                   {channel.submittedBy?.name ?? "unknown"} (
                   {channel.submittedBy?.email ?? "—"}) ·{" "}
-                  {channel.submittedBy?.plan ?? "FREE"} · {when(channel.createdAt)}
+                  {channel.submittedBy?.plan ?? "FREE"} ·{" "}
+                  {when(channel.createdAt)}
                 </p>
                 {channel.about ? (
                   <p className="mt-1 text-xs text-slate-600">{channel.about}</p>
@@ -134,14 +142,20 @@ export default async function AdminLiveChannelsPage() {
                 ) : null}
               </div>
               <p className="text-right text-xs">
-                <span className="font-bold text-slate-700">{channel.status}</span>
+                <span className="font-bold text-slate-700">
+                  {channel.status}
+                </span>
                 <br />
                 {channel.nonProfit
                   ? "Non-profit — free"
                   : paid
                     ? `Paid until ${when(channel.paidUntil!)}`
                     : "Unpaid"}
-                {channel.featured ? <><br />⭐ Featured</> : null}
+                {channel.featured ? (
+                  <>
+                    <br />⭐ Featured
+                  </>
+                ) : null}
               </p>
             </div>
 

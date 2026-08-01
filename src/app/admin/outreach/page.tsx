@@ -27,7 +27,12 @@ function inviteMessage(name: string, city: string, slug: string) {
 export default async function AdminOutreachPage({
   searchParams,
 }: {
-  searchParams: { city?: string; state?: string; status?: string; page?: string };
+  searchParams: {
+    city?: string;
+    state?: string;
+    status?: string;
+    page?: string;
+  };
 }) {
   await requireStaff();
 
@@ -39,7 +44,9 @@ export default async function AdminOutreachPage({
     source: "osm",
     ...(searchParams.city ? { city: searchParams.city } : {}),
     ...(searchParams.state ? { state: searchParams.state } : {}),
-    ...(status === "contacted" ? { NOT: { invitedAt: null } } : { invitedAt: null }),
+    ...(status === "contacted"
+      ? { NOT: { invitedAt: null } }
+      : { invitedAt: null }),
     // Only rows where the business itself publishes a way to reach it.
     OR: [
       { phone: { not: null } },
@@ -210,7 +217,11 @@ export default async function AdminOutreachPage({
               className="grid gap-2 sm:grid-cols-4"
             >
               <input type="hidden" name="id" value={row.id} />
-              <select name="channel" defaultValue="whatsapp" className={inputClass}>
+              <select
+                name="channel"
+                defaultValue="whatsapp"
+                className={inputClass}
+              >
                 <option value="whatsapp">WhatsApp sent</option>
                 <option value="email">Email sent</option>
                 <option value="phone">Called</option>
@@ -238,7 +249,10 @@ export default async function AdminOutreachPage({
         <Card>
           <p className="text-sm text-slate-600">
             Nothing here. Import more starter listings with{" "}
-            <code className="rounded bg-slate-100 px-1">npm run db:businesses</code>.
+            <code className="rounded bg-slate-100 px-1">
+              npm run db:businesses
+            </code>
+            .
           </p>
         </Card>
       ) : null}

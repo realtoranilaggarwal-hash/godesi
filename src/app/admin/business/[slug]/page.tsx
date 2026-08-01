@@ -21,14 +21,19 @@ export default async function StaffBusinessEditPage({
 }) {
   const user = await getCurrentUser();
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent(`/admin/business/${params.slug}`)}`);
+    redirect(
+      `/login?next=${encodeURIComponent(`/admin/business/${params.slug}`)}`,
+    );
   }
   if (!isStaff(user)) notFound();
 
   const [business, categories] = await Promise.all([
     db.business.findUnique({
       where: { slug: params.slug },
-      include: { vehicle: true, owner: { select: { email: true, plan: true } } },
+      include: {
+        vehicle: true,
+        owner: { select: { email: true, plan: true } },
+      },
     }),
     getCategoryTree(),
   ]);

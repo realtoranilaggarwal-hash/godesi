@@ -4,10 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
-import {
-  deleteEliteAction,
-  updateEliteAction,
-} from "@/app/actions/elite";
+import { deleteEliteAction, updateEliteAction } from "@/app/actions/elite";
 import { ELITE_BADGES, ELITE_STATUS_LABELS } from "@/lib/elite";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +13,9 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const STATUSES = Object.keys(ELITE_STATUS_LABELS) as (keyof typeof ELITE_STATUS_LABELS)[];
+const STATUSES = Object.keys(
+  ELITE_STATUS_LABELS,
+) as (keyof typeof ELITE_STATUS_LABELS)[];
 const BADGES = Object.keys(ELITE_BADGES) as (keyof typeof ELITE_BADGES)[];
 
 export default async function EliteAdminPage({
@@ -41,7 +40,10 @@ export default async function EliteAdminPage({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">🏆 GoDesi Elite desk</h1>
-        <Link href="/desi-elite" className="text-sm font-semibold text-indigo-600">
+        <Link
+          href="/desi-elite"
+          className="text-sm font-semibold text-indigo-600"
+        >
           View directory →
         </Link>
       </div>
@@ -50,7 +52,9 @@ export default async function EliteAdminPage({
         <Link
           href="/admin/desi-elite"
           className={`rounded-full px-3 py-1 font-semibold ${
-            searchParams.status ? "bg-slate-100 text-slate-700" : "bg-slate-900 text-white"
+            searchParams.status
+              ? "bg-slate-100 text-slate-700"
+              : "bg-slate-900 text-white"
           }`}
         >
           All ({entries.length})
@@ -79,7 +83,9 @@ export default async function EliteAdminPage({
       {entries.map((entry) => (
         <Card
           key={entry.id}
-          className={searchParams.entry === entry.id ? "ring-2 ring-indigo-400" : ""}
+          className={
+            searchParams.entry === entry.id ? "ring-2 ring-indigo-400" : ""
+          }
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
@@ -110,7 +116,9 @@ export default async function EliteAdminPage({
               <p className="font-bold text-slate-700">
                 {ELITE_STATUS_LABELS[entry.status]}
               </p>
-              <p className="text-slate-500">{ELITE_BADGES[entry.badge].label}</p>
+              <p className="text-slate-500">
+                {ELITE_BADGES[entry.badge].label}
+              </p>
               <p className="text-slate-500">
                 Paid ${(entry.paidCents / 100).toLocaleString()}
                 {entry.interviewPaid ? " · interview" : ""}
@@ -150,16 +158,27 @@ export default async function EliteAdminPage({
             </div>
           </details>
 
-          <form action={updateEliteAction} className="mt-3 grid gap-2 sm:grid-cols-6">
+          <form
+            action={updateEliteAction}
+            className="mt-3 grid gap-2 sm:grid-cols-6"
+          >
             <input type="hidden" name="id" value={entry.id} />
-            <select name="status" defaultValue={entry.status} className={inputClass}>
+            <select
+              name="status"
+              defaultValue={entry.status}
+              className={inputClass}
+            >
               {STATUSES.map((status) => (
                 <option key={status} value={status}>
                   {status.replace(/_/g, " ").toLowerCase()}
                 </option>
               ))}
             </select>
-            <select name="badge" defaultValue={entry.badge} className={inputClass}>
+            <select
+              name="badge"
+              defaultValue={entry.badge}
+              className={inputClass}
+            >
               {BADGES.map((badge) => (
                 <option key={badge} value={badge}>
                   {ELITE_BADGES[badge].label}
