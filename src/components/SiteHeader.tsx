@@ -12,6 +12,7 @@ import { HeaderShell } from "@/components/HeaderShell";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
+import { PostFab } from "@/components/PostFab";
 import { displayCurrency } from "@/lib/displayCurrency";
 
 const NAV = [
@@ -102,6 +103,8 @@ export async function SiteHeader() {
   ];
 
   return (
+    <>
+    <PostFab signedIn={Boolean(user)} />
     <HeaderShell
       items={categoryItems}
       bar={
@@ -297,5 +300,6 @@ export async function SiteHeader() {
         </div>
       }
     />
+    </>
   );
 }

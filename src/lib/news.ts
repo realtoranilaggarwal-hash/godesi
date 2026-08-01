@@ -96,6 +96,14 @@ export function twoLineSummary(input: string, limit = 700) {
   return `${clean.slice(0, limit).replace(/\s+\S*$/, "")}…`;
 }
 
+/**
+ * A member's own report is published in full on Godesi — there is no publisher
+ * to send the reader to, so trimming it would lose the story.
+ */
+export function memberStory(input: string) {
+  return decode(input).trim();
+}
+
 function firstImage(block: string) {
   return (
     attr(block, "media:content", "url") ??

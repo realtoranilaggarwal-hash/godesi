@@ -189,7 +189,11 @@ export default async function ReportPage({
 
           <InArticleAd />
 
-          {report.link && report.link !== report.sourceUrl ? (
+          {/* Member reports are written here, so there is no outside publisher
+              to send the reader to — the link only belongs on imported news. */}
+          {!report.submittedById &&
+          report.link &&
+          report.link !== report.sourceUrl ? (
             <a
               href={report.link}
               target="_blank"

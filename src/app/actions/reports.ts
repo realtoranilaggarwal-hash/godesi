@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { newsQuotaLeft, twoLineSummary } from "@/lib/news";
+import { memberStory, newsQuotaLeft } from "@/lib/news";
 import { REPORT_DECLARATIONS, REPORT_SOURCES } from "@/lib/journalists";
 import { REPORT_TOPIC_OPTIONS, topicSlug } from "@/lib/newsTopics";
 
@@ -91,7 +91,7 @@ export async function submitReportAction(
       data: {
         guid: `report:${randomUUID()}`,
         title: data.title,
-        summary: twoLineSummary(data.summary),
+        summary: memberStory(data.summary),
         link: "",
         source: user.name,
         submittedById: user.id,
