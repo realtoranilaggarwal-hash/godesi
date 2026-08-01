@@ -16,6 +16,7 @@ import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { AdPreview } from "@/components/AdPreview";
 import { proxyImage } from "@/lib/proxyImage";
+import { AD_PLACEMENTS } from "@/lib/ads";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
@@ -23,6 +24,11 @@ const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
   HEADER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER,
   SIDEBAR: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
   SKYSCRAPER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SKYSCRAPER,
+  LEADERBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
+  INCONTENT: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
+  MOBILE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
+  BILLBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HERO,
+  HALFPAGE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
 };
 
 type BannerRow = {
@@ -145,11 +151,13 @@ function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
  * page view from burning everyone's impression quota at once.
  */
 export async function SidebarBanners() {
-  const [rectangles, skyscrapers, rectanglesSold] = await Promise.all([
-    activeBanners("SIDEBAR", 2),
-    activeBanners("SKYSCRAPER", 2),
-    slotSoldCount("SIDEBAR"),
-  ]);
+  const [rectangles, halfPages, skyscrapers, rectanglesSold] =
+    await Promise.all([
+      activeBanners("SIDEBAR", 2),
+      activeBanners("HALFPAGE", 1),
+      activeBanners("SKYSCRAPER", 2),
+      slotSoldCount("SIDEBAR"),
+    ]);
 
   return (
     <aside
@@ -183,6 +191,17 @@ export async function SidebarBanners() {
           height={SIDEBAR_SIZE.height}
           width={SIDEBAR_SIZE.width}
           slot="SIDEBAR"
+        />
+      ))}
+      {/* One 300x600 half page under the rectangles, if anyone has booked it. */}
+      {halfPages.map((banner) => (
+        <BannerLink
+          key={banner.id}
+          banner={banner}
+          width={AD_PLACEMENTS.HALFPAGE.size.width}
+          height={AD_PLACEMENTS.HALFPAGE.size.height}
+          sellSlot="HALFPAGE"
+          sellLabel="300 × 600 half page, shown in rotation"
         />
       ))}
       {/* Skyscrapers run two-up so the pair fills the same 300px rail width. */}
@@ -299,6 +318,103 @@ export async function FooterBanner() {
         className="mx-auto max-w-full"
       />
       <BookThisSpot slot="HEADER" label="970 × 90 leaderboard" />
+    </div>
+  );
+}
+
+/**
+ * A standard-size unit dropped between the cards on a listing, news or event
+ * page. Desktop gets the 728x90 leaderboard, phones the 320x100 — one booking
+ * per size, both rotating between the advertisers sharing that slot.
+ */
+export async function InContentBanner({
+  size = "leaderboard",
+}: {
+  /** "rectangle" swaps the desktop unit for the 336x280 large rectangle. */
+  size?: "leaderboard" | "rectangle";
+}) {
+  const desktopSlot: BannerSlot =
+    size === "rectangle" ? "INCONTENT" : "LEADERBOARD";
+  const desktop = AD_PLACEMENTS[desktopSlot].size;
+  const mobile = AD_PLACEMENTS.MOBILE.size;
+
+  const [wide, phone] = await Promise.all([
+    activeBanners(desktopSlot, 1),
+    activeBanners("MOBILE", 1),
+  ]);
+
+  return (
+    <div className="my-4" aria-label="Sponsored">
+      <div className="hidden sm:block">
+        {wide[0] ? (
+          <BannerLink
+            banner={wide[0]}
+            width={desktop.width}
+            height={desktop.height}
+            className="mx-auto"
+            sellSlot={desktopSlot}
+            sellLabel={`${desktop.width} × ${desktop.height}, shown in rotation`}
+          />
+        ) : (
+          <AdvertiseHere
+            label={`${desktop.width} × ${desktop.height} in-content banner`}
+            width={desktop.width}
+            height={desktop.height}
+            slot={desktopSlot}
+            className="mx-auto"
+          />
+        )}
+      </div>
+      <div className="sm:hidden">
+        {phone[0] ? (
+          <BannerLink
+            banner={phone[0]}
+            width={mobile.width}
+            height={mobile.height}
+            className="mx-auto max-w-[320px]"
+            sellSlot="MOBILE"
+            sellLabel="320 × 100, shown in rotation"
+          />
+        ) : (
+          <AdvertiseHere
+            label="320 × 100 mobile banner"
+            width={mobile.width}
+            height={mobile.height}
+            slot="MOBILE"
+            className="mx-auto max-w-[320px]"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** The 970x250 billboard at the top of the busiest listing pages. */
+export async function BillboardBanner() {
+  const size = AD_PLACEMENTS.BILLBOARD.size;
+  const [banner] = await activeBanners("BILLBOARD", 1);
+
+  if (!banner) {
+    return (
+      <AdvertiseHere
+        label="970 × 250 billboard"
+        width={size.width}
+        height={size.height}
+        slot="BILLBOARD"
+        className="mb-4 hidden sm:block"
+      />
+    );
+  }
+
+  return (
+    <div className="mb-4 hidden sm:block">
+      <BannerLink
+        banner={banner}
+        width={size.width}
+        height={size.height}
+        sellSlot="BILLBOARD"
+        sellLabel="970 × 250 billboard, shown in rotation"
+      />
     </div>
   );
 }

@@ -12,7 +12,12 @@ export type CartItemKey =
   | "banner-sidebar"
   | "banner-header"
   | "banner-hero"
-  | "banner-skyscraper";
+  | "banner-skyscraper"
+  | "banner-billboard"
+  | "banner-leaderboard"
+  | "banner-incontent"
+  | "banner-halfpage"
+  | "banner-mobile";
 
 export type CartItem = {
   key: CartItemKey;
@@ -60,6 +65,11 @@ export const CART_ITEMS: CartItem[] = [
   bannerItem("banner-header", "HEADER", false),
   bannerItem("banner-hero", "HERO", false),
   bannerItem("banner-skyscraper", "SKYSCRAPER", false),
+  bannerItem("banner-billboard", "BILLBOARD", false),
+  bannerItem("banner-leaderboard", "LEADERBOARD", false),
+  bannerItem("banner-incontent", "INCONTENT", false),
+  bannerItem("banner-halfpage", "HALFPAGE", false),
+  bannerItem("banner-mobile", "MOBILE", false),
 ];
 
 /** Thrown in with the membership at no extra charge. */

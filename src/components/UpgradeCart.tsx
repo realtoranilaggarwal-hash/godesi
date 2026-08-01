@@ -72,6 +72,9 @@ export function UpgradeCart({
           <h3 className="text-lg font-bold">Build your package</h3>
           <p className="text-sm text-slate-500">
             Tick what you want — the price on the right updates as you go.
+            Banners run in rotation with the other advertisers in that spot, and
+            you can watch the views, clicks and CTR of each one in your
+            dashboard.
           </p>
 
           <ul className="mt-3 space-y-2">

@@ -23,7 +23,8 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     name: "Header leaderboard",
     size: { width: 970, height: 90 },
     slots: 1,
-    blurb: "Top of every page, above the fold — the highest-visibility slot on Godesi.",
+    blurb:
+      "Top of every page, above the fold — the highest-visibility slot on Godesi.",
     priceInr: 7999,
     priceUsd: 95,
     cpmInr: 320,
@@ -56,7 +57,8 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     name: "Sidebar medium rectangle",
     size: { width: 300, height: 250 },
     slots: 10,
-    blurb: "Classic 300x250 in the sponsored rail beside listings, events and news.",
+    blurb:
+      "Classic 300x250 in the sponsored rail beside listings, events and news.",
     priceInr: 2499,
     priceUsd: 29,
     cpmInr: 180,
@@ -72,7 +74,8 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     name: "Skyscraper",
     size: { width: 160, height: 600 },
     slots: 4,
-    blurb: "Tall 160x600 unit that stays visible as visitors scroll long listing pages.",
+    blurb:
+      "Tall 160x600 unit that stays visible as visitors scroll long listing pages.",
     priceInr: 3999,
     priceUsd: 47,
     cpmInr: 240,
@@ -83,13 +86,103 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Ideal for events, courses and offers",
     ],
   },
+  BILLBOARD: {
+    slot: "BILLBOARD",
+    name: "Billboard",
+    size: { width: 970, height: 250 },
+    slots: 2,
+    blurb:
+      "Standard 970x250 billboard at the top of category, search and news pages, shared by two advertisers in rotation.",
+    priceInr: 9999,
+    priceUsd: 119,
+    cpmInr: 380,
+    cpmUsd: 4.5,
+    highlights: [
+      "Biggest standard display size",
+      "Top of the busiest listing pages",
+      "Two advertisers in rotation",
+    ],
+  },
+  LEADERBOARD: {
+    slot: "LEADERBOARD",
+    name: "In-content leaderboard",
+    size: { width: 728, height: 90 },
+    slots: 6,
+    blurb:
+      "Standard 728x90 placed between the cards on listing, news and event pages, where people are already reading.",
+    priceInr: 3499,
+    priceUsd: 39,
+    cpmInr: 200,
+    cpmUsd: 2.4,
+    highlights: [
+      "Sits inside the results, not beside them",
+      "Six advertisers share the rotation",
+      "Standard size — reuse your existing creative",
+    ],
+  },
+  INCONTENT: {
+    slot: "INCONTENT",
+    name: "In-content rectangle",
+    size: { width: 336, height: 280 },
+    slots: 8,
+    blurb:
+      "Standard 336x280 large rectangle dropped between listings, news stories and events.",
+    priceInr: 2999,
+    priceUsd: 35,
+    cpmInr: 190,
+    cpmUsd: 2.3,
+    highlights: [
+      "Highest-clicking standard display size",
+      "Appears mid-page on desktop and mobile",
+      "Eight advertisers in rotation",
+    ],
+  },
+  HALFPAGE: {
+    slot: "HALFPAGE",
+    name: "Half page",
+    size: { width: 300, height: 600 },
+    slots: 4,
+    blurb:
+      "Standard 300x600 half page in the sponsored rail — twice the height of a rectangle.",
+    priceInr: 4999,
+    priceUsd: 59,
+    cpmInr: 260,
+    cpmUsd: 3.1,
+    highlights: [
+      "Dominates the sidebar as visitors scroll",
+      "Four slots only",
+      "Good for offers with a lot to say",
+    ],
+  },
+  MOBILE: {
+    slot: "MOBILE",
+    name: "Mobile banner",
+    size: { width: 320, height: 100 },
+    slots: 8,
+    blurb:
+      "Standard 320x100 shown between cards on phones, where most desi visitors browse.",
+    priceInr: 1999,
+    priceUsd: 24,
+    cpmInr: 150,
+    cpmUsd: 1.8,
+    highlights: [
+      "Phone-only placement",
+      "Most of our traffic is mobile",
+      "Cheapest way to start",
+    ],
+  },
 };
 
 export const AD_SLOT_ORDER: BannerSlot[] = [
   "HERO",
+  "BILLBOARD",
   "HEADER",
+  "LEADERBOARD",
+  "INCONTENT",
   "SIDEBAR",
+  "HALFPAGE",
   "SKYSCRAPER",
+  "MOBILE",
 ];
 
 export const AD_DURATIONS = [1, 3, 6, 12] as const;
@@ -131,7 +224,7 @@ export function adImpressionPrice(
   impressions: number,
 ) {
   const cpm = currency === "INR" ? placement.cpmInr : placement.cpmUsd;
-  const gross = (cpm * impressions) / 1000 * (1 - packDiscount(impressions));
+  const gross = ((cpm * impressions) / 1000) * (1 - packDiscount(impressions));
   return currency === "INR" ? Math.round(gross) : Math.round(gross * 100) / 100;
 }
 
@@ -178,7 +271,10 @@ export function formatAdImpressionPrice(
   currency: Currency,
   impressions: number,
 ) {
-  return formatMoney(adImpressionPrice(placement, currency, impressions), currency);
+  return formatMoney(
+    adImpressionPrice(placement, currency, impressions),
+    currency,
+  );
 }
 
 export function ctr(impressions: number, clicks: number) {

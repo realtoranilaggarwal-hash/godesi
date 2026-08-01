@@ -5,7 +5,11 @@ import { can, getCurrentUser } from "@/lib/auth";
 import { ingestIfStale } from "@/lib/news";
 import { NewsCard } from "@/components/NewsCard";
 import { NewsForm } from "@/components/forms/NewsForm";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import {
+  InContentBanner,
+  InlineBanner,
+  SidebarBanners,
+} from "@/components/Banners";
 import { ChatPanel } from "@/components/ChatPanel";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { JournalistJoinForm } from "@/components/forms/JournalistJoinForm";
@@ -64,7 +68,9 @@ export default async function NewsPage({
       orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
       take: 12,
       include: {
-        submittedBy: { select: { name: true, username: true, avatarUrl: true } },
+        submittedBy: {
+          select: { name: true, username: true, avatarUrl: true },
+        },
       },
     }),
     db.newsItem.findMany({
@@ -77,7 +83,9 @@ export default async function NewsPage({
       orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
       take: 40,
       include: {
-        submittedBy: { select: { name: true, username: true, avatarUrl: true } },
+        submittedBy: {
+          select: { name: true, username: true, avatarUrl: true },
+        },
       },
     }),
   ]);
@@ -86,7 +94,10 @@ export default async function NewsPage({
 
   const myVotes = user
     ? await db.newsVote.findMany({
-        where: { userId: user.id, newsId: { in: items.map((item) => item.id) } },
+        where: {
+          userId: user.id,
+          newsId: { in: items.map((item) => item.id) },
+        },
         select: { newsId: true, value: true },
       })
     : [];
@@ -198,22 +209,45 @@ export default async function NewsPage({
         ) : null}
 
         {items.length ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {items.map((item) => (
-              <NewsCard
-                key={item.id}
-                item={item}
-                vote={voteByNews.get(item.id) ?? 0}
-                posterLevel={
-                  item.submittedById
-                    ? levelByUser.get(item.submittedById) ?? null
-                    : null
-                }
-                canVote={Boolean(user)}
-                canFeature={isNewsStaff}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {items.slice(0, 6).map((item) => (
+                <NewsCard
+                  key={item.id}
+                  item={item}
+                  vote={voteByNews.get(item.id) ?? 0}
+                  posterLevel={
+                    item.submittedById
+                      ? (levelByUser.get(item.submittedById) ?? null)
+                      : null
+                  }
+                  canVote={Boolean(user)}
+                  canFeature={isNewsStaff}
+                />
+              ))}
+            </div>
+            {items.length > 6 ? (
+              <>
+                <InContentBanner />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {items.slice(6).map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      item={item}
+                      vote={voteByNews.get(item.id) ?? 0}
+                      posterLevel={
+                        item.submittedById
+                          ? (levelByUser.get(item.submittedById) ?? null)
+                          : null
+                      }
+                      canVote={Boolean(user)}
+                      canFeature={isNewsStaff}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </>
         ) : (
           <EmptyState
             title={topic ? "Nothing on this topic yet" : "No stories yet"}
@@ -226,10 +260,10 @@ export default async function NewsPage({
         )}
 
         <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          Stories credited to a member are submitted by the community.
-          Godesi reviews them but does not verify every claim, and our team can
-          edit, unpublish or delete any story that is not genuine, original or
-          safe. Spotted a problem?{" "}
+          Stories credited to a member are submitted by the community. Godesi
+          reviews them but does not verify every claim, and our team can edit,
+          unpublish or delete any story that is not genuine, original or safe.
+          Spotted a problem?{" "}
           <Link href="/contact" className="font-semibold underline">
             Report it
           </Link>
@@ -297,10 +331,7 @@ export default async function NewsPage({
           <h2 className="font-bold">Share a story ✍️</h2>
           <p className="mt-1 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
             Saw it yourself? File a{" "}
-            <Link
-              href="/news/report"
-              className="font-bold underline"
-            >
+            <Link href="/news/report" className="font-bold underline">
               full report with photos
             </Link>{" "}
             instead — this box is for sharing someone else&rsquo;s article.
@@ -319,9 +350,13 @@ export default async function NewsPage({
                 <ul className="mt-4 space-y-1 border-t border-slate-100 pt-3 text-sm">
                   {mine.map((item) => (
                     <li key={item.id} className="flex justify-between gap-3">
-                      <span className="truncate text-slate-600">{item.title}</span>
+                      <span className="truncate text-slate-600">
+                        {item.title}
+                      </span>
                       <span className="shrink-0 text-xs font-bold uppercase text-slate-400">
-                        {item.status === "PENDING" ? "In review" : "Not accepted"}
+                        {item.status === "PENDING"
+                          ? "In review"
+                          : "Not accepted"}
                       </span>
                     </li>
                   ))}
@@ -334,7 +369,9 @@ export default async function NewsPage({
                 Any Godesi member can submit a story — sign in and share it. Our
                 team reviews submissions, and contributors earn reward points.
               </p>
-              <LinkButton href="/login?next=/news">Sign in to post news</LinkButton>
+              <LinkButton href="/login?next=/news">
+                Sign in to post news
+              </LinkButton>
             </div>
           )}
 

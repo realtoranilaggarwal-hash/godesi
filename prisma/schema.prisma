@@ -64,6 +64,11 @@ enum BannerSlot {
   HERO
   SIDEBAR
   SKYSCRAPER
+  BILLBOARD
+  LEADERBOARD
+  INCONTENT
+  HALFPAGE
+  MOBILE
 }
 
 enum BannerStatus {

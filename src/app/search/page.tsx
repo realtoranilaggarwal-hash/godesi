@@ -3,7 +3,11 @@ import { searchBusinesses, listCities, listCountries } from "@/lib/businesses";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessCard } from "@/components/BusinessCard";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import {
+  InContentBanner,
+  InlineBanner,
+  SidebarBanners,
+} from "@/components/Banners";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 
@@ -173,11 +177,23 @@ export default async function SearchPage({
         </p>
 
         {results.length ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {results.map((business) => (
-              <BusinessCard key={business.id} business={business} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {results.slice(0, 6).map((business) => (
+                <BusinessCard key={business.id} business={business} />
+              ))}
+            </div>
+            {results.length > 6 ? (
+              <>
+                <InContentBanner />
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {results.slice(6).map((business) => (
+                    <BusinessCard key={business.id} business={business} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </>
         ) : (
           <EmptyState
             title="No businesses match your filters"

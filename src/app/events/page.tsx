@@ -5,7 +5,11 @@ import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
 import { FeaturedEventStrip } from "@/components/FeaturedEvents";
 import { planRank } from "@/lib/plans";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import {
+  InContentBanner,
+  InlineBanner,
+  SidebarBanners,
+} from "@/components/Banners";
 import { ChatPanel } from "@/components/ChatPanel";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
@@ -44,7 +48,9 @@ export default async function EventsPage({
         ? [searchParams.feature]
         : []
   ).filter((value) =>
-    EVENT_FEATURE_FILTERS.includes(value as (typeof EVENT_FEATURE_FILTERS)[number]),
+    EVENT_FEATURE_FILTERS.includes(
+      value as (typeof EVENT_FEATURE_FILTERS)[number],
+    ),
   );
 
   /** Toggling a chip keeps every other filter in the query string. */
@@ -92,7 +98,9 @@ export default async function EventsPage({
       ...(venue ? { venue: { contains: venue, mode: "insensitive" } } : {}),
       ...(type ? { eventType: type } : {}),
       ...(modeFilter ? { mode: modeFilter } : {}),
-      ...(selectedFeatures.length ? { features: { hasEvery: selectedFeatures } } : {}),
+      ...(selectedFeatures.length
+        ? { features: { hasEvery: selectedFeatures } }
+        : {}),
     },
     orderBy: { startsAt: when === "past" ? "desc" : "asc" },
     take: 48,
@@ -186,7 +194,12 @@ export default async function EventsPage({
             </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
             {selectedFeatures.map((feature) => (
-              <input key={feature} type="hidden" name="feature" value={feature} />
+              <input
+                key={feature}
+                type="hidden"
+                name="feature"
+                value={feature}
+              />
             ))}
             <button
               type="submit"
@@ -222,11 +235,23 @@ export default async function EventsPage({
         </Card>
 
         {events.length ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {events.slice(0, 6).map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+            {events.length > 6 ? (
+              <>
+                <InContentBanner />
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {events.slice(6).map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </>
         ) : (
           <EmptyState
             title="No events here yet"

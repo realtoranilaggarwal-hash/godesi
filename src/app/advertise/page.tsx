@@ -14,7 +14,11 @@ import {
   packDiscount,
 } from "@/lib/ads";
 import { requestCurrency } from "@/lib/currency";
-import { RESOURCE_CPM, RESOURCE_PACKS, formatResourcePrice } from "@/lib/resources";
+import {
+  RESOURCE_CPM,
+  RESOURCE_PACKS,
+  formatResourcePrice,
+} from "@/lib/resources";
 import { AdPreview } from "@/components/AdPreview";
 import { AdBookingForm } from "@/components/forms/AdBookingForm";
 import { DesignHelp } from "@/components/DesignHelp";
@@ -59,11 +63,13 @@ export default async function AdvertisePage({
         <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
           Advertising
         </p>
-        <h1 className="mt-2 text-3xl font-bold sm:text-4xl">Advertise on Godesi</h1>
+        <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
+          Advertise on Godesi
+        </h1>
         <p className="mt-3 max-w-2xl text-white/90">
-          Put your brand in front of people actively looking for desi businesses,
-          services, events and news. Choose a placement, upload your banner, and
-          track impressions, clicks and CTR from your dashboard.
+          Put your brand in front of people actively looking for desi
+          businesses, services, events and news. Choose a placement, upload your
+          banner, and track impressions, clicks and CTR from your dashboard.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
@@ -81,7 +87,6 @@ export default async function AdvertisePage({
         </div>
       </section>
 
-
       {user?.role === "ADMIN" ? (
         <Alert tone="success">
           Admin: add a banner to any slot without payment from{" "}
@@ -97,28 +102,40 @@ export default async function AdvertisePage({
       ) : null}
 
       <Card id="book">
-        <h2 className="text-lg font-bold">Two ways to book — and how rotation works</h2>
+        <h2 className="text-lg font-bold">
+          Two ways to book — and how rotation works
+        </h2>
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-slate-50 p-3">
             <p className="text-sm font-bold">Monthly</p>
             <p className="mt-1 text-sm text-slate-600">
-              Your banner runs for the months you book, from the day we approve it. Book
-              now to hold next month, and longer bookings are discounted.
+              Your banner runs for the months you book, from the day we approve
+              it. Book now to hold next month, and longer bookings are
+              discounted.
             </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-3">
             <p className="text-sm font-bold">Pay per views</p>
             <p className="mt-1 text-sm text-slate-600">
-              Buy a pack of views instead of a date range. Your banner retires itself the
-              moment the last purchased view is delivered — you never pay for more.
+              Buy a pack of views instead of a date range. Your banner retires
+              itself the moment the last purchased view is delivered — you never
+              pay for more.
             </p>
           </div>
         </div>
         <p className="mt-3 text-sm text-slate-600">
-          Every spot is shared. When several advertisers book the same placement their
-          banners <strong>rotate</strong>: each page view shows one of them, weighted so
-          everyone gets a fair share of the views they paid for. That means a spot that
-          already shows an ad is still bookable — you simply join the rotation.
+          Every spot is shared. When several advertisers book the same placement
+          their banners <strong>rotate</strong>: each page view shows one of
+          them, weighted so everyone gets a fair share of the views they paid
+          for. That means a spot that already shows an ad is still bookable —
+          you simply join the rotation.
+        </p>
+        <p className="mt-2 text-sm text-slate-600">
+          Every view and click is counted. Watch them live in{" "}
+          <Link href="/dashboard/ads" className="font-semibold text-indigo-600">
+            your dashboard → my ads
+          </Link>
+          , with impressions, clicks and CTR for each banner you run.
         </p>
       </Card>
 
@@ -163,10 +180,14 @@ export default async function AdvertisePage({
               <div className="mt-4 rounded-xl bg-slate-50 p-3">
                 <p className="text-2xl font-bold">
                   {formatAdPrice(placement, currency)}
-                  <span className="text-sm font-medium text-slate-500"> / month</span>
+                  <span className="text-sm font-medium text-slate-500">
+                    {" "}
+                    / month
+                  </span>
                 </p>
                 <p className="text-xs text-slate-500">
-                  or about {formatCpm(placement, currency)} per 1,000 impressions
+                  or about {formatCpm(placement, currency)} per 1,000
+                  impressions
                 </p>
               </div>
 
@@ -212,11 +233,14 @@ export default async function AdvertisePage({
       <Card id="text-links">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-bold">Text links &amp; resource links</h2>
+            <h2 className="text-lg font-bold">
+              Text links &amp; resource links
+            </h2>
             <p className="mt-1 max-w-2xl text-sm text-slate-600">
-              No artwork needed. Your title sits in the &ldquo;Recommended links&rdquo; box
-              on category pages, business cards and property listings, labelled as
-              sponsored, and retires itself once your purchased views are delivered.
+              No artwork needed. Your title sits in the &ldquo;Recommended
+              links&rdquo; box on category pages, business cards and property
+              listings, labelled as sponsored, and retires itself once your
+              purchased views are delivered.
             </p>
           </div>
           <LinkButton href="/resources/new">Advertise a link</LinkButton>
@@ -235,16 +259,17 @@ export default async function AdvertisePage({
 
         <p className="mt-3 text-sm text-slate-600">
           {currency === "INR" ? "₹" : "$"}
-          {RESOURCE_CPM[currency].toLocaleString()} per 1,000 views · clicks and views
-          tracked · category targeted.
+          {RESOURCE_CPM[currency].toLocaleString()} per 1,000 views · clicks and
+          views tracked · category targeted.
         </p>
       </Card>
 
       <Card>
         <h2 className="text-lg font-bold">Need your banner designed?</h2>
         <p className="mt-1 text-sm text-slate-600">
-          You do not need a designer. Copy the prompt below into ChatGPT, fill in your
-          details, download the image and upload it in your advertiser dashboard.
+          You do not need a designer. Copy the prompt below into ChatGPT, fill
+          in your details, download the image and upload it in your advertiser
+          dashboard.
         </p>
         <div className="mt-3">
           <DesignHelp size={AD_PLACEMENTS.SIDEBAR.size} />
@@ -255,22 +280,23 @@ export default async function AdvertisePage({
         <h2 className="text-lg font-bold">How it works</h2>
         <ol className="mt-2 space-y-2 text-sm text-slate-600">
           <li>
-            <strong>1. Book a slot.</strong> Pay monthly, or buy a pack of views and
-            only pay for the impressions you get. Bigger bookings are discounted.
+            <strong>1. Book a slot.</strong> Pay monthly, or buy a pack of views
+            and only pay for the impressions you get. Bigger bookings are
+            discounted.
           </li>
           <li>
             <strong>2. Upload your creative.</strong> Add your banner image and
             destination URL in the advertiser dashboard.
           </li>
           <li>
-            <strong>3. We approve it.</strong> Our team checks the creative, assigns
-            your slot and switches it live — usually within a day.
+            <strong>3. We approve it.</strong> Our team checks the creative,
+            assigns your slot and switches it live — usually within a day.
           </li>
           <li>
-            <strong>4. Track performance.</strong> Impressions, clicks, CTR and days
-            or views remaining are updated live in your dashboard. Banners sharing a
-            slot rotate on every page view, and a views pack retires itself once it is
-            fully delivered.
+            <strong>4. Track performance.</strong> Impressions, clicks, CTR and
+            days or views remaining are updated live in your dashboard. Banners
+            sharing a slot rotate on every page view, and a views pack retires
+            itself once it is fully delivered.
           </li>
         </ol>
         <p className="mt-3 text-xs text-slate-500">
