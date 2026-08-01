@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Currency } from "@/lib/currency";
 import {
   BUNDLE_EXTRAS,
@@ -14,6 +14,9 @@ import { startBundleCheckoutAction } from "@/app/actions/billing";
 
 /** The membership is the base of every cart, so it cannot be unticked. */
 const REQUIRED: CartItemKey = "membership";
+
+/** How long we hold the advertised code once they tap it. */
+const HOLD_SECONDS = 30;
 
 export function UpgradeCart({
   currency,
@@ -38,6 +41,24 @@ export function UpgradeCart({
     "banner-sidebar",
   ]);
   const [code, setCode] = useState("");
+  /** Seconds left on the locked offer; null until they lock it. */
+  const [held, setHeld] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (held === null) return;
+    if (held <= 0) {
+      setCode("");
+      return;
+    }
+    const timer = setTimeout(() => setHeld(held - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [held]);
+
+  function lockOffer() {
+    if (!flashCode) return;
+    setCode(flashCode);
+    setHeld(HOLD_SECONDS);
+  }
 
   const cart = useMemo(
     () => priceCart(selected, currency),
@@ -127,6 +148,53 @@ export function UpgradeCart({
           </ul>
         </div>
 
+        {flashCode ? (
+          <div className="rounded-2xl border-2 border-rose-400 bg-gradient-to-r from-rose-600 via-orange-500 to-amber-400 p-4 text-white">
+            <p className="text-lg font-black">
+              Take everything above for{" "}
+              {flashPercent === 50 ? "half price" : `${flashPercent}% off`}
+              {flashBonusMonths > 0
+                ? ` — and stretch it to ${Math.round(
+                    (12 + flashBonusMonths) / 12,
+                  )} years`
+                : ""}
+            </p>
+            <p className="mt-1 text-sm text-white/90">
+              Code <strong>{flashCode}</strong> cuts{" "}
+              {formatBundleMoney(cart.total, currency)} to{" "}
+              <strong>
+                {formatBundleMoney(
+                  cart.total -
+                    (flashPercent
+                      ? Math.round(cart.total * flashPercent) / 100
+                      : flashFixed),
+                  currency,
+                )}
+              </strong>
+              {flashBonusMonths > 0
+                ? ` and runs for ${12 + flashBonusMonths} months instead of 12.`
+                : "."}
+            </p>
+            {held !== null && held > 0 ? (
+              <p className="mt-2 rounded-xl bg-white/20 px-3 py-2 text-center text-sm font-black">
+                ⏱ Held for you — 00:{String(held).padStart(2, "0")}. Start the
+                payment before it runs out and the {termMonths}-month term is
+                yours.
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={lockOffer}
+                className="mt-2 w-full rounded-xl bg-white px-4 py-2.5 text-sm font-black text-rose-700 hover:bg-rose-50"
+              >
+                {held === null
+                  ? `Lock this price for ${HOLD_SECONDS} seconds`
+                  : "The hold ran out — tap to try again"}
+              </button>
+            )}
+          </div>
+        ) : null}
+
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
             Free with every package
@@ -207,13 +275,15 @@ export function UpgradeCart({
                 </p>
                 <button
                   type="button"
-                  onClick={() => setCode(flashCode)}
+                  onClick={lockOffer}
                   className="mt-1 text-lg font-black text-rose-700 underline"
                 >
                   {flashCode}
                 </button>
                 <p className="text-[11px] text-rose-600">
-                  Tap to apply this code
+                  {held !== null && held > 0
+                    ? `Held for 00:${String(held).padStart(2, "0")}`
+                    : "Tap to apply this code"}
                 </p>
               </div>
             ) : null}

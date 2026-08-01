@@ -290,6 +290,9 @@ model User {
 
   /// What a MODERATOR may manage; ignored for other roles. See lib/permissions.
   staffPermissions String[] @default([])
+
+  /// Paid for the Elite interview inside a package, before applying.
+  elitePrepaid Boolean @default(false)
 }
 
 enum ReferralStatus {

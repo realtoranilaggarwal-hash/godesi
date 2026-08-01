@@ -19,8 +19,9 @@ export function AdminBannersCard({ banners }: { banners: BannerRow[] }) {
     <Card id="banners">
       <h2 className="mb-1 text-lg font-bold">Banners</h2>
       <p className="mb-3 text-sm text-slate-500">
-        10 sidebar slots (300×250), 4 skyscrapers (160×600) and 1 header slot.
-        Saving a slot replaces whatever is in it.
+        Every standard size is here — pick the size, leave the position blank
+        and it takes the next free slot. Banners sharing a size rotate, and the
+        views and clicks of each are counted below.
       </p>
       <BannerForm />
 

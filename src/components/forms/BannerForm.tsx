@@ -41,13 +41,12 @@ export function BannerForm() {
         </Field>
         <Field
           label="Position"
-          hint="Leave blank for the next free slot · sidebar 1–10 · skyscraper 1–4 · header 1"
+          hint="Leave blank for the next free slot in that size"
         >
           <input
             name="position"
             type="number"
             min={1}
-            max={AD_PLACEMENTS.SIDEBAR.slots}
             placeholder="next free slot"
             className={inputClass}
           />

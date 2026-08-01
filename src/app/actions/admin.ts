@@ -2,10 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { ListingStatus, NewsStatus, Plan } from "@prisma/client";
+import type {
+  BannerSlot,
+  ListingStatus,
+  NewsStatus,
+  Plan,
+} from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireRole, requirePermission } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { AD_SLOT_ORDER } from "@/lib/ads";
 import { slotCapacity } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
@@ -156,7 +162,7 @@ export async function setUserPlanAction(formData: FormData) {
 }
 
 const bannerSchema = z.object({
-  slot: z.enum(["HERO", "SIDEBAR", "HEADER", "SKYSCRAPER"]),
+  slot: z.enum(AD_SLOT_ORDER as [BannerSlot, ...BannerSlot[]]),
   /** Blank means "the next free slot", so several creatives can share a rotation. */
   position: z.coerce.number().int().min(1).optional(),
   advertiserEmail: z.string().trim().email("Enter a valid email").optional(),

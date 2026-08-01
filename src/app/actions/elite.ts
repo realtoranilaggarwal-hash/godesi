@@ -86,7 +86,8 @@ export async function submitEliteAction(
       photoUrl: formData.get("photoUrl") || undefined,
       contactPhone: formData.get("contactPhone") || undefined,
       contactEmail: formData.get("contactEmail") || undefined,
-      nominationType: formData.get("nominationType") === "OTHER" ? "OTHER" : "SELF",
+      nominationType:
+        formData.get("nominationType") === "OTHER" ? "OTHER" : "SELF",
       nomineeName: formData.get("nomineeName") || undefined,
       nomineeContact: formData.get("nomineeContact") || undefined,
     });
@@ -117,7 +118,8 @@ export async function submitEliteAction(
       .filter((value) => value.startsWith("http"))
       .slice(0, 10);
 
-    const name = data.nominationType === "OTHER" ? data.nomineeName! : data.fullName;
+    const name =
+      data.nominationType === "OTHER" ? data.nomineeName! : data.fullName;
     const existing =
       data.nominationType === "SELF"
         ? await db.eliteEntry.findFirst({
@@ -131,8 +133,13 @@ export async function submitEliteAction(
       };
     }
 
+    // An interview bought inside an upgrade package is credited on the first
+    // application, so they never pay for it twice.
+    const prepaid = data.nominationType === "SELF" && user.elitePrepaid;
+
     const entry = await db.eliteEntry.create({
       data: {
+        interviewPaid: prepaid,
         slug: await uniqueEliteSlug(name, data.city),
         userId: data.nominationType === "SELF" ? user.id : null,
         nominatedById: data.nominationType === "OTHER" ? user.id : null,
@@ -146,20 +153,31 @@ export async function submitEliteAction(
         shortBio: data.shortBio,
         achievements: data.achievements ?? null,
         yearsExperience:
-          typeof data.yearsExperience === "number" ? data.yearsExperience : null,
+          typeof data.yearsExperience === "number"
+            ? data.yearsExperience
+            : null,
         websiteUrl: data.websiteUrl ?? null,
         videoUrl: data.videoUrl ?? null,
         photoUrl: data.photoUrl ?? null,
         socialLinks,
         proofUrls,
         interviewTypes,
-        contactPhone: data.contactPhone ? normalizeWhatsApp(data.contactPhone) : null,
+        contactPhone: data.contactPhone
+          ? normalizeWhatsApp(data.contactPhone)
+          : null,
         contactEmail: data.contactEmail ?? null,
         nominationType: data.nominationType,
         nomineeName: data.nomineeName ?? null,
         nomineeContact: data.nomineeContact ?? null,
       },
     });
+
+    if (prepaid) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { elitePrepaid: false },
+      });
+    }
 
     revalidatePath("/admin/desi-elite");
     revalidatePath("/dashboard");
@@ -303,12 +321,16 @@ export async function updateEliteAction(formData: FormData) {
       videoPackage: videoPackage || entry.videoPackage,
       reviewedAt: new Date(),
       publishedAt:
-        status === "PUBLISHED" ? (entry.publishedAt ?? new Date()) : entry.publishedAt,
+        status === "PUBLISHED"
+          ? (entry.publishedAt ?? new Date())
+          : entry.publishedAt,
     },
   });
 
   if (entry.userId && status !== entry.status) {
-    const messages: Partial<Record<EliteStatus, { title: string; body: string }>> = {
+    const messages: Partial<
+      Record<EliteStatus, { title: string; body: string }>
+    > = {
       APPROVED: {
         title: "Your GoDesi Elite application is approved",
         body: "Our team will contact you to arrange your interview.",
@@ -333,9 +355,7 @@ export async function updateEliteAction(formData: FormData) {
         title: message.title,
         body: message.body,
         href:
-          status === "PUBLISHED"
-            ? `/desi-elite/${updated.slug}`
-            : "/dashboard",
+          status === "PUBLISHED" ? `/desi-elite/${updated.slug}` : "/dashboard",
       });
       const owner = await db.user.findUnique({
         where: { id: entry.userId },

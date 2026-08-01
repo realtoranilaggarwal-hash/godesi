@@ -1,6 +1,7 @@
 import type { BannerSlot } from "@prisma/client";
 import type { Currency } from "@/lib/currency";
 import { AD_PLACEMENTS } from "@/lib/ads";
+import { ELITE_PACKAGES } from "@/lib/elite";
 import { PLANS } from "@/lib/plans";
 import { formatInr, formatUsd } from "@/lib/format";
 
@@ -18,7 +19,8 @@ export type CartItemKey =
   | "banner-incontent"
   | "banner-halfpage"
   | "banner-mobile"
-  | "banner-fullbanner";
+  | "banner-fullbanner"
+  | "elite";
 
 export type CartItem = {
   key: CartItemKey;
@@ -72,6 +74,15 @@ export const CART_ITEMS: CartItem[] = [
   bannerItem("banner-halfpage", "HALFPAGE", false),
   bannerItem("banner-mobile", "MOBILE", false),
   bannerItem("banner-fullbanner", "FULLBANNER", false),
+  {
+    key: "elite",
+    label: "GoDesi Elite interview + video",
+    blurb:
+      "One-time. We interview you by phone, WhatsApp, Zoom or Facebook Live and publish your GoDesi Elite profile with a 30–60 second video.",
+    inr: 3_999,
+    usd: ELITE_PACKAGES.INTERVIEW.usd,
+    inBundle: false,
+  },
 ];
 
 /** Thrown in with the membership at no extra charge. */

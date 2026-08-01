@@ -1,6 +1,7 @@
 import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
+import { notify } from "@/lib/notifications";
 import { awardPoints, awardSpendPoints } from "@/lib/rewards";
 import { cartItem, type CartItem } from "@/lib/bundles";
 
@@ -117,6 +118,10 @@ export async function grantBundle({
   });
   if (result.alreadyProcessed) return result;
 
+  if (items.some((item) => item.key === "elite")) {
+    await grantEliteInterview(userId);
+  }
+
   for (const item of items) {
     if (!item.slot) continue;
     await db.adOrder.create({
@@ -134,6 +139,38 @@ export async function grantBundle({
   }
 
   return result;
+}
+
+/**
+ * An Elite interview bought inside a package: credited to the application if
+ * they already have one, otherwise held on the account until they apply.
+ */
+async function grantEliteInterview(userId: string) {
+  const entry = await db.eliteEntry.findFirst({
+    where: { userId },
+    select: { id: true },
+  });
+
+  if (entry) {
+    await db.eliteEntry.update({
+      where: { id: entry.id },
+      data: { interviewPaid: true },
+    });
+  } else {
+    await db.user.update({
+      where: { id: userId },
+      data: { elitePrepaid: true },
+    });
+  }
+
+  await notify({
+    userId,
+    title: "GoDesi Elite interview is paid",
+    body: entry
+      ? "Your Elite application is marked interview-paid — our team will contact you to book it."
+      : "Complete your Elite application and the interview is already paid for.",
+    href: "/desi-elite/apply",
+  });
 }
 
 export async function downgradeToFree(userId: string) {
