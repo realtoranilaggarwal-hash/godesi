@@ -21,6 +21,15 @@ export default async function Page() {
     include: {
       event: { select: { title: true } },
       createdBy: { select: { email: true } },
+      redemptions: {
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          createdAt: true,
+          user: { select: { email: true, name: true } },
+        },
+      },
     },
   });
 
@@ -30,9 +39,11 @@ export default async function Page() {
       <Card id="discount-coupons">
         <h2 className="mb-1 text-lg font-bold">Discount coupons</h2>
         <p className="mb-3 text-sm text-slate-500">
-          Create codes to hand to clients — for plan upgrades, advertising or
-          event tickets. Organisers can also make their own codes for their
-          events.
+          Create a code for each caller — for the complete package, plan
+          upgrades, advertising or event tickets. Package codes can cut the
+          price, add extra free months (48 makes the one-year package five
+          years), or both. Everyone who used a code is listed under it, so you
+          can see which caller closed which client.
         </p>
         <CouponForm />
         <ul className="mt-5 divide-y divide-slate-100 border-t border-slate-100 text-sm">
@@ -61,6 +72,16 @@ export default async function Page() {
                     : ""}
                   {coupon.createdBy ? ` · by ${coupon.createdBy.email}` : ""}
                 </p>
+                {coupon.redemptions.length ? (
+                  <ul className="mt-1 text-xs text-slate-500">
+                    {coupon.redemptions.map((redemption) => (
+                      <li key={redemption.id}>
+                        ✓ {redemption.user.name ?? redemption.user.email} ·{" "}
+                        {redemption.createdAt.toLocaleDateString()}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
               <form action={toggleCouponAction}>
                 <input type="hidden" name="id" value={coupon.id} />
