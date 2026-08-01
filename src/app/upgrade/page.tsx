@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { requestCurrency, formatPlanPrice } from "@/lib/currency";
+import {
+  requestCurrency,
+  formatPlanPrice,
+  type Currency,
+} from "@/lib/currency";
 import { PLANS } from "@/lib/plans";
 import {
   bundleListPrice,
@@ -28,7 +32,7 @@ const ERRORS: Record<string, string> = {
 };
 
 /** The newest live package code with uses left, shown as the flash offer. */
-async function flashOffer() {
+async function flashOffer(currency: Currency) {
   const coupon = await db.coupon.findFirst({
     where: {
       scope: "BUNDLE",
@@ -37,15 +41,33 @@ async function flashOffer() {
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     orderBy: { createdAt: "desc" },
-    select: { code: true, maxRedemptions: true, timesRedeemed: true },
+    select: {
+      code: true,
+      maxRedemptions: true,
+      timesRedeemed: true,
+      discountKind: true,
+      amount: true,
+      currency: true,
+      bonusMonths: true,
+    },
   });
-  if (!coupon) return { code: null, left: null };
+  const none = { code: null, left: null, percent: 0, fixed: 0, bonusMonths: 0 };
+  if (!coupon) return none;
   const left =
     coupon.maxRedemptions === null
       ? null
       : coupon.maxRedemptions - coupon.timesRedeemed;
-  if (left !== null && left <= 0) return { code: null, left: null };
-  return { code: coupon.code, left };
+  if (left !== null && left <= 0) return none;
+  return {
+    code: coupon.code,
+    left,
+    percent: coupon.discountKind === "PERCENT" ? coupon.amount : 0,
+    fixed:
+      coupon.discountKind === "FIXED" && coupon.currency === currency
+        ? coupon.amount
+        : 0,
+    bonusMonths: coupon.bonusMonths,
+  };
 }
 
 export default async function UpgradePage({
@@ -56,7 +78,7 @@ export default async function UpgradePage({
   const user = await getCurrentUser();
   const currency = requestCurrency();
   const saving = bundleSaving(currency);
-  const flash = await flashOffer();
+  const flash = await flashOffer(currency);
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
@@ -110,6 +132,9 @@ export default async function UpgradePage({
         signedIn={Boolean(user)}
         flashCode={flash.code}
         flashLeft={flash.left}
+        flashPercent={flash.percent}
+        flashFixed={flash.fixed}
+        flashBonusMonths={flash.bonusMonths}
       />
 
       <Card>

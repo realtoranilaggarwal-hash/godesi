@@ -20,12 +20,18 @@ export function UpgradeCart({
   signedIn,
   flashCode,
   flashLeft,
+  flashPercent,
+  flashFixed,
+  flashBonusMonths,
 }: {
   currency: Currency;
   signedIn: boolean;
   /** A live code with uses left, shown as the scarcity offer. */
   flashCode: string | null;
   flashLeft: number | null;
+  flashPercent: number;
+  flashFixed: number;
+  flashBonusMonths: number;
 }) {
   const [selected, setSelected] = useState<CartItemKey[]>([
     "membership",
@@ -37,6 +43,18 @@ export function UpgradeCart({
     () => priceCart(selected, currency),
     [selected, currency],
   );
+
+  /** Preview of the advertised code — every other code is priced at checkout. */
+  const flashApplied =
+    flashCode !== null && code.trim().toUpperCase() === flashCode;
+  const flashDiscount = flashApplied
+    ? Math.min(
+        cart.total,
+        flashPercent ? Math.round(cart.total * flashPercent) / 100 : flashFixed,
+      )
+    : 0;
+  const payable = cart.total - flashDiscount;
+  const termMonths = 12 + (flashApplied ? flashBonusMonths : 0);
 
   function toggle(key: CartItemKey) {
     if (key === REQUIRED) return;
@@ -144,12 +162,23 @@ export function UpgradeCart({
                   {formatBundleMoney(cart.listTotal, currency)}
                 </span>
               </div>
+              {flashDiscount > 0 ? (
+                <div className="flex justify-between font-semibold text-rose-600">
+                  <span>Code {flashCode}</span>
+                  <span>-{formatBundleMoney(flashDiscount, currency)}</span>
+                </div>
+              ) : null}
               <div className="flex items-baseline justify-between">
                 <span className="font-bold">You pay</span>
                 <span className="text-2xl font-black text-slate-900">
-                  {formatBundleMoney(cart.total, currency)}
+                  {formatBundleMoney(payable, currency)}
                 </span>
               </div>
+              {flashApplied && flashBonusMonths > 0 ? (
+                <div className="mt-1 rounded-xl bg-amber-100 px-3 py-1 text-center text-xs font-bold text-amber-800">
+                  Code {flashCode} makes it {termMonths} months
+                </div>
+              ) : null}
               {cart.saving > 0 ? (
                 <div className="mt-1 rounded-xl bg-emerald-50 px-3 py-2 text-center text-sm font-black text-emerald-700">
                   You save {formatBundleMoney(cart.saving, currency)} (
@@ -161,7 +190,8 @@ export function UpgradeCart({
                 </p>
               )}
               <p className="mt-1 text-center text-[11px] text-slate-400">
-                12 months from the day you pay · one payment, no auto-renewal
+                {termMonths} months from the day you pay · one payment, no
+                auto-renewal
               </p>
             </div>
 
@@ -208,7 +238,7 @@ export function UpgradeCart({
                   type="submit"
                   className="w-full rounded-xl bg-emerald-600 px-4 py-3 font-black text-white hover:bg-emerald-700"
                 >
-                  Upgrade now — {formatBundleMoney(cart.total, currency)}
+                  Upgrade now — {formatBundleMoney(payable, currency)}
                 </button>
                 <p className="text-center text-[11px] text-slate-500">
                   Some codes cut the price, some add extra years. The final
