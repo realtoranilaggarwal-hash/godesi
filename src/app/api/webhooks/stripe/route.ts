@@ -92,6 +92,7 @@ export async function POST(request: Request) {
         await grantBundle({
           userId,
           months: Number.isFinite(months) && months > 0 ? months : 12,
+          itemKeys: (session.metadata?.items ?? "membership").split(","),
           provider: "stripe",
           reference: session.id,
           amountMinor: session.amount_total ?? 0,

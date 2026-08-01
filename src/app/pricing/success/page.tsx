@@ -48,6 +48,7 @@ export default async function CheckoutSuccessPage({
         await grantBundle({
           userId: user.id,
           months: Number.isFinite(months) && months > 0 ? months : 12,
+          itemKeys: (session.metadata?.items ?? "membership").split(","),
           provider: "stripe",
           reference: session.id,
           amountMinor: session.amount_total ?? 0,

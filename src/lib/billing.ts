@@ -2,6 +2,7 @@ import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
 import { awardPoints, awardSpendPoints } from "@/lib/rewards";
+import { cartItem, type CartItem } from "@/lib/bundles";
 
 export const PLAN_DURATION_DAYS = 30;
 
@@ -81,12 +82,13 @@ export async function activatePlan({
 }
 
 /**
- * The all-in-one package: Premium membership for the whole term plus the
- * banner slot, booked as an ad order so the desk knows to place the creative.
+ * Grants a paid cart: the membership for the whole term, plus an ad order for
+ * every banner bought so the desk knows to place the creative.
  */
 export async function grantBundle({
   userId,
   months,
+  itemKeys,
   provider,
   reference,
   amountMinor,
@@ -94,11 +96,16 @@ export async function grantBundle({
 }: {
   userId: string;
   months: number;
+  itemKeys: string[];
   provider: PaymentProvider;
   reference: string;
   amountMinor: number;
   currency: string;
 }) {
+  const items = itemKeys
+    .map((key) => cartItem(key))
+    .filter((item): item is CartItem => Boolean(item));
+
   const result = await activatePlan({
     userId,
     plan: "PREMIUM",
@@ -110,18 +117,21 @@ export async function grantBundle({
   });
   if (result.alreadyProcessed) return result;
 
-  await db.adOrder.create({
-    data: {
-      userId,
-      slot: "SIDEBAR",
-      months,
-      amountMinor: 0,
-      currency,
-      provider,
-      reference: `bundle_ad_${reference}`,
-      status: "PAID",
-    },
-  });
+  for (const item of items) {
+    if (!item.slot) continue;
+    await db.adOrder.create({
+      data: {
+        userId,
+        slot: item.slot,
+        months,
+        amountMinor: 0,
+        currency,
+        provider,
+        reference: `bundle_${item.key}_${reference}`,
+        status: "PAID",
+      },
+    });
+  }
 
   return result;
 }

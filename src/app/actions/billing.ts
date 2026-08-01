@@ -15,10 +15,11 @@ import { siteUrl, toMinor } from "@/lib/format";
 import { planPrice, requestCurrency, stripeUnitAmount } from "@/lib/currency";
 import { checkCoupon, couponMetadata } from "@/lib/coupons";
 import {
-  BUNDLE_LINES,
   BUNDLE_MONTHS,
-  bundleUnitAmount,
+  cartItem,
   describeTerm,
+  priceCart,
+  toBundleMinor,
 } from "@/lib/bundles";
 
 /**
@@ -83,13 +84,22 @@ export async function startStripeCheckoutAction(formData: FormData) {
 }
 
 /**
- * The all-in-one yearly package. A caller's coupon can cut the price, add
- * extra years, or both — whatever the code was created with.
+ * The upgrade cart. Prices are recomputed here from the item keys, so the
+ * browser cannot change what is charged. A caller's coupon can cut the price,
+ * add extra years, or both — whatever the code was created with.
  */
 export async function startBundleCheckoutAction(formData: FormData) {
   const user = await requireUser();
   const currency = requestCurrency();
-  const listAmount = bundleUnitAmount(currency);
+
+  const keys = formData
+    .getAll("items")
+    .map((value) => String(value))
+    .filter((key) => Boolean(cartItem(key)));
+  if (!keys.includes("membership")) keys.unshift("membership");
+
+  const cart = priceCart(keys, currency);
+  const listAmount = toBundleMinor(cart.total);
 
   const code = String(formData.get("couponCode") ?? "").trim();
   const check = code
@@ -108,12 +118,14 @@ export async function startBundleCheckoutAction(formData: FormData) {
   const discountMinor = check?.ok ? check.discountMinor : 0;
   const unitAmount = Math.max(0, listAmount - discountMinor);
   const months = BUNDLE_MONTHS + (coupon?.bonusMonths ?? 0);
+  const itemKeys = cart.items.map((item) => item.key);
 
   if (!stripeEnabled()) {
     if (!paypalEnabled()) {
       await grantBundle({
         userId: user.id,
         months,
+        itemKeys,
         provider: "mock",
         reference: `mock_bundle_${user.id}_${Date.now()}`,
         amountMinor: unitAmount,
@@ -132,6 +144,7 @@ export async function startBundleCheckoutAction(formData: FormData) {
       userId: user.id,
       kind: "bundle",
       months: String(months),
+      items: itemKeys.join(","),
       ...couponMetadata(coupon, discountMinor),
     },
     line_items: [
@@ -141,8 +154,8 @@ export async function startBundleCheckoutAction(formData: FormData) {
           currency: currency.toLowerCase(),
           unit_amount: unitAmount,
           product_data: {
-            name: `Godesi complete package — ${describeTerm(months)}`,
-            description: BUNDLE_LINES.map((line) => line.label).join(" · "),
+            name: `Godesi package — ${describeTerm(months)}`,
+            description: cart.items.map((item) => item.label).join(" · "),
           },
         },
       },

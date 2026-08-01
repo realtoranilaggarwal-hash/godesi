@@ -1,0 +1,231 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import type { Currency } from "@/lib/currency";
+import {
+  BUNDLE_EXTRAS,
+  CART_ITEMS,
+  formatBundleMoney,
+  itemPrice,
+  priceCart,
+  type CartItemKey,
+} from "@/lib/bundles";
+import { startBundleCheckoutAction } from "@/app/actions/billing";
+
+/** The membership is the base of every cart, so it cannot be unticked. */
+const REQUIRED: CartItemKey = "membership";
+
+export function UpgradeCart({
+  currency,
+  signedIn,
+  flashCode,
+  flashLeft,
+}: {
+  currency: Currency;
+  signedIn: boolean;
+  /** A live code with uses left, shown as the scarcity offer. */
+  flashCode: string | null;
+  flashLeft: number | null;
+}) {
+  const [selected, setSelected] = useState<CartItemKey[]>([
+    "membership",
+    "banner-sidebar",
+  ]);
+  const [code, setCode] = useState("");
+
+  const cart = useMemo(
+    () => priceCart(selected, currency),
+    [selected, currency],
+  );
+
+  function toggle(key: CartItemKey) {
+    if (key === REQUIRED) return;
+    setSelected((current) =>
+      current.includes(key)
+        ? current.filter((item) => item !== key)
+        : [...current, key],
+    );
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-start">
+      <div className="space-y-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <h3 className="text-lg font-bold">Build your package</h3>
+          <p className="text-sm text-slate-500">
+            Tick what you want — the price on the right updates as you go.
+          </p>
+
+          <ul className="mt-3 space-y-2">
+            {CART_ITEMS.map((item) => {
+              const checked = selected.includes(item.key);
+              const locked = item.key === REQUIRED;
+              return (
+                <li key={item.key}>
+                  <label
+                    className={`flex cursor-pointer gap-3 rounded-2xl border p-3 transition ${
+                      checked
+                        ? "border-emerald-400 bg-emerald-50"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-5 w-5 accent-emerald-600"
+                      checked={checked}
+                      disabled={locked}
+                      onChange={() => toggle(item.key)}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="font-semibold">{item.label}</span>
+                        <span className="text-sm font-bold text-slate-700">
+                          {formatBundleMoney(
+                            itemPrice(item, currency),
+                            currency,
+                          )}
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block text-xs text-slate-500">
+                        {item.blurb}
+                      </span>
+                      {locked ? (
+                        <span className="mt-1 inline-block rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                          always included
+                        </span>
+                      ) : item.inBundle ? (
+                        <span className="mt-1 inline-block rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                          in the deal
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+            Free with every package
+          </h3>
+          <ul className="mt-2 space-y-1 text-sm text-slate-600">
+            {BUNDLE_EXTRAS.map((extra) => (
+              <li key={extra}>✔ {extra}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="lg:sticky lg:top-4">
+        <div className="overflow-hidden rounded-2xl border-2 border-emerald-500 bg-white">
+          <div className="animate-pulse bg-gradient-to-r from-rose-600 via-orange-500 to-amber-400 px-4 py-2 text-center text-sm font-black uppercase tracking-wide text-white">
+            🔥 Get this deal today
+          </div>
+
+          <div className="space-y-2 p-4">
+            <p className="text-sm font-bold">Your cart</p>
+            <ul className="space-y-1 text-xs text-slate-600">
+              {cart.items.map((item) => (
+                <li key={item.key} className="flex justify-between gap-2">
+                  <span className="truncate">{item.label}</span>
+                  <span>
+                    {formatBundleMoney(itemPrice(item, currency), currency)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="border-t border-slate-100 pt-2 text-sm">
+              <div className="flex justify-between text-slate-500">
+                <span>Bought separately</span>
+                <span className={cart.saving ? "line-through" : ""}>
+                  {formatBundleMoney(cart.listTotal, currency)}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="font-bold">You pay</span>
+                <span className="text-2xl font-black text-slate-900">
+                  {formatBundleMoney(cart.total, currency)}
+                </span>
+              </div>
+              {cart.saving > 0 ? (
+                <div className="mt-1 rounded-xl bg-emerald-50 px-3 py-2 text-center text-sm font-black text-emerald-700">
+                  You save {formatBundleMoney(cart.saving, currency)} (
+                  {cart.savingPercent}%)
+                </div>
+              ) : (
+                <p className="mt-1 text-center text-xs text-slate-500">
+                  Add the sidebar banner to unlock the package discount.
+                </p>
+              )}
+              <p className="mt-1 text-center text-[11px] text-slate-400">
+                12 months from the day you pay · one payment, no auto-renewal
+              </p>
+            </div>
+
+            {flashCode ? (
+              <div className="animate-pulse rounded-xl border-2 border-dashed border-rose-400 bg-rose-50 p-3 text-center">
+                <p className="text-xs font-bold uppercase tracking-wide text-rose-700">
+                  {flashLeft
+                    ? `Only ${flashLeft} left at this price`
+                    : "Limited-time code"}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setCode(flashCode)}
+                  className="mt-1 text-lg font-black text-rose-700 underline"
+                >
+                  {flashCode}
+                </button>
+                <p className="text-[11px] text-rose-600">
+                  Tap to apply this code
+                </p>
+              </div>
+            ) : null}
+
+            {signedIn ? (
+              <form action={startBundleCheckoutAction} className="space-y-2">
+                {cart.items.map((item) => (
+                  <input
+                    key={item.key}
+                    type="hidden"
+                    name="items"
+                    value={item.key}
+                  />
+                ))}
+                <input
+                  name="couponCode"
+                  value={code}
+                  onChange={(event) =>
+                    setCode(event.target.value.toUpperCase())
+                  }
+                  placeholder="Coupon code"
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
+                />
+                <button
+                  type="submit"
+                  className="w-full rounded-xl bg-emerald-600 px-4 py-3 font-black text-white hover:bg-emerald-700"
+                >
+                  Upgrade now — {formatBundleMoney(cart.total, currency)}
+                </button>
+                <p className="text-center text-[11px] text-slate-500">
+                  Some codes cut the price, some add extra years. The final
+                  total is shown before you pay.
+                </p>
+              </form>
+            ) : (
+              <a
+                href="/signup?next=/upgrade"
+                className="block rounded-xl bg-emerald-600 px-4 py-3 text-center font-black text-white hover:bg-emerald-700"
+              >
+                Sign up free to upgrade
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

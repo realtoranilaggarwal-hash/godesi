@@ -1,25 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { requestCurrency } from "@/lib/currency";
+import { requestCurrency, formatPlanPrice } from "@/lib/currency";
+import { PLANS } from "@/lib/plans";
 import {
-  BUNDLE_LINES,
-  BUNDLE_MONTHS,
   bundleListPrice,
   bundlePrice,
   bundleSaving,
   formatBundleMoney,
 } from "@/lib/bundles";
-import { startBundleCheckoutAction } from "@/app/actions/billing";
-import { PLANS } from "@/lib/plans";
-import { formatPlanPrice } from "@/lib/currency";
+import { UpgradeCart } from "@/components/UpgradeCart";
 import { Alert, Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Everything included — one price",
   description:
-    "Featured listing, banner advertising, unlimited enquiries and Premium membership in one yearly Godesi package.",
+    "Build your Godesi package: Premium membership, featured listing, banner advertising and unlimited enquiries, with the savings shown as you go.",
 };
 
 const ERRORS: Record<string, string> = {
@@ -29,6 +27,26 @@ const ERRORS: Record<string, string> = {
   stripe_session: "We could not start the payment. Please try again.",
 };
 
+/** The newest live package code with uses left, shown as the flash offer. */
+async function flashOffer() {
+  const coupon = await db.coupon.findFirst({
+    where: {
+      scope: "BUNDLE",
+      active: true,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
+    orderBy: { createdAt: "desc" },
+    select: { code: true, maxRedemptions: true, timesRedeemed: true },
+  });
+  if (!coupon) return { code: null, left: null };
+  const left =
+    coupon.maxRedemptions === null
+      ? null
+      : coupon.maxRedemptions - coupon.timesRedeemed;
+  if (left !== null && left <= 0) return { code: null, left: null };
+  return { code: coupon.code, left };
+}
+
 export default async function UpgradePage({
   searchParams,
 }: {
@@ -36,12 +54,11 @@ export default async function UpgradePage({
 }) {
   const user = await getCurrentUser();
   const currency = requestCurrency();
-  const list = bundleListPrice(currency);
-  const price = bundlePrice(currency);
   const saving = bundleSaving(currency);
+  const flash = await flashOffer();
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
+    <div className="mx-auto max-w-5xl space-y-4">
       {searchParams.posted ? (
         <Card className="border-emerald-200 bg-emerald-50">
           <h1 className="text-xl font-black text-emerald-900">
@@ -75,107 +92,24 @@ export default async function UpgradePage({
           Godesi complete package
         </p>
         <h2 className="mt-1 text-3xl font-black">
-          Do you want to upgrade everything at once?
+          Everything you would buy separately, in one price
         </h2>
         <p className="mt-2 text-sm text-white/90">
-          Featured listing, your own banner on the site, unlimited enquiries
-          with contact details unlocked, and Premium membership — one price for
-          a whole year instead of paying for each one separately.
+          Premium membership, featured listing, your own banner on the site and
+          unlimited enquiries —{" "}
+          {formatBundleMoney(bundlePrice(currency), currency)} for a year
+          instead of {formatBundleMoney(bundleListPrice(currency), currency)}.
+          You save {formatBundleMoney(saving.amount, currency)} (
+          {saving.percent}%).
         </p>
       </div>
 
-      <Card>
-        <h3 className="mb-3 text-lg font-bold">What is in the package</h3>
-        <ul className="divide-y divide-slate-100 text-sm">
-          {BUNDLE_LINES.map((line) => {
-            const amount = currency === "INR" ? line.inr : line.usd;
-            return (
-              <li
-                key={line.label}
-                className="flex flex-wrap items-start justify-between gap-2 py-2"
-              >
-                <div className="min-w-0">
-                  <p className="font-semibold">✔ {line.label}</p>
-                  <p className="text-xs text-slate-500">{line.blurb}</p>
-                </div>
-                <span className="whitespace-nowrap text-sm text-slate-500">
-                  {amount > 0 ? (
-                    <span className="line-through">
-                      {formatBundleMoney(amount, currency)}
-                    </span>
-                  ) : (
-                    "included"
-                  )}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="mt-4 space-y-1 rounded-2xl bg-slate-50 p-4 text-sm">
-          <div className="flex justify-between text-slate-500">
-            <span>Bought separately for a year</span>
-            <span className="line-through">
-              {formatBundleMoney(list, currency)}
-            </span>
-          </div>
-          <div className="flex justify-between text-lg font-black text-slate-900">
-            <span>Package price</span>
-            <span>{formatBundleMoney(price, currency)}</span>
-          </div>
-          <div className="flex justify-between font-bold text-emerald-700">
-            <span>You save</span>
-            <span>
-              {formatBundleMoney(saving.amount, currency)} ({saving.percent}%)
-            </span>
-          </div>
-          <p className="pt-1 text-xs text-slate-500">
-            {BUNDLE_MONTHS} months from the day you pay. One payment, no
-            auto-renewal.
-          </p>
-        </div>
-
-        {user ? (
-          <form action={startBundleCheckoutAction} className="mt-4 space-y-2">
-            <label className="block text-sm font-semibold" htmlFor="couponCode">
-              Have a code from our team?
-            </label>
-            <div className="flex flex-wrap gap-2">
-              <input
-                id="couponCode"
-                name="couponCode"
-                placeholder="Enter coupon code"
-                className="min-w-[180px] flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
-              />
-              <button
-                type="submit"
-                className="rounded-xl bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700"
-              >
-                Upgrade now — {formatBundleMoney(price, currency)}
-              </button>
-            </div>
-            <p className="text-xs text-slate-500">
-              Some codes cut the price, some add extra years — the total is
-              shown on the payment page before you pay.
-            </p>
-          </form>
-        ) : (
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href="/signup?next=/upgrade"
-              className="rounded-xl bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700"
-            >
-              Sign up free to upgrade
-            </Link>
-            <Link
-              href="/login?next=/upgrade"
-              className="rounded-xl border border-slate-300 px-5 py-2 font-bold hover:bg-slate-50"
-            >
-              I already have an account
-            </Link>
-          </div>
-        )}
-      </Card>
+      <UpgradeCart
+        currency={currency}
+        signedIn={Boolean(user)}
+        flashCode={flash.code}
+        flashLeft={flash.left}
+      />
 
       <Card>
         <h3 className="mb-2 text-lg font-bold">Or buy one thing at a time</h3>
