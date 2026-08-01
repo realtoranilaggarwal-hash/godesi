@@ -76,6 +76,11 @@ export function UpgradeCart({
     : 0;
   const payable = cart.total - flashDiscount;
   const termMonths = 12 + (flashApplied ? flashBonusMonths : 0);
+  /** The package discount and the code together, against list price. */
+  const totalSaving = Math.max(0, cart.listTotal - payable);
+  const totalSavingPercent = cart.listTotal
+    ? Math.round((totalSaving / cart.listTotal) * 100)
+    : 0;
 
   function toggle(key: CartItemKey) {
     if (key === REQUIRED) return;
@@ -250,10 +255,10 @@ export function UpgradeCart({
                   Code {flashCode} makes it {termMonths} months
                 </div>
               ) : null}
-              {cart.saving > 0 ? (
+              {totalSaving > 0 ? (
                 <div className="mt-1 rounded-xl bg-emerald-50 px-3 py-2 text-center text-sm font-black text-emerald-700">
-                  You save {formatBundleMoney(cart.saving, currency)} (
-                  {cart.savingPercent}%)
+                  You save {formatBundleMoney(totalSaving, currency)} (
+                  {totalSavingPercent}%)
                 </div>
               ) : (
                 <p className="mt-1 text-center text-xs text-slate-500">
