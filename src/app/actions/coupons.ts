@@ -18,6 +18,7 @@ const couponSchema = z.object({
   discountKind: z.enum(["PERCENT", "FIXED"]),
   amount: z.coerce.number().int().min(0).default(0),
   bonusMonths: z.coerce.number().int().min(0).max(120).default(0),
+  publicOffer: z.coerce.boolean().default(false),
   currency: z.enum(["INR", "USD"]).optional(),
   eventId: z.string().trim().optional(),
   maxRedemptions: z.coerce.number().int().min(1).optional(),
@@ -31,6 +32,7 @@ function parseCoupon(formData: FormData) {
     discountKind: formData.get("discountKind") || "PERCENT",
     amount: formData.get("amount") || 0,
     bonusMonths: formData.get("bonusMonths") || 0,
+    publicOffer: formData.get("publicOffer") === "on",
     currency: formData.get("currency") || undefined,
     eventId: formData.get("eventId") || undefined,
     maxRedemptions: formData.get("maxRedemptions") || undefined,
@@ -68,6 +70,7 @@ export async function createCouponAction(
         discountKind: parsed.data.discountKind,
         amount: parsed.data.amount,
         bonusMonths: parsed.data.bonusMonths,
+        publicOffer: parsed.data.publicOffer,
         currency:
           parsed.data.discountKind === "FIXED" ? parsed.data.currency : null,
         maxRedemptions: parsed.data.maxRedemptions ?? null,

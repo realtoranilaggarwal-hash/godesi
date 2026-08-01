@@ -1222,6 +1222,8 @@ model Coupon {
   amount         Int
   /// Extra membership months a caller code throws in, on top of the term bought.
   bonusMonths    Int          @default(0)
+  /// Advertised on the upgrade page as a flash offer. Caller codes stay off.
+  publicOffer    Boolean      @default(false)
   /// Required for FIXED codes so the discount matches the buyer's currency.
   currency       String?
   /// Null for platform codes created in admin.

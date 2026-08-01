@@ -33,6 +33,7 @@ async function flashOffer() {
     where: {
       scope: "BUNDLE",
       active: true,
+      publicOffer: true,
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     orderBy: { createdAt: "desc" },

@@ -92,6 +92,20 @@ export function CouponForm() {
           />
         </Field>
         <DiscountFields withCurrency />
+        <label className="flex items-start gap-2 text-sm sm:col-span-2">
+          <input
+            type="checkbox"
+            name="publicOffer"
+            className="mt-1 h-4 w-4 accent-emerald-600"
+          />
+          <span>
+            Show this code as a flash offer on the upgrade page
+            <span className="block text-xs text-slate-500">
+              Leave off for caller-only codes. With a use limit it reads “only N
+              left at this price”.
+            </span>
+          </span>
+        </label>
       </div>
 
       <SubmitButton pendingLabel="Creating…">Create coupon</SubmitButton>

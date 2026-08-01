@@ -57,7 +57,10 @@ export default async function Page() {
                   {coupon.code}{" "}
                   <Badge tone={coupon.active ? "green" : "slate"}>
                     {coupon.active ? "active" : "off"}
-                  </Badge>
+                  </Badge>{" "}
+                  {coupon.publicOffer ? (
+                    <Badge tone="amber">flash offer</Badge>
+                  ) : null}
                 </p>
                 <p className="text-xs text-slate-400">
                   {describeCoupon(coupon)} · {coupon.scope.toLowerCase()}
