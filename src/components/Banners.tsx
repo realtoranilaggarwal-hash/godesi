@@ -12,6 +12,7 @@ import {
 } from "@/lib/banners";
 import { LiveVisitorMap } from "@/components/LiveVisitorMap";
 import { ActivityWall } from "@/components/ActivityWall";
+import { ChatPanel } from "@/components/ChatPanel";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { AdPreview } from "@/components/AdPreview";
@@ -165,6 +166,8 @@ export async function SidebarBanners() {
       aria-label="Sponsored"
     >
       <LiveVisitorMap compact />
+
+      <ChatPanel compact />
 
       <ActivityWall />
 

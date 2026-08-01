@@ -19,9 +19,12 @@ const POLL_MS = 5000;
 export function GlobalChat({
   initial,
   signedIn,
+  compact = false,
 }: {
   initial: ChatLine[];
   signedIn: boolean;
+  /** Narrow version for the sidebar rail, sized like the live visitor map. */
+  compact?: boolean;
 }) {
   const [messages, setMessages] = useState(initial);
   const [state, formAction] = useFormState(postChatMessageAction, emptyState);
@@ -65,9 +68,11 @@ export function GlobalChat({
       <div className="flex items-center justify-between gap-2 bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-3 text-white">
         <div>
           <h2 className="text-sm font-black">💬 Godesi global chat</h2>
-          <p className="text-[11px] opacity-90">
-            Say hello to desis online right now — keep it friendly, no links.
-          </p>
+          {compact ? null : (
+            <p className="text-[11px] opacity-90">
+              Say hello to desis online right now — keep it friendly, no links.
+            </p>
+          )}
         </div>
         <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold">
           {messages.length} recent
@@ -76,7 +81,9 @@ export function GlobalChat({
 
       <div
         ref={list}
-        className="max-h-80 space-y-3 overflow-y-auto px-4 py-3"
+        className={`space-y-3 overflow-y-auto px-4 py-3 ${
+          compact ? "h-48" : "max-h-80"
+        }`}
         aria-live="polite"
       >
         {messages.length ? (
@@ -131,13 +138,15 @@ export function GlobalChat({
         <form
           ref={form}
           action={formAction}
-          className="flex items-center gap-2 border-t border-slate-200 p-3"
+          className="flex items-center gap-2 border-t border-slate-200 p-2 sm:p-3"
         >
           <input
             name="body"
             maxLength={CHAT_MAX_LENGTH}
             required
-            placeholder="Say something to the community…"
+            placeholder={
+              compact ? "Say hi…" : "Say something to the community…"
+            }
             className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm"
           />
           <button
@@ -152,8 +161,10 @@ export function GlobalChat({
           <Link href="/login" className="font-bold text-indigo-600 underline">
             Sign in
           </Link>{" "}
-          to join the chat. Every message shows your name, so the room stays
-          civil.
+          to join the chat.
+          {compact
+            ? ""
+            : " Every message shows your name, so the room stays civil."}
         </p>
       )}
 
