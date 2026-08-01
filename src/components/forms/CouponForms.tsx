@@ -1,7 +1,10 @@
 "use client";
 
 import { useFormState } from "react-dom";
-import { createCouponAction, createEventCouponAction } from "@/app/actions/coupons";
+import {
+  createCouponAction,
+  createEventCouponAction,
+} from "@/app/actions/coupons";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Alert, Field, inputClass } from "@/components/ui";
@@ -11,13 +14,20 @@ function DiscountFields({ withCurrency }: { withCurrency: boolean }) {
   return (
     <>
       <Field label="Discount type">
-        <select name="discountKind" defaultValue="PERCENT" className={inputClass}>
+        <select
+          name="discountKind"
+          defaultValue="PERCENT"
+          className={inputClass}
+        >
           <option value="PERCENT">Percent off</option>
           <option value="FIXED">Fixed amount off</option>
         </select>
       </Field>
-      <Field label="Amount" hint="e.g. 20 for 20% off, or 500 for ₹500 off">
-        <input name="amount" type="number" min={1} required className={inputClass} />
+      <Field
+        label="Amount"
+        hint="e.g. 20 for 20% off, or 500 for ₹500 off — leave blank if the code only adds months"
+      >
+        <input name="amount" type="number" min={0} className={inputClass} />
       </Field>
       {withCurrency ? (
         <Field label="Currency" hint="Used for fixed-amount codes only">
@@ -28,7 +38,12 @@ function DiscountFields({ withCurrency }: { withCurrency: boolean }) {
         </Field>
       ) : null}
       <Field label="Total uses" hint="Leave blank for unlimited">
-        <input name="maxRedemptions" type="number" min={1} className={inputClass} />
+        <input
+          name="maxRedemptions"
+          type="number"
+          min={1}
+          className={inputClass}
+        />
       </Field>
       <Field label="Expires on" hint="Optional">
         <input name="expiresAt" type="date" className={inputClass} />
@@ -58,9 +73,23 @@ export function CouponForm() {
         <Field label="Applies to">
           <select name="scope" defaultValue="PLAN" className={inputClass}>
             <option value="PLAN">Plan upgrades</option>
+            <option value="BUNDLE">Complete package</option>
             <option value="ADS">Advertising</option>
             <option value="TICKETS">Event tickets</option>
           </select>
+        </Field>
+        <Field
+          label="Extra months free"
+          hint="Package codes only — 48 turns the one-year package into five years"
+        >
+          <input
+            name="bonusMonths"
+            type="number"
+            min={0}
+            max={120}
+            defaultValue={0}
+            className={inputClass}
+          />
         </Field>
         <DiscountFields withCurrency />
       </div>

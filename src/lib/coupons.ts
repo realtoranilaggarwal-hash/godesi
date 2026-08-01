@@ -7,9 +7,16 @@ export function normalizeCouponCode(input: string) {
 }
 
 export function describeCoupon(coupon: Coupon) {
-  return coupon.discountKind === "PERCENT"
-    ? `${coupon.amount}% off`
-    : `${coupon.currency ?? ""} ${coupon.amount} off`.trim();
+  const money =
+    coupon.amount > 0
+      ? coupon.discountKind === "PERCENT"
+        ? `${coupon.amount}% off`
+        : `${coupon.currency ?? ""} ${coupon.amount} off`.trim()
+      : null;
+  const bonus = coupon.bonusMonths
+    ? `+${coupon.bonusMonths} months free`
+    : null;
+  return [money, bonus].filter(Boolean).join(" · ") || "no discount";
 }
 
 /** Discount in minor units, never more than the amount being charged. */
@@ -23,9 +30,13 @@ export function discountFor({
   currency: string;
 }) {
   if (coupon.discountKind === "PERCENT") {
-    return Math.min(subtotalMinor, Math.round((subtotalMinor * coupon.amount) / 100));
+    return Math.min(
+      subtotalMinor,
+      Math.round((subtotalMinor * coupon.amount) / 100),
+    );
   }
-  if ((coupon.currency ?? "").toUpperCase() !== currency.toUpperCase()) return 0;
+  if ((coupon.currency ?? "").toUpperCase() !== currency.toUpperCase())
+    return 0;
   return Math.min(subtotalMinor, toMinor(coupon.amount));
 }
 
@@ -44,6 +55,7 @@ export async function checkCoupon({
   eventId,
   subtotalMinor,
   currency,
+  requireDiscount = true,
 }: {
   code: string;
   scope: CouponScope;
@@ -51,12 +63,15 @@ export async function checkCoupon({
   eventId?: string;
   subtotalMinor: number;
   currency: string;
+  /** Bundle codes may give extra months instead of money off. */
+  requireDiscount?: boolean;
 }): Promise<CouponCheck> {
   const normalized = normalizeCouponCode(code);
   if (!normalized) return { ok: false, error: "Enter a coupon code." };
 
   const coupon = await db.coupon.findUnique({ where: { code: normalized } });
-  if (!coupon || !coupon.active) return { ok: false, error: "That coupon code is not valid." };
+  if (!coupon || !coupon.active)
+    return { ok: false, error: "That coupon code is not valid." };
   if (coupon.scope !== scope) {
     return { ok: false, error: "That coupon cannot be used on this purchase." };
   }
@@ -66,7 +81,10 @@ export async function checkCoupon({
   if (coupon.expiresAt && coupon.expiresAt.getTime() < Date.now()) {
     return { ok: false, error: "That coupon has expired." };
   }
-  if (coupon.maxRedemptions !== null && coupon.timesRedeemed >= coupon.maxRedemptions) {
+  if (
+    coupon.maxRedemptions !== null &&
+    coupon.timesRedeemed >= coupon.maxRedemptions
+  ) {
     return { ok: false, error: "That coupon has been fully used." };
   }
 
@@ -76,7 +94,7 @@ export async function checkCoupon({
   if (used) return { ok: false, error: "You have already used that coupon." };
 
   const discountMinor = discountFor({ coupon, subtotalMinor, currency });
-  if (discountMinor <= 0) {
+  if (discountMinor <= 0 && requireDiscount) {
     return { ok: false, error: "That coupon does not apply to this amount." };
   }
 
@@ -88,7 +106,7 @@ export function couponMetadata(
   coupon: { id: string } | null,
   discountMinor: number,
 ): Record<string, string> {
-  if (!coupon || discountMinor <= 0) return {};
+  if (!coupon) return {};
   return { couponId: coupon.id, couponDiscountMinor: String(discountMinor) };
 }
 
@@ -109,8 +127,14 @@ export async function recordCouponFromMetadata({
 }) {
   const couponId = metadata?.couponId;
   const discountMinor = Number(metadata?.couponDiscountMinor ?? 0);
-  if (!couponId || !Number.isFinite(discountMinor) || discountMinor <= 0) return;
-  await recordCouponUse({ couponId, userId, amountMinor: discountMinor, currency, reference });
+  if (!couponId || !Number.isFinite(discountMinor) || discountMinor < 0) return;
+  await recordCouponUse({
+    couponId,
+    userId,
+    amountMinor: discountMinor,
+    currency,
+    reference,
+  });
 }
 
 /**

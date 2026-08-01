@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
-import { activatePlan, assertPaidPlan } from "@/lib/billing";
+import { activatePlan, assertPaidPlan, grantBundle } from "@/lib/billing";
 import { confirmTicket } from "@/lib/events";
 import { confirmAdOrder } from "@/lib/adOrders";
 import { confirmResourceOrder } from "@/lib/resourceOrders";
@@ -87,6 +87,16 @@ export async function POST(request: Request) {
         });
       } else if (session.metadata?.kind === "review-dispute" && reviewDisputeId) {
         await confirmReviewDispute({ disputeId: reviewDisputeId, reference: session.id });
+      } else if (session.metadata?.kind === "bundle" && userId) {
+        const months = Number(session.metadata?.months ?? 12);
+        await grantBundle({
+          userId,
+          months: Number.isFinite(months) && months > 0 ? months : 12,
+          provider: "stripe",
+          reference: session.id,
+          amountMinor: session.amount_total ?? 0,
+          currency: (session.currency ?? "inr").toUpperCase(),
+        });
       } else if (userId && plan) {
         await activatePlan({
           userId,

@@ -19,6 +19,7 @@ export async function activatePlan({
   reference,
   amountMinor,
   currency,
+  months = 1,
 }: {
   userId: string;
   plan: Plan;
@@ -27,11 +28,15 @@ export async function activatePlan({
   /** In the currency's minor unit (paise, cents). */
   amountMinor: number;
   currency: string;
+  /** Months of membership bought — the yearly package sells 12 or more. */
+  months?: number;
 }) {
   const existing = await db.payment.findUnique({ where: { reference } });
   if (existing) return { alreadyProcessed: true as const, payment: existing };
 
-  const expiresAt = new Date(Date.now() + PLAN_DURATION_DAYS * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(
+    Date.now() + months * PLAN_DURATION_DAYS * 24 * 60 * 60 * 1000,
+  );
 
   const [payment] = await db.$transaction([
     db.payment.create({
@@ -41,7 +46,10 @@ export async function activatePlan({
       where: { id: userId },
       data: { plan, planExpiresAt: expiresAt },
     }),
-    db.business.updateMany({ where: { ownerId: userId }, data: { featured: true } }),
+    db.business.updateMany({
+      where: { ownerId: userId },
+      data: { featured: true },
+    }),
   ]);
 
   await awardPoints({
@@ -72,13 +80,62 @@ export async function activatePlan({
   return { alreadyProcessed: false as const, payment };
 }
 
+/**
+ * The all-in-one package: Premium membership for the whole term plus the
+ * banner slot, booked as an ad order so the desk knows to place the creative.
+ */
+export async function grantBundle({
+  userId,
+  months,
+  provider,
+  reference,
+  amountMinor,
+  currency,
+}: {
+  userId: string;
+  months: number;
+  provider: PaymentProvider;
+  reference: string;
+  amountMinor: number;
+  currency: string;
+}) {
+  const result = await activatePlan({
+    userId,
+    plan: "PREMIUM",
+    provider,
+    reference,
+    amountMinor,
+    currency,
+    months,
+  });
+  if (result.alreadyProcessed) return result;
+
+  await db.adOrder.create({
+    data: {
+      userId,
+      slot: "SIDEBAR",
+      months,
+      amountMinor: 0,
+      currency,
+      provider,
+      reference: `bundle_ad_${reference}`,
+      status: "PAID",
+    },
+  });
+
+  return result;
+}
+
 export async function downgradeToFree(userId: string) {
   await db.$transaction([
     db.user.update({
       where: { id: userId },
       data: { plan: "FREE", planExpiresAt: null },
     }),
-    db.business.updateMany({ where: { ownerId: userId }, data: { featured: false } }),
+    db.business.updateMany({
+      where: { ownerId: userId },
+      data: { featured: false },
+    }),
   ]);
 }
 

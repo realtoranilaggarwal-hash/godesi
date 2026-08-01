@@ -200,6 +200,7 @@ export async function saveBusinessProfileAction(
 ): Promise<ActionState> {
   let slug: string;
   let staffEdit = false;
+  let isNew = false;
   try {
     const user = await requireUser();
     const parsed = readProfileForm(formData);
@@ -371,6 +372,7 @@ export async function saveBusinessProfileAction(
 
     const existing =
       target ?? (await db.business.findUnique({ where: { ownerId: user.id } }));
+    isNew = !existing;
     let businessId: string;
     if (existing) {
       const updated = await db.business.update({
@@ -402,7 +404,9 @@ export async function saveBusinessProfileAction(
   }
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
-  redirect(staffEdit ? `/b/${slug}?saved=1` : "/dashboard?saved=1");
+  if (staffEdit) redirect(`/b/${slug}?saved=1`);
+  // A first listing goes to the thank-you page, which also offers the package.
+  redirect(isNew ? "/upgrade?posted=1" : "/dashboard?saved=1");
 }
 
 export async function addMediaAction(

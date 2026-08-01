@@ -16,6 +16,12 @@ import { Alert, Badge, Card } from "@/components/ui";
 import { formatPlanPrice, requestCurrency } from "@/lib/currency";
 import { formatUsd } from "@/lib/format";
 import { WhyGodesi } from "@/components/WhyGodesi";
+import {
+  bundleListPrice,
+  bundlePrice,
+  bundleSaving,
+  formatBundleMoney,
+} from "@/lib/bundles";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -57,6 +63,24 @@ export default async function PricingPage({
           contacts.
         </p>
       </div>
+
+      <Link
+        href="/upgrade"
+        className="block rounded-3xl bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-orange-500 p-5 text-white hover:opacity-95"
+      >
+        <p className="text-xs font-bold uppercase tracking-widest text-white/80">
+          Best value
+        </p>
+        <p className="text-2xl font-black">
+          Complete package — membership + banner + featured, one price
+        </p>
+        <p className="mt-1 text-sm text-white/90">
+          Everything for a whole year for{" "}
+          {formatBundleMoney(bundlePrice(currency), currency)} instead of{" "}
+          {formatBundleMoney(bundleListPrice(currency), currency)} — save{" "}
+          {bundleSaving(currency).percent}% →
+        </p>
+      </Link>
 
       {searchParams.reason === "leads" ? (
         <Alert tone="info">
@@ -167,7 +191,10 @@ export default async function PricingPage({
                     ) : null}
 
                     {upiOn ? (
-                      <form action={startUpiPaymentAction} className="space-y-2">
+                      <form
+                        action={startUpiPaymentAction}
+                        className="space-y-2"
+                      >
                         <input type="hidden" name="plan" value={id} />
                         {stripeOn ? null : (
                           <input
