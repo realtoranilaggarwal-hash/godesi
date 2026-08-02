@@ -17,6 +17,21 @@ import {
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
 
+const CROSS_SECTION: Partial<
+  Record<Section, { section: Section; title: string; href: string }>
+> = {
+  rooms: {
+    section: "real-estate",
+    title: "Also to rent — whole flats and houses",
+    href: "/real-estate",
+  },
+  "real-estate": {
+    section: "rooms",
+    title: "Also here — single rooms and roommates",
+    href: "/rooms",
+  },
+};
+
 /** Shared shell for /real-estate and /rooms — same query, different copy. */
 export async function ListingSectionPage({
   section,
@@ -35,12 +50,26 @@ export async function ListingSectionPage({
   postHref: string;
   postLabel: string;
 }) {
-  const listings = await db.listing.findMany({
-    where: listingWhere(section, filters),
-    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-    include: LISTING_INCLUDE,
-    take: 60,
-  });
+  // Rooms and rentals get mixed up constantly — a room posted as "property for
+  // rent" is invisible on /rooms — so each page also shows the other one.
+  const also = CROSS_SECTION[section];
+
+  const [listings, crossListings] = await Promise.all([
+    db.listing.findMany({
+      where: listingWhere(section, filters),
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      include: LISTING_INCLUDE,
+      take: 60,
+    }),
+    also
+      ? db.listing.findMany({
+          where: listingWhere(also.section, {}),
+          orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+          include: LISTING_INCLUDE,
+          take: 3,
+        })
+      : Promise.resolve([]),
+  ]);
 
   return (
     <div className="flex gap-6">
@@ -78,6 +107,29 @@ export async function ListingSectionPage({
           />
         )}
 
+        {also && crossListings.length ? (
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-lg font-bold">{also.title}</h2>
+              <Link
+                href={also.href}
+                className="text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                See all →
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {crossListings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  cityBase={also.href}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         <p className="text-sm text-slate-500">
           Have something to list?{" "}
           <Link href={postHref} className="font-semibold text-indigo-600">
@@ -85,14 +137,14 @@ export async function ListingSectionPage({
           </Link>{" "}
           — buyers reach you straight on WhatsApp.
         </p>
-      {section === "real-estate" || section === "rooms" ? (
-        <FairHousingNotice />
-      ) : null}
-      {section === "rooms" ? <RoomSharingNotice /> : null}
+        {section === "real-estate" || section === "rooms" ? (
+          <FairHousingNotice />
+        ) : null}
+        {section === "rooms" ? <RoomSharingNotice /> : null}
 
-      <TradingTips />
+        <TradingTips />
 
-      <InlineBanner />
+        <InlineBanner />
       </div>
 
       <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">

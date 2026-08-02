@@ -121,7 +121,7 @@ export function LiveMediaPlayer() {
   const inOptions = options.some((option) => option.id === request.id);
 
   return (
-    <div className="fixed bottom-32 right-3 z-40 w-[19rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl sm:bottom-16">
+    <div className="fab-anchor fixed bottom-32 right-3 z-40 w-[19rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl sm:bottom-16">
       <div className="flex items-center justify-between gap-2 bg-slate-900 px-3 py-2 text-white">
         <p className="truncate text-xs font-bold">
           {isTv ? "📺 " : "🎧 "}

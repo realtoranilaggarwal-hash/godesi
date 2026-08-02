@@ -97,3 +97,26 @@ blockquote {
     overflow-y: auto;
   }
 }
+
+/*
+ * The cookie bar is fixed to the bottom of the screen, where the floating
+ * buttons live. On a phone it covered them, so taps did nothing — every
+ * floating widget carries this class and lifts clear while the bar is up.
+ */
+:root {
+  --fab-offset: 0px;
+}
+
+html.consent-open {
+  --fab-offset: 7rem;
+}
+
+@media (min-width: 640px) {
+  html.consent-open {
+    --fab-offset: 3.5rem;
+  }
+}
+
+.fab-anchor {
+  margin-bottom: var(--fab-offset);
+}

@@ -66,7 +66,9 @@ export function PostFab({ signedIn }: { signedIn: boolean }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  if (HIDDEN.some((path) => pathname === path || pathname.startsWith(`${path}/`)))
+  if (
+    HIDDEN.some((path) => pathname === path || pathname.startsWith(`${path}/`))
+  )
     return null;
 
   const link = (href: string) =>
@@ -83,7 +85,7 @@ export function PostFab({ signedIn }: { signedIn: boolean }) {
         />
       ) : null}
 
-      <div className="fixed bottom-20 right-4 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2">
+      <div className="fab-anchor fixed bottom-20 right-4 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2">
         {open ? (
           <div className="w-[19rem] max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
             <div className="bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-4 py-3 text-white">

@@ -20,6 +20,14 @@ export function CookieConsent() {
     }
   }, []);
 
+  // The bar covers the bottom of the screen, where the floating buttons live.
+  // `.fab-anchor` lifts them clear of it for as long as it is up.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("consent-open", visible);
+    return () => root.classList.remove("consent-open");
+  }, [visible]);
+
   function choose(value: "accepted" | "rejected") {
     try {
       window.localStorage.setItem(KEY, value);
@@ -33,12 +41,15 @@ export function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur">
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur sm:p-4">
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">
-          We use essential cookies to keep you signed in, and optional cookies to
-          measure how ads and pages perform. Read our{" "}
-          <Link href="/cookies" className="font-semibold text-indigo-600 underline">
+        <p className="text-xs text-slate-600 sm:text-sm">
+          We use essential cookies to keep you signed in, and optional cookies
+          to measure how ads and pages perform. Read our{" "}
+          <Link
+            href="/cookies"
+            className="font-semibold text-indigo-600 underline"
+          >
             cookie policy
           </Link>
           .

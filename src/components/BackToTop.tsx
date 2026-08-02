@@ -20,7 +20,7 @@ export function BackToTop() {
       type="button"
       aria-label="Back to top"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-24 left-4 z-40 rounded-full border border-slate-200 bg-white/95 px-3 py-2 text-sm font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white sm:bottom-6"
+      className="fab-anchor fixed bottom-24 left-4 z-40 rounded-full border border-slate-200 bg-white/95 px-3 py-2 text-sm font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white sm:bottom-6"
     >
       ↑ Top
     </button>

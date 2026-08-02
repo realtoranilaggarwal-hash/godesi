@@ -10,7 +10,10 @@ const VISIBLE_MS = 7000;
 const GAP_MS = 12000;
 
 function ago(iso: string) {
-  const minutes = Math.max(1, Math.round((Date.now() - Date.parse(iso)) / 60000));
+  const minutes = Math.max(
+    1,
+    Math.round((Date.now() - Date.parse(iso)) / 60000),
+  );
   if (minutes < 60) return `${minutes} min ago`;
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours} hr ago`;
@@ -49,8 +52,10 @@ export function LiveActivityFeed({ items }: { items: ActivityItem[] }) {
 
   return (
     <div
-      className={`pointer-events-none fixed bottom-4 left-4 z-40 max-w-[19rem] transition-all duration-300 ${
-        shown ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
+      className={`fab-anchor pointer-events-none fixed bottom-4 left-4 z-40 max-w-[19rem] transition-all duration-300 ${
+        shown
+          ? "translate-y-0 opacity-100"
+          : "pointer-events-none translate-y-3 opacity-0"
       }`}
       aria-live="polite"
     >
@@ -65,7 +70,9 @@ export function LiveActivityFeed({ items }: { items: ActivityItem[] }) {
           >
             {item.text}
           </Link>
-          <p className="mt-0.5 text-[11px] text-slate-400">{ago(item.at)} · Godesi</p>
+          <p className="mt-0.5 text-[11px] text-slate-400">
+            {ago(item.at)} · Godesi
+          </p>
         </div>
         <button
           type="button"

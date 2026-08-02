@@ -46,23 +46,7 @@ export function AiChat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [consentPending, setConsentPending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
-
-  // The cookie banner sits at the bottom of the screen; lift the launcher above
-  // it on phones so it stays tappable until a choice is made.
-  useEffect(() => {
-    const read = () => {
-      try {
-        setConsentPending(!window.localStorage.getItem("godesi_cookie_consent"));
-      } catch {
-        setConsentPending(false);
-      }
-    };
-    read();
-    window.addEventListener("godesi:cookie-consent", read);
-    return () => window.removeEventListener("godesi:cookie-consent", read);
-  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
@@ -107,9 +91,7 @@ export function AiChat() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ask Godesi AI"
-        className={`fixed right-4 z-40 ${
-          consentPending ? "bottom-32 sm:bottom-4" : "bottom-4"
-        } flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-3 text-sm font-bold text-white shadow-xl hover:brightness-110`}
+        className="fab-anchor fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-3 text-sm font-bold text-white shadow-xl hover:brightness-110"
       >
         <span aria-hidden>✨</span> Ask Godesi
       </button>
@@ -117,11 +99,13 @@ export function AiChat() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex h-[70vh] max-h-[560px] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+    <div className="fab-anchor fixed bottom-4 right-4 z-40 flex h-[70vh] max-h-[560px] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
       <div className="flex items-center justify-between bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-3 text-white">
         <div>
           <p className="text-sm font-bold">Godesi assistant</p>
-          <p className="text-[11px] opacity-90">Finds listings, events and leads</p>
+          <p className="text-[11px] opacity-90">
+            Finds listings, events and leads
+          </p>
         </div>
         <button
           type="button"
@@ -137,8 +121,8 @@ export function AiChat() {
         {turns.length === 0 && (
           <div className="space-y-2">
             <p className="text-slate-600">
-              Hi! Ask me anything about Godesi — I only answer from real listings on
-              the site.
+              Hi! Ask me anything about Godesi — I only answer from real
+              listings on the site.
             </p>
             <div className="flex flex-wrap gap-2">
               {SUGGESTIONS.map((s) => (
