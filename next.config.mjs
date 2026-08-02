@@ -25,6 +25,14 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        // Sessions are cookies on one host: serving www as well meant signing
+        // out on one host left the other still signed in as the old member.
+        source: "/:path*",
+        has: [{ type: "host", value: "www.godesi.com" }],
+        destination: "https://godesi.com/:path*",
+        permanent: true,
+      },
+      {
         // IT training grew into its own top-level category.
         source: "/categories/education-it-training-and-career-services",
         destination: "/categories/it-training",
