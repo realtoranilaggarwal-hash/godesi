@@ -8,6 +8,7 @@ import { isStaff, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { effectivePlan, extraCategoryLimit, mediaLimit } from "@/lib/plans";
 import { contactDetailKind } from "@/lib/moderation";
+import { autoApproveStatus } from "@/lib/autoApprove";
 import {
   cleanCertifications,
   cleanCustomOptions,
@@ -39,7 +40,11 @@ const vehicleSchema = z.object({
   vehicleType: z.enum(VEHICLE_TYPES, { message: "Pick the vehicle type" }),
   make: z.string().trim().min(1, "Pick the make"),
   model: z.string().trim().min(1, "Pick the model"),
-  year: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1),
+  year: z.coerce
+    .number()
+    .int()
+    .min(1950)
+    .max(new Date().getFullYear() + 1),
   mileage: z.coerce.number().int().min(0).max(2_000_000).optional(),
   mileageUnit: z.enum(MILEAGE_UNITS).default("mi"),
   fuelType: z.enum(FUEL_TYPES).optional(),
@@ -70,7 +75,8 @@ function readVehicleForm(formData: FormData) {
     price: value("vehiclePrice"),
     currency: value("vehicleCurrency") ?? "USD",
   });
-  if (!parsed.success) return { error: parsed.error.issues[0].message } as const;
+  if (!parsed.success)
+    return { error: parsed.error.issues[0].message } as const;
 
   const models = VEHICLE_MAKES[parsed.data.make];
   if (!models?.includes(parsed.data.model)) {
@@ -87,8 +93,14 @@ function readVehicleForm(formData: FormData) {
       condition: parsed.data.condition ?? null,
       price: parsed.data.price ?? null,
       negotiable: formData.get("negotiable") === "on",
-      features: keepKnown(VEHICLE_FEATURES, formData.getAll("vehicleFeatures").map(String)),
-      documents: keepKnown(VEHICLE_DOCUMENTS, formData.getAll("vehicleDocuments").map(String)),
+      features: keepKnown(
+        VEHICLE_FEATURES,
+        formData.getAll("vehicleFeatures").map(String),
+      ),
+      documents: keepKnown(
+        VEHICLE_DOCUMENTS,
+        formData.getAll("vehicleDocuments").map(String),
+      ),
     },
   } as const;
 }
@@ -112,7 +124,10 @@ const profileSchema = z.object({
   whatsappNumber: z
     .string()
     .trim()
-    .refine((v) => normalizeWhatsApp(v).length >= 10, "Enter a valid WhatsApp number"),
+    .refine(
+      (v) => normalizeWhatsApp(v).length >= 10,
+      "Enter a valid WhatsApp number",
+    ),
   phone: z.string().trim().optional(),
   publicEmail: z
     .string()
@@ -209,13 +224,18 @@ export async function saveBusinessProfileAction(
     // Staff may edit any card straight from its page by posting its id.
     const targetId = String(formData.get("businessId") ?? "").trim();
     staffEdit = Boolean(targetId) && isStaff(user);
-    if (targetId && !staffEdit) return { error: "You cannot edit that listing." };
+    if (targetId && !staffEdit)
+      return { error: "You cannot edit that listing." };
     const target = staffEdit
       ? await db.business.findUnique({ where: { id: targetId } })
       : null;
     if (staffEdit && !target) return { error: "Listing not found." };
 
-    if (!staffEdit && effectivePlan(user) === "FREE" && parsed.data.description) {
+    if (
+      !staffEdit &&
+      effectivePlan(user) === "FREE" &&
+      parsed.data.description
+    ) {
       const kind = contactDetailKind(parsed.data.description);
       if (kind) {
         return {
@@ -228,18 +248,25 @@ export async function saveBusinessProfileAction(
       where: { slug: parsed.data.categorySlug },
       include: { children: { select: { slug: true, name: true } } },
     });
-    if (!category || category.parentSlug) return { error: "Choose a valid category." };
+    if (!category || category.parentSlug)
+      return { error: "Choose a valid category." };
 
     const subcategory = parsed.data.subcategorySlug
-      ? category.children.find((child) => child.slug === parsed.data.subcategorySlug)
+      ? category.children.find(
+          (child) => child.slug === parsed.data.subcategorySlug,
+        )
       : undefined;
     if (parsed.data.subcategorySlug && !subcategory) {
-      return { error: "That subcategory does not belong to the chosen category." };
+      return {
+        error: "That subcategory does not belong to the chosen category.",
+      };
     }
 
     const extraLimit = staffEdit ? 20 : extraCategoryLimit(user);
     const wantedExtras = Array.from(
-      new Set(formData.getAll("extraCategorySlugs").map(String).filter(Boolean)),
+      new Set(
+        formData.getAll("extraCategorySlugs").map(String).filter(Boolean),
+      ),
     ).filter((slug) => slug !== category.slug && slug !== subcategory?.slug);
     if (wantedExtras.length > extraLimit) {
       return {
@@ -296,9 +323,12 @@ export async function saveBusinessProfileAction(
       return { error: `${missing[0]}: pick an option.` };
     }
 
-    const detail = (field: string) => String(formData.get(field) ?? "").trim() || null;
+    const detail = (field: string) =>
+      String(formData.get(field) ?? "").trim() || null;
 
-    const licenseNumber = set ? String(formData.get("licenseNumber") ?? "").trim() : "";
+    const licenseNumber = set
+      ? String(formData.get("licenseNumber") ?? "").trim()
+      : "";
     if (set?.license?.required && !licenseNumber) {
       return { error: `${set.license.label} is required.` };
     }
@@ -306,7 +336,12 @@ export async function saveBusinessProfileAction(
       ? String(formData.get("yearsExperience") ?? "").trim()
       : "";
     const yearsExperience = experienceRaw ? Number(experienceRaw) : null;
-    if (yearsExperience !== null && (!Number.isInteger(yearsExperience) || yearsExperience < 0 || yearsExperience > 70)) {
+    if (
+      yearsExperience !== null &&
+      (!Number.isInteger(yearsExperience) ||
+        yearsExperience < 0 ||
+        yearsExperience > 70)
+    ) {
       return { error: "Years of experience must be between 0 and 70." };
     }
 
@@ -361,7 +396,9 @@ export async function saveBusinessProfileAction(
       realtorUrl: parsed.data.realtorUrl ?? null,
       mapsUrl: parsed.data.mapsUrl ?? null,
       startingPrice: parsed.data.startingPrice ?? null,
-      priceCurrency: parsed.data.startingPrice ? (parsed.data.priceCurrency ?? "USD") : null,
+      priceCurrency: parsed.data.startingPrice
+        ? (parsed.data.priceCurrency ?? "USD")
+        : null,
       customQuote: parsed.data.customQuote ?? false,
       whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber),
     };
@@ -383,11 +420,23 @@ export async function saveBusinessProfileAction(
       businessId = updated.id;
     } else {
       const created = await db.business.create({
-        data: { ...data, ownerId: user.id, slug: await uniqueSlug(data.name, data.city) },
+        data: {
+          ...data,
+          ownerId: user.id,
+          slug: await uniqueSlug(data.name, data.city),
+          status: autoApproveStatus(
+            user,
+            [data.name, data.description, data.category].join(" "),
+          ),
+        },
       });
       slug = created.slug;
       businessId = created.id;
-      await awardPoints({ userId: user.id, reason: "PROFILE_CREATED", once: true });
+      await awardPoints({
+        userId: user.id,
+        reason: "PROFILE_CREATED",
+        once: true,
+      });
     }
 
     if (vehicle && "data" in vehicle) {
@@ -405,8 +454,8 @@ export async function saveBusinessProfileAction(
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
   if (staffEdit) redirect(`/b/${slug}?saved=1`);
-  // A first listing goes to the thank-you page, which also offers the package.
-  redirect(isNew ? "/upgrade?posted=1" : "/dashboard?saved=1");
+  // A first listing lands on a free confirmation, not on the price list.
+  redirect(isNew ? "/dashboard?business=new" : "/dashboard?saved=1");
 }
 
 export async function addMediaAction(
@@ -415,11 +464,14 @@ export async function addMediaAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const business = await db.business.findUnique({ where: { ownerId: user.id } });
+    const business = await db.business.findUnique({
+      where: { ownerId: user.id },
+    });
     if (!business) return { error: "Create your business profile first." };
 
     const url = String(formData.get("url") ?? "").trim();
-    const type = String(formData.get("type") ?? "IMAGE") === "VIDEO" ? "VIDEO" : "IMAGE";
+    const type =
+      String(formData.get("type") ?? "IMAGE") === "VIDEO" ? "VIDEO" : "IMAGE";
     const caption = String(formData.get("caption") ?? "").trim();
     if (!z.string().url().safeParse(url).success) {
       return { error: "Enter a valid media URL." };
@@ -453,8 +505,12 @@ export async function addMediaAction(
 export async function deleteMediaAction(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id") ?? "");
-  const media = await db.media.findUnique({ where: { id }, include: { business: true } });
-  if (!media || media.business.ownerId !== user.id) throw new Error("FORBIDDEN");
+  const media = await db.media.findUnique({
+    where: { id },
+    include: { business: true },
+  });
+  if (!media || media.business.ownerId !== user.id)
+    throw new Error("FORBIDDEN");
   await db.media.delete({ where: { id } });
   revalidatePath("/dashboard/media");
   revalidatePath(`/b/${media.business.slug}`);

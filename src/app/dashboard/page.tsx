@@ -58,6 +58,7 @@ export default async function DashboardPage({
 }: {
   searchParams: {
     saved?: string;
+    business?: string;
     posted?: string;
     upgraded?: string;
     verified?: string;
@@ -72,7 +73,9 @@ export default async function DashboardPage({
 
   const business = await db.business.findUnique({
     where: { ownerId: user.id },
-    include: { reviews: { where: { hidden: false }, select: { rating: true } } },
+    include: {
+      reviews: { where: { hidden: false }, select: { rating: true } },
+    },
   });
 
   const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats] =
@@ -154,6 +157,36 @@ export default async function DashboardPage({
             </Link>{" "}
             to secure your account and earn referral rewards.
           </Alert>
+        ) : null}
+        {searchParams.business && business ? (
+          <Card className="border-emerald-200 bg-emerald-50">
+            <h2 className="text-lg font-black text-emerald-900">
+              {business.status === "APPROVED"
+                ? "✅ Your business is live on Godesi — free"
+                : "✅ Your business is saved — it goes live once you verify your email"}
+            </h2>
+            <p className="mt-1 text-sm text-emerald-800">
+              {business.status === "APPROVED"
+                ? "People can find you in search, in your city and in your category right now. There is nothing to pay."
+                : "Verify your email and it publishes straight away — no waiting for us to approve it, and nothing to pay."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-emerald-900">
+              <Link href={`/b/${business.slug}`} className="underline">
+                See my page
+              </Link>
+              <Link href="/dashboard/media" className="underline">
+                Add photos
+              </Link>
+              {business.status === "APPROVED" ? null : (
+                <Link href="/verify-email" className="underline">
+                  Verify my email
+                </Link>
+              )}
+              <Link href="/upgrade" className="underline opacity-80">
+                Optional: paid boost
+              </Link>
+            </div>
+          </Card>
         ) : null}
         {searchParams.saved ? (
           <Alert tone="success">Profile saved.</Alert>
@@ -281,8 +314,9 @@ export default async function DashboardPage({
               {business.websiteUrl ? null : (
                 <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
                   <strong>No website yet?</strong> We build you a{" "}
-                  {WEBSITE_OFFER.pages}-page site for ${WEBSITE_OFFER.priceUsd}, then $
-                  {WEBSITE_OFFER.monthlyUsd}/month with domain and hosting included.{" "}
+                  {WEBSITE_OFFER.pages}-page site for ${WEBSITE_OFFER.priceUsd},
+                  then ${WEBSITE_OFFER.monthlyUsd}/month with domain and hosting
+                  included.{" "}
                   <Link href="/website" className="font-bold underline">
                     See what you get →
                   </Link>
