@@ -81,14 +81,14 @@ export function PostFab({ signedIn }: { signedIn: boolean }) {
           type="button"
           aria-label="Close"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-900/40"
+          className="fixed inset-0 z-[55] bg-slate-900/40"
         />
       ) : null}
 
-      <div className="fab-anchor fixed bottom-20 right-4 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2">
+      <div className="fab-anchor fixed bottom-20 right-4 z-[60] flex max-h-[calc(100vh-14rem)] max-w-[calc(100vw-2rem)] flex-col items-end gap-2">
         {open ? (
-          <div className="w-[19rem] max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-            <div className="bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-4 py-3 text-white">
+          <div className="flex min-h-0 w-[19rem] max-w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="shrink-0 bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-4 py-3 text-white">
               <p className="text-sm font-black">What do you want to post?</p>
               <p className="text-xs text-white/85">
                 {signedIn
@@ -96,7 +96,7 @@ export function PostFab({ signedIn }: { signedIn: boolean }) {
                   : "Free — you will be asked to create an account first"}
               </p>
             </div>
-            <ul className="max-h-[60vh] divide-y divide-slate-100 overflow-y-auto">
+            <ul className="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto">
               {OPTIONS.map((option) => (
                 <li key={option.href}>
                   <Link
@@ -119,7 +119,7 @@ export function PostFab({ signedIn }: { signedIn: boolean }) {
               ))}
             </ul>
             {signedIn ? null : (
-              <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-xs font-semibold">
+              <div className="flex shrink-0 items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-xs font-semibold">
                 <span className="text-slate-600">Already a member?</span>
                 <Link href="/login" className="text-indigo-700 underline">
                   Sign in
