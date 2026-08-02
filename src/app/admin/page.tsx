@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { Card } from "@/components/ui";
-import { ADMIN_SECTIONS } from "@/components/AdminNav";
+import { ADMIN_SECTIONS } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" };
