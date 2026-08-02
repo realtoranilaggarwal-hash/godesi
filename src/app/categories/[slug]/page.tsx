@@ -18,6 +18,34 @@ import { cleanSpecialties, specialtySet } from "@/lib/specialties";
 import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { VehicleFilters } from "@/components/VehicleFilters";
 import { VEHICLE_FEATURES, isVehicleCard, keepKnown } from "@/lib/vehicles";
+import { ListingCard } from "@/components/ListingCard";
+import {
+  LISTING_INCLUDE,
+  listingWhere,
+  type ListingSection,
+} from "@/lib/listings";
+
+/** Directory categories that also have member-posted listings of their own. */
+const LISTING_SECTIONS: Record<
+  string,
+  { section: ListingSection; title: string; href: string }
+> = {
+  "rooms-roommates": {
+    section: "rooms",
+    title: "Rooms and roommates posted by members",
+    href: "/rooms",
+  },
+  "real-estate": {
+    section: "real-estate",
+    title: "Property posted by members",
+    href: "/real-estate",
+  },
+  "buy-sell": {
+    section: "marketplace",
+    title: "Items for sale posted by members",
+    href: "/marketplace",
+  },
+};
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +114,9 @@ export default async function CategoryPage({
     : searchParams.cert
       ? [searchParams.cert]
       : [];
-  const selectedCerts = certOptions.filter((option) => certParam.includes(option));
+  const selectedCerts = certOptions.filter((option) =>
+    certParam.includes(option),
+  );
   const optParam = Array.isArray(searchParams.opt)
     ? searchParams.opt
     : searchParams.opt
@@ -137,7 +167,9 @@ export default async function CategoryPage({
         ? "professional"
         : "business",
   }).toString();
-  const [businesses, events] = await Promise.all([
+  const memberListings =
+    LISTING_SECTIONS[category.parent?.slug ?? category.slug];
+  const [businesses, events, listings] = await Promise.all([
     searchBusinesses({
       categorySlugs: scope,
       city: searchParams.city,
@@ -159,6 +191,17 @@ export default async function CategoryPage({
         category: { select: { name: true, icon: true, color: true } },
       },
     }),
+    memberListings
+      ? db.listing.findMany({
+          where: listingWhere(memberListings.section, {
+            city: searchParams.city,
+            q: searchParams.q,
+          }),
+          orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+          include: LISTING_INCLUDE,
+          take: 6,
+        })
+      : Promise.resolve([]),
   ]);
 
   return (
@@ -304,7 +347,9 @@ export default async function CategoryPage({
                 )}
                 {services.choices?.map((group) => (
                   <div key={group.key} className="mt-3">
-                    <p className="text-sm font-bold text-slate-900">{group.title}</p>
+                    <p className="text-sm font-bold text-slate-900">
+                      {group.title}
+                    </p>
                     <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
                       {group.options.map((option) => (
                         <label
@@ -424,6 +469,29 @@ export default async function CategoryPage({
               and start getting enquiries on WhatsApp.
             </p>
           </Card>
+        ) : null}
+
+        {memberListings && listings.length ? (
+          <section>
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-lg font-bold">{memberListings.title}</h2>
+              <Link
+                href={memberListings.href}
+                className="text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                See all →
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {listings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  cityBase={memberListings.href}
+                />
+              ))}
+            </div>
+          </section>
         ) : null}
 
         {events.length ? (
