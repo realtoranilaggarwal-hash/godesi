@@ -8,7 +8,18 @@ export const SITE = {
   salesEmail: process.env.NEXT_PUBLIC_SALES_EMAIL ?? "sales@godesi.com",
 };
 
-export type SocialLink = { key: string; label: string; icon: string; url: string };
+/** The public GoDesi community group — announcements, jobs, events, chat. */
+export const TELEGRAM_GROUP =
+  process.env.NEXT_PUBLIC_SOCIAL_TELEGRAM ?? "https://t.me/godesicommunity";
+
+export const TELEGRAM_HANDLE = "@godesicommunity";
+
+export type SocialLink = {
+  key: string;
+  label: string;
+  icon: string;
+  url: string;
+};
 
 const SOCIAL_ENV: Omit<SocialLink, "url">[] = [
   { key: "facebook", label: "Facebook", icon: "📘" },
@@ -16,6 +27,7 @@ const SOCIAL_ENV: Omit<SocialLink, "url">[] = [
   { key: "youtube", label: "YouTube", icon: "▶️" },
   { key: "x", label: "X (Twitter)", icon: "𝕏" },
   { key: "linkedin", label: "LinkedIn", icon: "in" },
+  { key: "telegram", label: "Telegram", icon: "✈️" },
   { key: "whatsapp", label: "WhatsApp", icon: "💬" },
 ];
 
@@ -25,6 +37,7 @@ const URLS: Record<string, string | undefined> = {
   youtube: process.env.NEXT_PUBLIC_SOCIAL_YOUTUBE,
   x: process.env.NEXT_PUBLIC_SOCIAL_X,
   linkedin: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN,
+  telegram: TELEGRAM_GROUP,
   whatsapp: process.env.NEXT_PUBLIC_SOCIAL_WHATSAPP,
 };
 

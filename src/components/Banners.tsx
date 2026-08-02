@@ -12,6 +12,7 @@ import {
 } from "@/lib/banners";
 import { LiveVisitorMap } from "@/components/LiveVisitorMap";
 import { ActivityWall } from "@/components/ActivityWall";
+import { TelegramJoin } from "@/components/TelegramJoin";
 import { ChatPanel } from "@/components/ChatPanel";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
@@ -169,6 +170,8 @@ export async function SidebarBanners() {
       <LiveVisitorMap compact />
 
       <ChatPanel compact />
+
+      <TelegramJoin compact />
 
       <ActivityWall />
 

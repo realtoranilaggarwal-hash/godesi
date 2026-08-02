@@ -1,79 +1,81 @@
 import Image from "next/image";
 import Link from "next/link";
+import { TelegramJoin } from "@/components/TelegramJoin";
 import { socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
 
 /** Five roughly equal columns, so no single list runs far past the others. */
-const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = [
-  {
-    title: "Directory",
-    links: [
-      { href: "/categories", label: "Categories" },
-      { href: "/search", label: "Businesses" },
-      { href: "/leads", label: "Leads" },
-      { href: "/events", label: "Events" },
-      { href: "/venues", label: "Venues" },
-      { href: "/resources", label: "Resources" },
-      { href: "/news", label: "News" },
-      { href: "/blog", label: "Blog" },
-      { href: "/find", label: "Search everything" },
-    ],
-  },
-  {
-    title: "For business",
-    links: [
-      { href: "/signup", label: "List your business free" },
-      { href: "/why-list", label: "Why list on Godesi?" },
-      { href: "/pricing", label: "Membership plans" },
-      { href: "/website", label: "Get a website for $99" },
-      { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
-      { href: "/advertise", label: "Advertise on Godesi" },
-      { href: "/events/new", label: "Post an event" },
-      { href: "/dashboard", label: "Dashboard" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { href: "/connect", label: "Connect" },
-      { href: "/alumni", label: "Find your batchmates" },
-      { href: "/buzz", label: "#godesi social wall" },
-      { href: "/news/report", label: "Share news" },
-      { href: "/journalists", label: "Become a local journalist" },
-      { href: "/rewards", label: "Refer & earn rewards" },
-      { href: "/leaderboard", label: "🏅 Top contributors" },
-      { href: "/safety", label: "Trust & safety" },
-    ],
-  },
-  {
-    title: "Live & media",
-    links: [
-      { href: "/live-radio", label: "🎧 Listen live — desi radio" },
-      { href: "/live-tv", label: "📺 Watch live — desi TV" },
-      { href: "/live/submit", label: "Add your radio or TV channel" },
-      { href: "/live", label: "Live visitor map" },
-      { href: "/desi-elite", label: "GoDesi Elite" },
-      { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
-      { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { href: "/about", label: "About us" },
-      { href: "/contact", label: "Contact us" },
-      { href: "/faq", label: "FAQ" },
-      { href: "/sitemap", label: "Sitemap" },
-      { href: "/report", label: "Report an issue" },
-      { href: "/terms", label: "Terms of service" },
-      { href: "/privacy", label: "Privacy policy" },
-      { href: "/cookies", label: "Cookie policy" },
-      { href: "/refunds", label: "Refund policy" },
-    ],
-  },
-];
+const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
+  [
+    {
+      title: "Directory",
+      links: [
+        { href: "/categories", label: "Categories" },
+        { href: "/search", label: "Businesses" },
+        { href: "/leads", label: "Leads" },
+        { href: "/events", label: "Events" },
+        { href: "/venues", label: "Venues" },
+        { href: "/resources", label: "Resources" },
+        { href: "/news", label: "News" },
+        { href: "/blog", label: "Blog" },
+        { href: "/find", label: "Search everything" },
+      ],
+    },
+    {
+      title: "For business",
+      links: [
+        { href: "/signup", label: "List your business free" },
+        { href: "/why-list", label: "Why list on Godesi?" },
+        { href: "/pricing", label: "Membership plans" },
+        { href: "/website", label: "Get a website for $99" },
+        { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
+        { href: "/advertise", label: "Advertise on Godesi" },
+        { href: "/events/new", label: "Post an event" },
+        { href: "/dashboard", label: "Dashboard" },
+      ],
+    },
+    {
+      title: "Community",
+      links: [
+        { href: "/connect", label: "Connect" },
+        { href: "/alumni", label: "Find your batchmates" },
+        { href: "/buzz", label: "#godesi social wall" },
+        { href: "/news/report", label: "Share news" },
+        { href: "/journalists", label: "Become a local journalist" },
+        { href: "/rewards", label: "Refer & earn rewards" },
+        { href: "/leaderboard", label: "🏅 Top contributors" },
+        { href: "/safety", label: "Trust & safety" },
+      ],
+    },
+    {
+      title: "Live & media",
+      links: [
+        { href: "/live-radio", label: "🎧 Listen live — desi radio" },
+        { href: "/live-tv", label: "📺 Watch live — desi TV" },
+        { href: "/live/submit", label: "Add your radio or TV channel" },
+        { href: "/live", label: "Live visitor map" },
+        { href: "/desi-elite", label: "GoDesi Elite" },
+        { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
+        { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { href: "/about", label: "About us" },
+        { href: "/contact", label: "Contact us" },
+        { href: "/faq", label: "FAQ" },
+        { href: "/sitemap", label: "Sitemap" },
+        { href: "/report", label: "Report an issue" },
+        { href: "/terms", label: "Terms of service" },
+        { href: "/privacy", label: "Privacy policy" },
+        { href: "/cookies", label: "Cookie policy" },
+        { href: "/refunds", label: "Refund policy" },
+      ],
+    },
+  ];
 
 export function SiteFooter() {
   const socials = socialLinks();
@@ -97,14 +99,21 @@ export function SiteFooter() {
             />
           </Link>
           <p className="mt-2 text-sm text-slate-600">
-            The desi directory for businesses, buyer requirements, community events
-            and daily news.
+            The desi directory for businesses, buyer requirements, community
+            events and daily news.
           </p>
           <p className="mt-3 text-sm text-slate-600">
-            <Link href="/contact" className="font-semibold hover:text-slate-900">
+            <Link
+              href="/contact"
+              className="font-semibold hover:text-slate-900"
+            >
               Contact us →
             </Link>
           </p>
+
+          <div className="mt-3">
+            <TelegramJoin />
+          </div>
           {socials.length ? (
             <div className="mt-3 flex flex-wrap gap-2">
               {socials.map((social) => (

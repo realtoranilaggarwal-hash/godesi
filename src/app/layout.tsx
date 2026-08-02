@@ -15,6 +15,7 @@ import { BackToTop } from "@/components/BackToTop";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
+import { TELEGRAM_GROUP } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -32,7 +33,9 @@ export const metadata: Metadata = {
     images: [{ url: "/og-godesi.jpg", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },
-  verification: { other: { "msvalidate.01": "9AC0C1E8C5BEEC4E0EF93C0575F608AE" } },
+  verification: {
+    other: { "msvalidate.01": "9AC0C1E8C5BEEC4E0EF93C0575F608AE" },
+  },
 };
 
 export default function RootLayout({
@@ -99,6 +102,7 @@ export default function RootLayout({
                   "https://www.youtube.com/@Godesibiz",
                   "https://x.com/godesi",
                   "https://www.linkedin.com/company/100483662/",
+                  TELEGRAM_GROUP,
                 ],
               },
               {
