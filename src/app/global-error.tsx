@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { isStaleBuild, reloadOnceForBuild } from "@/lib/staleBuild";
 
 /** Last-resort boundary: a layout-level crash (often a stale build) reloads once, then offers a way out. */
 export default function GlobalError({
@@ -11,32 +12,75 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    const stale =
-      /ChunkLoadError|Loading chunk|dynamically imported module|module script failed/i.test(
-        `${error.name} ${error.message}`,
-      );
-    const key = "godesi-reloaded-for-build";
-    const last = Number(sessionStorage.getItem(key) ?? 0);
-    if (!stale || Date.now() - last < 60_000) return;
-    sessionStorage.setItem(key, String(Date.now()));
-    window.location.reload();
+    if (isStaleBuild(error)) reloadOnceForBuild();
   }, [error]);
 
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-50 text-slate-900">
-        <div className="mx-auto max-w-lg px-4 py-20 text-center">
-          <h1 className="text-2xl font-black">Godesi hit an error 😕</h1>
-          <p className="mt-2 text-slate-600">
-            Reload the page — this is usually a stale copy of the site in your browser.
+      {/* The root layout crashed, so its stylesheet is gone: style inline. */}
+      <body
+        style={{
+          margin: 0,
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #4f46e5, #db2777)",
+          color: "#fff",
+          fontFamily:
+            "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+        }}
+      >
+        <div style={{ maxWidth: 420, textAlign: "center" }}>
+          <p style={{ fontSize: 40, margin: 0 }}>🪔</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800, margin: "12px 0 8px" }}>
+            Godesi needs a quick refresh
+          </h1>
+          <p style={{ margin: 0, opacity: 0.9, lineHeight: 1.5 }}>
+            Your browser is holding an old copy of the site. Reloading fixes it
+            — nothing is wrong with your account or your listing.
           </p>
-          <button
-            type="button"
-            onClick={reset}
-            className="mt-5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+          <div
+            style={{
+              marginTop: 20,
+              display: "flex",
+              gap: 10,
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
           >
-            Reload
-          </button>
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              style={{
+                background: "#fff",
+                color: "#4f46e5",
+                border: "none",
+                borderRadius: 12,
+                padding: "10px 20px",
+                fontSize: 15,
+                fontWeight: 700,
+              }}
+            >
+              Reload Godesi
+            </button>
+            <button
+              type="button"
+              onClick={reset}
+              style={{
+                background: "rgba(255,255,255,0.15)",
+                color: "#fff",
+                border: "1px solid rgba(255,255,255,0.5)",
+                borderRadius: 12,
+                padding: "10px 20px",
+                fontSize: 15,
+                fontWeight: 700,
+              }}
+            >
+              Try again
+            </button>
+          </div>
         </div>
       </body>
     </html>
