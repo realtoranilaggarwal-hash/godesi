@@ -9,6 +9,7 @@ import {
   priceLabel,
 } from "@/lib/listings";
 import type { Furnishing, GenderPreference, ListingKind } from "@prisma/client";
+import { thumbImage } from "@/lib/proxyImage";
 
 export type ListingCardItem = {
   slug: string;
@@ -41,7 +42,7 @@ export function ListingCard({
         {listing.images[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={listing.images[0].url}
+            src={thumbImage(listing.images[0].url, 640)}
             alt={listing.title}
             className="h-44 w-full object-cover"
             loading="lazy"

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { getCurrentUser, requireStaff, requireUser } from "@/lib/auth";
 import { type ActionState } from "@/lib/actions";
@@ -22,6 +23,7 @@ export async function postChatMessageAction(
   await db.chatMessage.create({
     data: { userId: user.id, body, place: user.location ?? null },
   });
+  revalidateTag("chat-recent");
   return { success: "Sent" };
 }
 

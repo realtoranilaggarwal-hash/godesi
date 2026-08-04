@@ -5,6 +5,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { whatsappLink } from "@/lib/format";
 import { StaffEditLink } from "@/components/StaffEditLink";
+import { thumbImage } from "@/lib/proxyImage";
 
 /**
  * `premium` frames a paid or hand-picked card with a ribbon so it reads as an
@@ -36,7 +37,9 @@ export function BusinessCard({
       <div className={`flex items-start gap-3 ${premium ? "pt-2" : ""}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={business.logoUrl ?? "/placeholder-logo.svg"}
+          src={
+            business.logoUrl ? thumbImage(business.logoUrl, 384) : "/placeholder-logo.svg"
+          }
           alt=""
           className={`${
             compact ? "h-10 w-10" : "h-12 w-12"

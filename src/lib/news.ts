@@ -169,54 +169,56 @@ export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
     failed: [] as string[],
   };
 
-  for (const feed of feeds) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      const response = await fetch(feed.url, {
-        headers: { "User-Agent": "GodesiNewsBot/1.0" },
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      // eslint-disable-next-line no-await-in-loop
-      const xml = await response.text();
-      const items = parseFeed(xml).slice(0, perFeed);
-      result.fetched += items.length;
-
-      for (const item of items) {
-        // eslint-disable-next-line no-await-in-loop
-        const existing = await db.newsItem.findUnique({
-          where: { guid: item.guid },
+  // Feeds are fetched together and written with one insert per feed: one at a
+  // time took long enough that the crawl outlived the function's time budget.
+  await Promise.all(
+    feeds.map(async (feed) => {
+      try {
+        const response = await fetch(feed.url, {
+          headers: { "User-Agent": "GodesiNewsBot/1.0" },
+          cache: "no-store",
+          signal: AbortSignal.timeout(8000),
         });
-        if (existing) {
-          result.skipped += 1;
-          continue;
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const xml = await response.text();
+        const items = parseFeed(xml).slice(0, perFeed);
+        result.fetched += items.length;
+
+        const known = await db.newsItem.findMany({
+          where: { guid: { in: items.map((item) => item.guid) } },
+          select: { guid: true },
+        });
+        const seen = new Set(known.map((row) => row.guid));
+        const fresh = items.filter((item) => !seen.has(item.guid));
+        result.skipped += items.length - fresh.length;
+
+        if (fresh.length) {
+          const { count } = await db.newsItem.createMany({
+            data: fresh.map((item) => ({
+              guid: item.guid,
+              title: item.title,
+              summary: item.summary,
+              imageUrl: item.imageUrl,
+              link: item.link,
+              source: feed.name,
+              topic: feed.topic,
+              publishedAt: item.publishedAt,
+              status: "PUBLISHED" as const,
+            })),
+            skipDuplicates: true,
+          });
+          result.inserted += count;
         }
-        // eslint-disable-next-line no-await-in-loop
-        await db.newsItem.create({
-          data: {
-            guid: item.guid,
-            title: item.title,
-            summary: item.summary,
-            imageUrl: item.imageUrl,
-            link: item.link,
-            source: feed.name,
-            topic: feed.topic,
-            publishedAt: item.publishedAt,
-            status: "PUBLISHED",
-          },
-        });
-        result.inserted += 1;
-      }
 
-      // eslint-disable-next-line no-await-in-loop
-      await db.newsFeed.update({
-        where: { id: feed.id },
-        data: { lastFetchedAt: new Date() },
-      });
-    } catch (error) {
-      result.failed.push(`${feed.name}: ${(error as Error).message}`);
-    }
-  }
+        await db.newsFeed.update({
+          where: { id: feed.id },
+          data: { lastFetchedAt: new Date() },
+        });
+      } catch (error) {
+        result.failed.push(`${feed.name}: ${(error as Error).message}`);
+      }
+    }),
+  );
 
   const purged = await purgeOldNews();
 
@@ -238,8 +240,9 @@ export async function purgeOldNews() {
 }
 
 /**
- * Keeps the news list fresh on Vercel Hobby, where scheduled crons may only run daily:
- * the first visitor after the staleness window triggers an ingest.
+ * Crawls only when the oldest feed has passed the staleness window. Called by
+ * the half-hourly cron — never from a page, since a visitor should not wait for
+ * nine publishers to answer.
  */
 export async function ingestIfStale(maxAgeMinutes = 30) {
   await ensureDefaultFeeds();

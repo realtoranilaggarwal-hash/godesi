@@ -6,6 +6,7 @@ import { ELITE_BADGES, showsContact } from "@/lib/elite";
 import { whatsappLink } from "@/lib/format";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { videoEmbedUrl } from "@/lib/video";
+import { thumbImage } from "@/lib/proxyImage";
 
 /** Featured entries lead with their video, Basic entries stay small and quiet. */
 export function EliteCard({
@@ -34,7 +35,7 @@ export function EliteCard({
       <div className="flex items-start gap-3 pt-2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={entry.photoUrl ?? "/placeholder-logo.svg"}
+          src={entry.photoUrl ? thumbImage(entry.photoUrl, 384) : "/placeholder-logo.svg"}
           alt=""
           className={`${
             size === "large" ? "h-16 w-16" : size === "small" ? "h-10 w-10" : "h-12 w-12"

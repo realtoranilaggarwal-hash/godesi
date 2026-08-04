@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidateDirectory } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -52,5 +53,6 @@ export async function verifyEmailOtpAction(
   }
 
   revalidatePath("/dashboard");
+  invalidateDirectory();
   redirect("/dashboard?verified=1");
 }

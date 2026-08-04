@@ -5,6 +5,7 @@ import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
 import { StaffEditLink } from "@/components/StaffEditLink";
+import { thumbImage } from "@/lib/proxyImage";
 
 export type EventListItem = {
   id: string;
@@ -50,7 +51,7 @@ export function EventCard({
       {event.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={event.imageUrl}
+          src={thumbImage(event.imageUrl, 640)}
           alt={event.title}
           className={`${posterHeight} w-full object-cover`}
           loading="lazy"

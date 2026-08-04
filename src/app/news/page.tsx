@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { can, getCurrentUser } from "@/lib/auth";
-import { ingestIfStale } from "@/lib/news";
 import { NewsCard } from "@/components/NewsCard";
 import { NewsForm } from "@/components/forms/NewsForm";
 import {
@@ -49,9 +48,6 @@ export default async function NewsPage({
       }
     : {};
   const isNewsStaff = user ? can(user, "news") : false;
-
-  // Refreshes the feed if the last crawl is older than 30 minutes.
-  await ingestIfStale(30).catch(() => null);
 
   /**
    * Wire feeds publish dozens of stories an hour and would bury the community's

@@ -1,5 +1,6 @@
 import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { planRank } from "@/lib/plans";
 
 export type BusinessListItem = {
@@ -90,7 +91,24 @@ export type SearchFilters = {
   sort?: "ranked" | "recent";
 };
 
+/**
+ * Directory pages ask for the same handful of filter combinations all day, and
+ * this query joins reviews, media and both category tables, so the result is
+ * held briefly instead of being rebuilt for every visitor.
+ */
 export async function searchBusinesses(
+  filters: SearchFilters = {},
+): Promise<BusinessListItem[]> {
+  return cachedSearch(filters);
+}
+
+const cachedSearch = cachedQuery(
+  "business-search",
+  CONTENT_TTL,
+  runSearchBusinesses,
+);
+
+async function runSearchBusinesses(
   filters: SearchFilters = {},
 ): Promise<BusinessListItem[]> {
   const {

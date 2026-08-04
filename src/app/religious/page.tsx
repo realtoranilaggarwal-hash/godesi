@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { gradientFor } from "@/lib/categories";
 import { formatFestivalDate, upcomingFestivals } from "@/lib/festivals";
 import { formatEventDate } from "@/lib/events";
-import { ingestIfStale } from "@/lib/news";
 import {
   FAITHS,
   FAITH_ICONS,
@@ -31,8 +30,6 @@ export default async function ReligiousPage({
 }: {
   searchParams: WorshipFilters;
 }) {
-  await ingestIfStale(60).catch(() => null);
-
   const [places, events, news] = await Promise.all([
     db.worshipPlace.findMany({
       where: worshipWhere(searchParams),

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { SOCIAL_TAG, socialWallPosts } from "@/lib/social";
 
 export type WallItem = {
@@ -23,7 +24,26 @@ const TAKE_PER_SOURCE = 8;
  * events, member news reports) blended with the posts staff pinned from other
  * networks. Nothing is scraped — external cards are curated links.
  */
+/**
+ * The rail renders this on most pages and it reads six tables, so the result is
+ * held for a minute. Dates survive the cache as strings, hence the revival.
+ */
 export async function wallItems(limit = 24): Promise<WallItem[]> {
+  const rows = await cachedWall(limit);
+  return rows.map((row) => ({ ...row, at: new Date(row.at) }));
+}
+
+const cachedWall = cachedQuery(
+  "wall-items",
+  CONTENT_TTL,
+  async (limit: number) =>
+    (await buildWallItems(limit)).map((item) => ({
+      ...item,
+      at: item.at.toISOString(),
+    })),
+);
+
+async function buildWallItems(limit = 24): Promise<WallItem[]> {
   const [members, businesses, listings, events, reports, social] =
     await Promise.all([
       db.user.findMany({

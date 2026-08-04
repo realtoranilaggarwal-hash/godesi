@@ -115,6 +115,8 @@ export async function SiteHeader() {
               alt="Godesi"
               width={1355}
               height={400}
+              // Without this the optimizer was asked for a 3840px copy of a 120px logo.
+              sizes="122px"
               priority
               className="h-8 w-auto sm:h-9"
             />

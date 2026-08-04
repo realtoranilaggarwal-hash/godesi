@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { wallItems, WALL_TAG, type WallItem } from "@/lib/wall";
 import { shortTime } from "@/lib/social";
+import { thumbImage } from "@/lib/proxyImage";
 
 const KIND_TONE: Record<WallItem["kind"], string> = {
   member: "bg-fuchsia-100 text-fuchsia-700",
@@ -18,7 +19,7 @@ export function WallCard({ item }: { item: WallItem }) {
         {item.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={item.avatarUrl}
+            src={thumbImage(item.avatarUrl, 384)}
             alt=""
             loading="lazy"
             className="h-7 w-7 shrink-0 rounded-full object-cover"
@@ -44,7 +45,7 @@ export function WallCard({ item }: { item: WallItem }) {
       {item.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={item.imageUrl}
+          src={thumbImage(item.imageUrl, 384)}
           alt=""
           loading="lazy"
           className="mt-2 h-24 w-full rounded-lg object-cover"

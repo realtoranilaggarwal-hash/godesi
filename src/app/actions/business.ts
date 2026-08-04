@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidateDirectory } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -453,6 +454,7 @@ export async function saveBusinessProfileAction(
   }
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
+  invalidateDirectory();
   if (staffEdit) redirect(`/b/${slug}?saved=1`);
   // A first listing lands on a free confirmation, not on the price list.
   redirect(isNew ? "/dashboard?business=new" : "/dashboard?saved=1");

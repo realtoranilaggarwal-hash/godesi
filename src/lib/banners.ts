@@ -1,5 +1,7 @@
+import { cache } from "react";
 import type { BannerSlot } from "@prisma/client";
 import { db } from "@/lib/db";
+import { cachedQuery } from "@/lib/cache";
 import { AD_PLACEMENTS } from "@/lib/ads";
 
 /** Sidebar rail holds 10 fixed 300x250 slots; the header holds 1; 4 skyscrapers. */
@@ -23,6 +25,37 @@ type RotatingBanner = {
   impressions: number;
   impressionCap: number | null;
 };
+
+/**
+ * A page with the rail asked the database once per slot, per view. The whole
+ * live inventory is small, so it is fetched in one cached query and each slot is
+ * filtered in memory; rotation still runs per request, so ads keep taking turns.
+ */
+const liveInventory = cachedQuery("banners-live", 30, async () => {
+  const now = new Date();
+  return db.banner.findMany({
+    where: {
+      active: true,
+      status: "ACTIVE",
+      AND: [
+        { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+        { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
+      ],
+    },
+    orderBy: { position: "asc" },
+    select: {
+      id: true,
+      slot: true,
+      title: true,
+      imageUrl: true,
+      linkUrl: true,
+      impressions: true,
+      impressionCap: true,
+    },
+  });
+});
+
+const inventory = cache(async () => liveInventory());
 
 /**
  * Picks which of the eligible creatives to show. Banners shown least so far get
@@ -70,53 +103,19 @@ function rotate(banners: RotatingBanner[], take: number) {
  * slots is fine — the extras rotate in on later page views.
  */
 export async function activeBanners(slot: BannerSlot, limit?: number) {
-  const now = new Date();
-
-  const eligible = await db.banner.findMany({
-    where: {
-      slot,
-      active: true,
-      status: "ACTIVE",
-      AND: [
-        { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-        { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
-      ],
-    },
-    orderBy: { position: "asc" },
-    select: {
-      id: true,
-      title: true,
-      imageUrl: true,
-      linkUrl: true,
-      impressions: true,
-      impressionCap: true,
-    },
-  });
-
-  const withQuota = eligible.filter(
+  const eligible = (await inventory()).filter(
     (banner) =>
-      banner.impressionCap === null ||
-      banner.impressions < banner.impressionCap,
+      banner.slot === slot &&
+      (banner.impressionCap === null ||
+        banner.impressions < banner.impressionCap),
   );
 
-  return rotate(withQuota, limit ?? slotCapacity(slot));
+  return rotate(eligible, limit ?? slotCapacity(slot));
 }
 
 /** How many advertisers currently share a slot, used to show unsold inventory. */
 export async function slotSoldCount(slot: BannerSlot) {
-  const now = new Date();
-
-  return db.banner.count({
-    where: {
-      slot,
-      active: true,
-      status: "ACTIVE",
-      AND: [
-        { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-        { OR: [{ endsAt: null }, { endsAt: { gte: now } }] },
-      ],
-    },
-  });
+  return (await inventory()).filter((banner) => banner.slot === slot).length;
 }
 
 /**

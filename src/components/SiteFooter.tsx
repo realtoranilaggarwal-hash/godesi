@@ -95,6 +95,7 @@ export function SiteFooter() {
               alt="Godesi"
               width={1355}
               height={400}
+              sizes="122px"
               className="h-9 w-auto"
             />
           </Link>

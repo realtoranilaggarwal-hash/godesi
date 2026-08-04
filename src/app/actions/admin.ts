@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { invalidateDirectory } from "@/lib/cache";
 import { z } from "zod";
 import type {
   BannerSlot,
@@ -55,6 +56,7 @@ export async function setListingStatusAction(formData: FormData) {
   }
   revalidatePath("/admin");
   revalidatePath(`/b/${business.slug}`);
+  invalidateDirectory();
 }
 
 /** Verified badge — staff set it only after checking ID and licence documents. */
@@ -69,6 +71,7 @@ export async function toggleVerifiedProviderAction(formData: FormData) {
   });
   revalidatePath("/admin");
   revalidatePath(`/b/${business.slug}`);
+  invalidateDirectory();
 }
 
 /**

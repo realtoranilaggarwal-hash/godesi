@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { cachedQuery } from "@/lib/cache";
 
 export const CHAT_MAX_LENGTH = 400;
 /** Messages a member may post in a rolling minute / hour. */
@@ -34,6 +35,17 @@ export async function recentChat(
   viewerId: string | null,
   take = CHAT_PAGE_SIZE,
 ): Promise<ChatLine[]> {
+  const rows = await cachedChat(take);
+  return rows.map((row) => ({ ...row, mine: row.userId === viewerId }));
+}
+
+/**
+ * The rail shows the room on most pages, so the lines are shared between
+ * visitors for a few seconds; the live poller keeps the open room current.
+ */
+const cachedChat = cachedQuery("chat-recent", 10, readChat);
+
+async function readChat(take = CHAT_PAGE_SIZE) {
   const rows = await db.chatMessage.findMany({
     where: { hidden: false },
     orderBy: { createdAt: "desc" },
@@ -56,7 +68,7 @@ export async function recentChat(
     place: row.place,
     avatarUrl: row.user.avatarUrl,
     createdAt: row.createdAt.toISOString(),
-    mine: row.userId === viewerId,
+    userId: row.userId,
   }));
 }
 
