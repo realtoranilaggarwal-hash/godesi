@@ -113,7 +113,7 @@ export function SiteFooter() {
           </p>
 
           <div className="mt-3">
-            <TelegramJoin />
+            <TelegramJoin inline />
           </div>
           {socials.length ? (
             <div className="mt-3 flex flex-wrap gap-2">

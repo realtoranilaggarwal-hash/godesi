@@ -20,6 +20,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
@@ -444,6 +445,15 @@ export default async function BusinessProfilePage({
             {business.videoUrl ? (
               <div className="mt-3">
                 <VideoEmbed url={business.videoUrl} title={business.name} />
+              </div>
+            ) : null}
+
+            {business.albumUrl ? (
+              <div className="mt-3">
+                <PhotoAlbumGallery
+                  url={business.albumUrl}
+                  heading="Photos"
+                />
               </div>
             ) : null}
 

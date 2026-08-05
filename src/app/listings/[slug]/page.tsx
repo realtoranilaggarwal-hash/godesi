@@ -21,6 +21,7 @@ import {
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { effectivePlan } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 
@@ -127,6 +128,8 @@ export default async function ListingPage({ params }: { params: { slug: string }
         ) : null}
 
         {listing.videoUrl ? <VideoEmbed url={listing.videoUrl} title={listing.title} /> : null}
+
+        <PhotoAlbumGallery url={listing.albumUrl} heading="More photos" />
 
         <Card>
           <h2 className="mb-2 font-bold">Details</h2>

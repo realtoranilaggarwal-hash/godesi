@@ -8,6 +8,7 @@ import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { WriteHelper } from "@/components/WriteHelper";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
@@ -237,6 +238,10 @@ export function BusinessProfileForm({
           purpose="logo"
           defaultValue={business?.logoUrl ?? ""}
           hint="Square logos look best."
+        />
+        <PhotoAlbumField
+          defaultValue={business?.albumUrl ?? ""}
+          hint="Your card holds one picture. Paste a public Google Photos album link and Godesi shows a 3×3 gallery of your work that opens the full album — no upload limit, no storage cost."
         />
         <Field
           label="Video link (YouTube or Vimeo)"

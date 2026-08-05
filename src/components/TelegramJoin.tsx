@@ -4,7 +4,28 @@ import { TELEGRAM_GROUP, TELEGRAM_HANDLE } from "@/lib/site";
  * The Telegram group is where the community actually talks between visits —
  * worth an invitation on the rail and in the footer, not just a small icon.
  */
-export function TelegramJoin({ compact = false }: { compact?: boolean }) {
+export function TelegramJoin({
+  compact = false,
+  inline = false,
+}: {
+  compact?: boolean;
+  /** One-line pill for the footer, where a full card made the column tower over the others. */
+  inline?: boolean;
+}) {
+  if (inline) {
+    return (
+      <a
+        href={TELEGRAM_GROUP}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex max-w-full items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 px-3 py-1.5 text-xs font-bold text-white transition hover:brightness-110"
+      >
+        <span aria-hidden>✈️</span>
+        <span className="truncate">Join us on Telegram · {TELEGRAM_HANDLE}</span>
+      </a>
+    );
+  }
+
   return (
     <a
       href={TELEGRAM_GROUP}

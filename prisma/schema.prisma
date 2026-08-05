@@ -376,6 +376,8 @@ model Listing {
   whatsapp    String
   /// Walkthrough video pasted from YouTube or Vimeo.
   videoUrl    String?
+  /// Public Google Photos album shown as a gallery; Google hosts the photos.
+  albumUrl    String?
   status      ListingStatus     @default(APPROVED)
   featured    Boolean           @default(false)
   createdAt   DateTime          @default(now())
@@ -554,6 +556,8 @@ model Business {
   realtorUrl         String?
   /// Intro/showcase video pasted from YouTube or Vimeo.
   videoUrl           String?
+  /// Public Google Photos album shown as a gallery; Google hosts the photos.
+  albumUrl           String?
   mapsUrl            String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.

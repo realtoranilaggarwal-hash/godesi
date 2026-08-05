@@ -9,6 +9,7 @@ import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import {
   FairHousingNotice,
   RoomSharingNotice,
@@ -188,8 +189,12 @@ export function ListingForm({
               onUploaded={(url) => setImages((current) => [...current, url].slice(0, imageLimit))}
             />
           ) : (
-            <p className="text-xs text-slate-500">
-              You have reached your plan&apos;s {imageLimit} photo limit.
+            <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+              That is all {imageLimit} uploads on your plan.{" "}
+              <a href="/upgrade" target="_blank" className="font-bold underline">
+                Upgrade for 20 uploads
+              </a>{" "}
+              — or add a free Google Photos album below and show as many photos as you like.
             </p>
           )}
           {images.map((url) => (
@@ -197,6 +202,8 @@ export function ListingForm({
           ))}
         </div>
       </Field>
+
+      <PhotoAlbumField />
 
       {isProperty || isRoom ? <FairHousingNotice /> : null}
       {isRoom ? <RoomSharingNotice /> : null}

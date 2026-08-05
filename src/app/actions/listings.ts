@@ -11,6 +11,7 @@ import { isMonthly, uniqueListingSlug } from "@/lib/listings";
 import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { isAlbumLink } from "@/lib/photoAlbum";
 import { effectivePlan } from "@/lib/plans";
 import { foundingFeatureActive } from "@/lib/founding";
 import { contactDetailKind } from "@/lib/moderation";
@@ -37,6 +38,14 @@ const schema = z.object({
       (value) => !value || isSupportedVideoUrl(value),
       "Paste a YouTube or Vimeo video link",
     ),
+  albumUrl: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (value) => !value || isAlbumLink(value),
+      "Paste a Google Photos album link (photos.app.goo.gl/…)",
+    ),
 });
 
 export async function createListingAction(
@@ -59,6 +68,7 @@ export async function createListingAction(
       genderPref: formData.get("genderPref") || undefined,
       whatsapp: formData.get("whatsapp"),
       videoUrl: formData.get("videoUrl") || undefined,
+      albumUrl: formData.get("albumUrl") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -93,6 +103,7 @@ export async function createListingAction(
         genderPref: parsed.data.genderPref ?? null,
         whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
         videoUrl: parsed.data.videoUrl ?? null,
+        albumUrl: parsed.data.albumUrl ?? null,
         featured: foundingFeatureActive(user),
         ownerId: user.id,
         images: {
