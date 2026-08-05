@@ -23,6 +23,7 @@ import {
 } from "@/components/forms/EventVenueFields";
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 
 /** Suggested seat types; organisers can rename them to anything. */
 const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
@@ -216,6 +217,7 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
+        <PhotoAlbumField hint="Photos from your last event? Paste a public Google Photos album link and Godesi shows a 3×3 gallery that opens the album." />
       </div>
 
       <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">

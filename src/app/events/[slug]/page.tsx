@@ -12,6 +12,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { EventPartnerProof } from "@/components/forms/EventPartnerProof";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 import {
@@ -212,6 +213,7 @@ export default async function EventPage({
               </div>
             ) : null}
             <VideoEmbed url={event.videoUrl} title={event.title} />
+            <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
               <ShareButtons

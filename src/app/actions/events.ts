@@ -11,6 +11,7 @@ import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/eve
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { isAlbumLink } from "@/lib/photoAlbum";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
 import { rememberVenue } from "@/lib/venues";
@@ -137,6 +138,10 @@ const eventSchema = z.object({
     (value) => !value || isSupportedVideoUrl(value),
     "Paste a YouTube or Vimeo video link",
   ),
+  albumUrl: optionalUrl.refine(
+    (value) => !value || isAlbumLink(value),
+    "Paste a Google Photos album link (photos.app.goo.gl/…)",
+  ),
 });
 
 /**
@@ -199,6 +204,7 @@ export async function createEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl") ?? undefined,
       videoUrl: formData.get("videoUrl") ?? undefined,
+      albumUrl: formData.get("albumUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
     if (formData.get("acceptPayoutTerms") !== "on") {
@@ -303,6 +309,7 @@ export async function createEventAction(
         tags,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        albumUrl: parsed.data.albumUrl ?? null,
         price,
         currency: parsed.data.currency ?? requestCurrency(),
         seatsTotal,
