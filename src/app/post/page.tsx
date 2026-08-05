@@ -20,8 +20,11 @@ type PostType =
   | "professional"
   | "event"
   | "property"
+  | "marketplace"
   | "requirement"
-  | "report";
+  | "report"
+  | "worship"
+  | "connect";
 
 const TYPES: {
   id: PostType;
@@ -29,6 +32,9 @@ const TYPES: {
   icon: string;
   blurb: string;
   gradient: string;
+  /** Types with a single form skip step 2 and go straight there. */
+  href?: string;
+  cta: string;
 }[] = [
   {
     id: "business",
@@ -36,6 +42,7 @@ const TYPES: {
     icon: "🏪",
     blurb: "Shop, restaurant, agency or service company",
     gradient: "from-orange-500 to-rose-500",
+    cta: "Start",
   },
   {
     id: "professional",
@@ -43,6 +50,7 @@ const TYPES: {
     icon: "🎓",
     blurb: "Real estate agent, attorney, accountant, consultant…",
     gradient: "from-cyan-500 to-sky-500",
+    cta: "Start",
   },
   {
     id: "event",
@@ -50,6 +58,7 @@ const TYPES: {
     icon: "🎟️",
     blurb: "Mela, concert, workshop or community meet",
     gradient: "from-fuchsia-500 to-pink-500",
+    cta: "Start",
   },
   {
     id: "property",
@@ -57,6 +66,16 @@ const TYPES: {
     icon: "🏢",
     blurb: "Sell, rent or share a home or a room",
     gradient: "from-emerald-500 to-teal-500",
+    cta: "Start",
+  },
+  {
+    id: "marketplace",
+    label: "Buy & Sell",
+    icon: "🛍️",
+    blurb: "Jewellery, clothes, furniture, electronics or anything else",
+    gradient: "from-lime-500 to-emerald-600",
+    href: "/listings/new?kind=MARKETPLACE",
+    cta: "Sell something",
   },
   {
     id: "requirement",
@@ -64,6 +83,7 @@ const TYPES: {
     icon: "📋",
     blurb: "Tell vendors what you need and get quotes",
     gradient: "from-indigo-500 to-violet-500",
+    cta: "Post a requirement",
   },
   {
     id: "report",
@@ -71,6 +91,25 @@ const TYPES: {
     icon: "📰",
     blurb: "Report local news from your area as a Godesi journalist",
     gradient: "from-amber-500 to-orange-600",
+    cta: "Report news",
+  },
+  {
+    id: "worship",
+    label: "Temple / Place of worship",
+    icon: "🛕",
+    blurb: "Temple, gurudwara, mosque or church in your city",
+    gradient: "from-yellow-500 to-amber-600",
+    href: "/religious/new",
+    cta: "Add a place",
+  },
+  {
+    id: "connect",
+    label: "Connect",
+    icon: "🤝",
+    blurb: "Meet desi friends nearby — walks, chai, cricket, study groups",
+    gradient: "from-sky-500 to-indigo-600",
+    href: "/connect/new",
+    cta: "Create a profile",
   },
 ];
 
@@ -120,7 +159,7 @@ function Tile({
   return (
     <Link
       href={href}
-      className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <span
         className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r ${
@@ -132,8 +171,11 @@ function Tile({
       </span>
       <p className="mt-2 font-bold text-slate-900">{label}</p>
       {blurb ? <p className="text-sm text-slate-600">{blurb}</p> : null}
-      <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white">
-        {cta} →
+      {/* Pushed down so every card in a row ends on the same line. */}
+      <span className="mt-auto pt-3">
+        <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white">
+          {cta} →
+        </span>
       </span>
     </Link>
   );
@@ -148,7 +190,10 @@ export default async function PostPage({
 }: {
   searchParams: { type?: string; category?: string };
 }) {
-  const type = TYPES.find((item) => item.id === searchParams.type)?.id;
+  const selected = TYPES.find((item) => item.id === searchParams.type);
+  // Types with one obvious form have no second step.
+  if (selected?.href) redirect(selected.href);
+  const type = selected?.id;
   if (type === "report") redirect("/news/report");
 
   const categories = await getCategoryTree();
@@ -171,18 +216,12 @@ export default async function PostPage({
               {TYPES.map((item) => (
                 <Tile
                   key={item.id}
-                  href={`/post?type=${item.id}`}
+                  href={item.href ?? `/post?type=${item.id}`}
                   icon={item.icon}
                   label={item.label}
                   blurb={item.blurb}
                   gradient={item.gradient}
-                  cta={
-                    item.id === "requirement"
-                      ? "Post a requirement"
-                      : item.id === "report"
-                        ? "Report news"
-                        : "Start"
-                  }
+                  cta={item.cta}
                 />
               ))}
             </div>
