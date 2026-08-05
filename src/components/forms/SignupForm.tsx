@@ -21,6 +21,16 @@ export function SignupForm({
       <FormError>{state.error}</FormError>
       {next ? <input type="hidden" name="next" value={next} /> : null}
 
+      {/* Bots fill every field they find; people never see this one. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+
       <Field label="I am a">
         <select name="role" defaultValue={defaultRole} className={inputClass}>
           <option value="BUSINESS">

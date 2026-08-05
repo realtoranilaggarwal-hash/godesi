@@ -51,7 +51,9 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     const { payload } = await jwtVerify(token, secret());
     if (!payload.sub) return null;
-    return db.user.findUnique({ where: { id: payload.sub } });
+    const user = await db.user.findUnique({ where: { id: payload.sub } });
+    // A suspended account keeps its content but stops being signed in anywhere.
+    return user?.bannedAt ? null : user;
   } catch {
     return null;
   }

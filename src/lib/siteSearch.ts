@@ -199,6 +199,8 @@ export async function siteSearch(
             { specialties: { has: q } },
             { categoryRef: { name: like } },
             { subcategoryRef: { name: like } },
+            // People search for the owner's name as often as the shop name.
+            { owner: { name: like } },
           ],
         },
         orderBy: [{ featured: "desc" }, { createdAt: "desc" }],

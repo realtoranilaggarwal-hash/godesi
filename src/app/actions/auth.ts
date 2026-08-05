@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -14,6 +15,13 @@ import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
+import { canonicalEmail, screenSignup } from "@/lib/signupGuard";
+
+/** The visitor's address, as Vercel forwards it. */
+function clientIp() {
+  const forwarded = headers().get("x-forwarded-for");
+  return forwarded?.split(",")[0]?.trim() || null;
+}
 
 /** Only same-site paths may be used as a post-auth destination. */
 function safeNext(value: FormDataEntryValue | null) {
@@ -45,13 +53,21 @@ export async function signupAction(
       return { error: parsed.error.issues[0].message };
     }
     const email = parsed.data.email.toLowerCase();
-    const existing = await db.user.findUnique({ where: { email } });
-    if (existing) return { error: "An account with this email already exists." };
+    const ip = clientIp();
+    const verdict = await screenSignup({
+      name: parsed.data.name,
+      email,
+      ip,
+      trap: String(formData.get("website") ?? ""),
+    });
+    if (!verdict.ok) return { error: verdict.reason };
 
     const user = await db.user.create({
       data: {
-        name: parsed.data.name,
+        name: parsed.data.name.trim(),
         email,
+        emailCanonical: canonicalEmail(email),
+        signupIp: ip,
         role: parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS",
         passwordHash: await hashPassword(parsed.data.password),
       },
@@ -89,6 +105,12 @@ export async function loginAction(
     const user = await db.user.findUnique({ where: { email } });
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
       return { error: "Invalid email or password." };
+    }
+    if (user.bannedAt) {
+      return {
+        error:
+          "This account has been suspended. Email support if you think that is a mistake.",
+      };
     }
     await createSession(user.id);
     target =

@@ -142,13 +142,6 @@ async function runSearchBusinesses(
       ...(certifications?.length
         ? { certifications: { hasEvery: certifications } }
         : {}),
-      ...(optionGroups.length
-        ? {
-            AND: optionGroups.map((group) => ({
-              serviceOptions: { hasSome: group },
-            })),
-          }
-        : {}),
       ...(vehicle && Object.values(vehicle).some((value) => value !== undefined)
         ? {
             vehicle: {
@@ -187,6 +180,9 @@ async function runSearchBusinesses(
           }
         : {}),
       AND: [
+        ...optionGroups.map((group) => ({
+          serviceOptions: { hasSome: group },
+        })),
         ...(categorySlugs?.length
           ? [
               {
@@ -216,6 +212,12 @@ async function runSearchBusinesses(
                   },
                   {
                     subcategoryRef: {
+                      name: { contains: q, mode: "insensitive" as const },
+                    },
+                  },
+                  // People search for the person as often as the shop name.
+                  {
+                    owner: {
                       name: { contains: q, mode: "insensitive" as const },
                     },
                   },

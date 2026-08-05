@@ -32,7 +32,12 @@ export default async function LoginPage({
     <div className="flex justify-center gap-8 py-6">
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Sign in to Godesi</h1>
-        {searchParams.error === "facebook-email" ? (
+        {searchParams.error === "suspended" ? (
+          <p className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+            This account has been suspended. Email us if you think that is a
+            mistake.
+          </p>
+        ) : searchParams.error === "facebook-email" ? (
           <p className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
             Facebook did not share an email address with us, so we could not
             create your account. Please allow email on the Facebook screen, or

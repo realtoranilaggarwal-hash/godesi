@@ -170,6 +170,19 @@ model User {
 
   emailVerifiedAt DateTime?
 
+  /// Dots and +tags stripped where the provider ignores them, so one mailbox
+  /// cannot open a dozen accounts that look unrelated.
+  emailCanonical String?
+  /// Address the account was created from, used only to rate-limit signups.
+  signupIp       String?
+  /// Set by an admin to lock the account out without deleting its content.
+  bannedAt       DateTime?
+  bannedReason   String?
+  /// Private admin note about the member, never shown publicly.
+  adminNote      String?
+  /// Last time an admin emailed this member from the members desk.
+  lastContactedAt DateTime?
+
   /// 1..1000 for the first thousand members — powers the 🏅 Founding member
   /// badge and their double reward points. Null once the spots are gone.
   foundingNumber Int? @unique
@@ -293,6 +306,9 @@ model User {
 
   /// Paid for the Elite interview inside a package, before applying.
   elitePrepaid Boolean @default(false)
+
+  @@index([emailCanonical])
+  @@index([signupIp, createdAt])
 }
 
 enum ReferralStatus {

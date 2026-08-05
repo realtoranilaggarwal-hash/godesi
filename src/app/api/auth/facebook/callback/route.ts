@@ -9,6 +9,7 @@ import {
 } from "@/lib/facebookAuth";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
+import { canonicalEmail } from "@/lib/signupGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,7 @@ export async function GET(request: Request) {
     (await db.user.create({
       data: {
         email: profile.email,
+        emailCanonical: canonicalEmail(profile.email),
         name: profile.name ?? profile.email.split("@")[0],
         // Facebook accounts sign in without a password; a random hash blocks password login.
         passwordHash: await hashPassword(randomBytes(32).toString("hex")),
@@ -44,6 +46,10 @@ export async function GET(request: Request) {
         emailVerifiedAt: new Date(),
       },
     }));
+
+  if (user.bannedAt) {
+    return NextResponse.redirect(new URL("/login?error=suspended", url));
+  }
 
   if (!existing) {
     await creditReferral(user.id);

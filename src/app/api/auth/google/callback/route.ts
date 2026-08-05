@@ -6,6 +6,7 @@ import { createSession, hashPassword } from "@/lib/auth";
 import { fetchGoogleProfile, googleAuthEnabled } from "@/lib/googleAuth";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
+import { canonicalEmail } from "@/lib/signupGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +24,17 @@ export async function GET(request: Request) {
   const profile = await fetchGoogleProfile(code);
   if (!profile) return failure;
 
+  const suspended = NextResponse.redirect(
+    new URL("/login?error=suspended", url),
+  );
+
   const existing = await db.user.findUnique({ where: { email: profile.email } });
   const user =
     existing ??
     (await db.user.create({
       data: {
         email: profile.email,
+        emailCanonical: canonicalEmail(profile.email),
         name: profile.name ?? profile.email.split("@")[0],
         // Google accounts sign in without a password; a random hash blocks password login.
         passwordHash: await hashPassword(randomBytes(32).toString("hex")),
@@ -36,6 +42,8 @@ export async function GET(request: Request) {
         emailVerifiedAt: profile.emailVerified ? new Date() : null,
       },
     }));
+
+  if (user.bannedAt) return suspended;
 
   if (!existing) {
     await creditReferral(user.id);
