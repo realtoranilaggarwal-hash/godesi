@@ -52,6 +52,21 @@ export function canonicalEmail(email: string) {
   return `${local}@${domain}`;
 }
 
+/**
+ * Plenty of real people have one dot in their Gmail address. Sprinkling three
+ * or more, or adding a +tag, is how one mailbox is stretched into many
+ * accounts, so only that counts as a signal.
+ */
+export function heavilyAliased(email: string) {
+  const clean = email.trim().toLowerCase();
+  const at = clean.lastIndexOf("@");
+  if (at < 1) return false;
+  const local = clean.slice(0, at);
+  const domain = clean.slice(at + 1);
+  if (!DOTLESS_DOMAINS.has(domain)) return local.includes("+");
+  return local.includes("+") || (local.match(/\./g) ?? []).length >= 3;
+}
+
 export function isDisposableEmail(email: string) {
   const domain = email.split("@")[1] ?? "";
   return DISPOSABLE_DOMAINS.has(domain);
@@ -147,7 +162,7 @@ export function spamSignals(user: {
 }) {
   const signals: string[] = [];
   if (looksMachineGenerated(user.name)) signals.push("Random-looking name");
-  if (canonicalEmail(user.email) !== user.email.toLowerCase())
+  if (heavilyAliased(user.email))
     signals.push("Dotted or tagged alias of another address");
   if (isDisposableEmail(user.email)) signals.push("Disposable email domain");
   if (!user.emailVerifiedAt) signals.push("Email never verified");
