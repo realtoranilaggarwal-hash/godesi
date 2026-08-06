@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -132,6 +133,8 @@ export async function createListingAction(
 
     revalidatePath("/real-estate");
     revalidatePath("/rooms");
+    if (listing.status === "APPROVED")
+      pingIndexNowInBackground(`/listings/${listing.slug}`);
     destination = `/listings/${listing.slug}`;
   } catch (error) {
     return fieldError(error);

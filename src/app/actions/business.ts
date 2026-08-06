@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { invalidateDirectory } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -461,6 +462,7 @@ export async function saveBusinessProfileAction(
   }
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
+  pingIndexNowInBackground(`/b/${slug}`);
   invalidateDirectory();
   if (staffEdit) redirect(`/b/${slug}?saved=1`);
   // A first listing lands on a free confirmation, not on the price list.

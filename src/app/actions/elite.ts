@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { EliteBadge, EliteStatus } from "@prisma/client";
@@ -377,6 +378,8 @@ export async function updateEliteAction(formData: FormData) {
   revalidatePath("/admin/desi-elite");
   revalidatePath("/desi-elite");
   revalidatePath(`/desi-elite/${updated.slug}`);
+  if (updated.status === "PUBLISHED")
+    pingIndexNowInBackground(`/desi-elite/${updated.slug}`);
 }
 
 export async function deleteEliteAction(formData: FormData) {

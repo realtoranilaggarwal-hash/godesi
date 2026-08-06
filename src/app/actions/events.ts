@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -352,6 +353,7 @@ export async function createEventAction(
   }
 
   revalidatePath("/events");
+  pingIndexNowInBackground(`/events/${slug}`);
   redirect(`/events/${slug}`);
 }
 

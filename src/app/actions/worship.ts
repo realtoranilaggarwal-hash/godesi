@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -78,6 +79,8 @@ export async function submitWorshipAction(
     });
 
     revalidatePath("/religious");
+    if (place.status === "APPROVED")
+      pingIndexNowInBackground(`/religious/${place.slug}`);
     if (isAdmin) destination = `/religious/${place.slug}`;
     else {
       return {
@@ -96,10 +99,11 @@ export async function reviewWorshipAction(formData: FormData) {
 
   const id = String(formData.get("id") ?? "");
   const approve = String(formData.get("decision") ?? "") === "approve";
-  await db.worshipPlace.update({
+  const place = await db.worshipPlace.update({
     where: { id },
     data: { status: approve ? "APPROVED" : "REJECTED" },
   });
+  if (approve) pingIndexNowInBackground(`/religious/${place.slug}`);
 
   revalidatePath("/religious");
   revalidatePath("/admin");

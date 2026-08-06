@@ -4,43 +4,79 @@
  * design: it is served from /<key>.txt so the engines can verify we own the
  * domain. Google does not take IndexNow — it reads the sitemap in robots.txt.
  */
+import { db } from "@/lib/db";
+
 export const INDEXNOW_KEY = "d1c3c0ca36429eaba3ccfe190f8eea6d";
 
 const ENDPOINT = "https://api.indexnow.org/indexnow";
 const HOST = "godesi.com";
 
-/** Pushes every url in the public sitemap so fresh listings, events and news are picked up. */
-export async function submitSitemapToIndexNow() {
+/**
+ * Streams a single page the moment it is published or edited. Search engines
+ * prefer this to batching the whole sitemap: the change is indexed sooner and
+ * neither side gets a burst of traffic.
+ */
+export async function pingIndexNow(path: string) {
+  const url = path.startsWith("http") ? path : `https://${HOST}${path}`;
+  if (!url.startsWith(`https://${HOST}`)) return;
+  const endpoint = `${ENDPOINT}?url=${encodeURIComponent(url)}&key=${INDEXNOW_KEY}&keyLocation=${encodeURIComponent(
+    `https://${HOST}/${INDEXNOW_KEY}.txt`,
+  )}`;
   try {
-    const response = await fetch(`https://${HOST}/sitemap.xml`, { cache: "no-store" });
-    if (!response.ok) return { submitted: 0, status: response.status };
-    const xml = await response.text();
-    const urls = (xml.match(/<loc>[^<]+<\/loc>/g) ?? []).map((tag) =>
-      tag.replace(/<\/?loc>/g, "").trim(),
-    );
-    return submitToIndexNow(urls);
+    await fetch(endpoint, { cache: "no-store" });
   } catch {
-    return { submitted: 0, status: 0 };
+    // Indexing is best-effort; never fail the member's save because of it.
   }
 }
 
-export async function submitToIndexNow(urls: string[]) {
-  const urlList = urls.filter((url) => url.startsWith(`https://${HOST}`)).slice(0, 10_000);
-  if (!urlList.length) return { submitted: 0, status: 0 };
-
-  try {
-    const response = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "content-type": "application/json; charset=utf-8" },
-      body: JSON.stringify({
-        host: HOST,
-        key: INDEXNOW_KEY,
-        keyLocation: `https://${HOST}/${INDEXNOW_KEY}.txt`,
-        urlList,
-      }),
-    });
-    return { submitted: urlList.length, status: response.status };
-  } catch {
-    return { submitted: 0, status: 0 };
-  }
+/** Fire-and-forget variant for server actions that must not wait on the network. */
+export function pingIndexNowInBackground(path: string) {
+  void pingIndexNow(path);
 }
+
+/**
+ * Safety net for anything a publish hook missed: streams only the pages that
+ * changed since the last run, one at a time, instead of resubmitting the whole
+ * sitemap in one batch.
+ */
+export async function streamRecentChanges(since: Date) {
+  const [businesses, listings, events, worship, elite, posts] = await Promise.all([
+    db.business.findMany({
+      where: { status: "APPROVED", updatedAt: { gte: since } },
+      select: { slug: true },
+    }),
+    db.listing.findMany({
+      where: { status: "APPROVED", updatedAt: { gte: since } },
+      select: { slug: true },
+    }),
+    db.event.findMany({
+      where: { status: "APPROVED", updatedAt: { gte: since } },
+      select: { slug: true },
+    }),
+    db.worshipPlace.findMany({
+      where: { status: "APPROVED", updatedAt: { gte: since } },
+      select: { slug: true },
+    }),
+    db.eliteEntry.findMany({
+      where: { status: "PUBLISHED", updatedAt: { gte: since } },
+      select: { slug: true },
+    }),
+    db.blogPost.findMany({
+      where: { published: true, updatedAt: { gte: since } },
+      select: { slug: true },
+    }),
+  ]);
+
+  const paths = [
+    ...businesses.map((row) => `/b/${row.slug}`),
+    ...listings.map((row) => `/listings/${row.slug}`),
+    ...events.map((row) => `/events/${row.slug}`),
+    ...worship.map((row) => `/religious/${row.slug}`),
+    ...elite.map((row) => `/desi-elite/${row.slug}`),
+    ...posts.map((row) => `/blog/${row.slug}`),
+  ];
+
+  for (const path of paths) await pingIndexNow(path);
+  return { submitted: paths.length };
+}
+

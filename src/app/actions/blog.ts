@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
@@ -61,20 +62,19 @@ export async function saveBlogPostAction(
       published: parsed.data.published,
     };
 
-    if (id) {
-      await db.blogPost.update({ where: { id }, data });
-    } else {
-      await db.blogPost.create({
-        data: {
-          ...data,
-          slug: await uniqueBlogSlug(parsed.data.title),
-          authorId: user.id,
-        },
-      });
-    }
+    const post = id
+      ? await db.blogPost.update({ where: { id }, data })
+      : await db.blogPost.create({
+          data: {
+            ...data,
+            slug: await uniqueBlogSlug(parsed.data.title),
+            authorId: user.id,
+          },
+        });
 
     revalidatePath("/blog");
     revalidatePath("/admin");
+    if (post.published) pingIndexNowInBackground(`/blog/${post.slug}`);
     return { success: id ? "Post updated." : "Post published." };
   } catch (error) {
     return fieldError(error);
@@ -97,6 +97,7 @@ export async function toggleBlogPostAction(formData: FormData) {
     where: { id },
     data: { published: !post.published },
   });
+  if (!post.published) pingIndexNowInBackground(`/blog/${post.slug}`);
   revalidatePath("/blog");
   revalidatePath("/admin");
 }

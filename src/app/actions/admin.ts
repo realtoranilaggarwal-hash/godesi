@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { invalidateDirectory } from "@/lib/cache";
 import { z } from "zod";
 import type {
@@ -56,6 +57,7 @@ export async function setListingStatusAction(formData: FormData) {
   }
   revalidatePath("/admin");
   revalidatePath(`/b/${business.slug}`);
+  if (status === "APPROVED") pingIndexNowInBackground(`/b/${business.slug}`);
   invalidateDirectory();
 }
 
@@ -418,6 +420,7 @@ export async function setNewsStatusAction(formData: FormData) {
   }
   revalidatePath("/admin");
   revalidatePath("/news");
+  if (status === "PUBLISHED") pingIndexNowInBackground(`/news/${item.id}`);
 }
 
 /** Pays a bonus the first time a contributor reaches each star level. */
@@ -493,6 +496,7 @@ export async function setEventStatusAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath(`/events/${event.slug}`);
+  if (status === "APPROVED") pingIndexNowInBackground(`/events/${event.slug}`);
 }
 
 const adminEventSchema = z.object({
