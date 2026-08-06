@@ -12,7 +12,7 @@ import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Apply for GoDesi Elite — Godesi",
+  title: "Apply or nominate someone for GoDesi Elite",
   description:
     "Apply or nominate someone for GoDesi Elite: the recognition directory of desi entrepreneurs, professionals and community leaders, with interviews and video profiles.",
 };
