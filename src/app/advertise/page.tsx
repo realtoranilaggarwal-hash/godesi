@@ -26,9 +26,9 @@ import { Alert, Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Advertise on Godesi",
+  title: "Advertise to desi buyers on Godesi",
   description:
-    "Reach desi buyers across the Godesi directory with header, sidebar and skyscraper banner placements.",
+    "Reach desi buyers across the Godesi directory with billboard, leaderboard, in-content, sidebar and mobile banners — all rotating, with live view and click reporting.",
 };
 
 const ERRORS: Record<string, string> = {

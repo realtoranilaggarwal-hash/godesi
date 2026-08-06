@@ -3,8 +3,9 @@ import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Cookie policy",
-  description: "The cookies Godesi uses and how to control them.",
+  title: "Cookie policy and your choices",
+  description:
+    "The cookies Godesi uses for sign-in, preferences, analytics and advertising, what each one does, how long it lasts, and how to control or refuse them in your browser.",
 };
 
 export default function CookiesPage() {

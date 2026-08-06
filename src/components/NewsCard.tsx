@@ -43,7 +43,7 @@ function Poster({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={poster.avatarUrl}
-      alt=""
+      alt={poster.name ?? "Godesi member"}
       className="h-6 w-6 rounded-full object-cover"
       loading="lazy"
     />
@@ -170,7 +170,7 @@ export function NewsCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={proxyImage(item.imageUrl)}
-            alt=""
+            alt={item.title}
             className="h-20 w-28 shrink-0 rounded-xl object-cover"
             loading="lazy"
           />

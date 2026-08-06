@@ -3,8 +3,9 @@ import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Refund policy",
-  description: "How refunds work for memberships, event tickets and advertising.",
+  title: "Refund and cancellation policy",
+  description:
+    "How refunds work for memberships, event tickets and advertising on Godesi: what is refundable, the time limits, cancelled events, and how to request your money back.",
 };
 
 export default function RefundsPage() {

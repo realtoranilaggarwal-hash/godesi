@@ -4,8 +4,9 @@ import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Privacy policy",
-  description: "What data Godesi collects, why, and the choices you have.",
+  title: "Privacy policy — your data on Godesi",
+  description:
+    "What data Godesi collects, why we collect it, who we share it with, how long we keep it, and the choices you have over your phone number, email and listings.",
 };
 
 export default function PrivacyPage() {

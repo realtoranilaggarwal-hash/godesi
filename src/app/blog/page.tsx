@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Godesi blog — updates, guides and what's new",
   description:
-    "Product updates, community guides and everything we are building on Godesi.",
+    "Product updates, community guides and everything we are building on Godesi — how to get more enquiries, sell online and grow your desi business.",
   alternates: { canonical: "/blog", types: { "application/rss+xml": "/blog/rss.xml" } },
 };
 
@@ -99,7 +99,7 @@ export default async function BlogPage() {
                   {post.coverUrl ? (
                     <Image
                       src={post.coverUrl}
-                      alt=""
+                      alt={post.title}
                       width={160}
                       height={120}
                       className="hidden h-24 w-32 shrink-0 rounded-xl object-cover sm:block"

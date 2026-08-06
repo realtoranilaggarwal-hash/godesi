@@ -300,7 +300,7 @@ export default async function JournalistsPage() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={leader.avatarUrl}
-                      alt=""
+                      alt={leader.name ?? "Godesi journalist"}
                       className="h-8 w-8 rounded-full object-cover"
                       loading="lazy"
                     />

@@ -20,9 +20,9 @@ import { NEWS_TOPICS, topicSlug } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Desi news",
+  title: "Desi news & community headlines",
   description:
-    "Community, business and India headlines, refreshed every 30 minutes.",
+    "Community, business and India headlines for the desi diaspora, refreshed every 30 minutes from trusted sources, plus stories reported by Godesi members.",
 };
 
 export default async function NewsPage({
@@ -287,7 +287,7 @@ export default async function NewsPage({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={leader.avatarUrl}
-                      alt=""
+                      alt={leader.name ?? "Godesi member"}
                       className="h-7 w-7 rounded-full object-cover"
                       loading="lazy"
                     />

@@ -5,9 +5,9 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "All categories",
+  title: "All business categories on Godesi",
   description:
-    "Home services, education, real estate, beauty, weddings, catering, travel, religious services, jobs and more.",
+    "Browse every Godesi category: home services, education, real estate, beauty, weddings, catering, travel, health, jobs, religious services, trade and buy & sell.",
 };
 
 export default async function CategoriesPage() {

@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "About us",
+  title: "About Godesi — our story and mission",
   description:
     "Godesi is a global desi marketplace: business listings, buyer requirements, events, real estate, wedding services, temples and community news.",
 };

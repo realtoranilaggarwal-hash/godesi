@@ -7,9 +7,9 @@ import { socialLinks } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Contact us",
+  title: "Contact the Godesi team for support",
   description:
-    "Get in touch with the Godesi team about listings, ads or support.",
+    "Get in touch with the Godesi team about your listing, membership, event tickets, advertising or anything that is not working — we reply to every message.",
 };
 
 export default function ContactPage({

@@ -161,7 +161,7 @@ export default async function ReportPage({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={report.submittedBy.avatarUrl}
-                  alt=""
+                  alt={report.submittedBy.name ?? "Godesi member"}
                   className="h-7 w-7 rounded-full object-cover"
                 />
               ) : (
@@ -211,7 +211,7 @@ export default async function ReportPage({
                 <img
                   key={url}
                   src={url}
-                  alt=""
+                  alt={`Photo from the report: ${report.title}`}
                   className="w-full rounded-2xl object-cover"
                   loading="lazy"
                 />
@@ -313,7 +313,7 @@ export default async function ReportPage({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={proxyImage(item.imageUrl)}
-                      alt=""
+                      alt={item.title}
                       loading="lazy"
                       className="h-16 w-20 shrink-0 rounded-xl object-cover"
                     />

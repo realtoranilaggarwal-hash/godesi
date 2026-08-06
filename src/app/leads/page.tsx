@@ -24,9 +24,9 @@ import { InArticleAd } from "@/components/InArticleAd";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Lead marketplace",
+  title: "Lead marketplace — live buyer requirements",
   description:
-    "Live buyer requirements. Premium members unlock contact details instantly.",
+    "Live buyer requirements from desi customers: quotes for home services, catering, weddings, travel and trade. Premium members unlock contact details instantly.",
 };
 
 function budgetLabel(min: number | null, max: number | null) {

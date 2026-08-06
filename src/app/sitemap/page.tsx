@@ -6,8 +6,9 @@ import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Sitemap",
-  description: "Every section of Godesi in one page: categories, cities and pages.",
+  title: "Sitemap — every page on Godesi",
+  description:
+    "Every section of Godesi in one page: business categories, cities, events, news, rooms and property, buy & sell, temples, resources and help pages.",
 };
 
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = [

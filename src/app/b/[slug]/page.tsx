@@ -30,6 +30,7 @@ import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
+import { metaDescription } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -71,12 +72,11 @@ export async function generateMetadata({
   if (!business) return { title: "Business not found" };
 
   const title = `${business.name} — ${business.category} in ${business.city}`;
-  const description =
-    (business.description ? maskContactDetails(business.description) : null)?.slice(
-      0,
-      160,
-    ) ??
-    `${business.name} is a ${business.category} in ${business.city}. Chat on WhatsApp, see reviews and scan the QR card on Godesi.`;
+  const description = metaDescription(
+    business.description ? maskContactDetails(business.description) : null,
+    `${business.name} is a ${business.category.toLowerCase()} in ${business.city}.`,
+    "Message on WhatsApp, call, see photos, opening hours and reviews, or scan the free QR business card on Godesi.",
+  );
 
   return {
     title,

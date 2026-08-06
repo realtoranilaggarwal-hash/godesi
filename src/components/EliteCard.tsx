@@ -36,7 +36,7 @@ export function EliteCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={entry.photoUrl ? thumbImage(entry.photoUrl, 384) : "/placeholder-logo.svg"}
-          alt=""
+          alt={entry.fullName}
           className={`${
             size === "large" ? "h-16 w-16" : size === "small" ? "h-10 w-10" : "h-12 w-12"
           } shrink-0 rounded-full border border-slate-200 object-cover`}

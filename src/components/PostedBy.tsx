@@ -17,7 +17,7 @@ export function PostedBy({
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={user.avatarUrl}
-          alt=""
+          alt={user.name ?? "Godesi member"}
           className="h-7 w-7 rounded-full border border-slate-200 object-cover"
         />
       ) : (

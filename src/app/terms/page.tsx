@@ -4,8 +4,9 @@ import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Terms of service",
-  description: "The rules for listing, buying and advertising on Godesi.",
+  title: "Terms of service and marketplace rules",
+  description:
+    "The rules for listing a business, buying and selling, booking event tickets and advertising on Godesi, plus your rights, our obligations and how disputes are handled.",
 };
 
 export default function TermsPage() {

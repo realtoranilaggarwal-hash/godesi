@@ -21,6 +21,7 @@ import {
   eventModeLabel,
 } from "@/lib/eventOptions";
 import { StaffEditLink } from "@/components/StaffEditLink";
+import { metaDescription } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,11 @@ export async function generateMetadata({
   if (!event) return { title: "Event not found" };
   return {
     title: `${event.title} — ${event.city}`,
-    description: event.description.slice(0, 160),
+    description: metaDescription(
+      event.description,
+      `${event.title} at ${event.venue}, ${event.city} on ${event.startsAt.toDateString()}.`,
+      "See the line-up, ticket prices and directions, and book online on Godesi.",
+    ),
     alternates: { canonical: `${siteUrl()}/events/${event.slug}` },
     openGraph: { images: event.imageUrl ? [event.imageUrl] : undefined },
   };
@@ -315,7 +320,7 @@ export default async function EventPage({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={event.business.logoUrl || "/placeholder-logo.svg"}
-                alt=""
+                alt={`${event.business.name} logo`}
                 className="h-12 w-12 rounded-xl object-cover"
               />
               <div>

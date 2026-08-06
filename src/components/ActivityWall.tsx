@@ -20,7 +20,7 @@ export function WallCard({ item }: { item: WallItem }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbImage(item.avatarUrl, 384)}
-            alt=""
+            alt={item.title}
             loading="lazy"
             className="h-7 w-7 shrink-0 rounded-full object-cover"
           />
@@ -46,7 +46,7 @@ export function WallCard({ item }: { item: WallItem }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={thumbImage(item.imageUrl, 384)}
-          alt=""
+          alt={item.text}
           loading="lazy"
           className="mt-2 h-24 w-full rounded-lg object-cover"
         />

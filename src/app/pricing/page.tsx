@@ -25,8 +25,9 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Membership plans",
-  description: "Free, Pro and Premium plans for businesses on Godesi.",
+  title: "Membership plans and pricing",
+  description:
+    "Compare the free, Pro and Premium plans for businesses on Godesi: digital card and QR code free forever, featured placement, banner ads and unlimited lead unlocks.",
 };
 
 const ERRORS: Record<string, string> = {

@@ -14,9 +14,9 @@ import { gradientFor } from "@/lib/categories";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Businesses",
+  title: "Search desi businesses near you",
   description:
-    "Search verified small businesses by category, subcategory, city and rating on Godesi.",
+    "Search verified desi small businesses by category, subcategory, city and rating. See photos, opening hours and reviews, and message the owner on WhatsApp free.",
 };
 
 type SearchParams = {

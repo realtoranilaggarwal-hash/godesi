@@ -14,6 +14,7 @@ import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
+import { metaDescription } from "@/lib/seo";
 import { cleanSpecialties, specialtySet } from "@/lib/specialties";
 import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { VehicleFilters } from "@/components/VehicleFilters";
@@ -56,11 +57,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const category = await getCategory(params.slug);
   if (!category) return { title: "Category not found" };
+  const names = category.children.slice(0, 6).map((child) => child.name);
   return {
     title: `${category.name} in India — Godesi directory`,
-    description:
-      category.blurb ??
-      `Find trusted ${category.name.toLowerCase()} businesses near you on Godesi.`,
+    description: metaDescription(
+      category.blurb,
+      names.length ? `Browse ${names.join(", ")} and more.` : null,
+      `Find trusted ${category.name.toLowerCase()} in your city on Godesi — verified desi businesses with photos, reviews, WhatsApp chat and free enquiries.`,
+    ),
     alternates: {
       canonical: `${siteUrl()}/categories/${category.slug}`,
       types: {

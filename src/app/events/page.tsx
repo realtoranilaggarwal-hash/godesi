@@ -22,9 +22,9 @@ import {
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Events & tickets",
+  title: "Desi events & tickets near you",
   description:
-    "Melas, workshops, weddings expos, satsangs and community events near you — book tickets instantly.",
+    "Melas, garba nights, workshops, wedding expos, satsangs and community events near you — see the line-up and venue, and book tickets online in a minute.",
 };
 
 export default async function EventsPage({
