@@ -4,6 +4,7 @@ import { gradientFor } from "@/lib/categories";
 import {
   LISTING_INCLUDE,
   listingWhere,
+  marketplaceCategories,
   type ListingFilters as Filters,
   type ListingSection as Section,
 } from "@/lib/listings";
@@ -54,7 +55,7 @@ export async function ListingSectionPage({
   // rent" is invisible on /rooms — so each page also shows the other one.
   const also = CROSS_SECTION[section];
 
-  const [listings, crossListings] = await Promise.all([
+  const [listings, crossListings, categories] = await Promise.all([
     db.listing.findMany({
       where: listingWhere(section, filters),
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
@@ -69,7 +70,10 @@ export async function ListingSectionPage({
           take: 3,
         })
       : Promise.resolve([]),
+    section === "marketplace" ? marketplaceCategories() : Promise.resolve([]),
   ]);
+
+  const categoryNames = new Map(categories.map((row) => [row.slug, row.name]));
 
   return (
     <div className="flex gap-6">
@@ -86,8 +90,30 @@ export async function ListingSectionPage({
           </div>
         </section>
 
+        {categories.length ? (
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/marketplace?category=${category.slug}`}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                  filters.category === category.slug
+                    ? "border-rose-500 bg-rose-500 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-rose-300"
+                }`}
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+
         <Card>
-          <ListingFilters section={section} filters={filters} />
+          <ListingFilters
+            section={section}
+            filters={filters}
+            categories={categories}
+          />
         </Card>
 
         {listings.length ? (
@@ -97,6 +123,11 @@ export async function ListingSectionPage({
                 key={listing.id}
                 listing={listing}
                 cityBase={`/${section}`}
+                categoryName={
+                  listing.categorySlug
+                    ? categoryNames.get(listing.categorySlug)
+                    : undefined
+                }
               />
             ))}
           </div>

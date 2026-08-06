@@ -23,6 +23,7 @@ export type ListingCardItem = {
   bedrooms: number | null;
   furnishing: Furnishing | null;
   genderPref: GenderPreference | null;
+  categorySlug: string | null;
   featured: boolean;
   images: { url: string }[];
   owner: { name: string; username: string | null; avatarUrl: string | null };
@@ -31,10 +32,13 @@ export type ListingCardItem = {
 export function ListingCard({
   listing,
   cityBase = "/real-estate",
+  categoryName,
 }: {
   listing: ListingCardItem;
   /** Section the city link should filter, e.g. "/rooms" or "/marketplace". */
   cityBase?: string;
+  /** Buy & sell category label, when the section knows the taxonomy. */
+  categoryName?: string;
 }) {
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -49,7 +53,7 @@ export function ListingCard({
           />
         ) : (
           <div className="flex h-44 items-center justify-center bg-gradient-to-br from-orange-400 via-rose-500 to-fuchsia-600 text-5xl">
-            🏡
+            {listing.kind === "MARKETPLACE" ? "🛍️" : "🏡"}
           </div>
         )}
       </Link>
@@ -57,6 +61,7 @@ export function ListingCard({
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge tone="indigo">{KIND_LABELS[listing.kind]}</Badge>
+          {categoryName ? <Badge tone="green">{categoryName}</Badge> : null}
           {listing.featured ? <Badge tone="amber">Featured</Badge> : null}
           {listing.furnishing ? (
             <Badge tone="slate">{FURNISHING_LABELS[listing.furnishing]}</Badge>

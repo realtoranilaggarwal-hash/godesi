@@ -7,6 +7,7 @@ import { mediaLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
 import { requestCurrency } from "@/lib/currency";
+import { marketplaceCategories } from "@/lib/listings";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -32,10 +33,13 @@ export default async function NewListingPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/listings/new");
 
-  const business = await db.business.findUnique({
-    where: { ownerId: user.id },
-    select: { whatsappNumber: true, phone: true },
-  });
+  const [business, categories] = await Promise.all([
+    db.business.findUnique({
+      where: { ownerId: user.id },
+      select: { whatsappNumber: true, phone: true },
+    }),
+    marketplaceCategories(),
+  ]);
 
   const kind = KINDS.includes(searchParams.kind as ListingKind)
     ? (searchParams.kind as ListingKind)
@@ -46,7 +50,8 @@ export default async function NewListingPage({
       <div>
         <h1 className="text-2xl font-bold">Post a listing</h1>
         <p className="text-sm text-slate-600">
-          Property, a room to share or something to sell — it takes a minute and it is free.
+          A home to sell or rent, a room to share, or anything you want to sell —
+          jewellery, clothes, furniture, electronics. A minute, and free.
         </p>
       </div>
       <Card>
@@ -55,6 +60,7 @@ export default async function NewListingPage({
           imageLimit={mediaLimit(user)}
           defaultWhatsapp={business?.whatsappNumber ?? business?.phone ?? ""}
           defaultCurrency={requestCurrency()}
+          categories={categories}
         />
       </Card>
     </div>

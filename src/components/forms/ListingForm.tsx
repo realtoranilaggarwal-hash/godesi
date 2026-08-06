@@ -21,12 +21,10 @@ import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 
-const KINDS: ListingKind[] = [
-  "PROPERTY_SALE",
-  "PROPERTY_RENT",
-  "ROOM_OFFERED",
-  "ROOM_WANTED",
-  "MARKETPLACE",
+/** Grouped so nobody picks "for sale" expecting to sell a necklace. */
+const KIND_GROUPS: { label: string; kinds: ListingKind[] }[] = [
+  { label: "Homes & rooms", kinds: ["PROPERTY_SALE", "PROPERTY_RENT", "ROOM_OFFERED", "ROOM_WANTED"] },
+  { label: "Buy & sell", kinds: ["MARKETPLACE"] },
 ];
 
 export function ListingForm({
@@ -34,11 +32,13 @@ export function ListingForm({
   imageLimit,
   defaultWhatsapp,
   defaultCurrency,
+  categories,
 }: {
   defaultKind: ListingKind;
   imageLimit: number;
   defaultWhatsapp: string;
   defaultCurrency: string;
+  categories: { slug: string; name: string }[];
 }) {
   const [state, formAction] = useFormState(createListingAction, emptyState);
   const [kind, setKind] = useState<ListingKind>(defaultKind);
@@ -46,6 +46,7 @@ export function ListingForm({
 
   const isRoom = kind === "ROOM_OFFERED" || kind === "ROOM_WANTED";
   const isProperty = kind === "PROPERTY_SALE" || kind === "PROPERTY_RENT";
+  const isItem = kind === "MARKETPLACE";
   const monthly = isRoom || kind === "PROPERTY_RENT";
 
   return (
@@ -59,18 +60,55 @@ export function ListingForm({
           onChange={(event) => setKind(event.target.value as ListingKind)}
           className={inputClass}
         >
-          {KINDS.map((option) => (
-            <option key={option} value={option}>
-              {KIND_LABELS[option]}
-            </option>
+          {KIND_GROUPS.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.kinds.map((option) => (
+                <option key={option} value={option}>
+                  {KIND_LABELS[option]}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </Field>
 
-      <Field label="Title" hint="e.g. 2 BHK in Kothrud, close to metro">
+      {isItem ? (
+        <Field
+          label="Category"
+          hint="Buyers browse by category, so pick the closest one."
+          required
+        >
+          <select name="categorySlug" required defaultValue="" className={inputClass}>
+            <option value="" disabled>
+              Choose a category
+            </option>
+            {categories.map((category) => (
+              <option key={category.slug} value={category.slug}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
+
+      <Field
+        label="Title"
+        hint={
+          isItem
+            ? "e.g. 22ct gold jhumka earrings, worn once"
+            : "e.g. 2 BHK in Kothrud, close to metro"
+        }
+      >
         <input name="title" required minLength={6} className={inputClass} />
       </Field>
-      <Field label="Description" hint="Amenities, house rules, what's included">
+      <Field
+        label="Description"
+        hint={
+          isItem
+            ? "Condition, size, age, what's included, why you are selling"
+            : "Amenities, house rules, what's included"
+        }
+      >
         <textarea name="description" rows={5} required className={inputClass} />
         <WriteHelper
           kind="listing"
@@ -89,7 +127,7 @@ export function ListingForm({
         <Field label="City">
           <input name="city" required className={inputClass} />
         </Field>
-        <Field label="Area / locality">
+        <Field label={isItem ? "Area (optional)" : "Area / locality"}>
           <input name="area" className={inputClass} />
         </Field>
         <Field
@@ -107,7 +145,7 @@ export function ListingForm({
         <CurrencySelect defaultValue={defaultCurrency} />
         <Field
           label="Video link (YouTube or Vimeo)"
-          hint="Optional walkthrough — paste a link like https://youtu.be/abc123."
+          hint={`Optional ${isItem ? "clip of the item" : "walkthrough"} — paste a link like https://youtu.be/abc123.`}
         >
           <input
             name="videoUrl"

@@ -22,6 +22,7 @@ const NAV = [
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
+  { href: "/marketplace", label: "Buy & Sell", icon: "🛍️" },
   { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
@@ -50,6 +51,7 @@ const BAR_NAV = [
   { href: "/events", label: "Events" },
   { href: "/real-estate", label: "Property" },
   { href: "/rooms", label: "Rooms" },
+  { href: "/marketplace", label: "Buy & Sell" },
   { href: "/news", label: "News" },
 ];
 

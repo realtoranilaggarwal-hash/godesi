@@ -373,6 +373,8 @@ model Listing {
   bedrooms    Int?
   furnishing  Furnishing?
   genderPref  GenderPreference?
+  /// Buy & sell items pick a subcategory of "buy-sell" (jewellery, furniture…).
+  categorySlug String?
   whatsapp    String
   /// Walkthrough video pasted from YouTube or Vimeo.
   videoUrl    String?
@@ -390,6 +392,7 @@ model Listing {
 
   @@index([kind, city])
   @@index([kind, status, featured])
+  @@index([kind, categorySlug])
 }
 
 model ListingImage {

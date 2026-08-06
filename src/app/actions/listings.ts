@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { can, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { requestCurrency } from "@/lib/currency";
-import { isMonthly, uniqueListingSlug } from "@/lib/listings";
+import { isMonthly, marketplaceCategories, uniqueListingSlug } from "@/lib/listings";
 import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
@@ -30,6 +30,7 @@ const schema = z.object({
   bedrooms: z.coerce.number().int().min(0).max(20).optional(),
   furnishing: z.enum(["FURNISHED", "SEMI_FURNISHED", "UNFURNISHED"]).optional(),
   genderPref: z.enum(["ANY", "MALE", "FEMALE"]).optional(),
+  categorySlug: z.string().trim().optional(),
   whatsapp: z.string().min(10, "Add a WhatsApp number so people can reach you"),
   videoUrl: z
     .string()
@@ -67,11 +68,24 @@ export async function createListingAction(
       bedrooms: formData.get("bedrooms") || undefined,
       furnishing: formData.get("furnishing") || undefined,
       genderPref: formData.get("genderPref") || undefined,
+      categorySlug: formData.get("categorySlug") || undefined,
       whatsapp: formData.get("whatsapp"),
       videoUrl: formData.get("videoUrl") || undefined,
       albumUrl: formData.get("albumUrl") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    // Items live in the Buy & sell tree; anything else has no category to pick.
+    let categorySlug: string | null = null;
+    if (parsed.data.kind === "MARKETPLACE") {
+      const allowed = await marketplaceCategories();
+      categorySlug =
+        allowed.find((category) => category.slug === parsed.data.categorySlug)?.slug ??
+        null;
+      if (!categorySlug) {
+        return { error: "Pick the category your item belongs to" };
+      }
+    }
 
     if (effectivePlan(user) === "FREE") {
       const kind = contactDetailKind(parsed.data.description);
@@ -102,6 +116,7 @@ export async function createListingAction(
         bedrooms: parsed.data.bedrooms ?? null,
         furnishing: parsed.data.furnishing ?? null,
         genderPref: parsed.data.genderPref ?? null,
+        categorySlug,
         whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
         videoUrl: parsed.data.videoUrl ?? null,
         albumUrl: parsed.data.albumUrl ?? null,
@@ -133,6 +148,7 @@ export async function createListingAction(
 
     revalidatePath("/real-estate");
     revalidatePath("/rooms");
+    revalidatePath("/marketplace");
     if (listing.status === "APPROVED")
       pingIndexNowInBackground(`/listings/${listing.slug}`);
     destination = `/listings/${listing.slug}`;
@@ -153,5 +169,6 @@ export async function deleteListingAction(formData: FormData) {
   await db.listing.delete({ where: { id } });
   revalidatePath("/real-estate");
   revalidatePath("/rooms");
+  revalidatePath("/marketplace");
   revalidatePath("/dashboard/listings");
 }

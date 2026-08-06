@@ -173,6 +173,11 @@ export default async function CategoryPage({
   }).toString();
   const memberListings =
     LISTING_SECTIONS[category.parent?.slug ?? category.slug];
+  /** On a Buy & sell subcategory, show only the items sold in it. */
+  const listingCategory =
+    memberListings?.section === "marketplace" && category.parent
+      ? category.slug
+      : undefined;
   const [businesses, events, listings] = await Promise.all([
     searchBusinesses({
       categorySlugs: scope,
@@ -200,6 +205,7 @@ export default async function CategoryPage({
           where: listingWhere(memberListings.section, {
             city: searchParams.city,
             q: searchParams.q,
+            category: listingCategory,
           }),
           orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
           include: LISTING_INCLUDE,
@@ -249,6 +255,14 @@ export default async function CategoryPage({
             >
               Request a service
             </Link>
+            {memberListings?.section === "marketplace" ? (
+              <Link
+                href="/listings/new?kind=MARKETPLACE"
+                className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
+              >
+                🛍️ Sell an item
+              </Link>
+            ) : null}
           </div>
         </section>
 
@@ -480,7 +494,11 @@ export default async function CategoryPage({
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="text-lg font-bold">{memberListings.title}</h2>
               <Link
-                href={memberListings.href}
+                href={
+                  listingCategory
+                    ? `${memberListings.href}?category=${listingCategory}`
+                    : memberListings.href
+                }
                 className="text-sm font-semibold text-indigo-600 hover:underline"
               >
                 See all →

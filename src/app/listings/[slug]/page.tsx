@@ -7,6 +7,7 @@ import {
   GENDER_LABELS,
   KIND_LABELS,
   LISTING_INCLUDE,
+  marketplaceCategories,
   priceLabel,
 } from "@/lib/listings";
 import { Badge, Card } from "@/components/ui";
@@ -59,7 +60,13 @@ export default async function ListingPage({ params }: { params: { slug: string }
   if (!listing) notFound();
 
   const isRoom = listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED";
-  const sectionHref = isRoom ? "/rooms" : "/real-estate";
+  const isItem = listing.kind === "MARKETPLACE";
+  const sectionHref = isItem ? "/marketplace" : isRoom ? "/rooms" : "/real-estate";
+  const category = listing.categorySlug
+    ? (await marketplaceCategories()).find(
+        (row) => row.slug === listing.categorySlug,
+      )
+    : null;
   const description =
     listing.owner && effectivePlan(listing.owner) !== "FREE"
       ? listing.description
@@ -67,6 +74,7 @@ export default async function ListingPage({ params }: { params: { slug: string }
 
   const facts = [
     ["Type", KIND_LABELS[listing.kind]],
+    category ? ["Category", category.name] : null,
     ["Location", `${listing.area ? `${listing.area}, ` : ""}${listing.city}`],
     ["Price", priceLabel(listing)],
     listing.bedrooms ? ["Bedrooms", `${listing.bedrooms} BHK`] : null,

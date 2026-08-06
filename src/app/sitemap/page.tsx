@@ -22,6 +22,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/events", label: "Events & tickets" },
       { href: "/real-estate", label: "Real estate" },
       { href: "/rooms", label: "Rooms & roommates" },
+      { href: "/marketplace", label: "Buy & sell — desi marketplace" },
       { href: "/wedding", label: "Wedding services" },
       { href: "/religious", label: "Temples & places of worship" },
       { href: "/connect", label: "Connect — meet desis near you" },

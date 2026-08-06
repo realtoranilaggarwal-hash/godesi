@@ -1,17 +1,33 @@
 import type { Furnishing, GenderPreference, ListingKind, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { TAXONOMY_TTL, cachedQuery } from "@/lib/cache";
 import { formatMoney } from "@/lib/format";
 import { slugify } from "@/lib/slug";
 
 export type ListingSection = "real-estate" | "rooms" | "marketplace";
 
 export const KIND_LABELS: Record<ListingKind, string> = {
-  PROPERTY_SALE: "For sale",
-  PROPERTY_RENT: "For rent",
-  ROOM_WANTED: "Need a room",
-  ROOM_OFFERED: "Have a room",
-  MARKETPLACE: "Buy & sell",
+  PROPERTY_SALE: "Property for sale",
+  PROPERTY_RENT: "Property for rent",
+  ROOM_WANTED: "Looking for a room",
+  ROOM_OFFERED: "Room available",
+  MARKETPLACE: "Item for sale",
 };
+
+/** The Buy & sell tree lives under this directory category. */
+export const MARKETPLACE_ROOT = "buy-sell";
+
+/** Subcategories a seller picks from: jewellery, furniture, electronics… */
+export const marketplaceCategories = cachedQuery(
+  "marketplace-categories",
+  TAXONOMY_TTL,
+  async () =>
+    db.category.findMany({
+      where: { parentSlug: MARKETPLACE_ROOT },
+      orderBy: { sortOrder: "asc" },
+      select: { slug: true, name: true },
+    }),
+);
 
 export const FURNISHING_LABELS: Record<Furnishing, string> = {
   FURNISHED: "Furnished",
@@ -65,6 +81,7 @@ export type ListingFilters = {
   furnishing?: string;
   gender?: string;
   bedrooms?: string;
+  category?: string;
   q?: string;
 };
 
@@ -93,6 +110,7 @@ export function listingWhere(
     ...(filters.city ? { city: { contains: filters.city, mode: "insensitive" } } : {}),
     ...(max ? { price: { lte: max, gt: 0 } } : {}),
     ...(bedrooms ? { bedrooms: { gte: bedrooms } } : {}),
+    ...(filters.category ? { categorySlug: filters.category } : {}),
     ...(filters.furnishing && filters.furnishing in FURNISHING_LABELS
       ? { furnishing: filters.furnishing as Furnishing }
       : {}),
