@@ -11,10 +11,26 @@ export async function GET(request: Request) {
   const topic = NEWS_TOPICS.some((row) => row.slug === wanted) ? wanted : null;
   const city = params.get("city")?.trim() || null;
 
+  // Older stories were filed before topics existed, so a filter also matches
+  // the free-text category the reporter picked back then — same as /news.
+  const topicWhere = topic
+    ? {
+        OR: [
+          { topic },
+          {
+            category: {
+              equals: NEWS_TOPICS.find((row) => row.slug === topic)?.label,
+              mode: "insensitive" as const,
+            },
+          },
+        ],
+      }
+    : {};
+
   const items = await db.newsItem.findMany({
     where: {
       status: "PUBLISHED",
-      ...(topic ? { topic } : {}),
+      ...topicWhere,
       ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
     },
     orderBy: { publishedAt: "desc" },
