@@ -41,7 +41,7 @@ const MAIN: { href: string; label: string; note: string }[] = [
   {
     href: "/marketplace/rss.xml",
     label: "Buy & sell items",
-    note: "Add ?category=jewellery-gold for one category.",
+    note: "Add ?category=buy-sell-jewellery-and-gold for one category.",
   },
   { href: "/blog/rss.xml", label: "Godesi blog", note: "Guides and what's new." },
   {
