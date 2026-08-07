@@ -5,10 +5,11 @@ import { sendContactMessageAction } from "@/app/actions/contact";
 import { CONTACT_TOPICS } from "@/lib/contact";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
   const [state, formAction] = useFormState(
@@ -19,7 +20,6 @@ export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Your name">
@@ -61,6 +61,7 @@ export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
         />
       </Field>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Sending...">Send message</SubmitButton>
     </form>
   );

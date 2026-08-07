@@ -5,7 +5,7 @@ import { useFormState } from "react-dom";
 import type { Faith } from "@prisma/client";
 import { submitWorshipAction } from "@/app/actions/worship";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -13,6 +13,7 @@ import { FAITHS, FAITH_LABELS } from "@/lib/worship";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function WorshipForm({
   imageLimit,
@@ -29,7 +30,6 @@ export function WorshipForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Type of place">
@@ -120,6 +120,7 @@ export function WorshipForm({
         </div>
       </Field>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Submitting...">Submit for review</SubmitButton>
     </form>
   );

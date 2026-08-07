@@ -11,10 +11,11 @@ import {
   REVERSE_IMAGE_SEARCH_URL,
 } from "@/lib/journalists";
 import { REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 /** `datetime-local` wants the local clock, not the UTC ISO string. */
 function localNow() {
@@ -88,7 +89,6 @@ export function ReportForm({
   return (
     <form ref={form} action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="Title" hint="What happened, in one line">
         <input
@@ -274,6 +274,7 @@ export function ReportForm({
         </div>
       </fieldset>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Sending to the news desk…">
         Submit report
       </SubmitButton>

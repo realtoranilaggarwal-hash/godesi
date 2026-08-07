@@ -4,9 +4,9 @@ import { useFormState } from "react-dom";
 import { redeemPointsAction } from "@/app/actions/rewards";
 import { emptyState } from "@/lib/actions";
 import { REWARDS } from "@/lib/rewards";
-import { Alert } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function RedeemPanel({ balance }: { balance: number }) {
   const [state, formAction] = useFormState(redeemPointsAction, emptyState);
@@ -14,7 +14,7 @@ export function RedeemPanel({ balance }: { balance: number }) {
   return (
     <div className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <ul className="space-y-2">
         {REWARDS.map((reward) => (

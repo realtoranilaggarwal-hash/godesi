@@ -4,9 +4,10 @@ import { useFormState } from "react-dom";
 import { createReviewAction } from "@/app/actions/reviews";
 import { emptyState } from "@/lib/actions";
 import { REVIEW_CRITERIA } from "@/lib/agents";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function ReviewForm({
   businessId,
@@ -24,7 +25,6 @@ export function ReviewForm({
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="businessId" value={businessId} />
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Your name">
@@ -88,6 +88,7 @@ export function ReviewForm({
         </label>
       </div>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Posting...">Post review</SubmitButton>
     </form>
   );

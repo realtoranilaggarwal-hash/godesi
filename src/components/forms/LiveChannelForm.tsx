@@ -8,6 +8,7 @@ import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 /**
  * Members submit their own station or channel, or suggest a charity / non-profit
@@ -21,7 +22,6 @@ export function LiveChannelForm() {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="Radio or TV?">
         <select
@@ -120,6 +120,7 @@ export function LiveChannelForm() {
         </Alert>
       ) : null}
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Submitting...">
         Submit for review
       </SubmitButton>

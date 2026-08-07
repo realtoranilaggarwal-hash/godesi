@@ -4,11 +4,12 @@ import { useFormState } from "react-dom";
 import { requestWebsiteAction } from "@/app/actions/websiteOffer";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER_PAGE_PROMPTS } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function WebsiteRequestForm({
   defaultBusinessName,
@@ -26,7 +27,6 @@ export function WebsiteRequestForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Business name">
@@ -113,6 +113,7 @@ export function WebsiteRequestForm({
         <textarea name="notes" rows={3} maxLength={2000} className={inputClass} />
       </Field>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Sending...">Send my website brief</SubmitButton>
     </form>
   );

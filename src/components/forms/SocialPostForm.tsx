@@ -4,9 +4,10 @@ import { useFormState } from "react-dom";
 import { addSocialPostAction } from "@/app/actions/social";
 import { emptyState } from "@/lib/actions";
 import { SOCIAL_TAG } from "@/lib/social";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 /** Staff paste a public post link; we store a quote and link, never a copy. */
 export function SocialPostForm() {
@@ -15,7 +16,7 @@ export function SocialPostForm() {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <Field
         label="Link to the post"

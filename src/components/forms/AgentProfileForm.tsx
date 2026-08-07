@@ -6,8 +6,9 @@ import { emptyState } from "@/lib/actions";
 import { AGENT_LANGUAGES, AGENT_LICENSE_TYPES } from "@/lib/agents";
 import { ImageField } from "@/components/forms/ImageField";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type AgentProfileDefaults = {
   brokerage: string;
@@ -37,7 +38,6 @@ export function AgentProfileForm({ defaults }: { defaults: AgentProfileDefaults 
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Brokerage" hint="Company you hang your licence with">
@@ -207,6 +207,7 @@ export function AgentProfileForm({ defaults }: { defaults: AgentProfileDefaults 
         previewClassName="h-28 w-28 rounded-xl object-cover"
       />
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton>Save agent profile</SubmitButton>
     </form>
   );

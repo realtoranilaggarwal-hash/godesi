@@ -6,11 +6,12 @@ import {
   saveJournalistPhoneAction,
 } from "@/app/actions/journalist";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field } from "@/components/ui";
+import { Field } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function JournalistPhoneForm({ phone }: { phone: string | null }) {
   const [state, formAction] = useFormState(
@@ -21,7 +22,7 @@ export function JournalistPhoneForm({ phone }: { phone: string | null }) {
   return (
     <form action={formAction} className="space-y-2">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
       <Field
         label="Mobile number"
         hint={`Never shown publicly. ${DIAL_CODE_HINT}`}
@@ -39,7 +40,7 @@ export function ClaimPressCardForm({ missing }: { missing: string[] }) {
   return (
     <form action={formAction} className="space-y-2">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
       {missing.length ? (
         <ul className="space-y-1 text-sm text-slate-600">
           {missing.map((item) => (

@@ -11,6 +11,7 @@ import { emptyState } from "@/lib/actions";
 import { Alert, Card } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 /**
  * "Friends near me": one button asks the browser for the visitor's location and
@@ -67,7 +68,7 @@ export function NearMe({
 
       {error ? <Alert>{error}</Alert> : null}
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <div className="flex flex-wrap gap-2">
         <button

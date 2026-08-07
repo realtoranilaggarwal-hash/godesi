@@ -5,8 +5,9 @@ import { addAgentSaleAction } from "@/app/actions/agents";
 import { emptyState } from "@/lib/actions";
 import { SALE_SIDE_LABELS } from "@/lib/agents";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function AgentSaleForm() {
   const [state, formAction] = useFormState(addAgentSaleAction, emptyState);
@@ -14,7 +15,7 @@ export function AgentSaleForm() {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Closed on">

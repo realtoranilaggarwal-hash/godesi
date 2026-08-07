@@ -3,9 +3,10 @@
 import { useFormState } from "react-dom";
 import { confirmUpiPaymentAction } from "@/app/actions/upi";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function UpiConfirmForm({
   reference,
@@ -19,7 +20,7 @@ export function UpiConfirmForm({
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
       <input type="hidden" name="reference" value={reference} />
       <Field
         label="UPI transaction / UTR number"

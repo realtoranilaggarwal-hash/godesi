@@ -3,13 +3,14 @@
 import { useFormState } from "react-dom";
 import { adminUpdateEventAction } from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import { FormError } from "@/components/forms/FormError";
 import { EVENT_TYPES } from "@/lib/eventOptions";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type AdminEventValues = {
   id: string;
@@ -45,7 +46,6 @@ export function AdminEventForm({
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="id" value={event.id} />
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <Field label="Event title">
         <input name="title" defaultValue={event.title} required className={inputClass} />
@@ -163,6 +163,7 @@ export function AdminEventForm({
         </Field>
       </div>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton>Save event</SubmitButton>
     </form>
   );

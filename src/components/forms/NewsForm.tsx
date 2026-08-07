@@ -3,9 +3,10 @@
 import { useFormState } from "react-dom";
 import { submitNewsAction } from "@/app/actions/news";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function NewsForm({ isAdmin }: { isAdmin: boolean }) {
   const [state, formAction] = useFormState(submitNewsAction, emptyState);
@@ -13,7 +14,7 @@ export function NewsForm({ isAdmin }: { isAdmin: boolean }) {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <Field label="Headline">
         <input name="title" required className={inputClass} />

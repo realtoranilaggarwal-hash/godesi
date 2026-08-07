@@ -4,9 +4,10 @@ import { useFormState } from "react-dom";
 import { grantModeratorAction } from "@/app/actions/team";
 import { emptyState } from "@/lib/actions";
 import { STAFF_PERMISSIONS } from "@/lib/permissions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function ModeratorForm() {
   const [state, formAction] = useFormState(grantModeratorAction, emptyState);
@@ -14,7 +15,7 @@ export function ModeratorForm() {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <Field label="Member email" hint="They must have a Godesi account already">
         <input name="email" type="email" required className={inputClass} />

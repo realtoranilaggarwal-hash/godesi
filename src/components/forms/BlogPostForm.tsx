@@ -3,10 +3,11 @@
 import { useFormState } from "react-dom";
 import { saveBlogPostAction } from "@/app/actions/blog";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageField } from "@/components/forms/ImageField";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type BlogPostDraft = {
   id: string;
@@ -25,7 +26,6 @@ export function BlogPostForm({ post }: { post?: BlogPostDraft }) {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
       {post ? <input type="hidden" name="id" value={post.id} /> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -100,6 +100,7 @@ export function BlogPostForm({ post }: { post?: BlogPostDraft }) {
         Published
       </label>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton>{post ? "Save post" : "Publish post"}</SubmitButton>
     </form>
   );

@@ -5,10 +5,11 @@ import { useFormState } from "react-dom";
 import { claimBusinessAction } from "@/app/actions/claims";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 /** Shown on unowned starter listings so the real business can take them over. */
 export function ClaimBusinessForm({
@@ -38,7 +39,7 @@ export function ClaimBusinessForm({
       <input type="hidden" name="businessId" value={businessId} />
       <p className="text-sm font-semibold text-amber-900">Claim this listing</p>
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <Field label="How are you connected to this business?">
         <textarea

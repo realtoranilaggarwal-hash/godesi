@@ -3,9 +3,9 @@
 import { useFormState } from "react-dom";
 import { approveBannerAction } from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
-import { Alert } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function ApproveAdForm({ id, capacity }: { id: string; capacity: number }) {
   const [state, formAction] = useFormState(approveBannerAction, emptyState);
@@ -28,7 +28,7 @@ export function ApproveAdForm({ id, capacity }: { id: string; capacity: number }
         Approve
       </SubmitButton>
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
     </form>
   );
 }

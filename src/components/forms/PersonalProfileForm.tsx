@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useFormState } from "react-dom";
 import { savePersonalProfileAction } from "@/app/actions/profile";
 import { emptyState } from "@/lib/actions";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -14,6 +14,7 @@ import type { AlumniEntry } from "@/lib/alumni";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type PersonalProfileValues = {
   name: string;
@@ -47,7 +48,6 @@ export function PersonalProfileForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex flex-col items-center gap-2">
@@ -246,6 +246,7 @@ export function PersonalProfileForm({
         </div>
       </details>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Saving...">Save my profile</SubmitButton>
     </form>
   );

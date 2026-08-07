@@ -12,10 +12,11 @@ import {
   MEETUP_MIN_AGE,
 } from "@/lib/meetups";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type MeetupProfileDefaults = {
   displayName: string;
@@ -40,7 +41,6 @@ export function MeetupProfileForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Display name" hint="First name or nickname is fine">
@@ -197,6 +197,7 @@ export function MeetupProfileForm({
         </label>
       </fieldset>
 
+      <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Saving…">Save my Connect profile</SubmitButton>
       <p className="text-xs text-slate-500">
         Connect is for networking, community and activities. Dating or adult content is

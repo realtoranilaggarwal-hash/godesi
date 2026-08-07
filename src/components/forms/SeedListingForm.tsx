@@ -5,8 +5,9 @@ import { addSeedListingAction, importSeedListingsAction } from "@/app/actions/se
 import { emptyState } from "@/lib/actions";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { SubmitButton } from "@/components/SubmitButton";
-import { Alert, Field, inputClass } from "@/components/ui";
+import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 const CSV_TEMPLATE =
   "name,city,categorySlug,subcategorySlug,profileType,state,phone,whatsappNumber,websiteUrl,address,description";
@@ -18,7 +19,7 @@ export function SeedListingForm({ categories }: { categories: CategoryOption[] }
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Business name">
@@ -60,7 +61,7 @@ export function SeedListingImportForm() {
   return (
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
-      {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+      <FormSuccess>{state.success}</FormSuccess>
 
       <Field
         label="CSV rows"

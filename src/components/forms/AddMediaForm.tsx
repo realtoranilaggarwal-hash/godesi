@@ -8,6 +8,7 @@ import { Alert, Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { FormError } from "@/components/forms/FormError";
+import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function AddMediaForm({
   used,
@@ -43,7 +44,7 @@ export function AddMediaForm({
         </summary>
         <form action={formAction} className="mt-3 space-y-3">
           <FormError>{state.error}</FormError>
-          {state.success ? <Alert tone="success">{state.success}</Alert> : null}
+          <FormSuccess>{state.success}</FormSuccess>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Media URL">
