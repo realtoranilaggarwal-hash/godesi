@@ -50,7 +50,11 @@ export default async function AdminPage() {
     { href: "/admin/claims", label: "Business claims", count: pendingClaims },
     { href: "/admin/ads", label: "Ads to approve", count: pendingAds },
     { href: "/admin/upi", label: "UPI payments to check", count: pendingUpi },
-    { href: "/admin/news", label: "Stories to review", count: pendingNews },
+    {
+      href: "/admin/news#pending",
+      label: "Stories to review",
+      count: pendingNews,
+    },
     {
       href: "/admin/connect",
       label: "Connect profiles",
