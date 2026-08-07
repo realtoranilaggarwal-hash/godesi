@@ -23,6 +23,10 @@ export const metadata: Metadata = {
   title: "Desi news & community headlines",
   description:
     "Community, business and India headlines for the desi diaspora, refreshed every 30 minutes from trusted sources, plus stories reported by Godesi members.",
+  alternates: {
+    canonical: "/news",
+    types: { "application/rss+xml": "/news/rss.xml" },
+  },
 };
 
 export default async function NewsPage({

@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   },
   description:
     "Godesi is a multi-category desi directory: business listings with QR cards and WhatsApp chat, buyer requirements, community events with online tickets and daily news.",
+  alternates: { types: { "application/rss+xml": "/feed.xml" } },
   openGraph: {
     type: "website",
     siteName: "Godesi",

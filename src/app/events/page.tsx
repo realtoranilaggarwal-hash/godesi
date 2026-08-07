@@ -25,6 +25,10 @@ export const metadata: Metadata = {
   title: "Desi events & tickets near you",
   description:
     "Melas, garba nights, workshops, wedding expos, satsangs and community events near you — see the line-up and venue, and book tickets online in a minute.",
+  alternates: {
+    canonical: "/events",
+    types: { "application/rss+xml": "/events/rss.xml" },
+  },
 };
 
 export default async function EventsPage({

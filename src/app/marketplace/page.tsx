@@ -7,7 +7,10 @@ export const metadata: Metadata = {
   title: "Buy & sell — desi marketplace",
   description:
     "Buy and sell within the desi community: jewellery, sarees and ethnic wear, furniture, electronics, homemade food, kids' things and more. Free to post, WhatsApp the seller directly.",
-  alternates: { canonical: "/marketplace" },
+  alternates: {
+    canonical: "/marketplace",
+    types: { "application/rss+xml": "/marketplace/rss.xml" },
+  },
 };
 
 export default function MarketplacePage({

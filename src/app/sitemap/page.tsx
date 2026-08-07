@@ -78,6 +78,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/cookies", label: "Cookie policy" },
       { href: "/refunds", label: "Refund policy" },
       { href: "/sitemap.xml", label: "XML sitemap" },
+      { href: "/feeds", label: "📡 RSS feeds" },
     ],
   },
 ];

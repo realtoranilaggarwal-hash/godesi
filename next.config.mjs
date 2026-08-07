@@ -33,6 +33,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Feed readers guess these paths; the real feed is /feed.xml.
+        source: "/:path(feed|rss|rss.xml|atom.xml)",
+        destination: "/feed.xml",
+        permanent: false,
+      },
+      {
         // IT training grew into its own top-level category.
         source: "/categories/education-it-training-and-career-services",
         destination: "/categories/it-training",

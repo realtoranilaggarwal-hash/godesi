@@ -68,6 +68,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/contact", label: "Contact us" },
         { href: "/faq", label: "FAQ" },
         { href: "/sitemap", label: "Sitemap" },
+        { href: "/feeds", label: "📡 RSS feeds" },
         { href: "/report", label: "Report an issue" },
         { href: "/terms", label: "Terms of service" },
         { href: "/privacy", label: "Privacy policy" },

@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   title: "Real estate — buy, sell and rent",
   description:
     "Desi property listings: flats and plots for sale, homes for rent and trusted agents. Filter by city, budget and furnishing, then contact owners on WhatsApp.",
+  alternates: {
+    canonical: "/real-estate",
+    types: { "application/rss+xml": "/real-estate/rss.xml" },
+  },
 };
 
 export default function RealEstatePage({
