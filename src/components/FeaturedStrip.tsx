@@ -52,7 +52,8 @@ export async function FeaturedStrip({
     STRIP_SIZE,
   );
 
-  const openSlots = Math.max(STRIP_SIZE - businesses.length, 0);
+  /** One slot always stays on sale, so the offer is visible even when full. */
+  const openSlots = Math.max(STRIP_SIZE - businesses.length - 1, 0);
   const fillers = openSlots
     ? (await searchBusinesses({ categorySlugs, take: 24 }))
         .filter((row) => !businesses.some((paid) => paid.id === row.id))
