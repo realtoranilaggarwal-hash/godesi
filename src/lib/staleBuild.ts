@@ -11,20 +11,51 @@ export function isStaleBuild(error: Error & { digest?: string }) {
   return STALE.test(`${error.name} ${error.message}`);
 }
 
-/** Reloads at most once a minute, so a genuine crash still shows the message. */
+const KEY = "godesi-build-reloads";
+/** A plain reload can be answered from cache with the same broken HTML. */
+const BUSTER = "__fresh";
+
+/**
+ * Reloads past the cache, twice at most: a phone that kept the old document
+ * needs a changed URL before it asks the network for the new one.
+ */
 export function reloadOnceForBuild() {
-  const key = "godesi-reloaded-for-build";
+  let tries = 0;
   try {
-    const last = Number(sessionStorage.getItem(key) ?? 0);
-    if (Date.now() - last < 60_000) return;
-    sessionStorage.setItem(key, String(Date.now()));
+    tries = Number(sessionStorage.getItem(KEY) ?? 0);
+    sessionStorage.setItem(KEY, String(tries + 1));
   } catch {
-    // Private mode without storage: reload anyway, the browser cache is the fix.
+    // Private mode without storage: reload anyway, the cache is the problem.
   }
-  void clearCaches().finally(() => window.location.reload());
+  if (tries >= 2) return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set(BUSTER, String(Date.now()));
+  void clearCaches().finally(() => window.location.replace(url.toString()));
+}
+
+/** Drops the cache buster once the page renders, so links stay shareable. */
+export function tidyBuildBuster() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(BUSTER)) return;
+  url.searchParams.delete(BUSTER);
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    // Nothing to tidy without storage.
+  }
 }
 
 async function clearCaches() {
+  if ("serviceWorker" in navigator) {
+    try {
+      const workers = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(workers.map((worker) => worker.unregister()));
+    } catch {
+      // A blocked registration list is not worth failing the reload over.
+    }
+  }
   if (!("caches" in window)) return;
   try {
     const keys = await caches.keys();

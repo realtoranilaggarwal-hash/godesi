@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { tidyBuildBuster } from "@/lib/staleBuild";
 
 /**
  * The domain previously ran WordPress with a PWA plugin, whose service worker still
@@ -9,6 +10,8 @@ import { useEffect } from "react";
  */
 export function UnregisterServiceWorkers() {
   useEffect(() => {
+    // Rendering got this far, so a recovery reload worked: drop its marker.
+    tidyBuildBuster();
     if (!("serviceWorker" in navigator)) return;
 
     void navigator.serviceWorker.getRegistrations().then(async (registrations) => {
