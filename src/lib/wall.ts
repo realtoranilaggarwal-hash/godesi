@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
+import { optionalRead } from "@/lib/resilient";
 import { SOCIAL_TAG, socialWallPosts } from "@/lib/social";
 
 export type WallItem = {
@@ -29,7 +30,8 @@ const TAKE_PER_SOURCE = 8;
  * held for a minute. Dates survive the cache as strings, hence the revival.
  */
 export async function wallItems(limit = 24): Promise<WallItem[]> {
-  const rows = await cachedWall(limit);
+  // The wall is a sidebar decoration: an unreachable database hides it.
+  const rows = await optionalRead(() => cachedWall(limit), []);
   return rows.map((row) => ({ ...row, at: new Date(row.at) }));
 }
 
@@ -202,9 +204,7 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
     })),
   ];
 
-  return items
-    .sort((a, b) => b.at.getTime() - a.at.getTime())
-    .slice(0, limit);
+  return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
 }
 
 export const WALL_TAG = SOCIAL_TAG;

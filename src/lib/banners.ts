@@ -2,6 +2,7 @@ import { cache } from "react";
 import type { BannerSlot } from "@prisma/client";
 import { db } from "@/lib/db";
 import { cachedQuery } from "@/lib/cache";
+import { optionalRead } from "@/lib/resilient";
 import { AD_PLACEMENTS } from "@/lib/ads";
 
 /** Sidebar rail holds 10 fixed 300x250 slots; the header holds 1; 4 skyscrapers. */
@@ -55,7 +56,9 @@ const liveInventory = cachedQuery("banners-live", 30, async () => {
   });
 });
 
-const inventory = cache(async () => liveInventory());
+// Advertising decorates the page; an unreachable database means no ads, not an
+// error page.
+const inventory = cache(async () => optionalRead(() => liveInventory(), []));
 
 /**
  * Picks which of the eligible creatives to show. Banners shown least so far get
