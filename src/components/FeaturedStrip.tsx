@@ -114,7 +114,10 @@ export async function FeaturedStrip({
               }
 
               return (
-                <div key={slot.business.id} className="flex flex-col">
+                <div
+                  key={slot.business.id}
+                  className="flex flex-col [&>*:first-child]:flex-1"
+                >
                   <BusinessCard
                     business={slot.business}
                     variant={
