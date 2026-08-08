@@ -12,10 +12,13 @@ import { thumbImage } from "@/lib/proxyImage";
 export function BusinessTile({
   business,
   premium = false,
+  smallImage = false,
 }: {
   business: BusinessListItem;
   /** Adds the paid ribbon and gold frame. */
   premium?: boolean;
+  /** Shorter picture, for the free rows below the paid strip. */
+  smallImage?: boolean;
 }) {
   const image = business.coverUrl ?? business.logoUrl;
 
@@ -36,7 +39,11 @@ export function BusinessTile({
           src={image ? thumbImage(image, 384) : "/placeholder-logo.svg"}
           alt={`${business.name} — ${business.category} in ${business.city}`}
           loading="lazy"
-          className={`h-32 w-full ${image ? "object-cover" : "object-contain p-6"}`}
+          className={`w-full ${smallImage ? "h-20" : "h-32"} ${
+            image
+              ? "object-cover"
+              : `object-contain ${smallImage ? "p-3" : "p-6"}`
+          }`}
         />
       </Link>
       {premium ? (

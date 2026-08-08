@@ -14,6 +14,7 @@ import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
+import { MarketplaceTile } from "@/components/MarketplaceTile";
 import { ActivityWall } from "@/components/ActivityWall";
 
 export const dynamic = "force-dynamic";
@@ -196,7 +197,11 @@ export default async function HomePage() {
           {businesses.length ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {businesses.map((business) => (
-                <BusinessTile key={business.id} business={business} />
+                <BusinessTile
+                  key={business.id}
+                  business={business}
+                  smallImage
+                />
               ))}
             </div>
           ) : (
@@ -300,6 +305,7 @@ export default async function HomePage() {
               <>
                 <SpaSpotlight listings={spaCount} />
                 <ReferEarnTile />
+                <MarketplaceTile />
               </>
             }
             dense
