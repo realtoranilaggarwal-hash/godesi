@@ -3,7 +3,7 @@
  * place so the price and contact details are identical on every surface.
  */
 export const WEBSITE_OFFER = {
-  priceUsd: 99,
+  priceUsd: 299,
   /** Monthly charge that keeps the domain and hosting running. */
   monthlyUsd: 10,
   pages: 5,
@@ -15,7 +15,7 @@ export const WEBSITE_OFFER = {
   whatsapp: process.env.NEXT_PUBLIC_WEBSITE_OFFER_WHATSAPP ?? "17329837958",
 };
 
-/** What the $99 build covers, shown on the offer page and in the nudge. */
+/** What the build covers, shown on the offer page and in the nudge. */
 export const WEBSITE_OFFER_INCLUDES = [
   "5-page static website — Home, About, Services, Gallery, Contact",
   "Your logo, colours, photos and text laid out for mobile first",

@@ -5,6 +5,7 @@ import { socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 /** Five roughly equal columns, so no single list runs far past the others. */
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
@@ -29,7 +30,10 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/signup", label: "List your business free" },
         { href: "/why-list", label: "Why list on Godesi?" },
         { href: "/pricing", label: "Membership plans" },
-        { href: "/website", label: "Get a website for $99" },
+        {
+          href: "/website",
+          label: `Get a website for $${WEBSITE_OFFER.priceUsd}`,
+        },
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
         { href: "/advertise", label: "Advertise on Godesi" },
         { href: "/events/new", label: "Post an event" },

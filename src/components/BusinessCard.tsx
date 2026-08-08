@@ -9,17 +9,19 @@ import { thumbImage } from "@/lib/proxyImage";
 
 /**
  * `premium` frames a paid or hand-picked card with a ribbon so it reads as an
- * upgrade; `compact` trims the body so free rows sit visually below it.
+ * upgrade; `showcase` gives the same big photo without claiming the listing is
+ * paid; `compact` trims the body so free rows sit visually below it.
  */
 export function BusinessCard({
   business,
   variant = "default",
 }: {
   business: BusinessListItem;
-  variant?: "default" | "compact" | "premium";
+  variant?: "default" | "compact" | "premium" | "showcase";
 }) {
   const premium = variant === "premium";
   const compact = variant === "compact";
+  const showcase = premium || variant === "showcase";
 
   return (
     <Card
@@ -30,26 +32,55 @@ export function BusinessCard({
       }`}
     >
       {premium ? (
-        <span className="absolute -top-2.5 left-4 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white shadow">
+        <span className="absolute left-4 top-3 z-10 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white shadow">
           ⭐ Premium
         </span>
       ) : null}
-      <div className={`flex items-start gap-3 ${premium ? "pt-2" : ""}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={
-            business.logoUrl ? thumbImage(business.logoUrl, 384) : "/placeholder-logo.svg"
-          }
-          alt=""
-          className={`${
-            compact ? "h-10 w-10" : "h-12 w-12"
-          } shrink-0 rounded-xl border border-slate-200 object-cover`}
-        />
+      {showcase ? (
+        <Link
+          href={`/b/${business.slug}`}
+          className="-mx-5 -mt-5 block overflow-hidden rounded-t-2xl bg-slate-100"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={
+              business.coverUrl
+                ? thumbImage(business.coverUrl, 750)
+                : business.logoUrl
+                  ? thumbImage(business.logoUrl, 750)
+                  : "/placeholder-logo.svg"
+            }
+            alt={`${business.name} — ${business.category} in ${business.city}`}
+            className={`h-44 w-full sm:h-52 ${
+              business.coverUrl || business.logoUrl
+                ? "object-cover"
+                : "object-contain p-8"
+            }`}
+          />
+        </Link>
+      ) : null}
+      <div className={`flex items-start gap-3 ${showcase ? "pt-1" : ""}`}>
+        {showcase ? null : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={
+              business.logoUrl
+                ? thumbImage(business.logoUrl, 384)
+                : "/placeholder-logo.svg"
+            }
+            alt=""
+            className={`${
+              compact ? "h-10 w-10" : "h-12 w-12"
+            } shrink-0 rounded-xl border border-slate-200 object-cover`}
+          />
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/b/${business.slug}`}
-              className="truncate font-semibold text-slate-900 hover:text-indigo-600"
+              className={`truncate font-semibold text-slate-900 hover:text-indigo-600 ${
+                showcase ? "text-lg" : ""
+              }`}
             >
               {business.name}
             </Link>

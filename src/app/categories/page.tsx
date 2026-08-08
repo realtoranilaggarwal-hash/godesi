@@ -23,7 +23,7 @@ export default async function CategoriesPage() {
             {categories.reduce((sum, item) => sum + item.children.length, 0)} subcategories
           </p>
         </div>
-        <CategoryTiles categories={categories} counts={counts} />
+        <CategoryTiles categories={categories} counts={counts} dense />
       <InlineBanner />
       </div>
       <SidebarBanners />

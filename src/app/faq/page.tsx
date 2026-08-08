@@ -4,6 +4,7 @@ import { LegalPage } from "@/components/LegalPage";
 import { SidebarBanners } from "@/components/Banners";
 import { ShareAnchor } from "@/components/ShareAnchor";
 import { SITE } from "@/lib/site";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -39,7 +40,10 @@ const ACTIONS: { href: string; label: string }[] = [
   { href: "/dashboard/rewards", label: "🪙 Your points wallet" },
   { href: "/leaderboard", label: "🏅 Top contributors" },
   { href: "/advertise", label: "📢 Advertise on Godesi" },
-  { href: "/website", label: "🌐 Get a website for $99" },
+  {
+    href: "/website",
+    label: `🌐 Get a website for $${WEBSITE_OFFER.priceUsd}`,
+  },
   { href: "/connect", label: "🤝 Connect & meet-ups" },
   { href: "/live", label: "💬 Global chat & live visitors" },
   { href: "/alumni", label: "🎓 Find your batchmates" },

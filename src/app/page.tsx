@@ -179,7 +179,11 @@ export default async function HomePage() {
             href="/categories"
             linkLabel="All categories"
           />
-          <CategoryTiles categories={categories.slice(0, 6)} counts={counts} />
+          <CategoryTiles
+            categories={categories.slice(0, 12)}
+            counts={counts}
+            dense
+          />
         </section>
 
         <section>
@@ -293,9 +297,10 @@ export default async function HomePage() {
             linkLabel="All categories"
           />
           <CategoryTiles
-            categories={categories.slice(6)}
+            categories={categories.slice(12)}
             counts={counts}
             extra={<SpaSpotlight listings={spaCount} />}
+            dense
           />
         </section>
 

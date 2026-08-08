@@ -37,7 +37,7 @@ const row = (label: string, value?: string) =>
   value ? `<p style="margin:0 0 6px"><strong>${label}:</strong> ${escape(value)}</p>` : "";
 
 /**
- * A $99 website enquiry. Everything the build needs is collected up front and
+ * A website-offer enquiry. Everything the build needs is collected up front and
  * emailed to the Godesi desk, so nobody has to chase the owner for basics.
  */
 export async function requestWebsiteAction(
