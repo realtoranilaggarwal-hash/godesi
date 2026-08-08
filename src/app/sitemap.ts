@@ -1,22 +1,45 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
+import { cachedQuery } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = siteUrl();
+/** Crawlers refetch the sitemap constantly, and it reads every published row. */
+const SITEMAP_TTL = 3600;
+
+/** Dates are stringified by the cache, so the rows carry ISO timestamps. */
+const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
   const [businesses, categories, events] = await Promise.all([
     db.business.findMany({
       where: { status: "APPROVED" },
       select: { slug: true, updatedAt: true },
     }),
-    db.category.findMany({ where: { parentSlug: null }, select: { slug: true } }),
+    db.category.findMany({
+      where: { parentSlug: null },
+      select: { slug: true },
+    }),
     db.event.findMany({
       where: { status: "APPROVED" },
       select: { slug: true, updatedAt: true },
     }),
   ]);
+  return {
+    businesses: businesses.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+    })),
+    categories: categories.map((row) => row.slug),
+    events: events.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+    })),
+  };
+});
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const base = siteUrl();
+  const { businesses, categories, events } = await sitemapRows();
 
   return [
     { url: base, changeFrequency: "daily", priority: 1 },
@@ -37,8 +60,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/news`, changeFrequency: "hourly", priority: 0.7 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/desi-elite`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${base}/desi-elite/apply`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/desi-elite/awards`, changeFrequency: "monthly", priority: 0.6 },
+    {
+      url: `${base}/desi-elite/apply`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${base}/desi-elite/awards`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
     { url: `${base}/live-radio`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/live/submit`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/leaderboard`, changeFrequency: "daily", priority: 0.6 },
@@ -65,20 +96,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/cookies`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/refunds`, changeFrequency: "yearly", priority: 0.2 },
-    ...categories.map((category) => ({
-      url: `${base}/categories/${category.slug}`,
+    ...categories.map((slug) => ({
+      url: `${base}/categories/${slug}`,
       changeFrequency: "daily" as const,
       priority: 0.7,
     })),
     ...businesses.map((business) => ({
       url: `${base}/b/${business.slug}`,
-      lastModified: business.updatedAt,
+      lastModified: new Date(business.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
     ...events.map((event) => ({
       url: `${base}/events/${event.slug}`,
-      lastModified: event.updatedAt,
+      lastModified: new Date(event.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),

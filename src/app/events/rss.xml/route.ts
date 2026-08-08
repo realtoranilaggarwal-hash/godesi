@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { rssResponse } from "@/lib/rss";
+import { cachedFeed, rssXml } from "@/lib/rss";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +7,12 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const city = new URL(request.url).searchParams.get("city")?.trim() || null;
 
+  return cachedFeed(`events-${city?.toLowerCase() ?? "all"}`, () =>
+    build(city),
+  );
+}
+
+async function build(city: string | null) {
   const events = await db.event.findMany({
     where: {
       status: "APPROVED",
@@ -29,7 +35,7 @@ export async function GET(request: Request) {
     },
   });
 
-  return rssResponse({
+  return rssXml({
     title: city ? `Godesi events in ${city}` : "Godesi events",
     description: city
       ? `Upcoming desi community events in ${city} — festivals, concerts, workshops and meetups, with online tickets.`

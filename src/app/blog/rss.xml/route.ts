@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { blogSummary } from "@/lib/blog";
 import { siteUrl } from "@/lib/format";
+import { cachedFeed } from "@/lib/rss";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,10 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
+  return cachedFeed("blog", build);
+}
+
+async function build() {
   const base = siteUrl();
   const posts = await db.blogPost.findMany({
     where: { published: true },
@@ -42,7 +47,5 @@ ${items}
   </channel>
 </rss>`;
 
-  return new Response(xml, {
-    headers: { "content-type": "application/rss+xml; charset=utf-8" },
-  });
+  return xml;
 }

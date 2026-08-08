@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { rssResponse } from "@/lib/rss";
+import { cachedFeed, rssXml } from "@/lib/rss";
 import { NEWS_TOPICS, topicLabel, topicOf, topicSlug } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
@@ -8,9 +8,18 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const wanted = params.get("topic")?.trim().toLowerCase();
-  const topic = NEWS_TOPICS.some((row) => row.slug === wanted) ? wanted : null;
+  const topic = NEWS_TOPICS.some((row) => row.slug === wanted)
+    ? (wanted ?? null)
+    : null;
   const city = params.get("city")?.trim() || null;
 
+  return cachedFeed(
+    `news-${topic ?? "all"}-${city?.toLowerCase() ?? "all"}`,
+    () => build(topic, city),
+  );
+}
+
+async function build(topic: string | null, city: string | null) {
   // Older stories were filed before topics existed, so a filter also matches
   // the free-text category the reporter picked back then — same as /news.
   const topicWhere = topic
@@ -51,7 +60,7 @@ export async function GET(request: Request) {
     .filter(Boolean)
     .join(" in ");
 
-  return rssResponse({
+  return rssXml({
     title: scope ? `Godesi news — ${scope}` : "Godesi news",
     description: scope
       ? `The newest ${scope} stories on Godesi, reported by members and gathered from trusted sources.`

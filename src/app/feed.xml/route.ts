@@ -1,11 +1,15 @@
 import { db } from "@/lib/db";
-import { rssResponse, type RssItem } from "@/lib/rss";
+import { cachedFeed, rssXml, type RssItem } from "@/lib/rss";
 import { topicLabel, topicOf } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
 
 /** Everything new on Godesi in one feed: stories, events, blog posts, listings. */
 export async function GET() {
+  return cachedFeed("site", build);
+}
+
+async function build() {
   const [news, events, posts, listings, businesses] = await Promise.all([
     db.newsItem.findMany({
       where: { status: "PUBLISHED" },
@@ -109,7 +113,8 @@ export async function GET() {
       link: `/listings/${listing.slug}`,
       description: listing.description,
       publishedAt: listing.createdAt,
-      category: listing.kind === "MARKETPLACE" ? "Buy & sell" : "Property & rooms",
+      category:
+        listing.kind === "MARKETPLACE" ? "Buy & sell" : "Property & rooms",
     })),
     ...businesses.map((business) => ({
       title: business.name,
@@ -126,7 +131,7 @@ export async function GET() {
     })),
   ].sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-  return rssResponse({
+  return rssXml({
     title: "Godesi — news, events, businesses and listings",
     description:
       "Everything new on Godesi: community news, events with tickets, new business cards, property, rooms and buy & sell listings.",

@@ -39,7 +39,11 @@ export function tidyBuildBuster() {
   const url = new URL(window.location.href);
   if (!url.searchParams.has(BUSTER)) return;
   url.searchParams.delete(BUSTER);
-  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  window.history.replaceState(
+    null,
+    "",
+    `${url.pathname}${url.search}${url.hash}`,
+  );
   try {
     sessionStorage.removeItem(KEY);
   } catch {

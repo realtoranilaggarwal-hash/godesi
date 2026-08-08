@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { getCategory, categoryScopeSlugs } from "@/lib/directory";
 import { listingWhere, KIND_LABELS, type ListingSection } from "@/lib/listings";
-import { rssResponse, type RssItem } from "@/lib/rss";
+import { cachedFeed, rssXml, type RssItem } from "@/lib/rss";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +21,12 @@ export async function GET(
   _request: Request,
   { params }: { params: { slug: string } },
 ) {
-  const category = await getCategory(params.slug);
-  if (!category) return new Response("Not found", { status: 404 });
+  return cachedFeed(`category-${params.slug}`, () => build(params.slug));
+}
+
+async function build(slug: string) {
+  const category = await getCategory(slug);
+  if (!category) return null;
 
   const scope = categoryScopeSlugs(category);
   const section =
@@ -55,7 +59,10 @@ export async function GET(
       where: {
         status: "APPROVED",
         startsAt: { gte: new Date() },
-        OR: [{ categorySlug: { in: scope } }, { categorySlugs: { hasSome: scope } }],
+        OR: [
+          { categorySlug: { in: scope } },
+          { categorySlugs: { hasSome: scope } },
+        ],
       },
       orderBy: { startsAt: "asc" },
       take: 10,
@@ -130,7 +137,7 @@ export async function GET(
     })),
   ].sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 
-  return rssResponse({
+  return rssXml({
     title: `${category.name} on Godesi`,
     description:
       category.blurb ??

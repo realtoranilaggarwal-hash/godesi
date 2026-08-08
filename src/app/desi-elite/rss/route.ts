@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
+import { cachedFeed } from "@/lib/rss";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,10 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
+  return cachedFeed("desi-elite", build);
+}
+
+async function build() {
   const base = siteUrl();
   const entries = await db.eliteEntry.findMany({
     where: { status: "PUBLISHED" },
@@ -46,7 +51,5 @@ ${items}
   </channel>
 </rss>`;
 
-  return new Response(xml, {
-    headers: { "content-type": "application/rss+xml; charset=utf-8" },
-  });
+  return xml;
 }

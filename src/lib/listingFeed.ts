@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { KIND_LABELS, listingWhere, type ListingSection } from "@/lib/listings";
-import { rssResponse } from "@/lib/rss";
+import { cachedFeed, rssXml } from "@/lib/rss";
 
 const FEEDS: Record<
   ListingSection,
@@ -29,12 +29,25 @@ const FEEDS: Record<
 /** One RSS route body for /real-estate, /rooms and /marketplace. */
 export async function listingFeed(section: ListingSection, request: Request) {
   const params = new URL(request.url).searchParams;
+  const city = params.get("city")?.trim().toLowerCase() || null;
+  const category = params.get("category")?.trim().toLowerCase() || null;
+
+  return cachedFeed(`${section}-${city ?? "all"}-${category ?? "all"}`, () =>
+    build(section, city, category),
+  );
+}
+
+async function build(
+  section: ListingSection,
+  city: string | null,
+  category: string | null,
+) {
   const feed = FEEDS[section];
 
   const listings = await db.listing.findMany({
     where: listingWhere(section, {
-      city: params.get("city") ?? undefined,
-      category: params.get("category") ?? undefined,
+      city: city ?? undefined,
+      category: category ?? undefined,
     }),
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -50,7 +63,7 @@ export async function listingFeed(section: ListingSection, request: Request) {
     },
   });
 
-  return rssResponse({
+  return rssXml({
     title: feed.title,
     description: feed.description,
     path: feed.path,

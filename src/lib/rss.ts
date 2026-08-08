@@ -1,4 +1,5 @@
 import { siteUrl } from "@/lib/format";
+import { cachedQuery } from "@/lib/cache";
 
 export type RssItem = {
   title: string;
@@ -25,14 +26,18 @@ export function teaser(text: string, length = 400) {
 }
 
 function itemXml(item: RssItem) {
-  const url = item.link.startsWith("http") ? item.link : `${siteUrl()}${item.link}`;
+  const url = item.link.startsWith("http")
+    ? item.link
+    : `${siteUrl()}${item.link}`;
   return `    <item>
       <title>${escapeXml(item.title)}</title>
       <link>${escapeXml(url)}</link>
       <guid isPermaLink="true">${escapeXml(url)}</guid>
       <description>${escapeXml(teaser(item.description))}</description>
       <pubDate>${item.publishedAt.toUTCString()}</pubDate>${
-        item.category ? `\n      <category>${escapeXml(item.category)}</category>` : ""
+        item.category
+          ? `\n      <category>${escapeXml(item.category)}</category>`
+          : ""
       }${
         item.imageUrl
           ? `\n      <enclosure url="${escapeXml(item.imageUrl)}" type="image/jpeg" />`
@@ -41,8 +46,34 @@ function itemXml(item: RssItem) {
     </item>`;
 }
 
+/** Feeds are polled far more often than they change, and every poll used to
+ * cost the same database traffic; the finished document is held instead. */
+export const FEED_TTL = 1800;
+
+/**
+ * Serves a feed from cache, rebuilding it at most once per `FEED_TTL`. The key
+ * must carry any query filter, since a closure is invisible to the cache.
+ */
+export async function cachedFeed(
+  key: string,
+  build: () => Promise<string | null>,
+) {
+  const xml = await cachedQuery(`feed-${key}`, FEED_TTL, build)();
+  if (!xml) return new Response("Not found", { status: 404 });
+  return new Response(xml, { headers: feedHeaders() });
+}
+
+function feedHeaders() {
+  return {
+    "content-type": "application/rss+xml; charset=utf-8",
+    "cache-control":
+      "public, max-age=600, s-maxage=1800, stale-while-revalidate=86400",
+    "access-control-allow-origin": "*",
+  };
+}
+
 /** One RSS 2.0 document builder, so every Godesi feed looks the same. */
-export function rssResponse({
+export function rssXml({
   title,
   description,
   path,
@@ -55,7 +86,9 @@ export function rssResponse({
   items: RssItem[];
 }) {
   const base = siteUrl();
-  const self = path.endsWith(".xml") ? `${base}${path}` : `${base}${path}/rss.xml`;
+  const self = path.endsWith(".xml")
+    ? `${base}${path}`
+    : `${base}${path}/rss.xml`;
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
@@ -69,11 +102,10 @@ ${items.map(itemXml).join("\n")}
   </channel>
 </rss>`;
 
-  return new Response(xml, {
-    headers: {
-      "content-type": "application/rss+xml; charset=utf-8",
-      "cache-control": "public, max-age=600, s-maxage=600, stale-while-revalidate=3600",
-      "access-control-allow-origin": "*",
-    },
-  });
+  return xml;
+}
+
+/** Uncached variant, for feeds built outside a cached wrapper. */
+export function rssResponse(channel: Parameters<typeof rssXml>[0]) {
+  return new Response(rssXml(channel), { headers: feedHeaders() });
 }
