@@ -15,6 +15,8 @@ import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
 import { PostFab } from "@/components/PostFab";
 import { displayCurrency } from "@/lib/displayCurrency";
+import { LocalWeather } from "@/components/LocalWeather";
+import { greetingFor, requestGeo } from "@/lib/geo";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -79,6 +81,8 @@ export async function SiteHeader() {
     getCategoryTree(),
   ]);
   const unread = user ? await optionalRead(() => unreadCount(user.id), 0) : 0;
+  const geo = requestGeo();
+  const firstName = user ? (user.name || user.email).split(/[\s@]/)[0] : null;
 
   const categoryItems = [
     ...categories.map((category) => ({
@@ -112,6 +116,16 @@ export async function SiteHeader() {
       <PostFab signedIn={Boolean(user)} />
       <HeaderShell
         items={categoryItems}
+        topRight={
+          <>
+            {firstName ? (
+              <span className="truncate text-xs font-semibold text-white/85">
+                {greetingFor(geo.timezone)}, {firstName} 👋
+              </span>
+            ) : null}
+            <LocalWeather />
+          </>
+        }
         bar={
           <div className="relative mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
             <Link href="/" className="shrink-0" aria-label="Godesi home">

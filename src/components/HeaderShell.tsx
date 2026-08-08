@@ -12,9 +12,12 @@ import { LiveMediaLinks } from "@/components/LiveMediaButtons";
 export function HeaderShell({
   bar,
   items,
+  topRight,
 }: {
   bar: ReactNode;
   items: StripItem[];
+  /** Greeting and weather, rendered on the server and passed in. */
+  topRight?: ReactNode;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -38,12 +41,15 @@ export function HeaderShell({
       <div className="bg-gradient-to-r from-slate-900 to-indigo-900">
         <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-1 sm:px-4">
           <LiveMediaLinks />
-          <Link
-            href="/live-tv"
-            className="hidden text-xs font-semibold text-white/80 underline hover:text-white sm:block"
-          >
-            TV channels
-          </Link>
+          <div className="flex items-center gap-3">
+            {topRight}
+            <Link
+              href="/live-tv"
+              className="hidden text-xs font-semibold text-white/80 underline hover:text-white sm:block"
+            >
+              TV channels
+            </Link>
+          </div>
         </div>
       </div>
 

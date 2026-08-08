@@ -2,7 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
 import { getCategoryCounts, getCategoryTree } from "@/lib/directory";
-import { BusinessCard } from "@/components/BusinessCard";
+import { BusinessTile } from "@/components/BusinessTile";
 import { CategoryTiles } from "@/components/CategoryTiles";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
@@ -13,6 +13,7 @@ import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
+import { ReferEarnTile } from "@/components/ReferEarnTile";
 import { ActivityWall } from "@/components/ActivityWall";
 
 export const dynamic = "force-dynamic";
@@ -68,11 +69,11 @@ export default async function HomePage() {
   ] = await Promise.all([
     getCategoryTree(),
     getCategoryCounts(),
-    searchBusinesses({ take: 6, sort: "recent" }),
+    searchBusinesses({ take: 12, sort: "recent" }),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
-      take: 3,
+      take: 6,
       include: {
         category: { select: { name: true, icon: true, color: true } },
       },
@@ -193,13 +194,9 @@ export default async function HomePage() {
             linkLabel="See all"
           />
           {businesses.length ? (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {businesses.map((business) => (
-                <BusinessCard
-                  key={business.id}
-                  business={business}
-                  variant="compact"
-                />
+                <BusinessTile key={business.id} business={business} />
               ))}
             </div>
           ) : (
@@ -249,9 +246,9 @@ export default async function HomePage() {
               href="/events"
               linkLabel="All events"
             />
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {events.map((event) => (
-                <EventCard key={event.id} event={event} variant="compact" />
+                <EventCard key={event.id} event={event} variant="tile" />
               ))}
             </div>
           </section>
@@ -299,7 +296,12 @@ export default async function HomePage() {
           <CategoryTiles
             categories={categories.slice(12)}
             counts={counts}
-            extra={<SpaSpotlight listings={spaCount} />}
+            extra={
+              <>
+                <SpaSpotlight listings={spaCount} />
+                <ReferEarnTile />
+              </>
+            }
             dense
           />
         </section>
