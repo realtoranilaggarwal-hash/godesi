@@ -110,7 +110,7 @@ export default async function Page() {
       <Card id="news">
         <h2 className="mb-1 text-lg font-bold">News</h2>
         <p className="mb-3 text-sm text-slate-500">
-          The crawler runs every 30 minutes and skips duplicates. Member
+          The crawler runs once a day and skips duplicates. Member
           submissions arrive as pending.
         </p>
         <NewsFeedForm />

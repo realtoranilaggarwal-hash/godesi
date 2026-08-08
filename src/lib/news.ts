@@ -241,7 +241,7 @@ export async function purgeOldNews() {
 
 /**
  * Crawls only when the oldest feed has passed the staleness window. Called by
- * the half-hourly cron — never from a page, since a visitor should not wait for
+ * the daily cron — never from a page, since a visitor should not wait for
  * nine publishers to answer.
  */
 export async function ingestIfStale(maxAgeMinutes = 30) {

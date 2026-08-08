@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Pulls the wire feeds every half hour (see vercel.json). The news page used to
- * do this inside the visitor's request, which made it wait for nine feeds.
+ * Manual top-up between the daily pulls: ingestion runs once a day (see
+ * vercel.json), so this is only called by hand when a story cannot wait.
  */
 function authorized(request: Request) {
   const secret = process.env.CRON_SECRET;

@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Desi news & community headlines",
   description:
-    "Community, business and India headlines for the desi diaspora, refreshed every 30 minutes from trusted sources, plus stories reported by Godesi members.",
+    "Community, business and India headlines for the desi diaspora, refreshed daily from trusted sources, plus stories reported by Godesi members.",
   alternates: {
     canonical: "/news",
     types: { "application/rss+xml": "/news/rss.xml" },
@@ -142,7 +142,7 @@ export default async function NewsPage({
         >
           <h1 className="text-3xl font-black">Desi news 📰</h1>
           <p className="mt-1 max-w-xl text-white/90">
-            Headlines pulled from trusted feeds every 30 minutes, plus stories
+            Headlines pulled from trusted feeds once a day, plus stories
             submitted by our members — vote the best ones up.
           </p>
           <div className="mt-4 flex flex-wrap gap-2 text-sm font-semibold">
@@ -254,7 +254,7 @@ export default async function NewsPage({
             body={
               topic
                 ? "Be the first — file a report and pick this topic."
-                : "The news crawler runs every 30 minutes — check back shortly."
+                : "The news crawler runs once a day — check back shortly."
             }
           />
         )}
