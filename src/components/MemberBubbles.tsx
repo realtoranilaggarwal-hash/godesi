@@ -13,16 +13,16 @@ export type BubbleMember = {
 
 /** Scattered spots inside the hero so bubbles never sit on top of each other. */
 const SPOTS = [
-  { left: 8, top: 6, size: 64, delay: 0 },
-  { left: 46, top: 0, size: 52, delay: 1.4 },
-  { left: 74, top: 14, size: 72, delay: 0.6 },
-  { left: 22, top: 34, size: 84, delay: 2.1 },
-  { left: 58, top: 40, size: 60, delay: 0.9 },
-  { left: 4, top: 62, size: 56, delay: 1.8 },
-  { left: 38, top: 68, size: 72, delay: 0.3 },
-  { left: 72, top: 62, size: 52, delay: 2.6 },
-  { left: 88, top: 40, size: 44, delay: 1.1 },
-  { left: 56, top: 20, size: 40, delay: 3.1 },
+  { left: 8, top: 6, size: 48, delay: 0 },
+  { left: 46, top: 0, size: 40, delay: 1.4 },
+  { left: 74, top: 14, size: 54, delay: 0.6 },
+  { left: 22, top: 34, size: 62, delay: 2.1 },
+  { left: 58, top: 40, size: 46, delay: 0.9 },
+  { left: 4, top: 62, size: 42, delay: 1.8 },
+  { left: 38, top: 68, size: 54, delay: 0.3 },
+  { left: 72, top: 62, size: 40, delay: 2.6 },
+  { left: 88, top: 40, size: 34, delay: 1.1 },
+  { left: 56, top: 20, size: 32, delay: 3.1 },
 ];
 
 function initials(name: string) {
@@ -79,14 +79,17 @@ export function MemberBubbles({
   }, []);
 
   const bubbles = useMemo(
-    () => members.slice(0, SPOTS.length).map((member, index) => ({ member, spot: SPOTS[index] })),
+    () =>
+      members
+        .slice(0, SPOTS.length)
+        .map((member, index) => ({ member, spot: SPOTS[index] })),
     [members],
   );
 
   if (!bubbles.length) return null;
 
   return (
-    <div className="relative hidden h-72 lg:block" aria-hidden={false}>
+    <div className="relative hidden h-52 lg:block" aria-hidden={false}>
       <style>{`
         @keyframes godesi-float {
           0%, 100% { transform: translateY(0) }
@@ -104,7 +107,7 @@ export function MemberBubbles({
         const content = (
           <span
             title={`${member.name}${member.location ? ` · ${member.location}` : ""}`}
-            className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-white/25 text-sm font-black text-white shadow-lg backdrop-blur"
+            className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-white/25 text-xs font-black text-white shadow-lg backdrop-blur"
           >
             {member.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -135,7 +138,10 @@ export function MemberBubbles({
             }}
           >
             {member.username ? (
-              <Link href={`/${member.username}`} className="block h-full w-full">
+              <Link
+                href={`/${member.username}`}
+                className="block h-full w-full"
+              >
                 {content}
               </Link>
             ) : (
@@ -150,7 +156,7 @@ export function MemberBubbles({
         );
       })}
 
-      <div className="absolute bottom-0 right-0 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold text-white backdrop-blur">
+      <div className="absolute bottom-0 right-0 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold text-white backdrop-blur">
         🎉 {total.toLocaleString()} members and counting
       </div>
     </div>

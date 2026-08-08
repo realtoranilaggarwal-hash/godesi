@@ -14,7 +14,7 @@ import { freshNewsCutoff } from "@/lib/news";
 import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
-import { MarketplaceTile } from "@/components/MarketplaceTile";
+import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
 
 export const dynamic = "force-dynamic";
@@ -109,17 +109,17 @@ export default async function HomePage() {
     <div className="space-y-8">
       <HeaderBanner />
 
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-10 text-white sm:px-10 sm:py-14">
-        <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-6 text-white sm:px-8 sm:py-8">
+        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-white/80">
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
               The desi directory
             </p>
-            <h1 className="mt-2 max-w-2xl text-3xl font-black leading-tight sm:text-5xl">
+            <h1 className="mt-1 max-w-2xl text-2xl font-black leading-tight sm:text-4xl">
               Find plumbers, pandits, caterers, tutors — and book events near
               you.
             </h1>
-            <p className="mt-3 max-w-2xl text-white/90">
+            <p className="mt-2 max-w-2xl text-sm text-white/90">
               {categories.length} categories,{" "}
               {categories.reduce((s, c) => s + c.children.length, 0)}{" "}
               subcategories, verified listings, buyer requirements, community
@@ -128,32 +128,32 @@ export default async function HomePage() {
 
             <form
               action="/search"
-              className="mt-6 flex max-w-2xl flex-col gap-2 sm:flex-row"
+              className="mt-4 flex max-w-2xl flex-col gap-2 sm:flex-row"
             >
               <input
                 name="q"
                 placeholder="What do you need? e.g. electrician, mehndi artist, tiffin"
-                className="w-full rounded-xl px-4 py-3 text-sm text-slate-900 outline-none"
+                className="w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 outline-none"
                 aria-label="Search businesses"
               />
               <input
                 name="city"
                 placeholder="City"
-                className="rounded-xl px-4 py-3 text-sm text-slate-900 outline-none sm:w-40"
+                className="rounded-xl px-4 py-2.5 text-sm text-slate-900 outline-none sm:w-40"
                 aria-label="City"
               />
               <button
                 type="submit"
-                className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
               >
                 Search
               </button>
             </form>
 
-            <div className="mt-5 flex flex-wrap items-center gap-1.5">
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <Link
                 href="/add-business"
-                className="rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-900 hover:bg-slate-100"
+                className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
               >
                 Add your business free
               </Link>
@@ -161,7 +161,7 @@ export default async function HomePage() {
                 <Link
                   key={action.href}
                   href={action.href}
-                  className="rounded-full border border-white/60 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10"
+                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
                 >
                   {action.label}
                 </Link>
@@ -305,7 +305,7 @@ export default async function HomePage() {
               <>
                 <SpaSpotlight listings={spaCount} />
                 <ReferEarnTile />
-                <MarketplaceTile />
+                <WebsiteOfferTile />
               </>
             }
             dense
