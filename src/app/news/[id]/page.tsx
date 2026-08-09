@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser, can } from "@/lib/auth";
 import { levelFor } from "@/lib/journalists";
@@ -13,12 +13,13 @@ import { InArticleAd } from "@/components/InArticleAd";
 import { SocialEmbed, isEmbeddable } from "@/components/SocialEmbed";
 import { proxyImage } from "@/lib/proxyImage";
 import { siteUrl } from "@/lib/format";
+import { isOriginalReport, newsIdFromParam, newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 
-async function loadReport(id: string) {
+async function loadReport(param: string) {
   return db.newsItem.findUnique({
-    where: { id },
+    where: { id: newsIdFromParam(param) },
     include: {
       submittedBy: {
         select: { id: true, name: true, username: true, avatarUrl: true },
@@ -34,9 +35,16 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const report = await loadReport(params.id);
   if (!report) return { title: "Report not found" };
+
+  // Syndicated feed items are somebody else's article: ranking our copy of it
+  // would be duplicate content, so only our own reporting is indexed.
+  const original = isOriginalReport(report);
+
   return {
     title: report.title,
     description: report.summary,
+    alternates: original ? { canonical: newsPath(report) } : undefined,
+    robots: original ? undefined : { index: false, follow: true },
     openGraph: { images: report.imageUrl ? [report.imageUrl] : [] },
   };
 }
@@ -58,6 +66,9 @@ export default async function ReportPage({
     getCurrentUser(),
   ]);
   if (!report) notFound();
+
+  const canonical = newsPath(report);
+  if (`/news/${params.id}` !== canonical) redirect(canonical);
 
   const isStaff = user ? can(user, "news") : false;
   const isAuthor = report.submittedById === user?.id;
@@ -83,7 +94,7 @@ export default async function ReportPage({
     db.newsItem.findMany({
       where: {
         status: "PUBLISHED",
-        id: { not: params.id },
+        id: { not: report.id },
         OR: [
           { topic: report.topic },
           ...(report.city ? [{ city: report.city }] : []),
@@ -136,7 +147,9 @@ export default async function ReportPage({
               </span>
             ) : null}
             {report.happenedAt ? (
-              <span className="text-slate-500">🕒 {when(report.happenedAt)}</span>
+              <span className="text-slate-500">
+                🕒 {when(report.happenedAt)}
+              </span>
             ) : null}
           </div>
 
@@ -280,10 +293,7 @@ export default async function ReportPage({
             isAuthor={isAuthor}
           />
 
-          <ShareButtons
-            url={`${siteUrl()}/news/${report.id}`}
-            title={report.title}
-          />
+          <ShareButtons url={`${siteUrl()}${canonical}`} title={report.title} />
 
           <p className="text-xs text-slate-500">
             Godesi is not the publisher of member reports and does not witness
@@ -306,7 +316,7 @@ export default async function ReportPage({
               {related.map((item) => (
                 <Link
                   key={item.id}
-                  href={`/news/${item.id}`}
+                  href={newsPath(item)}
                   className="flex gap-3 rounded-2xl border border-slate-200 p-2 transition hover:border-indigo-300 hover:shadow-sm"
                 >
                   {item.imageUrl ? (
@@ -333,11 +343,13 @@ export default async function ReportPage({
         ) : null}
 
         <Card className="space-y-2">
-          <h2 className="text-lg font-black">📣 Seen something in your city?</h2>
+          <h2 className="text-lg font-black">
+            📣 Seen something in your city?
+          </h2>
           <p className="text-sm text-slate-700">
             Godesi runs on what the community reports — a temple event, a new
-            shop, a scam warning, a school win. Post it and your story appears on
-            Godesi and across the desi network.
+            shop, a scam warning, a school win. Post it and your story appears
+            on Godesi and across the desi network.
           </p>
           <div className="flex flex-wrap gap-2 text-sm font-bold">
             <Link

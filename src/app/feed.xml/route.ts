@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { cachedFeed, rssXml, type RssItem } from "@/lib/rss";
 import { topicLabel, topicOf } from "@/lib/newsTopics";
+import { newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ async function build() {
   const items: RssItem[] = [
     ...news.map((item) => ({
       title: item.title,
-      link: `/news/${item.id}`,
+      link: newsPath(item),
       description: item.summary,
       publishedAt: item.publishedAt,
       imageUrl: item.imageUrl,

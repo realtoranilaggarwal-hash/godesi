@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/admin";
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
 import { Badge, Card } from "@/components/ui";
+import { newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "News desk" };
@@ -47,7 +48,9 @@ export default async function Page() {
                     <p className="font-bold">{item.title}</p>
                     <p className="text-xs text-slate-500">
                       {item.submittedBy?.name ?? item.source}
-                      {item.submittedBy?.email ? ` · ${item.submittedBy.email}` : ""}
+                      {item.submittedBy?.email
+                        ? ` · ${item.submittedBy.email}`
+                        : ""}
                       {item.city ? ` · ${item.city}` : ""}
                       {item.category ? ` · ${item.category}` : ""}
                       {" · "}
@@ -88,7 +91,7 @@ export default async function Page() {
                   </div>
                 ) : null}
                 <div className="flex flex-wrap gap-3 text-xs font-semibold text-indigo-600">
-                  <a href={`/news/${item.id}`} target="_blank" rel="noreferrer">
+                  <a href={newsPath(item)} target="_blank" rel="noreferrer">
                     Preview the story →
                   </a>
                   {item.sourceUrl ? (
@@ -110,8 +113,8 @@ export default async function Page() {
       <Card id="news">
         <h2 className="mb-1 text-lg font-bold">News</h2>
         <p className="mb-3 text-sm text-slate-500">
-          The crawler runs once a day and skips duplicates. Member
-          submissions arrive as pending.
+          The crawler runs once a day and skips duplicates. Member submissions
+          arrive as pending.
         </p>
         <NewsFeedForm />
 

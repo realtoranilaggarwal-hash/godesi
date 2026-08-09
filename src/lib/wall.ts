@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { optionalRead } from "@/lib/resilient";
 import { SOCIAL_TAG, socialWallPosts } from "@/lib/social";
+import { newsPath } from "@/lib/newsLinks";
 
 export type WallItem = {
   id: string;
@@ -184,7 +185,7 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
       text: `${[report.category, report.city].filter(Boolean).join(" · ") || "Local report"} — by ${
         report.submittedBy?.name ?? "a member"
       }`,
-      href: `/news/${report.id}`,
+      href: newsPath(report),
       external: false,
       imageUrl: report.imageUrl,
       avatarUrl: report.submittedBy?.avatarUrl ?? null,

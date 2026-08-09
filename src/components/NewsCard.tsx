@@ -3,6 +3,7 @@ import { featureNewsAction, voteNewsAction } from "@/app/actions/newsVotes";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import type { JournalistLevel } from "@/lib/journalists";
 import { proxyImage } from "@/lib/proxyImage";
+import { newsPath } from "@/lib/newsLinks";
 
 export type NewsListItem = {
   id: string;
@@ -115,7 +116,9 @@ function Votes({
         <Link href="/login?next=/news" className={buttonClass(false)}>
           ▲
         </Link>
-        <span className="text-xs font-bold text-slate-600">{item.score ?? 0}</span>
+        <span className="text-xs font-bold text-slate-600">
+          {item.score ?? 0}
+        </span>
         <Link href="/login?next=/news" className={buttonClass(false)}>
           ▼
         </Link>
@@ -128,15 +131,25 @@ function Votes({
       <form action={voteNewsAction}>
         <input type="hidden" name="id" value={item.id} />
         <input type="hidden" name="value" value="1" />
-        <button type="submit" aria-label="Upvote" className={buttonClass(vote > 0)}>
+        <button
+          type="submit"
+          aria-label="Upvote"
+          className={buttonClass(vote > 0)}
+        >
           ▲
         </button>
       </form>
-      <span className="text-xs font-bold text-slate-600">{item.score ?? 0}</span>
+      <span className="text-xs font-bold text-slate-600">
+        {item.score ?? 0}
+      </span>
       <form action={voteNewsAction}>
         <input type="hidden" name="id" value={item.id} />
         <input type="hidden" name="value" value="-1" />
-        <button type="submit" aria-label="Downvote" className={buttonClass(vote < 0)}>
+        <button
+          type="submit"
+          aria-label="Downvote"
+          className={buttonClass(vote < 0)}
+        >
           ▼
         </button>
       </form>
@@ -162,10 +175,12 @@ export function NewsCard({
   return (
     <div
       className={`rounded-2xl border bg-white p-3 shadow-sm transition hover:shadow-md ${
-        item.featured ? "border-amber-300 ring-1 ring-amber-200" : "border-slate-200"
+        item.featured
+          ? "border-amber-300 ring-1 ring-amber-200"
+          : "border-slate-200"
       }`}
     >
-      <Story link={item.link}>
+      <Story link={item.link.startsWith("/") ? newsPath(item) : item.link}>
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -185,8 +200,12 @@ export function NewsCard({
               ⭐ Important
             </span>
           ) : null}
-          <h3 className="line-clamp-2 font-semibold leading-snug">{item.title}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-slate-600">{item.summary}</p>
+          <h3 className="line-clamp-2 font-semibold leading-snug">
+            {item.title}
+          </h3>
+          <p className="mt-1 line-clamp-2 text-sm text-slate-600">
+            {item.summary}
+          </p>
           <p className="mt-1 text-xs text-slate-400">
             {item.category ? (
               <span className="font-semibold text-amber-600">

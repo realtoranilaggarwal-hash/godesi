@@ -5,6 +5,7 @@
  * domain. Google does not take IndexNow — it reads the sitemap in robots.txt.
  */
 import { db } from "@/lib/db";
+import { newsPath } from "@/lib/newsLinks";
 
 export const INDEXNOW_KEY = "d1c3c0ca36429eaba3ccfe190f8eea6d";
 
@@ -40,32 +41,41 @@ export function pingIndexNowInBackground(path: string) {
  * sitemap in one batch.
  */
 export async function streamRecentChanges(since: Date) {
-  const [businesses, listings, events, worship, elite, posts] = await Promise.all([
-    db.business.findMany({
-      where: { status: "APPROVED", updatedAt: { gte: since } },
-      select: { slug: true },
-    }),
-    db.listing.findMany({
-      where: { status: "APPROVED", updatedAt: { gte: since } },
-      select: { slug: true },
-    }),
-    db.event.findMany({
-      where: { status: "APPROVED", updatedAt: { gte: since } },
-      select: { slug: true },
-    }),
-    db.worshipPlace.findMany({
-      where: { status: "APPROVED", updatedAt: { gte: since } },
-      select: { slug: true },
-    }),
-    db.eliteEntry.findMany({
-      where: { status: "PUBLISHED", updatedAt: { gte: since } },
-      select: { slug: true },
-    }),
-    db.blogPost.findMany({
-      where: { published: true, updatedAt: { gte: since } },
-      select: { slug: true },
-    }),
-  ]);
+  const [businesses, listings, events, worship, elite, posts, reports] =
+    await Promise.all([
+      db.business.findMany({
+        where: { status: "APPROVED", updatedAt: { gte: since } },
+        select: { slug: true },
+      }),
+      db.listing.findMany({
+        where: { status: "APPROVED", updatedAt: { gte: since } },
+        select: { slug: true },
+      }),
+      db.event.findMany({
+        where: { status: "APPROVED", updatedAt: { gte: since } },
+        select: { slug: true },
+      }),
+      db.worshipPlace.findMany({
+        where: { status: "APPROVED", updatedAt: { gte: since } },
+        select: { slug: true },
+      }),
+      db.eliteEntry.findMany({
+        where: { status: "PUBLISHED", updatedAt: { gte: since } },
+        select: { slug: true },
+      }),
+      db.blogPost.findMany({
+        where: { published: true, updatedAt: { gte: since } },
+        select: { slug: true },
+      }),
+      db.newsItem.findMany({
+        where: {
+          status: "PUBLISHED",
+          submittedById: { not: null },
+          publishedAt: { gte: since },
+        },
+        select: { id: true, title: true },
+      }),
+    ]);
 
   const paths = [
     ...businesses.map((row) => `/b/${row.slug}`),
@@ -74,9 +84,9 @@ export async function streamRecentChanges(since: Date) {
     ...worship.map((row) => `/religious/${row.slug}`),
     ...elite.map((row) => `/desi-elite/${row.slug}`),
     ...posts.map((row) => `/blog/${row.slug}`),
+    ...reports.map((row) => newsPath(row)),
   ];
 
   for (const path of paths) await pingIndexNow(path);
   return { submitted: paths.length };
 }
-

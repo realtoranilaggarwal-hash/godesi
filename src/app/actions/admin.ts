@@ -26,6 +26,7 @@ import {
   autoShareInBackground,
   payloadForSubject,
 } from "@/lib/autoShare";
+import { isOriginalReport, newsPath } from "@/lib/newsLinks";
 
 export async function setListingStatusAction(formData: FormData) {
   await requirePermission("listings");
@@ -413,14 +414,16 @@ export async function setNewsStatusAction(formData: FormData) {
       id: item.id,
       title: item.title,
       body: item.summary,
-      path: item.link.startsWith("/") ? item.link : `/news/${item.id}`,
+      path: newsPath(item),
       imageUrl: item.imageUrl,
       tags: [item.city ?? "", item.category ?? "news"].filter(Boolean),
     });
   }
   revalidatePath("/admin");
   revalidatePath("/news");
-  if (status === "PUBLISHED") pingIndexNowInBackground(`/news/${item.id}`);
+  // Only our own reporting is indexable; syndicated items stay noindex.
+  if (status === "PUBLISHED" && isOriginalReport(item))
+    pingIndexNowInBackground(newsPath(item));
 }
 
 /** Pays a bonus the first time a contributor reaches each star level. */

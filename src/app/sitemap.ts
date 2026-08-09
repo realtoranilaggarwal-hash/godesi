@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
+import { newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ const SITEMAP_TTL = 3600;
 
 /** Dates are stringified by the cache, so the rows carry ISO timestamps. */
 const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
-  const [businesses, categories, events] = await Promise.all([
+  const [businesses, categories, events, reports] = await Promise.all([
     db.business.findMany({
       where: { status: "APPROVED" },
       select: { slug: true, updatedAt: true },
@@ -23,6 +24,12 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       where: { status: "APPROVED" },
       select: { slug: true, updatedAt: true },
     }),
+    // Feed items are somebody else's article; only our own reporting belongs
+    // in the sitemap.
+    db.newsItem.findMany({
+      where: { status: "PUBLISHED", submittedById: { not: null } },
+      select: { id: true, title: true, publishedAt: true },
+    }),
   ]);
   return {
     businesses: businesses.map((row) => ({
@@ -34,12 +41,16 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       slug: row.slug,
       updatedAt: row.updatedAt.toISOString(),
     })),
+    reports: reports.map((row) => ({
+      path: newsPath(row),
+      publishedAt: row.publishedAt.toISOString(),
+    })),
   };
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  const { businesses, categories, events } = await sitemapRows();
+  const { businesses, categories, events, reports } = await sitemapRows();
 
   return [
     { url: base, changeFrequency: "daily", priority: 1 },
@@ -111,6 +122,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/events/${event.slug}`,
       lastModified: new Date(event.updatedAt),
       changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+    ...reports.map((report) => ({
+      url: `${base}${report.path}`,
+      lastModified: new Date(report.publishedAt),
+      changeFrequency: "monthly" as const,
       priority: 0.6,
     })),
   ];

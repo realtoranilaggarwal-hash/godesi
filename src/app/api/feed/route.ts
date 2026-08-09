@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
+import { newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,9 @@ function teaser(text: string, length = 220) {
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
-  const kind: Kind = isKind(params.get("kind")) ? (params.get("kind") as Kind) : "news";
+  const kind: Kind = isKind(params.get("kind"))
+    ? (params.get("kind") as Kind)
+    : "news";
   const limit = Math.min(Number(params.get("limit") ?? 24) || 24, 60);
   const city = params.get("city")?.trim() || undefined;
   const topic = params.get("topic")?.trim() || undefined;
@@ -85,7 +88,7 @@ export async function GET(request: Request) {
           country: item.country,
           source: item.submittedById ? "Godesi member" : item.source,
           publishedAt: item.publishedAt,
-          url: `${base}/news/${item.id}`,
+          url: `${base}${newsPath(item)}`,
         })),
       },
       { headers },
@@ -103,7 +106,12 @@ export async function GET(request: Request) {
           ? {
               OR: [
                 { title: { contains: query, mode: "insensitive" as const } },
-                { description: { contains: query, mode: "insensitive" as const } },
+                {
+                  description: {
+                    contains: query,
+                    mode: "insensitive" as const,
+                  },
+                },
               ],
             }
           : {}),
@@ -243,7 +251,9 @@ export async function GET(request: Request) {
         ? {
             OR: [
               { name: { contains: query, mode: "insensitive" as const } },
-              { description: { contains: query, mode: "insensitive" as const } },
+              {
+                description: { contains: query, mode: "insensitive" as const },
+              },
             ],
           }
         : {}),

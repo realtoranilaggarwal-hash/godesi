@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { memberStory, newsQuotaLeft } from "@/lib/news";
+import { newsPath } from "@/lib/newsLinks";
 import { REPORT_DECLARATIONS, REPORT_SOURCES } from "@/lib/journalists";
 import { REPORT_TOPIC_OPTIONS, topicSlug } from "@/lib/newsTopics";
 
@@ -98,8 +99,9 @@ export async function submitReportAction(
         status: "PENDING",
         topic: topicSlug(data.topic),
         category:
-          REPORT_TOPIC_OPTIONS.find((option) => option.slug === topicSlug(data.topic))
-            ?.label ?? "General",
+          REPORT_TOPIC_OPTIONS.find(
+            (option) => option.slug === topicSlug(data.topic),
+          )?.label ?? "General",
         city: data.city,
         state: data.state ?? null,
         country: data.country ?? null,
@@ -116,7 +118,7 @@ export async function submitReportAction(
     // Member reports live on Godesi, so the story link points back at itself.
     await db.newsItem.update({
       where: { id: report.id },
-      data: { link: `/news/${report.id}` },
+      data: { link: newsPath(report) },
     });
 
     // Journalists start their patch from the first place they report on.
@@ -160,7 +162,10 @@ export async function verifyReportAction(formData: FormData) {
   } else if (existing) {
     await db.newsVerification.update({
       where: { id: existing.id },
-      data: { verdict, note: String(formData.get("note") ?? "").trim() || null },
+      data: {
+        verdict,
+        note: String(formData.get("note") ?? "").trim() || null,
+      },
     });
   } else {
     await db.newsVerification.create({

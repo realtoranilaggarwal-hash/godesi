@@ -131,7 +131,9 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
     const encoded = tag(block, "content:encoded");
     const brief = tag(block, "description") ?? tag(block, "summary");
     const description =
-      encoded && encoded.length > (brief?.length ?? 0) ? encoded : brief ?? "";
+      encoded && encoded.length > (brief?.length ?? 0)
+        ? encoded
+        : (brief ?? "");
     const dateText =
       tag(block, "pubDate") ??
       tag(block, "published") ??

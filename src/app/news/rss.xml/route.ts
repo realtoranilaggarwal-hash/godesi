@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { cachedFeed, rssXml } from "@/lib/rss";
 import { NEWS_TOPICS, topicLabel, topicOf, topicSlug } from "@/lib/newsTopics";
+import { newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -68,7 +69,7 @@ async function build(topic: string | null, city: string | null) {
     path: "/news",
     items: items.map((item) => ({
       title: item.title,
-      link: `/news/${item.id}`,
+      link: newsPath(item),
       description: item.city ? `${item.city} — ${item.summary}` : item.summary,
       publishedAt: item.publishedAt,
       imageUrl: item.imageUrl,

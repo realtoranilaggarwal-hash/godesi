@@ -1,9 +1,14 @@
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
+import { newsPath } from "@/lib/newsLinks";
 
 export const SHARE_KINDS = [
   { key: "business", label: "New business cards", icon: "🏪" },
-  { key: "listing", label: "New property, room and marketplace posts", icon: "🏠" },
+  {
+    key: "listing",
+    label: "New property, room and marketplace posts",
+    icon: "🏠",
+  },
   { key: "event", label: "New events", icon: "🎟️" },
   { key: "news", label: "Published local news reports", icon: "📰" },
 ] as const;
@@ -26,11 +31,15 @@ export type SharePayload = {
 };
 
 export function facebookConfigured() {
-  return Boolean(process.env.FACEBOOK_PAGE_ID && process.env.FACEBOOK_PAGE_TOKEN);
+  return Boolean(
+    process.env.FACEBOOK_PAGE_ID && process.env.FACEBOOK_PAGE_TOKEN,
+  );
 }
 
 export function telegramConfigured() {
-  return Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+  return Boolean(
+    process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID,
+  );
 }
 
 /** Which content types staff have switched on; unset keys default to on. */
@@ -155,7 +164,9 @@ export async function autoShare(payload: SharePayload, force = false) {
         });
       } catch (error) {
         const detail =
-          error instanceof Error ? error.message.slice(0, 300) : "Unknown error";
+          error instanceof Error
+            ? error.message.slice(0, 300)
+            : "Unknown error";
         await db.shareLog.upsert({
           where: { channel_subject: { channel: job.channel, subject } },
           create: {
@@ -241,7 +252,7 @@ export async function payloadForSubject(
       id: item.id,
       title: item.title,
       body: item.summary,
-      path: item.link.startsWith("/") ? item.link : `/news/${item.id}`,
+      path: newsPath(item),
       imageUrl: item.imageUrl,
       tags: [item.city ?? "", item.category ?? "news"].filter(Boolean),
     };
