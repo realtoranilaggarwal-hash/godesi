@@ -1,3 +1,4 @@
+import { createHmac, randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
 import { newsPath } from "@/lib/newsLinks";
@@ -15,7 +16,7 @@ export const SHARE_KINDS = [
 
 export type ShareKind = (typeof SHARE_KINDS)[number]["key"];
 
-export const SHARE_CHANNELS = ["FACEBOOK", "TELEGRAM"] as const;
+export const SHARE_CHANNELS = ["FACEBOOK", "TELEGRAM", "X"] as const;
 export type ShareChannel = (typeof SHARE_CHANNELS)[number];
 
 export type SharePayload = {
@@ -33,6 +34,15 @@ export type SharePayload = {
 export function facebookConfigured() {
   return Boolean(
     process.env.FACEBOOK_PAGE_ID && process.env.FACEBOOK_PAGE_TOKEN,
+  );
+}
+
+export function xConfigured() {
+  return Boolean(
+    process.env.X_API_KEY &&
+    process.env.X_API_SECRET &&
+    process.env.X_ACCESS_TOKEN &&
+    process.env.X_ACCESS_SECRET,
   );
 }
 
@@ -119,6 +129,88 @@ async function postToTelegram(payload: SharePayload) {
   return String(data.result?.message_id ?? "posted");
 }
 
+/** Percent-encoding OAuth 1.0a asks for: stricter than encodeURIComponent. */
+function oauthEncode(value: string) {
+  return encodeURIComponent(value).replace(
+    /[!*'()]/g,
+    (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+/**
+ * X still only accepts OAuth 1.0a user-context signatures for posting, and the
+ * payload is JSON, so the body is deliberately left out of the signature base.
+ */
+function xAuthHeader(url: string, method: "POST") {
+  const params: Record<string, string> = {
+    oauth_consumer_key: process.env.X_API_KEY ?? "",
+    oauth_nonce: randomUUID().replace(/-/g, ""),
+    oauth_signature_method: "HMAC-SHA1",
+    oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+    oauth_token: process.env.X_ACCESS_TOKEN ?? "",
+    oauth_version: "1.0",
+  };
+
+  const base = [
+    method,
+    oauthEncode(url),
+    oauthEncode(
+      Object.keys(params)
+        .sort()
+        .map((key) => `${oauthEncode(key)}=${oauthEncode(params[key])}`)
+        .join("&"),
+    ),
+  ].join("&");
+
+  const signingKey = `${oauthEncode(process.env.X_API_SECRET ?? "")}&${oauthEncode(
+    process.env.X_ACCESS_SECRET ?? "",
+  )}`;
+  const signature = createHmac("sha1", signingKey)
+    .update(base)
+    .digest("base64");
+
+  return `OAuth ${Object.entries({ ...params, oauth_signature: signature })
+    .map(([key, value]) => `${oauthEncode(key)}="${oauthEncode(value)}"`)
+    .join(", ")}`;
+}
+
+/** X counts a link as 23 characters however long it is. */
+function tweetText(payload: SharePayload) {
+  const url = `${siteUrl()}${payload.path}`;
+  const tags = ["#Godesi", ...(payload.tags ?? [])]
+    .map((tag) => (tag.startsWith("#") ? tag : `#${tag.replace(/\W+/g, "")}`))
+    .join(" ");
+  const room = 280 - 23 - tags.length - 4;
+  const head =
+    payload.title.length > room
+      ? `${payload.title.slice(0, room - 1).trimEnd()}…`
+      : payload.title;
+  return `${head}\n\n${url}\n${tags}`;
+}
+
+async function postToX(payload: SharePayload) {
+  if (!xConfigured()) throw new Error("X is not connected");
+
+  const endpoint = "https://api.twitter.com/2/tweets";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: xAuthHeader(endpoint, "POST"),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text: tweetText(payload) }),
+  });
+  const data = (await res.json().catch(() => ({}))) as {
+    data?: { id?: string };
+    detail?: string;
+    title?: string;
+  };
+  if (!res.ok) {
+    throw new Error(data.detail ?? data.title ?? `X returned ${res.status}`);
+  }
+  return data.data?.id ?? "posted";
+}
+
 /**
  * Broadcasts one new post to every connected channel. Failures are recorded
  * and swallowed: a social outage must never break someone's listing.
@@ -138,6 +230,9 @@ export async function autoShare(payload: SharePayload, force = false) {
   }
   if (telegramConfigured()) {
     jobs.push({ channel: "TELEGRAM", run: () => postToTelegram(payload) });
+  }
+  if (xConfigured()) {
+    jobs.push({ channel: "X", run: () => postToX(payload) });
   }
 
   await Promise.all(

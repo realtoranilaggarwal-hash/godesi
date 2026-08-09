@@ -8,6 +8,7 @@ import {
   facebookConfigured,
   shareSettings,
   telegramConfigured,
+  xConfigured,
 } from "@/lib/autoShare";
 import { Badge, Card } from "@/components/ui";
 
@@ -30,8 +31,8 @@ export default async function Page() {
       <Card id="auto-share">
         <h2 className="mb-1 text-lg font-bold">Auto-share to social</h2>
         <p className="mb-3 text-sm text-slate-500">
-          New posts are broadcast to the Godesi Facebook page and Telegram
-          channel. Tokens live in the server environment, never here.
+          New posts are broadcast to the Godesi Facebook page, Telegram channel
+          and X account. Tokens live in the server environment, never here.
         </p>
 
         <div className="mb-4 flex flex-wrap gap-2 text-xs">
@@ -41,13 +42,16 @@ export default async function Page() {
           <Badge tone={telegramConfigured() ? "green" : "slate"}>
             Telegram {telegramConfigured() ? "connected" : "not connected"}
           </Badge>
+          <Badge tone={xConfigured() ? "green" : "slate"}>
+            X {xConfigured() ? "connected" : "not connected"}
+          </Badge>
         </div>
 
-        {!facebookConfigured() && !telegramConfigured() ? (
+        {!facebookConfigured() && !telegramConfigured() && !xConfigured() ? (
           <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
             Nothing is connected yet, so nothing is being posted. Add
-            FACEBOOK_PAGE_ID + FACEBOOK_PAGE_TOKEN and/or TELEGRAM_BOT_TOKEN +
-            TELEGRAM_CHAT_ID to the environment.
+            FACEBOOK_PAGE_ID + FACEBOOK_PAGE_TOKEN, TELEGRAM_BOT_TOKEN +
+            TELEGRAM_CHAT_ID and/or the four X_* keys to the environment.
           </p>
         ) : null}
 
@@ -102,6 +106,17 @@ export default async function Page() {
                   <Badge tone={log.status === "SENT" ? "green" : "red"}>
                     {log.status.toLowerCase()}
                   </Badge>
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `${log.title}\n${log.url}`,
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-semibold text-emerald-600"
+                    title="Opens WhatsApp with the post ready — pick your channel or group"
+                  >
+                    WhatsApp
+                  </a>
                   <form action={retryShareAction}>
                     <input type="hidden" name="subject" value={log.subject} />
                     <button className="text-xs font-semibold text-brand-600">
