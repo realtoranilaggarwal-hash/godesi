@@ -6,7 +6,6 @@ import { BusinessTile } from "@/components/BusinessTile";
 import { CategoryTiles } from "@/components/CategoryTiles";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
-import { HeaderBanner } from "@/components/Banners";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
@@ -107,8 +106,6 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <HeaderBanner />
-
       <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-6 text-white sm:px-8 sm:py-8">
         <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div>
