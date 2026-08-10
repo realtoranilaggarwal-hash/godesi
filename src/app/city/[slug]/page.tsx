@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { cityNames } from "@/lib/cities";
+import { citySlug } from "@/lib/citySlug";
 import { newsPath } from "@/lib/newsLinks";
 import { siteUrl } from "@/lib/format";
 import { Card, EmptyState } from "@/components/ui";
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 /** Anything posted with this city on it, whatever section it lives in. */
 async function loadCity(slug: string) {
-  const names = await cityNames(slug);
+  const names = await cityNames(citySlug(slug));
   if (!names.length) return null;
 
   const where = { city: { in: names } };
@@ -65,13 +66,13 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const names = await cityNames(params.slug);
+  const names = await cityNames(citySlug(params.slug));
   if (!names.length) return { title: "City not found" };
   const city = [...names].sort((a, b) => a.length - b.length)[0];
   return {
     title: `${city} — desi news, businesses, events and rentals | Godesi`,
     description: `Everything desi in ${city}: community news reported by members, local businesses and professionals, upcoming events, property and rooms, temples and places of worship.`,
-    alternates: { canonical: `${siteUrl()}/city/${params.slug}` },
+    alternates: { canonical: `${siteUrl()}/city/${citySlug(params.slug)}` },
   };
 }
 
@@ -131,6 +132,10 @@ export default async function CityPage({
 }) {
   const data = await loadCity(params.slug);
   if (!data) notFound();
+
+  // "/city/iselin-nj" is the same place as "/city/iselin"; keep one URL.
+  if (citySlug(params.slug) !== params.slug)
+    redirect(`/city/${citySlug(params.slug)}`);
 
   const { name, reports, businesses, events, listings, worship } = data;
   const empty =
