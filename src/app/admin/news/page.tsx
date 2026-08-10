@@ -19,7 +19,7 @@ export const metadata: Metadata = { title: "News desk" };
 function StoryEditor({
   item,
 }: {
-  item: { id: string; title: string; summary: string };
+  item: { id: string; title: string; summary: string; albumUrl: string | null };
 }) {
   return (
     <details className="rounded-xl border border-slate-200 bg-slate-50 p-3">
@@ -38,6 +38,13 @@ function StoryEditor({
           defaultValue={item.summary}
           rows={12}
           className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs"
+        />
+        <input
+          name="albumUrl"
+          type="url"
+          defaultValue={item.albumUrl ?? ""}
+          placeholder="Google Photos album link (optional)"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
         />
         <p className="text-[11px] text-slate-500">
           Blank line starts a new paragraph, a line beginning with * or - makes

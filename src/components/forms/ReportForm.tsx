@@ -14,6 +14,7 @@ import { REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
@@ -70,7 +71,9 @@ export function ReportForm({
               place.state ?? "";
             (current.elements.namedItem("country") as HTMLInputElement).value =
               place.country ?? "";
-            setLocationNote(`Detected ${place.city}. Correct it if it is wrong.`);
+            setLocationNote(
+              `Detected ${place.city}. Correct it if it is wrong.`,
+            );
           } else {
             setLocationNote("We could not name that spot — type the city.");
           }
@@ -102,7 +105,12 @@ export function ReportForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Topic" hint="Readers filter the news page by this">
-          <select name="topic" required defaultValue="community" className={inputClass}>
+          <select
+            name="topic"
+            required
+            defaultValue="community"
+            className={inputClass}
+          >
             {REPORT_TOPIC_OPTIONS.map((option) => (
               <option key={option.slug} value={option.slug}>
                 {option.emoji} {option.label}
@@ -222,6 +230,8 @@ export function ReportForm({
           </ul>
         ) : null}
       </div>
+
+      <PhotoAlbumField hint="Shot more than eight photos? Paste a public Google Photos album link and the whole album shows under your story — nothing to upload." />
 
       <Field
         label="Video or social post link"

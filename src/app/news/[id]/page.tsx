@@ -11,6 +11,7 @@ import { StoryBody } from "@/components/StoryBody";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
+import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { SocialEmbed, isEmbeddable } from "@/components/SocialEmbed";
 import { proxyImage } from "@/lib/proxyImage";
 import { siteUrl } from "@/lib/format";
@@ -230,6 +231,8 @@ export default async function ReportPage({
               ))}
             </div>
           ) : null}
+
+          <PhotoAlbumGallery url={report.albumUrl} heading="More photos" />
 
           {report.videoUrl ? (
             <SocialEmbed url={report.videoUrl} label="Watch the video" />

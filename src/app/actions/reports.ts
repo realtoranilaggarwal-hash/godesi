@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { memberStory, newsQuotaLeft } from "@/lib/news";
 import { newsPath } from "@/lib/newsLinks";
+import { isAlbumLink } from "@/lib/photoAlbum";
 import { REPORT_DECLARATIONS, REPORT_SOURCES } from "@/lib/journalists";
 import { REPORT_TOPIC_OPTIONS, topicSlug } from "@/lib/newsTopics";
 
@@ -35,6 +36,14 @@ const reportSchema = z.object({
   sourceUrl: optionalUrl,
   videoUrl: optionalUrl,
   photoUrls: z.array(z.string().url()).max(MAX_PHOTOS),
+  albumUrl: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (value) => !value || isAlbumLink(value),
+      "Paste a Google Photos album link (photos.app.goo.gl/…)",
+    ),
 });
 
 /**
@@ -66,6 +75,7 @@ export async function submitReportAction(
       sourceType: formData.get("sourceType"),
       sourceUrl: formData.get("sourceUrl"),
       videoUrl: formData.get("videoUrl"),
+      albumUrl: formData.get("albumUrl") || undefined,
       photoUrls: formData
         .getAll("photoUrls")
         .map(String)
@@ -111,6 +121,7 @@ export async function submitReportAction(
         photoUrls: data.photoUrls,
         imageUrl: data.photoUrls[0] ?? null,
         videoUrl: data.videoUrl ?? null,
+        albumUrl: data.albumUrl || null,
         declaredAt: new Date(),
       },
     });

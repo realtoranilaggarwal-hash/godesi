@@ -1050,6 +1050,8 @@ model NewsItem {
   sourceUrl  String?
   photoUrls  String[]  @default([])
   videoUrl   String?
+  /// Public Google Photos album, shown as a gallery under the story.
+  albumUrl   String?
   /// Every truth declaration was ticked when the report was filed.
   declaredAt DateTime?
 

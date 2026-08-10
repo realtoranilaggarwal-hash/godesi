@@ -28,6 +28,7 @@ import {
 } from "@/lib/autoShare";
 import { isOriginalReport, newsPath } from "@/lib/newsLinks";
 import { memberStory } from "@/lib/news";
+import { isAlbumLink } from "@/lib/photoAlbum";
 
 export async function setListingStatusAction(formData: FormData) {
   await requirePermission("listings");
@@ -404,9 +405,13 @@ export async function editNewsAction(formData: FormData) {
   if (!id || title.length < 8) throw new Error("Give the report a headline");
   if (memberStory(summary).length < 30) throw new Error("The story is empty");
 
+  const album = String(formData.get("albumUrl") ?? "").trim();
+  if (album && !isAlbumLink(album))
+    throw new Error("Paste a Google Photos album link");
+
   const item = await db.newsItem.update({
     where: { id },
-    data: { title, summary: memberStory(summary) },
+    data: { title, summary: memberStory(summary), albumUrl: album || null },
   });
   if (item.submittedById) {
     await db.newsItem.update({
