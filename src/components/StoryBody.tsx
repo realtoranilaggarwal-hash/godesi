@@ -28,6 +28,21 @@ export function StoryBody({ text }: { text: string }) {
           );
         }
 
+        // Several short lines with no full stop are a list the writer typed
+        // without any bullet characters.
+        if (
+          lines.length >= 3 &&
+          lines.every((line) => line.length <= 80 && !/[.!?]$/.test(line))
+        ) {
+          return (
+            <ul key={index} className="ml-5 list-disc space-y-1">
+              {lines.map((line, item) => (
+                <li key={item}>{line}</li>
+              ))}
+            </ul>
+          );
+        }
+
         // A lone short line with no full stop is a section heading in practice.
         if (
           lines.length === 1 &&
