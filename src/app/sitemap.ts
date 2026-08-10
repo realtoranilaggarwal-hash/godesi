@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
+import { popularCities } from "@/lib/cities";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,8 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  const { businesses, categories, events, reports } = await sitemapRows();
+  const [{ businesses, categories, events, reports }, cities] =
+    await Promise.all([sitemapRows(), popularCities(200)]);
 
   return [
     { url: base, changeFrequency: "daily", priority: 1 },
@@ -69,6 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/events`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/venues`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/news`, changeFrequency: "hourly", priority: 0.7 },
+    { url: `${base}/city`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/desi-elite`, changeFrequency: "daily", priority: 0.8 },
     {
@@ -123,6 +126,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(event.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    })),
+    ...cities.map((city) => ({
+      url: `${base}/city/${city.slug}`,
+      changeFrequency: "daily" as const,
+      priority: 0.7,
     })),
     ...reports.map((report) => ({
       url: `${base}${report.path}`,

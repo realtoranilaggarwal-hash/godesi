@@ -28,6 +28,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/connect", label: "Connect — meet desis near you" },
       { href: "/resources", label: "Resources & important links" },
       { href: "/news", label: "News" },
+      { href: "/city", label: "Browse by city" },
       { href: "/desi-elite", label: "GoDesi Elite — recognised leaders" },
       { href: "/leaderboard", label: "Top contributors leaderboard" },
       { href: "/live-radio", label: "Live desi radio" },

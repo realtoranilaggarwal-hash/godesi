@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { citySlug } from "@/lib/citySlug";
 
 const linkClass = "underline-offset-2 hover:text-indigo-600 hover:underline";
 
 /**
- * City, state and country rendered with the city and country linked into the filtered
- * directory, so a visitor can jump from any card to everything else in that area.
+ * City, state and country rendered as links: the city opens its own hub — news,
+ * businesses, events, rentals and temples tagged with that place — and the
+ * country opens the filtered directory.
  */
 export function PlaceLink({
   city,
@@ -22,11 +24,7 @@ export function PlaceLink({
 }) {
   const parts = [
     city ? (
-      <Link
-        key="city"
-        href={`${base}?city=${encodeURIComponent(city)}`}
-        className={linkClass}
-      >
+      <Link key="city" href={`/city/${citySlug(city)}`} className={linkClass}>
         {city}
       </Link>
     ) : null,

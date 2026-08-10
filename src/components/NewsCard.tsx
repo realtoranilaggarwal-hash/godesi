@@ -4,6 +4,7 @@ import { JournalistBadge } from "@/components/JournalistBadge";
 import type { JournalistLevel } from "@/lib/journalists";
 import { proxyImage } from "@/lib/proxyImage";
 import { newsPath } from "@/lib/newsLinks";
+import { citySlug } from "@/lib/citySlug";
 
 export type NewsListItem = {
   id: string;
@@ -224,6 +225,15 @@ export function NewsCard({
           <span className="text-xs text-slate-400">Godesi news desk</span>
         )}
         <div className="flex items-center gap-2">
+          {item.city ? (
+            <Link
+              href={`/city/${citySlug(item.city)}`}
+              className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 hover:bg-indigo-100 hover:text-indigo-700"
+              title={`Everything desi in ${item.city}`}
+            >
+              📍 {item.city}
+            </Link>
+          ) : null}
           {canFeature ? (
             <form action={featureNewsAction}>
               <input type="hidden" name="id" value={item.id} />

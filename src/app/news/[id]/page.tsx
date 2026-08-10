@@ -11,6 +11,7 @@ import { StoryBody } from "@/components/StoryBody";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
+import { citySlug } from "@/lib/citySlug";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { SocialEmbed, isEmbeddable } from "@/components/SocialEmbed";
 import { proxyImage } from "@/lib/proxyImage";
@@ -144,9 +145,19 @@ export default async function ReportPage({
               </span>
             ) : null}
             {place ? (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">
-                📍 {place}
-              </span>
+              report.city ? (
+                <Link
+                  href={`/city/${citySlug(report.city)}`}
+                  className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 hover:bg-indigo-100 hover:text-indigo-700"
+                  title={`Everything desi in ${report.city}`}
+                >
+                  📍 {place}
+                </Link>
+              ) : (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">
+                  📍 {place}
+                </span>
+              )
             ) : null}
             {report.happenedAt ? (
               <span className="text-slate-500">
