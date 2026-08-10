@@ -139,8 +139,8 @@ export default async function CityPage({
     !worship.length;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-      <div className="space-y-4">
+    <div className="flex gap-6">
+      <div className="min-w-0 flex-1 space-y-4">
         <Card className="bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white">
           <h1 className="text-2xl font-black">📍 Everything desi in {name}</h1>
           <p className="mt-1 text-sm text-white/90">
