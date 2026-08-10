@@ -55,7 +55,9 @@ async function loadCity(slug: string) {
     }),
   ]);
 
-  return { name: names[0], reports, businesses, events, listings, worship };
+  // The shortest spelling reads best as a title: "Iselin", not "Iselin NJ, USA".
+  const name = [...names].sort((a, b) => a.length - b.length)[0];
+  return { name, reports, businesses, events, listings, worship };
 }
 
 export async function generateMetadata({
@@ -65,7 +67,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const names = await cityNames(params.slug);
   if (!names.length) return { title: "City not found" };
-  const city = names[0];
+  const city = [...names].sort((a, b) => a.length - b.length)[0];
   return {
     title: `${city} — desi news, businesses, events and rentals | Godesi`,
     description: `Everything desi in ${city}: community news reported by members, local businesses and professionals, upcoming events, property and rooms, temples and places of worship.`,

@@ -61,12 +61,21 @@ export const popularCities = cachedQuery(
       orderBy: { _count: { city: "desc" } },
       take: limit,
     });
-    return rows
-      .filter((row) => row.city)
-      .map((row) => ({
-        city: row.city,
-        slug: citySlug(row.city),
-        count: row._count.city,
-      }));
+    // The same place arrives spelled several ways, so the chips are merged.
+    const merged = new Map<string, { city: string; count: number }>();
+    for (const row of rows) {
+      if (!row.city) continue;
+      const slug = citySlug(row.city);
+      const seen = merged.get(slug);
+      if (!seen) {
+        merged.set(slug, { city: row.city, count: row._count.city });
+      } else {
+        seen.count += row._count.city;
+        if (row.city.length < seen.city.length) seen.city = row.city;
+      }
+    }
+    return Array.from(merged, ([slug, value]) => ({ slug, ...value })).sort(
+      (a, b) => b.count - a.count,
+    );
   },
 );
