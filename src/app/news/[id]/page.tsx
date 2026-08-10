@@ -7,6 +7,7 @@ import { levelFor } from "@/lib/journalists";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
+import { StoryBody } from "@/components/StoryBody";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
@@ -196,9 +197,7 @@ export default async function ReportPage({
             </div>
           ) : null}
 
-          <p className="whitespace-pre-line text-[15px] leading-relaxed text-slate-700">
-            {report.summary}
-          </p>
+          <StoryBody text={report.summary} />
 
           <InArticleAd />
 

@@ -27,6 +27,7 @@ import {
   payloadForSubject,
 } from "@/lib/autoShare";
 import { isOriginalReport, newsPath } from "@/lib/newsLinks";
+import { memberStory } from "@/lib/news";
 
 export async function setListingStatusAction(formData: FormData) {
   await requirePermission("listings");
@@ -389,6 +390,36 @@ export async function rejectBannerAction(formData: FormData) {
   });
   revalidatePath("/admin");
   revalidatePath("/");
+}
+
+/**
+ * Lets the desk fix a headline or re-paste a story with its paragraphs. The
+ * body is stored as text and rendered as text, so markup never runs.
+ */
+export async function editNewsAction(formData: FormData) {
+  await requirePermission("news");
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const summary = String(formData.get("summary") ?? "");
+  if (!id || title.length < 8) throw new Error("Give the report a headline");
+  if (memberStory(summary).length < 30) throw new Error("The story is empty");
+
+  const item = await db.newsItem.update({
+    where: { id },
+    data: { title, summary: memberStory(summary) },
+  });
+  if (item.submittedById) {
+    await db.newsItem.update({
+      where: { id },
+      data: { link: newsPath(item) },
+    });
+  }
+
+  revalidatePath("/admin/news");
+  revalidatePath("/news");
+  revalidatePath(newsPath(item));
+  if (item.status === "PUBLISHED" && isOriginalReport(item))
+    pingIndexNowInBackground(newsPath(item));
 }
 
 export async function setNewsStatusAction(formData: FormData) {

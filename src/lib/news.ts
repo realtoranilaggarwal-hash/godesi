@@ -98,10 +98,26 @@ export function twoLineSummary(input: string, limit = 700) {
 
 /**
  * A member's own report is published in full on Godesi — there is no publisher
- * to send the reader to, so trimming it would lose the story.
+ * to send the reader to, so trimming it would lose the story. Tags and entities
+ * are stripped exactly as for feed items (nothing a member types is ever
+ * rendered as markup), but the writer's line breaks are kept so the story reads
+ * as paragraphs instead of one wall of text.
  */
 export function memberStory(input: string) {
-  return decode(input).trim();
+  return input
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/\r\n?/g, "\n")
+    .replace(/[^\S\n]+/g, " ")
+    .replace(/ *\n */g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function firstImage(block: string) {

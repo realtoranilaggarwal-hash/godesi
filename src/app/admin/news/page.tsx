@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   deleteNewsAction,
   deleteNewsFeedAction,
+  editNewsAction,
   setNewsStatusAction,
 } from "@/app/actions/admin";
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
@@ -13,6 +14,42 @@ import { newsPath } from "@/lib/newsLinks";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "News desk" };
+
+/** Fixes a headline, or re-pastes a story so its paragraphs come back. */
+function StoryEditor({
+  item,
+}: {
+  item: { id: string; title: string; summary: string };
+}) {
+  return (
+    <details className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <summary className="cursor-pointer text-xs font-bold text-slate-600">
+        Edit headline and story
+      </summary>
+      <form action={editNewsAction} className="mt-2 space-y-2">
+        <input type="hidden" name="id" value={item.id} />
+        <input
+          name="title"
+          defaultValue={item.title}
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        />
+        <textarea
+          name="summary"
+          defaultValue={item.summary}
+          rows={12}
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 font-mono text-xs"
+        />
+        <p className="text-[11px] text-slate-500">
+          Blank line starts a new paragraph, a line beginning with * or - makes
+          a bullet, and a short line on its own becomes a sub-heading.
+        </p>
+        <button className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white">
+          Save story
+        </button>
+      </form>
+    </details>
+  );
+}
 
 export default async function Page() {
   const user = await getCurrentUser();
@@ -76,7 +113,10 @@ export default async function Page() {
                     ))}
                   </div>
                 </div>
-                <p className="text-sm text-slate-700">{item.summary}</p>
+                <p className="whitespace-pre-line text-sm text-slate-700">
+                  {item.summary}
+                </p>
+                <StoryEditor item={item} />
                 {item.photoUrls.length ? (
                   <div className="flex flex-wrap gap-2">
                     {item.photoUrls.map((url) => (
@@ -201,6 +241,11 @@ export default async function Page() {
                   </button>
                 </form>
               </div>
+              {item.submittedById ? (
+                <div className="w-full">
+                  <StoryEditor item={item} />
+                </div>
+              ) : null}
             </li>
           ))}
           {newsItems.length === 0 ? (

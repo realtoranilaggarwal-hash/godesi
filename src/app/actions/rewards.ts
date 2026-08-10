@@ -34,9 +34,14 @@ async function applyReward(key: string, userId: string) {
   }
 
   if (key === "featured-listing") {
-    const business = await db.business.findUnique({ where: { ownerId: userId } });
+    const business = await db.business.findUnique({
+      where: { ownerId: userId },
+    });
     if (!business) return false;
-    await db.business.update({ where: { id: business.id }, data: { featured: true } });
+    await db.business.update({
+      where: { id: business.id },
+      data: { featured: true },
+    });
     return true;
   }
 
@@ -119,4 +124,15 @@ export async function markNotificationsReadAction() {
   });
   revalidatePath("/dashboard/notifications");
   revalidatePath("/dashboard");
+}
+
+/** Weekly digest on or off, from the member's notifications page. */
+export async function setDigestAction(formData: FormData) {
+  const user = await requireUser();
+  const on = formData.get("on") === "yes";
+  await db.user.update({
+    where: { id: user.id },
+    data: { digestOptOutAt: on ? null : new Date() },
+  });
+  revalidatePath("/dashboard/notifications");
 }

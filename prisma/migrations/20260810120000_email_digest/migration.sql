@@ -1,0 +1,2 @@
+ALTER TABLE "User" ADD COLUMN "digestOptOutAt" TIMESTAMP(3);
+ALTER TABLE "User" ADD COLUMN "digestSentAt" TIMESTAMP(3);

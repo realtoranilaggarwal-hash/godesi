@@ -3,7 +3,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { markNotificationsReadAction } from "@/app/actions/rewards";
+import {
+  markNotificationsReadAction,
+  setDigestAction,
+} from "@/app/actions/rewards";
 import { Card, EmptyState } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -13,11 +16,18 @@ export default async function NotificationsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/dashboard/notifications");
 
-  const notifications = await db.notification.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const [notifications, member] = await Promise.all([
+    db.notification.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    }),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { digestOptOutAt: true },
+    }),
+  ]);
+  const digestOn = !member?.digestOptOutAt;
   const unread = notifications.filter((item) => !item.readAt).length;
 
   return (
@@ -35,6 +45,28 @@ export default async function NotificationsPage() {
           </form>
         ) : null}
       </div>
+
+      <Card className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-bold">📬 Weekly community digest</p>
+          <p className="text-sm text-slate-500">
+            One email a week: new reports, upcoming events, new businesses and
+            listings. Never for anything else.
+          </p>
+        </div>
+        <form action={setDigestAction}>
+          <input type="hidden" name="on" value={digestOn ? "no" : "yes"} />
+          <button
+            className={`rounded-xl px-3 py-1.5 text-sm font-bold ${
+              digestOn
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {digestOn ? "On" : "Off"}
+          </button>
+        </form>
+      </Card>
 
       {notifications.length ? (
         <Card>

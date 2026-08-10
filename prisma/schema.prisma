@@ -182,6 +182,10 @@ model User {
   adminNote      String?
   /// Last time an admin emailed this member from the members desk.
   lastContactedAt DateTime?
+  /// Set when the member unsubscribes from the weekly community digest.
+  digestOptOutAt  DateTime?
+  /// Last weekly digest we sent them, so a retry never double-sends.
+  digestSentAt    DateTime?
 
   /// 1..1000 for the first thousand members — powers the 🏅 Founding member
   /// badge and their double reward points. Null once the spots are gone.
