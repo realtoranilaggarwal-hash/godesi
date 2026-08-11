@@ -54,6 +54,7 @@ const HERO_ACTIONS: { href: string; label: string }[] = [
   { href: "/rewards", label: "🎁 Earn points" },
   { href: "/alumni", label: "🎓 Find batchmates" },
   { href: "/website", label: "🌐 Get a website" },
+  { href: "/trending", label: "#️⃣ Trending hashtags" },
 ];
 
 export default async function HomePage() {

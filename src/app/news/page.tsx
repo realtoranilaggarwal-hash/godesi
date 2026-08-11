@@ -159,6 +159,12 @@ export default async function NewsPage({
               📰 Report local news
             </Link>
             <Link
+              href="/trending"
+              className="rounded-xl bg-white/95 px-3 py-1.5 text-sky-700 hover:bg-white"
+            >
+              #️⃣ Trending hashtags
+            </Link>
+            <Link
               href="#post"
               className="rounded-xl bg-white/20 px-3 py-1.5 text-white hover:bg-white/30"
             >
