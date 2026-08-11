@@ -144,13 +144,19 @@ export const hashtagWall = unstable_cache(
     }
 
     const seen = new Set<string>();
-    return merged
-      .filter((hit) => {
-        if (!hit.link || seen.has(hit.link)) return false;
-        seen.add(hit.link);
-        return true;
-      })
-      .slice(0, 24);
+    const unique = merged.filter((hit) => {
+      if (!hit.link || seen.has(hit.link)) return false;
+      seen.add(hit.link);
+      return true;
+    });
+
+    // "Trending" should read as now, but a quiet tag would otherwise show
+    // nothing, so the cut-off only applies while there is enough left.
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const fresh = unique.filter(
+      (hit) => new Date(hit.publishedAt).getTime() >= cutoff,
+    );
+    return (fresh.length >= 6 ? fresh : unique).slice(0, 24);
   },
   ["hashtag-wall"],
   { revalidate: 600 },
