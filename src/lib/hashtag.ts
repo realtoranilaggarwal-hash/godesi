@@ -6,7 +6,8 @@ export type HashtagHit = {
   author: string;
   title: string;
   link: string;
-  publishedAt: Date;
+  /** ISO string, not a Date: the cache stringifies whatever it holds. */
+  publishedAt: string;
   imageUrl: string | null;
 };
 
@@ -38,7 +39,7 @@ async function fetchText(url: string) {
   const response = await fetch(url, {
     signal: AbortSignal.timeout(TIMEOUT),
     headers: { "user-agent": "GodesiBot/1.0 (+https://godesi.com)" },
-    next: { revalidate: 600 },
+    cache: "no-store",
   });
   if (!response.ok) return null;
   return response.text();
@@ -56,7 +57,7 @@ async function newsHits(query: string): Promise<HashtagHit[]> {
     author: item.title.split(" - ").slice(-1)[0] ?? "Google News",
     title: item.title.replace(/ - [^-]+$/, ""),
     link: item.link,
-    publishedAt: item.publishedAt,
+    publishedAt: item.publishedAt.toISOString(),
     imageUrl: item.imageUrl ?? null,
   }));
 }
@@ -114,9 +115,7 @@ async function mastodonHits(tag: string): Promise<HashtagHit[]> {
           : `@${status.account?.acct ?? "someone"}`,
         title: stripHtml(status.content ?? ""),
         link: status.url ?? "",
-        publishedAt: status.created_at
-          ? new Date(status.created_at)
-          : new Date(),
+        publishedAt: new Date(status.created_at ?? Date.now()).toISOString(),
         imageUrl: image?.preview_url ?? null,
       };
     })

@@ -35,8 +35,8 @@ export function generateMetadata({
   };
 }
 
-function ago(date: Date) {
-  const minutes = Math.round((Date.now() - date.getTime()) / 60000);
+function ago(iso: string) {
+  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   if (minutes < 60) return `${Math.max(minutes, 1)}m ago`;
   if (minutes < 1440) return `${Math.round(minutes / 60)}h ago`;
   return `${Math.round(minutes / 1440)}d ago`;
