@@ -1,0 +1,25 @@
+ALTER TABLE "NewsItem" ADD COLUMN "featured" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "NewsItem" ADD COLUMN "score" INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE "User" ADD COLUMN "staffPermissions" TEXT[] DEFAULT ARRAY[]::TEXT[];
+
+ALTER TYPE "PointsReason" ADD VALUE 'NEWS_PUBLISHED';
+ALTER TYPE "PointsReason" ADD VALUE 'NEWS_UPVOTED';
+ALTER TYPE "PointsReason" ADD VALUE 'NEWS_FEATURED';
+
+CREATE TABLE "NewsVote" (
+  "id" TEXT NOT NULL,
+  "newsId" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "value" INTEGER NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "NewsVote_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX "NewsVote_newsId_userId_key" ON "NewsVote"("newsId", "userId");
+CREATE INDEX "NewsVote_userId_idx" ON "NewsVote"("userId");
+
+ALTER TABLE "NewsVote" ADD CONSTRAINT "NewsVote_newsId_fkey"
+  FOREIGN KEY ("newsId") REFERENCES "NewsItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "NewsVote" ADD CONSTRAINT "NewsVote_userId_fkey"
+  FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

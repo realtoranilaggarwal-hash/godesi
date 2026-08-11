@@ -20,8 +20,103 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* User-generated text can contain unbroken strings (pasted URLs, spam); never let it widen the page. */
+p,
+h1,
+h2,
+h3,
+h4,
+li,
+dd,
+td,
+blockquote {
+  overflow-wrap: anywhere;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Live #godesi wall: the column drifts upward on its own and stops on hover
+   or for anyone who asked for less motion. A slim scrollbar stays visible so it
+   reads as scrollable content rather than a cropped box. */
+.wall-track {
+  animation: wall-drift 60s linear infinite;
+}
+
+.wall-scroller {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.wall-scroller::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wall-scroller::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.wall-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wall-scroller:hover .wall-track,
+.wall-scroller:focus-within .wall-track {
+  animation-play-state: paused;
+}
+
+@keyframes wall-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall-track {
+    animation: none;
+  }
+
+  .wall-scroller {
+    overflow-y: auto;
+  }
+}
+
+/*
+ * The cookie bar is fixed to the bottom of the screen, where the floating
+ * buttons live. On a phone it covered them, so taps did nothing — every
+ * floating widget carries this class and lifts clear while the bar is up.
+ */
+:root {
+  --fab-offset: 0px;
+}
+
+html.consent-open {
+  --fab-offset: 7rem;
+}
+
+@media (min-width: 640px) {
+  html.consent-open {
+    --fab-offset: 3.5rem;
+  }
+}
+
+.fab-anchor {
+  margin-bottom: var(--fab-offset);
 }

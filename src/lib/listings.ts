@@ -1,0 +1,143 @@
+import type { Furnishing, GenderPreference, ListingKind, Prisma } from "@prisma/client";
+import { db } from "@/lib/db";
+import { TAXONOMY_TTL, cachedQuery } from "@/lib/cache";
+import { formatMoney } from "@/lib/format";
+import { slugify } from "@/lib/slug";
+
+export type ListingSection = "real-estate" | "rooms" | "marketplace";
+
+export const KIND_LABELS: Record<ListingKind, string> = {
+  PROPERTY_SALE: "Property for sale",
+  PROPERTY_RENT: "Property for rent",
+  ROOM_WANTED: "Looking for a room",
+  ROOM_OFFERED: "Room available",
+  MARKETPLACE: "Item for sale",
+};
+
+/** The Buy & sell tree lives under this directory category. */
+export const MARKETPLACE_ROOT = "buy-sell";
+
+/** Subcategories a seller picks from: jewellery, furniture, electronics… */
+export const marketplaceCategories = cachedQuery(
+  "marketplace-categories",
+  TAXONOMY_TTL,
+  async () =>
+    db.category.findMany({
+      where: { parentSlug: MARKETPLACE_ROOT },
+      orderBy: { sortOrder: "asc" },
+      select: { slug: true, name: true },
+    }),
+);
+
+export const FURNISHING_LABELS: Record<Furnishing, string> = {
+  FURNISHED: "Furnished",
+  SEMI_FURNISHED: "Semi-furnished",
+  UNFURNISHED: "Unfurnished",
+};
+
+export const GENDER_LABELS: Record<GenderPreference, string> = {
+  ANY: "Anyone",
+  MALE: "Male only",
+  FEMALE: "Female only",
+};
+
+export const SECTION_KINDS: Record<ListingSection, ListingKind[]> = {
+  "real-estate": ["PROPERTY_SALE", "PROPERTY_RENT"],
+  rooms: ["ROOM_WANTED", "ROOM_OFFERED"],
+  marketplace: ["MARKETPLACE"],
+};
+
+/** Rooms are always monthly; sales and items are one-off prices. */
+export function isMonthly(kind: ListingKind) {
+  return kind === "PROPERTY_RENT" || kind === "ROOM_OFFERED" || kind === "ROOM_WANTED";
+}
+
+export function priceLabel(listing: {
+  price: number;
+  currency: string;
+  perMonth: boolean;
+}) {
+  if (!listing.price) return "Price on request";
+  const amount = formatMoney(listing.price, listing.currency);
+  return listing.perMonth ? `${amount}/month` : amount;
+}
+
+export async function uniqueListingSlug(title: string, city: string) {
+  const base = slugify([title, city].filter(Boolean).join(" ")) || "listing";
+  let candidate = base;
+  let counter = 1;
+  // eslint-disable-next-line no-await-in-loop
+  while (await db.listing.findUnique({ where: { slug: candidate } })) {
+    counter += 1;
+    candidate = `${base}-${counter}`;
+  }
+  return candidate;
+}
+
+export type ListingFilters = {
+  kind?: string;
+  city?: string;
+  max?: string;
+  furnishing?: string;
+  gender?: string;
+  bedrooms?: string;
+  category?: string;
+  q?: string;
+};
+
+function intOrNull(value?: string) {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** Builds the Prisma filter for a section page from URL search params. */
+export function listingWhere(
+  section: ListingSection,
+  filters: ListingFilters,
+): Prisma.ListingWhereInput {
+  const kinds = SECTION_KINDS[section];
+  const kind =
+    filters.kind && kinds.includes(filters.kind as ListingKind)
+      ? (filters.kind as ListingKind)
+      : null;
+  const max = intOrNull(filters.max);
+  const bedrooms = intOrNull(filters.bedrooms);
+
+  return {
+    status: "APPROVED",
+    kind: kind ? kind : { in: kinds },
+    ...(filters.city ? { city: { contains: filters.city, mode: "insensitive" } } : {}),
+    ...(max ? { price: { lte: max, gt: 0 } } : {}),
+    ...(bedrooms ? { bedrooms: { gte: bedrooms } } : {}),
+    ...(filters.category ? { categorySlug: filters.category } : {}),
+    ...(filters.furnishing && filters.furnishing in FURNISHING_LABELS
+      ? { furnishing: filters.furnishing as Furnishing }
+      : {}),
+    ...(filters.gender && filters.gender in GENDER_LABELS && filters.gender !== "ANY"
+      ? { genderPref: { in: [filters.gender as GenderPreference, "ANY"] } }
+      : {}),
+    ...(filters.q
+      ? {
+          OR: [
+            { title: { contains: filters.q, mode: "insensitive" } },
+            { description: { contains: filters.q, mode: "insensitive" } },
+            { area: { contains: filters.q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+}
+
+export const LISTING_INCLUDE = {
+  images: { orderBy: { sortOrder: "asc" } },
+  owner: {
+    select: {
+      name: true,
+      username: true,
+      avatarUrl: true,
+      plan: true,
+      planExpiresAt: true,
+    },
+  },
+} satisfies Prisma.ListingInclude;
