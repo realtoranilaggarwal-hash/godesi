@@ -7,8 +7,8 @@ import { can, getCurrentUser, isStaff } from "@/lib/auth";
 import { featureNewsAction } from "@/app/actions/newsVotes";
 import {
   deleteNewsAction,
+  setClassifiedStatusAction,
   setEventStatusAction,
-  setListingStatusAction,
   setNewsStatusAction,
 } from "@/app/actions/admin";
 import { deleteBlogPostAction, toggleBlogPostAction } from "@/app/actions/blog";
@@ -308,9 +308,19 @@ export default async function ContentDeskPage() {
 
       {allowed.listings ? (
         <Card id="listings">
-          <h2 className="mb-3 text-lg font-bold">
+          <h2 className="mb-1 text-lg font-bold">
             Property, rooms &amp; items
           </h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Property has its own desk with filters, featured slots and leads at{" "}
+            <Link
+              href="/admin/properties"
+              className="font-semibold text-indigo-600"
+            >
+              /admin/properties
+            </Link>
+            .
+          </p>
           <ul className="divide-y divide-slate-100 text-sm">
             {listings.map((listing) => (
               <li
@@ -335,7 +345,7 @@ export default async function ContentDeskPage() {
                   {(["APPROVED", "REJECTED"] as const)
                     .filter((status) => status !== listing.status)
                     .map((status) => (
-                      <form key={status} action={setListingStatusAction}>
+                      <form key={status} action={setClassifiedStatusAction}>
                         <input type="hidden" name="id" value={listing.id} />
                         <input type="hidden" name="status" value={status} />
                         <button

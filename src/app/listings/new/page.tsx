@@ -8,6 +8,7 @@ import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
 import { requestCurrency } from "@/lib/currency";
 import { marketplaceCategories } from "@/lib/listings";
+import { isPropertyGroup } from "@/lib/property";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ const KINDS: ListingKind[] = [
 export default async function NewListingPage({
   searchParams,
 }: {
-  searchParams: { kind?: string };
+  searchParams: { kind?: string; group?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/listings/new");
@@ -44,6 +45,10 @@ export default async function NewListingPage({
   const kind = KINDS.includes(searchParams.kind as ListingKind)
     ? (searchParams.kind as ListingKind)
     : "PROPERTY_SALE";
+  const group =
+    searchParams.group && isPropertyGroup(searchParams.group)
+      ? searchParams.group
+      : undefined;
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -61,6 +66,8 @@ export default async function NewListingPage({
           defaultWhatsapp={business?.whatsappNumber ?? business?.phone ?? ""}
           defaultCurrency={requestCurrency()}
           categories={categories}
+          defaultGroup={group}
+          defaultCountry={requestCurrency() === "INR" ? "India" : "United States"}
         />
       </Card>
     </div>
