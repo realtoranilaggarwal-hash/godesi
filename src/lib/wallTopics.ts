@@ -1,5 +1,11 @@
 import { db } from "@/lib/db";
 
+/**
+ * Every box costs two third-party requests, so the wall is capped — the admin
+ * desk warns when live topics exceed it rather than dropping them silently.
+ */
+export const WALL_TOPIC_LIMIT = 36;
+
 export type WallTopicView = {
   id: string;
   label: string;
@@ -40,7 +46,7 @@ export async function wallTopics(): Promise<WallTopicView[]> {
     const topics = await db.wallTopic.findMany({
       where: { active: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      take: 18,
+      take: WALL_TOPIC_LIMIT,
       select: { id: true, label: true, query: true, emoji: true },
     });
     return topics.length ? topics : FALLBACK_TOPICS;

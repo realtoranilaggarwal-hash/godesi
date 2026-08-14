@@ -9,12 +9,17 @@ import {
   saveWallTopicAction,
   toggleWallTopicAction,
 } from "@/app/actions/wall";
+import { WALL_TOPIC_LIMIT } from "@/lib/wallTopics";
 import { Card, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "News wall" };
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: { error?: string };
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/wall");
   if (!isStaff(user) || !can(user, "news")) redirect("/dashboard");
@@ -22,6 +27,7 @@ export default async function Page() {
   const topics = await db.wallTopic.findMany({
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   });
+  const live = topics.filter((topic) => topic.active).length;
 
   return (
     <div className="space-y-4">
@@ -31,6 +37,12 @@ export default async function Page() {
           View the wall →
         </Link>
       </div>
+
+      {searchParams.error ? (
+        <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
+          Nothing was saved. {searchParams.error.slice(0, 160)}
+        </p>
+      ) : null}
 
       <Card>
         <h2 className="mb-1 text-lg font-bold">Add a topic</h2>
@@ -79,9 +91,15 @@ export default async function Page() {
 
       <Card>
         <h2 className="mb-3 text-lg font-bold">
-          Topics ({topics.filter((topic) => topic.active).length} live of{" "}
-          {topics.length})
+          Topics ({live} live of {topics.length})
         </h2>
+        {live > WALL_TOPIC_LIMIT ? (
+          <p className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800">
+            The wall shows the first {WALL_TOPIC_LIMIT} live topics, so{" "}
+            {live - WALL_TOPIC_LIMIT} of these are not appearing. Hide some, or
+            give the ones you want a lower sort number.
+          </p>
+        ) : null}
         <ul className="divide-y divide-slate-100 text-sm">
           {topics.map((topic) => (
             <li key={topic.id} className="space-y-2 py-3">
