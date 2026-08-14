@@ -103,6 +103,7 @@ export function PropertyFilters({ filters }: { filters: PropertySearch }) {
           name="min"
           type="number"
           min={0}
+          max={2147483647}
           defaultValue={filters.min ?? ""}
           placeholder="Min price"
           aria-label="Minimum price"
@@ -112,6 +113,7 @@ export function PropertyFilters({ filters }: { filters: PropertySearch }) {
           name="max"
           type="number"
           min={0}
+          max={2147483647}
           defaultValue={filters.max ?? ""}
           placeholder="Max price"
           aria-label="Maximum price"

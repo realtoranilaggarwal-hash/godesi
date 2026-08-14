@@ -305,6 +305,26 @@ export async function recordListingLeadAction(listingId: string, channel: string
   }
 }
 
+/**
+ * Contact details for a property, handed over only after a signed-in member
+ * asks for them. They deliberately never travel to the browser with the page:
+ * client component props are serialised into the HTML, so passing them up front
+ * would publish every seller's number to anyone who reads the source.
+ */
+export async function revealListingContactAction(listingId: string) {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const listing = await db.listing.findFirst({
+    where: { id: listingId, status: "APPROVED" },
+    select: { contactName: true, contactPhone: true, contactEmail: true },
+  });
+  if (!listing) return null;
+
+  await recordListingLeadAction(listingId, listing.contactPhone ? "phone" : "email");
+  return listing;
+}
+
 export async function deleteListingAction(formData: FormData) {
   const user = await requireUser();
   const id = String(formData.get("id") ?? "");

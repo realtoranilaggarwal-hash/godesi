@@ -11,7 +11,7 @@ import { LISTING_INCLUDE, listingWhere } from "@/lib/listings";
 import {
   PROPERTY_GROUP_LABELS,
   hasPropertyFilters,
-  propertyWhere,
+  propertySearchWhere,
 } from "@/lib/property";
 
 export const dynamic = "force-dynamic";
@@ -56,10 +56,7 @@ export default async function RealEstatePage({
 }: {
   searchParams: PropertySearch;
 }) {
-  const where = {
-    ...listingWhere("real-estate", searchParams),
-    ...propertyWhere(searchParams),
-  };
+  const where = propertySearchWhere(searchParams);
   // A plain /real-estate?kind=… is still the "browse" view, so it does not count.
   const narrowing = { ...searchParams };
   delete narrowing.kind;

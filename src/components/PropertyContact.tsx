@@ -2,30 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { recordListingLeadAction } from "@/app/actions/listings";
+import { revealListingContactAction } from "@/app/actions/listings";
+
+type Contact = {
+  contactName: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+};
 
 /**
- * Phone and email behind one tap. Guests are asked to join first — that is what
- * keeps sellers' numbers off scrapers — and every reveal is counted as a lead
- * for the owner and the admin desk.
+ * Phone and email behind one tap. The values are never part of the page — they
+ * are fetched by a server action on reveal, because anything handed to a client
+ * component ends up in the delivered HTML where scrapers read it. Guests are
+ * asked to join first, and every reveal is counted as a lead.
  */
 export function PropertyContact({
   listingId,
   listingSlug,
-  name,
-  phone,
-  email,
+  hasPhone,
+  hasEmail,
   signedIn,
 }: {
   listingId: string;
   listingSlug: string;
-  name: string | null;
-  phone: string | null;
-  email: string | null;
+  hasPhone: boolean;
+  hasEmail: boolean;
   signedIn: boolean;
 }) {
-  const [shown, setShown] = useState(false);
-  if (!phone && !email) return null;
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [loading, setLoading] = useState(false);
+  if (!hasPhone && !hasEmail) return null;
 
   if (!signedIn) {
     return (
@@ -47,35 +53,48 @@ export function PropertyContact({
     );
   }
 
-  if (!shown) {
+  if (!contact) {
     return (
       <button
         type="button"
-        onClick={() => {
-          setShown(true);
-          void recordListingLeadAction(listingId, phone ? "phone" : "email");
+        disabled={loading}
+        onClick={async () => {
+          setLoading(true);
+          const found = await revealListingContactAction(listingId);
+          setContact(found);
+          setLoading(false);
         }}
-        className="w-full rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+        className="w-full rounded-xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 disabled:opacity-60"
       >
-        📞 Show phone{email ? " and email" : ""}
+        {loading
+          ? "Getting it…"
+          : `📞 Show phone${hasPhone && hasEmail ? " and email" : ""}`}
       </button>
     );
   }
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm">
-      {name ? <p className="font-bold">{name}</p> : null}
-      {phone ? (
+      {contact.contactName ? (
+        <p className="font-bold">{contact.contactName}</p>
+      ) : null}
+      {contact.contactPhone ? (
         <p className="mt-1">
-          <a href={`tel:${phone}`} className="font-semibold text-indigo-600">
-            📞 {phone}
+          <a
+            href={`tel:${contact.contactPhone}`}
+            className="font-semibold text-indigo-600"
+          >
+            📞 {contact.contactPhone}
           </a>
         </p>
       ) : null}
-      {email ? (
+      {contact.contactEmail ? (
         <p className="mt-1">
-          <a href={`mailto:${email}`} className="font-semibold text-indigo-600">
-            ✉️ {email}
+          <a
+            href={`mailto:${contact.contactEmail}`}
+            className="font-semibold text-indigo-600"
+          >
+            ✉️ {contact.contactEmail}
           </a>
         </p>
       ) : null}

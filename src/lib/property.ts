@@ -1,4 +1,5 @@
 import type { PostedByRole, PropertyGroup, Prisma } from "@prisma/client";
+import { listingWhere, type ListingFilters } from "@/lib/listings";
 
 /**
  * Real-estate taxonomy shared by the post form, the filters and the spec sheet
@@ -220,7 +221,10 @@ export type PropertyFilterParams = {
 function intOrNull(value?: string) {
   if (!value) return null;
   const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  // Postgres int4 — a longer number typed into the price box would otherwise
+  // reach Prisma and blow up the page.
+  return Math.min(parsed, 2_147_483_647);
 }
 
 function asArray(value?: string | string[]) {
@@ -254,6 +258,28 @@ export function propertyWhere(filters: PropertyFilterParams): Prisma.ListingWher
     ...(filters.parking ? { parkingCar: { gte: 1 } } : {}),
     ...(filters.nri ? { nriFriendly: true } : {}),
     ...(filters.deal ? { investmentDeal: true } : {}),
+  };
+}
+
+/**
+ * The whole /real-estate query: the shared section filter plus the property
+ * one. Both halves write `price`, so they are merged rather than spread — a
+ * plain spread silently dropped whichever bound came first.
+ */
+export function propertySearchWhere(
+  filters: PropertyFilterParams & ListingFilters,
+): Prisma.ListingWhereInput {
+  const base = listingWhere("real-estate", filters);
+  const extra = propertyWhere(filters);
+  const price = {
+    ...(base.price && typeof base.price === "object" ? base.price : {}),
+    ...(extra.price && typeof extra.price === "object" ? extra.price : {}),
+  };
+
+  return {
+    ...base,
+    ...extra,
+    ...(Object.keys(price).length ? { price } : {}),
   };
 }
 

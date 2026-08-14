@@ -149,9 +149,8 @@ export default async function ListingPage({ params }: { params: { slug: string }
             <PropertyContact
               listingId={listing.id}
               listingSlug={listing.slug}
-              name={listing.contactName}
-              phone={listing.contactPhone}
-              email={listing.contactEmail}
+              hasPhone={Boolean(listing.contactPhone)}
+              hasEmail={Boolean(listing.contactEmail)}
               signedIn={Boolean(viewer)}
             />
           ) : null}
