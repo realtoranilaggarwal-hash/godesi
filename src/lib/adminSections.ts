@@ -11,6 +11,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/coupons", label: "Coupons", icon: "🏷️" },
   { href: "/admin/news", label: "News", icon: "📰" },
   { href: "/admin/journalists", label: "Journalists", icon: "🗞️" },
+  { href: "/admin/wall", label: "News wall", icon: "🧱" },
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁" },
   { href: "/admin/connect", label: "Connect", icon: "🤝" },
   { href: "/admin/temples", label: "Temples", icon: "🛕" },
