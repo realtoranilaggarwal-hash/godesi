@@ -37,6 +37,19 @@ export async function GET(
         ? "#4f46e5"
         : "#94a3b8";
   const stacked = size === "square";
+  // The bundled font has no ✓ glyph, so the tick is drawn rather than typed —
+  // otherwise every PNG badge shows a missing-glyph box.
+  const tick = (px: number) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      width={px}
+      height={px}
+      alt=""
+      src={`data:image/svg+xml;utf8,${encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`,
+      )}`}
+    />
+  );
 
   return new ImageResponse(
     (
@@ -67,11 +80,9 @@ export async function GET(
               borderRadius: 999,
               background: mark,
               color: "#ffffff",
-              fontSize: 30 * scale,
-              fontWeight: 800,
             }}
           >
-            ✓
+            {tick(30 * scale)}
           </div>
         ) : null}
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -106,11 +117,9 @@ export async function GET(
               borderRadius: 999,
               background: mark,
               color: "#ffffff",
-              fontSize: (size === "small" ? 13 : 18) * scale,
-              fontWeight: 800,
             }}
           >
-            ✓
+            {tick((size === "small" ? 13 : 18) * scale)}
           </div>
         )}
       </div>

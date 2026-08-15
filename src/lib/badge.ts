@@ -36,7 +36,14 @@ const NOT_LISTED: Omit<BadgeStatus, "slug"> = {
   listedSince: new Date(0),
 };
 
+/** Slugs we generate; anything else cannot match a card and never reaches the database. */
+const SLUG = /^[a-z0-9][a-z0-9-]{0,120}$/i;
+
 export async function badgeStatus(slug: string): Promise<BadgeStatus> {
+  if (!SLUG.test(slug)) {
+    return { ...NOT_LISTED, slug };
+  }
+
   const business = await db.business.findUnique({
     where: { slug },
     select: {

@@ -45,7 +45,9 @@ export default async function BadgePage() {
             <p className="mt-1 text-sm text-slate-600">
               {status.level === "VERIFIED"
                 ? "Your card qualifies for the Verified badge. Paste it anywhere — it reads your live card, so it stays correct on its own."
-                : "Your card is live, so the badge says “Listed on Godesi.com” for now. It upgrades itself to Verified once you claim the card or start a paid membership — no need to change the code on your website."}
+                : status.level === "LISTED"
+                  ? "Your card is live, so the badge says “Listed on Godesi.com” for now. It upgrades itself to Verified once you claim the card or start a paid membership — no need to change the code on your website."
+                  : "Your card is not live yet, so the badge cannot say Listed or Verified — it reads “Find us on Godesi.com” until your card is approved. You can paste it now: it upgrades itself the moment the card goes live."}
             </p>
             <div className="mt-3">
               <BadgeEmbed
