@@ -37,6 +37,7 @@ async function loadEvent(slug: string) {
         select: { name: true, username: true, avatarUrl: true },
       },
       business: { select: { slug: true, name: true, logoUrl: true, city: true } },
+      source: { select: { name: true, websiteUrl: true } },
     },
   });
 }
@@ -71,6 +72,9 @@ export default async function EventPage({
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
+  // Imported from someone else's public calendar: we list it and send people to
+  // the organiser. Godesi sells no seats for it, so the booking box would lie.
+  const imported = event.sourceId !== null;
   const left = seatsLeft(event);
   const past = isPast(event);
   const maxPerBooking = Math.min(10, left);
@@ -118,7 +122,10 @@ export default async function EventPage({
                 <Badge tone="amber">🔥 Godesi Partner Event</Badge>
               ) : null}
               {past ? <Badge tone="slate">Finished</Badge> : null}
-              {left === 0 && !past ? <Badge tone="red">Sold out</Badge> : null}
+              {left === 0 && !past && !imported ? (
+                <Badge tone="red">Sold out</Badge>
+              ) : null}
+              {imported ? <Badge tone="slate">📅 Community calendar</Badge> : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -192,7 +199,9 @@ export default async function EventPage({
                   "Free entry"
                 )}
               </p>
-              <p>🪑 {left} of {event.seatsTotal} seats available</p>
+              {imported ? null : (
+                <p>🪑 {left} of {event.seatsTotal} seats available</p>
+              )}
             </div>
 
             {event.features.length ? (
@@ -338,6 +347,23 @@ export default async function EventPage({
           )}
         </Card>
 
+        {imported ? (
+          <Card>
+            <h2 className="font-bold">Tickets and details</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Godesi listed this event from {event.source?.name}&apos;s public
+              calendar and does not sell tickets for it. Check times and entry
+              with the organiser before travelling.
+            </p>
+            {event.websiteUrl ? (
+              <div className="mt-3">
+                <LinkButton href={event.websiteUrl} target="_blank">
+                  Open the organiser&apos;s page
+                </LinkButton>
+              </div>
+            ) : null}
+          </Card>
+        ) : (
         <Card>
           <h2 className="font-bold">Book your seats</h2>
           {past ? (
@@ -369,6 +395,7 @@ export default async function EventPage({
             </div>
           )}
         </Card>
+        )}
       </div>
 
       <SidebarBanners />

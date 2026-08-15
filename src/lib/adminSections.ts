@@ -4,6 +4,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/listings", label: "Listings", icon: "🏪" },
   { href: "/admin/claims", label: "Claims", icon: "✋" },
   { href: "/admin/events", label: "Events", icon: "🎟️" },
+  { href: "/admin/events/wire", label: "Event wire", icon: "📅" },
   { href: "/admin/banners", label: "Banners", icon: "🖼️" },
   { href: "/admin/ads", label: "Ad orders", icon: "📢" },
   { href: "/admin/members", label: "Members", icon: "👥" },

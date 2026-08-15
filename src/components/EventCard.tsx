@@ -22,6 +22,8 @@ export type EventListItem = {
   currency: string;
   seatsTotal: number;
   seatsBooked: number;
+  /** Set when the event came from a public calendar; Godesi sells no seats. */
+  sourceId?: string | null;
   category: { name: string; icon: string; color: string } | null;
 };
 
@@ -37,6 +39,7 @@ export function EventCard({
   variant?: "default" | "compact" | "tile";
 }) {
   const left = seatsLeft(event);
+  const imported = Boolean(event.sourceId);
   const tile = variant === "tile";
   const compact = variant === "compact" || tile;
   const posterHeight = tile ? "h-28" : compact ? "h-24" : "h-32";
@@ -85,7 +88,7 @@ export function EventCard({
             {event.partnerStatus === "APPROVED" ? (
               <Badge tone="amber">🔥 Partner event</Badge>
             ) : null}
-            {left === 0 ? <Badge tone="red">Sold out</Badge> : null}
+            {left === 0 && !imported ? <Badge tone="red">Sold out</Badge> : null}
           </div>
           <h3
             className={`line-clamp-2 font-bold leading-snug group-hover:text-indigo-600 ${

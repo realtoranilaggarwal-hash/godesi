@@ -52,8 +52,10 @@ export function MemberBubbles({
 
   useEffect(() => {
     const load = async () => {
+      // A tab left open in the background does not need fresh bubbles.
+      if (document.visibilityState !== "visible") return;
       try {
-        const response = await fetch("/api/members", { cache: "no-store" });
+        const response = await fetch("/api/members");
         if (!response.ok) return;
         const data = (await response.json()) as {
           members?: BubbleMember[];
@@ -74,7 +76,7 @@ export function MemberBubbles({
       }
     };
 
-    const timer = window.setInterval(load, 30000);
+    const timer = window.setInterval(load, 180_000);
     return () => window.clearInterval(timer);
   }, []);
 

@@ -858,6 +858,12 @@ model Event {
   /// Every category the event should appear under, including the primary one.
   categorySlugs String[]  @default([])
 
+  /// Set when the event was imported from a public calendar rather than posted.
+  sourceId  String?
+  source    EventSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  /// The calendar's own id for this entry, so a re-import updates one row.
+  sourceUid String?
+
   speakers EventSpeaker[]
   sessions EventSession[]
   tickets  Ticket[]
@@ -865,11 +871,43 @@ model Event {
   tiers    TicketTier[]
   coupons  Coupon[]
 
+  @@unique([sourceId, sourceUid])
   @@index([startsAt])
   @@index([categorySlug])
   @@index([city])
   @@index([venueRefId])
   @@map("EventListing")
+}
+
+/// A public calendar we import community events from — a temple's iCal feed, a
+/// cultural association's Google Calendar, an organiser's event RSS.
+model EventSource {
+  id            String          @id @default(cuid())
+  /// Shown on every imported event as the credit, e.g. "Umiya Dham, Edison".
+  name          String
+  url           String          @unique
+  kind          EventSourceKind @default(ICS)
+  /// Where the organisation is, used when a calendar entry gives no place.
+  city          String
+  state         String?
+  country       String          @default("USA")
+  /// Link back to the organisation, shown as "Details on their website".
+  websiteUrl    String?
+  categorySlugs String[]        @default([])
+  tags          String[]        @default([])
+  active        Boolean         @default(true)
+  lastRunAt     DateTime?
+  /// Human-readable outcome of the last run, including the failure if it failed.
+  lastStatus    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  events Event[]
+}
+
+enum EventSourceKind {
+  ICS
+  RSS
 }
 
 /// Whether the organiser has signed up to — and delivered — the branding deal.
