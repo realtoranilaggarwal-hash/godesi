@@ -302,6 +302,17 @@ export async function saveLinkedEventAction(formData: FormData) {
     reject("The event has to end after it starts.");
   }
 
+  // The category is a foreign key: a slug that is not a real category has to
+  // be dropped rather than sent to Postgres, which would reject the whole row.
+  const categorySlug = parsed.data.categorySlug
+    ? ((
+        await db.category.findUnique({
+          where: { slug: parsed.data.categorySlug },
+          select: { slug: true },
+        })
+      )?.slug ?? null)
+    : null;
+
   const host = new URL(parsed.data.sourceUrl).hostname.replace(/^www\./, "");
   const sourceId = await manualSource(host);
   const duplicate = await db.event.findUnique({
@@ -334,10 +345,8 @@ export async function saveLinkedEventAction(formData: FormData) {
         country: parsed.data.country,
         imageUrl: parsed.data.imageUrl ?? null,
         websiteUrl: parsed.data.sourceUrl,
-        categorySlug: parsed.data.categorySlug || null,
-        categorySlugs: parsed.data.categorySlug
-          ? [parsed.data.categorySlug]
-          : [],
+        categorySlug,
+        categorySlugs: categorySlug ? [categorySlug] : [],
         tags: list(parsed.data.tags),
         // Godesi sells no tickets for someone else's event.
         price: 0,

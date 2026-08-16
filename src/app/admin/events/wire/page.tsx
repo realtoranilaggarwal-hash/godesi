@@ -15,6 +15,7 @@ import {
   saveLinkedEventAction,
   toggleEventSourceAction,
 } from "@/app/actions/eventWire";
+import { getCategoryTree } from "@/lib/directory";
 import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
 
@@ -67,7 +68,8 @@ export default async function Page({
   if (!user) redirect("/login?next=/admin/events/wire");
   if (!isStaff(user) || !can(user, "events")) redirect("/dashboard");
 
-  const [sources, imported] = await Promise.all([
+  const [categories, sources, imported] = await Promise.all([
+    getCategoryTree(),
     db.eventSource.findMany({
       orderBy: [{ active: "desc" }, { name: "asc" }],
       include: { _count: { select: { events: true } } },
@@ -246,8 +248,15 @@ export default async function Page({
               <Field label="Country">
                 <input name="country" defaultValue="USA" className={inputClass} />
               </Field>
-              <Field label="Category" hint="Optional slug, e.g. religious">
-                <input name="categorySlug" className={inputClass} />
+              <Field label="Category" hint="Optional — helps people find it">
+                <select name="categorySlug" className={inputClass}>
+                  <option value="">No category</option>
+                  {categories.map((category) => (
+                    <option key={category.slug} value={category.slug}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Tags" hint="Optional, comma separated">
                 <input name="tags" className={inputClass} />
@@ -356,7 +365,11 @@ export default async function Page({
             />
           </Field>
           <Field label="Categories" hint="Optional, comma separated slugs">
-            <input name="categorySlugs" placeholder="religious" className={inputClass} />
+            <input
+              name="categorySlugs"
+              placeholder="religious-services"
+              className={inputClass}
+            />
           </Field>
           <Field label="Tags" hint="Optional, comma separated">
             <input name="tags" placeholder="temple, aarti" className={inputClass} />

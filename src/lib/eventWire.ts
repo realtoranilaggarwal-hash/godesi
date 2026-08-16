@@ -217,6 +217,13 @@ export async function importSource(source: Source): Promise<WireResult> {
   result.reason = skipReason(entries, upcoming.length, now, horizon);
 
   const placeZone = zoneForPlace(source.state, source.country);
+  // categorySlug is a foreign key, so a slug nobody typed correctly has to be
+  // dropped: otherwise Postgres rejects every event from that calendar.
+  const known = await db.category.findMany({
+    where: { slug: { in: source.categorySlugs } },
+    select: { slug: true },
+  });
+  const categorySlugs = known.map((category) => category.slug);
 
   for (const entry of upcoming) {
     const place = splitLocation(entry.location);
@@ -247,8 +254,8 @@ export async function importSource(source: Source): Promise<WireResult> {
       state: source.state,
       country: source.country,
       websiteUrl: entry.url ?? source.websiteUrl,
-      categorySlugs: source.categorySlugs,
-      categorySlug: source.categorySlugs[0] ?? null,
+      categorySlugs,
+      categorySlug: categorySlugs[0] ?? null,
       tags: source.tags,
       // Godesi sells no tickets for an imported event; the organiser does.
       price: 0,
