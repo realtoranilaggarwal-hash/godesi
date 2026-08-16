@@ -19,7 +19,7 @@ const STEPS = [
   },
   {
     title: "Print the standee",
-    body: "Download the artwork below and get it printed — we point you at a printer that does it cheaply.",
+    body: "Download the 38×70 in artwork below and get it printed — we point you at a printer that does roll-up standees cheaply.",
   },
   {
     title: "Stand it at the entrance",
@@ -79,7 +79,7 @@ export default async function EventPartnerPage() {
                   rel="noreferrer noopener"
                   className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700"
                 >
-                  Download the standee (PDF)
+                  Download the standee (PDF, 38×70 in)
                 </a>
               ) : null}
               {kit.printerUrl ? (
@@ -127,6 +127,9 @@ export default async function EventPartnerPage() {
             Printing costs are yours; the design, the featuring and the banners
             are ours. Featuring runs until the event finishes, and we take it
             down if the standee never goes up.
+            {kit?.printerUrl
+              ? " The printer link is a referral link, so Godesi may earn a small commission — it costs you no more."
+              : ""}
           </p>
         </Card>
 
