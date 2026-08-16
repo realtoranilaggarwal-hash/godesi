@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { emailEnabled, sendEmail, ticketEmail } from "@/lib/email";
 import { recordCouponUse } from "@/lib/coupons";
+import { LEGACY_EVENT_ZONE } from "@/lib/time";
 
 export async function uniqueEventSlug(title: string, city: string) {
   const base = slugify([title, city].filter(Boolean).join(" ")) || "event";
@@ -14,25 +15,6 @@ export async function uniqueEventSlug(title: string, city: string) {
     candidate = `${base}-${counter}`;
   }
   return candidate;
-}
-
-/** The IST wall-clock date and time a form's date/time inputs expect. */
-export function istParts(value: Date) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(value);
-  const get = (type: string) =>
-    parts.find((part) => part.type === type)?.value ?? "";
-  return {
-    date: `${get("year")}-${get("month")}-${get("day")}`,
-    time: `${get("hour")}:${get("minute")}`,
-  };
 }
 
 /** Human-typable ticket code, e.g. GD-4F7K-9QX2. */
@@ -51,7 +33,11 @@ export function isPast(event: { startsAt: Date }) {
   return event.startsAt.getTime() < Date.now();
 }
 
-export function formatEventDate(value: Date) {
+/**
+ * An event's time is always shown in the town's own zone, with the zone named,
+ * so "8:00 pm EST" means the same thing to a reader in Edison and in Delhi.
+ */
+export function formatEventDate(value: Date, zone?: string | null) {
   return new Intl.DateTimeFormat("en-IN", {
     weekday: "short",
     day: "numeric",
@@ -59,7 +45,8 @@ export function formatEventDate(value: Date) {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "Asia/Kolkata",
+    timeZoneName: "short",
+    timeZone: zone || LEGACY_EVENT_ZONE,
   }).format(value);
 }
 
@@ -68,20 +55,22 @@ export function formatEventDate(value: Date) {
  * date when it runs over into another one. Null when the calendar it came from
  * gave the same minute for both, which reads as "4:00 am – 4:00 am".
  */
-export function formatEventEnd(startsAt: Date, endsAt: Date) {
+export function formatEventEnd(
+  startsAt: Date,
+  endsAt: Date,
+  zone?: string | null,
+) {
   if (endsAt.getTime() - startsAt.getTime() < 60_000) return null;
-  const sameDay =
-    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(
-      startsAt,
-    ) ===
-    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(
-      endsAt,
-    );
-  if (!sameDay) return formatEventDate(endsAt);
+  const timeZone = zone || LEGACY_EVENT_ZONE;
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone });
+  if (day.format(startsAt) !== day.format(endsAt)) {
+    return formatEventDate(endsAt, timeZone);
+  }
   return new Intl.DateTimeFormat("en-IN", {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "Asia/Kolkata",
+    timeZoneName: "short",
+    timeZone,
   }).format(endsAt);
 }
 
@@ -160,14 +149,22 @@ async function sendTicketConfirmation(ticketId: string) {
   const ticket = await db.ticket.findUnique({
     where: { id: ticketId },
     include: {
-      event: { select: { title: true, startsAt: true, venue: true, city: true } },
+      event: {
+        select: {
+          title: true,
+          startsAt: true,
+          timeZone: true,
+          venue: true,
+          city: true,
+        },
+      },
     },
   });
   if (!ticket?.buyerEmail) return;
 
   const { subject, html } = ticketEmail({
     eventTitle: ticket.event.title,
-    when: formatEventDate(ticket.event.startsAt),
+    when: formatEventDate(ticket.event.startsAt, ticket.event.timeZone),
     venue: `${ticket.event.venue}, ${ticket.event.city}`,
     seats: ticket.quantity,
     code: ticket.code,

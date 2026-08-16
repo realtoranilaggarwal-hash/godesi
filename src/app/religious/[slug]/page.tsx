@@ -56,7 +56,14 @@ export default async function WorshipPlacePage({ params }: { params: { slug: str
     },
     orderBy: { startsAt: "asc" },
     take: 5,
-    select: { id: true, slug: true, title: true, venue: true, startsAt: true },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      venue: true,
+      startsAt: true,
+      timeZone: true,
+    },
   });
 
   return (
@@ -153,7 +160,7 @@ export default async function WorshipPlacePage({ params }: { params: { slug: str
                     {event.title}
                   </Link>
                   <p className="text-sm text-slate-600">
-                    {formatEventDate(event.startsAt)} · {event.venue}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.venue}
                   </p>
                 </li>
               ))}

@@ -12,7 +12,8 @@ import {
   wireOrganizerId,
 } from "@/lib/eventWire";
 import { readEventLink } from "@/lib/eventLink";
-import { istParts, uniqueEventSlug } from "@/lib/events";
+import { uniqueEventSlug } from "@/lib/events";
+import { instantFrom, isEventZone, zoneForPlace } from "@/lib/time";
 import { titleCase } from "@/lib/titlecase";
 
 const sourceSchema = z.object({
@@ -186,6 +187,7 @@ const linkedSchema = z.object({
   imageUrl: z.string().trim().url().max(500).optional().or(z.literal("").transform(() => undefined)),
   categorySlug: z.string().trim().max(60).optional(),
   tags: z.string().trim().max(200).optional(),
+  timeZone: z.string().trim().max(60).optional(),
 });
 
 /**
@@ -219,20 +221,21 @@ export async function readEventLinkAction(formData: FormData) {
     );
   }
 
-  const start = draft.startsAt ? istParts(draft.startsAt) : null;
-  const end = draft.endsAt ? istParts(draft.endsAt) : null;
   const params = new URLSearchParams({
     link: draft.sourceUrl,
     host: draft.host,
     title: draft.title,
-    date: start?.date ?? "",
-    time: start?.time ?? "",
-    endDate: end?.date ?? "",
-    endTime: end?.time ?? "",
+    date: draft.start?.date ?? "",
+    time: draft.start?.time ?? "",
+    endDate: draft.end?.date ?? "",
+    endTime: draft.end?.time ?? "",
     venue: draft.venue,
     address: draft.address,
     city: draft.city,
     state: draft.state,
+    // The page states the event's own local time; the zone is guessed from
+    // where it happens and the desk can correct it.
+    zone: zoneForPlace(draft.state, ""),
     text: draft.description.slice(0, 1500),
     missing: draft.missing.join(", "),
   });
@@ -259,23 +262,30 @@ export async function saveLinkedEventAction(formData: FormData) {
     imageUrl: formData.get("imageUrl") || undefined,
     categorySlug: formData.get("categorySlug") || undefined,
     tags: formData.get("tags") || undefined,
+    timeZone: formData.get("timeZone") || undefined,
   });
   if (!parsed.success) {
     reject(parsed.error.issues.map((issue) => issue.message).join(" "));
   }
 
-  const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
-  if (Number.isNaN(startsAt.getTime())) reject("Enter a valid date and time.");
+  // Times are the event's own local times, so they are read in its zone.
+  const zone =
+    parsed.data.timeZone && isEventZone(parsed.data.timeZone)
+      ? parsed.data.timeZone
+      : zoneForPlace(parsed.data.state, parsed.data.country);
+
+  const startsAt = instantFrom(parsed.data.date, parsed.data.time, zone);
+  if (!startsAt) reject("Enter a valid date and time.");
 
   const endsAt =
     parsed.data.endDate || parsed.data.endTime
-      ? new Date(
-          `${parsed.data.endDate || parsed.data.date}T${
-            parsed.data.endTime || parsed.data.time
-          }:00+05:30`,
+      ? instantFrom(
+          parsed.data.endDate || parsed.data.date,
+          parsed.data.endTime || parsed.data.time,
+          zone,
         )
       : null;
-  if (endsAt && Number.isNaN(endsAt.getTime())) {
+  if ((parsed.data.endDate || parsed.data.endTime) && !endsAt) {
     reject("Enter a valid end date and time.");
   }
   if (endsAt && endsAt <= startsAt) {
@@ -304,6 +314,7 @@ export async function saveLinkedEventAction(formData: FormData) {
         .slice(0, 5000),
       startsAt,
       endsAt,
+      timeZone: zone,
       venue: titleCase(parsed.data.venue),
       hallName: parsed.data.hallName || null,
       address: parsed.data.address || null,

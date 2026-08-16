@@ -15,6 +15,7 @@ import {
   saveLinkedEventAction,
   toggleEventSourceAction,
 } from "@/app/actions/eventWire";
+import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
 
 function Field({
@@ -57,6 +58,7 @@ export default async function Page({
     address?: string;
     city?: string;
     state?: string;
+    zone?: string;
     text?: string;
     missing?: string;
   };
@@ -79,6 +81,7 @@ export default async function Page({
         slug: true,
         title: true,
         startsAt: true,
+        timeZone: true,
         venue: true,
         city: true,
         status: true,
@@ -173,6 +176,24 @@ export default async function Page({
                   className={inputClass}
                 />
               </Field>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Times are in"
+                  hint="The event's own local time, not yours"
+                >
+                  <select
+                    name="timeZone"
+                    defaultValue={searchParams.zone ?? DEFAULT_EVENT_ZONE}
+                    className={inputClass}
+                  >
+                    {EVENT_TIME_ZONES.map((zone) => (
+                      <option key={zone.value} value={zone.value}>
+                        {zone.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
               <Field label="End date" hint="Optional">
                 <input
                   name="endDate"
@@ -420,7 +441,8 @@ export default async function Page({
                     {event.title}
                   </Link>
                   <p className="text-xs text-slate-500">
-                    {formatEventDate(event.startsAt)} · {event.venue},{" "}
+                    {formatEventDate(event.startsAt, event.timeZone)} ·{" "}
+                    {event.venue},{" "}
                     {event.city} · from {event.source?.name}
                     {event.status === "REJECTED" ? " · removed" : ""}
                   </p>

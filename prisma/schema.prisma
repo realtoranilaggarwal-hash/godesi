@@ -883,6 +883,10 @@ model Event {
   description       String
   startsAt          DateTime
   endsAt            DateTime?
+  /// IANA zone the times were written in, e.g. "America/New_York". Events from
+  /// before this was recorded are read as India time, which is what they were
+  /// entered as.
+  timeZone          String?
   venue             String
   /// Hall, banquet room or ground inside a venue that has several.
   hallName          String?

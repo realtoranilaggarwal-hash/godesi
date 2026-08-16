@@ -85,7 +85,7 @@ export default async function EventPage({
   const past = isPast(event);
   const maxPerBooking = Math.min(10, left);
   const endLabel = event.endsAt
-    ? formatEventEnd(event.startsAt, event.endsAt)
+    ? formatEventEnd(event.startsAt, event.endsAt, event.timeZone)
     : null;
 
   return (
@@ -167,7 +167,7 @@ export default async function EventPage({
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>
-                📅 {formatEventDate(event.startsAt)}
+                📅 {formatEventDate(event.startsAt, event.timeZone)}
                 {endLabel ? ` – ${endLabel}` : ""}
               </p>
               <p>

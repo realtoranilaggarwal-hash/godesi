@@ -30,6 +30,7 @@ export async function GET(
       title: true,
       slug: true,
       startsAt: true,
+      timeZone: true,
       venue: true,
       city: true,
       price: true,
@@ -99,7 +100,7 @@ export async function GET(
         : ""
     }
      <div class="body">
-       <p class="when">${escapeHtml(formatEventDate(event.startsAt))}</p>
+       <p class="when">${escapeHtml(formatEventDate(event.startsAt, event.timeZone))}</p>
        <a class="title" href="${url}" target="_blank" rel="noopener">${icon}${escapeHtml(event.title)}</a>
        <p class="where">📍 ${escapeHtml(event.venue)}, ${escapeHtml(event.city)}</p>
        <div class="row">

@@ -3,6 +3,7 @@ import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { parseIcs, type IcsEvent } from "@/lib/ics";
+import { placeWallClock, zoneForPlace } from "@/lib/time";
 
 /**
  * Imports community events from the public calendars organisations already
@@ -14,6 +15,11 @@ export const WIRE_EMAIL = "community-calendar@godesi.com";
 export const WIRE_HORIZON_DAYS = 180;
 /** Most entries taken from one calendar in a single run. */
 export const WIRE_PER_SOURCE = 40;
+
+/** A calendar time that names no zone, so it means the town's own clock. */
+function loose(entry: IcsEvent) {
+  return entry.floating || entry.allDay;
+}
 
 export type WireResult = {
   source: string;
@@ -210,11 +216,14 @@ export async function importSource(source: Source): Promise<WireResult> {
   result.skipped = entries.length - upcoming.length;
   result.reason = skipReason(entries, upcoming.length, now, horizon);
 
+  const placeZone = zoneForPlace(source.state, source.country);
+
   for (const entry of upcoming) {
     const place = splitLocation(entry.location);
     const description =
       plainText(entry.description) ||
       `${entry.title} at ${place.venue ?? source.name}.`;
+    const zone = entry.zone ?? placeZone;
 
     const data = {
       title: entry.title,
@@ -222,8 +231,16 @@ export async function importSource(source: Source): Promise<WireResult> {
         0,
         5000,
       ),
-      startsAt: entry.startsAt,
-      endsAt: entry.endsAt,
+      // A floating calendar time is a wall clock with no zone: it means 6pm in
+      // the temple's own town, so it is placed there rather than left in UTC.
+      startsAt: loose(entry)
+        ? placeWallClock(entry.startsAt, zone)
+        : entry.startsAt,
+      endsAt:
+        entry.endsAt && loose(entry)
+          ? placeWallClock(entry.endsAt, zone)
+          : entry.endsAt,
+      timeZone: zone,
       venue: place.venue ?? source.name,
       address: place.address,
       city: source.city,

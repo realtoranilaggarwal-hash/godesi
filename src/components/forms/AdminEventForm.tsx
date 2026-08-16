@@ -11,6 +11,7 @@ import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
 import { EVENT_TYPES } from "@/lib/eventOptions";
+import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type AdminEventValues = {
@@ -21,6 +22,7 @@ export type AdminEventValues = {
   time: string;
   endDate: string;
   endTime: string;
+  timeZone: string;
   venue: string;
   hallName: string;
   hallCapacity: number | null;
@@ -80,7 +82,7 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Start time" hint="India Standard Time">
+        <Field label="Start time" hint="The time where the event happens">
           <input
             name="time"
             type="time"
@@ -88,6 +90,22 @@ export function AdminEventForm({
             required
             className={inputClass}
           />
+        </Field>
+        <Field
+          label="Times are in"
+          hint="The venue's own zone — shown to everyone as that"
+        >
+          <select
+            name="timeZone"
+            defaultValue={event.timeZone}
+            className={inputClass}
+          >
+            {EVENT_TIME_ZONES.map((zone) => (
+              <option key={zone.value} value={zone.value}>
+                {zone.label}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label="End date" hint="Optional — for events that run past midnight or over days">
           <input

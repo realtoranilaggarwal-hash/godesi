@@ -19,7 +19,13 @@ export default async function MyTicketsPage() {
     db.ticket.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
-      include: { event: { select: { title: true, slug: true, startsAt: true, city: true } } },
+      include: { event: { select: {
+            title: true,
+            slug: true,
+            startsAt: true,
+            timeZone: true,
+            city: true,
+          } } },
     }),
     db.event.findMany({
       where: { organizerId: user.id },
@@ -44,7 +50,7 @@ export default async function MyTicketsPage() {
                 <div>
                   <p className="font-medium">{ticket.event.title}</p>
                   <p className="text-sm text-slate-500">
-                    {formatEventDate(ticket.event.startsAt)} · {ticket.event.city} ·{" "}
+                    {formatEventDate(ticket.event.startsAt, ticket.event.timeZone)} · {ticket.event.city} ·{" "}
                     {ticket.quantity} seat(s) ·{" "}
                     {ticket.amountMinor ? formatMinor(ticket.amountMinor, ticket.currency) : "Free"}
                   </p>
@@ -79,7 +85,7 @@ export default async function MyTicketsPage() {
                     {event.title}
                   </Link>
                   <p className="text-sm text-slate-500">
-                    {formatEventDate(event.startsAt)} · {event.seatsBooked}/{event.seatsTotal}{" "}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.seatsBooked}/{event.seatsTotal}{" "}
                     booked · {seatsLeft(event)} left · {event._count.tickets} bookings
                   </p>
                 </div>

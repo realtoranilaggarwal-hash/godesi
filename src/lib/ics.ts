@@ -4,8 +4,14 @@
  * where, what and a link — and ignores the rest of RFC 5545 rather than
  * pretending to implement it.
  */
+import { zoneOffsetMinutes } from "@/lib/time";
+
 export type IcsEvent = {
   uid: string;
+  /** Zone the calendar wrote the times in, when it said so. */
+  zone: string | null;
+  /** A time with no zone at all: a wall clock we have to place ourselves. */
+  floating: boolean;
   title: string;
   description: string;
   location: string;
@@ -40,38 +46,6 @@ function splitLine(line: string) {
   return { name: name.toUpperCase(), params, value };
 }
 
-/**
- * Offset of a named zone at a given instant, so a wall-clock calendar time
- * becomes the right absolute time across daylight saving.
- */
-function zoneOffsetMinutes(zone: string, utcGuess: Date) {
-  try {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: zone,
-      hour12: false,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }).formatToParts(utcGuess);
-    const get = (type: string) =>
-      Number(parts.find((part) => part.type === type)?.value ?? "0");
-    const asUtc = Date.UTC(
-      get("year"),
-      get("month") - 1,
-      get("day"),
-      get("hour") % 24,
-      get("minute"),
-      get("second"),
-    );
-    return (asUtc - utcGuess.getTime()) / 60_000;
-  } catch {
-    return 0;
-  }
-}
-
 function parseDate(value: string, params: string[]) {
   const zone = params
     .find((param) => param.toUpperCase().startsWith("TZID="))
@@ -83,6 +57,8 @@ function parseDate(value: string, params: string[]) {
     return {
       date: new Date(Date.UTC(+year, +month - 1, +day, 12)),
       allDay: true,
+      zone: zone ?? null,
+      floating: false,
     };
   }
 
@@ -90,18 +66,18 @@ function parseDate(value: string, params: string[]) {
   if (!stamp) return null;
   const [, year, month, day, hour, minute, second, utc] = stamp;
   const naive = Date.UTC(+year, +month - 1, +day, +hour, +minute, +second);
-  if (utc) return { date: new Date(naive), allDay: false };
+  if (utc) return { date: new Date(naive), allDay: false, zone: null, floating: false };
   if (!zone) {
-    // No zone and no Z: floating local time. Treat it as the calendar's own
-    // wall clock in UTC rather than guessing the server's zone.
-    return { date: new Date(naive), allDay: false };
+    // No zone and no Z: a floating wall clock. It is returned as if UTC and
+    // flagged, so the importer can place it in the town's own zone.
+    return { date: new Date(naive), allDay: false, zone: null, floating: true };
   }
   // Two passes: the offset itself depends on the instant near a DST boundary.
   let guess = new Date(naive);
   for (let pass = 0; pass < 2; pass += 1) {
     guess = new Date(naive - zoneOffsetMinutes(zone, guess) * 60_000);
   }
-  return { date: guess, allDay: false };
+  return { date: guess, allDay: false, zone, floating: false };
 }
 
 export function parseIcs(raw: string, limit = 400): IcsEvent[] {
@@ -154,6 +130,8 @@ function buildEvent(
       0,
       200,
     ),
+    zone: start.zone,
+    floating: start.floating,
     title: title.slice(0, 160),
     description: fields.DESCRIPTION
       ? unescapeText(fields.DESCRIPTION.value).slice(0, 4000)

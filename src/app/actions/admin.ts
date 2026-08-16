@@ -19,6 +19,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
 import { levelFor } from "@/lib/journalists";
 import { formatEventDate } from "@/lib/events";
+import { DEFAULT_EVENT_ZONE, instantFrom, isEventZone } from "@/lib/time";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import {
   SHARE_KINDS,
@@ -526,7 +527,7 @@ export async function setEventStatusAction(formData: FormData) {
       kind: "event",
       id: event.id,
       title: `🎟️ ${event.title}`,
-      body: `${formatEventDate(event.startsAt)} · ${event.venue}, ${event.city}`,
+      body: `${formatEventDate(event.startsAt, event.timeZone)} · ${event.venue}, ${event.city}`,
       path: `/events/${event.slug}`,
       imageUrl: event.imageUrl,
       tags: [event.city, "desievents"],
@@ -646,6 +647,7 @@ const adminEventSchema = z.object({
     .or(z.literal("").transform(() => undefined)),
   featured: z.coerce.boolean().default(false),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
+  timeZone: z.string().trim().max(60).optional(),
 });
 
 /** Full admin edit of any event — dates, pricing, seats, artwork and status. */
@@ -682,26 +684,30 @@ export async function adminUpdateEventAction(
       albumUrl: formData.get("albumUrl"),
       featured: formData.get("featured") === "on",
       status: formData.get("status"),
+      timeZone: formData.get("timeZone") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const startsAt = new Date(
-      `${parsed.data.date}T${parsed.data.time}:00+05:30`,
-    );
-    if (Number.isNaN(startsAt.getTime()))
-      return { error: "Enter a valid date and time." };
+    // The times typed are the event's own local times, in its own zone.
+    const zone =
+      parsed.data.timeZone && isEventZone(parsed.data.timeZone)
+        ? parsed.data.timeZone
+        : DEFAULT_EVENT_ZONE;
+
+    const startsAt = instantFrom(parsed.data.date, parsed.data.time, zone);
+    if (!startsAt) return { error: "Enter a valid date and time." };
 
     // An end time on its own ends the same day; an end date on its own reuses
     // the start time, which is what a multi-day festival means by "to the 3rd".
     const endsAt =
       parsed.data.endTime || parsed.data.endDate
-        ? new Date(
-            `${parsed.data.endDate || parsed.data.date}T${
-              parsed.data.endTime || parsed.data.time
-            }:00+05:30`,
+        ? instantFrom(
+            parsed.data.endDate || parsed.data.date,
+            parsed.data.endTime || parsed.data.time,
+            zone,
           )
         : null;
-    if (endsAt && Number.isNaN(endsAt.getTime()))
+    if ((parsed.data.endTime || parsed.data.endDate) && !endsAt)
       return { error: "Enter a valid end date and time." };
     if (endsAt && endsAt <= startsAt)
       return { error: "The event has to end after it starts." };
@@ -724,6 +730,7 @@ export async function adminUpdateEventAction(
         description: sentenceCase(parsed.data.description),
         startsAt,
         endsAt,
+        timeZone: zone,
         venue: titleCase(parsed.data.venue),
         hallName: parsed.data.hallName || null,
         hallCapacity: parsed.data.hallCapacity ?? null,

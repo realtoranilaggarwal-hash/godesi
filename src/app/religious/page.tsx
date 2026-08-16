@@ -59,6 +59,7 @@ export default async function ReligiousPage({
         city: true,
         venue: true,
         startsAt: true,
+        timeZone: true,
       },
     }),
     db.newsItem.findMany({
@@ -245,7 +246,7 @@ export default async function ReligiousPage({
                     {event.title}
                   </Link>
                   <p className="text-sm text-slate-600">
-                    {formatEventDate(event.startsAt)} · {event.venue},{" "}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.venue},{" "}
                     {event.city}
                   </p>
                 </li>

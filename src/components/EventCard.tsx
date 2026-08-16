@@ -13,6 +13,7 @@ export type EventListItem = {
   slug: string;
   title: string;
   startsAt: Date;
+  timeZone?: string | null;
   venue: string;
   hallName?: string | null;
   city: string;
@@ -107,7 +108,7 @@ export function EventCard({
             </h3>
           </div>
           <p className={`text-slate-600 ${tile ? "text-xs" : "text-sm"}`}>
-            📅 {formatEventDate(event.startsAt)}
+            📅 {formatEventDate(event.startsAt, event.timeZone)}
           </p>
           <p
             className={`line-clamp-1 text-slate-600 ${

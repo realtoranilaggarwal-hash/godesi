@@ -96,7 +96,7 @@ export async function FeaturedEventRail({ take = 4 }: { take?: number }) {
         >
           <p className="text-sm font-bold text-slate-900">{event.title}</p>
           <p className="mt-1 text-xs text-slate-500">
-            {formatEventDate(event.startsAt)} · {event.city}
+            {formatEventDate(event.startsAt, event.timeZone)} · {event.city}
           </p>
         </Link>
       ))}

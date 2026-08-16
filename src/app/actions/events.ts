@@ -9,6 +9,7 @@ import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
 import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
+import { instantFrom, isEventZone, zoneForPlace } from "@/lib/time";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
@@ -224,19 +225,26 @@ export async function createEventAction(
       return { error: "Please confirm you understand how ticket money and fees work." };
     }
 
-    const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
-    if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
+    // An organiser types the time of the town the event is in; the zone box
+    // says which, and defaults to the one their state suggests.
+    const chosen = String(formData.get("timeZone") ?? "");
+    const zone = isEventZone(chosen)
+      ? chosen
+      : zoneForPlace(parsed.data.state, parsed.data.country);
+
+    const startsAt = instantFrom(parsed.data.date, parsed.data.time, zone);
+    if (!startsAt) return { error: "Enter a valid date and time." };
 
     // An end time alone finishes the same day; an end date alone keeps the start time.
     const endsAt =
       parsed.data.endTime || parsed.data.endDate
-        ? new Date(
-            `${parsed.data.endDate || parsed.data.date}T${
-              parsed.data.endTime || parsed.data.time
-            }:00+05:30`,
+        ? instantFrom(
+            parsed.data.endDate || parsed.data.date,
+            parsed.data.endTime || parsed.data.time,
+            zone,
           )
         : null;
-    if (endsAt && Number.isNaN(endsAt.getTime()))
+    if ((parsed.data.endTime || parsed.data.endDate) && !endsAt)
       return { error: "Enter a valid end date and time." };
     if (endsAt && endsAt <= startsAt)
       return { error: "The event has to end after it starts." };
@@ -312,6 +320,7 @@ export async function createEventAction(
         description: sentenceCase(parsed.data.description),
         startsAt,
         endsAt,
+        timeZone: zone,
         venue: titleCase(parsed.data.venue),
         hallName: parsed.data.hallName || null,
         hallCapacity: parsed.data.hallCapacity ?? null,

@@ -120,7 +120,7 @@ export default async function Page() {
                     {event.title}
                   </Link>
                   <div className="text-xs text-slate-500">
-                    {formatEventDate(event.startsAt)} · {event.city} ·{" "}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.city} ·{" "}
                     {event.organizer.email} · {event.seatsBooked}/
                     {event.seatsTotal} seats · {event._count.tickets} bookings
                   </div>

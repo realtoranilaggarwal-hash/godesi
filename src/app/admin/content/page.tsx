@@ -48,6 +48,7 @@ export default async function ContentDeskPage() {
         title: true,
         city: true,
         startsAt: true,
+        timeZone: true,
         status: true,
       },
     }),
@@ -261,7 +262,7 @@ export default async function ContentDeskPage() {
                     {event.title}
                   </Link>
                   <p className="text-xs text-slate-500">
-                    {formatEventDate(event.startsAt)} · {event.city}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.city}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
