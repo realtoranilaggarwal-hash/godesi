@@ -34,20 +34,43 @@ export function isPast(event: { startsAt: Date }) {
 }
 
 /**
+ * "EST", "IST" — the zone's own abbreviation. No single locale knows them all:
+ * en-US names the American zones and calls Kolkata "GMT+5:30", en-IN the other
+ * way round, so each is tried until one gives a name rather than an offset.
+ */
+function zoneLabel(value: Date, timeZone: string) {
+  for (const locale of ["en-US", "en-IN", "en-GB"]) {
+    const label = new Intl.DateTimeFormat(locale, {
+      timeZone,
+      timeZoneName: "short",
+    })
+      .formatToParts(value)
+      .find((part) => part.type === "timeZoneName")?.value;
+    if (label && !label.startsWith("GMT") && !label.startsWith("UTC")) {
+      return label;
+    }
+  }
+  return new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "short" })
+    .formatToParts(value)
+    .find((part) => part.type === "timeZoneName")?.value ?? "";
+}
+
+/**
  * An event's time is always shown in the town's own zone, with the zone named,
  * so "8:00 pm EST" means the same thing to a reader in Edison and in Delhi.
  */
 export function formatEventDate(value: Date, zone?: string | null) {
-  return new Intl.DateTimeFormat("en-IN", {
+  const timeZone = zone || LEGACY_EVENT_ZONE;
+  const stamp = new Intl.DateTimeFormat("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZoneName: "short",
-    timeZone: zone || LEGACY_EVENT_ZONE,
+    timeZone,
   }).format(value);
+  return `${stamp} ${zoneLabel(value, timeZone)}`;
 }
 
 /**
@@ -66,12 +89,12 @@ export function formatEventEnd(
   if (day.format(startsAt) !== day.format(endsAt)) {
     return formatEventDate(endsAt, timeZone);
   }
-  return new Intl.DateTimeFormat("en-IN", {
+  const clock = new Intl.DateTimeFormat("en-IN", {
     hour: "numeric",
     minute: "2-digit",
-    timeZoneName: "short",
     timeZone,
   }).format(endsAt);
+  return `${clock} ${zoneLabel(endsAt, timeZone)}`;
 }
 
 /**
