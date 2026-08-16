@@ -49,6 +49,39 @@ async function wireAccount() {
   return created.id;
 }
 
+/** The account hand-added links are filed under, same as a calendar import. */
+export async function wireOrganizerId() {
+  return wireAccount();
+}
+
+/**
+ * The stand-in "calendar" a hand-pasted link is filed under, one per website,
+ * so those events get the same credit-and-no-tickets treatment as an import and
+ * can be removed from the same desk. It is never fetched: nightly runs only
+ * read active sources.
+ */
+export async function manualSource(host: string) {
+  const url = `manual://${host}`;
+  const existing = await db.eventSource.findUnique({
+    where: { url },
+    select: { id: true },
+  });
+  if (existing) return existing.id;
+
+  const created = await db.eventSource.create({
+    data: {
+      name: host,
+      url,
+      city: "",
+      country: "USA",
+      active: false,
+      lastStatus: "Added by hand from pasted links.",
+    },
+    select: { id: true },
+  });
+  return created.id;
+}
+
 async function eventSlug(title: string, startsAt: Date) {
   const base =
     slugify(`${title} ${startsAt.toISOString().slice(0, 10)}`) || "event";

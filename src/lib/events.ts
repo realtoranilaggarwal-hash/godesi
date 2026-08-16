@@ -16,6 +16,25 @@ export async function uniqueEventSlug(title: string, city: string) {
   return candidate;
 }
 
+/** The IST wall-clock date and time a form's date/time inputs expect. */
+export function istParts(value: Date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(value);
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    date: `${get("year")}-${get("month")}-${get("day")}`,
+    time: `${get("hour")}:${get("minute")}`,
+  };
+}
+
 /** Human-typable ticket code, e.g. GD-4F7K-9QX2. */
 export function ticketCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

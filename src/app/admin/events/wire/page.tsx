@@ -8,9 +8,11 @@ import { formatEventDate } from "@/lib/events";
 import {
   deleteEventSourceAction,
   findFeedAction,
+  readEventLinkAction,
   removeImportedEventAction,
   runEventSourceAction,
   saveEventSourceAction,
+  saveLinkedEventAction,
   toggleEventSourceAction,
 } from "@/app/actions/eventWire";
 import { Card, inputClass } from "@/components/ui";
@@ -39,7 +41,25 @@ export const metadata: Metadata = { title: "Event wire" };
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { error?: string; found?: string; feed?: string };
+  searchParams: {
+    error?: string;
+    found?: string;
+    feed?: string;
+    added?: string;
+    link?: string;
+    host?: string;
+    title?: string;
+    date?: string;
+    time?: string;
+    endDate?: string;
+    endTime?: string;
+    venue?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    text?: string;
+    missing?: string;
+  };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/events/wire");
@@ -76,11 +96,169 @@ export default async function Page({
         </Link>
       </div>
 
+      {searchParams.added ? (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+          Event added and live on /events.
+        </p>
+      ) : null}
+
       {searchParams.error ? (
         <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-800">
           {searchParams.error.slice(0, 200)}
         </p>
       ) : null}
+
+      <Card id="confirm">
+        <h2 className="mb-1 text-lg font-bold">Add one event from a link</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          For events that have no calendar feed — a Facebook event, a listing on
+          another site, an organiser&apos;s own page. Paste the link and we read
+          what the page says publicly; you check it before it goes live. Write
+          the description in your own words rather than copying theirs, and
+          leave the link pointing at the organiser — Godesi sells no tickets for
+          these.
+        </p>
+        <form action={readEventLinkAction} className="flex flex-wrap gap-2">
+          <input
+            name="link"
+            required
+            type="url"
+            placeholder="https://www.facebook.com/events/1234567890"
+            aria-label="Event page link"
+            className={`${inputClass} min-w-0 flex-1`}
+          />
+          <button className="rounded-xl border border-indigo-300 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50">
+            Read the page
+          </button>
+        </form>
+
+        {searchParams.link ? (
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <p className="mb-2 text-sm font-semibold text-slate-700">
+              From {searchParams.host}
+              {searchParams.missing
+                ? ` — could not read the ${searchParams.missing}, so fill that in`
+                : " — check it and save"}
+            </p>
+            <form
+              action={saveLinkedEventAction}
+              className="grid gap-3 sm:grid-cols-2"
+            >
+              <input type="hidden" name="sourceUrl" value={searchParams.link} />
+              <div className="sm:col-span-2">
+                <Field label="Title">
+                  <input
+                    name="title"
+                    required
+                    defaultValue={searchParams.title ?? ""}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <Field label="Date">
+                <input
+                  name="date"
+                  type="date"
+                  required
+                  defaultValue={searchParams.date ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Start time">
+                <input
+                  name="time"
+                  type="time"
+                  required
+                  defaultValue={searchParams.time ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="End date" hint="Optional">
+                <input
+                  name="endDate"
+                  type="date"
+                  defaultValue={searchParams.endDate ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="End time" hint="Optional">
+                <input
+                  name="endTime"
+                  type="time"
+                  defaultValue={searchParams.endTime ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Venue">
+                <input
+                  name="venue"
+                  required
+                  defaultValue={searchParams.venue ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Hall / room" hint="Optional">
+                <input name="hallName" className={inputClass} />
+              </Field>
+              <Field label="Address" hint="Optional">
+                <input
+                  name="address"
+                  defaultValue={searchParams.address ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="City">
+                <input
+                  name="city"
+                  required
+                  defaultValue={searchParams.city ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="State" hint="Two letters">
+                <input
+                  name="state"
+                  defaultValue={searchParams.state ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Country">
+                <input name="country" defaultValue="USA" className={inputClass} />
+              </Field>
+              <Field label="Category" hint="Optional slug, e.g. religious">
+                <input name="categorySlug" className={inputClass} />
+              </Field>
+              <Field label="Tags" hint="Optional, comma separated">
+                <input name="tags" className={inputClass} />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Description"
+                  hint="Rewrite in your own words — their text is their copyright"
+                >
+                  <textarea
+                    name="description"
+                    rows={4}
+                    defaultValue={searchParams.text ?? ""}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Poster image"
+                  hint="Leave blank unless the organiser is happy for us to use it"
+                >
+                  <input name="imageUrl" className={inputClass} />
+                </Field>
+              </div>
+              <button className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white sm:col-span-2">
+                Add this event
+              </button>
+            </form>
+          </div>
+        ) : null}
+      </Card>
 
       <Card>
         <h2 className="mb-1 text-lg font-bold">Find a calendar</h2>
