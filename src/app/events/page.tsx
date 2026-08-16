@@ -128,6 +128,15 @@ export default async function EventsPage({
     take: 12,
   });
 
+  // The halls people ask for by name, so "parties at Royal Albert Palace" is one tap.
+  const venueRows = await db.event.groupBy({
+    by: ["venue"],
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    _count: { venue: true },
+    orderBy: { _count: { venue: "desc" } },
+    take: 8,
+  });
+
   const events = await db.event.findMany({
     where: {
       status: "APPROVED",
@@ -260,6 +269,37 @@ export default async function EventsPage({
             </div>
           ) : null}
 
+          {venueRows.length ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
+                Venues
+              </span>
+              {venueRows.map((row) => {
+                const active =
+                  (venue ?? "").toLowerCase() === row.venue.toLowerCase();
+                return (
+                  <Link
+                    key={row.venue}
+                    href={searchHref({ venue: active ? "" : row.venue })}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "bg-white text-rose-700"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {row.venue} · {row._count.venue}
+                  </Link>
+                );
+              })}
+              <Link
+                href="/venues"
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-white underline hover:bg-white/20"
+              >
+                All venues →
+              </Link>
+            </div>
+          ) : null}
+
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/events/new" variant="secondary">
               Post your event
@@ -270,7 +310,7 @@ export default async function EventsPage({
             >
               Get featured free 🤝
             </Link>
-            {q || city || from || to || when ? (
+            {q || city || venue || from || to || when ? (
               <Link
                 href="/events"
                 className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
@@ -333,6 +373,7 @@ export default async function EventsPage({
             </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
             {q ? <input type="hidden" name="q" value={q} /> : null}
+            {venue ? <input type="hidden" name="venue" value={venue} /> : null}
             {from ? <input type="hidden" name="from" value={from} /> : null}
             {to ? <input type="hidden" name="to" value={to} /> : null}
             {selectedFeatures.map((feature) => (

@@ -83,6 +83,7 @@ export function eventTextWhere(q?: string) {
     OR: [
       { title: contains },
       { venue: contains },
+      { hallName: contains },
       { city: contains },
       { description: contains },
       { address: contains },

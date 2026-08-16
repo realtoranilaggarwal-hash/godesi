@@ -171,7 +171,13 @@ export default async function EventPage({
                 {endLabel ? ` – ${endLabel}` : ""}
               </p>
               <p>
-                📍 {event.venue}
+                📍{" "}
+                <Link
+                  href={`/events?venue=${encodeURIComponent(event.venue)}`}
+                  className="font-semibold text-indigo-600 hover:underline"
+                >
+                  {event.venue}
+                </Link>
                 {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
                 {event.state ? `, ${event.state}` : ""}
                 {event.country ? `, ${event.country}` : ""}
