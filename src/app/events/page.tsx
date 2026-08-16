@@ -19,6 +19,11 @@ import {
   EVENT_TYPES,
   eventFeatureIcon,
 } from "@/lib/eventOptions";
+import {
+  EVENT_WHEN,
+  eventDateRange,
+  eventTextWhere,
+} from "@/lib/eventSearch";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -41,10 +46,14 @@ export default async function EventsPage({
     type?: string;
     mode?: string;
     venue?: string;
+    q?: string;
+    from?: string;
+    to?: string;
     feature?: string | string[];
   };
 }) {
-  const { city, category, when, type, mode, venue } = searchParams;
+  const { city, category, when, type, mode, venue, q, from, to } =
+    searchParams;
   const selectedFeatures = (
     Array.isArray(searchParams.feature)
       ? searchParams.feature
@@ -57,6 +66,29 @@ export default async function EventsPage({
     ),
   );
 
+  /** Chips change one thing and keep the rest of the search intact. */
+  const searchHref = (changes: Record<string, string>) => {
+    const params = new URLSearchParams();
+    const current: Record<string, string | undefined> = {
+      q,
+      city,
+      category,
+      when,
+      type,
+      mode,
+      venue,
+      from,
+      to,
+      ...changes,
+    };
+    for (const [key, value] of Object.entries(current)) {
+      if (value) params.set(key, value);
+    }
+    for (const value of selectedFeatures) params.append("feature", value);
+    const query = params.toString();
+    return query ? `/events?${query}` : "/events";
+  };
+
   /** Toggling a chip keeps every other filter in the query string. */
   const featureHref = (feature: string) => {
     const params = new URLSearchParams();
@@ -66,6 +98,9 @@ export default async function EventsPage({
     if (type) params.set("type", type);
     if (mode) params.set("mode", mode);
     if (venue) params.set("venue", venue);
+    if (q) params.set("q", q);
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
     for (const value of selectedFeatures) {
       if (value !== feature) params.append("feature", value);
     }
@@ -84,21 +119,34 @@ export default async function EventsPage({
       ]
     : undefined;
 
+  const cityRows = await db.event.groupBy({
+    by: ["city"],
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    _count: { city: true },
+    orderBy: { _count: { city: "desc" } },
+    take: 12,
+  });
+
   const events = await db.event.findMany({
     where: {
       status: "APPROVED",
-      ...(when === "past"
-        ? { startsAt: { lt: new Date() } }
-        : { startsAt: { gte: new Date() } }),
+      startsAt: eventDateRange(when, from, to),
+      // Both the search box and the category scope are OR groups, so they are
+      // combined rather than overwriting one another.
+      AND: [
+        ...(eventTextWhere(q) ? [eventTextWhere(q)!] : []),
+        ...(scope
+          ? [
+              {
+                OR: [
+                  { categorySlug: { in: scope } },
+                  { categorySlugs: { hasSome: scope } },
+                ],
+              },
+            ]
+          : []),
+      ],
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
-      ...(scope
-        ? {
-            OR: [
-              { categorySlug: { in: scope } },
-              { categorySlugs: { hasSome: scope } },
-            ],
-          }
-        : {}),
       ...(venue ? { venue: { contains: venue, mode: "insensitive" } } : {}),
       ...(type ? { eventType: type } : {}),
       ...(modeFilter ? { mode: modeFilter } : {}),
@@ -133,16 +181,95 @@ export default async function EventsPage({
             Melas, workshops, expos, satsangs and weddings — book a seat in
             seconds and get a QR ticket on your phone.
           </p>
+          <form
+            className="mt-4 grid gap-2 rounded-2xl bg-white/15 p-2 backdrop-blur sm:grid-cols-[1.4fr_1fr_1fr_auto]"
+            role="search"
+          >
+            <input
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Garba, satsang, temple name…"
+              aria-label="Search events"
+              className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+            />
+            <input
+              name="city"
+              defaultValue={city ?? ""}
+              placeholder="City, e.g. Edison"
+              aria-label="City"
+              className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+            />
+            <input
+              type="date"
+              name="from"
+              defaultValue={from ?? ""}
+              aria-label="On or after this date"
+              className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900"
+            />
+            <button
+              type="submit"
+              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
+            >
+              Search
+            </button>
+          </form>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {EVENT_WHEN.map((option) => {
+              const active = (when ?? "") === option.value && !from && !to;
+              return (
+                <Link
+                  key={option.value || "any"}
+                  href={searchHref({ when: option.value, from: "", to: "" })}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                    active
+                      ? "bg-white text-rose-700"
+                      : "bg-white/20 text-white hover:bg-white/30"
+                  }`}
+                >
+                  {option.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {cityRows.length ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
+                Cities
+              </span>
+              {cityRows.map((row) => {
+                const active =
+                  (city ?? "").toLowerCase() === row.city.toLowerCase();
+                return (
+                  <Link
+                    key={row.city}
+                    href={searchHref({ city: active ? "" : row.city })}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "bg-white text-rose-700"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {row.city} · {row._count.city}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : null}
+
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/events/new" variant="secondary">
               Post your event
             </LinkButton>
-            <Link
-              href={when === "past" ? "/events" : "/events?when=past"}
-              className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
-            >
-              {when === "past" ? "Upcoming events" : "Past events"}
-            </Link>
+            {q || city || from || to || when ? (
+              <Link
+                href="/events"
+                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+              >
+                Clear search
+              </Link>
+            ) : null}
           </div>
         </section>
 
@@ -197,6 +324,9 @@ export default async function EventsPage({
               ))}
             </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
+            {q ? <input type="hidden" name="q" value={q} /> : null}
+            {from ? <input type="hidden" name="from" value={from} /> : null}
+            {to ? <input type="hidden" name="to" value={to} /> : null}
             {selectedFeatures.map((feature) => (
               <input
                 key={feature}
@@ -258,8 +388,16 @@ export default async function EventsPage({
           </>
         ) : (
           <EmptyState
-            title="No events here yet"
-            body="Be the first to list one — posting an event is free."
+            title={
+              q || city || from || to
+                ? "Nothing matches that search"
+                : "No events here yet"
+            }
+            body={
+              q || city || from || to
+                ? "Try a wider date range, or clear the search to see everything coming up."
+                : "Be the first to list one — posting an event is free."
+            }
           />
         )}
 
