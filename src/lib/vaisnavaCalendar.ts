@@ -15,7 +15,10 @@ function feedUrl(year: number, city = "New York City [United States of America]"
 
 export type Observance = { title: string; date: Date };
 
-async function loadObservances(): Promise<Observance[]> {
+/** The cache stores JSON, so dates travel as ISO strings and are revived. */
+type StoredObservance = { title: string; date: string };
+
+async function loadObservances(): Promise<StoredObservance[]> {
   const year = new Date().getUTCFullYear();
   try {
     const response = await fetch(feedUrl(year), {
@@ -25,7 +28,7 @@ async function loadObservances(): Promise<Observance[]> {
     if (!response.ok) return [];
     return parseIcs(await response.text(), 500).map((entry) => ({
       title: entry.title,
-      date: entry.startsAt,
+      date: entry.startsAt.toISOString(),
     }));
   } catch {
     // The panel simply does not render when their site is unreachable.
@@ -47,6 +50,7 @@ export async function upcomingObservances(count = 6) {
     today.getUTCDate(),
   );
   return all
+    .map((entry) => ({ title: entry.title, date: new Date(entry.date) }))
     .filter((entry) => entry.date.getTime() >= startOfDay - 43_200_000)
     .sort((a, b) => a.date.getTime() - b.date.getTime())
     .slice(0, count);

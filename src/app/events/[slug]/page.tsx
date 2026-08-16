@@ -12,7 +12,7 @@ import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
-import { EventPoster } from "@/components/EventPoster";
+import { eventTheme } from "@/lib/eventTheme";
 import { EventPartnerProof } from "@/components/forms/EventPartnerProof";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 import {
@@ -76,6 +76,11 @@ export default async function EventPage({
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
   const left = seatsLeft(event);
+  const theme = eventTheme(
+    event.title,
+    event.category?.icon,
+    event.category?.color,
+  );
   const past = isPast(event);
   const maxPerBooking = Math.min(10, left);
 
@@ -90,18 +95,7 @@ export default async function EventPage({
           {event.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={event.imageUrl} alt={event.title} className="h-56 w-full object-cover" />
-          ) : (
-            <EventPoster
-              title={event.title}
-              startsAt={event.startsAt}
-              venue={event.venue}
-              city={event.city}
-              icon={event.category?.icon}
-              color={event.category?.color}
-              className="h-48"
-              large
-            />
-          )}
+          ) : null}
           <div className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
               {event.category ? (
@@ -131,7 +125,12 @@ export default async function EventPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-black sm:text-3xl">{event.title}</h1>
+              <h1 className="flex items-center gap-2 text-2xl font-black sm:text-3xl">
+                {event.imageUrl ? null : (
+                  <span aria-hidden>{theme.icon}</span>
+                )}
+                {event.title}
+              </h1>
               <StaffEditLink href={`/admin/events/${event.id}`} />
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">

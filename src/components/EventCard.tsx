@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { thumbImage } from "@/lib/proxyImage";
-import { EventPoster, placeLine } from "@/components/EventPoster";
+import { eventTheme, placeLine } from "@/lib/eventTheme";
+import { gradientFor } from "@/lib/categories";
 
 export type EventListItem = {
   id: string;
@@ -42,6 +43,11 @@ export function EventCard({
   const imported = Boolean(event.sourceId);
   const tile = variant === "tile";
   const compact = variant === "compact" || tile;
+  const theme = eventTheme(
+    event.title,
+    event.category?.icon,
+    event.category?.color,
+  );
   const posterHeight = tile ? "h-28" : compact ? "h-24" : "h-32";
 
   return (
@@ -63,17 +69,7 @@ export function EventCard({
             className={`${posterHeight} w-full object-cover`}
             loading="lazy"
           />
-        ) : (
-          <EventPoster
-            title={event.title}
-            startsAt={event.startsAt}
-            venue={null}
-            city={tile ? null : event.city}
-            icon={event.category?.icon}
-            color={event.category?.color}
-            className={posterHeight}
-          />
-        )}
+        ) : null}
 
         <div
           className={`flex flex-1 flex-col gap-1 ${
@@ -91,13 +87,25 @@ export function EventCard({
             ) : null}
             {left === 0 && !imported ? <Badge tone="red">Sold out</Badge> : null}
           </div>
-          <h3
-            className={`line-clamp-2 font-bold leading-snug group-hover:text-indigo-600 ${
-              tile ? "text-sm" : ""
-            }`}
-          >
-            {event.title}
-          </h3>
+          <div className="flex items-start gap-2">
+            {event.imageUrl ? null : (
+              <span
+                aria-hidden
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradientFor(
+                  theme.color,
+                )} text-base`}
+              >
+                {theme.icon}
+              </span>
+            )}
+            <h3
+              className={`line-clamp-2 font-bold leading-snug group-hover:text-indigo-600 ${
+                tile ? "text-sm" : ""
+              }`}
+            >
+              {event.title}
+            </h3>
+          </div>
           <p className={`text-slate-600 ${tile ? "text-xs" : "text-sm"}`}>
             📅 {formatEventDate(event.startsAt)}
           </p>
