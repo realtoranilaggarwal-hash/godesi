@@ -680,6 +680,9 @@ model Business {
   featured           Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.
   source             String?
+  /// The public page a starter row's facts were read from, credited on the card
+  /// and used to refuse the same page twice.
+  sourceUrl          String?       @unique
   /// OpenStreetMap element id, so imports stay re-runnable without duplicates.
   osmId              String?       @unique
   /// Owner-invite outreach on unclaimed starter listings: when we last reached
@@ -1249,6 +1252,9 @@ model Lead {
   city           String
   budgetMin      Int?
   budgetMax      Int?
+  /// The currency the poster typed the budget in; null reads as INR, the only
+  /// currency the form offered before.
+  budgetCurrency String?
   /// Wedding/event date the requirement is for.
   eventDate      DateTime?
   contactName    String

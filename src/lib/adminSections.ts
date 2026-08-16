@@ -2,6 +2,8 @@
 export const ADMIN_SECTIONS = [
   { href: "/admin", label: "Overview", icon: "📊" },
   { href: "/admin/listings", label: "Listings", icon: "🏪" },
+  { href: "/admin/listings/wire", label: "Listing wire", icon: "🔗" },
+  { href: "/admin/properties", label: "Property", icon: "🏢" },
   { href: "/admin/claims", label: "Claims", icon: "✋" },
   { href: "/admin/events", label: "Events", icon: "🎟️" },
   { href: "/admin/events/wire", label: "Event wire", icon: "📅" },
@@ -12,6 +14,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/coupons", label: "Coupons", icon: "🏷️" },
   { href: "/admin/news", label: "News", icon: "📰" },
   { href: "/admin/journalists", label: "Journalists", icon: "🗞️" },
+  { href: "/admin/wall", label: "News wall", icon: "🧱" },
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁" },
   { href: "/admin/connect", label: "Connect", icon: "🤝" },
   { href: "/admin/temples", label: "Temples", icon: "🛕" },

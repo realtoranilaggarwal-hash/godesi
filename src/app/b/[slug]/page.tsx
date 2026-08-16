@@ -552,6 +552,20 @@ export default async function BusinessProfilePage({
               (ODbL).
             </p>
           ) : null}
+          {business.sourceUrl ? (
+            <p className="text-xs text-amber-800">
+              Listed from their public page on{" "}
+              <a
+                href={business.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline"
+              >
+                {business.source}
+              </a>
+              . Claiming replaces these basics with your own.
+            </p>
+          ) : null}
           {viewer ? (
             <ClaimBusinessForm businessId={business.id} open={searchParams.claim === "1"} />
           ) : (
