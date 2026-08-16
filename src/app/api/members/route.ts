@@ -9,7 +9,7 @@ async function newestMembers() {
     db.user.findMany({
       where: { emailVerifiedAt: { not: null } },
       orderBy: { createdAt: "desc" },
-      take: 18,
+      take: 24,
       select: {
         id: true,
         name: true,
