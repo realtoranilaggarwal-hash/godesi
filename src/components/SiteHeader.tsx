@@ -23,6 +23,7 @@ const NAV = [
   { href: "/search", label: "Businesses", icon: "🏪" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
+  { href: "/blog", label: "Blog", icon: "✍️" },
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
   { href: "/marketplace", label: "Buy & Sell", icon: "🛍️" },
@@ -50,13 +51,13 @@ const QUICK_LINKS = [
  */
 const BAR_NAV = [
   { href: "/search", label: "Businesses" },
-  { href: "/leads", label: "Leads" },
   { href: "/events", label: "Events" },
+  { href: "/blog", label: "Blog" },
+  { href: "/leads", label: "Leads" },
   { href: "/real-estate", label: "Property" },
   { href: "/rooms", label: "Rooms" },
   { href: "/marketplace", label: "Buy & Sell" },
   { href: "/news", label: "News" },
-  { href: "/blog", label: "Blog" },
 ];
 
 /** Admins land on the full panel, moderators on the content desk. */
@@ -86,6 +87,13 @@ export async function SiteHeader() {
   const firstName = user ? (user.name || user.email).split(/[\s@]/)[0] : null;
 
   const categoryItems = [
+    {
+      href: "/blog",
+      label: "Blog",
+      icon: "✍️",
+      className:
+        "bg-gradient-to-r from-slate-900 to-indigo-800 text-white hover:opacity-90",
+    },
     ...categories.map((category) => ({
       href: `/categories/${category.slug}`,
       label: category.name,
@@ -102,7 +110,6 @@ export async function SiteHeader() {
   ];
   const menuLinks = [
     ...NAV,
-    { href: "/blog", label: "Blog", icon: "✍️" },
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
