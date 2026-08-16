@@ -15,6 +15,24 @@ import {
 } from "@/app/actions/eventWire";
 import { Card, inputClass } from "@/components/ui";
 
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block text-sm">
+      <span className="font-semibold text-slate-700">{label}</span>
+      {hint ? <span className="ml-1 text-slate-400">— {hint}</span> : null}
+      <span className="mt-1 block">{children}</span>
+    </label>
+  );
+}
+
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Event wire" };
 
@@ -102,61 +120,48 @@ export default async function Page({
           away, credited to the calendar, and you remove anything that is junk
           below. Runs every night at 03:30 UTC.
         </p>
-        <form action={saveEventSourceAction} className="grid gap-2 sm:grid-cols-2">
-          <input
-            name="name"
-            required
-            placeholder="Shown as the credit, e.g. Umiya Dham Edison"
-            aria-label="Calendar name"
-            className={inputClass}
-          />
-          <input
-            name="url"
-            required
-            type="url"
-            defaultValue={searchParams.feed ?? ""}
-            placeholder="https://…/basic.ics"
-            aria-label="Feed address"
-            className={inputClass}
-          />
-          <input
-            name="city"
-            required
-            placeholder="City, e.g. Edison"
-            aria-label="City"
-            className={inputClass}
-          />
-          <input
-            name="state"
-            placeholder="State, e.g. NJ"
-            aria-label="State"
-            className={inputClass}
-          />
-          <input
-            name="country"
-            defaultValue="USA"
-            aria-label="Country"
-            className={inputClass}
-          />
-          <input
-            name="websiteUrl"
-            type="url"
-            placeholder="Their website (optional)"
-            aria-label="Website"
-            className={inputClass}
-          />
-          <input
-            name="categorySlugs"
-            placeholder="Category slugs, comma separated (optional)"
-            aria-label="Categories"
-            className={inputClass}
-          />
-          <input
-            name="tags"
-            placeholder="Tags, e.g. temple, aarti (optional)"
-            aria-label="Tags"
-            className={inputClass}
-          />
+        <form action={saveEventSourceAction} className="grid gap-3 sm:grid-cols-2">
+          <Field label="Organisation name" hint="Shown as the credit on every event">
+            <input
+              name="name"
+              required
+              placeholder="Umiya Dham Edison"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Calendar feed address" hint="Ends in .ics or ?ical=1">
+            <input
+              name="url"
+              required
+              type="url"
+              defaultValue={searchParams.feed ?? ""}
+              placeholder="https://…/basic.ics"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="City" hint="Where the events happen, town only">
+            <input name="city" required placeholder="Edison" className={inputClass} />
+          </Field>
+          <Field label="State" hint="Two letters">
+            <input name="state" placeholder="NJ" className={inputClass} />
+          </Field>
+          <Field label="Country">
+            <input name="country" defaultValue="USA" className={inputClass} />
+          </Field>
+          <Field label="Their website" hint="Optional, linked from each event">
+            <input
+              name="websiteUrl"
+              type="url"
+              placeholder="https://theirtemple.org"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Categories" hint="Optional, comma separated slugs">
+            <input name="categorySlugs" placeholder="religious" className={inputClass} />
+          </Field>
+          <Field label="Tags" hint="Optional, comma separated">
+            <input name="tags" placeholder="temple, aarti" className={inputClass} />
+          </Field>
           <button className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white sm:col-span-2">
             Add calendar
           </button>

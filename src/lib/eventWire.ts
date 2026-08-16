@@ -20,6 +20,8 @@ export type WireResult = {
   added: number;
   updated: number;
   skipped: number;
+  /// Why a run that imported nothing imported nothing, in the desk's words.
+  reason?: string;
   error?: string;
 };
 
@@ -97,6 +99,27 @@ function looksLikeJunk(entry: IcsEvent) {
   );
 }
 
+/**
+ * A calendar nobody has updated since last year is the usual reason a run
+ * imports nothing, and "50 skipped" alone does not say so.
+ */
+function skipReason(
+  entries: IcsEvent[],
+  kept: number,
+  now: number,
+  horizon: number,
+) {
+  if (kept || !entries.length) return undefined;
+  const newest = Math.max(...entries.map((entry) => entry.startsAt.getTime()));
+  if (newest < now) {
+    return `every entry is in the past, the last one on ${new Date(newest).toDateString()}. Ask them to update their calendar.`;
+  }
+  if (entries.every((entry) => entry.startsAt.getTime() > horizon)) {
+    return `nothing falls within the next ${WIRE_HORIZON_DAYS} days.`;
+  }
+  return "every entry looks like blocked-out time rather than an event.";
+}
+
 type Source = {
   id: string;
   name: string;
@@ -152,6 +175,7 @@ export async function importSource(source: Source): Promise<WireResult> {
     .slice(0, WIRE_PER_SOURCE);
 
   result.skipped = entries.length - upcoming.length;
+  result.reason = skipReason(entries, upcoming.length, now, horizon);
 
   for (const entry of upcoming) {
     const place = splitLocation(entry.location);
@@ -216,7 +240,12 @@ export async function importSource(source: Source): Promise<WireResult> {
     where: { id: source.id },
     data: {
       lastRunAt: new Date(),
-      lastStatus: `${result.added} added, ${result.updated} updated, ${result.skipped} skipped`,
+      lastStatus: [
+        `${result.added} added, ${result.updated} updated, ${result.skipped} skipped`,
+        result.reason,
+      ]
+        .filter(Boolean)
+        .join(" — "),
     },
   });
 
