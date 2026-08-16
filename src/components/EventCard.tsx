@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { formatEventDate, seatsLeft } from "@/lib/events";
 import { Money } from "@/components/Money";
-import { gradientFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { thumbImage } from "@/lib/proxyImage";
+import { EventPoster, placeLine } from "@/components/EventPoster";
 
 export type EventListItem = {
   id: string;
@@ -64,14 +64,15 @@ export function EventCard({
             loading="lazy"
           />
         ) : (
-          <div
-            className={`flex ${posterHeight} items-center justify-center bg-gradient-to-br ${gradientFor(
-              event.category?.color ?? "rose",
-            )} text-5xl`}
-            aria-hidden
-          >
-            {event.category?.icon ?? "🎉"}
-          </div>
+          <EventPoster
+            title={event.title}
+            startsAt={event.startsAt}
+            venue={null}
+            city={tile ? null : event.city}
+            icon={event.category?.icon}
+            color={event.category?.color}
+            className={posterHeight}
+          />
         )}
 
         <div
@@ -108,7 +109,10 @@ export function EventCard({
             📍{" "}
             {tile
               ? event.city
-              : `${event.venue}${event.hallName ? ` — ${event.hallName}` : ""}, ${event.city}`}
+              : placeLine(
+                  `${event.venue}${event.hallName ? ` — ${event.hallName}` : ""}`,
+                  event.city,
+                )}
           </p>
           {event.features?.length && !compact ? (
             <div className="flex flex-wrap gap-1">
@@ -128,12 +132,17 @@ export function EventCard({
             >
               {event.price ? (
                 <Money value={event.price} currency={event.currency} />
+              ) : imported ? (
+                // The organiser sets their own entry terms; we do not know them.
+                "See organiser"
               ) : (
                 "Free entry"
               )}
             </span>
             <span className="text-xs text-slate-500">
-              {left} seat{left === 1 ? "" : "s"} left
+              {imported
+                ? "Community calendar"
+                : `${left} seat${left === 1 ? "" : "s"} left`}
             </span>
           </div>
         </div>

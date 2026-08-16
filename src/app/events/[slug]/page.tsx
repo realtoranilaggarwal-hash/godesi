@@ -6,13 +6,13 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatMoney, siteUrl } from "@/lib/format";
 import { Money } from "@/components/Money";
 import { formatEventDate, isPast, seatsLeft } from "@/lib/events";
-import { gradientFor } from "@/lib/categories";
 import { TicketForm } from "@/components/forms/TicketForm";
 import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
+import { EventPoster } from "@/components/EventPoster";
 import { EventPartnerProof } from "@/components/forms/EventPartnerProof";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 import {
@@ -91,14 +91,16 @@ export default async function EventPage({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={event.imageUrl} alt={event.title} className="h-56 w-full object-cover" />
           ) : (
-            <div
-              className={`flex h-40 items-center justify-center bg-gradient-to-br ${gradientFor(
-                event.category?.color ?? "rose",
-              )} text-6xl`}
-              aria-hidden
-            >
-              {event.category?.icon ?? "🎉"}
-            </div>
+            <EventPoster
+              title={event.title}
+              startsAt={event.startsAt}
+              venue={event.venue}
+              city={event.city}
+              icon={event.category?.icon}
+              color={event.category?.color}
+              className="h-48"
+              large
+            />
           )}
           <div className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
@@ -195,6 +197,8 @@ export default async function EventPage({
                   </>
                 ) : event.tiers.length ? (
                   `${event.tiers.length} ticket types from free`
+                ) : imported ? (
+                  "Entry terms: see the organiser"
                 ) : (
                   "Free entry"
                 )}
