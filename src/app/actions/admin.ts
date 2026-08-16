@@ -592,8 +592,24 @@ const adminEventSchema = z.object({
   description: z.string().trim().min(20, "Describe the event (20+ characters)"),
   date: z.string().trim().min(1, "Event date is required"),
   time: z.string().trim().min(1, "Event time is required"),
+  endDate: z.string().trim().optional(),
+  endTime: z.string().trim().optional(),
   venue: z.string().trim().min(3, "Venue is required"),
+  hallName: z.string().trim().max(120).optional(),
+  hallCapacity: z.coerce
+    .number()
+    .int()
+    .min(0, "Capacity cannot be negative")
+    .optional(),
+  venueUrl: z
+    .string()
+    .trim()
+    .url("Enter a full venue URL starting with https://")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   city: z.string().trim().min(2, "City is required"),
+  frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
+  recurrence: z.string().trim().max(120).optional(),
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
   eventType: z.string().trim().max(60).optional(),
@@ -645,8 +661,15 @@ export async function adminUpdateEventAction(
       description: formData.get("description"),
       date: formData.get("date"),
       time: formData.get("time"),
+      endDate: formData.get("endDate") ?? undefined,
+      endTime: formData.get("endTime") ?? undefined,
       venue: formData.get("venue"),
+      hallName: formData.get("hallName") ?? undefined,
+      hallCapacity: formData.get("hallCapacity") || undefined,
+      venueUrl: formData.get("venueUrl") ?? undefined,
       city: formData.get("city"),
+      frequency: formData.get("frequency") || "ONE_TIME",
+      recurrence: formData.get("recurrence") ?? undefined,
       categorySlug: formData.get("categorySlug"),
       subcategorySlug: formData.get("subcategorySlug"),
       eventType: formData.get("eventType") ?? undefined,
@@ -668,6 +691,21 @@ export async function adminUpdateEventAction(
     if (Number.isNaN(startsAt.getTime()))
       return { error: "Enter a valid date and time." };
 
+    // An end time on its own ends the same day; an end date on its own reuses
+    // the start time, which is what a multi-day festival means by "to the 3rd".
+    const endsAt =
+      parsed.data.endTime || parsed.data.endDate
+        ? new Date(
+            `${parsed.data.endDate || parsed.data.date}T${
+              parsed.data.endTime || parsed.data.time
+            }:00+05:30`,
+          )
+        : null;
+    if (endsAt && Number.isNaN(endsAt.getTime()))
+      return { error: "Enter a valid end date and time." };
+    if (endsAt && endsAt <= startsAt)
+      return { error: "The event has to end after it starts." };
+
     const existing = await db.event.findUnique({
       where: { id: parsed.data.id },
       select: { seatsBooked: true },
@@ -685,8 +723,17 @@ export async function adminUpdateEventAction(
         title: titleCase(parsed.data.title),
         description: sentenceCase(parsed.data.description),
         startsAt,
+        endsAt,
         venue: titleCase(parsed.data.venue),
+        hallName: parsed.data.hallName || null,
+        hallCapacity: parsed.data.hallCapacity ?? null,
+        venueUrl: parsed.data.venueUrl ?? null,
         city: titleCase(parsed.data.city),
+        frequency: parsed.data.frequency,
+        recurrence:
+          parsed.data.frequency === "RECURRING"
+            ? parsed.data.recurrence || null
+            : null,
         eventType: parsed.data.eventType || null,
         websiteUrl: parsed.data.websiteUrl ?? null,
         imageUrl: parsed.data.imageUrl ?? null,

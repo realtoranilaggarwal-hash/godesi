@@ -115,8 +115,16 @@ const eventSchema = z.object({
   description: z.string().trim().min(20, "Describe the event (20+ characters)"),
   date: z.string().trim().min(1, "Event date is required"),
   time: z.string().trim().min(1, "Event time is required"),
+  endDate: z.string().trim().optional(),
+  endTime: z.string().trim().optional(),
   venue: z.string().trim().min(3, "Venue is required"),
   hallName: z.string().trim().max(120).optional(),
+  hallCapacity: z.coerce
+    .number()
+    .int()
+    .min(0, "Capacity cannot be negative")
+    .optional(),
+  venueUrl: optionalUrl,
   address: z.string().trim().max(300).optional(),
   mapsUrl: optionalUrl,
   city: z.string().trim().min(2, "City is required"),
@@ -184,8 +192,12 @@ export async function createEventAction(
       description: formData.get("description"),
       date: formData.get("date"),
       time: formData.get("time"),
+      endDate: formData.get("endDate") ?? undefined,
+      endTime: formData.get("endTime") ?? undefined,
       venue: formData.get("venue"),
       hallName: formData.get("hallName") ?? undefined,
+      hallCapacity: formData.get("hallCapacity") || undefined,
+      venueUrl: formData.get("venueUrl") ?? undefined,
       address: formData.get("address") ?? undefined,
       mapsUrl: formData.get("mapsUrl") ?? undefined,
       city: formData.get("city"),
@@ -214,6 +226,20 @@ export async function createEventAction(
 
     const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
     if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
+
+    // An end time alone finishes the same day; an end date alone keeps the start time.
+    const endsAt =
+      parsed.data.endTime || parsed.data.endDate
+        ? new Date(
+            `${parsed.data.endDate || parsed.data.date}T${
+              parsed.data.endTime || parsed.data.time
+            }:00+05:30`,
+          )
+        : null;
+    if (endsAt && Number.isNaN(endsAt.getTime()))
+      return { error: "Enter a valid end date and time." };
+    if (endsAt && endsAt <= startsAt)
+      return { error: "The event has to end after it starts." };
 
     const tiers = readTiers(formData);
     if ("error" in tiers) return { error: tiers.error };
@@ -285,8 +311,11 @@ export async function createEventAction(
         title: titleCase(parsed.data.title),
         description: sentenceCase(parsed.data.description),
         startsAt,
+        endsAt,
         venue: titleCase(parsed.data.venue),
         hallName: parsed.data.hallName || null,
+        hallCapacity: parsed.data.hallCapacity ?? null,
+        venueUrl: parsed.data.venueUrl ?? null,
         address: parsed.data.address || null,
         mapsUrl: parsed.data.mapsUrl ?? null,
         venueRefId: venueRef?.id ?? null,

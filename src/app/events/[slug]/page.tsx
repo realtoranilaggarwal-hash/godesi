@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { formatMoney, siteUrl } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { formatEventDate, isPast, seatsLeft } from "@/lib/events";
+import { formatEventDate, formatEventEnd, isPast, seatsLeft } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
 import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
@@ -92,6 +92,34 @@ export default async function EventPage({
           <Alert>Payment cancelled — your seats were not booked.</Alert>
         ) : null}
 
+        {/* Where the visitor is, and the way back to the list they came from. */}
+        <nav
+          aria-label="Breadcrumb"
+          className="flex flex-wrap items-center gap-1 text-sm text-slate-500"
+        >
+          <Link href="/events" className="font-semibold text-indigo-600 hover:underline">
+            ← All events
+          </Link>
+          {event.category ? (
+            <>
+              <span aria-hidden>/</span>
+              <Link
+                href={`/events?category=${event.category.slug}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                {event.category.icon} {event.category.name}
+              </Link>
+            </>
+          ) : null}
+          <span aria-hidden>/</span>
+          <Link
+            href={`/events?city=${encodeURIComponent(event.city)}`}
+            className="font-semibold text-indigo-600 hover:underline"
+          >
+            {event.city}
+          </Link>
+        </nav>
+
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           {event.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -135,13 +163,40 @@ export default async function EventPage({
               <StaffEditLink href={`/admin/events/${event.id}`} />
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
-              <p>📅 {formatEventDate(event.startsAt)}</p>
+              <p>
+                📅 {formatEventDate(event.startsAt)}
+                {event.endsAt
+                  ? ` – ${formatEventEnd(event.startsAt, event.endsAt)}`
+                  : ""}
+              </p>
               <p>
                 📍 {event.venue}
                 {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
                 {event.state ? `, ${event.state}` : ""}
                 {event.country ? `, ${event.country}` : ""}
               </p>
+              {event.hallName || event.hallCapacity || event.venueUrl ? (
+                <p>
+                  🏛️{" "}
+                  {event.hallName ? <strong>{event.hallName}</strong> : "Hall"}
+                  {event.hallCapacity
+                    ? ` · holds about ${event.hallCapacity.toLocaleString("en-IN")} people`
+                    : ""}
+                  {event.venueUrl ? (
+                    <>
+                      {" · "}
+                      <a
+                        href={event.venueUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-indigo-600 hover:underline"
+                      >
+                        venue website
+                      </a>
+                    </>
+                  ) : null}
+                </p>
+              ) : null}
               {event.address ? <p>🏠 {event.address}</p> : null}
               {event.mapsUrl ? (
                 <p>

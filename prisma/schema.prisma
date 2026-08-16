@@ -886,6 +886,10 @@ model Event {
   venue             String
   /// Hall, banquet room or ground inside a venue that has several.
   hallName          String?
+  /// How many people the hall holds, as quoted by the venue.
+  hallCapacity      Int?
+  /// The venue's or hall's own page, so people can check the space themselves.
+  venueUrl          String?
   address           String?
   mapsUrl           String?
   city              String

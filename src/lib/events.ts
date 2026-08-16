@@ -45,6 +45,26 @@ export function formatEventDate(value: Date) {
 }
 
 /**
+ * The end of an event: just the time when it finishes the same day, the full
+ * date when it runs over into another one.
+ */
+export function formatEventEnd(startsAt: Date, endsAt: Date) {
+  const sameDay =
+    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(
+      startsAt,
+    ) ===
+    new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(
+      endsAt,
+    );
+  if (!sameDay) return formatEventDate(endsAt);
+  return new Intl.DateTimeFormat("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Kolkata",
+  }).format(endsAt);
+}
+
+/**
  * Confirms a ticket and takes the seats in one transaction. Idempotent on the
  * payment reference, so a Stripe webhook and the success page can both call it.
  */

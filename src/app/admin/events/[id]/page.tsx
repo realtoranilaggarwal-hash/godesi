@@ -53,6 +53,7 @@ export default async function AdminEditEventPage({
   if (!event) notFound();
 
   const { date, time } = istParts(event.startsAt);
+  const end = event.endsAt ? istParts(event.endsAt) : null;
   const parentSlug = event.category?.parentSlug ?? event.category?.slug ?? "";
   const subSlug = event.category?.parentSlug ? event.category.slug : "";
 
@@ -82,8 +83,15 @@ export default async function AdminEditEventPage({
             description: event.description,
             date,
             time,
+            endDate: end?.date ?? "",
+            endTime: end?.time ?? "",
             venue: event.venue,
+            hallName: event.hallName ?? "",
+            hallCapacity: event.hallCapacity,
+            venueUrl: event.venueUrl ?? "",
             city: event.city,
+            frequency: event.frequency,
+            recurrence: event.recurrence ?? "",
             categorySlug: parentSlug,
             subcategorySlug: subSlug,
             eventType: event.eventType ?? "",

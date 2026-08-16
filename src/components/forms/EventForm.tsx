@@ -92,6 +92,12 @@ export function EventForm({
         <Field label="Start time" hint="India Standard Time">
           <input name="time" type="time" required className={inputClass} />
         </Field>
+        <Field label="End time" hint="Optional — when it finishes">
+          <input name="endTime" type="time" className={inputClass} />
+        </Field>
+        <Field label="End date" hint="Only for events that run over more than one day">
+          <input name="endDate" type="date" className={inputClass} />
+        </Field>
         <Field label="Event type">
           <select name="eventType" required className={inputClass}>
             <option value="">Select a type</option>

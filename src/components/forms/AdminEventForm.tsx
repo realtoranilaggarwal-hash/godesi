@@ -19,8 +19,15 @@ export type AdminEventValues = {
   description: string;
   date: string;
   time: string;
+  endDate: string;
+  endTime: string;
   venue: string;
+  hallName: string;
+  hallCapacity: number | null;
+  venueUrl: string;
   city: string;
+  frequency: "ONE_TIME" | "RECURRING";
+  recurrence: string;
   categorySlug: string;
   subcategorySlug: string;
   eventType: string;
@@ -82,11 +89,68 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
+        <Field label="End date" hint="Optional — for events that run past midnight or over days">
+          <input
+            name="endDate"
+            type="date"
+            defaultValue={event.endDate}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="End time" hint="Optional — shown as “7:00 pm – 11:00 pm”">
+          <input
+            name="endTime"
+            type="time"
+            defaultValue={event.endTime}
+            className={inputClass}
+          />
+        </Field>
         <Field label="Venue">
           <input name="venue" defaultValue={event.venue} required className={inputClass} />
         </Field>
+        <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
+          <input name="hallName" defaultValue={event.hallName} className={inputClass} />
+        </Field>
+        <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
+          <input
+            name="hallCapacity"
+            type="number"
+            min={0}
+            defaultValue={event.hallCapacity ?? ""}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
+          <input
+            name="venueUrl"
+            defaultValue={event.venueUrl}
+            placeholder="https://royalalbertspalace.com"
+            className={inputClass}
+          />
+        </Field>
         <Field label="City">
           <input name="city" defaultValue={event.city} required className={inputClass} />
+        </Field>
+        <Field label="Repeats">
+          <select
+            name="frequency"
+            defaultValue={event.frequency}
+            className={inputClass}
+          >
+            <option value="ONE_TIME">One-time event</option>
+            <option value="RECURRING">Repeats</option>
+          </select>
+        </Field>
+        <Field
+          label="How often it repeats"
+          hint="Plain English, e.g. “Every Sunday 10am” — only used when it repeats"
+        >
+          <input
+            name="recurrence"
+            defaultValue={event.recurrence}
+            placeholder="Every Sunday 10am"
+            className={inputClass}
+          />
         </Field>
         <CategorySelect
           categories={categories}
