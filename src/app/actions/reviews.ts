@@ -11,6 +11,7 @@ import { disputeFee } from "@/lib/reviewDisputes";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { awardPoints } from "@/lib/rewards";
+import { REVIEW_SOURCES } from "@/lib/reviewSources";
 
 const reviewSchema = z.object({
   businessId: z.string().min(1),
@@ -223,4 +224,71 @@ export async function decideReviewDisputeAction(formData: FormData) {
 
   revalidatePath("/admin/reviews");
   revalidatePath(`/b/${dispute.review.business.slug}`);
+}
+
+const offsiteSchema = z.object({
+  businessSlug: z.string().trim().min(1, "Enter the business page slug"),
+  authorName: z.string().trim().min(2, "Enter the customer's name"),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().trim().min(5, "Paste what the customer wrote"),
+  source: z.enum(REVIEW_SOURCES),
+});
+
+/**
+ * Staff enter a review a customer sent over WhatsApp or email. It is labelled
+ * as such on the card, and the customer must have agreed to it being published
+ * — we publish the words and a first name, never their number.
+ */
+export async function addOffsiteReviewAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    if (!can(user, "reviews")) return { error: "Not allowed." };
+
+    const parsed = offsiteSchema.safeParse({
+      businessSlug: formData.get("businessSlug"),
+      authorName: formData.get("authorName"),
+      rating: formData.get("rating"),
+      comment: formData.get("comment"),
+      source: formData.get("source"),
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0].message };
+    if (formData.get("consent") !== "on") {
+      return {
+        error:
+          "Confirm the customer agreed to their words being published on Godesi.",
+      };
+    }
+
+    const slug = parsed.data.businessSlug.trim().replace(/^.*\/b\//, "");
+    const business = await db.business.findUnique({ where: { slug } });
+    if (!business)
+      return { error: `No business page found at /b/${slug}.` };
+
+    if (/\+?\d[\d\s()-]{7,}/.test(parsed.data.comment)) {
+      return {
+        error: "Remove the phone number from the review text before saving.",
+      };
+    }
+
+    await db.review.create({
+      data: {
+        businessId: business.id,
+        authorName: parsed.data.authorName,
+        rating: parsed.data.rating,
+        comment: parsed.data.comment,
+        source: parsed.data.source,
+        addedById: user.id,
+        consentAt: new Date(),
+      },
+    });
+
+    revalidatePath(`/b/${business.slug}`);
+    revalidatePath("/admin/reviews");
+    return { success: `Added to ${business.name}.` };
+  } catch (error) {
+    return fieldError(error);
+  }
 }

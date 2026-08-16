@@ -4,11 +4,17 @@ import { planRank } from "@/lib/plans";
 import { EventCard } from "@/components/EventCard";
 import { formatEventDate } from "@/lib/events";
 
-/** Upcoming events whose organiser is on a paid plan, newest first. */
+/**
+ * Upcoming events an admin has pinned, then those on a paid plan, by date.
+ */
 async function paidEvents(take: number) {
   const rows = await db.event.findMany({
-    where: { status: "APPROVED", startsAt: { gte: new Date() } },
-    orderBy: { startsAt: "asc" },
+    where: {
+      status: "APPROVED",
+      startsAt: { gte: new Date() },
+      OR: [{ featured: true }, { organizer: { plan: { not: "FREE" } } }],
+    },
+    orderBy: [{ featured: "desc" }, { startsAt: "asc" }],
     take: 40,
     include: {
       category: { select: { name: true, icon: true, color: true } },
@@ -16,7 +22,9 @@ async function paidEvents(take: number) {
     },
   });
 
-  return rows.filter((row) => planRank(row.organizer.plan) > 0).slice(0, take);
+  return rows
+    .filter((row) => row.featured || planRank(row.organizer.plan) > 0)
+    .slice(0, take);
 }
 
 const UPGRADE_COPY =

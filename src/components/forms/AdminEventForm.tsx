@@ -8,6 +8,7 @@ import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
 import { EVENT_TYPES } from "@/lib/eventOptions";
 import { FormSuccess } from "@/components/forms/FormSuccess";
@@ -30,6 +31,8 @@ export type AdminEventValues = {
   seatsBooked: number;
   imageUrl: string;
   videoUrl: string;
+  albumUrl: string;
+  featured: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
 };
 
@@ -153,6 +156,26 @@ export function AdminEventForm({
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />
+        </Field>
+        <div className="sm:col-span-2">
+          <PhotoAlbumField
+            defaultValue={event.albumUrl}
+            hint="Paste a public Google Photos album link and the event page shows a 3×3 gallery that opens the album."
+          />
+        </div>
+        <Field
+          label="Feature this event"
+          hint="Pins it to the featured strip at the top of /events, ahead of paid plans."
+        >
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              name="featured"
+              defaultChecked={event.featured}
+              className="h-4 w-4"
+            />
+            Show in featured events
+          </label>
         </Field>
         <Field label="Status">
           <select name="status" defaultValue={event.status} className={inputClass}>

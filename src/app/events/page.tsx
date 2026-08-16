@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
 import { FeaturedEventStrip } from "@/components/FeaturedEvents";
+import { EventSuppliersStrip } from "@/components/EventSuppliersStrip";
 import { planRank } from "@/lib/plans";
 import {
   InContentBanner,
@@ -166,6 +167,7 @@ export default async function EventsPage({
   const partnerRank = (status: string) => (status === "APPROVED" ? 1 : 0);
   events.sort(
     (a, b) =>
+      Number(b.featured) - Number(a.featured) ||
       partnerRank(b.partnerStatus) - partnerRank(a.partnerStatus) ||
       planRank(b.organizer.plan) - planRank(a.organizer.plan),
   );
@@ -262,6 +264,12 @@ export default async function EventsPage({
             <LinkButton href="/events/new" variant="secondary">
               Post your event
             </LinkButton>
+            <Link
+              href="/events/partner"
+              className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+            >
+              Get featured free 🤝
+            </Link>
             {q || city || from || to || when ? (
               <Link
                 href="/events"
@@ -400,6 +408,8 @@ export default async function EventsPage({
             }
           />
         )}
+
+        <EventSuppliersStrip />
 
         <p className="text-sm text-slate-500">
           Organising something?{" "}

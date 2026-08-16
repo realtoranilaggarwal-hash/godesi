@@ -538,6 +538,54 @@ export async function setEventStatusAction(formData: FormData) {
   if (status === "APPROVED") pingIndexNowInBackground(`/events/${event.slug}`);
 }
 
+const partnerKitSchema = z.object({
+  standeePdfUrl: z.string().trim().url().optional().or(z.literal("")),
+  printerUrl: z.string().trim().url().optional().or(z.literal("")),
+  banner160Url: z.string().trim().url().optional().or(z.literal("")),
+  banner728Url: z.string().trim().url().optional().or(z.literal("")),
+  note: z.string().trim().max(400).optional(),
+});
+
+/** The standee and banner artwork organisers download from /events/partner. */
+export async function savePartnerKitAction(formData: FormData) {
+  await requirePermission("events");
+  const parsed = partnerKitSchema.parse({
+    standeePdfUrl: formData.get("standeePdfUrl") ?? "",
+    printerUrl: formData.get("printerUrl") ?? "",
+    banner160Url: formData.get("banner160Url") ?? "",
+    banner728Url: formData.get("banner728Url") ?? "",
+    note: formData.get("note") ?? "",
+  });
+  const data = {
+    standeePdfUrl: parsed.standeePdfUrl || null,
+    printerUrl: parsed.printerUrl || null,
+    banner160Url: parsed.banner160Url || null,
+    banner728Url: parsed.banner728Url || null,
+    note: parsed.note || null,
+  };
+  await db.partnerKit.upsert({
+    where: { id: "default" },
+    create: { id: "default", ...data },
+    update: data,
+  });
+  revalidatePath("/events/partner");
+  revalidatePath("/admin/events");
+}
+
+/** Pin or unpin an event from the featured strip, from the events desk. */
+export async function toggleEventFeaturedAction(formData: FormData) {
+  await requirePermission("events");
+  const id = String(formData.get("id") ?? "");
+  const featured = formData.get("featured") === "1";
+  const event = await db.event.update({
+    where: { id },
+    data: { featured },
+  });
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath(`/events/${event.slug}`);
+}
+
 const adminEventSchema = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(5, "Give the event a clear title"),
@@ -574,6 +622,13 @@ const adminEventSchema = z.object({
       (value) => !value || isSupportedVideoUrl(value),
       "Paste a YouTube or Vimeo video link",
     ),
+  albumUrl: z
+    .string()
+    .trim()
+    .url("Enter a valid Google Photos album link")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  featured: z.coerce.boolean().default(false),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
 });
 
@@ -601,6 +656,8 @@ export async function adminUpdateEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl"),
       videoUrl: formData.get("videoUrl"),
+      albumUrl: formData.get("albumUrl"),
+      featured: formData.get("featured") === "on",
       status: formData.get("status"),
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -634,6 +691,8 @@ export async function adminUpdateEventAction(
         websiteUrl: parsed.data.websiteUrl ?? null,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        albumUrl: parsed.data.albumUrl ?? null,
+        featured: parsed.data.featured,
         price: parsed.data.price,
         currency: parsed.data.currency,
         seatsTotal: parsed.data.seatsTotal,
@@ -650,6 +709,46 @@ export async function adminUpdateEventAction(
   } catch (error) {
     return fieldError(error);
   }
+}
+
+/**
+ * Approve, reject or hold a member-posted listing (property, room or item).
+ * `setListingStatusAction` above moderates directory businesses — a different
+ * table entirely, despite the shared word "listing".
+ */
+export async function setClassifiedStatusAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "") as ListingStatus;
+  if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
+    throw new Error("Invalid status");
+  }
+  const listing = await db.listing.update({ where: { id }, data: { status } });
+
+  revalidatePath("/admin/properties");
+  revalidatePath("/admin/content");
+  revalidatePath("/real-estate");
+  revalidatePath("/rooms");
+  revalidatePath("/marketplace");
+  revalidatePath(`/listings/${listing.slug}`);
+}
+
+/** Puts a member listing in (or out of) the paid featured slots. */
+export async function toggleClassifiedFeaturedAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const listing = await db.listing.findUnique({ where: { id } });
+  if (!listing) throw new Error("Listing not found");
+  await db.listing.update({
+    where: { id },
+    data: { featured: !listing.featured },
+  });
+
+  revalidatePath("/admin/properties");
+  revalidatePath("/real-estate");
+  revalidatePath("/rooms");
+  revalidatePath("/marketplace");
+  revalidatePath(`/listings/${listing.slug}`);
 }
 
 export async function toggleFeaturedAction(formData: FormData) {

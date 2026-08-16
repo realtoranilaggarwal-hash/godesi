@@ -10,6 +10,7 @@ import { TicketForm } from "@/components/forms/TicketForm";
 import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
+import { EventEmbed } from "@/components/EventEmbed";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { eventTheme } from "@/lib/eventTheme";
@@ -240,6 +241,19 @@ export default async function EventPage({
             </div>
           </div>
         </div>
+
+        <Card>
+          <h2 className="font-bold">Put this event on your own website</h2>
+          <p className="mb-3 mt-1 text-sm text-slate-600">
+            Copy this code into your site and the card below appears there,
+            always up to date. Visitors tap it and book here — free, no account
+            needed on their side.
+          </p>
+          <EventEmbed
+            eventUrl={`${siteUrl()}/events/${event.slug}`}
+            title={event.title}
+          />
+        </Card>
 
         {user?.id === event.organizerId && event.partnerStatus !== "NONE" ? (
           <EventPartnerProof

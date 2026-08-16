@@ -9,6 +9,7 @@ import { effectivePlan } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
+import { reviewSourceLabel } from "@/lib/reviewSources";
 import { QrCard } from "@/components/QrCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoundingBadge } from "@/components/FoundingBadge";
@@ -692,6 +693,11 @@ export default async function BusinessProfilePage({
                     </div>
                     {review.comment ? (
                       <p className="mt-1 text-sm text-slate-700">{review.comment}</p>
+                    ) : null}
+                    {reviewSourceLabel(review.source) ? (
+                      <p className="mt-1 text-xs text-slate-400">
+                        {reviewSourceLabel(review.source)}
+                      </p>
                     ) : null}
                   </div>
                 ))
