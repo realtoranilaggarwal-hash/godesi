@@ -10,16 +10,20 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { PHONE_PATTERN, PHONE_PATTERN_HINT } from "@/lib/format";
 import { FormError } from "@/components/forms/FormError";
 import { LocationScopeField } from "@/components/forms/LocationScopeField";
+import { BudgetFields } from "@/components/forms/BudgetFields";
 
 /** Couples post here; only Premium vendors can unlock the contact details. */
 export function WeddingRequirementForm({
   defaultName,
   defaultEmail,
   defaultService,
+  currency,
 }: {
   defaultName?: string;
   defaultEmail?: string;
   defaultService?: string;
+  /** Guessed from where the visitor is; they can change it. */
+  currency: string;
 }) {
   const [state, formAction] = useFormState(createLeadAction, emptyState);
   const [services, setServices] = useState<string[]>(
@@ -119,12 +123,7 @@ export function WeddingRequirementForm({
             Date not decided yet / flexible
           </label>
         </Field>
-        <Field label="Budget from">
-          <input name="budgetMin" type="number" min={0} className={inputClass} />
-        </Field>
-        <Field label="Budget to">
-          <input name="budgetMax" type="number" min={0} className={inputClass} />
-        </Field>
+        <BudgetFields currency={currency} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

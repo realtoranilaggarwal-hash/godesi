@@ -5,6 +5,7 @@ import { weddingServiceName } from "@/lib/wedding";
 import { WeddingRequirementForm } from "@/components/forms/WeddingRequirementForm";
 import { PostingSidebar } from "@/components/PostingSidebar";
 import { Card } from "@/components/ui";
+import { displayCurrency } from "@/lib/displayCurrency";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default async function NewWeddingRequirementPage({
             defaultService={
               searchParams.service ? weddingServiceName(searchParams.service) : undefined
             }
+            currency={displayCurrency()}
           />
         </Card>
       </div>

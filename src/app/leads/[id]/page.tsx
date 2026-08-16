@@ -10,7 +10,7 @@ import {
 } from "@/app/actions/leads";
 import { UNLOCK_LEAD_POINTS, wallet } from "@/lib/rewards";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
-import { formatInr } from "@/lib/format";
+import { budgetRange } from "@/lib/budget";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Requirement" };
@@ -48,10 +48,8 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
         </p>
         {lead.budgetMin !== null || lead.budgetMax !== null ? (
           <p className="text-sm font-medium">
-            Budget: {formatInr(lead.budgetMin ?? lead.budgetMax ?? 0)}
-            {lead.budgetMin !== null && lead.budgetMax !== null
-              ? ` – ${formatInr(lead.budgetMax)}`
-              : ""}
+            Budget:{" "}
+            {budgetRange(lead.budgetMin, lead.budgetMax, lead.budgetCurrency)}
           </p>
         ) : null}
         <p className="whitespace-pre-line text-slate-700">{lead.description}</p>

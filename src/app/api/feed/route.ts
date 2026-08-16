@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
 import { newsPath } from "@/lib/newsLinks";
+import { budgetCurrencyOf } from "@/lib/budget";
 
 export const dynamic = "force-dynamic";
 
@@ -215,6 +216,7 @@ export async function GET(request: Request) {
         city: true,
         budgetMin: true,
         budgetMax: true,
+        budgetCurrency: true,
         createdAt: true,
       },
     });
@@ -231,6 +233,7 @@ export async function GET(request: Request) {
           city: item.city,
           budgetMin: item.budgetMin,
           budgetMax: item.budgetMax,
+          budgetCurrency: budgetCurrencyOf(item.budgetCurrency),
           postedAt: item.createdAt,
           url: `${base}/leads/${item.id}`,
         })),
