@@ -62,10 +62,14 @@ function guessCategory(...hints: string[]) {
   return "";
 }
 
-/** Sulekha-style paths read like /belleville-nj/religious-service/om-temple-123. */
+/**
+ * Sulekha-style paths read like /belleville-nj/religious-service/om-temple-123,
+ * and their trade pages like /edison-nj/pandit-hindu-priest-services, so the
+ * trade is in either of the last two segments.
+ */
 function tradeFromPath(pathname: string) {
   const parts = pathname.split("/").filter(Boolean);
-  return parts.length > 1 ? parts[parts.length - 2] : (parts[0] ?? "");
+  return parts.slice(-2).join(" ");
 }
 
 /** Listing sites put the town in the path, e.g. /cliffside-park-nj/… */
