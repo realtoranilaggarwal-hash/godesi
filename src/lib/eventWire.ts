@@ -109,11 +109,11 @@ type Source = {
   tags: string[];
 };
 
-async function fetchFeed(url: string) {
+async function fetchFeed(url: string, timeoutMs = 20_000) {
   const response = await fetch(url, {
     headers: { "User-Agent": "GodesiEventWire/1.0 (+https://godesi.com)" },
     cache: "no-store",
-    signal: AbortSignal.timeout(20_000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!response.ok) throw new Error(`Feed returned HTTP ${response.status}`);
   return response.text();
@@ -227,6 +227,15 @@ export async function importSource(source: Source): Promise<WireResult> {
 const PRIVATE_HOST =
   /^(localhost$|0\.|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1)/i;
 
+/** Where community sites keep their calendar when it is not on the front page. */
+const CALENDAR_PAGES = [
+  "/events",
+  "/events/",
+  "/calendar",
+  "/calendar/",
+  "/upcoming-events",
+];
+
 /** Google Calendar's embed code carries the id its .ics address is built from. */
 function googleIcsFrom(page: string) {
   const found = new Set<string>();
@@ -252,11 +261,22 @@ function googleIcsFrom(page: string) {
  */
 export async function discoverFeeds(website: string) {
   const target = new URL(website);
-  if (!/^https?:$/.test(target.protocol) || PRIVATE_HOST.test(target.hostname)) {
+  const privateHost =
+    PRIVATE_HOST.test(target.hostname) && process.env.NODE_ENV === "production";
+  if (!/^https?:$/.test(target.protocol) || privateHost) {
     throw new Error("That address is not a public website.");
   }
   const origin = target.origin;
-  const page = await fetchFeed(website);
+
+  // Temples rarely put the calendar on the front page, so the usual event
+  // pages are read too.
+  const pages = [website, ...CALENDAR_PAGES.map((path) => `${origin}${path}`)];
+  const fetched = await Promise.all(
+    // Most sites have only one or two of these paths, so a miss is expected.
+    pages.map((url) => fetchFeed(url, 8_000).catch(() => "")),
+  );
+  const page = fetched.join("");
+  if (!page) throw new Error("nothing answered at that address");
 
   const candidates = new Set<string>(googleIcsFrom(page));
 
@@ -271,18 +291,15 @@ export async function discoverFeeds(website: string) {
   // The Events Calendar's standard export, present even when nothing links it.
   candidates.add(`${origin}/events/?ical=1`);
 
-  const working: { url: string; events: number }[] = [];
-  for (const url of Array.from(candidates).slice(0, 8)) {
-    try {
-      // eslint-disable-next-line no-await-in-loop
-      const body = await fetchFeed(url);
-      if (!body.includes("BEGIN:VEVENT")) continue;
-      working.push({ url, events: parseIcs(body).length });
-    } catch {
-      // A dead candidate is normal — most pages have none at all.
-    }
-  }
-  return working;
+  // A dead candidate is normal — most pages advertise none at all.
+  const bodies = await Promise.all(
+    Array.from(candidates)
+      .slice(0, 8)
+      .map(async (url) => ({ url, body: await fetchFeed(url, 8_000).catch(() => "") })),
+  );
+  return bodies
+    .filter((found) => found.body.includes("BEGIN:VEVENT"))
+    .map((found) => ({ url: found.url, events: parseIcs(found.body).length }));
 }
 
 export async function runEventWire() {
