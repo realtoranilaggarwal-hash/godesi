@@ -56,6 +56,7 @@ const BAR_NAV = [
   { href: "/rooms", label: "Rooms" },
   { href: "/marketplace", label: "Buy & Sell" },
   { href: "/news", label: "News" },
+  { href: "/blog", label: "Blog" },
 ];
 
 /** Admins land on the full panel, moderators on the content desk. */
