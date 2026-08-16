@@ -84,6 +84,9 @@ export default async function EventPage({
   );
   const past = isPast(event);
   const maxPerBooking = Math.min(10, left);
+  const endLabel = event.endsAt
+    ? formatEventEnd(event.startsAt, event.endsAt)
+    : null;
 
   return (
     <div className="flex gap-6">
@@ -165,9 +168,7 @@ export default async function EventPage({
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>
                 📅 {formatEventDate(event.startsAt)}
-                {event.endsAt
-                  ? ` – ${formatEventEnd(event.startsAt, event.endsAt)}`
-                  : ""}
+                {endLabel ? ` – ${endLabel}` : ""}
               </p>
               <p>
                 📍 {event.venue}

@@ -46,9 +46,11 @@ export function formatEventDate(value: Date) {
 
 /**
  * The end of an event: just the time when it finishes the same day, the full
- * date when it runs over into another one.
+ * date when it runs over into another one. Null when the calendar it came from
+ * gave the same minute for both, which reads as "4:00 am – 4:00 am".
  */
 export function formatEventEnd(startsAt: Date, endsAt: Date) {
+  if (endsAt.getTime() - startsAt.getTime() < 60_000) return null;
   const sameDay =
     new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(
       startsAt,
