@@ -24,7 +24,7 @@ export function EventEmbed({
   )} — tickets on Godesi"></iframe>`;
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex gap-1 text-xs font-semibold">
           {(["light", "dark"] as const).map((option) => (
@@ -60,7 +60,7 @@ export function EventEmbed({
         title="Embed preview"
       />
 
-      <pre className="overflow-x-auto rounded-xl bg-slate-900 p-3 text-[11px] leading-relaxed text-slate-100">
+      <pre className="w-full max-w-full whitespace-pre-wrap break-all rounded-xl bg-slate-900 p-3 text-[11px] leading-relaxed text-slate-100">
         {html}
       </pre>
       <button
