@@ -44,6 +44,16 @@ function refresh() {
   revalidatePath("/events");
 }
 
+/** Next's redirect() works by throwing, so it must pass through a catch. */
+function isRedirect(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    typeof (error as { digest?: unknown }).digest === "string" &&
+    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  );
+}
+
 /** Sends the admin back with a reason rather than losing what they typed. */
 function reject(reason: string): never {
   redirect(`/admin/events/wire?error=${encodeURIComponent(reason)}`);
@@ -301,40 +311,53 @@ export async function saveLinkedEventAction(formData: FormData) {
   if (duplicate) reject(`That link is already listed as /events/${duplicate.slug}`);
 
   const city = titleCase(parsed.data.city);
-  await db.event.create({
-    data: {
-      title: parsed.data.title,
-      slug: await uniqueEventSlug(parsed.data.title, city),
-      description: [
-        parsed.data.description,
-        `Listed by Godesi from ${host}. Check the details with the organiser.`,
-      ]
-        .filter(Boolean)
-        .join("\n\n")
-        .slice(0, 5000),
-      startsAt,
-      endsAt,
-      timeZone: zone,
-      venue: titleCase(parsed.data.venue),
-      hallName: parsed.data.hallName || null,
-      address: parsed.data.address || null,
-      city,
-      state: parsed.data.state || null,
-      country: parsed.data.country,
-      imageUrl: parsed.data.imageUrl ?? null,
-      websiteUrl: parsed.data.sourceUrl,
-      categorySlug: parsed.data.categorySlug || null,
-      categorySlugs: parsed.data.categorySlug ? [parsed.data.categorySlug] : [],
-      tags: list(parsed.data.tags),
-      // Godesi sells no tickets for someone else's event.
-      price: 0,
-      seatsTotal: 0,
-      status: "APPROVED" as const,
-      organizerId: await wireOrganizerId(),
-      sourceId,
-      sourceUid: parsed.data.sourceUrl,
-    },
-  });
+  try {
+    await db.event.create({
+      data: {
+        title: parsed.data.title,
+        slug: await uniqueEventSlug(parsed.data.title, city),
+        description: [
+          parsed.data.description,
+          `Listed by Godesi from ${host}. Check the details with the organiser.`,
+        ]
+          .filter(Boolean)
+          .join("\n\n")
+          .slice(0, 5000),
+        startsAt,
+        endsAt,
+        timeZone: zone,
+        venue: titleCase(parsed.data.venue),
+        hallName: parsed.data.hallName || null,
+        address: parsed.data.address || null,
+        city,
+        state: parsed.data.state || null,
+        country: parsed.data.country,
+        imageUrl: parsed.data.imageUrl ?? null,
+        websiteUrl: parsed.data.sourceUrl,
+        categorySlug: parsed.data.categorySlug || null,
+        categorySlugs: parsed.data.categorySlug
+          ? [parsed.data.categorySlug]
+          : [],
+        tags: list(parsed.data.tags),
+        // Godesi sells no tickets for someone else's event.
+        price: 0,
+        seatsTotal: 0,
+        status: "APPROVED" as const,
+        organizerId: await wireOrganizerId(),
+        sourceId,
+        sourceUid: parsed.data.sourceUrl,
+      },
+    });
+  } catch (error) {
+    // A failure here used to show the desk the generic crash page, which says
+    // nothing about what to change. Redirects still travel as thrown errors.
+    if (isRedirect(error)) throw error;
+    reject(
+      `Could not save that event: ${
+        error instanceof Error ? error.message.slice(0, 300) : "unknown error"
+      }`,
+    );
+  }
 
   refresh();
   redirect("/admin/events/wire?added=1");
