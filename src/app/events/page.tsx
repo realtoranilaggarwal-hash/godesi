@@ -136,6 +136,22 @@ export default async function EventsPage({
     return query ? `/events?${query}` : "/events";
   };
   const modeFilter = EVENT_MODES.find((option) => option.value === mode)?.value;
+  /** Whether an empty list means "nothing matches" rather than "nothing yet". */
+  const filtered = Boolean(
+    q ||
+      city ||
+      state ||
+      venue ||
+      genre ||
+      lang ||
+      category ||
+      type ||
+      mode ||
+      from ||
+      to ||
+      when ||
+      selectedFeatures.length,
+  );
   const categories = await getCategoryTree();
   const scope = category
     ? [
@@ -616,12 +632,12 @@ export default async function EventsPage({
         ) : (
           <EmptyState
             title={
-              q || city || from || to
+              filtered
                 ? "Nothing matches that search"
                 : "No events here yet"
             }
             body={
-              q || city || from || to
+              filtered
                 ? "Try a wider date range, or clear the search to see everything coming up."
                 : "Be the first to list one — posting an event is free."
             }
