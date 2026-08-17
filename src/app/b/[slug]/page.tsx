@@ -723,11 +723,23 @@ export default async function BusinessProfilePage({
             {!isOwner ? (
               <div className="mt-5 border-t border-slate-100 pt-4">
                 <h3 className="mb-3 font-semibold">Leave a review</h3>
-                <ReviewForm
-                  businessId={business.id}
-                  defaultName={viewer?.name}
-                  detailed={isAgent}
-                />
+                {viewer ? (
+                  <ReviewForm
+                    businessId={business.id}
+                    defaultName={viewer.name}
+                    detailed={isAgent}
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-slate-600">
+                      Reviews run under a real Godesi account, so businesses are
+                      not judged by anonymous strangers.
+                    </p>
+                    <LinkButton href={`/login?next=/b/${business.slug}`}>
+                      Sign in to review
+                    </LinkButton>
+                  </div>
+                )}
               </div>
             ) : null}
           </Card>

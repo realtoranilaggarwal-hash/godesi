@@ -29,7 +29,12 @@ export async function createReviewAction(
   formData: FormData,
 ): Promise<ActionState> {
   try {
+    // A review names a business publicly, so it comes from an account we can
+    // trace and, if it turns out to be fake, hold responsible.
     const user = await getCurrentUser();
+    if (!user) {
+      return { error: "Please sign in to leave a review — it takes a minute and keeps reviews real." };
+    }
     const parsed = reviewSchema.safeParse({
       businessId: formData.get("businessId"),
       rating: formData.get("rating"),
@@ -52,14 +57,14 @@ export async function createReviewAction(
       where: { id: parsed.data.businessId },
     });
     if (!business) return { error: "Business not found." };
-    if (user && business.ownerId === user.id) {
+    if (business.ownerId === user.id) {
       return { error: "You cannot review your own business." };
     }
 
     const review = await db.review.create({
       data: {
         businessId: business.id,
-        authorId: user?.id ?? null,
+        authorId: user.id,
         authorName: parsed.data.authorName,
         rating: parsed.data.rating,
         comment: parsed.data.comment || null,
@@ -69,14 +74,12 @@ export async function createReviewAction(
         negotiation: parsed.data.negotiation ?? null,
       },
     });
-    if (user) {
-      await awardPoints({
-        userId: user.id,
-        reason: "REVIEW_POSTED",
-        note: `Review of ${business.name}`,
-        key: review.id,
-      });
-    }
+    await awardPoints({
+      userId: user.id,
+      reason: "REVIEW_POSTED",
+      note: `Review of ${business.name}`,
+      key: review.id,
+    });
 
     revalidatePath(`/b/${business.slug}`);
     return { success: "Thanks for your review!" };
