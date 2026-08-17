@@ -87,6 +87,16 @@ export default async function EventsPage({
     ),
   );
 
+  /**
+   * Remounts the two search forms whenever the query changes. A chip is a soft
+   * navigation, so React keeps the old `<select>` values and a later submit
+   * would post the stale "All categories" over the chip the visitor picked.
+   */
+  const formKey = [q, city, state, category, genre, lang, when, type, mode, venue, from, to]
+    .map((value) => value ?? "")
+    .concat(selectedFeatures)
+    .join("|");
+
   /** Chips change one thing and keep the rest of the search intact. */
   const searchHref = (changes: Record<string, string>) => {
     const params = new URLSearchParams();
@@ -291,6 +301,7 @@ export default async function EventsPage({
             seconds and get a QR ticket on your phone.
           </p>
           <form
+            key={formKey}
             className="mt-4 grid gap-2 rounded-2xl bg-white/15 p-2 backdrop-blur sm:grid-cols-[1.4fr_1fr_1fr_auto]"
             role="search"
           >
@@ -315,6 +326,26 @@ export default async function EventsPage({
               aria-label="On or after this date"
               className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900"
             />
+            {/* Chip filters live in the URL, not in this form — without these a
+                search would silently throw away the category the visitor picked. */}
+            {genre ? <input type="hidden" name="genre" value={genre} /> : null}
+            {lang ? <input type="hidden" name="lang" value={lang} /> : null}
+            {state ? <input type="hidden" name="state" value={state} /> : null}
+            {venue ? <input type="hidden" name="venue" value={venue} /> : null}
+            {type ? <input type="hidden" name="type" value={type} /> : null}
+            {mode ? <input type="hidden" name="mode" value={mode} /> : null}
+            {when ? <input type="hidden" name="when" value={when} /> : null}
+            {category ? (
+              <input type="hidden" name="category" value={category} />
+            ) : null}
+            {selectedFeatures.map((feature) => (
+              <input
+                key={feature}
+                type="hidden"
+                name="feature"
+                value={feature}
+              />
+            ))}
             <button
               type="submit"
               className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
@@ -501,7 +532,10 @@ export default async function EventsPage({
         <FeaturedEventStrip />
 
         <Card>
-          <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]">
+          <form
+            key={formKey}
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]"
+          >
             <input
               name="city"
               defaultValue={city ?? ""}

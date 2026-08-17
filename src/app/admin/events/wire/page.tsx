@@ -15,6 +15,7 @@ import {
   saveLinkedEventAction,
   toggleEventSourceAction,
 } from "@/app/actions/eventWire";
+import { cleanEventCategories, cleanEventLanguages } from "@/lib/eventCategories";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
@@ -252,12 +253,12 @@ export default async function Page({
                 <input name="country" defaultValue="USA" className={inputClass} />
               </Field>
               <EventCategoryPicker
-                defaultCategories={(searchParams.genres ?? "")
-                  .split(",")
-                  .filter(Boolean)}
-                defaultLanguages={(searchParams.langs ?? "")
-                  .split(",")
-                  .filter(Boolean)}
+                defaultCategories={cleanEventCategories(
+                  (searchParams.genres ?? "").split(",").filter(Boolean),
+                )}
+                defaultLanguages={cleanEventLanguages(
+                  (searchParams.langs ?? "").split(",").filter(Boolean),
+                )}
                 hint="Ticked from what the page says it is — correct them, they are the lists it shows up in."
               />
               <Field label="Business category" hint="Optional — the trade behind it">
