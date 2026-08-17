@@ -5,7 +5,7 @@ import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { can, requireUser } from "@/lib/auth";
+import { can, getCurrentUser, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { requestCurrency } from "@/lib/currency";
 import { isMonthly, marketplaceCategories, uniqueListingSlug } from "@/lib/listings";
@@ -18,6 +18,23 @@ import { foundingFeatureActive } from "@/lib/founding";
 import { contactDetailKind } from "@/lib/moderation";
 import { autoShareInBackground } from "@/lib/autoShare";
 import { titleCase } from "@/lib/titlecase";
+import {
+  AMENITIES,
+  AREA_UNITS,
+  CONSTRUCTION_TYPES,
+  FACINGS,
+  FLOORING_TYPES,
+  LOT_UNITS,
+  OWNERSHIPS,
+  PARKING_TYPES,
+  PROPERTY_AGES,
+  PROPERTY_HIGHLIGHTS,
+  SALE_TYPES,
+  TENANT_PREFS,
+  UTILITIES,
+  groupForType,
+  keepOptions,
+} from "@/lib/property";
 
 const schema = z.object({
   kind: z.enum(["PROPERTY_SALE", "PROPERTY_RENT", "ROOM_WANTED", "ROOM_OFFERED", "MARKETPLACE"]),
@@ -48,7 +65,81 @@ const schema = z.object({
       (value) => !value || isAlbumLink(value),
       "Paste a Google Photos album link (photos.app.goo.gl/…)",
     ),
+  // Property block below; ignored for rooms and buy & sell.
+  propertyType: z.string().trim().optional(),
+  postedByRole: z.enum(["OWNER", "AGENT", "BUILDER"]).optional(),
+  bathrooms: z.coerce.number().int().min(0).max(20).optional(),
+  balconies: z.coerce.number().int().min(0).max(20).optional(),
+  builtUpArea: z.coerce.number().int().min(0).max(10_000_000).optional(),
+  carpetArea: z.coerce.number().int().min(0).max(10_000_000).optional(),
+  areaUnit: z.string().trim().optional(),
+  propertyAge: z.string().trim().optional(),
+  floor: z.coerce.number().int().min(-5).max(200).optional(),
+  totalFloors: z.coerce.number().int().min(0).max(200).optional(),
+  facing: z.string().trim().optional(),
+  ownership: z.string().trim().optional(),
+  negotiable: z.coerce.boolean().optional(),
+  underLoan: z.coerce.boolean().optional(),
+  deposit: z.coerce.number().int().min(0).max(500_000_000).optional(),
+  maintenance: z.coerce.number().int().min(0).max(10_000_000).optional(),
+  parkingCar: z.coerce.number().int().min(0).max(20).optional(),
+  parkingBike: z.coerce.number().int().min(0).max(20).optional(),
+  lotSize: z.coerce.number().int().min(0).max(10_000_000).optional(),
+  lotUnit: z.string().trim().optional(),
+  threeQuarterBaths: z.coerce.number().int().min(0).max(20).optional(),
+  halfBaths: z.coerce.number().int().min(0).max(20).optional(),
+  yearBuilt: z.coerce
+    .number()
+    .int()
+    .min(1600, "Check the year built")
+    .max(new Date().getFullYear() + 5, "Check the year built")
+    .optional(),
+  saleType: z.string().trim().optional(),
+  hoaFee: z.coerce.number().int().min(0).max(10_000_000).optional(),
+  propertyTax: z.coerce.number().int().min(0).max(10_000_000).optional(),
+  openHouseDate: z.string().trim().optional(),
+  openHouseStart: z.string().trim().optional(),
+  openHouseEnd: z.string().trim().optional(),
+  schoolDistrict: z.string().trim().max(120).optional(),
+  mlsNumber: z.string().trim().max(40).optional(),
+  tourUrl: z
+    .string()
+    .trim()
+    .url("Paste a full link for the virtual tour")
+    .optional(),
+  mapUrl: z.string().trim().url("Paste a Google Maps link").optional(),
+  state: z.string().trim().max(80).optional(),
+  country: z.string().trim().max(80).optional(),
+  availableFrom: z.coerce.date().optional(),
+  tenantPref: z.string().trim().optional(),
+  nriFriendly: z.coerce.boolean().optional(),
+  investmentDeal: z.coerce.boolean().optional(),
+  contactName: z.string().trim().max(80).optional(),
+  contactPhone: z.string().trim().max(30).optional(),
+  contactEmail: z.string().trim().email("Check the contact email").optional(),
 });
+
+function oneOf(value: string | undefined, allowed: { slug: string }[]) {
+  return allowed.some((option) => option.slug === value) ? (value as string) : null;
+}
+
+/**
+ * An open house is a date plus two clock times on that date. Times without a
+ * date are dropped, and an end before the start is ignored rather than saved
+ * backwards.
+ */
+function openHouseWindow(date?: string, start?: string, end?: string) {
+  if (!date) return { startsAt: null, endsAt: null };
+  const startsAt = new Date(`${date}T${start || "00:00"}`);
+  if (Number.isNaN(startsAt.getTime())) return { startsAt: null, endsAt: null };
+  if (!end) return { startsAt, endsAt: null };
+  const endsAt = new Date(`${date}T${end}`);
+  return {
+    startsAt,
+    endsAt:
+      Number.isNaN(endsAt.getTime()) || endsAt <= startsAt ? null : endsAt,
+  };
+}
 
 export async function createListingAction(
   _prev: ActionState,
@@ -72,6 +163,48 @@ export async function createListingAction(
       whatsapp: formData.get("whatsapp"),
       videoUrl: formData.get("videoUrl") || undefined,
       albumUrl: formData.get("albumUrl") || undefined,
+      propertyType: formData.get("propertyType") || undefined,
+      postedByRole: formData.get("postedByRole") || undefined,
+      bathrooms: formData.get("bathrooms") || undefined,
+      balconies: formData.get("balconies") || undefined,
+      builtUpArea: formData.get("builtUpArea") || undefined,
+      carpetArea: formData.get("carpetArea") || undefined,
+      areaUnit: formData.get("areaUnit") || undefined,
+      propertyAge: formData.get("propertyAge") || undefined,
+      floor: formData.get("floor") || undefined,
+      totalFloors: formData.get("totalFloors") || undefined,
+      facing: formData.get("facing") || undefined,
+      ownership: formData.get("ownership") || undefined,
+      negotiable: formData.get("negotiable") ? true : undefined,
+      underLoan: formData.get("underLoan") ? true : undefined,
+      deposit: formData.get("deposit") || undefined,
+      maintenance: formData.get("maintenance") || undefined,
+      parkingCar: formData.get("parkingCar") || undefined,
+      parkingBike: formData.get("parkingBike") || undefined,
+      lotSize: formData.get("lotSize") || undefined,
+      lotUnit: formData.get("lotUnit") || undefined,
+      threeQuarterBaths: formData.get("threeQuarterBaths") || undefined,
+      halfBaths: formData.get("halfBaths") || undefined,
+      yearBuilt: formData.get("yearBuilt") || undefined,
+      saleType: formData.get("saleType") || undefined,
+      hoaFee: formData.get("hoaFee") || undefined,
+      propertyTax: formData.get("propertyTax") || undefined,
+      openHouseDate: formData.get("openHouseDate") || undefined,
+      openHouseStart: formData.get("openHouseStart") || undefined,
+      openHouseEnd: formData.get("openHouseEnd") || undefined,
+      schoolDistrict: formData.get("schoolDistrict") || undefined,
+      mlsNumber: formData.get("mlsNumber") || undefined,
+      tourUrl: formData.get("tourUrl") || undefined,
+      mapUrl: formData.get("mapUrl") || undefined,
+      state: formData.get("state") || undefined,
+      country: formData.get("country") || undefined,
+      availableFrom: formData.get("availableFrom") || undefined,
+      tenantPref: formData.get("tenantPref") || undefined,
+      nriFriendly: formData.get("nriFriendly") ? true : undefined,
+      investmentDeal: formData.get("investmentDeal") ? true : undefined,
+      contactName: formData.get("contactName") || undefined,
+      contactPhone: formData.get("contactPhone") || undefined,
+      contactEmail: formData.get("contactEmail") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -95,6 +228,88 @@ export async function createListingAction(
         };
       }
     }
+
+    const isProperty =
+      parsed.data.kind === "PROPERTY_SALE" || parsed.data.kind === "PROPERTY_RENT";
+    const propertyType = isProperty
+      ? (groupForType(parsed.data.propertyType ?? "") ? parsed.data.propertyType! : null)
+      : null;
+    const propertyGroup = propertyType ? groupForType(propertyType) : null;
+    const openHouse = openHouseWindow(
+      parsed.data.openHouseDate,
+      parsed.data.openHouseStart,
+      parsed.data.openHouseEnd,
+    );
+    const property = isProperty
+      ? {
+          propertyGroup,
+          propertyType,
+          postedByRole: parsed.data.postedByRole ?? "OWNER",
+          bathrooms: parsed.data.bathrooms ?? null,
+          balconies: parsed.data.balconies ?? null,
+          builtUpArea: parsed.data.builtUpArea ?? null,
+          carpetArea: parsed.data.carpetArea ?? null,
+          areaUnit: oneOf(parsed.data.areaUnit, AREA_UNITS) ?? "sqft",
+          propertyAge: oneOf(parsed.data.propertyAge, PROPERTY_AGES),
+          floor: parsed.data.floor ?? null,
+          totalFloors: parsed.data.totalFloors ?? null,
+          facing: oneOf(parsed.data.facing, FACINGS),
+          ownership: oneOf(parsed.data.ownership, OWNERSHIPS),
+          negotiable: parsed.data.negotiable ?? false,
+          underLoan: parsed.data.underLoan ?? false,
+          deposit: parsed.data.deposit ?? null,
+          maintenance: parsed.data.maintenance ?? null,
+          parkingCar: parsed.data.parkingCar ?? null,
+          parkingBike: parsed.data.parkingBike ?? null,
+          lotSize: parsed.data.lotSize ?? null,
+          lotUnit: oneOf(parsed.data.lotUnit, LOT_UNITS) ?? "sqft",
+          threeQuarterBaths: parsed.data.threeQuarterBaths ?? null,
+          halfBaths: parsed.data.halfBaths ?? null,
+          yearBuilt: parsed.data.yearBuilt ?? null,
+          saleType: oneOf(parsed.data.saleType, SALE_TYPES),
+          hoaFee: parsed.data.hoaFee ?? null,
+          propertyTax: parsed.data.propertyTax ?? null,
+          openHouseAt: openHouse.startsAt,
+          openHouseEndsAt: openHouse.endsAt,
+          schoolDistrict: parsed.data.schoolDistrict || null,
+          mlsNumber: parsed.data.mlsNumber || null,
+          construction: keepOptions(
+            formData.getAll("construction").map(String),
+            CONSTRUCTION_TYPES,
+          ),
+          flooring: keepOptions(
+            formData.getAll("flooring").map(String),
+            FLOORING_TYPES,
+          ),
+          parkingTypes: keepOptions(
+            formData.getAll("parkingTypes").map(String),
+            PARKING_TYPES,
+          ),
+          highlights: keepOptions(
+            formData.getAll("highlights").map(String),
+            PROPERTY_HIGHLIGHTS,
+          ),
+          amenities: keepOptions(
+            formData.getAll("amenities").map(String),
+            AMENITIES,
+          ),
+          utilities: keepOptions(
+            formData.getAll("utilities").map(String),
+            UTILITIES,
+          ),
+          tourUrl: parsed.data.tourUrl ?? null,
+          mapUrl: parsed.data.mapUrl ?? null,
+          state: parsed.data.state || null,
+          country: parsed.data.country || null,
+          availableFrom: parsed.data.availableFrom ?? null,
+          tenantPref: oneOf(parsed.data.tenantPref, TENANT_PREFS),
+          nriFriendly: parsed.data.nriFriendly ?? false,
+          investmentDeal: parsed.data.investmentDeal ?? false,
+          contactName: parsed.data.contactName || null,
+          contactPhone: parsed.data.contactPhone || null,
+          contactEmail: parsed.data.contactEmail || null,
+        }
+      : {};
 
     const images = formData
       .getAll("images")
@@ -120,6 +335,7 @@ export async function createListingAction(
         whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
         videoUrl: parsed.data.videoUrl ?? null,
         albumUrl: parsed.data.albumUrl ?? null,
+        ...property,
         featured: foundingFeatureActive(user),
         ownerId: user.id,
         images: {
@@ -149,6 +365,7 @@ export async function createListingAction(
     revalidatePath("/real-estate");
     revalidatePath("/rooms");
     revalidatePath("/marketplace");
+    revalidatePath("/categories/real-estate");
     if (listing.status === "APPROVED")
       pingIndexNowInBackground(`/listings/${listing.slug}`);
     destination = `/listings/${listing.slug}`;
@@ -156,6 +373,44 @@ export async function createListingAction(
     return fieldError(error);
   }
   redirect(destination);
+}
+
+/**
+ * Records that someone took a seller's contact detail. Called from the listing
+ * page as the visitor leaves for WhatsApp, so the owner and the admin lead desk
+ * can see demand. Never throws at the caller — a failed count must not block
+ * the enquiry.
+ */
+export async function recordListingLeadAction(listingId: string, channel: string) {
+  if (!["whatsapp", "phone", "email"].includes(channel)) return;
+  try {
+    const user = await getCurrentUser();
+    await db.listingLead.create({
+      data: { listingId, channel, userId: user?.id ?? null },
+    });
+  } catch {
+    // Counting leads is best-effort.
+  }
+}
+
+/**
+ * Contact details for a property, handed over only after a signed-in member
+ * asks for them. They deliberately never travel to the browser with the page:
+ * client component props are serialised into the HTML, so passing them up front
+ * would publish every seller's number to anyone who reads the source.
+ */
+export async function revealListingContactAction(listingId: string) {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const listing = await db.listing.findFirst({
+    where: { id: listingId, status: "APPROVED" },
+    select: { contactName: true, contactPhone: true, contactEmail: true },
+  });
+  if (!listing) return null;
+
+  await recordListingLeadAction(listingId, listing.contactPhone ? "phone" : "email");
+  return listing;
 }
 
 export async function deleteListingAction(formData: FormData) {

@@ -418,6 +418,33 @@ model Listing {
   /// Refundable deposit and monthly maintenance, in the same currency as price.
   deposit        Int?
   maintenance    Int?
+  /// US market fields. Lot size is the plot; `builtUpArea` is finished space.
+  lotSize        Int?
+  /// Unit of `lotSize` alone: "sqft" or "acre".
+  lotUnit        String?
+  /// Baths counted the American way: full (bath + shower), three-quarter
+  /// (shower, no tub) and half (no bathing). `bathrooms` stays the full count.
+  threeQuarterBaths Int?
+  halfBaths      Int?
+  yearBuilt      Int?
+  /// Slug from SALE_TYPES, e.g. "resale", "new-construction", "foreclosure".
+  saleType       String?
+  /// Slugs from CONSTRUCTION_TYPES, FLOORING_TYPES, PARKING_TYPES and
+  /// PROPERTY_HIGHLIGHTS; unknown values are dropped on save.
+  construction   String[]       @default([])
+  flooring       String[]       @default([])
+  parkingTypes   String[]       @default([])
+  highlights     String[]       @default([])
+  /// Monthly HOA or condo fee and the yearly property tax, in `currency`.
+  hoaFee         Int?
+  propertyTax    Int?
+  /// Next open house, and when it ends the same day.
+  openHouseAt    DateTime?
+  openHouseEndsAt DateTime?
+  /// Local school district, which US buyers search on as hard as price.
+  schoolDistrict String?
+  /// MLS number so a listing can be matched against the public record.
+  mlsNumber      String?
   parkingCar     Int?
   parkingBike    Int?
   /// Slugs from AMENITIES and UTILITIES; unknown values are dropped on save.
@@ -460,6 +487,8 @@ model Listing {
   @@index([kind, status, featured])
   @@index([kind, categorySlug])
   @@index([status, propertyGroup, propertyType])
+  @@index([openHouseAt])
+  @@index([builtUpArea])
 }
 
 /// One recorded enquiry on a listing: who asked, and how they reached out.
