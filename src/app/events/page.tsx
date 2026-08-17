@@ -24,6 +24,8 @@ import {
   EVENT_WHEN,
   eventDateRange,
   eventTextWhere,
+  stateLabel,
+  statesMatching,
 } from "@/lib/eventSearch";
 import {
   EVENT_CATEGORIES,
@@ -47,6 +49,7 @@ export default async function EventsPage({
 }: {
   searchParams: {
     city?: string;
+    state?: string;
     category?: string;
     genre?: string;
     lang?: string;
@@ -60,7 +63,7 @@ export default async function EventsPage({
     feature?: string | string[];
   };
 }) {
-  const { city, category, when, type, mode, venue, q, from, to } =
+  const { city, state, category, when, type, mode, venue, q, from, to } =
     searchParams;
   // The event's own category (garba, comedy, satsang) and the language it runs
   // in — separate from `category`, which is the trade behind it.
@@ -90,6 +93,7 @@ export default async function EventsPage({
     const current: Record<string, string | undefined> = {
       q,
       city,
+      state,
       category,
       genre,
       lang,
@@ -113,6 +117,7 @@ export default async function EventsPage({
   const featureHref = (feature: string) => {
     const params = new URLSearchParams();
     if (city) params.set("city", city);
+    if (state) params.set("state", state);
     if (category) params.set("category", category);
     if (genre) params.set("genre", genre);
     if (lang) params.set("lang", lang);
@@ -140,6 +145,19 @@ export default async function EventsPage({
           ?.children.map((c) => c.slug) ?? []),
       ]
     : undefined;
+
+  // "Events in Florida" is how people ask, so states get their own chip row.
+  const stateRows = await db.event.groupBy({
+    by: ["state"],
+    where: {
+      status: "APPROVED",
+      startsAt: { gte: new Date() },
+      state: { not: null },
+    },
+    _count: { state: true },
+    orderBy: { _count: { state: "desc" } },
+    take: 10,
+  });
 
   const cityRows = await db.event.groupBy({
     by: ["city"],
@@ -209,7 +227,18 @@ export default async function EventsPage({
       ],
       ...(genre ? { genres: { has: genre } } : {}),
       ...(lang ? { languages: { has: lang } } : {}),
-      ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
+      // The city box doubles as a state box, so "NJ" or "New Jersey" works in it.
+      ...(city
+        ? {
+            OR: [
+              { city: { contains: city, mode: "insensitive" as const } },
+              ...statesMatching(city).map((match) => ({
+                state: { equals: match, mode: "insensitive" as const },
+              })),
+            ],
+          }
+        : {}),
+      ...(state ? { state: { equals: state, mode: "insensitive" } } : {}),
       ...(venue ? { venue: { contains: venue, mode: "insensitive" } } : {}),
       ...(type ? { eventType: type } : {}),
       ...(modeFilter ? { mode: modeFilter } : {}),
@@ -259,8 +288,8 @@ export default async function EventsPage({
             <input
               name="city"
               defaultValue={city ?? ""}
-              placeholder="City, e.g. Edison"
-              aria-label="City"
+              placeholder="City or state, e.g. Edison or NJ"
+              aria-label="City or state"
               className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
             />
             <input
@@ -351,6 +380,31 @@ export default async function EventsPage({
             </div>
           ) : null}
 
+          {stateRows.length > 1 ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
+                States
+              </span>
+              {stateRows.map((row) => {
+                const code = row.state ?? "";
+                const active = (state ?? "").toLowerCase() === code.toLowerCase();
+                return (
+                  <Link
+                    key={code}
+                    href={searchHref({ state: active ? "" : code })}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "bg-white text-rose-700"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {stateLabel(code)} · {row._count.state}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : null}
+
           {cityRows.length ? (
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wide text-white/70">
@@ -417,7 +471,7 @@ export default async function EventsPage({
             >
               Get featured free 🤝
             </Link>
-            {q || city || venue || from || to || when || genre || lang ? (
+            {q || city || state || venue || from || to || when || genre || lang ? (
               <Link
                 href="/events"
                 className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
@@ -495,6 +549,7 @@ export default async function EventsPage({
             {category ? (
               <input type="hidden" name="category" value={category} />
             ) : null}
+            {state ? <input type="hidden" name="state" value={state} /> : null}
             {q ? <input type="hidden" name="q" value={q} /> : null}
             {venue ? <input type="hidden" name="venue" value={venue} /> : null}
             {from ? <input type="hidden" name="from" value={from} /> : null}

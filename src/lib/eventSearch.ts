@@ -79,14 +79,94 @@ export function eventTextWhere(q?: string) {
   const term = q?.trim();
   if (!term) return undefined;
   const contains = { contains: term, mode: "insensitive" as const };
+  // People type either half of a state, so "NJ" and "New Jersey" find the same
+  // events whichever way the organiser wrote it.
+  const stateTerms = statesMatching(term).map((state) => ({
+    state: { equals: state, mode: "insensitive" as const },
+  }));
   return {
     OR: [
       { title: contains },
       { venue: contains },
       { hallName: contains },
       { city: contains },
+      { state: contains },
+      { country: contains },
       { description: contains },
       { address: contains },
+      ...stateTerms,
     ],
   };
+}
+
+/** Two-letter codes and full names of the states the diaspora is thickest in. */
+export const US_STATES: Record<string, string> = {
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DC: "District of Columbia",
+  DE: "Delaware",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  IA: "Iowa",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  MA: "Massachusetts",
+  MD: "Maryland",
+  ME: "Maine",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MO: "Missouri",
+  MS: "Mississippi",
+  MT: "Montana",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  NE: "Nebraska",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NV: "Nevada",
+  NY: "New York",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VA: "Virginia",
+  VT: "Vermont",
+  WA: "Washington",
+  WI: "Wisconsin",
+  WV: "West Virginia",
+  WY: "Wyoming",
+};
+
+/** The label to show for a stored state, "NJ" → "New Jersey". */
+export function stateLabel(state: string) {
+  return US_STATES[state.trim().toUpperCase()] ?? state;
+}
+
+/** Both spellings of whatever the visitor typed, e.g. "texas" → ["TX", "Texas"]. */
+export function statesMatching(term: string) {
+  const wanted = term.trim().toLowerCase();
+  const found: string[] = [];
+  for (const [code, name] of Object.entries(US_STATES)) {
+    if (code.toLowerCase() === wanted || name.toLowerCase() === wanted) {
+      found.push(code, name);
+    }
+  }
+  return found;
 }

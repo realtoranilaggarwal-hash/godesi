@@ -10,6 +10,7 @@ import { TicketForm } from "@/components/forms/TicketForm";
 import { SidebarBanners } from "@/components/Banners";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
+import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
@@ -209,8 +210,24 @@ export default async function EventPage({
                 >
                   {event.venue}
                 </Link>
-                {event.hallName ? ` — ${event.hallName}` : ""}, {event.city}
-                {event.state ? `, ${event.state}` : ""}
+                {event.hallName ? ` — ${event.hallName}` : ""},{" "}
+                <Link
+                  href={`/events?city=${encodeURIComponent(event.city)}`}
+                  className="font-semibold text-indigo-600 hover:underline"
+                >
+                  {event.city}
+                </Link>
+                {event.state ? (
+                  <>
+                    ,{" "}
+                    <Link
+                      href={`/events?state=${encodeURIComponent(event.state)}`}
+                      className="font-semibold text-indigo-600 hover:underline"
+                    >
+                      {event.state}
+                    </Link>
+                  </>
+                ) : null}
                 {event.country ? `, ${event.country}` : ""}
               </p>
               {event.hallName || event.hallCapacity || event.venueUrl ? (
@@ -300,6 +317,25 @@ export default async function EventPage({
                 <p>🪑 {left} of {event.seatsTotal} seats available</p>
               )}
             </div>
+
+            {past ? null : (
+              <AddToCalendar
+                slug={event.slug}
+                title={event.title}
+                startsAt={event.startsAt}
+                endsAt={event.endsAt}
+                place={[
+                  event.hallName,
+                  event.venue,
+                  event.address,
+                  event.city,
+                  event.state,
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+                details={`${siteUrl()}/events/${event.slug}`}
+              />
+            )}
 
             {event.features.length ? (
               <div className="flex flex-wrap gap-1.5">
