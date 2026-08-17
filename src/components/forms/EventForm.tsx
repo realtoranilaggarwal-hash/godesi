@@ -16,6 +16,7 @@ import {
   EVENT_MODES,
   EVENT_TYPES,
 } from "@/lib/eventOptions";
+import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { FormError } from "@/components/forms/FormError";
 import {
   EventVenueFields,
@@ -112,6 +113,7 @@ export function EventForm({
         <Field label="End date" hint="Only for events that run over more than one day">
           <input name="endDate" type="date" className={inputClass} />
         </Field>
+        <EventCategoryPicker />
         <Field label="Event type">
           <select name="eventType" required className={inputClass}>
             <option value="">Select a type</option>

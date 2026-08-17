@@ -11,6 +11,7 @@ import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
 import { EVENT_TYPES } from "@/lib/eventOptions";
+import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
@@ -33,6 +34,8 @@ export type AdminEventValues = {
   categorySlug: string;
   subcategorySlug: string;
   eventType: string;
+  genres: string[];
+  languages: string[];
   websiteUrl: string;
   price: number;
   currency: string;
@@ -175,6 +178,10 @@ export function AdminEventForm({
           required={false}
           defaultCategory={event.categorySlug}
           defaultSubcategory={event.subcategorySlug}
+        />
+        <EventCategoryPicker
+          defaultCategories={event.genres}
+          defaultLanguages={event.languages}
         />
         <Field label="Event type">
           <select

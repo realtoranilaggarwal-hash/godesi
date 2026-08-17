@@ -3,6 +3,10 @@ import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { parseIcs, type IcsEvent } from "@/lib/ics";
+import {
+  guessEventCategories,
+  guessEventLanguages,
+} from "@/lib/eventCategories";
 import { placeWallClock, zoneForPlace } from "@/lib/time";
 
 /**
@@ -256,6 +260,10 @@ export async function importSource(source: Source): Promise<WireResult> {
       websiteUrl: entry.url ?? source.websiteUrl,
       categorySlugs,
       categorySlug: categorySlugs[0] ?? null,
+      // A calendar states no category, so the entry's own words place it —
+      // "Ekadasi parayanam" as devotional, "Garba night" as garba-dandiya.
+      genres: guessEventCategories(entry.title, description),
+      languages: guessEventLanguages(entry.title, description),
       tags: source.tags,
       // Godesi sells no tickets for an imported event; the organiser does.
       price: 0,

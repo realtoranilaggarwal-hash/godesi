@@ -16,6 +16,11 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
+import {
+  cleanEventCategories,
+  cleanEventLanguages,
+  guessEventCategories,
+} from "@/lib/eventCategories";
 import { rememberVenue } from "@/lib/venues";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
@@ -283,6 +288,20 @@ export async function createEventAction(
     const categorySlugs = Array.from(
       new Set([primaryCategory, ...extraCategories].filter(Boolean) as string[]),
     );
+    // Untouched by the organiser, the title still puts the event in a list.
+    const picked = cleanEventCategories(
+      formData.getAll("genres").map((value) => String(value)),
+    );
+    const genres = picked.length
+      ? picked
+      : guessEventCategories(
+          parsed.data.title,
+          parsed.data.eventType,
+          parsed.data.description,
+        );
+    const languages = cleanEventLanguages(
+      formData.getAll("languages").map((value) => String(value)),
+    );
     const tags = (parsed.data.tags ?? "")
       .split(",")
       .map((tag) => tag.trim().slice(0, 30))
@@ -335,6 +354,8 @@ export async function createEventAction(
         state: parsed.data.state,
         country: parsed.data.country,
         eventType: parsed.data.eventType,
+        genres,
+        languages,
         mode: parsed.data.mode,
         onlineUrl: parsed.data.onlineUrl ?? null,
         websiteUrl: parsed.data.websiteUrl ?? null,

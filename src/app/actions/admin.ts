@@ -19,6 +19,10 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
 import { levelFor } from "@/lib/journalists";
 import { formatEventDate } from "@/lib/events";
+import {
+  cleanEventCategories,
+  cleanEventLanguages,
+} from "@/lib/eventCategories";
 import { DEFAULT_EVENT_ZONE, instantFrom, isEventZone } from "@/lib/time";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import {
@@ -688,6 +692,13 @@ export async function adminUpdateEventAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
+    const genres = cleanEventCategories(
+      formData.getAll("genres").map((value) => String(value)),
+    );
+    const languages = cleanEventLanguages(
+      formData.getAll("languages").map((value) => String(value)),
+    );
+
     // The times typed are the event's own local times, in its own zone.
     const zone =
       parsed.data.timeZone && isEventZone(parsed.data.timeZone)
@@ -742,6 +753,8 @@ export async function adminUpdateEventAction(
             ? parsed.data.recurrence || null
             : null,
         eventType: parsed.data.eventType || null,
+        genres,
+        languages,
         websiteUrl: parsed.data.websiteUrl ?? null,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,

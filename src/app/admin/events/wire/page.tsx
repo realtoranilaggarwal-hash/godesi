@@ -16,6 +16,7 @@ import {
   toggleEventSourceAction,
 } from "@/app/actions/eventWire";
 import { getCategoryTree } from "@/lib/directory";
+import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
 
@@ -61,6 +62,8 @@ export default async function Page({
     state?: string;
     zone?: string;
     text?: string;
+    genres?: string;
+    langs?: string;
     missing?: string;
   };
 }) {
@@ -248,7 +251,16 @@ export default async function Page({
               <Field label="Country">
                 <input name="country" defaultValue="USA" className={inputClass} />
               </Field>
-              <Field label="Category" hint="Optional — helps people find it">
+              <EventCategoryPicker
+                defaultCategories={(searchParams.genres ?? "")
+                  .split(",")
+                  .filter(Boolean)}
+                defaultLanguages={(searchParams.langs ?? "")
+                  .split(",")
+                  .filter(Boolean)}
+                hint="Ticked from what the page says it is — correct them, they are the lists it shows up in."
+              />
+              <Field label="Business category" hint="Optional — the trade behind it">
                 <select name="categorySlug" className={inputClass}>
                   <option value="">No category</option>
                   {categories.map((category) => (

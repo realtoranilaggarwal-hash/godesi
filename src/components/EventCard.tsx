@@ -3,6 +3,10 @@ import { formatEventDate, seatsLeft } from "@/lib/events";
 import { Money } from "@/components/Money";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
+import {
+  eventCategoryIcon,
+  eventCategoryLabel,
+} from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { thumbImage } from "@/lib/proxyImage";
 import { eventTheme, placeLine } from "@/lib/eventTheme";
@@ -27,6 +31,8 @@ export type EventListItem = {
   /** Set when the event came from a public calendar; Godesi sells no seats. */
   sourceId?: string | null;
   category: { name: string; icon: string; color: string } | null;
+  /** The event's own categories, e.g. garba-dandiya — the first one is shown. */
+  genres?: string[];
 };
 
 /**
@@ -78,7 +84,12 @@ export function EventCard({
           }`}
         >
           <div className="flex items-center gap-2">
-            {event.category && !tile ? (
+            {event.genres?.length && !tile ? (
+              <Badge tone="indigo">
+                {eventCategoryIcon(event.genres[0])}{" "}
+                {eventCategoryLabel(event.genres[0])}
+              </Badge>
+            ) : event.category && !tile ? (
               <Badge tone="indigo">
                 {event.category.icon} {event.category.name}
               </Badge>

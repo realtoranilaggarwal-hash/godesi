@@ -12,6 +12,12 @@ import {
   wireOrganizerId,
 } from "@/lib/eventWire";
 import { readEventLink } from "@/lib/eventLink";
+import {
+  cleanEventCategories,
+  cleanEventLanguages,
+  guessEventCategories,
+  guessEventLanguages,
+} from "@/lib/eventCategories";
 import { uniqueEventSlug } from "@/lib/events";
 import { instantFrom, isEventZone, zoneForPlace } from "@/lib/time";
 import { titleCase } from "@/lib/titlecase";
@@ -247,6 +253,10 @@ export async function readEventLinkAction(formData: FormData) {
     // where it happens and the desk can correct it.
     zone: zoneForPlace(draft.state, ""),
     text: draft.description.slice(0, 1500),
+    // Pre-ticked on the confirm screen from what the page says it is, so a
+    // pasted Bollywood night lands in that list even if nobody edits it.
+    genres: guessEventCategories(draft.title, draft.description).join(","),
+    langs: guessEventLanguages(draft.title, draft.description).join(","),
     missing: draft.missing.join(", "),
   });
   redirect(`/admin/events/wire?${params.toString()}#confirm`);
@@ -313,6 +323,15 @@ export async function saveLinkedEventAction(formData: FormData) {
       )?.slug ?? null)
     : null;
 
+  // The event's own categories are a plain list, not a foreign key, so an
+  // unknown value is dropped instead of failing the whole row.
+  const genres = cleanEventCategories(
+    formData.getAll("genres").map((value) => String(value)),
+  );
+  const languages = cleanEventLanguages(
+    formData.getAll("languages").map((value) => String(value)),
+  );
+
   const host = new URL(parsed.data.sourceUrl).hostname.replace(/^www\./, "");
   const sourceId = await manualSource(host);
   const duplicate = await db.event.findUnique({
@@ -347,6 +366,10 @@ export async function saveLinkedEventAction(formData: FormData) {
         websiteUrl: parsed.data.sourceUrl,
         categorySlug,
         categorySlugs: categorySlug ? [categorySlug] : [],
+        genres: genres.length
+          ? genres
+          : guessEventCategories(parsed.data.title, parsed.data.description),
+        languages,
         tags: list(parsed.data.tags),
         // Godesi sells no tickets for someone else's event.
         price: 0,

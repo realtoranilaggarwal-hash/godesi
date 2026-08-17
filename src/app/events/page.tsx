@@ -25,6 +25,11 @@ import {
   eventDateRange,
   eventTextWhere,
 } from "@/lib/eventSearch";
+import {
+  EVENT_CATEGORIES,
+  EVENT_LANGUAGES,
+  isEventCategory,
+} from "@/lib/eventCategories";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -43,6 +48,8 @@ export default async function EventsPage({
   searchParams: {
     city?: string;
     category?: string;
+    genre?: string;
+    lang?: string;
     when?: string;
     type?: string;
     mode?: string;
@@ -55,6 +62,16 @@ export default async function EventsPage({
 }) {
   const { city, category, when, type, mode, venue, q, from, to } =
     searchParams;
+  // The event's own category (garba, comedy, satsang) and the language it runs
+  // in — separate from `category`, which is the trade behind it.
+  const genre = searchParams.genre && isEventCategory(searchParams.genre)
+    ? searchParams.genre
+    : undefined;
+  const lang = EVENT_LANGUAGES.some(
+    (option) => option.slug === searchParams.lang,
+  )
+    ? searchParams.lang
+    : undefined;
   const selectedFeatures = (
     Array.isArray(searchParams.feature)
       ? searchParams.feature
@@ -74,6 +91,8 @@ export default async function EventsPage({
       q,
       city,
       category,
+      genre,
+      lang,
       when,
       type,
       mode,
@@ -95,6 +114,8 @@ export default async function EventsPage({
     const params = new URLSearchParams();
     if (city) params.set("city", city);
     if (category) params.set("category", category);
+    if (genre) params.set("genre", genre);
+    if (lang) params.set("lang", lang);
     if (when) params.set("when", when);
     if (type) params.set("type", type);
     if (mode) params.set("mode", mode);
@@ -137,6 +158,36 @@ export default async function EventsPage({
     take: 8,
   });
 
+  // Postgres cannot group by the members of an array, so the facets are counted
+  // here from the upcoming events and only the ones with events are offered.
+  const facetRows = await db.event.findMany({
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    select: { genres: true, languages: true },
+    take: 1000,
+  });
+  const genreCounts = new Map<string, number>();
+  const languageCounts = new Map<string, number>();
+  for (const row of facetRows) {
+    for (const slug of row.genres) {
+      genreCounts.set(slug, (genreCounts.get(slug) ?? 0) + 1);
+    }
+    for (const slug of row.languages) {
+      languageCounts.set(slug, (languageCounts.get(slug) ?? 0) + 1);
+    }
+  }
+  const genreRows = EVENT_CATEGORIES.filter((option) =>
+    genreCounts.has(option.slug),
+  )
+    .map((option) => ({ ...option, count: genreCounts.get(option.slug) ?? 0 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 14);
+  const languageRows = EVENT_LANGUAGES.filter((option) =>
+    languageCounts.has(option.slug),
+  ).map((option) => ({
+    ...option,
+    count: languageCounts.get(option.slug) ?? 0,
+  }));
+
   const events = await db.event.findMany({
     where: {
       status: "APPROVED",
@@ -156,6 +207,8 @@ export default async function EventsPage({
             ]
           : []),
       ],
+      ...(genre ? { genres: { has: genre } } : {}),
+      ...(lang ? { languages: { has: lang } } : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(venue ? { venue: { contains: venue, mode: "insensitive" } } : {}),
       ...(type ? { eventType: type } : {}),
@@ -244,6 +297,60 @@ export default async function EventsPage({
             })}
           </div>
 
+          {genreRows.length ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
+                Categories
+              </span>
+              {genreRows.map((row) => {
+                const active = genre === row.slug;
+                return (
+                  <Link
+                    key={row.slug}
+                    href={searchHref({ genre: active ? "" : row.slug })}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "bg-white text-rose-700"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {row.icon} {row.label} · {row.count}
+                  </Link>
+                );
+              })}
+              <Link
+                href="/events/categories"
+                className="rounded-full px-3 py-1.5 text-xs font-semibold text-white underline hover:bg-white/20"
+              >
+                All categories →
+              </Link>
+            </div>
+          ) : null}
+
+          {languageRows.length > 1 ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
+                Language
+              </span>
+              {languageRows.map((row) => {
+                const active = lang === row.slug;
+                return (
+                  <Link
+                    key={row.slug}
+                    href={searchHref({ lang: active ? "" : row.slug })}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "bg-white text-rose-700"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {row.label} · {row.count}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : null}
+
           {cityRows.length ? (
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <span className="text-xs font-bold uppercase tracking-wide text-white/70">
@@ -310,7 +417,7 @@ export default async function EventsPage({
             >
               Get featured free 🤝
             </Link>
-            {q || city || venue || from || to || when ? (
+            {q || city || venue || from || to || when || genre || lang ? (
               <Link
                 href="/events"
                 className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
@@ -324,7 +431,7 @@ export default async function EventsPage({
         <FeaturedEventStrip />
 
         <Card>
-          <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+          <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]">
             <input
               name="city"
               defaultValue={city ?? ""}
@@ -333,15 +440,28 @@ export default async function EventsPage({
               aria-label="City"
             />
             <select
-              name="category"
-              defaultValue={category ?? ""}
+              name="genre"
+              defaultValue={genre ?? ""}
               className={inputClass}
-              aria-label="Category"
+              aria-label="Event category"
             >
               <option value="">All categories</option>
-              {categories.map((item) => (
+              {EVENT_CATEGORIES.map((item) => (
                 <option key={item.slug} value={item.slug}>
-                  {item.icon} {item.name}
+                  {item.icon} {item.label}
+                </option>
+              ))}
+            </select>
+            <select
+              name="lang"
+              defaultValue={lang ?? ""}
+              className={inputClass}
+              aria-label="Language"
+            >
+              <option value="">Any language</option>
+              {EVENT_LANGUAGES.map((item) => (
+                <option key={item.slug} value={item.slug}>
+                  {item.label}
                 </option>
               ))}
             </select>
@@ -372,6 +492,9 @@ export default async function EventsPage({
               ))}
             </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
+            {category ? (
+              <input type="hidden" name="category" value={category} />
+            ) : null}
             {q ? <input type="hidden" name="q" value={q} /> : null}
             {venue ? <input type="hidden" name="venue" value={venue} /> : null}
             {from ? <input type="hidden" name="from" value={from} /> : null}

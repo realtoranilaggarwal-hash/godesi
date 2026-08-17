@@ -21,6 +21,11 @@ import {
   eventModeIcon,
   eventModeLabel,
 } from "@/lib/eventOptions";
+import {
+  eventCategoryIcon,
+  eventCategoryLabel,
+  eventLanguageLabel,
+} from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 
@@ -103,6 +108,18 @@ export default async function EventPage({
           <Link href="/events" className="font-semibold text-indigo-600 hover:underline">
             ← All events
           </Link>
+          {event.genres.length ? (
+            <>
+              <span aria-hidden>/</span>
+              <Link
+                href={`/events?genre=${event.genres[0]}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                {eventCategoryIcon(event.genres[0])}{" "}
+                {eventCategoryLabel(event.genres[0])}
+              </Link>
+            </>
+          ) : null}
           {event.category ? (
             <>
               <span aria-hidden>/</span>
@@ -137,7 +154,21 @@ export default async function EventPage({
                   </Badge>
                 </Link>
               ) : null}
-              {event.eventType ? <Badge tone="amber">{event.eventType}</Badge> : null}
+              {event.genres.map((slug) => (
+                <Link key={slug} href={`/events?genre=${slug}`}>
+                  <Badge tone="amber">
+                    {eventCategoryIcon(slug)} {eventCategoryLabel(slug)}
+                  </Badge>
+                </Link>
+              ))}
+              {event.languages.map((slug) => (
+                <Link key={slug} href={`/events?lang=${slug}`}>
+                  <Badge tone="green">{eventLanguageLabel(slug)}</Badge>
+                </Link>
+              ))}
+              {event.genres.length || !event.eventType ? null : (
+                <Badge tone="amber">{event.eventType}</Badge>
+              )}
               <Badge>
                 {eventModeIcon(event.mode)} {eventModeLabel(event.mode)}
               </Badge>

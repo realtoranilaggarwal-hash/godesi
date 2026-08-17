@@ -80,6 +80,8 @@ export default async function AdminEditEventPage({
             categorySlug: parentSlug,
             subcategorySlug: subSlug,
             eventType: event.eventType ?? "",
+            genres: event.genres,
+            languages: event.languages,
             websiteUrl: event.websiteUrl ?? "",
             price: event.price,
             currency: event.currency,

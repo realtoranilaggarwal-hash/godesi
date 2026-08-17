@@ -919,6 +919,11 @@ model Event {
   partnerNote       String?
   /// Conference, workshop, concert… drives the badge and the type filter.
   eventType         String?
+  /// The event's own categories from `lib/eventCategories` (garba-dandiya,
+  /// standup-comedy, devotional…), several per event, browsable on /events.
+  genres            String[]           @default([])
+  /// Languages it is performed in, e.g. hindi, tamil — a facet on /events.
+  languages         String[]           @default([])
   mode              EventMode          @default(OFFLINE)
   /// Join link for online and hybrid events.
   onlineUrl         String?
@@ -974,6 +979,8 @@ model Event {
   @@index([categorySlug])
   @@index([city])
   @@index([venueRefId])
+  @@index([genres], type: Gin)
+  @@index([languages], type: Gin)
   @@map("EventListing")
 }
 
