@@ -5,7 +5,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { whatsappLink } from "@/lib/format";
 import { StaffEditLink } from "@/components/StaffEditLink";
-import { thumbImage } from "@/lib/proxyImage";
+import { LogoTile } from "@/components/LogoTile";
 
 /**
  * `premium` frames a paid or hand-picked card with a ribbon so it reads as an
@@ -35,17 +35,12 @@ export function BusinessCard({
         </span>
       ) : null}
       <div className={`flex items-start gap-3 ${premium ? "pt-2" : ""}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={
-            business.logoUrl
-              ? thumbImage(business.logoUrl, 384)
-              : "/placeholder-logo.svg"
-          }
-          alt=""
-          className={`${
-            compact ? "h-10 w-10" : "h-12 w-12"
-          } shrink-0 rounded-xl border border-slate-200 object-cover`}
+        <LogoTile
+          name={business.name}
+          icon={business.categoryIcon}
+          imageUrl={business.logoUrl}
+          className={compact ? "h-10 w-10" : "h-12 w-12"}
+          emojiClassName={compact ? "text-xl" : "text-2xl"}
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">

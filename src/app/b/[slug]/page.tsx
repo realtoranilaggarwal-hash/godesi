@@ -25,6 +25,7 @@ import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { LogoTile } from "@/components/LogoTile";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { disclaimerFor, specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
@@ -207,11 +208,12 @@ export default async function BusinessProfilePage({
 
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={business.logoUrl ?? "/placeholder-logo.svg"}
-            alt={`${business.name} logo`}
-            className="h-20 w-20 rounded-2xl border border-slate-200 object-cover"
+          <LogoTile
+            name={business.name}
+            icon={business.categoryRef?.icon}
+            imageUrl={business.logoUrl}
+            className="h-20 w-20"
+            emojiClassName="text-4xl"
           />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
