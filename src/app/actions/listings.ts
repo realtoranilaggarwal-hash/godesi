@@ -13,7 +13,7 @@ import { awardPoints } from "@/lib/rewards";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
-import { effectivePlan } from "@/lib/plans";
+import { effectivePlan, listingImageLimit } from "@/lib/plans";
 import { foundingFeatureActive } from "@/lib/founding";
 import { contactDetailKind } from "@/lib/moderation";
 import { autoShareInBackground } from "@/lib/autoShare";
@@ -305,8 +305,11 @@ export async function createListingAction(
           tenantPref: oneOf(parsed.data.tenantPref, TENANT_PREFS),
           nriFriendly: parsed.data.nriFriendly ?? false,
           investmentDeal: parsed.data.investmentDeal ?? false,
-          contactName: parsed.data.contactName || null,
-          contactPhone: parsed.data.contactPhone || null,
+          // Nobody is asked their own name and number twice: enquiries fall
+          // back to the poster and the WhatsApp number given above.
+          contactName: parsed.data.contactName || user.name || null,
+          contactPhone:
+            parsed.data.contactPhone || normalizeWhatsApp(parsed.data.whatsapp),
           contactEmail: parsed.data.contactEmail || null,
         }
       : {};
@@ -315,7 +318,7 @@ export async function createListingAction(
       .getAll("images")
       .map((value) => String(value).trim())
       .filter((value) => value.startsWith("https://"))
-      .slice(0, 20);
+      .slice(0, listingImageLimit(user));
 
     const listing = await db.listing.create({
       data: {

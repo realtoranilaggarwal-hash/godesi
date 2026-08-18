@@ -93,6 +93,15 @@ export function mediaLimit(user: Pick<User, "plan" | "planExpiresAt">) {
 }
 
 /**
+ * Photos allowed on a single listing. A free listing gets one — the cover shot
+ * — and is pointed at a Google Photos album for the rest, which costs us no
+ * storage and lets a seller show a whole house.
+ */
+export function listingImageLimit(user: Pick<User, "plan" | "planExpiresAt">) {
+  return effectivePlan(user) === "FREE" ? 1 : PLANS[effectivePlan(user)].mediaLimit;
+}
+
+/**
  * Founding members post without a weekly cap while we are still filling the
  * site with content; everyone else gets their plan's allowance.
  */

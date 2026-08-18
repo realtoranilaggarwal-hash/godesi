@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import type { ListingKind } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { mediaLimit } from "@/lib/plans";
+import { PLANS, listingImageLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
 import { requestCurrency } from "@/lib/currency";
@@ -62,7 +62,8 @@ export default async function NewListingPage({
       <Card>
         <ListingForm
           defaultKind={kind}
-          imageLimit={mediaLimit(user)}
+          imageLimit={listingImageLimit(user)}
+          paidImageLimit={PLANS.PRO.mediaLimit}
           defaultWhatsapp={business?.whatsappNumber ?? business?.phone ?? ""}
           defaultCurrency={requestCurrency()}
           categories={categories}

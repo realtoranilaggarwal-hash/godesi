@@ -56,12 +56,10 @@ export function PropertyFields({
   forRent,
   defaultGroup = "RESIDENTIAL",
   defaultRole = "OWNER",
-  defaultCountry,
 }: {
   forRent: boolean;
   defaultGroup?: PropertyGroup;
   defaultRole?: PostedByRole;
-  defaultCountry?: string;
 }) {
   const [group, setGroup] = useState<PropertyGroup>(defaultGroup);
   const [type, setType] = useState(PROPERTY_TYPES[defaultGroup][0].slug);
@@ -293,12 +291,6 @@ export function PropertyFields({
           <Field label="Available from">
             <input name="availableFrom" type="date" className={inputClass} />
           </Field>
-          <Field label="State / province">
-            <input name="state" className={inputClass} />
-          </Field>
-          <Field label="Country">
-            <input name="country" defaultValue={defaultCountry} className={inputClass} />
-          </Field>
           <Field label="Google Maps pin" hint="Maps → drop a pin → Share → copy link.">
             <input
               name="mapUrl"
@@ -310,16 +302,29 @@ export function PropertyFields({
           <Field label="Virtual tour link">
             <input name="tourUrl" type="url" className={inputClass} />
           </Field>
-          <Field label="Contact name">
-            <input name="contactName" className={inputClass} />
-          </Field>
-          <Field label="Phone" hint="Shown to signed-in Godesi members only.">
-            <input name="contactPhone" className={inputClass} />
-          </Field>
-          <Field label="Email" hint="Shown to signed-in members only.">
-            <input name="contactEmail" type="email" className={inputClass} />
-          </Field>
         </div>
+
+        <details className="mt-4 rounded-xl bg-slate-50 p-3">
+          <summary className="cursor-pointer text-xs font-bold text-slate-700">
+            Someone else handles enquiries? — optional
+          </summary>
+          <p className="mt-1 text-xs text-slate-500">
+            Buyers already reach you on your name and the WhatsApp number above.
+            Fill this in only if an agent or a relative should be contacted
+            instead.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-3">
+            <Field label="Their name">
+              <input name="contactName" maxLength={80} className={inputClass} />
+            </Field>
+            <Field label="Their phone" hint="Shown to signed-in members only.">
+              <input name="contactPhone" maxLength={30} className={inputClass} />
+            </Field>
+            <Field label="Their email" hint="Shown to signed-in members only.">
+              <input name="contactEmail" type="email" className={inputClass} />
+            </Field>
+          </div>
+        </details>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <Field label="Open house date">
