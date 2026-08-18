@@ -21,27 +21,37 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
     icon: "👰",
     items: [
       "Makeup Artists",
+      "Hair Stylists",
       "Mehndi Artists",
+      "Saree Draping & Pagri Tying",
       "Bridal Wear",
       "Groom Wear",
+      "Tailoring & Alterations",
       "Jewellery",
-      "Marriage Bureaus",
     ],
   },
   {
-    title: "Photography",
+    title: "Photography & video",
     icon: "📸",
     items: [
       "Photographers",
       "Videographers",
       "Pre-Wedding Shoots",
       "Drone Photography",
+      "Photo Booths",
+      "Live Streaming",
     ],
   },
   {
     title: "Catering",
     icon: "🍛",
-    items: ["Caterers", "Regional Cuisine Catering", "Dessert & Cake Vendors"],
+    items: [
+      "Caterers",
+      "Regional Cuisine Catering",
+      "Dessert & Cake Vendors",
+      "Wedding Cakes",
+      "Bartending & Bar Service",
+    ],
   },
   {
     title: "Entertainment",
@@ -52,6 +62,8 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
       "Dhol & Baraat",
       "Dance Choreographers",
       "Anchors & Artists",
+      "Fireworks & Sparklers",
+      "Cold Sparklers & Special Effects",
     ],
   },
   {
@@ -59,10 +71,13 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
     icon: "🎪",
     items: [
       "Wedding Planners",
+      "Wedding Coordinators",
       "Decorators & Florists",
       "Mandap Setup",
       "Floral Designers",
       "Tent & Lighting",
+      "Event Rentals & Supplies",
+      "Stage & Sound Rentals",
     ],
   },
   {
@@ -78,17 +93,39 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
   {
     title: "Transport",
     icon: "🚗",
-    items: ["Luxury Cars", "Baraat Horse & Carriage", "Guest Transport"],
+    items: [
+      "Luxury Cars",
+      "Baraat Horse & Carriage",
+      "Guest Transport",
+      "Valet & Guest Parking",
+      "Honeymoon & Travel",
+    ],
   },
   {
-    title: "Religious",
+    title: "Religious & rituals",
     icon: "🛕",
-    items: ["Pandits", "Gurudwara Services", "Nikah Services"],
+    items: [
+      "Pandits",
+      "Gurudwara Services",
+      "Nikah Services",
+      "Church & Interfaith Officiants",
+      "Astrologers & Horoscope Matching",
+    ],
   },
   {
     title: "Invitations & gifts",
     icon: "💌",
     items: ["Invitation Cards", "Digital Invites", "Gift Hampers"],
+  },
+  {
+    title: "Before the wedding",
+    icon: "💍",
+    items: ["Marriage Bureaus", "Matchmaking Services"],
+  },
+  {
+    title: "Practical",
+    icon: "🛡️",
+    items: ["Security Services", "Wedding Loans & Insurance"],
   },
 ];
 

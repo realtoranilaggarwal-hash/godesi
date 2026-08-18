@@ -7,7 +7,8 @@ import { formatMoney, siteUrl } from "@/lib/format";
 import { Money } from "@/components/Money";
 import { formatEventDate, formatEventEnd, isPast, seatsLeft } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
-import { SidebarBanners } from "@/components/Banners";
+import { InContentBanner, SidebarBanners } from "@/components/Banners";
+import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { AddToCalendar } from "@/components/AddToCalendar";
@@ -93,6 +94,29 @@ export default async function EventPage({
   const endLabel = event.endsAt
     ? formatEventEnd(event.startsAt, event.endsAt, event.timeZone)
     : null;
+
+  // The page runs out of content well before the ad rail does, so it ends with
+  // what the visitor most likely wants next: the same kind of event, or
+  // anything else on in their city.
+  const related = await db.event.findMany({
+    where: {
+      status: "APPROVED",
+      startsAt: { gte: new Date() },
+      id: { not: event.id },
+      OR: [
+        { city: { equals: event.city, mode: "insensitive" } },
+        ...(event.genres.length ? [{ genres: { hasSome: event.genres } }] : []),
+        ...(event.state
+          ? [{ state: { equals: event.state, mode: "insensitive" as const } }]
+          : []),
+      ],
+    },
+    orderBy: { startsAt: "asc" },
+    take: 8,
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+    },
+  });
 
   return (
     <div className="flex gap-6">
@@ -542,6 +566,27 @@ export default async function EventPage({
           )}
         </Card>
         )}
+
+        <InContentBanner size="leaderboard" />
+
+        {related.length ? (
+          <Card>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-bold">More events like this</h2>
+              <Link
+                href={`/events?city=${encodeURIComponent(event.city)}`}
+                className="text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                All events in {event.city} →
+              </Link>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {related.map((item) => (
+                <EventCard key={item.id} event={item} variant="tile" />
+              ))}
+            </div>
+          </Card>
+        ) : null}
       </div>
 
       <SidebarBanners />

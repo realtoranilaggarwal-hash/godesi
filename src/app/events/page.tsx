@@ -173,7 +173,9 @@ export default async function EventsPage({
     : undefined;
 
   // "Events in Florida" is how people ask, so states get their own chip row.
-  const stateRows = await db.event.groupBy({
+  // "NJ" and "New Jersey" are the same state, so rows are merged on the label
+  // they display under rather than on the raw stored text.
+  const rawStateRows = await db.event.groupBy({
     by: ["state"],
     where: {
       status: "APPROVED",
@@ -182,15 +184,31 @@ export default async function EventsPage({
     },
     _count: { state: true },
     orderBy: { _count: { state: "desc" } },
-    take: 10,
+    take: 40,
   });
+  const byStateLabel = new Map<string, { code: string; count: number }>();
+  for (const row of rawStateRows) {
+    const code = row.state ?? "";
+    if (!code) continue;
+    const label = stateLabel(code);
+    const seen = byStateLabel.get(label);
+    byStateLabel.set(label, {
+      // Keep the spelt-out value so the chip's own link matches both rows.
+      code: seen && seen.code.length >= code.length ? seen.code : code,
+      count: (seen?.count ?? 0) + row._count.state,
+    });
+  }
+  const stateRows = Array.from(byStateLabel.entries())
+    .map(([label, row]) => ({ label, ...row }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
 
   const cityRows = await db.event.groupBy({
     by: ["city"],
     where: { status: "APPROVED", startsAt: { gte: new Date() } },
     _count: { city: true },
     orderBy: { _count: { city: "desc" } },
-    take: 12,
+    take: 8,
   });
 
   // The halls people ask for by name, so "parties at Royal Albert Palace" is one tap.
@@ -224,7 +242,7 @@ export default async function EventsPage({
   )
     .map((option) => ({ ...option, count: genreCounts.get(option.slug) ?? 0 }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 14);
+    .slice(0, 12);
   const languageRows = EVENT_LANGUAGES.filter((option) =>
     languageCounts.has(option.slug),
   ).map((option) => ({
@@ -250,6 +268,20 @@ export default async function EventsPage({
               },
             ]
           : []),
+        // A state chip must find both spellings: some events store "NJ" and
+        // others "New Jersey".
+        ...(state
+          ? [
+              {
+                OR: [
+                  { state: { equals: state, mode: "insensitive" as const } },
+                  ...statesMatching(state).map((match) => ({
+                    state: { equals: match, mode: "insensitive" as const },
+                  })),
+                ],
+              },
+            ]
+          : []),
       ],
       ...(genre ? { genres: { has: genre } } : {}),
       ...(lang ? { languages: { has: lang } } : {}),
@@ -264,7 +296,6 @@ export default async function EventsPage({
             ],
           }
         : {}),
-      ...(state ? { state: { equals: state, mode: "insensitive" } } : {}),
       ...(venue ? { venue: { contains: venue, mode: "insensitive" } } : {}),
       ...(type ? { eventType: type } : {}),
       ...(modeFilter ? { mode: modeFilter } : {}),
@@ -378,7 +409,7 @@ export default async function EventsPage({
               <span className="text-xs font-bold uppercase tracking-wide text-white/70">
                 Categories
               </span>
-              {genreRows.map((row) => {
+              {genreRows.slice(0, 6).map((row) => {
                 const active = genre === row.slug;
                 return (
                   <Link
@@ -400,6 +431,44 @@ export default async function EventsPage({
               >
                 All categories →
               </Link>
+            </div>
+          ) : null}
+
+          {/*
+           * Everything past the first six categories lives in a drawer: the
+           * chip rows are useful, but unfolded they pushed the events
+           * themselves off the first screen. Opened automatically when one of
+           * the filters inside it is in use, so an active chip is never hidden.
+           */}
+          <details
+            open={Boolean(lang || state || city || venue)}
+            className="mt-2"
+          >
+            <summary className="inline-flex cursor-pointer list-none rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/30">
+              Browse by language, state, city or venue
+            </summary>
+
+          {genreRows.length > 6 ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
+                More categories
+              </span>
+              {genreRows.slice(6).map((row) => {
+                const active = genre === row.slug;
+                return (
+                  <Link
+                    key={row.slug}
+                    href={searchHref({ genre: active ? "" : row.slug })}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                      active
+                        ? "bg-white text-rose-700"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {row.icon} {row.label} · {row.count}
+                  </Link>
+                );
+              })}
             </div>
           ) : null}
 
@@ -433,19 +502,20 @@ export default async function EventsPage({
                 States
               </span>
               {stateRows.map((row) => {
-                const code = row.state ?? "";
-                const active = (state ?? "").toLowerCase() === code.toLowerCase();
+                const active =
+                  (state ?? "").toLowerCase() === row.code.toLowerCase() ||
+                  (state ? stateLabel(state) === row.label : false);
                 return (
                   <Link
-                    key={code}
-                    href={searchHref({ state: active ? "" : code })}
+                    key={row.label}
+                    href={searchHref({ state: active ? "" : row.code })}
                     className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
                       active
                         ? "bg-white text-rose-700"
                         : "bg-white/20 text-white hover:bg-white/30"
                     }`}
                   >
-                    {stateLabel(code)} · {row._count.state}
+                    {row.label} · {row.count}
                   </Link>
                 );
               })}
@@ -507,6 +577,7 @@ export default async function EventsPage({
               </Link>
             </div>
           ) : null}
+          </details>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/events/new" variant="secondary">
