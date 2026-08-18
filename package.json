@@ -13,7 +13,8 @@
     "postinstall": "prisma generate",
     "db:categories": "tsx prisma/categories.ts",
     "db:worship": "tsx prisma/worship-import.ts",
-    "db:businesses": "tsx prisma/business-import.ts"
+    "db:businesses": "tsx prisma/business-import.ts",
+    "db:community": "tsx prisma/community-import.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
