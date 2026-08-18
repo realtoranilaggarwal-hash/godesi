@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requirePermission } from "@/lib/auth";
 import { readBusinessLink } from "@/lib/businessLink";
 import { normalizeWhatsApp } from "@/lib/format";
+import { cleanServiceOptions, cleanSpecialties } from "@/lib/specialties";
 import { uniqueSlug } from "@/lib/slug";
 import { titleCase } from "@/lib/titlecase";
 
@@ -74,6 +75,14 @@ export async function readBusinessLinkAction(formData: FormData) {
       city: draft.city,
       state: draft.state,
       category: draft.categorySlug,
+      sub: draft.subcategorySlug,
+      // Pre-ticked services, and the facts that go with them.
+      services: draft.specialties.join("|"),
+      languages: draft.languages.join(", "),
+      areas: draft.areas.join(", "),
+      years: draft.years,
+      hours: draft.hours,
+      suggestion: draft.suggestion.slice(0, 1200),
       type: draft.professional ? "PROFESSIONAL" : "BUSINESS",
       missing: draft.missing.join(", "),
     }).toString()}#confirm`,
@@ -98,6 +107,10 @@ const linkedSchema = z.object({
   sourceUrl: z.string().trim().url("Keep the link to the page it came from.").max(500),
   profileType: z.enum(["BUSINESS", "PROFESSIONAL"]).default("BUSINESS"),
   publishPhone: z.string().trim().optional(),
+  languages: z.string().trim().max(300).optional(),
+  hours: z.string().trim().max(200).optional(),
+  areas: z.string().trim().max(1000).optional(),
+  experienceYears: z.coerce.number().int().min(0).max(120).optional(),
 });
 
 /**
@@ -119,6 +132,10 @@ export async function saveLinkedBusinessAction(formData: FormData) {
     sourceUrl: formData.get("sourceUrl"),
     profileType: formData.get("profileType") || "BUSINESS",
     publishPhone: formData.get("publishPhone") || undefined,
+    languages: formData.get("languages") || undefined,
+    hours: formData.get("hours") || undefined,
+    areas: formData.get("areas") || undefined,
+    experienceYears: formData.get("experienceYears") || undefined,
   });
   if (!parsed.success) {
     reject(parsed.error.issues.map((issue) => issue.message).join(" "));
@@ -151,6 +168,16 @@ export async function saveLinkedBusinessAction(formData: FormData) {
 
   const city = titleCase(parsed.data.city);
   const host = new URL(parsed.data.sourceUrl).hostname.replace(/^www\./, "");
+  // Services and languages are checked against our own lists, so a hand-edited
+  // form can never store a tag nobody can filter by.
+  const specialties = cleanSpecialties(
+    subcategory?.slug,
+    formData.getAll("specialties").map(String),
+  );
+  const languages = cleanServiceOptions(
+    subcategory?.slug,
+    (parsed.data.languages ?? "").split(",").map((value) => value.trim()),
+  );
   // A number read off someone else's page is only published when the desk says
   // it is the business's own public number; otherwise it is kept for the
   // invite so we can ask the owner to claim the card.
@@ -168,6 +195,10 @@ export async function saveLinkedBusinessAction(formData: FormData) {
         category: subcategory?.name ?? category.name,
         address: parsed.data.address || null,
         description: parsed.data.description || null,
+        specialties,
+        serviceOptions: languages,
+        availability: parsed.data.hours || null,
+        yearsExperience: parsed.data.experienceYears ?? null,
         phone: publish ? (parsed.data.phone ?? null) : null,
         whatsappNumber:
           publish && parsed.data.phone
@@ -179,9 +210,14 @@ export async function saveLinkedBusinessAction(formData: FormData) {
         source: host,
         sourceUrl: parsed.data.sourceUrl,
         inviteNote:
-          !publish && parsed.data.phone
-            ? `Number published on ${host}: ${parsed.data.phone} (not shown on the card)`
-            : null,
+          [
+            !publish && parsed.data.phone
+              ? `Number published on ${host}: ${parsed.data.phone} (not shown on the card)`
+              : "",
+            parsed.data.areas ? `Areas served on ${host}: ${parsed.data.areas}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n") || null,
       },
     });
   } catch (error) {

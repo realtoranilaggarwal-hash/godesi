@@ -174,6 +174,41 @@ export default async function HomePage() {
       <FeaturedStrip />
 
       <div className="space-y-8">
+        <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
+          {news.length ? (
+            <section className="lg:col-span-2">
+              <SectionHeading
+                title="Desi news 📰"
+                href="/news"
+                linkLabel="All news"
+              />
+              <p className="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+                🗞️ Are you a journalist, or have news to share? Post it and your
+                story shows right here.{" "}
+                <Link href="/news/report" className="font-bold underline">
+                  Share news
+                </Link>{" "}
+                ·{" "}
+                <Link href="/journalists" className="font-bold underline">
+                  Become a journalist
+                </Link>
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {news.map((item) => (
+                  <NewsCard key={item.id} item={item} />
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <ActivityWall
+            limit={16}
+            className={news.length ? "" : "lg:col-span-3"}
+          />
+        </div>
+
+        {/* A handful of shelves, with the rest a click away: the page should
+            not open on a wall of forty categories. */}
         <section>
           <SectionHeading
             title="Browse by category"
@@ -181,10 +216,32 @@ export default async function HomePage() {
             linkLabel="All categories"
           />
           <CategoryTiles
-            categories={categories.slice(0, 12)}
+            categories={categories.slice(0, 6)}
             counts={counts}
             dense
           />
+          <details className="group mt-3">
+            <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 hover:bg-slate-50">
+              <span className="group-open:hidden">
+                More categories ({categories.length - 6}) ↓
+              </span>
+              <span className="hidden group-open:inline">Fewer categories ↑</span>
+            </summary>
+            <div className="mt-3">
+              <CategoryTiles
+                categories={categories.slice(6)}
+                counts={counts}
+                extra={
+                  <>
+                    <SpaSpotlight listings={spaCount} />
+                    <ReferEarnTile />
+                    <WebsiteOfferTile />
+                  </>
+                }
+                dense
+              />
+            </div>
+          </details>
         </section>
 
         <section>
@@ -257,59 +314,6 @@ export default async function HomePage() {
             </div>
           </section>
         ) : null}
-
-        <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
-          {news.length ? (
-            <section className="lg:col-span-2">
-              <SectionHeading
-                title="Desi news 📰"
-                href="/news"
-                linkLabel="All news"
-              />
-              <p className="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-                🗞️ Are you a journalist, or have news to share? Post it and your
-                story shows right here.{" "}
-                <Link href="/news/report" className="font-bold underline">
-                  Share news
-                </Link>{" "}
-                ·{" "}
-                <Link href="/journalists" className="font-bold underline">
-                  Become a journalist
-                </Link>
-              </p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {news.map((item) => (
-                  <NewsCard key={item.id} item={item} />
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          <ActivityWall
-            limit={16}
-            className={news.length ? "" : "lg:col-span-3"}
-          />
-        </div>
-
-        <section>
-          <SectionHeading
-            title="More categories"
-            href="/categories"
-            linkLabel="All categories"
-          />
-          <CategoryTiles
-            categories={categories.slice(12)}
-            counts={counts}
-            extra={
-              <>
-                <SpaSpotlight listings={spaCount} />
-                <ReferEarnTile />
-                <WebsiteOfferTile />
-              </>
-            }
-            dense
-          />
-        </section>
 
         <AboutGodesi />
       </div>

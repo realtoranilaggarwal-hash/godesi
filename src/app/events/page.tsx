@@ -203,14 +203,6 @@ export default async function EventsPage({
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  const cityRows = await db.event.groupBy({
-    by: ["city"],
-    where: { status: "APPROVED", startsAt: { gte: new Date() } },
-    _count: { city: true },
-    orderBy: { _count: { city: "desc" } },
-    take: 8,
-  });
-
   // The halls people ask for by name, so "parties at Royal Albert Palace" is one tap.
   const venueRows = await db.event.groupBy({
     by: ["venue"],
@@ -237,12 +229,13 @@ export default async function EventsPage({
       languageCounts.set(slug, (languageCounts.get(slug) ?? 0) + 1);
     }
   }
+  // Only the categories something is actually on under, so the dropdown is a
+  // list of what is on rather than of everything we support.
   const genreRows = EVENT_CATEGORIES.filter((option) =>
     genreCounts.has(option.slug),
   )
     .map((option) => ({ ...option, count: genreCounts.get(option.slug) ?? 0 }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 12);
+    .sort((a, b) => b.count - a.count);
   const languageRows = EVENT_LANGUAGES.filter((option) =>
     languageCounts.has(option.slug),
   ).map((option) => ({
@@ -404,180 +397,19 @@ export default async function EventsPage({
             })}
           </div>
 
-          {genreRows.length ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
-                Categories
-              </span>
-              {genreRows.slice(0, 6).map((row) => {
-                const active = genre === row.slug;
-                return (
-                  <Link
-                    key={row.slug}
-                    href={searchHref({ genre: active ? "" : row.slug })}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      active
-                        ? "bg-white text-rose-700"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {row.icon} {row.label} · {row.count}
-                  </Link>
-                );
-              })}
-              <Link
-                href="/events/categories"
-                className="rounded-full px-3 py-1.5 text-xs font-semibold text-white underline hover:bg-white/20"
-              >
-                All categories →
-              </Link>
-            </div>
-          ) : null}
-
           {/*
-           * Everything past the first six categories lives in a drawer: the
-           * chip rows are useful, but unfolded they pushed the events
-           * themselves off the first screen. Opened automatically when one of
-           * the filters inside it is in use, so an active chip is never hidden.
+           * No chip rows: the category, language, state, city and venue
+           * dropdowns below do the same job in one line, and the events
+           * themselves start on the first screen.
            */}
-          <details
-            open={Boolean(lang || state || city || venue)}
-            className="mt-2"
-          >
-            <summary className="inline-flex cursor-pointer list-none rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/30">
-              Browse by language, state, city or venue
-            </summary>
-
-          {genreRows.length > 6 ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
-                More categories
-              </span>
-              {genreRows.slice(6).map((row) => {
-                const active = genre === row.slug;
-                return (
-                  <Link
-                    key={row.slug}
-                    href={searchHref({ genre: active ? "" : row.slug })}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      active
-                        ? "bg-white text-rose-700"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {row.icon} {row.label} · {row.count}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
-
-          {languageRows.length > 1 ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
-                Language
-              </span>
-              {languageRows.map((row) => {
-                const active = lang === row.slug;
-                return (
-                  <Link
-                    key={row.slug}
-                    href={searchHref({ lang: active ? "" : row.slug })}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      active
-                        ? "bg-white text-rose-700"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {row.label} · {row.count}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
-
-          {stateRows.length > 1 ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
-                States
-              </span>
-              {stateRows.map((row) => {
-                const active =
-                  (state ?? "").toLowerCase() === row.code.toLowerCase() ||
-                  (state ? stateLabel(state) === row.label : false);
-                return (
-                  <Link
-                    key={row.label}
-                    href={searchHref({ state: active ? "" : row.code })}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      active
-                        ? "bg-white text-rose-700"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {row.label} · {row.count}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
-
-          {cityRows.length ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
-                Cities
-              </span>
-              {cityRows.map((row) => {
-                const active =
-                  (city ?? "").toLowerCase() === row.city.toLowerCase();
-                return (
-                  <Link
-                    key={row.city}
-                    href={searchHref({ city: active ? "" : row.city })}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      active
-                        ? "bg-white text-rose-700"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {row.city} · {row._count.city}
-                  </Link>
-                );
-              })}
-            </div>
-          ) : null}
-
-          {venueRows.length ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-bold uppercase tracking-wide text-white/70">
-                Venues
-              </span>
-              {venueRows.map((row) => {
-                const active =
-                  (venue ?? "").toLowerCase() === row.venue.toLowerCase();
-                return (
-                  <Link
-                    key={row.venue}
-                    href={searchHref({ venue: active ? "" : row.venue })}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      active
-                        ? "bg-white text-rose-700"
-                        : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {row.venue} · {row._count.venue}
-                  </Link>
-                );
-              })}
-              <Link
-                href="/venues"
-                className="rounded-full px-3 py-1.5 text-xs font-semibold text-white underline hover:bg-white/20"
-              >
-                All venues →
-              </Link>
-            </div>
-          ) : null}
-          </details>
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/90">
+            <Link href="/events/categories" className="underline hover:text-white">
+              Browse all categories →
+            </Link>
+            <Link href="/venues" className="underline hover:text-white">
+              Browse venues →
+            </Link>
+          </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/events/new" variant="secondary">
@@ -605,7 +437,7 @@ export default async function EventsPage({
         <Card>
           <form
             key={formKey}
-            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]"
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto]"
           >
             <input
               name="city"
@@ -621,9 +453,10 @@ export default async function EventsPage({
               aria-label="Event category"
             >
               <option value="">All categories</option>
-              {EVENT_CATEGORIES.map((item) => (
+              {(genreRows.length ? genreRows : EVENT_CATEGORIES).map((item) => (
                 <option key={item.slug} value={item.slug}>
                   {item.icon} {item.label}
+                  {"count" in item ? ` · ${item.count}` : ""}
                 </option>
               ))}
             </select>
@@ -634,9 +467,10 @@ export default async function EventsPage({
               aria-label="Language"
             >
               <option value="">Any language</option>
-              {EVENT_LANGUAGES.map((item) => (
+              {(languageRows.length ? languageRows : EVENT_LANGUAGES).map((item) => (
                 <option key={item.slug} value={item.slug}>
                   {item.label}
+                  {"count" in item ? ` · ${item.count}` : ""}
                 </option>
               ))}
             </select>
@@ -666,13 +500,39 @@ export default async function EventsPage({
                 </option>
               ))}
             </select>
+            {/* State and venue are dropdowns too, so the chip rows they used
+                to need are gone and the events start near the top. */}
+            <select
+              name="state"
+              defaultValue={state ?? ""}
+              className={inputClass}
+              aria-label="State"
+            >
+              <option value="">Any state</option>
+              {stateRows.map((row) => (
+                <option key={row.label} value={row.code}>
+                  {row.label} · {row.count}
+                </option>
+              ))}
+            </select>
+            <select
+              name="venue"
+              defaultValue={venue ?? ""}
+              className={inputClass}
+              aria-label="Venue"
+            >
+              <option value="">Any venue</option>
+              {venueRows.map((row) => (
+                <option key={row.venue} value={row.venue}>
+                  {row.venue} · {row._count.venue}
+                </option>
+              ))}
+            </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
             {category ? (
               <input type="hidden" name="category" value={category} />
             ) : null}
-            {state ? <input type="hidden" name="state" value={state} /> : null}
             {q ? <input type="hidden" name="q" value={q} /> : null}
-            {venue ? <input type="hidden" name="venue" value={venue} /> : null}
             {from ? <input type="hidden" name="from" value={from} /> : null}
             {to ? <input type="hidden" name="to" value={to} /> : null}
             {selectedFeatures.map((feature) => (

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { getCategoryTree } from "@/lib/directory";
+import { specialtySet } from "@/lib/specialties";
 import {
   readBusinessLinkAction,
   removeLinkedBusinessAction,
@@ -49,6 +50,13 @@ export default async function Page({
     city?: string;
     state?: string;
     category?: string;
+    sub?: string;
+    services?: string;
+    languages?: string;
+    areas?: string;
+    years?: string;
+    hours?: string;
+    suggestion?: string;
     type?: string;
     missing?: string;
   };
@@ -56,6 +64,10 @@ export default async function Page({
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/listings/wire");
   if (!isStaff(user) || !can(user, "listings")) redirect("/dashboard");
+
+  const picked = searchParams.sub ?? "";
+  const ticked = new Set((searchParams.services ?? "").split("|").filter(Boolean));
+  const services = specialtySet(picked);
 
   const [categories, added] = await Promise.all([
     getCategoryTree(),
@@ -124,6 +136,12 @@ export default async function Page({
             Read the page
           </button>
         </form>
+        <p className="mt-2 text-xs text-slate-500">
+          A <b>Google Maps</b> link works too. Google shows a robot nothing but
+          the name, so we take the street, town, phone, website and hours for
+          that exact spot from OpenStreetMap instead — free, no key. Whatever it
+          cannot find, you type from your own screen.
+        </p>
 
         {searchParams.link ? (
           <div className="mt-4 border-t border-slate-100 pt-4">
@@ -147,6 +165,35 @@ export default async function Page({
                 </p>
               </div>
             ) : null}
+            {/* Choosing the trade reloads the screen so its own service
+                tick-boxes appear; it is a plain GET so nothing is saved yet. */}
+            <form method="get" className="mb-3 flex flex-wrap items-end gap-2">
+              {Object.entries(searchParams).map(([key, value]) =>
+                value && key !== "sub" && key !== "error" && key !== "added" ? (
+                  <input key={key} type="hidden" name={key} value={value} />
+                ) : null,
+              )}
+              <div className="min-w-0 flex-1">
+                <Field label="Trade" hint="Which shelf the card sits on">
+                  <select name="sub" defaultValue={picked} className={inputClass}>
+                    <option value="">No trade — top category only</option>
+                    {categories.map((category) => (
+                      <optgroup key={category.slug} label={category.name}>
+                        {category.children.map((child) => (
+                          <option key={child.slug} value={child.slug}>
+                            {child.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+              <button className="rounded-xl border border-indigo-300 px-3 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50">
+                Show its services
+              </button>
+            </form>
+
             <form
               action={saveLinkedBusinessAction}
               className="grid gap-3 sm:grid-cols-2"
@@ -177,6 +224,7 @@ export default async function Page({
                   ))}
                 </select>
               </Field>
+              <input type="hidden" name="subcategorySlug" value={picked} />
               <Field label="City">
                 <input
                   name="city"
@@ -238,14 +286,98 @@ export default async function Page({
                   </span>
                 </label>
               </div>
+              <Field label="Years in business" hint="Optional">
+                <input
+                  name="experienceYears"
+                  type="number"
+                  min={0}
+                  max={120}
+                  defaultValue={searchParams.years ?? ""}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Hours" hint="As the page states them">
+                <input
+                  name="hours"
+                  defaultValue={searchParams.hours ?? ""}
+                  placeholder="Mon–Sat 9am–7pm"
+                  className={inputClass}
+                />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field
+                  label="Languages"
+                  hint="Comma-separated — shown as tags people can filter by"
+                >
+                  <input
+                    name="languages"
+                    defaultValue={searchParams.languages ?? ""}
+                    placeholder="English, Hindi, Gujarati"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+
+              {services ? (
+                <div className="sm:col-span-2 rounded-xl border border-slate-200 p-3">
+                  <p className="text-sm font-semibold text-slate-700">
+                    {services.title}
+                  </p>
+                  <p className="mb-2 text-xs text-slate-500">
+                    Pre-ticked from what the page says it does — untick anything
+                    it does not. These become the card&apos;s tags and the
+                    filters people search by.
+                  </p>
+                  <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {services.options.map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-start gap-2 text-xs text-slate-700"
+                      >
+                        <input
+                          type="checkbox"
+                          name="specialties"
+                          value={option}
+                          defaultChecked={ticked.has(option)}
+                          className="mt-0.5"
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="sm:col-span-2 text-xs text-slate-500">
+                  Pick a trade above and press <b>Show its services</b> to tick
+                  what this business does.
+                </p>
+              )}
+
+              {searchParams.areas ? (
+                <div className="sm:col-span-2">
+                  <Field
+                    label="Areas served"
+                    hint="Kept on the claim invite, not shown on the card"
+                  >
+                    <textarea
+                      name="areas"
+                      rows={2}
+                      defaultValue={searchParams.areas}
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              ) : null}
+
               <div className="sm:col-span-2">
                 <Field
                   label="Description"
-                  hint="Your own words — two lines is plenty"
+                  hint="Written from the facts above — edit it, it is ours not theirs"
                 >
                   <textarea
                     name="description"
                     rows={3}
+                    defaultValue={searchParams.suggestion ?? ""}
                     placeholder="Hindi-speaking priest for griha pravesh, satyanarayan pooja and weddings across north Jersey."
                     className={inputClass}
                   />

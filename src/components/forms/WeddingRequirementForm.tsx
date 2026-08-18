@@ -17,11 +17,13 @@ export function WeddingRequirementForm({
   defaultName,
   defaultEmail,
   defaultService,
+  defaultCity,
   currency,
 }: {
   defaultName?: string;
   defaultEmail?: string;
   defaultService?: string;
+  defaultCity?: string;
   /** Guessed from where the visitor is; they can change it. */
   currency: string;
 }) {
@@ -104,7 +106,7 @@ export function WeddingRequirementForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <LocationScopeField />
+        <LocationScopeField defaultCity={defaultCity} />
         {dateFlexible ? <input type="hidden" name="eventDate" value="" /> : null}
         <Field label="Wedding / event date" hint="Leave blank if the date is not fixed">
           <input

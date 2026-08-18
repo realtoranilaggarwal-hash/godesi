@@ -18,10 +18,19 @@ export const metadata: Metadata = {
 export default async function NewWeddingRequirementPage({
   searchParams,
 }: {
-  searchParams: { service?: string };
+  searchParams: { service?: string; city?: string };
 }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/signup?role=CLIENT&next=/wedding/requirements/new");
+  if (!user) {
+    // Keep what they asked for on /wedding, so signing up does not lose it.
+    const query = new URLSearchParams();
+    if (searchParams.service) query.set("service", searchParams.service);
+    if (searchParams.city) query.set("city", searchParams.city);
+    const next = query.size
+      ? `/wedding/requirements/new?${query.toString()}`
+      : "/wedding/requirements/new";
+    redirect(`/signup?role=CLIENT&next=${encodeURIComponent(next)}`);
+  }
 
   return (
     <div className="flex justify-center gap-6">
@@ -42,6 +51,7 @@ export default async function NewWeddingRequirementPage({
             defaultService={
               searchParams.service ? weddingServiceName(searchParams.service) : undefined
             }
+            defaultCity={searchParams.city}
             currency={displayCurrency()}
           />
         </Card>

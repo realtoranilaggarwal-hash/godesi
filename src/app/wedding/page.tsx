@@ -6,6 +6,8 @@ import {
   WEDDING_GROUPS,
   WEDDING_SLUG,
   featuredWeddingVendors,
+  weddingCities,
+  weddingServiceCounts,
   weddingServiceName,
   weddingServiceSlug,
   weddingVendors,
@@ -51,7 +53,7 @@ export default async function WeddingPage({
 }) {
   const { city, service, rating, budget, q } = searchParams;
 
-  const [vendors, featured, requirements] = await Promise.all([
+  const [vendors, featured, requirements, serviceCounts, cities] = await Promise.all([
     weddingVendors({
       service,
       city,
@@ -66,6 +68,8 @@ export default async function WeddingPage({
       take: 3,
       select: { id: true, title: true, city: true, eventDate: true },
     }),
+    weddingServiceCounts(),
+    weddingCities(),
   ]);
 
   const activeName = service ? weddingServiceName(service) : undefined;
@@ -95,6 +99,53 @@ export default async function WeddingPage({
           </div>
         </section>
 
+        {/* Say what you need, get quotes back — the shortest route for a couple
+            who does not want to browse vendor by vendor. */}
+        <Card className="border-rose-200 bg-gradient-to-br from-rose-50 via-white to-amber-50">
+          <h2 className="text-center text-lg font-black text-slate-900">
+            Express your wedding needs and explore everything you want 💐
+          </h2>
+          <form
+            action="/wedding/requirements/new"
+            className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-center"
+          >
+            <input
+              name="city"
+              defaultValue={city ?? ""}
+              placeholder="City, state"
+              aria-label="Your city"
+              className={`${inputClass} sm:w-52`}
+            />
+            <select
+              name="service"
+              defaultValue={service ?? ""}
+              aria-label="Service you need"
+              className={`${inputClass} sm:w-64`}
+            >
+              <option value="">Enter a service</option>
+              {WEDDING_GROUPS.map((group) => (
+                <optgroup key={group.title} label={group.title}>
+                  {group.items.map((item) => (
+                    <option key={item} value={weddingServiceSlug(item)}>
+                      {item}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-xl bg-rose-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-rose-700"
+            >
+              Get quotes
+            </button>
+          </form>
+          <p className="mt-2 text-center text-xs text-slate-500">
+            e.g. wedding decorators, wedding florists &amp; decor, wedding
+            invitations
+          </p>
+        </Card>
+
         {featured.length ? (
           <section aria-label="Featured wedding vendors">
             <div className="flex items-baseline justify-between gap-3">
@@ -118,41 +169,55 @@ export default async function WeddingPage({
           </section>
         ) : null}
 
-        <section aria-label="Browse wedding services" className="space-y-3">
-          <h2 className="text-lg font-black text-slate-900">Browse by service</h2>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {WEDDING_GROUPS.map((group) => (
-              <div
-                key={group.title}
-                className="rounded-2xl border border-rose-100 bg-rose-50/50 p-3"
-              >
-                <p className="text-sm font-black text-rose-900">
-                  {group.icon} {group.title}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {group.items.map((item) => {
-                    const slug = weddingServiceSlug(item);
-                    const active = service === slug;
-                    return (
-                      <Link
-                        key={slug}
-                        href={`/wedding?service=${slug}${
-                          city ? `&city=${encodeURIComponent(city)}` : ""
-                        }`}
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          active
-                            ? "bg-rose-600 text-white"
-                            : "border border-rose-200 bg-white text-rose-700 hover:bg-rose-100"
+        {/* One tile per service with its own live count, the way a shopper
+            expects to pick a trade — not a wall of small chips. */}
+        <section aria-label="Browse wedding services" className="space-y-4">
+          <h2 className="text-lg font-black text-slate-900">
+            Browse every wedding service
+          </h2>
+          {WEDDING_GROUPS.map((group) => (
+            <div key={group.title}>
+              <p className="text-sm font-black text-rose-900">
+                {group.icon} {group.title}
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {group.items.map((item) => {
+                  const slug = weddingServiceSlug(item);
+                  const active = service === slug;
+                  const count = serviceCounts.get(slug) ?? 0;
+                  return (
+                    <Link
+                      key={slug}
+                      href={`/wedding?service=${slug}${
+                        city ? `&city=${encodeURIComponent(city)}` : ""
+                      }`}
+                      className={`rounded-2xl border p-3 text-center transition ${
+                        active
+                          ? "border-rose-600 bg-rose-600 text-white"
+                          : "border-rose-100 bg-white hover:border-rose-300 hover:bg-rose-50"
+                      }`}
+                    >
+                      <span className="block text-2xl leading-none">
+                        {group.icon}
+                      </span>
+                      <span className="mt-2 block text-sm font-bold leading-tight">
+                        {item}
+                      </span>
+                      <span
+                        className={`mt-1 block text-xs ${
+                          active ? "text-white/80" : "text-slate-500"
                         }`}
                       >
-                        {item}
-                      </Link>
-                    );
-                  })}
-                </div>
+                        {count
+                          ? `${count} ${count === 1 ? "business" : "businesses"} available`
+                          : "Be the first to list"}
+                      </span>
+                    </Link>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </section>
 
         <Card>
@@ -301,6 +366,26 @@ export default async function WeddingPage({
             </Link>
           </div>
         </section>
+
+        {cities.length ? (
+          <section aria-label="Wedding vendors by city">
+            <h2 className="text-lg font-black text-slate-900">Vendors by city</h2>
+            <div className="mt-2 grid grid-cols-2 gap-1 text-sm sm:grid-cols-3 lg:grid-cols-4">
+              {cities.map((row) => (
+                <Link
+                  key={`${row.city}-${row.state ?? ""}`}
+                  href={`/wedding?city=${encodeURIComponent(row.city)}${
+                    service ? `&service=${service}` : ""
+                  }`}
+                  className="truncate text-slate-600 hover:text-rose-600 hover:underline"
+                >
+                  {row.city}
+                  {row.state ? `, ${row.state}` : ""} · {row.count}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <RecommendedLinks
           categorySlug={service ?? WEDDING_SLUG}
