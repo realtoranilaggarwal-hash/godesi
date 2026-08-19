@@ -670,8 +670,10 @@ model Business {
   yelpUrl            String?
   zillowUrl          String?
   realtorUrl         String?
-  /// Intro/showcase video pasted from YouTube or Vimeo.
+  /// Intro/showcase video pasted from YouTube or Vimeo. The first of `videoUrls`.
   videoUrl           String?
+  /// Every showcase video, in order. A free card shows one; paid plans show more.
+  videoUrls          String[]      @default([])
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl           String?
   mapsUrl            String?

@@ -25,6 +25,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Unique QR code + download",
       "WhatsApp click-to-chat button",
       "Up to 5 uploaded images",
+      "1 YouTube video and 6 photos from your Google Photos album",
       "One category only",
       "Phone, email and links hidden in your description",
       "Post events and sell tickets (Godesi keeps a 2% service fee)",
@@ -42,6 +43,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Everything in Free",
       "Featured listing badge",
       "Up to 20 uploaded images",
+      "6 YouTube videos and 18 photos from your Google Photos album",
       "Phone and email shown on your listing",
       "List under 2 extra categories",
       "No Godesi service fee on ticket sales",
@@ -64,6 +66,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Analytics dashboard",
       "Priority ranking in search",
       "Up to 20 uploaded images",
+      "12 YouTube videos and 36 photos from your Google Photos album",
     ],
   },
 };
@@ -99,6 +102,38 @@ export function mediaLimit(user: Pick<User, "plan" | "planExpiresAt">) {
  */
 export function listingImageLimit(user: Pick<User, "plan" | "planExpiresAt">) {
   return effectivePlan(user) === "FREE" ? 1 : PLANS[effectivePlan(user)].mediaLimit;
+}
+
+const VIDEO_LIMITS: Record<Plan, number> = { FREE: 1, PRO: 6, PREMIUM: 12 };
+
+/** The ceiling, used when staff edit a card on the owner's behalf. */
+export const MAX_VIDEO_LIMIT = VIDEO_LIMITS.PREMIUM;
+
+/**
+ * Showcase videos a card may embed. One is free — a DJ's set or a photographer's
+ * reel — and paid plans turn the page into a proper showreel. Founding members
+ * keep the paid allowance as part of their seat.
+ */
+export function videoLimit(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber">,
+) {
+  if (user.foundingNumber !== null) return VIDEO_LIMITS.PREMIUM;
+  return VIDEO_LIMITS[effectivePlan(user)];
+}
+
+const ALBUM_PHOTO_LIMITS: Record<Plan, number> = { FREE: 6, PRO: 18, PREMIUM: 36 };
+
+/**
+ * Thumbnails shown from a member's public Google Photos album. Google hosts the
+ * pictures, so the cap is a plan perk rather than a storage cost, and the album
+ * link itself always opens the rest.
+ */
+export function albumPhotoLimit(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber"> | null,
+) {
+  if (!user) return ALBUM_PHOTO_LIMITS.FREE;
+  if (user.foundingNumber !== null) return ALBUM_PHOTO_LIMITS.PREMIUM;
+  return ALBUM_PHOTO_LIMITS[effectivePlan(user)];
 }
 
 /**

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { effectivePlan } from "@/lib/plans";
+import { albumPhotoLimit, effectivePlan, videoLimit } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -156,6 +156,14 @@ export default async function BusinessProfilePage({
       ? business.description
       : maskContactDetails(business.description)
     : null;
+  /** Older cards saved a single link before the showreel field existed. */
+  const videos = (
+    business.videoUrls.length
+      ? business.videoUrls
+      : business.videoUrl
+        ? [business.videoUrl]
+        : []
+  ).slice(0, business.owner ? videoLimit(business.owner) : 1);
   const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
@@ -445,9 +453,13 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
-            {business.videoUrl ? (
-              <div className="mt-3">
-                <VideoEmbed url={business.videoUrl} title={business.name} />
+            {videos.length ? (
+              <div
+                className={`mt-3 grid gap-3 ${videos.length > 1 ? "sm:grid-cols-2" : ""}`}
+              >
+                {videos.map((video) => (
+                  <VideoEmbed key={video} url={video} title={business.name} />
+                ))}
               </div>
             ) : null}
 
@@ -456,6 +468,7 @@ export default async function BusinessProfilePage({
                 <PhotoAlbumGallery
                   url={business.albumUrl}
                   heading="Photos"
+                  limit={albumPhotoLimit(business.owner)}
                 />
               </div>
             ) : null}
