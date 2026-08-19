@@ -165,7 +165,9 @@ export async function GET(request: Request) {
       where: {
         status: "PUBLISHED",
         ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
-        ...(category ? { category: { in: category.split(",") } } : {}),
+        // Elite categories contain commas ("Arts, Media & Music"), so several
+        // are passed pipe-separated.
+        ...(category ? { category: { in: category.split("|") } } : {}),
         ...(query
           ? {
               OR: [
