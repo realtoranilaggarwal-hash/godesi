@@ -1,5 +1,5 @@
 /**
- * Reads a business page someone pasted — a Sulekha provider page, a temple's
+ * Reads a business page someone pasted — a directory profile, a temple's
  * own site, a company's about page — and pulls out the facts a directory card
  * needs: who they are, what they do, where, and how to reach them.
  *
@@ -297,7 +297,7 @@ function suggestDescription({
 }
 
 /**
- * Sulekha-style paths read like /belleville-nj/religious-service/om-temple-123,
+ * Directory paths read like /belleville-nj/religious-service/om-temple-123,
  * and their trade pages like /edison-nj/pandit-hindu-priest-services, so the
  * trade is in either of the last two segments.
  */

@@ -556,14 +556,14 @@ export default async function BusinessProfilePage({
           ) : null}
           {business.sourceUrl ? (
             <p className="text-xs text-amber-800">
-              Listed from their public page on{" "}
+              Listed from{" "}
               <a
                 href={business.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
                 className="underline"
               >
-                {business.source}
+                a public page
               </a>
               . Claiming replaces these basics with your own.
             </p>

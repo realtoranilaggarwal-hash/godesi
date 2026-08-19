@@ -18,6 +18,8 @@ export function EliteCard({
 }) {
   const badge = ELITE_BADGES[entry.badge];
   const embed = size === "large" && entry.videoUrl ? videoEmbedUrl(entry.videoUrl) : null;
+  // Written by our team from public record, waiting for the person to take over.
+  const unclaimed = Boolean(entry.sourceUrl) && entry.userId === null;
 
   return (
     <Card className={`relative flex flex-col gap-2 ${badge.card}`}>
@@ -109,11 +111,17 @@ export function EliteCard({
         </div>
       ) : null}
 
+      {unclaimed ? (
+        <p className="rounded-lg bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-900">
+          Unclaimed — is this you? Claim this profile
+        </p>
+      ) : null}
+
       <Link
-        href={`/desi-elite/${entry.slug}`}
+        href={`/desi-elite/${entry.slug}${unclaimed ? "?claim=1" : ""}`}
         className="mt-auto text-sm font-semibold text-indigo-600 hover:underline"
       >
-        View profile →
+        {unclaimed ? "View and claim →" : "View profile →"}
       </Link>
     </Card>
   );

@@ -117,8 +117,8 @@ export default async function Page({
       <Card id="confirm">
         <h2 className="mb-1 text-lg font-bold">Add one business from a link</h2>
         <p className="mb-3 text-sm text-slate-500">
-          Paste a priest, IT company, caterer or temple page — a Sulekha
-          provider page, their own website, anything public. We read the facts
+          Paste a priest, IT company, caterer or temple page — their own
+          website, a directory profile, anything public. We read the facts
           it publishes (name, trade, town, address) and you confirm them. The
           card goes up unclaimed and free, credited to where we found it, so the
           owner can claim it and fill in the rest.
@@ -128,7 +128,7 @@ export default async function Page({
             name="link"
             required
             type="url"
-            placeholder="https://us.sulekha.com/…/priest-services/…"
+            placeholder="https://example.com/…/priest-services/…"
             aria-label="Business page link"
             className={`${inputClass} min-w-0 flex-1`}
           />

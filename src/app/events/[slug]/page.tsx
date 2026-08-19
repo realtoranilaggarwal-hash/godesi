@@ -521,9 +521,9 @@ export default async function EventPage({
           <Card>
             <h2 className="font-bold">Tickets and details</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Godesi listed this event from {event.source?.name} and does not
-              sell tickets for it. Check times and entry with the organiser
-              before travelling.
+              Godesi listed this event from the organiser&apos;s public listing
+              and does not sell tickets for it. Check times and entry with the
+              organiser before travelling.
             </p>
             {event.websiteUrl ? (
               <div className="mt-3">

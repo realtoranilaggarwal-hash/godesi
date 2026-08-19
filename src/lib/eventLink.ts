@@ -1,5 +1,5 @@
 /**
- * Reads an event page someone pasted — a Facebook event, a Sulekha listing, an
+ * Reads an event page someone pasted — a Facebook event, a directory listing, an
  * organiser's own page — and pulls out the facts we show: what, when, where.
  * Nothing is saved until a person confirms it, because pages lie and some
  * (Facebook especially) answer a robot with a login wall.

@@ -238,7 +238,11 @@ export async function importSource(source: Source): Promise<WireResult> {
 
     const data = {
       title: entry.title,
-      description: `${description}\n\nListed from ${source.name}'s public calendar.`.slice(
+      description: `${description}\n\nListed from ${
+        // A host-shaped source name is a website we read, not the organiser, and
+        // naming another directory in our own copy helps nobody.
+        source.name.includes(".") ? "the organiser's" : `${source.name}'s`
+      } public calendar.`.slice(
         0,
         5000,
       ),

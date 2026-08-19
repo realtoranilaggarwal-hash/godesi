@@ -348,7 +348,9 @@ export async function saveLinkedEventAction(formData: FormData) {
         slug: await uniqueEventSlug(parsed.data.title, city),
         description: [
           parsed.data.description,
-          `Listed by Godesi from ${host}. Check the details with the organiser.`,
+          // The page we read is linked from the event, so naming another
+          // directory in our own copy adds nothing for the reader.
+          "Listed by Godesi from the organiser's public listing. Check the details with the organiser.",
         ]
           .filter(Boolean)
           .join("\n\n")

@@ -10,6 +10,7 @@ const KIND_TONE: Record<WallItem["kind"], string> = {
   event: "bg-sky-100 text-sky-700",
   report: "bg-amber-100 text-amber-700",
   social: "bg-slate-200 text-slate-700",
+  update: "bg-indigo-100 text-indigo-700",
 };
 
 export function WallCard({ item }: { item: WallItem }) {

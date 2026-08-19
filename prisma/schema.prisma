@@ -300,6 +300,7 @@ model User {
   /// Answer to the "want to be in GoDesi Elite?" prompt: SELF, OTHER or LATER.
   elitePrompt  String?
   eliteEntries EliteEntry[]
+  eliteClaims  EliteClaim[]
   eliteOrders  EliteOrder[]
 
   liveChannels       LiveChannel[]
@@ -1838,6 +1839,13 @@ model EliteEntry {
   paidCents     Int     @default(0)
 
   orders EliteOrder[]
+  claims EliteClaim[]
+
+  /// Where a staff-compiled profile's facts came from, e.g. the person's own
+  /// site or their Wikipedia page. Unique, so a source is only compiled once.
+  sourceUrl  String? @unique
+  /// How the source is credited on the profile, e.g. "Wikipedia".
+  sourceName String?
 
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?
@@ -1851,6 +1859,26 @@ model EliteEntry {
 
   @@index([status, badge, publishedAt])
   @@index([userId])
+}
+
+/// Somebody asking to take over a profile our team compiled from public
+/// sources, so the person themselves owns and edits it from then on.
+model EliteClaim {
+  id      String     @id @default(cuid())
+  entryId String
+  entry   EliteEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// How the claimant is the person, or represents them.
+  message String
+  phone   String?
+  email   String?
+
+  status    ClaimStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  @@unique([entryId, userId])
+  @@index([status])
 }
 
 enum LiveMediaKind {

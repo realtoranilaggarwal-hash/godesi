@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { Card, LinkButton } from "@/components/ui";
+import { ClaimEliteForm } from "@/components/forms/ClaimEliteForm";
 import { PlaceLink } from "@/components/PlaceLink";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { ELITE_BADGES, showsContact } from "@/lib/elite";
@@ -34,11 +36,17 @@ export async function generateMetadata({
 
 export default async function EliteProfilePage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { claim?: string };
 }) {
   const entry = await getEntry(params.slug);
   if (!entry) notFound();
+
+  const viewer = await getCurrentUser();
+  // Compiled by our team from public record and nobody has taken it over yet.
+  const unclaimed = Boolean(entry.sourceUrl) && entry.userId === null;
 
   const badge = ELITE_BADGES[entry.badge];
   const embed = videoEmbedUrl(entry.videoUrl ?? entry.interviewUrl);
@@ -167,7 +175,12 @@ export default async function EliteProfilePage({
 
       <Card>
         <h2 className="mb-2 text-lg font-bold">Contact</h2>
-        {showsContact(entry.badge) ? (
+        {unclaimed ? (
+          <p className="text-sm text-slate-600">
+            No contact details: GoDesi publishes none for an unclaimed profile.
+            Claim it above to choose what is shown.
+          </p>
+        ) : showsContact(entry.badge) ? (
           <div className="flex flex-wrap gap-2">
             {entry.contactPhone ? (
               <a
@@ -201,6 +214,49 @@ export default async function EliteProfilePage({
           </p>
         )}
       </Card>
+
+      {unclaimed ? (
+        <Card className="border-amber-200 bg-amber-50">
+          <p className="text-sm font-black text-amber-900">
+            Unclaimed profile
+          </p>
+          <p className="mt-1 text-sm text-amber-900">
+            GoDesi wrote this entry from public record — no photograph, contact
+            number or text has been copied from anywhere. If this is you, claim
+            it and the page becomes yours to correct, complete and add your
+            photo, video and links to.
+          </p>
+          {entry.sourceUrl ? (
+            <p className="mt-2 text-xs text-amber-800">
+              Fact checked against{" "}
+              <a
+                href={entry.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline"
+              >
+                {entry.sourceName ?? "a public page"}
+              </a>
+              . Something wrong?{" "}
+              <Link href="/contact" className="underline">
+                Tell us and we will fix or remove it
+              </Link>
+              .
+            </p>
+          ) : null}
+          <div className="mt-3">
+            {viewer ? (
+              <ClaimEliteForm entryId={entry.id} open={searchParams.claim === "1"} />
+            ) : (
+              <LinkButton
+                href={`/login?next=/desi-elite/${entry.slug}?claim=1`}
+              >
+                Sign in to claim this profile
+              </LinkButton>
+            )}
+          </div>
+        </Card>
+      ) : null}
 
       <Card className="border-amber-200 bg-amber-50">
         <p className="text-sm font-semibold text-amber-900">

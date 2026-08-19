@@ -14,7 +14,8 @@
     "db:categories": "tsx prisma/categories.ts",
     "db:worship": "tsx prisma/worship-import.ts",
     "db:businesses": "tsx prisma/business-import.ts",
-    "db:community": "tsx prisma/community-import.ts"
+    "db:community": "tsx prisma/community-import.ts",
+    "db:elite": "tsx prisma/elite-import.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

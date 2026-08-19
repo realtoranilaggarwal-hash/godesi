@@ -6,7 +6,7 @@ import { budgetCurrencyOf } from "@/lib/budget";
 
 export const dynamic = "force-dynamic";
 
-const KINDS = ["news", "events", "businesses", "leads"] as const;
+const KINDS = ["news", "events", "businesses", "leads", "elite"] as const;
 type Kind = (typeof KINDS)[number];
 
 function isKind(value: string | null): value is Kind {
@@ -152,6 +152,70 @@ export async function GET(request: Request) {
           eventType: item.eventType,
           categorySlug: item.categorySlug,
           url: `${base}/events/${item.slug}`,
+        })),
+      },
+      { headers },
+    );
+  }
+
+  if (kind === "elite") {
+    // GoDesi Elite profiles for desiwhoswho.com: the teaser and where to claim,
+    // with the full profile (and the claim form) staying on Godesi.
+    const items = await db.eliteEntry.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
+        ...(category ? { category: { in: category.split(",") } } : {}),
+        ...(query
+          ? {
+              OR: [
+                { fullName: { contains: query, mode: "insensitive" as const } },
+                { businessName: { contains: query, mode: "insensitive" as const } },
+                { shortBio: { contains: query, mode: "insensitive" as const } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ badge: "desc" }, { paidCents: "desc" }, { publishedAt: "desc" }],
+      take: limit,
+      select: {
+        slug: true,
+        fullName: true,
+        businessName: true,
+        shortBio: true,
+        category: true,
+        city: true,
+        state: true,
+        country: true,
+        photoUrl: true,
+        badge: true,
+        sourceUrl: true,
+        sourceName: true,
+        userId: true,
+        publishedAt: true,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        kind,
+        items: items.map((item) => ({
+          slug: item.slug,
+          name: item.fullName,
+          org: item.businessName,
+          teaser: teaser(item.shortBio, 200),
+          category: item.category,
+          city: item.city,
+          state: item.state,
+          country: item.country,
+          imageUrl: item.photoUrl,
+          badge: item.badge,
+          claimed: item.userId !== null,
+          sourceUrl: item.sourceUrl,
+          sourceName: item.sourceName,
+          publishedAt: item.publishedAt,
+          url: `${base}/desi-elite/${item.slug}`,
+          claimUrl: `${base}/desi-elite/${item.slug}?claim=1`,
         })),
       },
       { headers },

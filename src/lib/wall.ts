@@ -6,7 +6,14 @@ import { newsPath } from "@/lib/newsLinks";
 
 export type WallItem = {
   id: string;
-  kind: "member" | "business" | "listing" | "event" | "report" | "social";
+  kind:
+    | "member"
+    | "business"
+    | "listing"
+    | "event"
+    | "report"
+    | "social"
+    | "update";
   icon: string;
   /** Who or what the card is about. */
   title: string;
@@ -47,7 +54,7 @@ const cachedWall = cachedQuery(
 );
 
 async function buildWallItems(limit = 24): Promise<WallItem[]> {
-  const [members, businesses, listings, events, reports, social] =
+  const [members, businesses, listings, events, reports, social, updates] =
     await Promise.all([
       db.user.findMany({
         where: { username: { not: null } },
@@ -121,6 +128,21 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
         },
       }),
       socialWallPosts(TAKE_PER_SOURCE),
+      // "What's new" posts, so a visitor scrolling the wall learns what Godesi
+      // can do and not only who joined it.
+      db.blogPost.findMany({
+        where: { published: true, kind: "UPDATE" },
+        orderBy: { publishedAt: "desc" },
+        take: TAKE_PER_SOURCE,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          excerpt: true,
+          coverUrl: true,
+          publishedAt: true,
+        },
+      }),
     ]);
 
   const items: WallItem[] = [
@@ -190,6 +212,18 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
       imageUrl: report.imageUrl,
       avatarUrl: report.submittedBy?.avatarUrl ?? null,
       at: report.publishedAt,
+    })),
+    ...updates.map((update) => ({
+      id: `update:${update.id}`,
+      kind: "update" as const,
+      icon: "\u{1F195}",
+      title: "New on Godesi",
+      text: update.excerpt ? `${update.title} — ${update.excerpt}` : update.title,
+      href: `/blog/${update.slug}`,
+      external: false,
+      imageUrl: update.coverUrl,
+      avatarUrl: null,
+      at: update.publishedAt,
     })),
     ...social.map((post) => ({
       id: `social:${post.id}`,
