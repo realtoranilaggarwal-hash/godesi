@@ -6,6 +6,7 @@ export type AdPlacement = {
   slot: BannerSlot;
   name: string;
   size: { width: number; height: number };
+  /** How many creatives a page shows at once; more advertisers simply rotate. */
   slots: number;
   blurb: string;
   /** Monthly rate per placement. */
@@ -82,7 +83,7 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     cpmUsd: 2.9,
     highlights: [
       "Long dwell time on scroll-heavy pages",
-      "Four slots only — low clutter",
+      "Four shown at a time, rotating — never sold out",
       "Ideal for events, courses and offers",
     ],
   },
@@ -150,7 +151,7 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     cpmUsd: 3.1,
     highlights: [
       "Dominates the sidebar as visitors scroll",
-      "Four slots only",
+      "Four shown at a time, rotating — never sold out",
       "Good for offers with a lot to say",
     ],
   },

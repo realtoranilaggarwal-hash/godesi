@@ -14,8 +14,35 @@ export const HERO_SIZE = AD_PLACEMENTS.HERO.size;
 export const HEADER_SIZE = AD_PLACEMENTS.HEADER.size;
 export const SKYSCRAPER_SIZE = AD_PLACEMENTS.SKYSCRAPER.size;
 
+/**
+ * How many creatives of a placement a page shows at once. It is not a limit on
+ * how many advertisers can buy it: the extras rotate in on later page views.
+ */
 export function slotCapacity(slot: BannerSlot) {
   return AD_PLACEMENTS[slot].slots;
+}
+
+/**
+ * The lowest unused ordering number in a slot. Positions order the rotation and
+ * are unbounded, so a placement never sells out.
+ */
+export async function nextPosition(slot: BannerSlot, exceptId?: string) {
+  const used = new Set(
+    (
+      await db.banner.findMany({
+        where: {
+          slot,
+          position: { not: null },
+          ...(exceptId ? { NOT: { id: exceptId } } : {}),
+        },
+        select: { position: true },
+      })
+    ).map((row) => row.position),
+  );
+
+  let candidate = 1;
+  while (used.has(candidate)) candidate += 1;
+  return candidate;
 }
 
 type RotatingBanner = {

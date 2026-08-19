@@ -14,7 +14,7 @@ import { db } from "@/lib/db";
 import { requireRole, requirePermission } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { AD_SLOT_ORDER } from "@/lib/ads";
-import { slotCapacity } from "@/lib/banners";
+import { nextPosition } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
 import { levelFor } from "@/lib/journalists";
@@ -209,11 +209,6 @@ export async function saveBannerAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const limit = slotCapacity(parsed.data.slot);
-    if (parsed.data.position && parsed.data.position > limit) {
-      return { error: `${parsed.data.slot} has only ${limit} slot(s).` };
-    }
-
     const {
       slot,
       position: requested,
@@ -237,25 +232,8 @@ export async function saveBannerAction(
       advertiserId = advertiser.id;
     }
 
-    let position = requested;
-    if (!position) {
-      const used = new Set(
-        (
-          await db.banner.findMany({
-            where: { slot, position: { not: null } },
-            select: { position: true },
-          })
-        ).map((row) => row.position),
-      );
-      position = Array.from({ length: limit }, (_, index) => index + 1).find(
-        (candidate) => !used.has(candidate),
-      );
-      if (!position) {
-        return {
-          error: `All ${limit} ${slot} slot(s) are taken — pick a slot number to replace one.`,
-        };
-      }
-    }
+    // A position only orders the rotation, so there is always another one free.
+    const position = requested ?? (await nextPosition(slot));
 
     const schedule = {
       impressionCap: impressionCap ?? null,
@@ -283,7 +261,9 @@ export async function saveBannerAction(
 
     revalidatePath("/admin");
     revalidatePath("/");
-    return { success: `Banner saved in ${slot} slot ${position}.` };
+    return {
+      success: `Banner saved in ${slot} position ${position} — it rotates with the others in that placement.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
@@ -341,39 +321,18 @@ export async function approveBannerAction(
     const banner = await db.banner.findUnique({ where: { id } });
     if (!banner) return { error: "Banner not found." };
 
-    const capacity = slotCapacity(banner.slot);
-    let position =
-      Number.isInteger(requested) && requested > 0 ? requested : null;
-
-    if (position && position > capacity) {
-      return { error: `${banner.slot} has only ${capacity} slot(s).` };
-    }
-
-    if (!position) {
-      const used = await db.banner.findMany({
-        where: {
-          slot: banner.slot,
-          NOT: { id: banner.id },
-          position: { not: null },
-        },
-        select: { position: true },
-      });
-      const taken = new Set(used.map((row) => row.position));
-      for (let candidate = 1; candidate <= capacity; candidate += 1) {
-        if (!taken.has(candidate)) {
-          position = candidate;
-          break;
-        }
-      }
-      if (!position) return { error: `All ${banner.slot} slots are occupied.` };
-    }
-
-    const occupant = await db.banner.findUnique({
-      where: { slot_position: { slot: banner.slot, position } },
-    });
-    if (occupant && occupant.id !== banner.id) {
-      return { error: `${banner.slot} slot ${position} is already taken.` };
-    }
+    const asked = Number.isInteger(requested) && requested > 0 ? requested : null;
+    // Positions are unbounded ordering numbers, so a placement never sells out:
+    // an asked-for number that is in use simply moves to the next free one.
+    const occupant = asked
+      ? await db.banner.findUnique({
+          where: { slot_position: { slot: banner.slot, position: asked } },
+        })
+      : null;
+    const position =
+      asked && (!occupant || occupant.id === banner.id)
+        ? asked
+        : await nextPosition(banner.slot, banner.id);
 
     await db.banner.update({
       where: { id: banner.id },
