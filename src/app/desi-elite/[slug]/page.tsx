@@ -77,7 +77,7 @@ export default async function EliteProfilePage({
             <img
               src={entry.photoUrl ?? "/placeholder-logo.svg"}
               alt={entry.fullName}
-              className="h-24 w-24 rounded-2xl border border-slate-200 object-cover"
+              className="h-32 w-24 rounded-2xl border border-slate-200 bg-slate-100 object-contain"
             />
             {entry.photoCredit ? (
               <p className="mt-1 max-w-[9rem] text-[10px] leading-tight text-slate-500">

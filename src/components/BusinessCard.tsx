@@ -39,8 +39,10 @@ export function BusinessCard({
           name={business.name}
           icon={business.categoryIcon}
           imageUrl={business.logoUrl}
-          className={compact ? "h-10 w-10" : "h-12 w-12"}
-          emojiClassName={compact ? "text-xl" : "text-2xl"}
+          className={
+            premium ? "h-16 w-16" : compact ? "h-10 w-10" : "h-12 w-12"
+          }
+          emojiClassName={compact ? "text-xl" : premium ? "text-3xl" : "text-2xl"}
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
