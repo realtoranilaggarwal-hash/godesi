@@ -23,6 +23,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/content", label: "Content desk", icon: "✍️" },
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/admin/live-channels", label: "Radio & TV", icon: "🎧" },
+  { href: "/admin/help-clips", label: "Help clips", icon: "▶️" },
   { href: "/admin/outreach", label: "Outreach", icon: "📣" },
   { href: "/admin/team", label: "Team", icon: "🔑" },
 ];

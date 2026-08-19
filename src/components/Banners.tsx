@@ -14,6 +14,7 @@ import { LiveVisitorMap } from "@/components/LiveVisitorMap";
 import { ActivityWall } from "@/components/ActivityWall";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { ChatPanel } from "@/components/ChatPanel";
+import { HelpClipCard } from "@/components/HelpClipCard";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { HousePromo } from "@/components/HousePromo";
@@ -148,7 +149,14 @@ function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
  * Showing a couple per view lets ten advertisers share the slot and keeps each
  * page view from burning everyone's impression quota at once.
  */
-export async function SidebarBanners() {
+export async function SidebarBanners({
+  categorySlug = null,
+  parentSlug = null,
+}: {
+  /** Lets a category page offer its own "how it works" clip. */
+  categorySlug?: string | null;
+  parentSlug?: string | null;
+} = {}) {
   const [rectangles, halfPages, skyscrapers, rectanglesSold] =
     await Promise.all([
       activeBanners("SIDEBAR", 2),
@@ -162,6 +170,8 @@ export async function SidebarBanners() {
       className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
       aria-label="Sponsored"
     >
+      <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
+
       <LiveVisitorMap compact />
 
       <ChatPanel compact />

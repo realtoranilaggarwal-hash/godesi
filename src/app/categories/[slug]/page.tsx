@@ -579,7 +579,10 @@ export default async function CategoryPage({
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <SidebarBanners
+        categorySlug={category.slug}
+        parentSlug={category.parent?.slug ?? null}
+      />
     </div>
   );
 }

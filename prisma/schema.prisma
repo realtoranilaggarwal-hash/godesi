@@ -396,87 +396,87 @@ model Listing {
   genderPref  GenderPreference?
 
   /// Property fields below are set only on PROPERTY_SALE / PROPERTY_RENT.
-  propertyGroup  PropertyGroup?
+  propertyGroup     PropertyGroup?
   /// Slug from PROPERTY_TYPES, e.g. "apartment", "office-space", "agricultural-land".
-  propertyType   String?
-  postedByRole   PostedByRole?
-  bathrooms      Int?
-  balconies      Int?
-  builtUpArea    Int?
-  carpetArea     Int?
+  propertyType      String?
+  postedByRole      PostedByRole?
+  bathrooms         Int?
+  balconies         Int?
+  builtUpArea       Int?
+  carpetArea        Int?
   /// Unit both areas are given in: "sqft", "sqm", "sqyd", "acre", "guntha".
-  areaUnit       String?
+  areaUnit          String?
   /// Bracket slug from PROPERTY_AGES, e.g. "under-construction", "0-5".
-  propertyAge    String?
-  floor          Int?
-  totalFloors    Int?
+  propertyAge       String?
+  floor             Int?
+  totalFloors       Int?
   /// Compass slug from FACINGS, e.g. "north-east".
-  facing         String?
+  facing            String?
   /// Slug from OWNERSHIPS, e.g. "freehold", "leasehold".
-  ownership      String?
-  negotiable     Boolean        @default(false)
-  underLoan      Boolean        @default(false)
+  ownership         String?
+  negotiable        Boolean        @default(false)
+  underLoan         Boolean        @default(false)
   /// Refundable deposit and monthly maintenance, in the same currency as price.
-  deposit        Int?
-  maintenance    Int?
+  deposit           Int?
+  maintenance       Int?
   /// US market fields. Lot size is the plot; `builtUpArea` is finished space.
-  lotSize        Int?
+  lotSize           Int?
   /// Unit of `lotSize` alone: "sqft" or "acre".
-  lotUnit        String?
+  lotUnit           String?
   /// Baths counted the American way: full (bath + shower), three-quarter
   /// (shower, no tub) and half (no bathing). `bathrooms` stays the full count.
   threeQuarterBaths Int?
-  halfBaths      Int?
-  yearBuilt      Int?
+  halfBaths         Int?
+  yearBuilt         Int?
   /// Slug from SALE_TYPES, e.g. "resale", "new-construction", "foreclosure".
-  saleType       String?
+  saleType          String?
   /// Slugs from CONSTRUCTION_TYPES, FLOORING_TYPES, PARKING_TYPES and
   /// PROPERTY_HIGHLIGHTS; unknown values are dropped on save.
-  construction   String[]       @default([])
-  flooring       String[]       @default([])
-  parkingTypes   String[]       @default([])
-  highlights     String[]       @default([])
+  construction      String[]       @default([])
+  flooring          String[]       @default([])
+  parkingTypes      String[]       @default([])
+  highlights        String[]       @default([])
   /// Monthly HOA or condo fee and the yearly property tax, in `currency`.
-  hoaFee         Int?
-  propertyTax    Int?
+  hoaFee            Int?
+  propertyTax       Int?
   /// Next open house, and when it ends the same day.
-  openHouseAt    DateTime?
-  openHouseEndsAt DateTime?
+  openHouseAt       DateTime?
+  openHouseEndsAt   DateTime?
   /// Local school district, which US buyers search on as hard as price.
-  schoolDistrict String?
+  schoolDistrict    String?
   /// MLS number so a listing can be matched against the public record.
-  mlsNumber      String?
-  parkingCar     Int?
-  parkingBike    Int?
+  mlsNumber         String?
+  parkingCar        Int?
+  parkingBike       Int?
   /// Slugs from AMENITIES and UTILITIES; unknown values are dropped on save.
-  amenities      String[]       @default([])
-  utilities      String[]       @default([])
+  amenities         String[]       @default([])
+  utilities         String[]       @default([])
   /// Matterport/YouTube-style walkthrough, and a Google Maps pin.
-  tourUrl        String?
-  mapUrl         String?
-  state          String?
-  country        String?
-  availableFrom  DateTime?
+  tourUrl           String?
+  mapUrl            String?
+  state             String?
+  country           String?
+  availableFrom     DateTime?
   /// Slug from TENANT_PREFS, e.g. "family", "bachelors", "company".
-  tenantPref     String?
+  tenantPref        String?
   /// Cross-border buyers and investors browse these as their own sections.
-  nriFriendly    Boolean        @default(false)
-  investmentDeal Boolean        @default(false)
+  nriFriendly       Boolean        @default(false)
+  investmentDeal    Boolean        @default(false)
   /// Direct contact, revealed to signed-in members only; guests get WhatsApp.
-  contactName    String?
-  contactPhone   String?
-  contactEmail   String?
+  contactName       String?
+  contactPhone      String?
+  contactEmail      String?
   /// Buy & sell items pick a subcategory of "buy-sell" (jewellery, furniture…).
-  categorySlug   String?
-  whatsapp       String
+  categorySlug      String?
+  whatsapp          String
   /// Walkthrough video pasted from YouTube or Vimeo.
-  videoUrl       String?
+  videoUrl          String?
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
-  albumUrl       String?
-  status         ListingStatus  @default(APPROVED)
-  featured       Boolean        @default(false)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  albumUrl          String?
+  status            ListingStatus  @default(APPROVED)
+  featured          Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -765,11 +765,11 @@ model Media {
 }
 
 model Review {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   businessId       String
-  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business         Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   authorId         String?
-  author           User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author           User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorName       String
   rating           Int
   comment          String?
@@ -785,9 +785,9 @@ model Review {
   addedById        String?
   consentAt        DateTime?
   /// Taken down by staff (fake, abusive or successfully disputed) but kept for audit.
-  hidden           Boolean  @default(false)
+  hidden           Boolean   @default(false)
   hiddenReason     String?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
 
   disputes ReviewDispute[]
 
@@ -1845,9 +1845,9 @@ model EliteEntry {
 
   /// Where a staff-compiled profile's facts came from, e.g. the person's own
   /// site or their Wikipedia page. Unique, so a source is only compiled once.
-  sourceUrl  String? @unique
+  sourceUrl   String? @unique
   /// How the source is credited on the profile, e.g. "Wikipedia".
-  sourceName String?
+  sourceName  String?
   /// Photographer and licence for a freely-licensed portrait, shown under it.
   photoCredit String?
 
@@ -2042,4 +2042,25 @@ model PartnerKit {
   banner728Url  String?
   note          String?
   updatedAt     DateTime @updatedAt
+}
+
+/// A short "how Godesi works" clip shown in the sidebar. The video stays on
+/// YouTube or Vimeo — we only keep the link, where it belongs and how often it
+/// was played. A visitor sees the card once and nothing loads until they click.
+model HelpClip {
+  id           String   @id @default(cuid())
+  title        String
+  /// YouTube or Vimeo link, including Shorts.
+  url          String
+  /// One line under the title, e.g. "10 seconds — how to post a requirement".
+  note         String?
+  /// Category or subcategory slug this clip belongs to; null shows it sitewide.
+  categorySlug String?
+  sortOrder    Int      @default(0)
+  active       Boolean  @default(true)
+  /// How many visitors pressed play.
+  plays        Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([active, categorySlug, sortOrder])
 }
