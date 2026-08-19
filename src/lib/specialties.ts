@@ -977,6 +977,7 @@ function weddingSet({
           "Marathi",
           "Punjabi",
           "Bengali",
+          "Sanskrit",
           "Urdu",
           "Nepali",
         ],
@@ -1181,6 +1182,150 @@ const DJ_TABS: OptionTab[] = [
 ];
 
 const DJ_OPTIONS = DJ_TABS.flatMap((tab) => tab.options);
+
+/**
+ * A priest is booked for one named ritual, so the list is the ritual itself —
+ * from a naming ceremony to asthi visarjan — rather than a vague "puja".
+ */
+const PRIEST_TABS: OptionTab[] = [
+  {
+    title: "Weddings & engagements",
+    options: [
+      "Hindu wedding (vivah)",
+      "Vedic wedding with full rituals",
+      "South Indian wedding",
+      "Gujarati wedding",
+      "Marathi wedding",
+      "Bengali wedding",
+      "Punjabi wedding",
+      "Anand Karaj (Sikh ceremony)",
+      "Nikah",
+      "Jain wedding",
+      "Buddhist wedding",
+      "Interfaith ceremony",
+      "Christian wedding officiant",
+      "Court / civil ceremony officiant",
+      "Destination wedding ceremony",
+      "Engagement / roka / sagai",
+      "Sagan & tilak",
+      "Haldi & mehndi rituals",
+      "Ganesh puja before the wedding",
+      "Mandap muhurat & ghar puja",
+      "Vratam & Gauri puja",
+      "Reception blessing",
+      "Wedding anniversary vow renewal",
+    ],
+  },
+  {
+    title: "Baby & child ceremonies",
+    options: [
+      "Baby shower / seemantham / godh bharai",
+      "Punsavan & garbhadhan",
+      "Namkaran (naming)",
+      "Cradle ceremony",
+      "Annaprashan (first food)",
+      "Mundan / chudakarana (tonsure)",
+      "First birthday & ayush homam",
+      "Vidyarambham / aksharabhyasam",
+      "Upanayanam / janeu (thread ceremony)",
+      "Ritu kala / half-saree function",
+      "Karnavedha (ear piercing)",
+    ],
+  },
+  {
+    title: "Home, business & vehicle",
+    options: [
+      "Griha pravesh / housewarming",
+      "Vastu shanti puja",
+      "Rakshoghna homam",
+      "Bhoomi puja / ground breaking",
+      "New office & shop opening puja",
+      "Business & Lakshmi prosperity puja",
+      "Vahan puja (new vehicle)",
+      "Kitchen & first cooking ritual",
+      "Well / borewell & water puja",
+      "Vastu consultation & guidance",
+    ],
+  },
+  {
+    title: "Pujas, havan & graha shanti",
+    options: [
+      "Satyanarayan puja & katha",
+      "Ganesh puja",
+      "Lakshmi puja",
+      "Saraswati puja",
+      "Durga & Navratri puja",
+      "Rudrabhishek",
+      "Maha Mrityunjaya jaap",
+      "Sudarshana homam",
+      "Chandi & Devi homam",
+      "Navagraha shanti",
+      "Mangal dosha & kuja shanti",
+      "Shani shanti & Rahu-Ketu puja",
+      "Nakshatra & birth star shanti",
+      "Kaal sarp dosha puja",
+      "Ayushya homam & health puja",
+      "Sathabhishekam & shastipoorthi (60th)",
+      "Havan / yagya of your choice",
+      "Sundarkand & Hanuman Chalisa paath",
+      "Sanskrit mantra chanting & jaap",
+    ],
+  },
+  {
+    title: "Festivals & katha",
+    options: [
+      "Diwali Lakshmi puja",
+      "Ganesh Chaturthi",
+      "Navratri & Garba puja",
+      "Durga puja",
+      "Janmashtami",
+      "Ram Navami",
+      "Maha Shivratri",
+      "Karva Chauth & Vat Savitri",
+      "Raksha Bandhan & Bhai Dooj",
+      "Makar Sankranti & Pongal",
+      "Onam & Vishu",
+      "Ugadi & Gudi Padwa",
+      "Chhath puja",
+      "Akhand Ramayan paath",
+      "Bhagwat katha & pravachan",
+      "Bhajan sandhya & kirtan",
+      "Sikh Akhand Paath & Sukhmani Sahib",
+      "Temple & community festival puja",
+    ],
+  },
+  {
+    title: "Last rites & ancestral",
+    options: [
+      "Antim sanskar / funeral rites",
+      "Cremation ceremony",
+      "Asthi visarjan (ash immersion)",
+      "Terahvi & 13th-day ceremony",
+      "Shraddh & pind daan",
+      "Pitra dosha & tarpan",
+      "Pitru paksha rituals",
+      "Death anniversary (barsi)",
+      "Prayer meeting & shanti path",
+      "Garuda Purana paath",
+    ],
+  },
+  {
+    title: "Dates & guidance",
+    options: [
+      "Muhurat (auspicious date) selection",
+      "Kundli / horoscope matching",
+      "Birth chart reading",
+      "Panchang & festival calendar guidance",
+      "Naming suggestions from the birth star",
+      "Remedies & upay guidance",
+      "Spiritual counselling",
+      "Explaining each ritual to the family",
+      "Teaching mantras & shlokas",
+    ],
+  },
+];
+
+const PRIEST_OPTIONS = PRIEST_TABS.flatMap((tab) => tab.options);
 
 const WEDDING_SETS: Record<string, SpecialtySet> = {
   "Mehndi Artists": weddingSet({
@@ -1579,47 +1724,105 @@ const WEDDING_SETS: Record<string, SpecialtySet> = {
     priceLabel: "Hall rental from",
   }),
 
-  Pandits: weddingSet({
-    title: "Select the ceremonies you perform",
-    hint: "Pick every puja and ritual you conduct.",
-    options: [
-      "Hindu wedding (vivah)",
-      "Engagement / roka",
-      "Ganesh puja",
-      "Griha pravesh / housewarming",
-      "Satyanarayan puja",
-      "Namkaran (naming)",
-      "Annaprasan (first food)",
-      "Mundan (tonsure)",
-      "Upanayanam / thread ceremony",
-      "Baby shower / seemantham",
-      "Havan & homam",
-      "Navagraha & dosha puja",
-      "Rudrabhishek",
-      "Lakshmi & Diwali puja",
-      "Navratri & Durga puja",
-      "Satsang & bhajan",
-      "Last rites & shraddha",
-      "Pitra dosha & tarpan",
-      "Vastu puja",
-      "Car & vehicle puja",
-      "Business opening puja",
-      "Muhurat (date selection)",
-      "Kundli matching",
-      "Telugu rituals",
-      "Tamil rituals",
-      "Kannada rituals",
-      "Malayalam rituals",
-      "Gujarati rituals",
-      "Marathi rituals",
-      "Bengali rituals",
-      "Punjabi rituals",
-      "Travel to your home",
-      "Online / video ceremony",
-      "Samagri (puja items) provided",
-    ],
-    priceLabel: "Dakshina / fee from",
-  }),
+  Pandits: {
+    ...weddingSet({
+      title: "Select the ceremonies you perform",
+      hint: "Pick every puja and ritual by name — families search for the exact one.",
+      options: PRIEST_OPTIONS,
+      extra: [
+        {
+          key: "traditions",
+          title: "Traditions and vidhis you follow",
+          clientTitle: "Which tradition should the ceremony follow?",
+          options: [
+            "North Indian / Vedic",
+            "South Indian / Dravidian",
+            "Telugu",
+            "Tamil",
+            "Kannada",
+            "Malayali",
+            "Gujarati",
+            "Marathi",
+            "Bengali",
+            "Punjabi / Hindu",
+            "Sikh (Granthi / path)",
+            "Jain",
+            "Buddhist",
+            "Muslim (Nikah)",
+            "Christian",
+            "Arya Samaj",
+            "ISKCON / Vaishnav",
+            "Swaminarayan",
+            "Shaiva & Shakta",
+            "Interfaith & mixed families",
+          ],
+          mode: "multi",
+        },
+        {
+          key: "arrangements",
+          title: "What you bring and how you serve",
+          clientTitle: "How should it be arranged?",
+          options: [
+            "Samagri (puja items) provided",
+            "Samagri list sent in advance",
+            "Havan kund & fire setup",
+            "Idols, photos & altar setup",
+            "Mandap / small stage setup",
+            "Flowers, fruit & prasad arranged",
+            "Priest's own mic & speaker",
+            "Ceremony at your home",
+            "Ceremony at a temple",
+            "Ceremony at a banquet hall or venue",
+            "Outdoor & beach ceremony",
+            "Ceremony at the crematorium",
+            "Destination ceremony (we travel)",
+            "Online / video ceremony",
+            "Ceremony explained in English as it goes",
+            "Printed vows & shlokas for the family",
+            "Marriage licence signing / registered officiant",
+            "Two priests for a large ceremony",
+            "Bhajan singers or musicians arranged",
+          ],
+          mode: "multi",
+        },
+        {
+          key: "distance",
+          title: "How far you travel",
+          clientTitle: "How far should they travel?",
+          options: [
+            "Up to 10 miles",
+            "Up to 25 miles",
+            "Up to 50 miles",
+            "More than 50 miles",
+            "Anywhere in the country",
+            "Overseas / destination ceremonies",
+          ],
+          mode: "single",
+        },
+        {
+          key: "payments",
+          title: "Payments you accept",
+          options: [
+            "Cash",
+            "Zelle",
+            "Venmo",
+            "PayPal",
+            "Cash App",
+            "Check",
+            "Bank transfer",
+            "Visa / Mastercard",
+            "American Express",
+            "Debit card",
+            "UPI",
+            "Whatever the family offers as dakshina",
+          ],
+          mode: "multi",
+        },
+      ],
+      priceLabel: "Dakshina / fee from",
+    }),
+    optionTabs: PRIEST_TABS,
+  },
 
   "Bridal Wear": weddingSet({
     title: "Select what you sell or rent",
@@ -1699,6 +1902,21 @@ SPECIALTY_SETS[
 ] = SPECIALTY_SETS["professionals-astrologers"];
 SPECIALTY_SETS[subcategorySlug("religious-services", "Astrologers")] =
   SPECIALTY_SETS["professionals-astrologers"];
+
+/**
+ * A priest listed under Religious & Cultural does the same work as a wedding
+ * pandit, so the whole ritual list follows him there — a havan specialist and a
+ * katha mandali are booked from the same set.
+ */
+for (const name of [
+  "Pandits & Purohits",
+  "Havan & Yagya",
+  "Last Rites Services",
+  "Katha & Bhajan Mandali",
+]) {
+  SPECIALTY_SETS[subcategorySlug("religious-services", name)] =
+    WEDDING_SETS.Pandits;
+}
 
 export function specialtySet(subcategorySlug?: string | null): SpecialtySet | null {
   if (!subcategorySlug) return null;
