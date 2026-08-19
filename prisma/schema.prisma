@@ -1846,6 +1846,8 @@ model EliteEntry {
   sourceUrl  String? @unique
   /// How the source is credited on the profile, e.g. "Wikipedia".
   sourceName String?
+  /// Photographer and licence for a freely-licensed portrait, shown under it.
+  photoCredit String?
 
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?

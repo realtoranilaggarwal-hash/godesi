@@ -39,6 +39,7 @@ export function EliteCard({
         <img
           src={entry.photoUrl ? thumbImage(entry.photoUrl, 384) : "/placeholder-logo.svg"}
           alt={entry.fullName}
+          title={entry.photoCredit ?? undefined}
           className={`${
             size === "large" ? "h-16 w-16" : size === "small" ? "h-10 w-10" : "h-12 w-12"
           } shrink-0 rounded-full border border-slate-200 object-cover`}

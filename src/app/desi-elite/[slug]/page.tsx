@@ -72,12 +72,19 @@ export default async function EliteProfilePage({
           className="absolute right-4 top-4"
         />
         <div className="flex flex-col gap-4 pt-3 sm:flex-row sm:items-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={entry.photoUrl ?? "/placeholder-logo.svg"}
-            alt={entry.fullName}
-            className="h-24 w-24 rounded-2xl border border-slate-200 object-cover"
-          />
+          <div className="shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={entry.photoUrl ?? "/placeholder-logo.svg"}
+              alt={entry.fullName}
+              className="h-24 w-24 rounded-2xl border border-slate-200 object-cover"
+            />
+            {entry.photoCredit ? (
+              <p className="mt-1 max-w-[9rem] text-[10px] leading-tight text-slate-500">
+                {entry.photoCredit}
+              </p>
+            ) : null}
+          </div>
           <div className="min-w-0">
             <h1 className="text-2xl font-black sm:text-3xl">{entry.fullName}</h1>
             {entry.businessName ? (
@@ -221,10 +228,11 @@ export default async function EliteProfilePage({
             Unclaimed profile
           </p>
           <p className="mt-1 text-sm text-amber-900">
-            GoDesi wrote this entry from public record — no photograph, contact
-            number or text has been copied from anywhere. If this is you, claim
-            it and the page becomes yours to correct, complete and add your
-            photo, video and links to.
+            GoDesi wrote this entry from public record — no text was copied and
+            no contact number is published. Any picture here is freely licensed
+            and credited under it. If this is you, claim it and the page becomes
+            yours to correct, complete and add your own photo, video and links
+            to.
           </p>
           {entry.sourceUrl ? (
             <p className="mt-2 text-xs text-amber-800">
