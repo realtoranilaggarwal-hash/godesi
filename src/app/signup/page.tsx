@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SignupForm } from "@/components/forms/SignupForm";
 import { Card } from "@/components/ui";
-import { JoinBenefits } from "@/components/JoinBenefits";
+import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 import { FoundingOffer } from "@/components/FoundingOffer";
 
@@ -29,7 +29,9 @@ export default async function SignupPage({
   }
 
   return (
-    <div className="flex justify-center gap-8 py-6">
+    <div className="flex justify-center gap-6 py-6">
+      <JoinPerks />
+
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
         <FoundingOffer showCta={false} />
@@ -59,7 +61,7 @@ export default async function SignupPage({
         </p>
       </div>
 
-      <JoinBenefits />
+      <JoinRail />
     </div>
   );
 }

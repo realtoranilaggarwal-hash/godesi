@@ -57,20 +57,26 @@ export function HelpClip({
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-black">
         <div className="relative aspect-[9/16]">
           <iframe
-            src={`${embedUrl}?autoplay=1&rel=0`}
+            src={`${embedUrl}?autoplay=1&mute=0&rel=0&playsinline=1`}
             title={clip.title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 h-full w-full"
           />
         </div>
-        <button
-          type="button"
-          onClick={() => setPlaying(false)}
-          className="w-full bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
-        >
-          Close video
-        </button>
+        <div className="flex items-center justify-between bg-slate-900 px-3 py-2 text-xs font-semibold text-white">
+          <button type="button" onClick={() => setPlaying(false)}>
+            Close video
+          </button>
+          <a
+            href={clip.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-slate-300 hover:text-white"
+          >
+            No sound? Watch on YouTube
+          </a>
+        </div>
       </div>
     );
   }

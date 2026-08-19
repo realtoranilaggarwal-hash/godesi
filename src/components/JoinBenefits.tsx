@@ -34,10 +34,13 @@ const PERKS = [
   },
 ];
 
-/** Fills the empty column on signup/login: why to join, then sellable ad space. */
-export function JoinBenefits() {
+/**
+ * The "why join" rail. It sits on one side of the sign-in form with the
+ * community and ad rail on the other, so neither column runs very long.
+ */
+export function JoinPerks() {
   return (
-    <div className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+    <div className="hidden w-[280px] shrink-0 space-y-4 xl:block">
       <section className="rounded-2xl border border-slate-200 bg-white p-4">
         <h2 className="text-sm font-black text-slate-900">Why join Godesi?</h2>
         <p className="mt-1 text-xs text-slate-500">
@@ -65,7 +68,14 @@ export function JoinBenefits() {
           Compare free and paid plans →
         </Link>
       </section>
+    </div>
+  );
+}
 
+/** The community and sponsored rail, kept on the other side of the form. */
+export function JoinRail() {
+  return (
+    <div className="hidden shrink-0 lg:block">
       <SidebarBanners />
     </div>
   );
