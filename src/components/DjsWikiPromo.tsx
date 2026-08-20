@@ -80,8 +80,8 @@ export function DjsWikiBanner() {
             </a>
           </div>
           <p className="mt-2 text-xs text-slate-500">
-            Only what you publish on your Godesi card is shown — your phone
-            number stays hidden unless you choose to show it.
+            Only what you publish on your Godesi card is shown — the phone field
+            is optional, so leave it out and no number appears.
           </p>
         </div>
         <div className="bg-slate-900">
