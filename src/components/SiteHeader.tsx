@@ -124,6 +124,7 @@ export async function SiteHeader() {
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
     { href: "/resources", label: "Resources", icon: "🔗" },
+    { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
     { href: "/rewards", label: "Refer & earn", icon: "🎁" },

@@ -8,6 +8,7 @@ import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
+import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
@@ -174,6 +175,8 @@ export default async function HomePage() {
           <MemberBubbles members={members} total={memberCount} />
         </div>
       </section>
+
+      <GodesiWikiBanner />
 
       <FeaturedStrip />
 

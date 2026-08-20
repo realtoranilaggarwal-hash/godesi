@@ -56,6 +56,14 @@ const PROMOS = [
     tone: "from-amber-600 to-orange-600",
   },
   {
+    emoji: "🌐",
+    title: "Free GoDesi.wiki membership",
+    text: "List free and you are published on GoDesi.wiki too, with free SEO.",
+    cta: "See what you get",
+    href: "/marketing",
+    tone: "from-amber-600 to-slate-800",
+  },
+  {
     emoji: "🎧",
     title: "DJs — free DJs.wiki listing",
     text: "List in the DJ section and you are published on DJs.wiki too.",
