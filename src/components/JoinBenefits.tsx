@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SidebarBanners } from "@/components/Banners";
+import { isPhoneRequest } from "@/lib/device";
 
 const PERKS = [
   {
@@ -39,6 +40,8 @@ const PERKS = [
  * community and ad rail on the other, so neither column runs very long.
  */
 export function JoinPerks() {
+  if (isPhoneRequest()) return null;
+
   return (
     <div className="hidden w-[280px] shrink-0 space-y-4 xl:block">
       <section className="rounded-2xl border border-slate-200 bg-white p-4">

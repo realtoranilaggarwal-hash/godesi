@@ -15,6 +15,8 @@ import { ActivityWall } from "@/components/ActivityWall";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { ChatPanel } from "@/components/ChatPanel";
 import { HelpClipCard } from "@/components/HelpClipCard";
+import { CategoryNav } from "@/components/CategoryNav";
+import { isPhoneRequest } from "@/lib/device";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { HousePromo } from "@/components/HousePromo";
@@ -157,6 +159,10 @@ export async function SidebarBanners({
   categorySlug?: string | null;
   parentSlug?: string | null;
 } = {}) {
+  // The rail is hidden below lg, and rendering it for a phone anyway shipped a
+  // live map, a chat poll, banner impressions and ad units nobody could see.
+  if (isPhoneRequest()) return null;
+
   const [rectangles, halfPages, skyscrapers, rectanglesSold] =
     await Promise.all([
       activeBanners("SIDEBAR", 2),
@@ -170,6 +176,8 @@ export async function SidebarBanners({
       className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
       aria-label="Sponsored"
     >
+      <CategoryNav />
+
       <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
 
       <LiveVisitorMap compact />

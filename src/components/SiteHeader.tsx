@@ -7,7 +7,7 @@ import { effectivePlan } from "@/lib/plans";
 import { getCategoryTree } from "@/lib/directory";
 import { optionalRead } from "@/lib/resilient";
 import { unreadCount } from "@/lib/notifications";
-import { gradientFor } from "@/lib/categories";
+import { gradientFor, softFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { HeaderShell } from "@/components/HeaderShell";
 import { MobileMenu } from "@/components/MobileMenu";
@@ -108,6 +108,16 @@ export async function SiteHeader() {
         "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
     },
   ];
+  const pickerGroups = categories.map((category) => ({
+    slug: category.slug,
+    name: category.name,
+    icon: category.icon,
+    className: softFor(category.color),
+    children: category.children.map((child) => ({
+      slug: child.slug,
+      name: child.name,
+    })),
+  }));
   const menuLinks = [
     ...NAV,
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
@@ -217,6 +227,7 @@ export async function SiteHeader() {
               <MobileMenu
                 links={menuLinks}
                 categories={categoryItems}
+                groups={pickerGroups}
                 account={
                   user
                     ? {
