@@ -15,6 +15,8 @@ import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
 import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
+import { CategoryPicker } from "@/components/CategoryPicker";
+import { categoryPickerGroups } from "@/components/CategoryNav";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +107,7 @@ export default async function HomePage() {
       },
     }),
   ]);
+  const pickerGroups = await categoryPickerGroups();
 
   return (
     <div className="space-y-8">
@@ -242,6 +245,13 @@ export default async function HomePage() {
               />
             </div>
           </details>
+          <div className="mt-3 max-w-md">
+            <CategoryPicker
+              groups={pickerGroups}
+              quickCount={0}
+              label="Pick a service from the full list"
+            />
+          </div>
         </section>
 
         <section>

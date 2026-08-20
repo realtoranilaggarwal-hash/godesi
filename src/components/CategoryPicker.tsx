@@ -21,11 +21,13 @@ export type PickerGroup = {
 export function CategoryPicker({
   groups,
   quickCount = 8,
+  label = "All categories",
   onNavigate,
 }: {
   groups: PickerGroup[];
   /** How many categories to show as short links before the tree opens. */
   quickCount?: number;
+  label?: string;
   onNavigate?: () => void;
 }) {
   const [openTree, setOpenTree] = useState(false);
@@ -35,7 +37,7 @@ export function CategoryPicker({
 
   return (
     <div>
-      <ul className="flex flex-wrap gap-1.5">
+      <ul className="flex flex-wrap gap-1.5 empty:hidden">
         {groups.slice(0, quickCount).map((group) => (
           <li key={group.slug}>
             <Link
@@ -56,7 +58,7 @@ export function CategoryPicker({
         aria-expanded={openTree}
         className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
       >
-        All categories
+        {label}
         <span aria-hidden>{openTree ? "▴" : "▾"}</span>
       </button>
 
