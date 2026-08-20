@@ -16,6 +16,7 @@ import { TelegramJoin } from "@/components/TelegramJoin";
 import { ChatPanel } from "@/components/ChatPanel";
 import { HelpClipCard } from "@/components/HelpClipCard";
 import { CategoryNav } from "@/components/CategoryNav";
+import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { isPhoneRequest } from "@/lib/device";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
@@ -179,6 +180,8 @@ export async function SidebarBanners({
       <CategoryNav />
 
       <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
+
+      <DjsWikiCard />
 
       <LiveVisitorMap compact />
 

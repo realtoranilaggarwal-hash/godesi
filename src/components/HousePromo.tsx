@@ -56,6 +56,14 @@ const PROMOS = [
     tone: "from-amber-600 to-orange-600",
   },
   {
+    emoji: "🎧",
+    title: "DJs — free DJs.wiki listing",
+    text: "List in the DJ section and you are published on DJs.wiki too.",
+    cta: "List free for a year",
+    href: "/categories/events-wedding-dj-and-sound",
+    tone: "from-fuchsia-700 to-purple-800",
+  },
+  {
     emoji: "🎁",
     title: "Earn while you refer",
     text: "Points for every friend who lists, redeemable for coupons.",

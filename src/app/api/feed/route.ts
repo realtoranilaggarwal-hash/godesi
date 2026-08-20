@@ -316,14 +316,27 @@ export async function GET(request: Request) {
       ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
       ...(category ? { categorySlug: { in: category.split(",") } } : {}),
       ...(subcategory
-        ? { subcategorySlug: { in: subcategory.split(",") } }
+        ? {
+            OR: [
+              { subcategorySlug: { in: subcategory.split(",") } },
+              { extraCategorySlugs: { hasSome: subcategory.split(",") } },
+            ],
+          }
         : {}),
       ...(query
         ? {
-            OR: [
-              { name: { contains: query, mode: "insensitive" as const } },
+            AND: [
               {
-                description: { contains: query, mode: "insensitive" as const },
+                OR: [
+                  { name: { contains: query, mode: "insensitive" as const } },
+                  {
+                    description: {
+                      contains: query,
+                      mode: "insensitive" as const,
+                    },
+                  },
+                  { specialties: { has: query } },
+                ],
               },
             ],
           }
@@ -341,6 +354,10 @@ export async function GET(request: Request) {
       country: true,
       categorySlug: true,
       subcategorySlug: true,
+      specialties: true,
+      serviceOptions: true,
+      yearsExperience: true,
+      verifiedProvider: true,
       ownerId: true,
       featured: true,
     },
@@ -359,6 +376,9 @@ export async function GET(request: Request) {
         country: item.country,
         categorySlug: item.categorySlug,
         subcategory: item.subcategorySlug,
+        services: [...item.specialties, ...item.serviceOptions].slice(0, 8),
+        yearsExperience: item.yearsExperience,
+        verified: item.verifiedProvider,
         claimed: Boolean(item.ownerId),
         featured: item.featured,
         url: `${base}/b/${item.slug}`,

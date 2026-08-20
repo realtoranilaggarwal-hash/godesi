@@ -7,6 +7,7 @@ import { CategoryTiles } from "@/components/CategoryTiles";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
+import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
@@ -175,6 +176,8 @@ export default async function HomePage() {
       </section>
 
       <FeaturedStrip />
+
+      <DjsWikiCard />
 
       <div className="space-y-8">
         <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">

@@ -15,6 +15,7 @@ import {
 import { VendorCard } from "@/components/VendorCard";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
@@ -168,6 +169,8 @@ export default async function WeddingPage({
             </div>
           </section>
         ) : null}
+
+        <DjsWikiCard />
 
         {/* One tile per service with its own live count, the way a shopper
             expects to pick a trade — not a wall of small chips. */}

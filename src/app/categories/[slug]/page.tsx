@@ -10,6 +10,7 @@ import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { DJ_CATEGORY_SLUGS, DjsWikiBanner } from "@/components/DjsWikiPromo";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
@@ -265,6 +266,8 @@ export default async function CategoryPage({
             ) : null}
           </div>
         </section>
+
+        {DJ_CATEGORY_SLUGS.includes(category.slug) ? <DjsWikiBanner /> : null}
 
         <FeaturedStrip
           categorySlugs={scope}
