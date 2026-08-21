@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, LinkButton } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
+import { ShareButtons } from "@/components/ShareButtons";
+import { CopyButton } from "@/components/CopyButton";
+import { siteUrl } from "@/lib/format";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { platformFeePercent } from "@/lib/connect";
 import { PLANS } from "@/lib/plans";
@@ -173,6 +176,11 @@ const MEDIA = [
 export default function EventFeesPage() {
   const hero = AD_PLACEMENTS.HERO;
   const leaderboard = AD_PLACEMENTS.LEADERBOARD;
+  const pageUrl = `${siteUrl()}/events/how-it-works`;
+  const embedSnippet = `<iframe src="${siteUrl()}/events/your-event/embed"
+  width="320" height="260" loading="lazy"
+  style="border:0;max-width:100%"
+  title="Tickets on Godesi"></iframe>`;
 
   return (
     <div className="flex gap-6">
@@ -202,6 +210,22 @@ export default function EventFeesPage() {
             </Link>
           </div>
         </section>
+
+        <Card>
+          <h2 className="text-lg font-bold">
+            Know someone hosting an event? Send them this page 📨
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            A temple committee, a garba organiser, a college association, a
+            promoter bringing an artist over — one tap and they have everything
+            on this page. Listing is free for them too.
+          </p>
+          <ShareButtons
+            url={pageUrl}
+            title="Post your event free on Godesi — tickets, categories, venue, photos and video"
+            className="mt-3"
+          />
+        </Card>
 
         <Card>
           <h2 className="text-lg font-bold">What it costs</h2>
@@ -431,6 +455,79 @@ export default function EventFeesPage() {
 
         <Card>
           <h2 className="text-lg font-bold">
+            Attendees put it in their calendar — so they turn up
+          </h2>
+          <p className="mt-2 text-sm text-slate-700">
+            Half the people who mean to come forget on the day. Every Godesi
+            event page carries an <strong>Add to calendar</strong> row — Google
+            Calendar, Outlook.com, and an .ics file for Apple Calendar and
+            Outlook desktop — so one tap puts your event in the phone that wakes
+            them up. Their own calendar then sends the reminder the night before
+            and an hour ahead; nothing for you to chase.
+          </p>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-700">
+            <li>
+              The saved entry carries the title, the start and end time in the
+              right time zone, and the venue address — so their phone can even
+              tell them when to leave.
+            </li>
+            <li>
+              Ticket buyers also get the QR ticket by email, which keeps the
+              event and the directions in their inbox.
+            </li>
+            <li>
+              Recurring classes, weekly satsangs and monthly meetups keep their
+              calendar link too, so regulars re-add the next date in one tap.
+            </li>
+          </ul>
+        </Card>
+
+        <Card>
+          <h2 className="text-lg font-bold">
+            Put your event on your own website — we give you the code
+          </h2>
+          <p className="mt-2 text-sm text-slate-700">
+            Every event page has a <strong>&ldquo;Put this on your
+            website&rdquo;</strong> box with a ready-made snippet. Paste it into
+            your own site, your WordPress page, your temple&apos;s site or your
+            society newsletter page and visitors see the poster, the date, the
+            venue and a live seat count — and book without leaving your page.
+            Light and dark versions, and a copy button so you never type it.
+          </p>
+          <div className="mt-3 rounded-2xl bg-slate-900 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/60">
+                What the snippet looks like
+              </p>
+              <CopyButton value={embedSnippet} label="Copy" />
+            </div>
+            <pre className="mt-2 overflow-x-auto text-xs leading-relaxed text-emerald-200">
+              <code>{embedSnippet}</code>
+            </pre>
+            <p className="mt-2 text-xs text-white/60">
+              Your event page hands you this with your own event&apos;s link
+              filled in.
+            </p>
+          </div>
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-700">
+            <li>
+              It costs nothing and there is no limit — put it on as many pages
+              as you like, and on a friend&apos;s or a sponsor&apos;s site too.
+            </li>
+            <li>
+              Update the date, price or venue on Godesi once and every embed
+              updates itself — no re-editing your website.
+            </li>
+            <li>
+              Prefer a link? Every event also has share buttons for WhatsApp,
+              Facebook and X, an RSS feed of your city&apos;s events, and a QR
+              code you can print on a poster.
+            </li>
+          </ul>
+        </Card>
+
+        <Card>
+          <h2 className="text-lg font-bold">
             Where your event gets published
           </h2>
           <div className="mt-3 space-y-3">
@@ -605,6 +702,16 @@ export default function EventFeesPage() {
             >
               Ask us anything
             </Link>
+          </div>
+          <div className="mt-5 border-t border-white/15 pt-4">
+            <p className="text-sm font-semibold text-white/80">
+              Pass it on to a friend who is hosting something 👇
+            </p>
+            <ShareButtons
+              url={pageUrl}
+              title="Post your event free on Godesi — tickets, categories, venue, photos and video"
+              className="mt-3"
+            />
           </div>
         </section>
       </div>
