@@ -12,7 +12,10 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
-  const limit = Math.min(Number(params.get("limit") ?? 48) || 48, 200);
+  const limit = Math.min(
+    Math.max(Number(params.get("limit") ?? 48) || 48, 1),
+    200,
+  );
   const skip = Math.max(Number(params.get("offset") ?? 0) || 0, 0);
   const city = params.get("city")?.trim() || undefined;
   const state = params.get("state")?.trim() || undefined;
