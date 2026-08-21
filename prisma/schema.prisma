@@ -301,6 +301,7 @@ model User {
   elitePrompt  String?
   eliteEntries EliteEntry[]
   eliteClaims  EliteClaim[]
+  eventClaims  EventClaim[]
   eliteOrders  EliteOrder[]
 
   liveChannels       LiveChannel[]
@@ -993,6 +994,12 @@ model Event {
   /// Every category the event should appear under, including the primary one.
   categorySlugs String[]  @default([])
 
+  /// Kept when an imported event is claimed, so the original listing is still
+  /// credited after the organiser takes the page over.
+  importedFrom String?
+  /// When the real organiser took over an imported event.
+  claimedAt    DateTime?
+
   /// Set when the event was imported from a public calendar rather than posted.
   sourceId  String?
   source    EventSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
@@ -1001,6 +1008,7 @@ model Event {
 
   speakers EventSpeaker[]
   sessions EventSession[]
+  claims   EventClaim[]
   tickets  Ticket[]
   /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
   tiers    TicketTier[]
@@ -1396,6 +1404,26 @@ model BusinessClaim {
   createdAt  DateTime    @default(now())
 
   @@unique([businessId, userId])
+  @@index([status])
+}
+
+/// An organiser asks for an event we listed from a public calendar, so they can
+/// run their own ticketing on Godesi instead of the site we found it on.
+model EventClaim {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// How the claimant runs the event.
+  message String
+  phone   String?
+  email   String?
+
+  status    ClaimStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  @@unique([eventId, userId])
   @@index([status])
 }
 

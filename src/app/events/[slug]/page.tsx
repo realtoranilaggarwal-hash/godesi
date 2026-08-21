@@ -13,6 +13,7 @@ import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
+import { EventClaimPitch } from "@/components/EventClaimPitch";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { eventTheme } from "@/lib/eventTheme";
@@ -30,6 +31,7 @@ import {
 } from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
+import { platformFeePercent } from "@/lib/connect";
 
 export const dynamic = "force-dynamic";
 
@@ -460,16 +462,54 @@ export default async function EventPage({
         </div>
 
         <Card>
-          <h2 className="font-bold">Put this event on your own website</h2>
-          <p className="mb-3 mt-1 text-sm text-slate-600">
-            Copy this code into your site and the card below appears there,
-            always up to date. Visitors tap it and book here — free, no account
-            needed on their side.
-          </p>
-          <EventEmbed
-            eventUrl={`${siteUrl()}/events/${event.slug}`}
-            title={event.title}
-          />
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+            <div className="min-w-0">
+              <h2 className="font-bold">Put this event on your own website</h2>
+              <p className="mb-3 mt-1 text-sm text-slate-600">
+                Copy this code into your site and the card below appears there,
+                always up to date. Visitors tap it and book here — free, no
+                account needed on their side.
+              </p>
+              <EventEmbed
+                eventUrl={`${siteUrl()}/events/${event.slug}`}
+                title={event.title}
+              />
+            </div>
+
+            {imported ? (
+              <EventClaimPitch
+                anchorId="claim-event"
+                eventId={event.id}
+                slug={event.slug}
+                signedIn={Boolean(user)}
+                sourceName={event.source?.name}
+              />
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                <p className="text-xs font-black uppercase tracking-wide text-slate-500">
+                  Organisers
+                </p>
+                <h3 className="mt-1 text-base font-black text-slate-900">
+                  Running your own event?
+                </h3>
+                <p className="mt-2">
+                  Listing is free and unlimited. We keep{" "}
+                  {platformFeePercent()}% of tickets you sell on the free plan
+                  and nothing on a paid plan, and free-entry events never cost
+                  anything.
+                </p>
+                <div className="mt-3 flex flex-col gap-2">
+                  <LinkButton href="/events/new">Post your event free</LinkButton>
+                  <Link
+                    href="/events/how-it-works"
+                    className="text-sm font-bold text-indigo-600 hover:underline"
+                  >
+                    Fees, tickets and where you get listed →
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
         </Card>
 
         {user?.id === event.organizerId && event.partnerStatus !== "NONE" ? (
@@ -579,6 +619,11 @@ export default async function EventPage({
           ) : (
             <PostedBy user={event.organizer} className="mt-1" />
           )}
+          {event.claimedAt && event.importedFrom ? (
+            <p className="mt-2 text-xs text-slate-500">
+              Claimed by the organiser. First listed from {event.importedFrom}.
+            </p>
+          ) : null}
         </Card>
 
         {imported ? (
@@ -596,6 +641,22 @@ export default async function EventPage({
                 </LinkButton>
               </div>
             ) : null}
+            <p className="mt-3 text-sm text-emerald-800">
+              <span className="font-bold">Is this your event?</span> Claim it
+              free and sell these seats here instead — {platformFeePercent()}% on
+              the free plan, nothing on a paid one.{" "}
+              <a href="#claim-event" className="font-bold underline">
+                Claim it below
+              </a>{" "}
+              or read{" "}
+              <Link
+                href="/events/how-it-works"
+                className="font-bold underline"
+              >
+                how events work on Godesi
+              </Link>
+              .
+            </p>
           </Card>
         ) : (
         <Card>
