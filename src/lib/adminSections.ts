@@ -2,6 +2,7 @@
 export const ADMIN_SECTIONS = [
   { href: "/admin", label: "Overview", icon: "📊" },
   { href: "/admin/listings", label: "Listings", icon: "🏪" },
+  { href: "/admin/properties", label: "Property", icon: "🏢" },
   { href: "/admin/claims", label: "Claims", icon: "✋" },
   { href: "/admin/events", label: "Events", icon: "🎟️" },
   { href: "/admin/banners", label: "Banners", icon: "🖼️" },
