@@ -13,6 +13,7 @@ import {
 import { ChatPanel } from "@/components/ChatPanel";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
+import { platformFeePercent } from "@/lib/connect";
 import {
   EVENT_FEATURE_FILTERS,
   EVENT_MODES,
@@ -263,13 +264,37 @@ export default async function EventsPage({
           />
         )}
 
-        <p className="text-sm text-slate-500">
-          Organising something?{" "}
-          <Link href="/events/new" className="font-semibold text-indigo-600">
-            Publish your event
-          </Link>{" "}
-          and sell tickets with QR check-in.
-        </p>
+        <Card className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-black">
+              Organising something? Post it once. 🎟️
+            </h2>
+            <p className="text-sm text-slate-600">
+              Listing is free and unlimited, tickets are{" "}
+              {platformFeePercent()}% on the
+              free plan and nothing on a paid one — and the same post publishes
+              itself on Eventringer.com, your city page and your category page.
+            </p>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/how-events-work-on-godesi.webp"
+            alt="How events work on Godesi: create the event, get listed, sell tickets, reach more people, grow — with the listing plans, ticketing fees and where your event gets published"
+            width={1024}
+            height={1536}
+            loading="lazy"
+            className="w-full rounded-2xl border border-slate-200"
+          />
+          <div className="flex flex-wrap gap-2">
+            <LinkButton href="/events/new">Post your event free</LinkButton>
+            <Link
+              href="/events/how-it-works"
+              className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Fees & how it works
+            </Link>
+          </div>
+        </Card>
         <ChatPanel />
         <InlineBanner />
       </div>
