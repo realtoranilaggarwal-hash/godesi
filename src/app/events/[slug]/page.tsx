@@ -482,7 +482,6 @@ export default async function EventPage({
                 eventId={event.id}
                 slug={event.slug}
                 signedIn={Boolean(user)}
-                sourceName={event.source?.name}
               />
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">

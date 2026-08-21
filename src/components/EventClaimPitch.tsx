@@ -11,13 +11,11 @@ export function EventClaimPitch({
   eventId,
   slug,
   signedIn,
-  sourceName,
   anchorId,
 }: {
   eventId: string;
   slug: string;
   signedIn: boolean;
-  sourceName?: string | null;
   anchorId?: string;
 }) {
   const fee = platformFeePercent();
@@ -34,10 +32,9 @@ export function EventClaimPitch({
         Is this your event? Claim it free and keep more of your ticket money
       </h3>
       <p className="mt-2 text-sm text-emerald-900">
-        We listed this from a public listing, so people who want tickets are sent
-        {sourceName ? ` back to ${sourceName}` : " back to the other site"} — and
-        that site takes its cut. Claim the page and you can sell the same seats
-        here instead.
+        We listed this from a public calendar, so anyone wanting tickets goes
+        back to the site we found it on — and that site takes its cut. Claim the
+        page and you can sell the same seats here instead.
       </p>
 
       <ul className="mt-3 space-y-1.5 text-sm text-emerald-900">
