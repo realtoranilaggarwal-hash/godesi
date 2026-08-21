@@ -31,6 +31,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/news", label: "News" },
         { href: "/city", label: "Browse by city" },
         { href: "/trending", label: "Trending hashtags" },
+        { href: "/wall", label: "Desi news wall" },
         { href: "/desi-elite", label: "GoDesi Elite — recognised leaders" },
         { href: "/leaderboard", label: "Top contributors leaderboard" },
         { href: "/live-radio", label: "Live desi radio" },

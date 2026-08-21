@@ -55,6 +55,7 @@ const HERO_ACTIONS: { href: string; label: string }[] = [
   { href: "/alumni", label: "🎓 Find batchmates" },
   { href: "/website", label: "🌐 Get a website" },
   { href: "/trending", label: "#️⃣ Trending hashtags" },
+  { href: "/wall", label: "🧱 Desi news wall" },
 ];
 
 export default async function HomePage() {
