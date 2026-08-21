@@ -111,7 +111,7 @@ const REASONS = [
   },
   {
     title: "One post, several sites",
-    body: "The same event shows on Godesi, on GoDesi.wiki, and festival events on Diwali.cc — with our dedicated events site EventRinger.com next. You never re-type it.",
+    body: "The same event shows on Godesi, on our dedicated events site EventRinger.com, on GoDesi.wiki, and festival events on Diwali.cc. You never re-type it.",
   },
   {
     title: "Real ticketing, not a form",
@@ -149,8 +149,8 @@ const NETWORK = [
   },
   {
     site: "EventRinger.com",
-    status: "Launching",
-    body: "Our dedicated desi events site. It runs on the same feed as the sites above, so when it goes live your existing Godesi events appear there with nothing for you to do.",
+    status: "Live",
+    body: "Our dedicated desi events site — melas, garba nights, concerts, pujas, workshops, expos and job fairs, in shelves by kind. It runs on the same feed, so your Godesi event appears there by itself and links back for booking.",
   },
 ];
 
