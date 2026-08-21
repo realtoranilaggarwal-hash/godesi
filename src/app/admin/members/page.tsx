@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { deleteMembersAction } from "@/app/actions/members";
+import { makeModeratorAction } from "@/app/actions/team";
 import { formatMinor } from "@/lib/format";
 import { looksLikeSpam, spamSignals } from "@/lib/signupGuard";
 import { Badge, Card, inputClass } from "@/components/ui";
@@ -238,7 +239,22 @@ export default async function Page({
                         <td className="whitespace-nowrap text-xs text-slate-500">
                           {row.createdAt.toLocaleDateString("en-IN")}
                         </td>
-                        <td className="text-xs">{row.role}</td>
+                        <td className="text-xs">
+                          {row.role}
+                          {row.role === "CLIENT" || row.role === "BUSINESS" ? (
+                            <div className="mt-1">
+                              <button
+                                type="submit"
+                                formAction={makeModeratorAction}
+                                name="id"
+                                value={row.id}
+                                className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                              >
+                                make moderator
+                              </button>
+                            </div>
+                          ) : null}
+                        </td>
                         <td>
                           <Badge tone={row.plan === "FREE" ? "slate" : "indigo"}>
                             {row.plan}
