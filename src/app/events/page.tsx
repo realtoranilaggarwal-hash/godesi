@@ -409,6 +409,12 @@ export default async function EventsPage({
             <Link href="/venues" className="underline hover:text-white">
               Browse venues →
             </Link>
+            <Link
+              href="/events/how-it-works"
+              className="underline hover:text-white"
+            >
+              Fees &amp; how posting works →
+            </Link>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">

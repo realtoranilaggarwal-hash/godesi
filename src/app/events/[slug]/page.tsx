@@ -118,9 +118,73 @@ export default async function EventPage({
     },
   });
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description.slice(0, 500),
+    startDate: event.startsAt.toISOString(),
+    endDate: event.endsAt?.toISOString(),
+    eventAttendanceMode:
+      event.mode === "ONLINE"
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : event.mode === "HYBRID"
+          ? "https://schema.org/MixedEventAttendanceMode"
+          : "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    url: `${siteUrl()}/events/${event.slug}`,
+    image: event.imageUrl ?? undefined,
+    ...(event.mode === "ONLINE"
+      ? {
+          location: {
+            "@type": "VirtualLocation",
+            url: event.onlineUrl ?? `${siteUrl()}/events/${event.slug}`,
+          },
+        }
+      : {
+          location: {
+            "@type": "Place",
+            name: [event.venue, event.hallName].filter(Boolean).join(" — "),
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: event.address ?? undefined,
+              addressLocality: event.city,
+              addressRegion: event.state ?? undefined,
+              addressCountry: event.country ?? undefined,
+            },
+          },
+        }),
+    organizer: {
+      "@type": "Organization",
+      name: event.business?.name ?? event.organizer?.name ?? "Godesi",
+      url: event.business
+        ? `${siteUrl()}/b/${event.business.slug}`
+        : siteUrl(),
+    },
+    // Imported events are ticketed elsewhere, so no offer is claimed for them.
+    ...(imported
+      ? {}
+      : {
+          offers: {
+            "@type": "Offer",
+            price: event.price,
+            priceCurrency: event.currency,
+            availability:
+              left > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/SoldOut",
+            url: `${siteUrl()}/events/${event.slug}`,
+          },
+        }),
+  };
+
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-6">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {searchParams.error === "cancelled" ? (
           <Alert>Payment cancelled — your seats were not booked.</Alert>
         ) : null}

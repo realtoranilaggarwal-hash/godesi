@@ -50,6 +50,12 @@ export default async function EventPartnerPage() {
             <LinkButton href="/events/new" variant="secondary">
               Post your event
             </LinkButton>
+            <Link
+              href="/events/how-it-works"
+              className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+            >
+              Fees &amp; how it works
+            </Link>
           </div>
         </section>
 
