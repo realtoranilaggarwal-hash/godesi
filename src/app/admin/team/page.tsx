@@ -76,6 +76,18 @@ export default async function Page({
           it with the tick boxes below. They must have signed up on Godesi
           first, and they never see members, payments, ads or reward points.
         </p>
+        <p className="mb-3 text-sm text-slate-500">
+          Then send her the{" "}
+          <Link
+            href="/admin/handbook"
+            className="font-semibold text-indigo-600"
+          >
+            staff handbook
+          </Link>{" "}
+          — one written procedure per beat (events, DJs, astrologers, IT
+          companies, Elite) with the pitch, the messages to send and what she
+          must collect before a page goes live.
+        </p>
 
         <form method="get" className="flex flex-wrap gap-2">
           <input

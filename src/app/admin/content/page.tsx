@@ -76,7 +76,15 @@ export default async function ContentDeskPage() {
         <h1 className="text-2xl font-black">Content desk</h1>
         <p className="text-sm text-slate-600">
           Add and moderate events, listings, news and blog posts. Member
-          details, payments and reward points stay with admins.
+          details, payments and reward points stay with admins. New here? Read
+          your section in the{" "}
+          <Link
+            href="/admin/handbook"
+            className="font-semibold text-indigo-600"
+          >
+            staff handbook
+          </Link>{" "}
+          first.
         </p>
       </div>
 
