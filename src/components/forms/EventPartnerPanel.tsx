@@ -18,7 +18,15 @@ export function EventPartnerPanel() {
       </legend>
       <p className="text-sm text-amber-900">
         Do you want Godesi to help sell and promote your tickets — free promotion to
-        the local desi audience in return for a little branding at your venue?
+        the local desi audience in return for a little branding at your venue?{" "}
+        <a
+          href="/events/partner"
+          target="_blank"
+          rel="noreferrer"
+          className="font-bold underline"
+        >
+          What you get
+        </a>
       </p>
 
       <div className="flex flex-wrap gap-2">

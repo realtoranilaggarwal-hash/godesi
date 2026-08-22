@@ -9,6 +9,7 @@ import { LeadForm } from "@/components/forms/LeadForm";
 import type { RequirementOptionSet } from "@/components/forms/RequirementOptions";
 import { specialtySet } from "@/lib/specialties";
 import { Card } from "@/components/ui";
+import { displayCurrency } from "@/lib/displayCurrency";
 import { PostingSidebar } from "@/components/PostingSidebar";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ export default async function NewLeadPage({
             groups={groups.filter((group) => group.items.length)}
             optionSets={optionSets}
             defaultOptionSlug={category?.slug}
+            currency={displayCurrency()}
           />
         </Card>
       </div>

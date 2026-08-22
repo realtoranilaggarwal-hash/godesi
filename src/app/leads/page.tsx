@@ -12,7 +12,7 @@ import {
   LinkButton,
   inputClass,
 } from "@/components/ui";
-import { formatInr } from "@/lib/format";
+import { budgetRange } from "@/lib/budget";
 import { PostedBy } from "@/components/PostedBy";
 import {
   InContentBanner,
@@ -28,13 +28,6 @@ export const metadata: Metadata = {
   description:
     "Live buyer requirements from desi customers: quotes for home services, catering, weddings, travel and trade. Premium members unlock contact details instantly.",
 };
-
-function budgetLabel(min: number | null, max: number | null) {
-  if (min === null && max === null) return "Budget not specified";
-  if (min !== null && max !== null)
-    return `${formatInr(min)} – ${formatInr(max)}`;
-  return formatInr((min ?? max) as number);
-}
 
 export default async function LeadsPage({
   searchParams,
@@ -147,7 +140,12 @@ export default async function LeadsPage({
                     <Badge tone="slate">{lead.category}</Badge>
                   </div>
                   <p className="text-sm text-slate-500">
-                    {lead.city} · {budgetLabel(lead.budgetMin, lead.budgetMax)}
+                    {lead.city} ·{" "}
+                    {budgetRange(
+                      lead.budgetMin,
+                      lead.budgetMax,
+                      lead.budgetCurrency,
+                    )}
                   </p>
                   <p className="line-clamp-3 text-sm text-slate-700">
                     {lead.description}

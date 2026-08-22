@@ -53,7 +53,7 @@ async function readAlbum(url: string): Promise<AlbumPreview> {
   const images: string[] = [];
   for (const match of html.match(PHOTO) ?? []) {
     if (!images.includes(match)) images.push(match);
-    if (images.length >= 24) break;
+    if (images.length >= 36) break;
   }
 
   return {

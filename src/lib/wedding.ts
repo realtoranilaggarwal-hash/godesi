@@ -1,4 +1,5 @@
 import { CATEGORY_TREE, subcategorySlug } from "@/lib/categories";
+import { db } from "@/lib/db";
 import { searchBusinesses, type BusinessListItem } from "@/lib/businesses";
 import { planRank } from "@/lib/plans";
 
@@ -21,27 +22,37 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
     icon: "👰",
     items: [
       "Makeup Artists",
+      "Hair Stylists",
       "Mehndi Artists",
+      "Saree Draping & Pagri Tying",
       "Bridal Wear",
       "Groom Wear",
+      "Tailoring & Alterations",
       "Jewellery",
-      "Marriage Bureaus",
     ],
   },
   {
-    title: "Photography",
+    title: "Photography & video",
     icon: "📸",
     items: [
       "Photographers",
       "Videographers",
       "Pre-Wedding Shoots",
       "Drone Photography",
+      "Photo Booths",
+      "Live Streaming",
     ],
   },
   {
     title: "Catering",
     icon: "🍛",
-    items: ["Caterers", "Regional Cuisine Catering", "Dessert & Cake Vendors"],
+    items: [
+      "Caterers",
+      "Regional Cuisine Catering",
+      "Dessert & Cake Vendors",
+      "Wedding Cakes",
+      "Bartending & Bar Service",
+    ],
   },
   {
     title: "Entertainment",
@@ -52,6 +63,8 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
       "Dhol & Baraat",
       "Dance Choreographers",
       "Anchors & Artists",
+      "Fireworks & Sparklers",
+      "Cold Sparklers & Special Effects",
     ],
   },
   {
@@ -59,10 +72,13 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
     icon: "🎪",
     items: [
       "Wedding Planners",
+      "Wedding Coordinators",
       "Decorators & Florists",
       "Mandap Setup",
       "Floral Designers",
       "Tent & Lighting",
+      "Event Rentals & Supplies",
+      "Stage & Sound Rentals",
     ],
   },
   {
@@ -78,17 +94,39 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
   {
     title: "Transport",
     icon: "🚗",
-    items: ["Luxury Cars", "Baraat Horse & Carriage", "Guest Transport"],
+    items: [
+      "Luxury Cars",
+      "Baraat Horse & Carriage",
+      "Guest Transport",
+      "Valet & Guest Parking",
+      "Honeymoon & Travel",
+    ],
   },
   {
-    title: "Religious",
+    title: "Religious & rituals",
     icon: "🛕",
-    items: ["Pandits", "Gurudwara Services", "Nikah Services"],
+    items: [
+      "Pandits",
+      "Gurudwara Services",
+      "Nikah Services",
+      "Church & Interfaith Officiants",
+      "Astrologers & Horoscope Matching",
+    ],
   },
   {
     title: "Invitations & gifts",
     icon: "💌",
     items: ["Invitation Cards", "Digital Invites", "Gift Hampers"],
+  },
+  {
+    title: "Before the wedding",
+    icon: "💍",
+    items: ["Marriage Bureaus", "Matchmaking Services"],
+  },
+  {
+    title: "Practical",
+    icon: "🛡️",
+    items: ["Security Services", "Wedding Loans & Insurance"],
   },
 ];
 
@@ -146,6 +184,45 @@ export async function weddingVendors(
   return vendors.filter(
     (vendor) => vendor.startingPrice === null || vendor.startingPrice <= budget,
   );
+}
+
+/**
+ * How many vendors sit under each wedding service, so the browse grid can say
+ * "12 businesses available" the way a shopper expects — a service nobody is
+ * listed under still shows, at zero, because it is a shelf we invite vendors to.
+ */
+export async function weddingServiceCounts(): Promise<Map<string, number>> {
+  const rows = await db.business.groupBy({
+    by: ["subcategorySlug"],
+    where: {
+      status: "APPROVED",
+      subcategorySlug: { in: (weddingCategory?.children ?? []).map(weddingServiceSlug) },
+    },
+    _count: { subcategorySlug: true },
+  });
+
+  return new Map(
+    rows
+      .filter((row) => row.subcategorySlug)
+      .map((row) => [row.subcategorySlug as string, row._count.subcategorySlug]),
+  );
+}
+
+/** The towns wedding vendors are listed in, for the "vendors by city" rows. */
+export async function weddingCities(take = 40) {
+  const rows = await db.business.groupBy({
+    by: ["city", "state"],
+    where: { status: "APPROVED", categorySlug: WEDDING_SLUG },
+    _count: { city: true },
+    orderBy: { _count: { city: "desc" } },
+    take,
+  });
+
+  return rows.map((row) => ({
+    city: row.city,
+    state: row.state,
+    count: row._count.city,
+  }));
 }
 
 export async function featuredWeddingVendors(take = 8) {

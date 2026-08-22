@@ -5,10 +5,11 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { effectivePlan } from "@/lib/plans";
+import { albumPhotoLimit, effectivePlan, videoLimit } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
+import { reviewSourceLabel } from "@/lib/reviewSources";
 import { QrCard } from "@/components/QrCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoundingBadge } from "@/components/FoundingBadge";
@@ -24,6 +25,7 @@ import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { LogoTile } from "@/components/LogoTile";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { disclaimerFor, specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
@@ -154,6 +156,14 @@ export default async function BusinessProfilePage({
       ? business.description
       : maskContactDetails(business.description)
     : null;
+  /** Older cards saved a single link before the showreel field existed. */
+  const videos = (
+    business.videoUrls.length
+      ? business.videoUrls
+      : business.videoUrl
+        ? [business.videoUrl]
+        : []
+  ).slice(0, business.owner ? videoLimit(business.owner) : 1);
   const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
@@ -206,11 +216,12 @@ export default async function BusinessProfilePage({
 
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={business.logoUrl ?? "/placeholder-logo.svg"}
-            alt={`${business.name} logo`}
-            className="h-20 w-20 rounded-2xl border border-slate-200 object-cover"
+          <LogoTile
+            name={business.name}
+            icon={business.categoryRef?.icon}
+            imageUrl={business.logoUrl}
+            className="h-20 w-20"
+            emojiClassName="text-4xl"
           />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -442,9 +453,13 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
-            {business.videoUrl ? (
-              <div className="mt-3">
-                <VideoEmbed url={business.videoUrl} title={business.name} />
+            {videos.length ? (
+              <div
+                className={`mt-3 grid gap-3 ${videos.length > 1 ? "sm:grid-cols-2" : ""}`}
+              >
+                {videos.map((video) => (
+                  <VideoEmbed key={video} url={video} title={business.name} />
+                ))}
               </div>
             ) : null}
 
@@ -453,6 +468,7 @@ export default async function BusinessProfilePage({
                 <PhotoAlbumGallery
                   url={business.albumUrl}
                   heading="Photos"
+                  limit={albumPhotoLimit(business.owner)}
                 />
               </div>
             ) : null}
@@ -549,6 +565,20 @@ export default async function BusinessProfilePage({
                 OpenStreetMap contributors
               </a>{" "}
               (ODbL).
+            </p>
+          ) : null}
+          {business.sourceUrl ? (
+            <p className="text-xs text-amber-800">
+              Listed from{" "}
+              <a
+                href={business.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline"
+              >
+                a public page
+              </a>
+              . Claiming replaces these basics with your own.
             </p>
           ) : null}
           {viewer ? (
@@ -693,6 +723,11 @@ export default async function BusinessProfilePage({
                     {review.comment ? (
                       <p className="mt-1 text-sm text-slate-700">{review.comment}</p>
                     ) : null}
+                    {reviewSourceLabel(review.source) ? (
+                      <p className="mt-1 text-xs text-slate-400">
+                        {reviewSourceLabel(review.source)}
+                      </p>
+                    ) : null}
                   </div>
                 ))
               ) : (
@@ -703,11 +738,23 @@ export default async function BusinessProfilePage({
             {!isOwner ? (
               <div className="mt-5 border-t border-slate-100 pt-4">
                 <h3 className="mb-3 font-semibold">Leave a review</h3>
-                <ReviewForm
-                  businessId={business.id}
-                  defaultName={viewer?.name}
-                  detailed={isAgent}
-                />
+                {viewer ? (
+                  <ReviewForm
+                    businessId={business.id}
+                    defaultName={viewer.name}
+                    detailed={isAgent}
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-slate-600">
+                      Reviews run under a real Godesi account, so businesses are
+                      not judged by anonymous strangers.
+                    </p>
+                    <LinkButton href={`/login?next=/b/${business.slug}`}>
+                      Sign in to review
+                    </LinkButton>
+                  </div>
+                )}
               </div>
             ) : null}
           </Card>

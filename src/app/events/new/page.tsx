@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
@@ -36,7 +37,13 @@ export default async function NewEventPage({
           <h1 className="text-2xl font-bold">Post your event 🎟️</h1>
           <p className="text-sm text-slate-600">
             Free to list. Attendees book seats online and get a QR ticket you
-            can scan at the gate. Paid tickets are collected securely by Stripe.
+            can scan at the gate. Paid tickets are collected securely by Stripe.{" "}
+            <Link
+              href="/events/how-it-works"
+              className="font-semibold text-indigo-600"
+            >
+              Fees, categories, venues and where you get listed →
+            </Link>
           </p>
         </div>
         <Card>

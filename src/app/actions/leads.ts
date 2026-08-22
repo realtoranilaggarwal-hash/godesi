@@ -14,6 +14,7 @@ import {
   specialtySet,
 } from "@/lib/specialties";
 import { spendPoints, UNLOCK_LEAD_POINTS } from "@/lib/rewards";
+import { budgetCurrencyOf } from "@/lib/budget";
 
 const leadSchema = z.object({
   title: z.string().trim().min(5, "Give your requirement a clear title"),
@@ -22,6 +23,7 @@ const leadSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   budgetMin: z.coerce.number().int().min(0).optional(),
   budgetMax: z.coerce.number().int().min(0).optional(),
+  budgetCurrency: z.string().trim().optional(),
   eventDate: z.coerce.date().optional(),
   contactName: z.string().trim().min(2, "Contact name is required"),
   contactPhone: z.string().trim().min(10, "Enter a valid contact phone"),
@@ -46,6 +48,7 @@ export async function createLeadAction(
       city: formData.get("city"),
       budgetMin: formData.get("budgetMin") || undefined,
       budgetMax: formData.get("budgetMax") || undefined,
+      budgetCurrency: formData.get("budgetCurrency") || undefined,
       eventDate: formData.get("eventDate") || undefined,
       contactName: formData.get("contactName") || user.name,
       contactPhone: formData.get("contactPhone"),
@@ -85,6 +88,7 @@ export async function createLeadAction(
         categorySlug: set ? categorySlug : null,
         serviceOptions,
         city: parsed.data.city,
+        budgetCurrency: budgetCurrencyOf(parsed.data.budgetCurrency),
         budgetMin: parsed.data.budgetMin ?? null,
         budgetMax: parsed.data.budgetMax ?? null,
         eventDate: parsed.data.eventDate ?? null,

@@ -14,11 +14,16 @@ import { db } from "@/lib/db";
 import { requireRole, requirePermission } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { AD_SLOT_ORDER } from "@/lib/ads";
-import { slotCapacity } from "@/lib/banners";
+import { nextPosition } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewards";
 import { levelFor } from "@/lib/journalists";
 import { formatEventDate } from "@/lib/events";
+import {
+  cleanEventCategories,
+  cleanEventLanguages,
+} from "@/lib/eventCategories";
+import { DEFAULT_EVENT_ZONE, instantFrom, isEventZone } from "@/lib/time";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import {
   SHARE_KINDS,
@@ -204,11 +209,6 @@ export async function saveBannerAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const limit = slotCapacity(parsed.data.slot);
-    if (parsed.data.position && parsed.data.position > limit) {
-      return { error: `${parsed.data.slot} has only ${limit} slot(s).` };
-    }
-
     const {
       slot,
       position: requested,
@@ -232,25 +232,8 @@ export async function saveBannerAction(
       advertiserId = advertiser.id;
     }
 
-    let position = requested;
-    if (!position) {
-      const used = new Set(
-        (
-          await db.banner.findMany({
-            where: { slot, position: { not: null } },
-            select: { position: true },
-          })
-        ).map((row) => row.position),
-      );
-      position = Array.from({ length: limit }, (_, index) => index + 1).find(
-        (candidate) => !used.has(candidate),
-      );
-      if (!position) {
-        return {
-          error: `All ${limit} ${slot} slot(s) are taken — pick a slot number to replace one.`,
-        };
-      }
-    }
+    // A position only orders the rotation, so there is always another one free.
+    const position = requested ?? (await nextPosition(slot));
 
     const schedule = {
       impressionCap: impressionCap ?? null,
@@ -278,7 +261,9 @@ export async function saveBannerAction(
 
     revalidatePath("/admin");
     revalidatePath("/");
-    return { success: `Banner saved in ${slot} slot ${position}.` };
+    return {
+      success: `Banner saved in ${slot} position ${position} — it rotates with the others in that placement.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
@@ -336,39 +321,18 @@ export async function approveBannerAction(
     const banner = await db.banner.findUnique({ where: { id } });
     if (!banner) return { error: "Banner not found." };
 
-    const capacity = slotCapacity(banner.slot);
-    let position =
-      Number.isInteger(requested) && requested > 0 ? requested : null;
-
-    if (position && position > capacity) {
-      return { error: `${banner.slot} has only ${capacity} slot(s).` };
-    }
-
-    if (!position) {
-      const used = await db.banner.findMany({
-        where: {
-          slot: banner.slot,
-          NOT: { id: banner.id },
-          position: { not: null },
-        },
-        select: { position: true },
-      });
-      const taken = new Set(used.map((row) => row.position));
-      for (let candidate = 1; candidate <= capacity; candidate += 1) {
-        if (!taken.has(candidate)) {
-          position = candidate;
-          break;
-        }
-      }
-      if (!position) return { error: `All ${banner.slot} slots are occupied.` };
-    }
-
-    const occupant = await db.banner.findUnique({
-      where: { slot_position: { slot: banner.slot, position } },
-    });
-    if (occupant && occupant.id !== banner.id) {
-      return { error: `${banner.slot} slot ${position} is already taken.` };
-    }
+    const asked = Number.isInteger(requested) && requested > 0 ? requested : null;
+    // Positions are unbounded ordering numbers, so a placement never sells out:
+    // an asked-for number that is in use simply moves to the next free one.
+    const occupant = asked
+      ? await db.banner.findUnique({
+          where: { slot_position: { slot: banner.slot, position: asked } },
+        })
+      : null;
+    const position =
+      asked && (!occupant || occupant.id === banner.id)
+        ? asked
+        : await nextPosition(banner.slot, banner.id);
 
     await db.banner.update({
       where: { id: banner.id },
@@ -526,7 +490,7 @@ export async function setEventStatusAction(formData: FormData) {
       kind: "event",
       id: event.id,
       title: `🎟️ ${event.title}`,
-      body: `${formatEventDate(event.startsAt)} · ${event.venue}, ${event.city}`,
+      body: `${formatEventDate(event.startsAt, event.timeZone)} · ${event.venue}, ${event.city}`,
       path: `/events/${event.slug}`,
       imageUrl: event.imageUrl,
       tags: [event.city, "desievents"],
@@ -538,14 +502,78 @@ export async function setEventStatusAction(formData: FormData) {
   if (status === "APPROVED") pingIndexNowInBackground(`/events/${event.slug}`);
 }
 
+const partnerKitSchema = z.object({
+  standeePdfUrl: z.string().trim().url().optional().or(z.literal("")),
+  printerUrl: z.string().trim().url().optional().or(z.literal("")),
+  banner160Url: z.string().trim().url().optional().or(z.literal("")),
+  banner728Url: z.string().trim().url().optional().or(z.literal("")),
+  note: z.string().trim().max(400).optional(),
+});
+
+/** The standee and banner artwork organisers download from /events/partner. */
+export async function savePartnerKitAction(formData: FormData) {
+  await requirePermission("events");
+  const parsed = partnerKitSchema.parse({
+    standeePdfUrl: formData.get("standeePdfUrl") ?? "",
+    printerUrl: formData.get("printerUrl") ?? "",
+    banner160Url: formData.get("banner160Url") ?? "",
+    banner728Url: formData.get("banner728Url") ?? "",
+    note: formData.get("note") ?? "",
+  });
+  const data = {
+    standeePdfUrl: parsed.standeePdfUrl || null,
+    printerUrl: parsed.printerUrl || null,
+    banner160Url: parsed.banner160Url || null,
+    banner728Url: parsed.banner728Url || null,
+    note: parsed.note || null,
+  };
+  await db.partnerKit.upsert({
+    where: { id: "default" },
+    create: { id: "default", ...data },
+    update: data,
+  });
+  revalidatePath("/events/partner");
+  revalidatePath("/admin/events");
+}
+
+/** Pin or unpin an event from the featured strip, from the events desk. */
+export async function toggleEventFeaturedAction(formData: FormData) {
+  await requirePermission("events");
+  const id = String(formData.get("id") ?? "");
+  const featured = formData.get("featured") === "1";
+  const event = await db.event.update({
+    where: { id },
+    data: { featured },
+  });
+  revalidatePath("/admin/events");
+  revalidatePath("/events");
+  revalidatePath(`/events/${event.slug}`);
+}
+
 const adminEventSchema = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(5, "Give the event a clear title"),
   description: z.string().trim().min(20, "Describe the event (20+ characters)"),
   date: z.string().trim().min(1, "Event date is required"),
   time: z.string().trim().min(1, "Event time is required"),
+  endDate: z.string().trim().optional(),
+  endTime: z.string().trim().optional(),
   venue: z.string().trim().min(3, "Venue is required"),
+  hallName: z.string().trim().max(120).optional(),
+  hallCapacity: z.coerce
+    .number()
+    .int()
+    .min(0, "Capacity cannot be negative")
+    .optional(),
+  venueUrl: z
+    .string()
+    .trim()
+    .url("Enter a full venue URL starting with https://")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   city: z.string().trim().min(2, "City is required"),
+  frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
+  recurrence: z.string().trim().max(120).optional(),
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
   eventType: z.string().trim().max(60).optional(),
@@ -574,7 +602,15 @@ const adminEventSchema = z.object({
       (value) => !value || isSupportedVideoUrl(value),
       "Paste a YouTube or Vimeo video link",
     ),
+  albumUrl: z
+    .string()
+    .trim()
+    .url("Enter a valid Google Photos album link")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  featured: z.coerce.boolean().default(false),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
+  timeZone: z.string().trim().max(60).optional(),
 });
 
 /** Full admin edit of any event — dates, pricing, seats, artwork and status. */
@@ -590,8 +626,15 @@ export async function adminUpdateEventAction(
       description: formData.get("description"),
       date: formData.get("date"),
       time: formData.get("time"),
+      endDate: formData.get("endDate") ?? undefined,
+      endTime: formData.get("endTime") ?? undefined,
       venue: formData.get("venue"),
+      hallName: formData.get("hallName") ?? undefined,
+      hallCapacity: formData.get("hallCapacity") || undefined,
+      venueUrl: formData.get("venueUrl") ?? undefined,
       city: formData.get("city"),
+      frequency: formData.get("frequency") || "ONE_TIME",
+      recurrence: formData.get("recurrence") ?? undefined,
       categorySlug: formData.get("categorySlug"),
       subcategorySlug: formData.get("subcategorySlug"),
       eventType: formData.get("eventType") ?? undefined,
@@ -601,15 +644,43 @@ export async function adminUpdateEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl"),
       videoUrl: formData.get("videoUrl"),
+      albumUrl: formData.get("albumUrl"),
+      featured: formData.get("featured") === "on",
       status: formData.get("status"),
+      timeZone: formData.get("timeZone") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const startsAt = new Date(
-      `${parsed.data.date}T${parsed.data.time}:00+05:30`,
+    const genres = cleanEventCategories(
+      formData.getAll("genres").map((value) => String(value)),
     );
-    if (Number.isNaN(startsAt.getTime()))
-      return { error: "Enter a valid date and time." };
+    const languages = cleanEventLanguages(
+      formData.getAll("languages").map((value) => String(value)),
+    );
+
+    // The times typed are the event's own local times, in its own zone.
+    const zone =
+      parsed.data.timeZone && isEventZone(parsed.data.timeZone)
+        ? parsed.data.timeZone
+        : DEFAULT_EVENT_ZONE;
+
+    const startsAt = instantFrom(parsed.data.date, parsed.data.time, zone);
+    if (!startsAt) return { error: "Enter a valid date and time." };
+
+    // An end time on its own ends the same day; an end date on its own reuses
+    // the start time, which is what a multi-day festival means by "to the 3rd".
+    const endsAt =
+      parsed.data.endTime || parsed.data.endDate
+        ? instantFrom(
+            parsed.data.endDate || parsed.data.date,
+            parsed.data.endTime || parsed.data.time,
+            zone,
+          )
+        : null;
+    if ((parsed.data.endTime || parsed.data.endDate) && !endsAt)
+      return { error: "Enter a valid end date and time." };
+    if (endsAt && endsAt <= startsAt)
+      return { error: "The event has to end after it starts." };
 
     const existing = await db.event.findUnique({
       where: { id: parsed.data.id },
@@ -628,12 +699,26 @@ export async function adminUpdateEventAction(
         title: titleCase(parsed.data.title),
         description: sentenceCase(parsed.data.description),
         startsAt,
+        endsAt,
+        timeZone: zone,
         venue: titleCase(parsed.data.venue),
+        hallName: parsed.data.hallName || null,
+        hallCapacity: parsed.data.hallCapacity ?? null,
+        venueUrl: parsed.data.venueUrl ?? null,
         city: titleCase(parsed.data.city),
+        frequency: parsed.data.frequency,
+        recurrence:
+          parsed.data.frequency === "RECURRING"
+            ? parsed.data.recurrence || null
+            : null,
         eventType: parsed.data.eventType || null,
+        genres,
+        languages,
         websiteUrl: parsed.data.websiteUrl ?? null,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        albumUrl: parsed.data.albumUrl ?? null,
+        featured: parsed.data.featured,
         price: parsed.data.price,
         currency: parsed.data.currency,
         seatsTotal: parsed.data.seatsTotal,
@@ -650,6 +735,46 @@ export async function adminUpdateEventAction(
   } catch (error) {
     return fieldError(error);
   }
+}
+
+/**
+ * Approve, reject or hold a member-posted listing (property, room or item).
+ * `setListingStatusAction` above moderates directory businesses — a different
+ * table entirely, despite the shared word "listing".
+ */
+export async function setClassifiedStatusAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "") as ListingStatus;
+  if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
+    throw new Error("Invalid status");
+  }
+  const listing = await db.listing.update({ where: { id }, data: { status } });
+
+  revalidatePath("/admin/properties");
+  revalidatePath("/admin/content");
+  revalidatePath("/real-estate");
+  revalidatePath("/rooms");
+  revalidatePath("/marketplace");
+  revalidatePath(`/listings/${listing.slug}`);
+}
+
+/** Puts a member listing in (or out of) the paid featured slots. */
+export async function toggleClassifiedFeaturedAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const listing = await db.listing.findUnique({ where: { id } });
+  if (!listing) throw new Error("Listing not found");
+  await db.listing.update({
+    where: { id },
+    data: { featured: !listing.featured },
+  });
+
+  revalidatePath("/admin/properties");
+  revalidatePath("/real-estate");
+  revalidatePath("/rooms");
+  revalidatePath("/marketplace");
+  revalidatePath(`/listings/${listing.slug}`);
 }
 
 export async function toggleFeaturedAction(formData: FormData) {

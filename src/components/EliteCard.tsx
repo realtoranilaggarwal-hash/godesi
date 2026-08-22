@@ -18,6 +18,8 @@ export function EliteCard({
 }) {
   const badge = ELITE_BADGES[entry.badge];
   const embed = size === "large" && entry.videoUrl ? videoEmbedUrl(entry.videoUrl) : null;
+  // Written by our team from public record, waiting for the person to take over.
+  const unclaimed = Boolean(entry.sourceUrl) && entry.userId === null;
 
   return (
     <Card className={`relative flex flex-col gap-2 ${badge.card}`}>
@@ -37,9 +39,10 @@ export function EliteCard({
         <img
           src={entry.photoUrl ? thumbImage(entry.photoUrl, 384) : "/placeholder-logo.svg"}
           alt={entry.fullName}
-          className={`${
-            size === "large" ? "h-16 w-16" : size === "small" ? "h-10 w-10" : "h-12 w-12"
-          } shrink-0 rounded-full border border-slate-200 object-cover`}
+          title={entry.photoCredit ?? undefined}
+          className={`${size === "small" ? "h-10 w-10" : badge.photoSize} ${
+            badge.photo
+          } shrink-0 rounded-full border border-slate-200 bg-slate-100 object-cover object-top`}
         />
         <div className="min-w-0 flex-1">
           <Link
@@ -109,11 +112,17 @@ export function EliteCard({
         </div>
       ) : null}
 
+      {unclaimed ? (
+        <p className="rounded-lg bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-900">
+          Unclaimed — is this you? Claim this profile
+        </p>
+      ) : null}
+
       <Link
-        href={`/desi-elite/${entry.slug}`}
+        href={`/desi-elite/${entry.slug}${unclaimed ? "?claim=1" : ""}`}
         className="mt-auto text-sm font-semibold text-indigo-600 hover:underline"
       >
-        View profile →
+        {unclaimed ? "View and claim →" : "View profile →"}
       </Link>
     </Card>
   );

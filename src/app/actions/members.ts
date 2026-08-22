@@ -13,6 +13,7 @@ import {
   renderMemberEmail,
 } from "@/lib/memberEmails";
 import { invalidateDirectory } from "@/lib/cache";
+import { ALL_PERMISSIONS } from "@/lib/permissions";
 
 const ASSIGNABLE_ROLES: Role[] = ["CLIENT", "BUSINESS", "MODERATOR", "ADMIN"];
 
@@ -27,8 +28,26 @@ export async function setMemberRoleAction(formData: FormData) {
   const role = String(formData.get("role") ?? "") as Role;
   if (!ASSIGNABLE_ROLES.includes(role)) throw new Error("Invalid role");
 
-  await db.user.update({ where: { id }, data: { role } });
+  // A moderator with no permissions can open the desk but do nothing, so a
+  // fresh one starts with all of them; leaving the role clears them.
+  const staffPermissions =
+    role === "MODERATOR" ? [...ALL_PERMISSIONS] : role === "ADMIN" ? undefined : [];
+  const current = await db.user.findUnique({
+    where: { id },
+    select: { role: true, staffPermissions: true },
+  });
+  const keepExisting =
+    role === "MODERATOR" && current?.role === "MODERATOR" && current.staffPermissions.length > 0;
+
+  await db.user.update({
+    where: { id },
+    data: {
+      role,
+      ...(keepExisting || staffPermissions === undefined ? {} : { staffPermissions }),
+    },
+  });
   refresh(id);
+  revalidatePath("/admin/team");
 }
 
 export async function setMemberVerifiedAction(formData: FormData) {

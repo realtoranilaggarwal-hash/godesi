@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { StripItem } from "@/components/CategoryStrip";
+import { CategoryPicker, type PickerGroup } from "@/components/CategoryPicker";
 
 export type MenuLink = { href: string; label: string; icon: string };
 
@@ -13,11 +14,14 @@ export type MenuLink = { href: string; label: string; icon: string };
 export function MobileMenu({
   links,
   categories,
+  groups,
   account,
   signOut,
 }: {
   links: MenuLink[];
   categories: StripItem[];
+  /** The full taxonomy, so a phone can walk down the tree and pick. */
+  groups: PickerGroup[];
   account: { href: string; label: string } | null;
   signOut: () => Promise<void>;
 }) {
@@ -88,18 +92,22 @@ export function MobileMenu({
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">
               Categories
             </p>
-            <div className="grid grid-cols-1 gap-1.5 text-xs font-semibold sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={close}
-                  className={`rounded-xl px-3 py-2 ${item.className}`}
-                >
-                  {item.icon} {item.label}
-                </Link>
-              ))}
-            </div>
+            {groups.length ? (
+              <CategoryPicker groups={groups} quickCount={6} onNavigate={close} />
+            ) : (
+              <div className="grid grid-cols-1 gap-1.5 text-xs font-semibold sm:grid-cols-2 lg:grid-cols-3">
+                {categories.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={close}
+                    className={`rounded-xl px-3 py-2 ${item.className}`}
+                  >
+                    {item.icon} {item.label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       ) : null}

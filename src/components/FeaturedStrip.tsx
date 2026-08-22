@@ -32,9 +32,10 @@ function SlotForSale({ index, total }: { index: number; total: number }) {
 }
 
 /**
- * Paid listings lead the strip. Until the slots sell we keep the rows full:
- * recent listings run as a free spotlight, and one slot always stays on sale
- * instead of leaving white space.
+ * Paid listings lead the strip. Until the slots sell, cards a member has
+ * claimed run as a free spotlight and the rest of the row is offered for sale.
+ * An unclaimed card seeded from public data is never spotlighted — nobody has
+ * asked to be promoted, and it would read as a paid placement.
  */
 export async function FeaturedStrip({
   categorySlugs,
@@ -48,18 +49,26 @@ export async function FeaturedStrip({
     MAX_SLOTS,
   );
 
-  /** Round up to whole rows so the grid never ends ragged. */
+  // Members whose cards can hold the strip up while the slots are unsold.
+  const claimed = (
+    await searchBusinesses({
+      categorySlugs,
+      claimedOnly: true,
+      take: MAX_SLOTS * 2,
+    })
+  ).filter((row) => !businesses.some((paid) => paid.id === row.id));
+
+  /**
+   * Three full rows whenever there are members to fill them, rounded to whole
+   * rows so the grid never ends ragged — and one slot always left for sale.
+   * Short of members it shrinks, rather than showing a wall of empty ads.
+   */
   const total = Math.min(
-    Math.max(Math.ceil((businesses.length + 1) / ROW) * ROW, ROW),
+    Math.max(Math.ceil((businesses.length + claimed.length + 1) / ROW) * ROW, ROW),
     MAX_SLOTS,
   );
 
-  const openSlots = Math.max(total - businesses.length - 1, 0);
-  const fillers = openSlots
-    ? (await searchBusinesses({ categorySlugs, take: MAX_SLOTS * 2 }))
-        .filter((row) => !businesses.some((paid) => paid.id === row.id))
-        .slice(0, openSlots)
-    : [];
+  const fillers = claimed.slice(0, Math.max(total - businesses.length - 1, 0));
 
   const forSale = Math.max(total - businesses.length - fillers.length, 0);
   const pro = PLANS.PRO;

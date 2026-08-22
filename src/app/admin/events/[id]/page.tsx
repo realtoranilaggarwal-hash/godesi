@@ -5,30 +5,12 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { AdminEventForm } from "@/components/forms/AdminEventForm";
+import { LEGACY_EVENT_ZONE, wallClockIn } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
 import { reviewPartnerAction } from "@/app/actions/events";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Edit event" };
-
-/** Renders the IST wall-clock date/time the organiser originally entered. */
-function istParts(date: Date) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(date);
-  const get = (type: string) =>
-    parts.find((part) => part.type === type)?.value ?? "";
-  return {
-    date: `${get("year")}-${get("month")}-${get("day")}`,
-    time: `${get("hour")}:${get("minute")}`,
-  };
-}
 
 export default async function AdminEditEventPage({
   params,
@@ -52,7 +34,10 @@ export default async function AdminEditEventPage({
   ]);
   if (!event) notFound();
 
-  const { date, time } = istParts(event.startsAt);
+  // The form shows the times as the event's own town states them.
+  const zone = event.timeZone || LEGACY_EVENT_ZONE;
+  const { date, time } = wallClockIn(event.startsAt, zone);
+  const end = event.endsAt ? wallClockIn(event.endsAt, zone) : null;
   const parentSlug = event.category?.parentSlug ?? event.category?.slug ?? "";
   const subSlug = event.category?.parentSlug ? event.category.slug : "";
 
@@ -82,11 +67,21 @@ export default async function AdminEditEventPage({
             description: event.description,
             date,
             time,
+            endDate: end?.date ?? "",
+            endTime: end?.time ?? "",
+            timeZone: zone,
             venue: event.venue,
+            hallName: event.hallName ?? "",
+            hallCapacity: event.hallCapacity,
+            venueUrl: event.venueUrl ?? "",
             city: event.city,
+            frequency: event.frequency,
+            recurrence: event.recurrence ?? "",
             categorySlug: parentSlug,
             subcategorySlug: subSlug,
             eventType: event.eventType ?? "",
+            genres: event.genres,
+            languages: event.languages,
             websiteUrl: event.websiteUrl ?? "",
             price: event.price,
             currency: event.currency,
@@ -94,6 +89,8 @@ export default async function AdminEditEventPage({
             seatsBooked: event.seatsBooked,
             imageUrl: event.imageUrl ?? "",
             videoUrl: event.videoUrl ?? "",
+            albumUrl: event.albumUrl ?? "",
+            featured: event.featured,
             status: event.status,
           }}
         />

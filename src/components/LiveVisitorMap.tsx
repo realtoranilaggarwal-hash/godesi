@@ -31,15 +31,20 @@ export function LiveVisitorMap({ compact = false }: { compact?: boolean }) {
   useEffect(() => {
     let active = true;
     const load = () =>
-      fetch("/api/live")
-        .then((response) => (response.ok ? response.json() : null))
-        .then((snapshot: LiveSnapshot | null) => {
-          if (active && snapshot) setData(snapshot);
-        })
-        .catch(() => undefined);
+      // A tab left open in the background is not watching the map.
+      document.visibilityState !== "visible"
+        ? undefined
+        : fetch("/api/live")
+            .then((response) => (response.ok ? response.json() : null))
+            .then((snapshot: LiveSnapshot | null) => {
+              if (active && snapshot) setData(snapshot);
+            })
+            .catch(() => undefined);
 
     void load();
-    const timer = setInterval(load, 20_000);
+    // The endpoint is cached for 30s, so polling faster than this only adds
+    // requests without adding information.
+    const timer = setInterval(load, 60_000);
     return () => {
       active = false;
       clearInterval(timer);

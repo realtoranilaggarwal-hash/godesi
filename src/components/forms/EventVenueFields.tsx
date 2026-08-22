@@ -97,6 +97,21 @@ export function EventVenueFields({
         </datalist>
       </Field>
 
+      <Field
+        label="Hall capacity"
+        hint="Optional — how many people it seats, so guests know the size"
+      >
+        <input name="hallCapacity" type="number" min={0} className={inputClass} />
+      </Field>
+
+      <Field label="Venue website" hint="Optional — the hall's own page">
+        <input
+          name="venueUrl"
+          placeholder="https://royalalbertspalace.com"
+          className={inputClass}
+        />
+      </Field>
+
       {online ? null : (
         <>
           <Field label="Street address" hint="Shown on the event page so people find it">

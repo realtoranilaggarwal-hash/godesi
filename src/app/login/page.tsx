@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "@/components/forms/LoginForm";
 import { Card } from "@/components/ui";
-import { JoinBenefits } from "@/components/JoinBenefits";
+import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,9 @@ export default async function LoginPage({
   }
 
   return (
-    <div className="flex justify-center gap-8 py-6">
+    <div className="flex justify-center gap-6 py-6">
+      <JoinPerks />
+
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Sign in to Godesi</h1>
         {searchParams.error === "suspended" ? (
@@ -68,7 +70,7 @@ export default async function LoginPage({
         </p>
       </div>
 
-      <JoinBenefits />
+      <JoinRail />
     </div>
   );
 }

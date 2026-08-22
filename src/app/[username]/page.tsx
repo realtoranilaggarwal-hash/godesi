@@ -353,7 +353,7 @@ export default async function PublicProfilePage({
                   >
                     <p className="font-bold text-slate-900">{event.title}</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      📅 {formatEventDate(event.startsAt)}
+                      📅 {formatEventDate(event.startsAt, event.timeZone)}
                     </p>
                     <p className="text-sm text-slate-600">📍 {event.city}</p>
                   </Link>
