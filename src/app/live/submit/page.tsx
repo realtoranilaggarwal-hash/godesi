@@ -68,9 +68,9 @@ export default async function SubmitLiveChannelPage({
           <p className="rounded-xl bg-white/70 p-3">
             <strong>Featured spot</strong>
             <br />
-            Premium members sit above every other station.{" "}
+            Featured members sit above every other station.{" "}
             <Link href="/pricing" className="font-semibold underline">
-              See Premium
+              See Featured
             </Link>
           </p>
         </div>
@@ -228,7 +228,7 @@ export default async function SubmitLiveChannelPage({
 
           {premium ? (
             <Alert tone="success">
-              You&apos;re on Premium — ask our team to feature any of your
+              You&apos;re on Featured — ask our team to feature any of your
               approved stations at the top of the page.
             </Alert>
           ) : (
@@ -236,7 +236,7 @@ export default async function SubmitLiveChannelPage({
               Want your station pinned at the top with a ⭐ Featured ribbon? That
               needs the{" "}
               <Link href="/pricing" className="font-bold underline">
-                Premium package
+                Featured package
               </Link>
               .
             </Alert>

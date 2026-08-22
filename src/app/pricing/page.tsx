@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { effectivePlan, PLANS, PLAN_ORDER } from "@/lib/plans";
+import {
+  effectivePlan,
+  FOUNDING_OFFER_ENDS_LABEL,
+  PLANS,
+  PLAN_ORDER,
+  PLAN_TERMS,
+  planTermPrice,
+  planTerms,
+  type TermId,
+} from "@/lib/plans";
 import {
   downgradeToFreeAction,
   mockSubscribeAction,
@@ -13,7 +22,7 @@ import { upiEnabled, upiVpa } from "@/lib/upi";
 import { startUpiPaymentAction } from "@/app/actions/upi";
 import { PayPalCheckout } from "@/components/PayPalCheckout";
 import { Alert, Badge, Card } from "@/components/ui";
-import { formatPlanPrice, requestCurrency } from "@/lib/currency";
+import { formatMoney, requestCurrency } from "@/lib/currency";
 import { formatUsd } from "@/lib/format";
 import { WhyGodesi } from "@/components/WhyGodesi";
 import {
@@ -27,7 +36,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Membership plans and pricing",
   description:
-    "Compare the free, Pro and Premium plans for businesses on Godesi: digital card and QR code free forever, featured placement, banner ads and unlimited lead unlocks.",
+    "Compare the free, Pro and Featured plans for businesses on Godesi: digital card and QR code free forever, gold Featured placement, banner ads and unlimited lead unlocks.",
 };
 
 const ERRORS: Record<string, string> = {
@@ -38,12 +47,19 @@ const ERRORS: Record<string, string> = {
   mock_disabled: "Please complete a real payment to upgrade.",
   upi_unavailable: "UPI payments are not configured yet.",
   coupon: "That coupon code is not valid for plan upgrades.",
+  term: "That membership length is not on sale — pick another one.",
 };
+
+const TERM_TABS: { id: TermId; label: string }[] = [
+  { id: "MONTH", label: "Monthly" },
+  { id: "YEAR", label: "Yearly" },
+  { id: "FIVE_YEAR", label: "5 years — founding price" },
+];
 
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: { reason?: string; error?: string };
+  searchParams: { reason?: string; error?: string; term?: string };
 }) {
   const user = await getCurrentUser();
   const current = user ? effectivePlan(user) : null;
@@ -54,15 +70,39 @@ export default async function PricingPage({
   const upiOn = upiEnabled();
   const providersOn = stripeOn || paypalOn || upiOn;
   const currency = requestCurrency();
+  const wanted: TermId = TERM_TABS.some((tab) => tab.id === searchParams.term)
+    ? (searchParams.term as TermId)
+    : "YEAR";
 
   return (
     <div className="space-y-6">
       <div className="text-center">
         <h1 className="text-3xl font-bold">Membership plans</h1>
         <p className="mt-1 text-slate-600">
-          Start free. Upgrade when you want featured placement and buyer
+          Start free. Upgrade when you want the gold Featured placement and buyer
           contacts.
         </p>
+        <div className="mt-4 inline-flex flex-wrap justify-center gap-1 rounded-2xl bg-slate-100 p-1">
+          {TERM_TABS.map((tab) => (
+            <Link
+              key={tab.id}
+              href={`/pricing?term=${tab.id}`}
+              className={`rounded-xl px-3 py-1.5 text-sm font-semibold ${
+                wanted === tab.id
+                  ? "bg-white text-indigo-700 shadow"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </div>
+        {wanted === "FIVE_YEAR" ? (
+          <p className="mt-2 text-sm font-semibold text-amber-700">
+            Founding price: pay one year, stay five. Ends{" "}
+            {FOUNDING_OFFER_ENDS_LABEL}.
+          </p>
+        ) : null}
       </div>
 
       <Link
@@ -73,10 +113,10 @@ export default async function PricingPage({
           Best value
         </p>
         <p className="text-2xl font-black">
-          Complete package — membership + banner + featured, one price
+          Complete package — Featured membership + Elite interview, 5 years
         </p>
         <p className="mt-1 text-sm text-white/90">
-          Everything for a whole year for{" "}
+          Both for five years for{" "}
           {formatBundleMoney(bundlePrice(currency), currency)} instead of{" "}
           {formatBundleMoney(bundleListPrice(currency), currency)} — save{" "}
           {bundleSaving(currency).percent}% →
@@ -85,12 +125,12 @@ export default async function PricingPage({
 
       {searchParams.reason === "leads" ? (
         <Alert tone="info">
-          Unlocking lead contact details requires the Premium plan.
+          Unlocking lead contact details requires the Featured plan.
         </Alert>
       ) : null}
       {searchParams.reason === "featured" ? (
         <Alert tone="info">
-          The ⭐ featured specialisation badge comes with Pro and Premium — pick
+          The ⭐ featured specialisation badge comes with Pro and Featured — pick
           a plan below and the picker unlocks on your card.
         </Alert>
       ) : null}
@@ -105,6 +145,12 @@ export default async function PricingPage({
           const plan = PLANS[id];
           const isCurrent = current === id;
           const isFree = id === "FREE";
+          const terms = planTerms(plan);
+          const term = terms.includes(wanted) ? wanted : terms[terms.length - 1];
+          const price = term ? planTermPrice(plan, term, currency) : null;
+          const priceInr = term ? planTermPrice(plan, term, "INR") : null;
+          const priceUsd = term ? planTermPrice(plan, term, "USD") : null;
+          const label = price === null ? "" : formatMoney(price, currency);
 
           return (
             <Card
@@ -117,16 +163,26 @@ export default async function PricingPage({
                   {isCurrent ? <Badge tone="green">Current</Badge> : null}
                 </div>
                 <p className="mt-1 text-3xl font-black">
-                  {isFree ? "Free" : formatPlanPrice(plan, currency)}
-                  {isFree ? null : (
+                  {isFree ? "Free" : label}
+                  {isFree || !term ? null : (
                     <span className="text-sm font-medium text-slate-500">
-                      /month
+                      {" "}
+                      for {PLAN_TERMS[term].label}
                     </span>
                   )}
                 </p>
-                {!isFree && paypalOn && currency === "INR" ? (
+                {!isFree && term === "FIVE_YEAR" ? (
+                  <p className="text-xs font-semibold text-amber-700">
+                    One year&apos;s price for five years — until{" "}
+                    {FOUNDING_OFFER_ENDS_LABEL}
+                  </p>
+                ) : null}
+                {!isFree &&
+                paypalOn &&
+                currency === "INR" &&
+                priceUsd !== null ? (
                   <p className="text-xs text-slate-500">
-                    or {formatUsd(plan.priceUsd)} via PayPal
+                    or {formatUsd(priceUsd)} via PayPal
                   </p>
                 ) : null}
               </div>
@@ -172,6 +228,7 @@ export default async function PricingPage({
                         className="space-y-2"
                       >
                         <input type="hidden" name="plan" value={id} />
+                        <input type="hidden" name="term" value={term} />
                         <input
                           name="couponCode"
                           placeholder="Coupon code (optional)"
@@ -182,13 +239,17 @@ export default async function PricingPage({
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                         >
-                          Pay by card — {formatPlanPrice(plan, currency)}
+                          Pay by card — {label}
                         </button>
                       </form>
                     ) : null}
 
                     {paypalOn ? (
-                      <PayPalCheckout plan={id} clientId={paypalClientId} />
+                      <PayPalCheckout
+                        plan={id}
+                        term={term}
+                        clientId={paypalClientId}
+                      />
                     ) : null}
 
                     {upiOn ? (
@@ -197,6 +258,7 @@ export default async function PricingPage({
                         className="space-y-2"
                       >
                         <input type="hidden" name="plan" value={id} />
+                        <input type="hidden" name="term" value={term} />
                         {stripeOn ? null : (
                           <input
                             name="couponCode"
@@ -209,7 +271,8 @@ export default async function PricingPage({
                           type="submit"
                           className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
                         >
-                          Pay by UPI — {formatPlanPrice(plan, "INR")}
+                          Pay by UPI —{" "}
+                          {priceInr === null ? "" : formatMoney(priceInr, "INR")}
                         </button>
                         <p className="text-center text-xs text-slate-500">
                           PhonePe · Google Pay · Paytm · any bank app
@@ -220,6 +283,7 @@ export default async function PricingPage({
                     {!providersOn ? (
                       <form action={mockSubscribeAction}>
                         <input type="hidden" name="plan" value={id} />
+                        <input type="hidden" name="term" value={term} />
                         <button
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
@@ -270,7 +334,7 @@ export default async function PricingPage({
 
       <p className="text-center text-xs text-slate-500">
         {providersOn
-          ? "Card and PayPal payments are processed securely by our providers. Plans run for 30 days."
+          ? "Card and PayPal payments are processed securely by our providers. Every membership runs for the length you pick above."
           : "No payment provider is configured, so checkout runs in test mode."}
         {upiOn
           ? ` UPI payments go to ${upiVpa()} and are confirmed by our team, so activation is not instant.`

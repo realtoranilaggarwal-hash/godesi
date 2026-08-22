@@ -58,7 +58,15 @@ function loadSdk(clientId: string) {
   return sdkPromise;
 }
 
-export function PayPalCheckout({ plan, clientId }: { plan: Plan; clientId: string }) {
+export function PayPalCheckout({
+  plan,
+  term = "MONTH",
+  clientId,
+}: {
+  plan: Plan;
+  term?: string;
+  clientId: string;
+}) {
   const container = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
   const router = useRouter();
@@ -79,7 +87,7 @@ export function PayPalCheckout({ plan, clientId }: { plan: Plan; clientId: strin
               const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ plan }),
+                body: JSON.stringify({ plan, term }),
               });
               const data = await response.json();
               if (!response.ok) throw new Error(data.error ?? "Could not start payment");
@@ -109,7 +117,7 @@ export function PayPalCheckout({ plan, clientId }: { plan: Plan; clientId: strin
     return () => {
       cancelled = true;
     };
-  }, [clientId, plan, router]);
+  }, [clientId, plan, term, router]);
 
   return (
     <div className="space-y-2">

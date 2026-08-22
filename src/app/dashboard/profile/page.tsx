@@ -8,7 +8,12 @@ import { isAgentCard } from "@/lib/agents";
 import { Card, LinkButton } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 import { ListingHelp } from "@/components/ListingHelp";
-import { effectivePlan, extraCategoryLimit } from "@/lib/plans";
+import {
+  albumPhotoLimit,
+  effectivePlan,
+  extraCategoryLimit,
+  videoLimit,
+} from "@/lib/plans";
 import { requestCountry } from "@/lib/currency";
 import { SignOutButton } from "@/components/SignOutButton";
 
@@ -116,6 +121,8 @@ export default async function ProfileEditorPage({
             defaultCountry={requestCountry()}
             canFeatureSpecialty={effectivePlan(user) !== "FREE"}
             extraCategoryLimit={extraCategoryLimit(user)}
+            videoLimit={videoLimit(user)}
+            albumPhotoLimit={albumPhotoLimit(user)}
             foundingMember={user.foundingNumber !== null}
           />
         </Card>

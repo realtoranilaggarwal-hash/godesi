@@ -2,8 +2,11 @@
 export const ADMIN_SECTIONS = [
   { href: "/admin", label: "Overview", icon: "📊" },
   { href: "/admin/listings", label: "Listings", icon: "🏪" },
+  { href: "/admin/listings/wire", label: "Listing wire", icon: "🔗" },
+  { href: "/admin/properties", label: "Property", icon: "🏢" },
   { href: "/admin/claims", label: "Claims", icon: "✋" },
   { href: "/admin/events", label: "Events", icon: "🎟️" },
+  { href: "/admin/events/wire", label: "Event wire", icon: "📅" },
   { href: "/admin/banners", label: "Banners", icon: "🖼️" },
   { href: "/admin/ads", label: "Ad orders", icon: "📢" },
   { href: "/admin/members", label: "Members", icon: "👥" },
@@ -11,6 +14,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/coupons", label: "Coupons", icon: "🏷️" },
   { href: "/admin/news", label: "News", icon: "📰" },
   { href: "/admin/journalists", label: "Journalists", icon: "🗞️" },
+  { href: "/admin/wall", label: "News wall", icon: "🧱" },
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁" },
   { href: "/admin/connect", label: "Connect", icon: "🤝" },
   { href: "/admin/temples", label: "Temples", icon: "🛕" },
@@ -19,6 +23,8 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/content", label: "Content desk", icon: "✍️" },
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/admin/live-channels", label: "Radio & TV", icon: "🎧" },
+  { href: "/admin/help-clips", label: "Help clips", icon: "▶️" },
   { href: "/admin/outreach", label: "Outreach", icon: "📣" },
   { href: "/admin/team", label: "Team", icon: "🔑" },
+  { href: "/admin/handbook", label: "Handbook", icon: "📗" },
 ];

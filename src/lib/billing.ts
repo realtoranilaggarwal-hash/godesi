@@ -5,7 +5,27 @@ import { notify } from "@/lib/notifications";
 import { awardPoints, awardSpendPoints } from "@/lib/rewards";
 import { cartItem, type CartItem } from "@/lib/bundles";
 
-export const PLAN_DURATION_DAYS = 30;
+/** Banners inside a package are still booked a year at a time. */
+export const BANNER_MONTHS = 12;
+
+/** The longest term on sale is the five-year founding one, plus coupon bonus months. */
+const MAX_TERM_MONTHS = 72;
+
+/**
+ * Membership runs to the same day of the month it was bought on, so a year is a
+ * real year rather than twelve thirty-day blocks.
+ */
+export function termEnd(months: number) {
+  const end = new Date();
+  end.setMonth(end.getMonth() + termMonths(months));
+  return end;
+}
+
+/** Guards against a bad provider callback buying a century of membership. */
+export function termMonths(months: number) {
+  if (!Number.isFinite(months)) return 1;
+  return Math.min(MAX_TERM_MONTHS, Math.max(1, Math.round(months)));
+}
 
 export type PaymentProvider = "stripe" | "paypal" | "upi" | "mock";
 
@@ -36,9 +56,7 @@ export async function activatePlan({
   const existing = await db.payment.findUnique({ where: { reference } });
   if (existing) return { alreadyProcessed: true as const, payment: existing };
 
-  const expiresAt = new Date(
-    Date.now() + months * PLAN_DURATION_DAYS * 24 * 60 * 60 * 1000,
-  );
+  const expiresAt = termEnd(months);
 
   const [payment] = await db.$transaction([
     db.payment.create({
@@ -50,7 +68,11 @@ export async function activatePlan({
     }),
     db.business.updateMany({
       where: { ownerId: userId },
-      data: { featured: true },
+      data: {
+        featured: true,
+        featuredRank: plan === "PREMIUM" ? 2 : 1,
+        featuredUntil: expiresAt,
+      },
     }),
   ]);
 
@@ -119,7 +141,7 @@ export async function grantBundle({
   if (result.alreadyProcessed) return result;
 
   if (items.some((item) => item.key === "elite")) {
-    await grantEliteInterview(userId);
+    await grantEliteInterview(userId, months);
   }
 
   for (const item of items) {
@@ -128,7 +150,7 @@ export async function grantBundle({
       data: {
         userId,
         slot: item.slot,
-        months,
+        months: BANNER_MONTHS,
         amountMinor: 0,
         currency,
         provider,
@@ -145,7 +167,7 @@ export async function grantBundle({
  * An Elite interview bought inside a package: credited to the application if
  * they already have one, otherwise held on the account until they apply.
  */
-async function grantEliteInterview(userId: string) {
+async function grantEliteInterview(userId: string, months: number) {
   const entry = await db.eliteEntry.findFirst({
     where: { userId },
     select: { id: true },
@@ -154,7 +176,7 @@ async function grantEliteInterview(userId: string) {
   if (entry) {
     await db.eliteEntry.update({
       where: { id: entry.id },
-      data: { interviewPaid: true },
+      data: { interviewPaid: true, eliteUntil: termEnd(months) },
     });
   } else {
     await db.user.update({
@@ -181,7 +203,7 @@ export async function downgradeToFree(userId: string) {
     }),
     db.business.updateMany({
       where: { ownerId: userId },
-      data: { featured: false },
+      data: { featured: false, featuredRank: 0, featuredUntil: null },
     }),
   ]);
 }

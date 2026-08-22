@@ -17,6 +17,10 @@ import { NewsCard } from "@/components/NewsCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
+import {
+  VAISNAVA_CREDIT,
+  upcomingObservances,
+} from "@/lib/vaisnavaCalendar";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -55,6 +59,7 @@ export default async function ReligiousPage({
         city: true,
         venue: true,
         startsAt: true,
+        timeZone: true,
       },
     }),
     db.newsItem.findMany({
@@ -69,6 +74,7 @@ export default async function ReligiousPage({
   ]);
 
   const festivals = upcomingFestivals(6);
+  const observances = await upcomingObservances(8);
 
   return (
     <div className="flex gap-6">
@@ -113,6 +119,39 @@ export default async function ReligiousPage({
             ))}
           </div>
         </Card>
+
+        {observances.length ? (
+          <Card>
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-bold">Vaishnava calendar</h2>
+              <a
+                href="https://www.vaisnavacalendar.info"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-xs font-semibold text-slate-500 hover:text-indigo-700"
+              >
+                Dates from {VAISNAVA_CREDIT} →
+              </a>
+            </div>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {observances.map((observance) => (
+                <li
+                  key={`${observance.title}-${observance.date.toISOString()}`}
+                  className="flex items-baseline gap-2 rounded-xl border border-violet-100 bg-violet-50/60 px-3 py-2 text-sm"
+                >
+                  <span className="whitespace-nowrap font-bold text-violet-800">
+                    {formatFestivalDate(observance.date)}
+                  </span>
+                  <span className="text-slate-700">{observance.title}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-slate-500">
+              Ekadashi and appearance days for the New York timezone. Confirm
+              fasting times with your temple.
+            </p>
+          </Card>
+        ) : null}
 
         <Card>
           <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -207,7 +246,7 @@ export default async function ReligiousPage({
                     {event.title}
                   </Link>
                   <p className="text-sm text-slate-600">
-                    {formatEventDate(event.startsAt)} · {event.venue},{" "}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.venue},{" "}
                     {event.city}
                   </p>
                 </li>

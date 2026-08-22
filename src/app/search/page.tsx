@@ -160,7 +160,7 @@ export default async function SearchPage({
                 defaultChecked={premiumOnly}
                 className="h-4 w-4 rounded border-slate-300"
               />
-              Premium / Pro members only
+              Featured / Pro members only
             </label>
 
             <button

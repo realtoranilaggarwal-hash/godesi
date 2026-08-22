@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
 import { deleteEliteAction, updateEliteAction } from "@/app/actions/elite";
+import { reviewEliteClaimAction } from "@/app/actions/eliteClaims";
 import { ELITE_BADGES, ELITE_STATUS_LABELS } from "@/lib/elite";
 
 export const dynamic = "force-dynamic";
@@ -27,14 +28,25 @@ export default async function EliteAdminPage({
   if (!user) redirect(`/login?next=${encodeURIComponent("/admin/desi-elite")}`);
   if (!isStaff(user)) notFound();
 
-  const entries = await db.eliteEntry.findMany({
-    where: searchParams.status
-      ? { status: searchParams.status as (typeof STATUSES)[number] }
-      : undefined,
-    orderBy: { createdAt: "desc" },
-    include: { user: { select: { email: true, name: true } } },
-    take: 200,
-  });
+  const [entries, claims] = await Promise.all([
+    db.eliteEntry.findMany({
+      where: searchParams.status
+        ? { status: searchParams.status as (typeof STATUSES)[number] }
+        : undefined,
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { email: true, name: true } } },
+      take: 200,
+    }),
+    db.eliteClaim.findMany({
+      where: { status: "PENDING" },
+      orderBy: { createdAt: "asc" },
+      include: {
+        entry: { select: { id: true, slug: true, fullName: true } },
+        user: { select: { name: true, email: true, username: true } },
+      },
+      take: 50,
+    }),
+  ]);
 
   return (
     <div className="space-y-4">
@@ -73,6 +85,58 @@ export default async function EliteAdminPage({
           </Link>
         ))}
       </div>
+
+      {claims.length ? (
+        <Card className="border-amber-300 bg-amber-50">
+          <h2 className="text-base font-black text-amber-900">
+            People claiming a compiled profile ({claims.length})
+          </h2>
+          <p className="mt-1 text-xs text-amber-800">
+            Verify who they are before approving: approving hands them the page
+            and the right to edit it.
+          </p>
+          <ul className="mt-3 divide-y divide-amber-200 text-sm">
+            {claims.map((claim) => (
+              <li key={claim.id} className="space-y-1 py-3">
+                <p className="font-bold text-slate-900">
+                  <Link
+                    href={`/desi-elite/${claim.entry.slug}`}
+                    className="text-indigo-700 hover:underline"
+                  >
+                    {claim.entry.fullName}
+                  </Link>{" "}
+                  ← {claim.user.name}
+                </p>
+                <p className="text-xs text-slate-600">
+                  {claim.user.email}
+                  {claim.email ? ` · ${claim.email}` : ""}
+                  {claim.phone ? ` · ${claim.phone}` : ""}
+                </p>
+                <p className="whitespace-pre-line text-sm text-slate-700">
+                  {claim.message}
+                </p>
+                <form action={reviewEliteClaimAction} className="flex gap-2 pt-1">
+                  <input type="hidden" name="id" value={claim.id} />
+                  <button
+                    name="decision"
+                    value="approve"
+                    className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-bold text-white"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    name="decision"
+                    value="reject"
+                    className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-bold text-slate-700"
+                  >
+                    Reject
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
 
       {!entries.length ? (
         <Card>

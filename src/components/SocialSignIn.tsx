@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { googleAuthEnabled } from "@/lib/googleAuth";
 import { facebookAuthEnabled } from "@/lib/facebookAuth";
 
@@ -24,7 +23,10 @@ export function SocialSignIn({
   return (
     <div className="space-y-3">
       {google ? (
-        <Link href={withNext("/api/auth/google", next)} className={buttonClass}>
+        // A plain anchor, not a Link: these routes redirect to the provider, so
+        // client-side routing only prefetched a cross-origin URL and then had to
+        // fall back to a full navigation, which stalled the tap on phones.
+        <a href={withNext("/api/auth/google", next)} className={buttonClass}>
           <svg viewBox="0 0 18 18" aria-hidden className="h-4 w-4">
             <path
               fill="#4285F4"
@@ -44,11 +46,11 @@ export function SocialSignIn({
             />
           </svg>
           {verb} with Google
-        </Link>
+        </a>
       ) : null}
 
       {facebook ? (
-        <Link
+        <a
           href={withNext("/api/auth/facebook", next)}
           className={buttonClass}
         >
@@ -59,7 +61,7 @@ export function SocialSignIn({
             />
           </svg>
           {verb} with Facebook
-        </Link>
+        </a>
       ) : null}
 
       <div className="flex items-center gap-3 text-xs text-slate-400">

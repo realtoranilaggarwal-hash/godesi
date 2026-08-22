@@ -203,7 +203,11 @@ export async function siteSearch(
             { owner: { name: like } },
           ],
         },
-        orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+        orderBy: [
+          { featuredRank: "desc" },
+          { featured: "desc" },
+          { createdAt: "desc" },
+        ],
         take: 12,
         select: {
           slug: true,

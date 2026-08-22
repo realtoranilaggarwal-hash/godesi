@@ -1,20 +1,24 @@
 import { albumPreview, albumThumb, isAlbumLink } from "@/lib/photoAlbum";
 
 /**
- * Nine thumbnails from a member's public Google Photos album. Google serves the
+ * Thumbnails from a member's public Google Photos album. Google serves the
  * pictures and every tile opens the album, so Godesi stores only the link.
  */
 export async function PhotoAlbumGallery({
   url,
   heading = "Photo gallery",
+  limit = 9,
 }: {
   url: string | null;
   heading?: string;
+  /** Thumbnails shown here; the album link always opens the rest. */
+  limit?: number;
 }) {
   if (!url || !isAlbumLink(url)) return null;
 
   const { images, title } = await albumPreview(url);
-  const tiles = images.slice(0, 9);
+  const tiles = images.slice(0, limit);
+  const held = images.length - tiles.length;
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -30,6 +34,11 @@ export async function PhotoAlbumGallery({
         </a>
       </div>
       {title ? <p className="text-sm text-slate-500">{title}</p> : null}
+      {held > 0 ? (
+        <p className="text-xs text-slate-500">
+          Showing {tiles.length} of {images.length} — the rest open in the album.
+        </p>
+      ) : null}
 
       {tiles.length ? (
         <div className="mt-3 grid grid-cols-3 gap-2">

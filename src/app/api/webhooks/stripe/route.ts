@@ -99,6 +99,7 @@ export async function POST(request: Request) {
           currency: (session.currency ?? "inr").toUpperCase(),
         });
       } else if (userId && plan) {
+        const planMonths = Number(session.metadata?.months ?? 1);
         await activatePlan({
           userId,
           plan: assertPaidPlan(plan),
@@ -106,6 +107,8 @@ export async function POST(request: Request) {
           reference: session.id,
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
+          months:
+            Number.isFinite(planMonths) && planMonths > 0 ? planMonths : 1,
         });
       }
 

@@ -167,7 +167,7 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
         </ul>
         <p>Each requirement includes budget, location and a description.</p>
         <p>
-          👉 Premium members can unlock and contact these leads directly, so
+          👉 Featured members can unlock and contact these leads directly, so
           customers are already looking for you instead of you chasing them.{" "}
           <Link href="/leads">Browse leads</Link>.
         </p>

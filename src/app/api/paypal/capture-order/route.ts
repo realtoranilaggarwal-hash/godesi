@@ -30,7 +30,8 @@ export async function POST(request: Request) {
     }
 
     // custom_id is set server-side at order creation, so the buyer cannot forge it.
-    const [userId, planId] = (unit?.custom_id ?? "").split(":");
+    const [userId, planId, termMonths] = (unit?.custom_id ?? "").split(":");
+    const months = Number(termMonths ?? 1);
     if (userId !== user.id || !planId) {
       return NextResponse.json({ error: "Payment does not match account" }, { status: 403 });
     }
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
       reference: capture.id,
       amountMinor: toMinor(Number(capture.amount.value)),
       currency: capture.amount.currency_code,
+      months: Number.isFinite(months) && months > 0 ? months : 1,
     });
 
     revalidatePath("/dashboard");

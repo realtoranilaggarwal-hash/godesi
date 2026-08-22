@@ -5,10 +5,11 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { effectivePlan } from "@/lib/plans";
+import { albumPhotoLimit, effectivePlan, PLANS, videoLimit } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
+import { reviewSourceLabel } from "@/lib/reviewSources";
 import { QrCard } from "@/components/QrCard";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoundingBadge } from "@/components/FoundingBadge";
@@ -24,6 +25,7 @@ import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { LogoTile } from "@/components/LogoTile";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { disclaimerFor, specialtySet } from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
@@ -140,13 +142,14 @@ export default async function BusinessProfilePage({
   const isOwner = viewer?.id === business.ownerId;
   /**
    * Phone and email are only rendered for paid listings (or to the owner/admin), so a
-   * free listing never exposes them in the HTML. WhatsApp chat stays open to everyone,
-   * as promised by the Free plan.
+   * free listing never exposes them in the HTML. A paid member can still switch the
+   * details off. WhatsApp chat stays open to everyone, as promised by the Free plan.
    */
-  const contactVisible =
-    isOwner ||
-    viewer?.role === "ADMIN" ||
-    (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
+  const ownerPlan = business.owner ? effectivePlan(business.owner) : "FREE";
+  const paidContact = business.owner
+    ? effectivePlan(business.owner) !== "FREE" && !business.hideContact
+    : false;
+  const contactVisible = isOwner || viewer?.role === "ADMIN" || paidContact;
   // Free listings agreed to WhatsApp-only contact, so details typed into the
   // description are masked rather than left as a paid-field workaround.
   const description = business.description
@@ -154,6 +157,14 @@ export default async function BusinessProfilePage({
       ? business.description
       : maskContactDetails(business.description)
     : null;
+  /** Older cards saved a single link before the showreel field existed. */
+  const videos = (
+    business.videoUrls.length
+      ? business.videoUrls
+      : business.videoUrl
+        ? [business.videoUrl]
+        : []
+  ).slice(0, business.owner ? videoLimit(business.owner) : 1);
   const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
@@ -206,18 +217,21 @@ export default async function BusinessProfilePage({
 
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={business.logoUrl ?? "/placeholder-logo.svg"}
-            alt={`${business.name} logo`}
-            className="h-20 w-20 rounded-2xl border border-slate-200 object-cover"
+          <LogoTile
+            name={business.name}
+            icon={business.categoryRef?.icon}
+            imageUrl={business.logoUrl}
+            className={`h-20 w-20 ${
+              ownerPlan === "PREMIUM" ? "ring-4 ring-amber-400 ring-offset-2" : ""
+            }`}
+            emojiClassName="text-4xl"
           />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
               <StaffEditLink href={`/admin/business/${business.slug}`} />
-              {business.owner && business.owner.plan !== "FREE" ? (
-                <Badge tone="indigo">{business.owner.plan}</Badge>
+              {ownerPlan !== "FREE" ? (
+                <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
               ) : null}
               {business.owner ? (
                 <FoundingBadge number={business.owner.foundingNumber} />
@@ -442,9 +456,13 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
-            {business.videoUrl ? (
-              <div className="mt-3">
-                <VideoEmbed url={business.videoUrl} title={business.name} />
+            {videos.length ? (
+              <div
+                className={`mt-3 grid gap-3 ${videos.length > 1 ? "sm:grid-cols-2" : ""}`}
+              >
+                {videos.map((video) => (
+                  <VideoEmbed key={video} url={video} title={business.name} />
+                ))}
               </div>
             ) : null}
 
@@ -453,6 +471,7 @@ export default async function BusinessProfilePage({
                 <PhotoAlbumGallery
                   url={business.albumUrl}
                   heading="Photos"
+                  limit={albumPhotoLimit(business.owner)}
                 />
               </div>
             ) : null}
@@ -551,6 +570,20 @@ export default async function BusinessProfilePage({
               (ODbL).
             </p>
           ) : null}
+          {business.sourceUrl ? (
+            <p className="text-xs text-amber-800">
+              Listed from{" "}
+              <a
+                href={business.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline"
+              >
+                a public page
+              </a>
+              . Claiming replaces these basics with your own.
+            </p>
+          ) : null}
           {viewer ? (
             <ClaimBusinessForm businessId={business.id} open={searchParams.claim === "1"} />
           ) : (
@@ -561,13 +594,18 @@ export default async function BusinessProfilePage({
         </Card>
       ) : null}
 
-      {!contactVisible && (business.phone || business.publicEmail) ? (
+      {!paidContact && (business.phone || business.publicEmail) ? (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">
           <p className="text-sm text-amber-900">
-            📞 Phone and email are shown on Pro &amp; Premium listings. This business can
-            unlock them by upgrading — meanwhile you can chat on WhatsApp.
+            📞 Pro and Featured members can show their phone and email here, and
+            switch them off again whenever they like. Meanwhile you can chat on
+            WhatsApp.
           </p>
-          {isOwner ? <LinkButton href="/pricing">Upgrade to show contact</LinkButton> : null}
+          {isOwner ? (
+            <LinkButton href="/dashboard/profile">
+              {business.hideContact ? "Show my contact" : "Upgrade to show contact"}
+            </LinkButton>
+          ) : null}
         </Card>
       ) : null}
 
@@ -693,6 +731,11 @@ export default async function BusinessProfilePage({
                     {review.comment ? (
                       <p className="mt-1 text-sm text-slate-700">{review.comment}</p>
                     ) : null}
+                    {reviewSourceLabel(review.source) ? (
+                      <p className="mt-1 text-xs text-slate-400">
+                        {reviewSourceLabel(review.source)}
+                      </p>
+                    ) : null}
                   </div>
                 ))
               ) : (
@@ -703,11 +746,23 @@ export default async function BusinessProfilePage({
             {!isOwner ? (
               <div className="mt-5 border-t border-slate-100 pt-4">
                 <h3 className="mb-3 font-semibold">Leave a review</h3>
-                <ReviewForm
-                  businessId={business.id}
-                  defaultName={viewer?.name}
-                  detailed={isAgent}
-                />
+                {viewer ? (
+                  <ReviewForm
+                    businessId={business.id}
+                    defaultName={viewer.name}
+                    detailed={isAgent}
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-slate-600">
+                      Reviews run under a real Godesi account, so businesses are
+                      not judged by anonymous strangers.
+                    </p>
+                    <LinkButton href={`/login?next=/b/${business.slug}`}>
+                      Sign in to review
+                    </LinkButton>
+                  </div>
+                )}
               </div>
             ) : null}
           </Card>

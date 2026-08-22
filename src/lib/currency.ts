@@ -17,6 +17,10 @@ export function planPrice(plan: PlanInfo, currency: Currency) {
   return currency === "INR" ? plan.priceInr : plan.priceUsd;
 }
 
+export function formatMoney(amount: number, currency: Currency) {
+  return currency === "INR" ? formatInr(amount) : formatUsd(amount);
+}
+
 export function formatPlanPrice(plan: PlanInfo, currency: Currency) {
   return currency === "INR" ? formatInr(plan.priceInr) : formatUsd(plan.priceUsd);
 }

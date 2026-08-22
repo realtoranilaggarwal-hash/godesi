@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { emailEnabled, sendEmail, ticketEmail } from "@/lib/email";
 import { recordCouponUse } from "@/lib/coupons";
+import { LEGACY_EVENT_ZONE } from "@/lib/time";
 
 export async function uniqueEventSlug(title: string, city: string) {
   const base = slugify([title, city].filter(Boolean).join(" ")) || "event";
@@ -32,16 +33,68 @@ export function isPast(event: { startsAt: Date }) {
   return event.startsAt.getTime() < Date.now();
 }
 
-export function formatEventDate(value: Date) {
-  return new Intl.DateTimeFormat("en-IN", {
+/**
+ * "EST", "IST" — the zone's own abbreviation. No single locale knows them all:
+ * en-US names the American zones and calls Kolkata "GMT+5:30", en-IN the other
+ * way round, so each is tried until one gives a name rather than an offset.
+ */
+function zoneLabel(value: Date, timeZone: string) {
+  for (const locale of ["en-US", "en-IN", "en-GB"]) {
+    const label = new Intl.DateTimeFormat(locale, {
+      timeZone,
+      timeZoneName: "short",
+    })
+      .formatToParts(value)
+      .find((part) => part.type === "timeZoneName")?.value;
+    if (label && !label.startsWith("GMT") && !label.startsWith("UTC")) {
+      return label;
+    }
+  }
+  return new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "short" })
+    .formatToParts(value)
+    .find((part) => part.type === "timeZoneName")?.value ?? "";
+}
+
+/**
+ * An event's time is always shown in the town's own zone, with the zone named,
+ * so "8:00 pm EST" means the same thing to a reader in Edison and in Delhi.
+ */
+export function formatEventDate(value: Date, zone?: string | null) {
+  const timeZone = zone || LEGACY_EVENT_ZONE;
+  const stamp = new Intl.DateTimeFormat("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "Asia/Kolkata",
+    timeZone,
   }).format(value);
+  return `${stamp} ${zoneLabel(value, timeZone)}`;
+}
+
+/**
+ * The end of an event: just the time when it finishes the same day, the full
+ * date when it runs over into another one. Null when the calendar it came from
+ * gave the same minute for both, which reads as "4:00 am – 4:00 am".
+ */
+export function formatEventEnd(
+  startsAt: Date,
+  endsAt: Date,
+  zone?: string | null,
+) {
+  if (endsAt.getTime() - startsAt.getTime() < 60_000) return null;
+  const timeZone = zone || LEGACY_EVENT_ZONE;
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone });
+  if (day.format(startsAt) !== day.format(endsAt)) {
+    return formatEventDate(endsAt, timeZone);
+  }
+  const clock = new Intl.DateTimeFormat("en-IN", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone,
+  }).format(endsAt);
+  return `${clock} ${zoneLabel(endsAt, timeZone)}`;
 }
 
 /**
@@ -119,14 +172,22 @@ async function sendTicketConfirmation(ticketId: string) {
   const ticket = await db.ticket.findUnique({
     where: { id: ticketId },
     include: {
-      event: { select: { title: true, startsAt: true, venue: true, city: true } },
+      event: {
+        select: {
+          title: true,
+          startsAt: true,
+          timeZone: true,
+          venue: true,
+          city: true,
+        },
+      },
     },
   });
   if (!ticket?.buyerEmail) return;
 
   const { subject, html } = ticketEmail({
     eventTitle: ticket.event.title,
-    when: formatEventDate(ticket.event.startsAt),
+    when: formatEventDate(ticket.event.startsAt, ticket.event.timeZone),
     venue: `${ticket.event.venue}, ${ticket.event.city}`,
     seats: ticket.quantity,
     code: ticket.code,

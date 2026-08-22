@@ -3,6 +3,12 @@ import { ELITE_PACKAGES, type ElitePackageId } from "@/lib/elite";
 import { notify } from "@/lib/notifications";
 import { awardSpendPoints } from "@/lib/rewards";
 
+function eliteTermEnd(years: number) {
+  const end = new Date();
+  end.setFullYear(end.getFullYear() + years);
+  return end;
+}
+
 /**
  * Marks an Elite purchase paid and applies it to the profile: the interview fee
  * unlocks the shoot, the film upgrades the video package, and every payment adds
@@ -35,11 +41,15 @@ export async function confirmEliteOrder({
   }
 
   const item = ELITE_PACKAGES[order.packageId as ElitePackageId];
+  const cents = Math.round((item?.usd ?? 0) * 100);
   await db.eliteEntry.update({
     where: { id: order.entryId },
     data: {
-      paidCents: { increment: Math.round((item?.usd ?? 0) * 100) },
-      ...(item?.kind === "INTERVIEW" ? { interviewPaid: true } : {}),
+      paidCents: { increment: cents },
+      rankCents: { increment: cents },
+      ...(item?.kind === "INTERVIEW"
+        ? { interviewPaid: true, eliteUntil: eliteTermEnd(item.years ?? 1) }
+        : {}),
       ...(item?.kind === "VIDEO" ? { videoPackage: "PRO" } : {}),
     },
   });

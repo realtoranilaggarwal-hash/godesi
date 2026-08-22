@@ -83,7 +83,7 @@ export default function PrivacyPage() {
       <p>
         Anything in your public listing is visible to everyone. Phone and email on a
         listing are shown only for paid plans; WhatsApp chat is available on all plans.
-        Buyer contact details in a requirement are only revealed to Premium members who
+        Buyer contact details in a requirement are only revealed to Featured members who
         unlock them.
       </p>
 
@@ -112,6 +112,17 @@ export default function PrivacyPage() {
         <Link href="/about" className="text-indigo-600 underline">
           about page
         </Link>
+        . We also use Microsoft Clarity, which records how pages are used — clicks,
+        scrolling and a replay of the layout — so we can fix confusing screens. Clarity
+        masks the text you type, and we never use it to identify you. See{" "}
+        <a
+          href="https://privacy.microsoft.com/privacystatement"
+          target="_blank"
+          rel="noreferrer"
+          className="text-indigo-600 underline"
+        >
+          Microsoft&rsquo;s privacy statement
+        </a>
         . Banner and link impressions and clicks are counted in aggregate for advertisers.
       </p>
 
