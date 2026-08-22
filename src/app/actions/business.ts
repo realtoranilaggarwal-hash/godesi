@@ -392,8 +392,10 @@ export async function saveBusinessProfileAction(
           : []
     ).slice(0, staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user));
 
+    // showContact is the form's wording; the column stores the opposite.
+    const { showContact, ...fields } = parsed.data;
     const data = {
-      ...parsed.data,
+      ...fields,
       name: titleCase(parsed.data.name),
       city: titleCase(parsed.data.city),
       specialties,
@@ -424,7 +426,7 @@ export async function saveBusinessProfileAction(
       phone: parsed.data.phone || null,
       address: parsed.data.address || null,
       publicEmail: parsed.data.publicEmail ?? null,
-      hideContact: !parsed.data.showContact,
+      hideContact: !showContact,
       logoUrl: parsed.data.logoUrl ?? null,
       websiteUrl: parsed.data.websiteUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
