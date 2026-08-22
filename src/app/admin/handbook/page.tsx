@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireStaff } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card } from "@/components/ui";
 import {
   HANDBOOK_HOUSE_RULES,
@@ -13,7 +14,9 @@ export const metadata: Metadata = { title: "Staff handbook | Godesi admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminHandbookPage() {
-  await requireStaff();
+  const user = await getCurrentUser();
+  if (!user) redirect("/login?next=/admin/handbook");
+  if (!isStaff(user)) redirect("/dashboard");
 
   return (
     <div className="space-y-4">

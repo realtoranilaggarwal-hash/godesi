@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { requireStaff } from "@/lib/auth";
+import { notFound, redirect } from "next/navigation";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card } from "@/components/ui";
 import { CopyButton } from "@/components/CopyButton";
 import { playbookBySlug } from "@/lib/handbook";
@@ -41,7 +41,9 @@ export default async function HandbookPlaybookPage({
 }: {
   params: { slug: string };
 }) {
-  await requireStaff();
+  const user = await getCurrentUser();
+  if (!user) redirect(`/login?next=/admin/handbook/${params.slug}`);
+  if (!isStaff(user)) redirect("/dashboard");
 
   const playbook = playbookBySlug(params.slug);
   if (!playbook) notFound();
