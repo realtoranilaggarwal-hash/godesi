@@ -144,6 +144,8 @@ const profileSchema = z.object({
     .email("Enter a valid email")
     .optional()
     .or(z.literal("").transform(() => undefined)),
+  /** Paid members choose whether the public sees their phone and email. */
+  showContact: z.boolean(),
   address: z.string().trim().optional(),
   logoUrl: optionalUrl,
   websiteUrl: optionalUrl,
@@ -216,6 +218,7 @@ function readProfileForm(formData: FormData) {
     whatsappNumber: value("whatsappNumber"),
     phone: value("phone"),
     publicEmail: value("publicEmail"),
+    showContact: formData.get("showContact") !== null,
     address: value("address"),
     logoUrl: value("logoUrl"),
     websiteUrl: value("websiteUrl"),
@@ -421,6 +424,7 @@ export async function saveBusinessProfileAction(
       phone: parsed.data.phone || null,
       address: parsed.data.address || null,
       publicEmail: parsed.data.publicEmail ?? null,
+      hideContact: !parsed.data.showContact,
       logoUrl: parsed.data.logoUrl ?? null,
       websiteUrl: parsed.data.websiteUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,

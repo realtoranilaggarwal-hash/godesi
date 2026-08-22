@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { Currency } from "@/lib/currency";
 import {
   BUNDLE_EXTRAS,
+  BUNDLE_MONTHS,
   CART_ITEMS,
+  describeTerm,
   formatBundleMoney,
   itemPrice,
   priceCart,
@@ -75,7 +77,7 @@ export function UpgradeCart({
       )
     : 0;
   const payable = cart.total - flashDiscount;
-  const termMonths = 12 + (flashApplied ? flashBonusMonths : 0);
+  const termMonths = BUNDLE_MONTHS + (flashApplied ? flashBonusMonths : 0);
   /** The package discount and the code together, against list price. */
   const totalSaving = Math.max(0, cart.listTotal - payable);
   const totalSavingPercent = cart.listTotal
@@ -177,7 +179,7 @@ export function UpgradeCart({
                 )}
               </strong>
               {flashBonusMonths > 0
-                ? ` and runs for ${12 + flashBonusMonths} months instead of 12.`
+                ? ` and runs for ${BUNDLE_MONTHS + flashBonusMonths} months instead of ${BUNDLE_MONTHS}.`
                 : "."}
             </p>
             {held !== null && held > 0 ? (
@@ -266,8 +268,8 @@ export function UpgradeCart({
                 </p>
               )}
               <p className="mt-1 text-center text-[11px] text-slate-400">
-                {termMonths} months from the day you pay · one payment, no
-                auto-renewal
+                {termMonths} months from the day you pay ({describeTerm(termMonths)}) ·
+                one payment, no auto-renewal
               </p>
             </div>
 

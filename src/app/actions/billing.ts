@@ -12,7 +12,15 @@ import {
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
 import { siteUrl, toMinor } from "@/lib/format";
-import { planPrice, requestCurrency, stripeUnitAmount } from "@/lib/currency";
+import { requestCurrency } from "@/lib/currency";
+import {
+  PLAN_TERMS,
+  planTermPrice,
+  planTerms,
+  termOrThrow,
+  type PlanInfo,
+  type TermId,
+} from "@/lib/plans";
 import { checkCoupon, couponMetadata } from "@/lib/coupons";
 import {
   BUNDLE_MONTHS,
@@ -30,11 +38,14 @@ import {
 export async function startStripeCheckoutAction(formData: FormData) {
   const user = await requireUser();
   const plan = planOrThrow(String(formData.get("plan") ?? ""));
+  const term = requestedTerm(formData, plan);
 
   if (!stripeEnabled()) redirect("/pricing?error=stripe_unavailable");
 
   const currency = requestCurrency();
-  const listAmount = stripeUnitAmount(plan, currency);
+  const price = planTermPrice(plan, term, currency);
+  if (price === null) redirect("/pricing?error=term");
+  const listAmount = toMinor(price);
 
   const code = String(formData.get("couponCode") ?? "").trim();
   const check = code
@@ -58,6 +69,7 @@ export async function startStripeCheckoutAction(formData: FormData) {
     metadata: {
       userId: user.id,
       plan: plan.id,
+      months: String(PLAN_TERMS[term].months),
       ...couponMetadata(check?.ok ? check.coupon : null, discountMinor),
     },
     line_items: [
@@ -67,7 +79,7 @@ export async function startStripeCheckoutAction(formData: FormData) {
           currency: currency.toLowerCase(),
           unit_amount: unitAmount,
           product_data: {
-            name: `Godesi ${plan.name} — 30 days`,
+            name: `Godesi ${plan.name} — ${PLAN_TERMS[term].label}`,
             description: discountMinor
               ? `${plan.features.join(" · ")} · coupon applied`
               : plan.features.join(" · "),
@@ -168,6 +180,16 @@ export async function startBundleCheckoutAction(formData: FormData) {
   redirect(session.url);
 }
 
+/**
+ * The term the buyer picked, refusing anything this plan does not sell (the
+ * five-year founding price, for instance, once the offer has closed).
+ */
+function requestedTerm(formData: FormData, plan: PlanInfo): TermId {
+  const term = termOrThrow(String(formData.get("term") ?? "MONTH"));
+  if (!planTerms(plan).includes(term)) redirect("/pricing?error=term");
+  return term;
+}
+
 export async function downgradeToFreeAction() {
   const user = await requireUser();
   await downgradeToFree(user.id);
@@ -189,13 +211,15 @@ export async function mockSubscribeAction(formData: FormData) {
 
   const mockCurrency = requestCurrency();
 
+  const term = requestedTerm(formData, plan);
   await activatePlan({
     userId: user.id,
     plan: plan.id,
     provider: "mock",
     reference: `mock_${user.id}_${Date.now()}`,
-    amountMinor: toMinor(planPrice(plan, mockCurrency)),
+    amountMinor: toMinor(planTermPrice(plan, term, mockCurrency) ?? 0),
     currency: mockCurrency,
+    months: PLAN_TERMS[term].months,
   });
 
   revalidatePath("/dashboard");

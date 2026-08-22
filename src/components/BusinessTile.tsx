@@ -56,7 +56,7 @@ export function BusinessTile({
       </Link>
       {premium ? (
         <span className="absolute left-2 top-2 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white shadow">
-          ⭐ Premium
+          ⭐ Featured
         </span>
       ) : null}
 

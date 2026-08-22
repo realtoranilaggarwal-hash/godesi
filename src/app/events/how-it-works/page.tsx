@@ -370,7 +370,7 @@ export default function EventFeesPage() {
               <span className="font-semibold text-slate-900">
                 Extra categories
               </span>{" "}
-              — Free lists under one, Pro adds two more, Premium five, for
+              — Free lists under one, Pro adds two more, Featured five, for
               events that genuinely belong in several places (a wedding expo is
               also a fashion show and a trade show).
             </li>
@@ -602,7 +602,7 @@ export default function EventFeesPage() {
             </li>
             <li>
               <span className="font-semibold text-slate-900">
-                A Pro or Premium plan
+                A Pro or Featured plan
               </span>{" "}
               — removes our ticket fee, adds the featured badge, extra
               categories and higher ranking in search.{" "}
@@ -660,7 +660,7 @@ export default function EventFeesPage() {
               </dt>
               <dd className="text-slate-600">
                 On Free and Pro we collect the money and send it after the
-                event, minus the processor&apos;s charge. On Premium the money
+                event, minus the processor&apos;s charge. On Featured the money
                 lands in your own Stripe account as tickets sell. Refunds are
                 yours to decide.
               </dd>

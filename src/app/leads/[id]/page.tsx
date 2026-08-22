@@ -109,7 +109,7 @@ export default async function LeadDetailPage({ params }: { params: { id: string 
             ) : (
               <div className="space-y-2">
                 <Alert tone="info">
-                  Contact details come with the Premium plan.{" "}
+                  Contact details come with the Featured plan.{" "}
                   <Link href="/pricing" className="font-semibold underline">
                     See plans
                   </Link>

@@ -39,7 +39,7 @@ export default async function NewWeddingRequirementPage({
           <h1 className="text-2xl font-bold">Post your wedding requirement 💍</h1>
           <p className="text-sm text-slate-600">
             Tell vendors what you need and they will come to you. Your phone number
-            stays hidden — only Premium vendors can unlock it, and they reply on
+            stays hidden — only Featured vendors can unlock it, and they reply on
             WhatsApp.
           </p>
         </div>

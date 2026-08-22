@@ -73,6 +73,7 @@ export const ELITE_CATEGORIES = [
 
 export type ElitePackageId =
   | "INTERVIEW"
+  | "INTERVIEW_1Y"
   | "VIDEO_PRO"
   | "BOOST_100"
   | "BOOST_250"
@@ -85,13 +86,29 @@ export type ElitePackageId =
  */
 export const ELITE_PACKAGES: Record<
   ElitePackageId,
-  { label: string; usd: number; blurb: string; kind: "INTERVIEW" | "VIDEO" | "BOOST" }
+  {
+    label: string;
+    usd: number;
+    blurb: string;
+    kind: "INTERVIEW" | "VIDEO" | "BOOST";
+    /** Years the Elite profile and its top slot are held for. */
+    years?: number;
+  }
 > = {
   INTERVIEW: {
-    label: "Elite interview + 30–60 second video",
-    usd: 50,
+    label: "Elite interview + profile for 5 years",
+    usd: 500,
+    years: 5,
     blurb:
-      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live and publishes your Elite profile with a 30–60 second video.",
+      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live, publishes your Elite profile with a 30–60 second video, and holds your top slot for five years.",
+    kind: "INTERVIEW",
+  },
+  INTERVIEW_1Y: {
+    label: "Elite interview + profile for 1 year",
+    usd: 250,
+    years: 1,
+    blurb:
+      "The same interview and published profile, held for one year. Renew at the price of the day.",
     kind: "INTERVIEW",
   },
   VIDEO_PRO: {
@@ -128,9 +145,12 @@ export function elitePackageOrThrow(value: string) {
   return { id, ...item };
 }
 
-/** Spend first, then badge, then newest — so paying members sit on top. */
+/**
+ * Spend inside a live term first, then newest — so paying members sit on top
+ * while their term runs and drop back to date order once it lapses.
+ */
 export const ELITE_ORDER: Prisma.EliteEntryOrderByWithRelationInput[] = [
-  { paidCents: "desc" },
+  { rankCents: "desc" },
   { publishedAt: "desc" },
 ];
 

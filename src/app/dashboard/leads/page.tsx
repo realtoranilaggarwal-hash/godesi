@@ -65,7 +65,7 @@ export default async function UnlockedLeadsPage() {
       ) : (
         <EmptyState
           title="No leads unlocked yet"
-          body="Premium members can unlock buyer contact details from the lead marketplace."
+          body="Featured members can unlock buyer contact details from the lead marketplace."
         />
       )}
     </div>

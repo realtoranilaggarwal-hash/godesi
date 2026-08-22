@@ -49,7 +49,7 @@ export default async function AdminLiveChannelsPage() {
         <p className="mt-1 text-sm text-slate-600">
           Approve member-submitted stations, feature paid ones and clear
           &ldquo;not working&rdquo; reports. Carriage is $50/month; charity and
-          non-profit suggestions are free. Featuring is for Premium members.
+          non-profit suggestions are free. Featuring is for Featured members.
         </p>
         <div className="mt-2 flex gap-3 text-sm font-semibold text-indigo-600">
           <Link href="/live-radio">Live radio →</Link>

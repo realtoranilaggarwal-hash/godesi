@@ -19,6 +19,8 @@ import {
   uniqueEliteSlug,
 } from "@/lib/elite";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { termEnd } from "@/lib/billing";
+import { BUNDLE_MONTHS } from "@/lib/bundles";
 
 const optionalUrl = z
   .string()
@@ -141,6 +143,7 @@ export async function submitEliteAction(
     const entry = await db.eliteEntry.create({
       data: {
         interviewPaid: prepaid,
+        eliteUntil: prepaid ? termEnd(BUNDLE_MONTHS) : null,
         slug: await uniqueEliteSlug(name, data.city),
         userId: data.nominationType === "SELF" ? user.id : null,
         nominatedById: data.nominationType === "OTHER" ? user.id : null,

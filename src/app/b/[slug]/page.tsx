@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { albumPhotoLimit, effectivePlan, videoLimit } from "@/lib/plans";
+import { albumPhotoLimit, effectivePlan, PLANS, videoLimit } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -142,13 +142,14 @@ export default async function BusinessProfilePage({
   const isOwner = viewer?.id === business.ownerId;
   /**
    * Phone and email are only rendered for paid listings (or to the owner/admin), so a
-   * free listing never exposes them in the HTML. WhatsApp chat stays open to everyone,
-   * as promised by the Free plan.
+   * free listing never exposes them in the HTML. A paid member can still switch the
+   * details off. WhatsApp chat stays open to everyone, as promised by the Free plan.
    */
-  const contactVisible =
-    isOwner ||
-    viewer?.role === "ADMIN" ||
-    (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
+  const ownerPlan = business.owner ? effectivePlan(business.owner) : "FREE";
+  const paidContact = business.owner
+    ? effectivePlan(business.owner) !== "FREE" && !business.hideContact
+    : false;
+  const contactVisible = isOwner || viewer?.role === "ADMIN" || paidContact;
   // Free listings agreed to WhatsApp-only contact, so details typed into the
   // description are masked rather than left as a paid-field workaround.
   const description = business.description
@@ -220,15 +221,17 @@ export default async function BusinessProfilePage({
             name={business.name}
             icon={business.categoryRef?.icon}
             imageUrl={business.logoUrl}
-            className="h-20 w-20"
+            className={`h-20 w-20 ${
+              ownerPlan === "PREMIUM" ? "ring-4 ring-amber-400 ring-offset-2" : ""
+            }`}
             emojiClassName="text-4xl"
           />
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
               <StaffEditLink href={`/admin/business/${business.slug}`} />
-              {business.owner && business.owner.plan !== "FREE" ? (
-                <Badge tone="indigo">{business.owner.plan}</Badge>
+              {ownerPlan !== "FREE" ? (
+                <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
               ) : null}
               {business.owner ? (
                 <FoundingBadge number={business.owner.foundingNumber} />
@@ -591,13 +594,18 @@ export default async function BusinessProfilePage({
         </Card>
       ) : null}
 
-      {!contactVisible && (business.phone || business.publicEmail) ? (
+      {!paidContact && (business.phone || business.publicEmail) ? (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">
           <p className="text-sm text-amber-900">
-            📞 Phone and email are shown on Pro &amp; Premium listings. This business can
-            unlock them by upgrading — meanwhile you can chat on WhatsApp.
+            📞 Pro and Featured members can show their phone and email here, and
+            switch them off again whenever they like. Meanwhile you can chat on
+            WhatsApp.
           </p>
-          {isOwner ? <LinkButton href="/pricing">Upgrade to show contact</LinkButton> : null}
+          {isOwner ? (
+            <LinkButton href="/dashboard/profile">
+              {business.hideContact ? "Show my contact" : "Upgrade to show contact"}
+            </LinkButton>
+          ) : null}
         </Card>
       ) : null}
 

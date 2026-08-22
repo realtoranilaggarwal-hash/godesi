@@ -39,7 +39,7 @@ function SlotForSale({ index, total }: { index: number; total: number }) {
  */
 export async function FeaturedStrip({
   categorySlugs,
-  title = "Premium businesses",
+  title = "Featured businesses",
 }: {
   categorySlugs?: string[];
   title?: string;

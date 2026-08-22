@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Lead marketplace — live buyer requirements",
   description:
-    "Live buyer requirements from desi customers: quotes for home services, catering, weddings, travel and trade. Premium members unlock contact details instantly.",
+    "Live buyer requirements from desi customers: quotes for home services, catering, weddings, travel and trade. Featured members unlock contact details instantly.",
 };
 
 export default async function LeadsPage({
@@ -83,7 +83,7 @@ export default async function LeadsPage({
           <Alert tone="info">
             Contact details are hidden on your current plan.{" "}
             <Link href="/pricing" className="font-semibold underline">
-              Upgrade to Premium
+              Upgrade to Featured
             </Link>{" "}
             to unlock leads.
           </Alert>
@@ -192,7 +192,7 @@ export default async function LeadsPage({
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                         >
-                          {premium ? "Unlock contact" : "Unlock with Premium"}
+                          {premium ? "Unlock contact" : "Unlock with Featured"}
                         </button>
                       </form>
                     ) : (

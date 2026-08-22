@@ -83,7 +83,7 @@ export default function PrivacyPage() {
       <p>
         Anything in your public listing is visible to everyone. Phone and email on a
         listing are shown only for paid plans; WhatsApp chat is available on all plans.
-        Buyer contact details in a requirement are only revealed to Premium members who
+        Buyer contact details in a requirement are only revealed to Featured members who
         unlock them.
       </p>
 

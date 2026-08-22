@@ -1,7 +1,7 @@
 import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
-import { planRank } from "@/lib/plans";
+import { effectivePlan, planRank } from "@/lib/plans";
 
 export type BusinessListItem = {
   id: string;
@@ -233,7 +233,7 @@ async function runSearchBusinesses(
     },
     include: {
       vehicle: true,
-      owner: { select: { plan: true } },
+      owner: { select: { plan: true, planExpiresAt: true } },
       reviews: { where: { hidden: false }, select: { rating: true } },
       categoryRef: { select: { name: true, color: true, icon: true } },
       subcategoryRef: { select: { name: true } },
@@ -300,7 +300,7 @@ async function runSearchBusinesses(
               negotiable: row.vehicle.negotiable,
             }
           : null,
-        plan: row.owner?.plan ?? "FREE",
+        plan: row.owner ? effectivePlan(row.owner) : "FREE",
         rating,
         reviewCount,
       };

@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { activatePlan, planOrThrow } from "@/lib/billing";
-import { planPrice } from "@/lib/currency";
+import { PLAN_TERMS, planTermPrice, planTerms, termOrThrow } from "@/lib/plans";
 import { toMinor } from "@/lib/format";
 import { newUpiReference, upiEnabled } from "@/lib/upi";
 import { checkCoupon } from "@/lib/coupons";
@@ -17,7 +17,9 @@ export async function startUpiPaymentAction(formData: FormData) {
   const plan = planOrThrow(String(formData.get("plan") ?? ""));
   if (!upiEnabled()) redirect("/pricing?error=upi_unavailable");
 
-  const listAmount = toMinor(planPrice(plan, "INR"));
+  const term = termOrThrow(String(formData.get("term") ?? "MONTH"));
+  if (!planTerms(plan).includes(term)) redirect("/pricing?error=term");
+  const listAmount = toMinor(planTermPrice(plan, term, "INR") ?? 0);
   const code = String(formData.get("couponCode") ?? "").trim();
   const check = code
     ? await checkCoupon({
@@ -39,6 +41,7 @@ export async function startUpiPaymentAction(formData: FormData) {
     data: {
       userId: user.id,
       plan: plan.id,
+      months: PLAN_TERMS[term].months,
       amountMinor,
       currency: "INR",
       reference: newUpiReference(),
@@ -109,6 +112,7 @@ export async function reviewUpiPaymentAction(formData: FormData) {
       reference: `upi_${request.reference}`,
       amountMinor: request.amountMinor,
       currency: request.currency,
+      months: request.months,
     });
   }
 

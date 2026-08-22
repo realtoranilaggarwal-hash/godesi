@@ -297,6 +297,18 @@ export function BusinessProfileForm({
             </select>
           </div>
         </Field>
+        <Field label="Show my phone and email">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="showContact"
+              defaultChecked={business ? !business.hideContact : true}
+              className="h-4 w-4"
+            />
+            Show them on my card (Pro and Featured only — free cards keep
+            WhatsApp)
+          </label>
+        </Field>
         <Field label="Custom quotes">
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input

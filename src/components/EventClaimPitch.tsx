@@ -52,7 +52,7 @@ export function EventClaimPitch({
         </li>
         <li>
           Card QR tickets by email, price tiers, coupon codes and a live seat
-          count — and on Premium the money lands in your own Stripe account.
+          count — and on Featured the money lands in your own Stripe account.
         </li>
         <li>
           Your page then publishes itself to EventRinger.com, GoDesi.wiki and

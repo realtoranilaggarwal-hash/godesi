@@ -178,7 +178,7 @@ export async function GET(request: Request) {
             }
           : {}),
       },
-      orderBy: [{ badge: "desc" }, { paidCents: "desc" }, { publishedAt: "desc" }],
+      orderBy: [{ badge: "desc" }, { rankCents: "desc" }, { publishedAt: "desc" }],
       take: limit,
       select: {
         slug: true,

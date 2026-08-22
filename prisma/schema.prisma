@@ -711,6 +711,12 @@ model Business {
   yearsExperience    Int?
   status             ListingStatus @default(PENDING)
   featured           Boolean       @default(false)
+  /// 0 free, 1 Pro, 2 Featured — decides card order and the gold treatment.
+  featuredRank       Int           @default(0)
+  /// When the paid term runs out; null on a card that was never paid for.
+  featuredUntil      DateTime?
+  /// Paid cards show phone and email unless the owner switches them off here.
+  hideContact        Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.
   source             String?
   /// The public page a starter row's facts were read from, credited on the card
@@ -1780,6 +1786,8 @@ model UpiRequest {
   userId       String
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan         Plan
+  /// Months of membership the buyer is paying for: 1, 12 or 60.
+  months       Int              @default(1)
   amountMinor  Int
   currency     String           @default("INR")
   /// Short code the buyer puts in the UPI note, e.g. GD7K3QF2.
@@ -1865,8 +1873,12 @@ model EliteEntry {
   /// NONE, BASIC (30-60s edit) or PRO (3-minute professional film).
   videoPackage  String  @default("NONE")
   /// Everything this member has paid towards their Elite profile, in cents.
-  /// Higher spend ranks the profile above others in its section.
   paidCents     Int     @default(0)
+  /// The part of that spend still inside its paid term; higher spend ranks the
+  /// profile above others in its section, and expiry drops it back to zero.
+  rankCents     Int     @default(0)
+  /// End of the paid Elite term; null for staff-compiled and unpaid profiles.
+  eliteUntil    DateTime?
 
   orders EliteOrder[]
   claims EliteClaim[]
@@ -1889,6 +1901,7 @@ model EliteEntry {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([status, badge, rankCents])
   @@index([status, badge, publishedAt])
   @@index([userId])
 }

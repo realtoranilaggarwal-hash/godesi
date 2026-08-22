@@ -1,4 +1,9 @@
 import type { Plan, User } from "@prisma/client";
+import type { Currency } from "@/lib/currency";
+
+export type TermId = "MONTH" | "YEAR" | "FIVE_YEAR";
+
+export type Price = { inr: number; usd: number };
 
 export type PlanInfo = {
   id: Plan;
@@ -6,11 +11,61 @@ export type PlanInfo = {
   priceInr: number;
   /** PayPal cannot settle INR, so paid plans are also priced in USD. */
   priceUsd: number;
+  /** What each term costs; a term the plan does not sell is absent. */
+  terms: Partial<Record<TermId, Price>>;
   mediaLimit: number;
   /** Local news reports a member may publish in a rolling week. */
   newsPostsPerWeek: number;
   features: string[];
 };
+
+/** The five-year price is a founding offer, and it stops on this date. */
+export const FOUNDING_OFFER_ENDS = new Date("2026-12-31T23:59:59Z");
+
+export function foundingOfferOpen(now: Date = new Date()) {
+  return now.getTime() <= FOUNDING_OFFER_ENDS.getTime();
+}
+
+export const FOUNDING_OFFER_ENDS_LABEL = "31 December 2026";
+
+export const PLAN_TERMS: Record<
+  TermId,
+  { id: TermId; months: number; label: string; founding: boolean }
+> = {
+  MONTH: { id: "MONTH", months: 1, label: "a month", founding: false },
+  YEAR: { id: "YEAR", months: 12, label: "a year", founding: false },
+  FIVE_YEAR: {
+    id: "FIVE_YEAR",
+    months: 60,
+    label: "5 years",
+    founding: true,
+  },
+};
+
+export function termOrThrow(value: string): TermId {
+  if (value === "MONTH" || value === "YEAR" || value === "FIVE_YEAR")
+    return value;
+  throw new Error("Unknown term");
+}
+
+/** Terms a plan can actually be bought for, cheapest first. */
+export function planTerms(plan: PlanInfo, now: Date = new Date()): TermId[] {
+  return (Object.keys(PLAN_TERMS) as TermId[]).filter(
+    (id) =>
+      Boolean(plan.terms[id]) &&
+      (!PLAN_TERMS[id].founding || foundingOfferOpen(now)),
+  );
+}
+
+export function planTermPrice(
+  plan: PlanInfo,
+  term: TermId,
+  currency: Currency,
+): number | null {
+  const price = plan.terms[term];
+  if (!price) return null;
+  return currency === "INR" ? price.inr : price.usd;
+}
 
 export const PLANS: Record<Plan, PlanInfo> = {
   FREE: {
@@ -18,13 +73,14 @@ export const PLANS: Record<Plan, PlanInfo> = {
     name: "Free",
     priceInr: 0,
     priceUsd: 0,
-    mediaLimit: 5,
+    terms: {},
+    mediaLimit: 1,
     newsPostsPerWeek: 1,
     features: [
       "Digital business card profile",
       "Unique QR code + download",
       "WhatsApp click-to-chat button",
-      "Up to 5 uploaded images",
+      "1 uploaded photo",
       "1 YouTube video and 6 photos from your Google Photos album",
       "One category only",
       "Phone, email and links hidden in your description",
@@ -37,15 +93,19 @@ export const PLANS: Record<Plan, PlanInfo> = {
     name: "Pro",
     priceInr: 499,
     priceUsd: 5.99,
-    mediaLimit: 20,
+    terms: {
+      MONTH: { inr: 499, usd: 5.99 },
+      YEAR: { inr: 2_999, usd: 59 },
+    },
+    mediaLimit: 3,
     newsPostsPerWeek: 10,
     features: [
       "Everything in Free",
-      "Featured listing badge",
-      "Up to 20 uploaded images",
-      "6 YouTube videos and 18 photos from your Google Photos album",
-      "Phone and email shown on your listing",
-      "List under 2 extra categories",
+      "Listed above free cards in your category",
+      "Up to 3 uploaded photos",
+      "2 YouTube videos and 15 photos from your Google Photos album",
+      "Phone and email shown on your listing (you can hide them)",
+      "3 categories in all — your main one plus 2 more",
       "No Godesi service fee on ticket sales",
       "10 news stories a week",
       "Higher search ranking than Free",
@@ -53,20 +113,27 @@ export const PLANS: Record<Plan, PlanInfo> = {
   },
   PREMIUM: {
     id: "PREMIUM",
-    name: "Premium",
+    name: "Featured",
     priceInr: 999,
-    priceUsd: 11.99,
-    mediaLimit: 20,
+    priceUsd: 50,
+    terms: {
+      MONTH: { inr: 999, usd: 50 },
+      YEAR: { inr: 4_999, usd: 600 },
+      FIVE_YEAR: { inr: 4_999, usd: 600 },
+    },
+    mediaLimit: 5,
     newsPostsPerWeek: 10,
     features: [
       "Everything in Pro",
+      "Gold ring and Featured ribbon on your card for the whole term",
+      "Top of your category, above Pro and free cards",
+      "Phone and email shown to everyone (a switch you can turn off)",
+      "Up to 5 uploaded photos",
+      "3 YouTube videos and 30 photos from your Google Photos album",
+      "5 categories in all — your main one plus 4 more",
       "Unlock lead contact details",
-      "List under 5 extra categories",
       "Get ticket money paid straight into your own Stripe account",
       "Analytics dashboard",
-      "Priority ranking in search",
-      "Up to 20 uploaded images",
-      "12 YouTube videos and 36 photos from your Google Photos album",
     ],
   },
 };
@@ -104,7 +171,7 @@ export function listingImageLimit(user: Pick<User, "plan" | "planExpiresAt">) {
   return effectivePlan(user) === "FREE" ? 1 : PLANS[effectivePlan(user)].mediaLimit;
 }
 
-const VIDEO_LIMITS: Record<Plan, number> = { FREE: 1, PRO: 6, PREMIUM: 12 };
+const VIDEO_LIMITS: Record<Plan, number> = { FREE: 1, PRO: 2, PREMIUM: 3 };
 
 /** The ceiling, used when staff edit a card on the owner's behalf. */
 export const MAX_VIDEO_LIMIT = VIDEO_LIMITS.PREMIUM;
@@ -121,7 +188,7 @@ export function videoLimit(
   return VIDEO_LIMITS[effectivePlan(user)];
 }
 
-const ALBUM_PHOTO_LIMITS: Record<Plan, number> = { FREE: 6, PRO: 18, PREMIUM: 36 };
+const ALBUM_PHOTO_LIMITS: Record<Plan, number> = { FREE: 6, PRO: 15, PREMIUM: 30 };
 
 /**
  * Thumbnails shown from a member's public Google Photos album. Google hosts the
@@ -166,5 +233,5 @@ export function extraCategoryLimit(
 const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
   FREE: 0,
   PRO: 2,
-  PREMIUM: 5,
+  PREMIUM: 4,
 };
