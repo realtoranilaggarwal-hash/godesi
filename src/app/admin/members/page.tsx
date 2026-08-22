@@ -5,7 +5,6 @@ import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { deleteMembersAction } from "@/app/actions/members";
-import { makeModeratorAction } from "@/app/actions/team";
 import { formatMinor } from "@/lib/format";
 import { looksLikeSpam, spamSignals } from "@/lib/signupGuard";
 import { Badge, Card, inputClass } from "@/components/ui";
@@ -245,7 +244,8 @@ export default async function Page({
                             <div className="mt-1">
                               <button
                                 type="submit"
-                                formAction={makeModeratorAction}
+                                formMethod="post"
+                                formAction="/admin/team/apply"
                                 name="id"
                                 value={row.id}
                                 className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"

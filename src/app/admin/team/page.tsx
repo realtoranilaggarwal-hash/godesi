@@ -5,11 +5,6 @@ import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { ModeratorForm } from "@/components/forms/ModeratorForm";
-import {
-  makeModeratorAction,
-  revokeModeratorAction,
-  updateModeratorPermissionsAction,
-} from "@/app/actions/team";
 import { ALL_PERMISSIONS, STAFF_PERMISSIONS } from "@/lib/permissions";
 import { Badge, Card, inputClass } from "@/components/ui";
 
@@ -19,7 +14,7 @@ export const metadata: Metadata = { title: "Team access" };
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: { q?: string; done?: string; error?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/team");
@@ -63,6 +58,17 @@ export default async function Page({
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Team access</h1>
+
+      {searchParams.done ? (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+          {searchParams.done}
+        </p>
+      ) : null}
+      {searchParams.error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          {searchParams.error}
+        </p>
+      ) : null}
 
       <Card id="make-moderator">
         <h2 className="mb-1 text-lg font-bold">Make someone a moderator</h2>
@@ -133,7 +139,8 @@ export default async function Page({
                   {candidate.createdAt.toLocaleDateString("en-IN")}
                 </p>
               </div>
-              <form action={makeModeratorAction}>
+              <form method="post" action="/admin/team/apply">
+                <input type="hidden" name="intent" value="make" />
                 <input type="hidden" name="id" value={candidate.id} />
                 <button
                   type="submit"
@@ -169,9 +176,11 @@ export default async function Page({
                 <p className="font-medium">{moderator.name ?? "Member"}</p>
                 <p className="text-xs text-slate-400">{moderator.email}</p>
                 <form
-                  action={updateModeratorPermissionsAction}
+                  method="post"
+                  action="/admin/team/apply"
                   className="mt-1 flex flex-wrap items-center gap-2"
                 >
+                  <input type="hidden" name="intent" value="permissions" />
                   <input type="hidden" name="id" value={moderator.id} />
                   {STAFF_PERMISSIONS.map((permission) => (
                     <label
@@ -199,7 +208,8 @@ export default async function Page({
               </div>
               <div className="flex shrink-0 flex-col gap-1">
                 {moderator.staffPermissions.length < ALL_PERMISSIONS.length ? (
-                  <form action={makeModeratorAction}>
+                  <form method="post" action="/admin/team/apply">
+                    <input type="hidden" name="intent" value="make" />
                     <input type="hidden" name="id" value={moderator.id} />
                     {ALL_PERMISSIONS.map((permission) => (
                       <input
@@ -217,7 +227,8 @@ export default async function Page({
                     </button>
                   </form>
                 ) : null}
-                <form action={revokeModeratorAction}>
+                <form method="post" action="/admin/team/apply">
+                  <input type="hidden" name="intent" value="revoke" />
                   <input type="hidden" name="id" value={moderator.id} />
                   <button
                     type="submit"
