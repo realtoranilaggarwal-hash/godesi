@@ -6,6 +6,7 @@ import { indianweddings } from "./prospects/indianweddings";
 import { jabwewed } from "./prospects/jabwewed";
 import { localfiles } from "./prospects/localfiles";
 import { shaadishop } from "./prospects/shaadishop";
+import { weddingconnect } from "./prospects/weddingconnect";
 import {
   page,
   pause,
@@ -23,6 +24,7 @@ import {
  *   npm run db:prospects -- jabwewed
  *   npm run db:prospects -- indianweddings              # US wedding vendors
  *   npm run db:prospects -- shaadishop texas             # one region's list
+ *   npm run db:prospects -- weddingconnect               # US wedding suppliers
  *
  * A business already listed somewhere is the warmest lead we have, so we read
  * these directories for facts only: who exists, what they do, and how to ring
@@ -42,6 +44,7 @@ const READERS: Record<string, Reader> = {
   jabwewed,
   localfiles,
   shaadishop,
+  weddingconnect,
 };
 
 type Facts = {

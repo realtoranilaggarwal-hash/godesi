@@ -15,19 +15,20 @@ import {
   type Reader,
 } from "./shared";
 
-
 /**
- * indianweddings.org — a US South Asian wedding vendor directory. Every vendor
- * page publishes machine-readable facts for search engines: name, telephone,
- * enquiry email, town, state and the vendor's own website. We read those.
+ * theweddingconnect.com — a US wedding vendor directory. Not a desi site, but
+ * every vendor page publishes the vendor's own telephone, mailbox, town, state
+ * and website for search engines, which is a call list of American wedding
+ * suppliers: DJs, halls, caterers, photographers, florists, planners.
  *
- *   npm run db:prospects -- indianweddings
- *   npm run db:prospects -- indianweddings dallas
+ *   npm run db:prospects -- weddingconnect
+ *   npm run db:prospects -- weddingconnect dj
  *
- * Their own photos and their own write-ups stay theirs; nothing is copied.
+ * Their write-ups, galleries and reviews are theirs; none of it is copied.
  */
 
-const ROOT = "https://indianweddings.org";
+const HOST = "theweddingconnect.com";
+const ROOT = `https://${HOST}`;
 
 /** Vendor pages, from the sitemap they publish for crawlers. */
 async function profiles() {
@@ -38,14 +39,21 @@ async function profiles() {
     .filter((url) => !url.endsWith("/vendors"));
 }
 
-export const indianweddings: Reader = {
-  host: "indianweddings.org",
-  filter: "slug fragment, e.g. dallas or venue",
+/** Their page title ends with the trade and the state: "… | DJs - Florida". */
+function trade(html: string) {
+  const title = entities(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
+  const tail = title.split("|").slice(1).join(" ");
+  return tail.split("-")[0].trim() || "wedding";
+}
+
+export const weddingconnect: Reader = {
+  host: HOST,
+  filter: "slug fragment, e.g. dj or texas",
   async *read(only) {
     const urls = (await profiles()).filter(
       (url) => !only.length || only.some((word) => url.includes(word)),
     );
-    console.log(`indianweddings.org: ${urls.length} vendor pages`);
+    console.log(`${HOST}: ${urls.length} vendor pages`);
 
     for (const url of urls) {
       const html = await page(url);
@@ -58,28 +66,16 @@ export const indianweddings: Reader = {
       if (!name) continue;
 
       const where = postal(found.address);
-      // Their page title ends with the trade, e.g. "… | Indian Wedding Venues".
-      const trade = entities(
-        html
-          .match(/<title>([^<]*)<\/title>/)?.[1]
-          ?.split("|")
-          .slice(1)
-          .join(" ")
-          .replace(/indian wedding/i, "")
-          .trim() || "wedding",
-      );
-      const websiteUrl = ownSite(found.sameAs, "indianweddings.org");
-
       const lead: Lead = {
         name,
-        trade,
+        trade: trade(html),
         sourceUrl: url,
         phone: phone(text(found.telephone)),
-        email: ownEmail(text(found.email), "indianweddings.org"),
-        city: text(where.addressLocality).replace(/\s+metro$/i, ""),
+        email: ownEmail(text(found.email), HOST),
+        city: text(where.addressLocality),
         state: stateCode(text(where.addressRegion)),
         address: text(where.streetAddress),
-        websiteUrl,
+        websiteUrl: ownSite(found.sameAs, HOST),
       };
       yield lead;
     }
