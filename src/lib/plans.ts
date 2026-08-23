@@ -42,6 +42,13 @@ export const PLAN_TERMS: Record<
   },
 };
 
+/** A term posted by a form, or nothing — a tampered field is not an exception. */
+export function termOrNull(value: string): TermId | null {
+  return value === "MONTH" || value === "YEAR" || value === "FIVE_YEAR"
+    ? value
+    : null;
+}
+
 export function termOrThrow(value: string): TermId {
   if (value === "MONTH" || value === "YEAR" || value === "FIVE_YEAR")
     return value;

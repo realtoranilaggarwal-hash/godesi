@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { activatePlan, planOrThrow } from "@/lib/billing";
-import { PLAN_TERMS, planTermPrice, planTerms, termOrThrow } from "@/lib/plans";
+import { activatePlan, planOrNull } from "@/lib/billing";
+import { PLAN_TERMS, planTermPrice, planTerms, termOrNull } from "@/lib/plans";
 import { toMinor } from "@/lib/format";
 import { newUpiReference, upiEnabled } from "@/lib/upi";
 import { checkCoupon } from "@/lib/coupons";
@@ -14,10 +14,14 @@ import { checkCoupon } from "@/lib/coupons";
 /** Creates a UPI request and sends the buyer to the QR page. */
 export async function startUpiPaymentAction(formData: FormData) {
   const user = await requireUser();
-  const plan = planOrThrow(String(formData.get("plan") ?? ""));
+  const plan =
+    planOrNull(String(formData.get("plan") ?? "")) ??
+    redirect("/pricing?error=term");
   if (!upiEnabled()) redirect("/pricing?error=upi_unavailable");
 
-  const term = termOrThrow(String(formData.get("term") ?? "MONTH"));
+  const term =
+    termOrNull(String(formData.get("term") ?? "MONTH")) ??
+    redirect("/pricing?error=term");
   if (!planTerms(plan).includes(term)) redirect("/pricing?error=term");
   const listAmount = toMinor(planTermPrice(plan, term, "INR") ?? 0);
   const code = String(formData.get("couponCode") ?? "").trim();

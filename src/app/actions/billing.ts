@@ -7,7 +7,7 @@ import {
   activatePlan,
   downgradeToFree,
   grantBundle,
-  planOrThrow,
+  planOrNull,
 } from "@/lib/billing";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
@@ -17,7 +17,7 @@ import {
   PLAN_TERMS,
   planTermPrice,
   planTerms,
-  termOrThrow,
+  termOrNull,
   type PlanInfo,
   type TermId,
 } from "@/lib/plans";
@@ -37,7 +37,9 @@ import {
  */
 export async function startStripeCheckoutAction(formData: FormData) {
   const user = await requireUser();
-  const plan = planOrThrow(String(formData.get("plan") ?? ""));
+  const plan =
+    planOrNull(String(formData.get("plan") ?? "")) ??
+    redirect("/pricing?error=term");
   const term = requestedTerm(formData, plan);
 
   if (!stripeEnabled()) redirect("/pricing?error=stripe_unavailable");
@@ -185,7 +187,9 @@ export async function startBundleCheckoutAction(formData: FormData) {
  * five-year founding price, for instance, once the offer has closed).
  */
 function requestedTerm(formData: FormData, plan: PlanInfo): TermId {
-  const term = termOrThrow(String(formData.get("term") ?? "MONTH"));
+  const term =
+    termOrNull(String(formData.get("term") ?? "MONTH")) ??
+    redirect("/pricing?error=term");
   if (!planTerms(plan).includes(term)) redirect("/pricing?error=term");
   return term;
 }
@@ -204,7 +208,9 @@ export async function downgradeToFreeAction() {
  */
 export async function mockSubscribeAction(formData: FormData) {
   const user = await requireUser();
-  const plan = planOrThrow(String(formData.get("plan") ?? ""));
+  const plan =
+    planOrNull(String(formData.get("plan") ?? "")) ??
+    redirect("/pricing?error=term");
 
   if (stripeEnabled() || paypalEnabled())
     redirect("/pricing?error=mock_disabled");

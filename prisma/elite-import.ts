@@ -1,5 +1,5 @@
 import { db } from "../src/lib/db";
-import { uniqueEliteSlug } from "../src/lib/elite";
+import { uniqueEliteSlug } from "../src/lib/eliteSlug";
 
 /**
  * Seeds GoDesi Elite with well-known desi figures in the United States, so the

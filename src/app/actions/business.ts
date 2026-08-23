@@ -25,7 +25,7 @@ import {
   missingChoiceGroups,
   specialtySet,
 } from "@/lib/specialties";
-import { uniqueSlug } from "@/lib/slug";
+import { uniqueSlug } from "@/lib/uniqueSlug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewards";
 import { isSupportedVideoUrl } from "@/lib/video";

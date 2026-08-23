@@ -16,8 +16,8 @@ import {
   INTERVIEW_TYPES,
   ELITE_CATEGORIES,
   elitePackageOrThrow,
-  uniqueEliteSlug,
 } from "@/lib/elite";
+import { uniqueEliteSlug } from "@/lib/eliteSlug";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { termEnd } from "@/lib/billing";
 import { BUNDLE_MONTHS } from "@/lib/bundles";

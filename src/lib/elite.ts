@@ -1,6 +1,4 @@
 import type { Prisma, EliteBadge, EliteStatus } from "@prisma/client";
-import { db } from "@/lib/db";
-import { slugify } from "@/lib/slug";
 
 export const ELITE_STATUS_LABELS: Record<EliteStatus, string> = {
   PENDING: "Waiting for review",
@@ -180,17 +178,6 @@ export function eliteWhere(filters: EliteFilters): Prisma.EliteEntryWhereInput {
     ];
   }
   return where;
-}
-
-export async function uniqueEliteSlug(name: string, city?: string) {
-  const base = slugify(city ? `${name}-${city}` : name) || "member";
-  let slug = base;
-  let suffix = 1;
-  while (await db.eliteEntry.findUnique({ where: { slug } })) {
-    suffix += 1;
-    slug = `${base}-${suffix}`;
-  }
-  return slug;
 }
 
 /** Contact details are only shown for Premium and Featured entries. */

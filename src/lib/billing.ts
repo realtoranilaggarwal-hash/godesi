@@ -215,6 +215,11 @@ export function assertPaidPlan(planId: string): Plan {
   return planId;
 }
 
+/** A plan posted by a form, or nothing, so the caller can send them back. */
+export function planOrNull(planId: string) {
+  return planId === "PRO" || planId === "PREMIUM" ? PLANS[planId] : null;
+}
+
 export function planOrThrow(planId: string) {
   const plan = PLANS[assertPaidPlan(planId)];
   if (!plan) throw new Error("Unknown plan");

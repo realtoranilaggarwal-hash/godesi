@@ -8,7 +8,7 @@ import { requirePermission } from "@/lib/auth";
 import { readBusinessLink } from "@/lib/businessLink";
 import { normalizeWhatsApp } from "@/lib/format";
 import { cleanServiceOptions, cleanSpecialties } from "@/lib/specialties";
-import { uniqueSlug } from "@/lib/slug";
+import { uniqueSlug } from "@/lib/uniqueSlug";
 import { titleCase } from "@/lib/titlecase";
 
 const DESK = "/admin/listings/wire";
