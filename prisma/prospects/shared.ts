@@ -50,6 +50,10 @@ export function phone(value: string) {
   // Listings sometimes carry the country code twice, e.g. "+1 +1 (281) …".
   const digits = value.replace(/\D+/g, "").replace(/^1+(?=\d{10}$)/, "");
   if (digits.length !== 10) return "";
+  // A real US number has no leading 0 or 1 in its area code or exchange, and a
+  // page full of 555s or 3333333333 is a placeholder, not a business.
+  if (!/^[2-9]\d\d[2-9]/.test(digits)) return "";
+  if (/^(\d)\1{9}$/.test(digits)) return "";
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 

@@ -5,6 +5,7 @@ import { deshvidesh } from "./prospects/deshvidesh";
 import { indianweddings } from "./prospects/indianweddings";
 import { jabwewed } from "./prospects/jabwewed";
 import { localfiles } from "./prospects/localfiles";
+import { shaadishop } from "./prospects/shaadishop";
 import {
   page,
   pause,
@@ -21,6 +22,7 @@ import {
  *   npm run db:prospects -- deshvidesh disc-jockey     # one trade
  *   npm run db:prospects -- jabwewed
  *   npm run db:prospects -- indianweddings              # US wedding vendors
+ *   npm run db:prospects -- shaadishop texas             # one region's list
  *
  * A business already listed somewhere is the warmest lead we have, so we read
  * these directories for facts only: who exists, what they do, and how to ring
@@ -39,6 +41,7 @@ const READERS: Record<string, Reader> = {
   indianweddings,
   jabwewed,
   localfiles,
+  shaadishop,
 };
 
 type Facts = {
@@ -125,7 +128,8 @@ async function contact(lead: Lead) {
   return {
     about: own.about,
     logoUrl: logo,
-    phone: dialable(lead.phone || own.phone) || lead.phone || own.phone,
+    // A number a moderator can't dial is worse than a blank: it wastes a call.
+    phone: dialable(lead.phone) || dialable(own.phone),
     email: lead.email || own.email,
     city: lead.city || own.city,
     state: lead.state || own.state,

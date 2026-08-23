@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/auth";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
 import { CATEGORY_TREE } from "@/lib/categories";
 import { siteUrl, whatsappLink } from "@/lib/format";
@@ -54,7 +55,9 @@ export default async function AdminProspectsPage({
     page?: string;
   };
 }) {
-  const staff = await requireStaff();
+  const staff = await getCurrentUser();
+  if (!staff) redirect("/login?next=/admin/prospects");
+  if (!isStaff(staff)) redirect("/dashboard");
 
   const status = STATUSES.find((entry) => entry.key === searchParams.status)?.key;
   const page = Math.max(1, Number(searchParams.page ?? "1") || 1);
