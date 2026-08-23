@@ -6,7 +6,9 @@ import { indianweddings } from "./prospects/indianweddings";
 import { jabwewed } from "./prospects/jabwewed";
 import { localfiles } from "./prospects/localfiles";
 import { shaadishop } from "./prospects/shaadishop";
+import { wedbae } from "./prospects/wedbae";
 import { weddingconnect } from "./prospects/weddingconnect";
+import { weddingfile } from "./prospects/weddingfile";
 import {
   page,
   pause,
@@ -44,7 +46,9 @@ const READERS: Record<string, Reader> = {
   jabwewed,
   localfiles,
   shaadishop,
+  wedbae,
   weddingconnect,
+  weddingfile,
 };
 
 type Facts = {
@@ -136,7 +140,8 @@ async function contact(lead: Lead) {
     email: lead.email || own.email,
     city: lead.city || own.city,
     state: lead.state || own.state,
-    address: lead.address || own.address,
+    // Own-site addresses arrive as a postal block; a call sheet wants one line.
+    address: (lead.address || own.address).replace(/\s+/g, " ").trim(),
     categorySlug: own.categorySlug || guessCategory(lead.trade),
     subcategorySlug: own.subcategorySlug,
   };

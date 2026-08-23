@@ -35,6 +35,9 @@ export async function page(url: string): Promise<string | null> {
 
 export function entities(value: string) {
   return value
+    .replace(/&#(\d+);/g, (_whole, code: string) =>
+      String.fromCharCode(Number(code)),
+    )
     .replace(/&amp;/g, "&")
     .replace(/&#0?39;|&apos;|&rsquo;/g, "'")
     .replace(/&quot;|&ldquo;|&rdquo;/g, '"')

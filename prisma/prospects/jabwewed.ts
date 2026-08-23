@@ -1,4 +1,4 @@
-import { entities, page, pause, phone, type Lead, type Reader } from "./shared";
+import { entities, page, pause, phone, type Reader } from "./shared";
 
 /**
  * jabwewed.com — a Houston wedding marketplace. Small (about 290 vendors) but
