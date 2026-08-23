@@ -3,6 +3,7 @@ import { hash } from "bcryptjs";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { parseIcs, type IcsEvent } from "@/lib/ics";
+import { publicUrl } from "@/lib/pageRead";
 import {
   guessEventCategories,
   guessEventLanguages,
@@ -176,7 +177,8 @@ type Source = {
 };
 
 async function fetchFeed(url: string, timeoutMs = 20_000) {
-  const response = await fetch(url, {
+  const target = await publicUrl(url);
+  const response = await fetch(target.toString(), {
     headers: { "User-Agent": "GodesiEventWire/1.0 (+https://godesi.com)" },
     cache: "no-store",
     signal: AbortSignal.timeout(timeoutMs),
@@ -321,10 +323,6 @@ export async function importSource(source: Source): Promise<WireResult> {
   return result;
 }
 
-/** Keeps the discovery fetch off our own network. */
-const PRIVATE_HOST =
-  /^(localhost$|0\.|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1)/i;
-
 /** Where community sites keep their calendar when it is not on the front page. */
 const CALENDAR_PAGES = [
   "/events",
@@ -358,12 +356,9 @@ function googleIcsFrom(page: string) {
  * the admin never saves an address that turns out to be a web page.
  */
 export async function discoverFeeds(website: string) {
-  const target = new URL(website);
-  const privateHost =
-    PRIVATE_HOST.test(target.hostname) && process.env.NODE_ENV === "production";
-  if (!/^https?:$/.test(target.protocol) || privateHost) {
+  const target = await publicUrl(website).catch(() => {
     throw new Error("That address is not a public website.");
-  }
+  });
   const origin = target.origin;
 
   // Temples rarely put the calendar on the front page, so the usual event
