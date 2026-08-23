@@ -8,17 +8,17 @@ export const dynamic = "force-dynamic";
 /**
  * Every open tab polls this, so the answer is shared: cached at the edge and
  * memoised on the server. However many people are browsing, the database is
- * read about twice a minute — otherwise the polling alone keeps the database
- * awake around the clock and burns the compute quota.
+ * read about once every two minutes — otherwise the polling alone keeps the
+ * database awake around the clock and burns the compute quota.
  */
 const cachedSnapshot = unstable_cache(liveSnapshot, ["live-snapshot"], {
-  revalidate: 30,
+  revalidate: 120,
 });
 
 export async function GET() {
   return NextResponse.json(await cachedSnapshot(), {
     headers: {
-      "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
+      "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
     },
   });
 }

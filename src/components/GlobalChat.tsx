@@ -10,11 +10,11 @@ import {
 import { emptyState } from "@/lib/actions";
 import { CHAT_MAX_LENGTH, type ChatLine } from "@/lib/chat";
 
-const POLL_MS = 5000;
+const POLL_MS = 20_000;
 
 /**
- * Global chit-chat room. Polling keeps it serverless-friendly: one small read
- * every few seconds, and only while the tab is actually visible.
+ * Global chit-chat room. Polling keeps it serverless-friendly: a shared cached
+ * read every twenty seconds, and only while the tab is actually visible.
  */
 export function GlobalChat({
   initial,

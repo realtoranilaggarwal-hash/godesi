@@ -82,7 +82,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "WhatsApp click-to-chat button",
       "1 uploaded photo",
       "1 YouTube video and 6 photos from your Google Photos album",
-      "One category only",
+      "3 categories in all — your main one plus 2 more",
       "Phone, email and links hidden in your description",
       "Post events and sell tickets (Godesi keeps a 2% service fee)",
       "1 news story a week",
@@ -105,7 +105,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Up to 3 uploaded photos",
       "2 YouTube videos and 15 photos from your Google Photos album",
       "Phone and email shown on your listing (you can hide them)",
-      "3 categories in all — your main one plus 2 more",
+      "5 categories in all — your main one plus 4 more",
       "No Godesi service fee on ticket sales",
       "10 news stories a week",
       "Higher search ranking than Free",
@@ -130,7 +130,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Phone and email shown to everyone (a switch you can turn off)",
       "Up to 5 uploaded photos",
       "3 YouTube videos and 30 photos from your Google Photos album",
-      "5 categories in all — your main one plus 4 more",
+      "10 categories in all — your main one plus 9 more",
       "Unlock lead contact details",
       "Get ticket money paid straight into your own Stripe account",
       "Analytics dashboard",
@@ -231,7 +231,7 @@ export function extraCategoryLimit(
 }
 
 const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
-  FREE: 0,
-  PRO: 2,
-  PREMIUM: 4,
+  FREE: 2,
+  PRO: 4,
+  PREMIUM: 9,
 };

@@ -59,6 +59,22 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
+/**
+ * The signed-in member's id straight from the session cookie. Polled routes
+ * use this instead of getCurrentUser so a tab left open does not run a
+ * database query every few seconds.
+ */
+export async function currentUserId(): Promise<string | null> {
+  const token = cookies().get(COOKIE)?.value;
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, secret());
+    return typeof payload.sub === "string" ? payload.sub : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function requireUser(): Promise<User> {
   const user = await getCurrentUser();
   if (!user) throw new Error("UNAUTHORIZED");

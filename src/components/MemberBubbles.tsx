@@ -83,7 +83,7 @@ export function MemberBubbles({
       }
     };
 
-    const timer = window.setInterval(load, 180_000);
+    const timer = window.setInterval(load, 600_000);
     return () => window.clearInterval(timer);
   }, []);
 

@@ -42,9 +42,9 @@ export function LiveVisitorMap({ compact = false }: { compact?: boolean }) {
             .catch(() => undefined);
 
     void load();
-    // The endpoint is cached for 30s, so polling faster than this only adds
-    // requests without adding information.
-    const timer = setInterval(load, 60_000);
+    // The endpoint is cached for two minutes, so polling faster than this only
+    // adds requests without adding information.
+    const timer = setInterval(load, 300_000);
     return () => {
       active = false;
       clearInterval(timer);

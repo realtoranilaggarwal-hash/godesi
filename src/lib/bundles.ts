@@ -62,7 +62,7 @@ export const CART_ITEMS: CartItem[] = [
     key: "membership",
     label: "Featured membership — 5 years",
     blurb:
-      "Gold ring and Featured ribbon, top of your category, phone and email shown, 5 photos, 3 videos, 30 album photos, 5 categories, enquiry contacts unlocked, analytics and your own Stripe payouts",
+      "Gold ring and Featured ribbon, top of your category, phone and email shown, 5 photos, 3 videos, 30 album photos, 10 categories, enquiry contacts unlocked, analytics and your own Stripe payouts",
     inr: featured.terms.FIVE_YEAR?.inr ?? featured.priceInr,
     usd: featured.terms.FIVE_YEAR?.usd ?? featured.priceUsd,
     inBundle: true,

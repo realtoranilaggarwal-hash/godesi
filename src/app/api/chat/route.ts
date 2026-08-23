@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { currentUserId } from "@/lib/auth";
 import { recentChat } from "@/lib/chat";
 
 export const dynamic = "force-dynamic";
 
-/** Polled by the chat box every few seconds — cheap read, no cache. */
+/**
+ * Polled by the chat box. The lines come from a shared cache and the viewer is
+ * read from the session cookie, so a poll costs no database query at all
+ * unless the cache has expired.
+ */
 export async function GET() {
-  const user = await getCurrentUser();
-  const messages = await recentChat(user?.id ?? null);
+  const messages = await recentChat(await currentUserId());
   return NextResponse.json(
     { messages },
     { headers: { "cache-control": "no-store" } },

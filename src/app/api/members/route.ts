@@ -26,15 +26,15 @@ async function newestMembers() {
 
 /** Newest members for the floating bubbles on the home hero. */
 const cachedMembers = unstable_cache(newestMembers, ["newest-members"], {
-  revalidate: 120,
+  revalidate: 600,
 });
 
-// Every open home page polls this. A signup showing up two minutes late costs
-// nobody anything; a database read per tab per 30 seconds costs compute hours.
+// Every open home page polls this. A signup showing up ten minutes late costs
+// nobody anything; a database read per tab per minute costs compute hours.
 export async function GET() {
   return NextResponse.json(await cachedMembers(), {
     headers: {
-      "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
+      "Cache-Control": "public, s-maxage=600, stale-while-revalidate=1800",
     },
   });
 }
