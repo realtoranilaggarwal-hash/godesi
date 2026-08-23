@@ -1,4 +1,5 @@
-import { RESOURCE_KIND_LABELS, recommendedLinks } from "@/lib/resources";
+import { RESOURCE_KIND_LABELS } from "@/lib/resources";
+import { recommendedLinks } from "@/lib/resourcesQueries";
 import { LinkImpressions } from "@/components/LinkImpressions";
 import { SidebarBanners } from "@/components/Banners";
 
@@ -13,10 +14,12 @@ export async function SafetyResourcesRail() {
   return (
     <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">
       <div className="rounded-2xl border border-teal-200 bg-teal-50/60 p-4">
-        <h2 className="text-base font-bold text-teal-900">🛡️ Safety tools & tips</h2>
+        <h2 className="text-base font-bold text-teal-900">
+          🛡️ Safety tools & tips
+        </h2>
         <p className="mt-1 text-xs text-teal-800">
-          Meet in public places, verify who you are meeting and never send money.
-          Godesi does not handle payments between members.
+          Meet in public places, verify who you are meeting and never send
+          money. Godesi does not handle payments between members.
         </p>
 
         {links.length ? (
@@ -38,7 +41,9 @@ export async function SafetyResourcesRail() {
                   ) : null}
                   <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-teal-700/70">
                     <span>{RESOURCE_KIND_LABELS[link.kind]}</span>
-                    {link.tags.length ? <span>· {link.tags.join(", ")}</span> : null}
+                    {link.tags.length ? (
+                      <span>· {link.tags.join(", ")}</span>
+                    ) : null}
                   </p>
                 </li>
               ))}

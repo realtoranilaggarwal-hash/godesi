@@ -16,7 +16,7 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { AD_SLOT_ORDER } from "@/lib/ads";
 import { nextPosition } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { levelFor } from "@/lib/journalists";
 import { formatEventDate } from "@/lib/events";
 import {
@@ -321,7 +321,8 @@ export async function approveBannerAction(
     const banner = await db.banner.findUnique({ where: { id } });
     if (!banner) return { error: "Banner not found." };
 
-    const asked = Number.isInteger(requested) && requested > 0 ? requested : null;
+    const asked =
+      Number.isInteger(requested) && requested > 0 ? requested : null;
     // Positions are unbounded ordering numbers, so a placement never sells out:
     // an asked-for number that is in use simply moves to the next free one.
     const occupant = asked

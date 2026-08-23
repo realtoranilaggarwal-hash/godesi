@@ -7,7 +7,7 @@ import { PersonalProfileForm } from "@/components/forms/PersonalProfileForm";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
-import { alumniFor } from "@/lib/alumni";
+import { alumniFor } from "@/lib/alumniQueries";
 import { SignOutButton } from "@/components/SignOutButton";
 
 export const dynamic = "force-dynamic";

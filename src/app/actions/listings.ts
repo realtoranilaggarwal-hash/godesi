@@ -8,8 +8,12 @@ import { db } from "@/lib/db";
 import { can, getCurrentUser, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { requestCurrency } from "@/lib/currency";
-import { isMonthly, marketplaceCategories, uniqueListingSlug } from "@/lib/listings";
-import { awardPoints } from "@/lib/rewards";
+import { isMonthly } from "@/lib/listings";
+import {
+  marketplaceCategories,
+  uniqueListingSlug,
+} from "@/lib/listingsQueries";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
@@ -37,7 +41,13 @@ import {
 } from "@/lib/property";
 
 const schema = z.object({
-  kind: z.enum(["PROPERTY_SALE", "PROPERTY_RENT", "ROOM_WANTED", "ROOM_OFFERED", "MARKETPLACE"]),
+  kind: z.enum([
+    "PROPERTY_SALE",
+    "PROPERTY_RENT",
+    "ROOM_WANTED",
+    "ROOM_OFFERED",
+    "MARKETPLACE",
+  ]),
   title: z.string().min(6, "Give your listing a clear title"),
   description: z.string().min(20, "Add a few lines of detail"),
   city: z.string().min(2, "Which city?"),
@@ -120,7 +130,9 @@ const schema = z.object({
 });
 
 function oneOf(value: string | undefined, allowed: { slug: string }[]) {
-  return allowed.some((option) => option.slug === value) ? (value as string) : null;
+  return allowed.some((option) => option.slug === value)
+    ? (value as string)
+    : null;
 }
 
 /**
@@ -213,8 +225,8 @@ export async function createListingAction(
     if (parsed.data.kind === "MARKETPLACE") {
       const allowed = await marketplaceCategories();
       categorySlug =
-        allowed.find((category) => category.slug === parsed.data.categorySlug)?.slug ??
-        null;
+        allowed.find((category) => category.slug === parsed.data.categorySlug)
+          ?.slug ?? null;
       if (!categorySlug) {
         return { error: "Pick the category your item belongs to" };
       }
@@ -230,9 +242,12 @@ export async function createListingAction(
     }
 
     const isProperty =
-      parsed.data.kind === "PROPERTY_SALE" || parsed.data.kind === "PROPERTY_RENT";
+      parsed.data.kind === "PROPERTY_SALE" ||
+      parsed.data.kind === "PROPERTY_RENT";
     const propertyType = isProperty
-      ? (groupForType(parsed.data.propertyType ?? "") ? parsed.data.propertyType! : null)
+      ? groupForType(parsed.data.propertyType ?? "")
+        ? parsed.data.propertyType!
+        : null
       : null;
     const propertyGroup = propertyType ? groupForType(propertyType) : null;
     const openHouse = openHouseWindow(
@@ -384,7 +399,10 @@ export async function createListingAction(
  * can see demand. Never throws at the caller — a failed count must not block
  * the enquiry.
  */
-export async function recordListingLeadAction(listingId: string, channel: string) {
+export async function recordListingLeadAction(
+  listingId: string,
+  channel: string,
+) {
   if (!["whatsapp", "phone", "email"].includes(channel)) return;
   try {
     const user = await getCurrentUser();
@@ -412,7 +430,10 @@ export async function revealListingContactAction(listingId: string) {
   });
   if (!listing) return null;
 
-  await recordListingLeadAction(listingId, listing.contactPhone ? "phone" : "email");
+  await recordListingLeadAction(
+    listingId,
+    listing.contactPhone ? "phone" : "email",
+  );
   return listing;
 }
 

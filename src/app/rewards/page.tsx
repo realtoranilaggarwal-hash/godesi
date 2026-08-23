@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
-import { pointValues, REWARDS } from "@/lib/rewards";
+import { REWARDS } from "@/lib/rewards";
+import { pointValues } from "@/lib/rewardsQueries";
 import { FOUNDING_LIMIT } from "@/lib/founding";
 import { Badge, Card } from "@/components/ui";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -173,8 +174,8 @@ export default async function RewardsExplainerPage() {
             </ul>
             <p className="mt-3 text-xs text-slate-500">
               Redeem from your dashboard. Featured listings and Pro months apply
-              instantly; banners and homepage promotion are scheduled by our team
-              within a working day.
+              instantly; banners and homepage promotion are scheduled by our
+              team within a working day.
             </p>
           </Card>
         </div>

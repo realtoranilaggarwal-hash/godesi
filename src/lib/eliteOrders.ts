@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { ELITE_PACKAGES, type ElitePackageId } from "@/lib/elite";
 import { notify } from "@/lib/notifications";
-import { awardSpendPoints } from "@/lib/rewards";
+import { awardSpendPoints } from "@/lib/rewardsQueries";
 
 function eliteTermEnd(years: number) {
   const end = new Date();

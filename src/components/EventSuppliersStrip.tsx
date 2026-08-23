@@ -1,4 +1,4 @@
-import { recommendedLinks } from "@/lib/resources";
+import { recommendedLinks } from "@/lib/resourcesQueries";
 import { LinkImpressions } from "@/components/LinkImpressions";
 
 /**

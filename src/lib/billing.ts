@@ -2,7 +2,7 @@ import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
 import { notify } from "@/lib/notifications";
-import { awardPoints, awardSpendPoints } from "@/lib/rewards";
+import { awardPoints, awardSpendPoints } from "@/lib/rewardsQueries";
 import { cartItem, type CartItem } from "@/lib/bundles";
 
 /** Banners inside a package are still booked a year at a time. */

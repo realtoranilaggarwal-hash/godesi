@@ -5,13 +5,15 @@ import { gradientFor } from "@/lib/categories";
 import {
   WEDDING_GROUPS,
   WEDDING_SLUG,
+  weddingServiceName,
+  weddingServiceSlug,
+} from "@/lib/wedding";
+import {
   featuredWeddingVendors,
   weddingCities,
   weddingServiceCounts,
-  weddingServiceName,
-  weddingServiceSlug,
   weddingVendors,
-} from "@/lib/wedding";
+} from "@/lib/weddingQueries";
 import { VendorCard } from "@/components/VendorCard";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
@@ -54,24 +56,28 @@ export default async function WeddingPage({
 }) {
   const { city, service, rating, budget, q } = searchParams;
 
-  const [vendors, featured, requirements, serviceCounts, cities] = await Promise.all([
-    weddingVendors({
-      service,
-      city,
-      q,
-      minRating: rating ? Number(rating) : undefined,
-      budget: budget ? Number(budget) : undefined,
-    }),
-    featuredWeddingVendors(8),
-    db.lead.findMany({
-      where: { status: "OPEN", category: { contains: "wedding", mode: "insensitive" } },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-      select: { id: true, title: true, city: true, eventDate: true },
-    }),
-    weddingServiceCounts(),
-    weddingCities(),
-  ]);
+  const [vendors, featured, requirements, serviceCounts, cities] =
+    await Promise.all([
+      weddingVendors({
+        service,
+        city,
+        q,
+        minRating: rating ? Number(rating) : undefined,
+        budget: budget ? Number(budget) : undefined,
+      }),
+      featuredWeddingVendors(8),
+      db.lead.findMany({
+        where: {
+          status: "OPEN",
+          category: { contains: "wedding", mode: "insensitive" },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: { id: true, title: true, city: true, eventDate: true },
+      }),
+      weddingServiceCounts(),
+      weddingCities(),
+    ]);
 
   const activeName = service ? weddingServiceName(service) : undefined;
 
@@ -83,9 +89,10 @@ export default async function WeddingPage({
         >
           <h1 className="text-3xl font-black">Wedding services 💐</h1>
           <p className="mt-1 max-w-xl text-white/90">
-            Planners, photographers, makeup and mehndi artists, DJs, dhol, caterers,
-            decorators, mandap, venues, pandits, cars and invitations — see photos,
-            packages and prices, then message the vendor on WhatsApp.
+            Planners, photographers, makeup and mehndi artists, DJs, dhol,
+            caterers, decorators, mandap, venues, pandits, cars and invitations
+            — see photos, packages and prices, then message the vendor on
+            WhatsApp.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/wedding/requirements/new" variant="secondary">
@@ -354,7 +361,8 @@ export default async function WeddingPage({
             </ul>
           ) : (
             <p className="mt-2 text-sm text-slate-600">
-              No open requirements right now — post yours and vendors will reach out.
+              No open requirements right now — post yours and vendors will reach
+              out.
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
@@ -372,7 +380,9 @@ export default async function WeddingPage({
 
         {cities.length ? (
           <section aria-label="Wedding vendors by city">
-            <h2 className="text-lg font-black text-slate-900">Vendors by city</h2>
+            <h2 className="text-lg font-black text-slate-900">
+              Vendors by city
+            </h2>
             <div className="mt-2 grid grid-cols-2 gap-1 text-sm sm:grid-cols-3 lg:grid-cols-4">
               {cities.map((row) => (
                 <Link

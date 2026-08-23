@@ -6,12 +6,11 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { notify } from "@/lib/notifications";
+import { POINTS, type EarnReason } from "@/lib/rewards";
 import {
-  POINTS,
   awardPoints,
   payPendingReferralMilestones,
-  type EarnReason,
-} from "@/lib/rewards";
+} from "@/lib/rewardsQueries";
 
 const EARN_REASONS = Object.keys(POINTS) as EarnReason[];
 
@@ -39,7 +38,9 @@ export async function setRewardPointsAction(
     }
     revalidatePath("/admin");
     revalidatePath("/dashboard/rewards");
-    return { success: `Updated ${saved} point value${saved === 1 ? "" : "s"}.` };
+    return {
+      success: `Updated ${saved} point value${saved === 1 ? "" : "s"}.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
@@ -91,7 +92,9 @@ export async function adjustUserPointsAction(
 
     revalidatePath("/admin");
     revalidatePath("/dashboard/rewards");
-    return { success: `${parsed.data.points > 0 ? "Credited" : "Debited"} ${user.name}.` };
+    return {
+      success: `${parsed.data.points > 0 ? "Credited" : "Debited"} ${user.name}.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
@@ -102,7 +105,8 @@ export async function reviewReferralAction(formData: FormData) {
   await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");
   const decision = String(formData.get("decision") ?? "");
-  if (!["APPROVED", "REJECTED"].includes(decision)) throw new Error("Invalid decision");
+  if (!["APPROVED", "REJECTED"].includes(decision))
+    throw new Error("Invalid decision");
 
   const referral = await db.referral.findUnique({
     where: { id },
@@ -135,7 +139,10 @@ export async function reviewReferralAction(formData: FormData) {
 
     await db.$transaction([
       db.referral.update({ where: { id }, data: { status: "REJECTED" } }),
-      db.user.update({ where: { id: referral.userId }, data: { referredById: null } }),
+      db.user.update({
+        where: { id: referral.userId },
+        data: { referredById: null },
+      }),
       ...(reversal > 0
         ? [
             db.pointsEntry.create({
@@ -166,13 +173,18 @@ export async function reviewRedemptionAction(formData: FormData) {
   await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");
   const decision = String(formData.get("decision") ?? "");
-  if (!["FULFILLED", "REJECTED"].includes(decision)) throw new Error("Invalid decision");
+  if (!["FULFILLED", "REJECTED"].includes(decision))
+    throw new Error("Invalid decision");
 
   const redemption = await db.redemption.findUnique({ where: { id } });
-  if (!redemption || redemption.status !== "REQUESTED") throw new Error("Nothing to review");
+  if (!redemption || redemption.status !== "REQUESTED")
+    throw new Error("Nothing to review");
 
   if (decision === "FULFILLED") {
-    await db.redemption.update({ where: { id }, data: { status: "FULFILLED" } });
+    await db.redemption.update({
+      where: { id },
+      data: { status: "FULFILLED" },
+    });
     await notify({
       userId: redemption.userId,
       title: "Your reward is live",

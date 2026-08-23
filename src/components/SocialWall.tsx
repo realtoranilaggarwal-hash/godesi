@@ -5,9 +5,9 @@ import {
   PLATFORM_LABELS,
   SOCIAL_TAG,
   shortTime,
-  socialWallPosts,
   type SocialWallPost,
 } from "@/lib/social";
+import { socialWallPosts } from "@/lib/socialQueries";
 
 function Post({ post }: { post: SocialWallPost }) {
   return (
@@ -33,7 +33,9 @@ function Post({ post }: { post: SocialWallPost }) {
         <span className="min-w-0 flex-1 truncate text-xs font-bold text-slate-900">
           {post.author}
           {post.handle ? (
-            <span className="ml-1 font-medium text-slate-500">{post.handle}</span>
+            <span className="ml-1 font-medium text-slate-500">
+              {post.handle}
+            </span>
           ) : null}
         </span>
         <span

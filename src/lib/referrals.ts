@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { db } from "@/lib/db";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { notify } from "@/lib/notifications";
 
 export const REFERRAL_COOKIE = "godesi_ref";

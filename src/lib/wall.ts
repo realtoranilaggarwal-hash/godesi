@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { optionalRead } from "@/lib/resilient";
-import { SOCIAL_TAG, socialWallPosts } from "@/lib/social";
+import { SOCIAL_TAG } from "@/lib/social";
+import { socialWallPosts } from "@/lib/socialQueries";
 import { newsPath } from "@/lib/newsLinks";
 
 export type WallItem = {
@@ -218,7 +219,9 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
       kind: "update" as const,
       icon: "\u{1F195}",
       title: "New on Godesi",
-      text: update.excerpt ? `${update.title} — ${update.excerpt}` : update.title,
+      text: update.excerpt
+        ? `${update.title} — ${update.excerpt}`
+        : update.title,
       href: `/blog/${update.slug}`,
       external: false,
       imageUrl: update.coverUrl,

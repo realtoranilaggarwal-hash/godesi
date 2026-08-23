@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { journalistStats, JOURNALIST_RULES } from "@/lib/journalists";
+import { JOURNALIST_RULES } from "@/lib/journalists";
+import { journalistStats } from "@/lib/journalistsQueries";
 import { ReportForm } from "@/components/forms/ReportForm";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { SidebarBanners } from "@/components/Banners";
@@ -53,7 +54,10 @@ export default async function ReportNewsPage() {
                         } left this week on your plan.`
                       : "You have used this week’s reports."}{" "}
                   {!quota.unlimited && quota.allowance === 1 ? (
-                    <Link href="/pricing" className="font-semibold text-indigo-600">
+                    <Link
+                      href="/pricing"
+                      className="font-semibold text-indigo-600"
+                    >
                       Paid members file 10 a week.
                     </Link>
                   ) : null}

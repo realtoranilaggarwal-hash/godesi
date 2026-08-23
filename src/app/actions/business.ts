@@ -27,7 +27,7 @@ import {
 } from "@/lib/specialties";
 import { uniqueSlug } from "@/lib/uniqueSlug";
 import { normalizeWhatsApp } from "@/lib/format";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { titleCase } from "@/lib/titlecase";

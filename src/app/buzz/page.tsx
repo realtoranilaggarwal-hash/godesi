@@ -3,7 +3,8 @@ import Link from "next/link";
 import { SidebarBanners } from "@/components/Banners";
 import { SocialWallCard } from "@/components/SocialWall";
 import { Card, EmptyState } from "@/components/ui";
-import { HASHTAG_LINKS, PLATFORM_LABELS, SOCIAL_TAG, socialWallPosts } from "@/lib/social";
+import { HASHTAG_LINKS, PLATFORM_LABELS, SOCIAL_TAG } from "@/lib/social";
+import { socialWallPosts } from "@/lib/socialQueries";
 import { wallItems } from "@/lib/wall";
 import { WallCard } from "@/components/ActivityWall";
 
@@ -21,7 +22,9 @@ export default async function BuzzPage() {
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-800 to-fuchsia-700 px-5 py-8 text-white sm:px-8">
-          <h1 className="text-3xl font-black">#{SOCIAL_TAG} around the web 🌍</h1>
+          <h1 className="text-3xl font-black">
+            #{SOCIAL_TAG} around the web 🌍
+          </h1>
           <p className="mt-2 max-w-2xl text-white/90">
             Everything happening around Godesi in one place — new members, new
             business cards, rooms and rentals, events and local news reports as
@@ -93,8 +96,9 @@ export default async function BuzzPage() {
         ) : null}
 
         <p className="rounded-2xl bg-slate-100 px-3 py-2 text-xs text-slate-600">
-          Posts belong to their authors and are shown as a short quote with a link to
-          the original. Nothing is scraped, and we remove any post on request.
+          Posts belong to their authors and are shown as a short quote with a
+          link to the original. Nothing is scraped, and we remove any post on
+          request.
         </p>
       </div>
       <SidebarBanners />

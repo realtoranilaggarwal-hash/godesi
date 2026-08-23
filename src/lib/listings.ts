@@ -1,8 +1,10 @@
-import type { Furnishing, GenderPreference, ListingKind, Prisma } from "@prisma/client";
-import { db } from "@/lib/db";
-import { TAXONOMY_TTL, cachedQuery } from "@/lib/cache";
+import type {
+  Furnishing,
+  GenderPreference,
+  ListingKind,
+  Prisma,
+} from "@prisma/client";
 import { formatMoney } from "@/lib/format";
-import { slugify } from "@/lib/slug";
 
 export type ListingSection = "real-estate" | "rooms" | "marketplace";
 
@@ -16,18 +18,6 @@ export const KIND_LABELS: Record<ListingKind, string> = {
 
 /** The Buy & sell tree lives under this directory category. */
 export const MARKETPLACE_ROOT = "buy-sell";
-
-/** Subcategories a seller picks from: jewellery, furniture, electronics… */
-export const marketplaceCategories = cachedQuery(
-  "marketplace-categories",
-  TAXONOMY_TTL,
-  async () =>
-    db.category.findMany({
-      where: { parentSlug: MARKETPLACE_ROOT },
-      orderBy: { sortOrder: "asc" },
-      select: { slug: true, name: true },
-    }),
-);
 
 export const FURNISHING_LABELS: Record<Furnishing, string> = {
   FURNISHED: "Furnished",
@@ -49,7 +39,11 @@ export const SECTION_KINDS: Record<ListingSection, ListingKind[]> = {
 
 /** Rooms are always monthly; sales and items are one-off prices. */
 export function isMonthly(kind: ListingKind) {
-  return kind === "PROPERTY_RENT" || kind === "ROOM_OFFERED" || kind === "ROOM_WANTED";
+  return (
+    kind === "PROPERTY_RENT" ||
+    kind === "ROOM_OFFERED" ||
+    kind === "ROOM_WANTED"
+  );
 }
 
 export function priceLabel(listing: {
@@ -60,18 +54,6 @@ export function priceLabel(listing: {
   if (!listing.price) return "Price on request";
   const amount = formatMoney(listing.price, listing.currency);
   return listing.perMonth ? `${amount}/month` : amount;
-}
-
-export async function uniqueListingSlug(title: string, city: string) {
-  const base = slugify([title, city].filter(Boolean).join(" ")) || "listing";
-  let candidate = base;
-  let counter = 1;
-  // eslint-disable-next-line no-await-in-loop
-  while (await db.listing.findUnique({ where: { slug: candidate } })) {
-    counter += 1;
-    candidate = `${base}-${counter}`;
-  }
-  return candidate;
 }
 
 export type ListingFilters = {
@@ -110,14 +92,18 @@ export function listingWhere(
   return {
     status: "APPROVED",
     kind: kind ? kind : { in: kinds },
-    ...(filters.city ? { city: { contains: filters.city, mode: "insensitive" } } : {}),
+    ...(filters.city
+      ? { city: { contains: filters.city, mode: "insensitive" } }
+      : {}),
     ...(max ? { price: { lte: max, gt: 0 } } : {}),
     ...(bedrooms ? { bedrooms: { gte: bedrooms } } : {}),
     ...(filters.category ? { categorySlug: filters.category } : {}),
     ...(filters.furnishing && filters.furnishing in FURNISHING_LABELS
       ? { furnishing: filters.furnishing as Furnishing }
       : {}),
-    ...(filters.gender && filters.gender in GENDER_LABELS && filters.gender !== "ANY"
+    ...(filters.gender &&
+    filters.gender in GENDER_LABELS &&
+    filters.gender !== "ANY"
       ? { genderPref: { in: [filters.gender as GenderPreference, "ANY"] } }
       : {}),
     ...(filters.q

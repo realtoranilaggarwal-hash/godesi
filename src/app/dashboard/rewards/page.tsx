@@ -4,12 +4,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
-import {
-  pointValues,
-  referralStats,
-  wallet,
-  UNLOCK_LEAD_POINTS,
-} from "@/lib/rewards";
+import { UNLOCK_LEAD_POINTS } from "@/lib/rewards";
+import { pointValues, referralStats, wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { effectivePlan } from "@/lib/plans";
 import { Badge, Card } from "@/components/ui";

@@ -10,7 +10,7 @@ import {
   PointsAdjustForm,
   RewardPointsForm,
 } from "@/components/forms/RewardAdminForms";
-import { pointValues } from "@/lib/rewards";
+import { pointValues } from "@/lib/rewardsQueries";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";

@@ -80,9 +80,10 @@ export default async function EliteApplyPage({
       ) : (
         <Card className="border-amber-200 bg-amber-50">
           <p className="text-sm font-bold text-amber-900">
-            Applying is free. After you apply you can add the $50 interview
-            (with a 30–60 second video) or a $500 three-minute professional film,
-            and any amount you invest lifts your profile higher in its section.
+            Applying is free. After you apply you can add the interview with a
+            30–60 second video — $250 for a year, $500 for five years — or a
+            $500 three-minute professional film, and any amount you invest lifts
+            your profile higher in its section.
           </p>
         </Card>
       )}

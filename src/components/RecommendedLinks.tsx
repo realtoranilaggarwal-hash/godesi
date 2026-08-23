@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { requestCurrency } from "@/lib/currency";
-import {
-  RESOURCE_KIND_LABELS,
-  formatResourcePrice,
-  recommendedLinks,
-} from "@/lib/resources";
+import { RESOURCE_KIND_LABELS, formatResourcePrice } from "@/lib/resources";
+import { recommendedLinks } from "@/lib/resourcesQueries";
 import { LinkImpressions } from "@/components/LinkImpressions";
 import { Card } from "@/components/ui";
 
@@ -19,7 +16,10 @@ export async function RecommendedLinks({
   categorySlug?: string | null;
   title?: string;
 }) {
-  const [links, currency] = [await recommendedLinks(categorySlug), requestCurrency()];
+  const [links, currency] = [
+    await recommendedLinks(categorySlug),
+    requestCurrency(),
+  ];
   const from = formatResourcePrice(currency, 1_000);
 
   return (
@@ -53,7 +53,9 @@ export async function RecommendedLinks({
                 ) : null}
                 <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                   <span>{RESOURCE_KIND_LABELS[link.kind]}</span>
-                  {link.tags.length ? <span>· {link.tags.join(", ")}</span> : null}
+                  {link.tags.length ? (
+                    <span>· {link.tags.join(", ")}</span>
+                  ) : null}
                 </p>
               </li>
             ))}

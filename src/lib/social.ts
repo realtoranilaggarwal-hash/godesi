@@ -1,5 +1,4 @@
 import type { SocialPlatform } from "@prisma/client";
-import { db } from "@/lib/db";
 
 export const SOCIAL_TAG = "godesi";
 
@@ -43,26 +42,6 @@ export type SocialWallPost = {
   postedAt: Date;
 };
 
-/** Curated posts for the wall, newest or lowest position first. */
-export async function socialWallPosts(limit = 6): Promise<SocialWallPost[]> {
-  return db.socialPost.findMany({
-    where: { active: true },
-    orderBy: [{ position: "asc" }, { postedAt: "desc" }],
-    take: limit,
-    select: {
-      id: true,
-      platform: true,
-      url: true,
-      author: true,
-      handle: true,
-      avatarUrl: true,
-      text: true,
-      imageUrl: true,
-      postedAt: true,
-    },
-  });
-}
-
 /** Guesses the network from a pasted post link, so staff only paste the URL. */
 export function platformFromUrl(url: string): SocialPlatform {
   const host = (() => {
@@ -73,9 +52,11 @@ export function platformFromUrl(url: string): SocialPlatform {
     }
   })();
   if (host.endsWith("instagram.com")) return "INSTAGRAM";
-  if (host.endsWith("facebook.com") || host.endsWith("fb.com")) return "FACEBOOK";
+  if (host.endsWith("facebook.com") || host.endsWith("fb.com"))
+    return "FACEBOOK";
   if (host.endsWith("linkedin.com")) return "LINKEDIN";
-  if (host.endsWith("youtube.com") || host.endsWith("youtu.be")) return "YOUTUBE";
+  if (host.endsWith("youtube.com") || host.endsWith("youtu.be"))
+    return "YOUTUBE";
   if (host.endsWith("threads.net")) return "THREADS";
   return "X";
 }
@@ -85,7 +66,10 @@ export function handleFromUrl(url: string): string | null {
   try {
     const parts = new URL(url).pathname.split("/").filter(Boolean);
     const first = parts[0];
-    if (!first || ["p", "reel", "posts", "hashtag", "watch", "shorts"].includes(first)) {
+    if (
+      !first ||
+      ["p", "reel", "posts", "hashtag", "watch", "shorts"].includes(first)
+    ) {
       return null;
     }
     return `@${first.replace(/^@/, "")}`;

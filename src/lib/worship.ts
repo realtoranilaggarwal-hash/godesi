@@ -1,6 +1,4 @@
 import type { Faith, Prisma } from "@prisma/client";
-import { db } from "@/lib/db";
-import { slugify } from "@/lib/slug";
 
 export const FAITH_LABELS: Record<Faith, string> = {
   HINDU_TEMPLE: "Hindu temple",
@@ -28,13 +26,22 @@ export function isFaith(value?: string | null): value is Faith {
   return Boolean(value && value in FAITH_LABELS);
 }
 
-export type WorshipFilters = { faith?: string; city?: string; country?: string; q?: string };
+export type WorshipFilters = {
+  faith?: string;
+  city?: string;
+  country?: string;
+  q?: string;
+};
 
-export function worshipWhere(filters: WorshipFilters): Prisma.WorshipPlaceWhereInput {
+export function worshipWhere(
+  filters: WorshipFilters,
+): Prisma.WorshipPlaceWhereInput {
   return {
     status: "APPROVED",
     ...(isFaith(filters.faith) ? { faith: filters.faith } : {}),
-    ...(filters.city ? { city: { contains: filters.city, mode: "insensitive" } } : {}),
+    ...(filters.city
+      ? { city: { contains: filters.city, mode: "insensitive" } }
+      : {}),
     ...(filters.country ? { country: filters.country } : {}),
     ...(filters.q
       ? {
@@ -46,18 +53,6 @@ export function worshipWhere(filters: WorshipFilters): Prisma.WorshipPlaceWhereI
         }
       : {}),
   };
-}
-
-export async function uniqueWorshipSlug(name: string, city: string) {
-  const base = slugify([name, city].filter(Boolean).join(" ")) || "place-of-worship";
-  let candidate = base;
-  let counter = 1;
-  // eslint-disable-next-line no-await-in-loop
-  while (await db.worshipPlace.findUnique({ where: { slug: candidate } })) {
-    counter += 1;
-    candidate = `${base}-${counter}`;
-  }
-  return candidate;
 }
 
 export function mapsUrl(place: {

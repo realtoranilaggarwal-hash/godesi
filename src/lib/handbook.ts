@@ -646,7 +646,7 @@ Send me the course list with timings and fees and one photo of the classroom or 
       {
         title: "Only then mention the interview",
         detail:
-          "Once the profile is theirs, offer the $50 interview and video. It is optional; the profile stays either way. Never suggest a claim depends on paying.",
+          "Once the profile is theirs, offer the interview and video — $250 for a year, $500 for five years. It is optional; the profile stays either way. Never suggest a claim depends on paying.",
       },
       {
         title: "Prepare the interview properly",

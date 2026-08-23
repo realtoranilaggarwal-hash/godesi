@@ -7,7 +7,7 @@ import { PLANS, listingImageLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
 import { requestCurrency } from "@/lib/currency";
-import { marketplaceCategories } from "@/lib/listings";
+import { marketplaceCategories } from "@/lib/listingsQueries";
 import { isPropertyGroup } from "@/lib/property";
 
 export const dynamic = "force-dynamic";
@@ -55,8 +55,8 @@ export default async function NewListingPage({
       <div>
         <h1 className="text-2xl font-bold">Post a listing</h1>
         <p className="text-sm text-slate-600">
-          A home to sell or rent, a room to share, or anything you want to sell —
-          jewellery, clothes, furniture, electronics. A minute, and free.
+          A home to sell or rent, a room to share, or anything you want to sell
+          — jewellery, clothes, furniture, electronics. A minute, and free.
         </p>
       </div>
       <Card>
@@ -68,7 +68,9 @@ export default async function NewListingPage({
           defaultCurrency={requestCurrency()}
           categories={categories}
           defaultGroup={group}
-          defaultCountry={requestCurrency() === "INR" ? "India" : "United States"}
+          defaultCountry={
+            requestCurrency() === "INR" ? "India" : "United States"
+          }
         />
       </Card>
     </div>

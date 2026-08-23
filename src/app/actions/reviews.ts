@@ -10,7 +10,7 @@ import { requestCurrency } from "@/lib/currency";
 import { disputeFee } from "@/lib/reviewDisputes";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { REVIEW_SOURCES } from "@/lib/reviewSources";
 
 const reviewSchema = z.object({
@@ -33,7 +33,10 @@ export async function createReviewAction(
     // trace and, if it turns out to be fake, hold responsible.
     const user = await getCurrentUser();
     if (!user) {
-      return { error: "Please sign in to leave a review — it takes a minute and keeps reviews real." };
+      return {
+        error:
+          "Please sign in to leave a review — it takes a minute and keeps reviews real.",
+      };
     }
     const parsed = reviewSchema.safeParse({
       businessId: formData.get("businessId"),
@@ -95,11 +98,16 @@ export async function setReviewHiddenAction(formData: FormData) {
 
   const id = String(formData.get("reviewId") ?? "");
   const hidden = formData.get("hidden") === "1";
-  const reason = String(formData.get("reason") ?? "").trim().slice(0, 300);
+  const reason = String(formData.get("reason") ?? "")
+    .trim()
+    .slice(0, 300);
 
   const review = await db.review.update({
     where: { id },
-    data: { hidden, hiddenReason: hidden ? reason || "Removed by Godesi staff" : null },
+    data: {
+      hidden,
+      hiddenReason: hidden ? reason || "Removed by Godesi staff" : null,
+    },
     include: { business: { select: { slug: true } } },
   });
 
@@ -168,7 +176,11 @@ export async function startReviewDisputeAction(formData: FormData) {
     mode: "payment",
     customer_email: user.email,
     client_reference_id: user.id,
-    metadata: { kind: "review-dispute", reviewDisputeId: dispute.id, userId: user.id },
+    metadata: {
+      kind: "review-dispute",
+      reviewDisputeId: dispute.id,
+      userId: user.id,
+    },
     line_items: [
       {
         quantity: 1,
@@ -198,7 +210,9 @@ export async function decideReviewDisputeAction(formData: FormData) {
 
   const id = String(formData.get("disputeId") ?? "");
   const approve = formData.get("decision") === "approve";
-  const note = String(formData.get("note") ?? "").trim().slice(0, 500);
+  const note = String(formData.get("note") ?? "")
+    .trim()
+    .slice(0, 500);
 
   const dispute = await db.reviewDispute.findUnique({
     where: { id },
@@ -267,8 +281,7 @@ export async function addOffsiteReviewAction(
 
     const slug = parsed.data.businessSlug.trim().replace(/^.*\/b\//, "");
     const business = await db.business.findUnique({ where: { slug } });
-    if (!business)
-      return { error: `No business page found at /b/${slug}.` };
+    if (!business) return { error: `No business page found at /b/${slug}.` };
 
     if (/\+?\d[\d\s()-]{7,}/.test(parsed.data.comment)) {
       return {
