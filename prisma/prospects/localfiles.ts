@@ -1,5 +1,12 @@
-import { US_STATES } from "../../src/lib/eventSearch";
-import { entities, page, pause, phone, type Lead, type Reader } from "./shared";
+import {
+  entities,
+  page,
+  pause,
+  phone,
+  stateCode,
+  type Lead,
+  type Reader,
+} from "./shared";
 
 /**
  * localfiles.com — desi yellow pages for 43 US metros, and the best call list
@@ -70,19 +77,6 @@ async function cities() {
     found.add(match[1]);
   }
   return Array.from(found).sort();
-}
-
-const CODES = new Map(
-  Object.entries(US_STATES).map(([code, name]) => [name.toLowerCase(), code]),
-);
-
-/** Whatever the listing calls the state, as the two letters we store. */
-function stateCode(value: string) {
-  const word = value.trim().replace(/\.$/, "");
-  if (/^[A-Za-z]{2}$/.test(word) && US_STATES[word.toUpperCase()]) {
-    return word.toUpperCase();
-  }
-  return CODES.get(word.toLowerCase()) ?? "";
 }
 
 /**

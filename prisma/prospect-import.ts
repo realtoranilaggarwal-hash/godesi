@@ -2,9 +2,16 @@ import { db } from "../src/lib/db";
 import { guessCategory, readBusinessLink } from "../src/lib/businessLink";
 import { titleCase } from "../src/lib/titlecase";
 import { deshvidesh } from "./prospects/deshvidesh";
+import { indianweddings } from "./prospects/indianweddings";
 import { jabwewed } from "./prospects/jabwewed";
 import { localfiles } from "./prospects/localfiles";
-import { phone as dialable, type Lead, type Reader } from "./prospects/shared";
+import {
+  page,
+  pause,
+  phone as dialable,
+  type Lead,
+  type Reader,
+} from "./prospects/shared";
 
 /**
  * Builds the moderators' call list from public desi directories.
@@ -13,6 +20,7 @@ import { phone as dialable, type Lead, type Reader } from "./prospects/shared";
  *   npm run db:prospects -- localfiles new_jersey      # one metro
  *   npm run db:prospects -- deshvidesh disc-jockey     # one trade
  *   npm run db:prospects -- jabwewed
+ *   npm run db:prospects -- indianweddings              # US wedding vendors
  *
  * A business already listed somewhere is the warmest lead we have, so we read
  * these directories for facts only: who exists, what they do, and how to ring
@@ -21,10 +29,17 @@ import { phone as dialable, type Lead, type Reader } from "./prospects/shared";
  *
  * Nothing here is published. Rows land in /admin/prospects for a moderator to
  * ring; the business gets a card only when its owner makes one. No description,
- * photo or logo is ever copied.
+ * photo or logo is ever copied from a directory — the only words and logo kept
+ * are the ones the business publishes on its own domain, and even those are
+ * only a draft the owner has to approve on the call.
  */
 
-const READERS: Record<string, Reader> = { deshvidesh, jabwewed, localfiles };
+const READERS: Record<string, Reader> = {
+  deshvidesh,
+  indianweddings,
+  jabwewed,
+  localfiles,
+};
 
 type Facts = {
   phone: string;
@@ -34,6 +49,8 @@ type Facts = {
   address: string;
   categorySlug: string;
   subcategorySlug: string;
+  /** Their own description of themselves, for the owner to approve or replace. */
+  about: string;
 };
 
 const EMPTY: Facts = {
@@ -44,6 +61,7 @@ const EMPTY: Facts = {
   address: "",
   categorySlug: "",
   subcategorySlug: "",
+  about: "",
 };
 
 /** What the business itself publishes: the part a moderator needs to ring. */
@@ -58,10 +76,42 @@ async function fromOwnSite(website: string): Promise<Facts> {
       address: draft.address,
       categorySlug: draft.categorySlug,
       subcategorySlug: draft.subcategorySlug,
+      about: draft.about.slice(0, 600),
     };
   } catch {
     return EMPTY;
   }
+}
+
+/**
+ * The logo a business publishes on its own domain. Only an image served from
+ * their own site counts — an og:image on a directory page belongs to the
+ * directory, and a stock photo helps nobody.
+ */
+async function ownLogo(website: string) {
+  const html = await page(website);
+  await pause();
+  if (!html) return "";
+
+  const candidates = [
+    /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i,
+    /"logo"\s*:\s*"([^"]+)"/i,
+    /"logo"\s*:\s*\{[^}]*"url"\s*:\s*"([^"]+)"/i,
+  ];
+
+  for (const pattern of candidates) {
+    const found = html.match(pattern)?.[1];
+    if (!found) continue;
+    try {
+      const image = new URL(found.replace(/\\\//g, "/"), website);
+      const site = new URL(website);
+      const root = (host: string) => host.split(".").slice(-2).join(".");
+      if (root(image.hostname) === root(site.hostname)) return image.toString();
+    } catch {
+      continue;
+    }
+  }
+  return "";
 }
 
 /**
@@ -70,9 +120,11 @@ async function fromOwnSite(website: string): Promise<Facts> {
  * to ring them yet.
  */
 async function contact(lead: Lead) {
-  const own =
-    lead.websiteUrl && !lead.phone ? await fromOwnSite(lead.websiteUrl) : EMPTY;
+  const own = lead.websiteUrl ? await fromOwnSite(lead.websiteUrl) : EMPTY;
+  const logo = lead.websiteUrl ? await ownLogo(lead.websiteUrl) : "";
   return {
+    about: own.about,
+    logoUrl: logo,
     phone: dialable(lead.phone || own.phone) || lead.phone || own.phone,
     email: lead.email || own.email,
     city: lead.city || own.city,
@@ -130,6 +182,8 @@ async function main() {
       email: found.email || null,
       websiteUrl: lead.websiteUrl || null,
       source: reader.host,
+      draftAbout: found.about || null,
+      draftLogoUrl: found.logoUrl || null,
     };
 
     if (dry) {

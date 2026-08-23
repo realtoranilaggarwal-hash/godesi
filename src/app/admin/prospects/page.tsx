@@ -318,6 +318,32 @@ export default async function AdminProspectsPage({
                   {row.source} ↗
                 </a>
               </p>
+              {row.draftAbout || row.draftLogoUrl ? (
+                <details className="mt-1 text-xs text-slate-600">
+                  <summary className="cursor-pointer font-semibold text-slate-700">
+                    Draft from their own website — read it back, don&apos;t
+                    publish it
+                  </summary>
+                  {row.draftAbout ? (
+                    <p className="mt-1 italic">“{row.draftAbout}”</p>
+                  ) : null}
+                  {row.draftLogoUrl ? (
+                    <a
+                      href={row.draftLogoUrl}
+                      target="_blank"
+                      rel="noreferrer nofollow"
+                      className="text-indigo-600"
+                    >
+                      their logo ↗
+                    </a>
+                  ) : null}
+                  <p className="mt-1 text-slate-500">
+                    These are the owner&apos;s own words and own logo from their
+                    own site. Offer them on the call — they go on a card only if
+                    the owner says yes, and they upload the picture themselves.
+                  </p>
+                </details>
+              ) : null}
               {row.calledAt ? (
                 <p className="text-xs font-semibold text-emerald-700">
                   Last call {row.calledAt.toLocaleDateString("en-US")}

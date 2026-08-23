@@ -7,6 +7,8 @@
  * logos are theirs and are never copied.
  */
 
+import { US_STATES } from "../../src/lib/eventSearch";
+
 const AGENT =
   "GodesiProspectReader/1.0 (+https://godesi.com; one page every 1.5s)";
 
@@ -49,6 +51,19 @@ export function phone(value: string) {
   const digits = value.replace(/\D+/g, "").replace(/^1+(?=\d{10}$)/, "");
   if (digits.length !== 10) return "";
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+const STATE_CODES = new Map(
+  Object.entries(US_STATES).map(([code, name]) => [name.toLowerCase(), code]),
+);
+
+/** Whatever a listing calls the state, as the two letters we store. */
+export function stateCode(value: string) {
+  const word = value.trim().replace(/\.$/, "");
+  if (/^[A-Za-z]{2}$/.test(word) && US_STATES[word.toUpperCase()]) {
+    return word.toUpperCase();
+  }
+  return STATE_CODES.get(word.toLowerCase()) ?? "";
 }
 
 /**

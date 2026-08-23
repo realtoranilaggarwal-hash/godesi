@@ -2112,6 +2112,12 @@ model Prospect {
   sourceUrl       String  @unique
   /// Host of that page, e.g. "deshvidesh.com", for crediting where it came from.
   source          String
+  /// How the business describes itself on its own website. Read to the owner on
+  /// the call as a starting draft; it goes on a card only if the owner says yes.
+  draftAbout      String?
+  /// Logo the business publishes on its own domain, offered to the owner the
+  /// same way. Never a photo lifted from a directory.
+  draftLogoUrl    String?
 
   status ProspectStatus @default(NEW)
   /// Moderator working this row, so two people never ring the same business.
