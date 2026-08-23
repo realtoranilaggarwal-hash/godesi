@@ -376,7 +376,10 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           published with a video and your business awards.
         </p>
         <ul>
-          <li>$50 one-time interview fee including a 30–60 second video</li>
+          <li>
+            One-time interview fee including a 30–60 second video — $250 for a
+            year, $500 for five years
+          </li>
           <li>$500 three-minute professional film from the content you supply</li>
           <li>$100 / $250 / $500 placement boosts — higher spend ranks higher</li>
           <li>Every nominee is invited to the annual GoDesi Elite Awards</li>

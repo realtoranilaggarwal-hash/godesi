@@ -615,7 +615,7 @@ Send me the course list with timings and fees and one photo of the classroom or 
     whyUs: [
       "Desi Who's Who is a recognition section for people who have built something — business, medicine, law, technology, arts, community work — and it lives on its own domain at desiwhoswho.com as well as on Godesi.",
       "Many well-known names are already there as unclaimed profiles built from public facts. Claiming is free: they correct the details, add their own photo and story and take the profile over.",
-      "The paid part is plain: the Elite interview with a 30–60 second video is a one-time $50, a professionally produced three-minute film is $500, and placement boosts are $100, $250 or $500 to sit higher in their section. Nothing else is charged.",
+      "The paid part is plain: the Elite interview with a 30–60 second video is a one-time $250 for a year or $500 for five years, a professionally produced three-minute film is $500, and placement boosts are $100, $250 or $500 to sit higher in their section. Nothing else is charged.",
       "The interview can be done by phone, WhatsApp, Zoom or Facebook Live — or skipped if they would rather send written answers.",
       "Elite cards carry a gold border and a larger portrait, and the profile links to their business listing, so recognition also feeds their work.",
       "Profiles also appear on desiwhoswho.com and godesi.wiki, and there is an RSS feed journalists can follow.",
@@ -693,7 +693,7 @@ Regards,
         label: "After the claim — offering the interview",
         text: `Thank you, the profile is yours now.
 
-If you would like it told properly, we also do an Elite interview: a short conversation by phone, WhatsApp, Zoom or Facebook Live, published on your profile with a 30–60 second video. That is a one-time $50. A professionally produced three-minute film from your own photos and footage is $500.
+If you would like it told properly, we also do an Elite interview: a short conversation by phone, WhatsApp, Zoom or Facebook Live, published on your profile with a 30–60 second video. That is a one-time $250 for a year, or $500 for five years. A professionally produced three-minute film from your own photos and footage is $500.
 
 Both are optional — your profile stays either way, at no cost. If you would like the interview, tell me a time that suits you and your time zone and I will send the questions ahead.`,
       },
