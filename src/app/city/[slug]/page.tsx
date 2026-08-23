@@ -8,6 +8,7 @@ import { newsPath } from "@/lib/newsLinks";
 import { siteUrl } from "@/lib/format";
 import { Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
+import { resultsAreThin, robotsFor } from "@/lib/thinContent";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,12 @@ export async function generateMetadata({
   const names = await cityNames(citySlug(params.slug));
   if (!names.length) return { title: "City not found" };
   const city = [...names].sort((a, b) => a.length - b.length)[0];
+  /** A city hub with almost nothing posted in it is a page with nothing to read. */
+  const posted = await db.business.count({
+    where: { status: "APPROVED", city: { in: names } },
+  });
   return {
+    robots: robotsFor(resultsAreThin(posted)),
     title: `${city} — desi news, businesses, events and rentals | Godesi`,
     description: `Everything desi in ${city}: community news reported by members, local businesses and professionals, upcoming events, property and rooms, temples and places of worship.`,
     alternates: { canonical: `${siteUrl()}/city/${citySlug(params.slug)}` },

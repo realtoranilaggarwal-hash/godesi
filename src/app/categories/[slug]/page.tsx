@@ -16,6 +16,7 @@ import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 import { metaDescription } from "@/lib/seo";
+import { resultsAreThin, robotsFor } from "@/lib/thinContent";
 import { cleanSpecialties, specialtySet } from "@/lib/specialties";
 import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { VehicleFilters } from "@/components/VehicleFilters";
@@ -53,13 +54,26 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: Record<string, string | string[] | undefined>;
 }): Promise<Metadata> {
   const category = await getCategory(params.slug);
   if (!category) return { title: "Category not found" };
   const names = category.children.slice(0, 6).map((child) => child.name);
+  /**
+   * A filtered view and a category nobody has listed in yet are both thin to a
+   * search engine; the plain category page is the one worth indexing.
+   */
+  const filtered = Object.values(searchParams).some(
+    (value) => value !== undefined && value !== "",
+  );
+  const listed = filtered
+    ? []
+    : await searchBusinesses({ categorySlugs: categoryScopeSlugs(category) });
   return {
+    robots: robotsFor(filtered || resultsAreThin(listed.length)),
     title: `${category.name} in India — Godesi directory`,
     description: metaDescription(
       category.blurb,

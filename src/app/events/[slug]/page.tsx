@@ -32,6 +32,7 @@ import {
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
+import { eventIsThin, robotsFor } from "@/lib/thinContent";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,7 @@ export async function generateMetadata({
       `${event.title} at ${event.venue}, ${event.city} on ${event.startsAt.toDateString()}.`,
       "See the line-up, ticket prices and directions, and book online on Godesi.",
     ),
+    robots: robotsFor(eventIsThin(event)),
     alternates: { canonical: `${siteUrl()}/events/${event.slug}` },
     openGraph: { images: event.imageUrl ? [event.imageUrl] : undefined },
   };
@@ -93,6 +95,8 @@ export default async function EventPage({
   );
   const past = isPast(event);
   const maxPerBooking = Math.min(10, left);
+  /** Somebody else's calendar entry until it is claimed: no network ads on it. */
+  const thin = eventIsThin(event);
   const endLabel = event.endsAt
     ? formatEventEnd(event.startsAt, event.endsAt, event.timeZone)
     : null;
@@ -691,7 +695,7 @@ export default async function EventPage({
         </Card>
         )}
 
-        <InContentBanner size="leaderboard" />
+        {thin ? null : <InContentBanner size="leaderboard" />}
 
         {related.length ? (
           <Card>
@@ -713,7 +717,7 @@ export default async function EventPage({
         ) : null}
       </div>
 
-      <SidebarBanners />
+      {thin ? null : <SidebarBanners />}
     </div>
   );
 }

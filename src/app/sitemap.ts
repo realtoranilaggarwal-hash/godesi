@@ -4,6 +4,7 @@ import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
 import { popularCities } from "@/lib/cities";
+import { businessIsThin, eventIsThin } from "@/lib/thinContent";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +14,23 @@ const SITEMAP_TTL = 3600;
 /** Dates are stringified by the cache, so the rows carry ISO timestamps. */
 const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
   const [businesses, categories, events, reports] = await Promise.all([
+    // A card or event with nothing on it but a name is left out: submitting
+    // thin pages is what the publisher policies count against the whole domain.
     db.business.findMany({
       where: { status: "APPROVED" },
-      select: { slug: true, updatedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        description: true,
+        logoUrl: true,
+        websiteUrl: true,
+        albumUrl: true,
+        videoUrl: true,
+        address: true,
+        specialties: true,
+        ownerId: true,
+        _count: { select: { media: true, reviews: true } },
+      },
     }),
     db.category.findMany({
       where: { parentSlug: null },
@@ -23,7 +38,17 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
     }),
     db.event.findMany({
       where: { status: "APPROVED" },
-      select: { slug: true, updatedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        description: true,
+        sourceId: true,
+        claimedAt: true,
+        imageUrl: true,
+        albumUrl: true,
+        videoUrl: true,
+        websiteUrl: true,
+      },
     }),
     // Feed items are somebody else's article; only our own reporting belongs
     // in the sitemap.
@@ -33,15 +58,26 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
     }),
   ]);
   return {
-    businesses: businesses.map((row) => ({
-      slug: row.slug,
-      updatedAt: row.updatedAt.toISOString(),
-    })),
+    businesses: businesses
+      .filter(
+        (row) =>
+          !businessIsThin({
+            ...row,
+            mediaCount: row._count.media,
+            reviewCount: row._count.reviews,
+          }),
+      )
+      .map((row) => ({
+        slug: row.slug,
+        updatedAt: row.updatedAt.toISOString(),
+      })),
     categories: categories.map((row) => row.slug),
-    events: events.map((row) => ({
-      slug: row.slug,
-      updatedAt: row.updatedAt.toISOString(),
-    })),
+    events: events
+      .filter((row) => !eventIsThin(row))
+      .map((row) => ({
+        slug: row.slug,
+        updatedAt: row.updatedAt.toISOString(),
+      })),
     reports: reports.map((row) => ({
       path: newsPath(row),
       publishedAt: row.publishedAt.toISOString(),

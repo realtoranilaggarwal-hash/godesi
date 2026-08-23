@@ -33,6 +33,7 @@ import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
+import { businessIsThin, robotsFor } from "@/lib/thinContent";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const business = await db.business.findUnique({
     where: { slug: params.slug },
-    select: { name: true, category: true, city: true, description: true, logoUrl: true },
+    select: {
+      name: true,
+      category: true,
+      city: true,
+      description: true,
+      logoUrl: true,
+      websiteUrl: true,
+      albumUrl: true,
+      videoUrl: true,
+      address: true,
+      specialties: true,
+      ownerId: true,
+      _count: { select: { media: true, reviews: true } },
+    },
   });
   if (!business) return { title: "Business not found" };
 
@@ -83,6 +97,13 @@ export async function generateMetadata({
   return {
     title,
     description,
+    robots: robotsFor(
+      businessIsThin({
+        ...business,
+        mediaCount: business._count.media,
+        reviewCount: business._count.reviews,
+      }),
+    ),
     alternates: { canonical: `/b/${params.slug}` },
     openGraph: {
       title,
@@ -170,6 +191,12 @@ export default async function BusinessProfilePage({
   const rating = reviewCount
     ? business.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
     : 0;
+  /** An unfilled card carries no network ads, per the publisher policies. */
+  const thin = businessIsThin({
+    ...business,
+    mediaCount: business.media.length,
+    reviewCount,
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -832,12 +859,12 @@ export default async function BusinessProfilePage({
 
       <HiringChecklist />
 
-      <InlineBanner />
+      {thin ? null : <InlineBanner />}
       </div>
 
       <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">
         <NeedHelpBox about={business.name} />
-        <SidebarBanners />
+        {thin ? null : <SidebarBanners />}
       </aside>
     </div>
   );
