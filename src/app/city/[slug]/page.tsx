@@ -150,6 +150,14 @@ export default async function CityPage({
     !events.length &&
     !listings.length &&
     !worship.length;
+  /** Ads stay off pages with almost nothing on them, matching the noindex above. */
+  const thin = resultsAreThin(
+    reports.length +
+      businesses.length +
+      events.length +
+      listings.length +
+      worship.length,
+  );
 
   return (
     <div className="flex gap-6">
@@ -270,7 +278,7 @@ export default async function CityPage({
         ) : null}
       </div>
 
-      <SidebarBanners />
+      {thin ? null : <SidebarBanners />}
     </div>
   );
 }

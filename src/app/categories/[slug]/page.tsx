@@ -229,6 +229,11 @@ export default async function CategoryPage({
       : Promise.resolve([]),
   ]);
 
+  /** Ads stay off pages with almost nothing on them, matching the noindex above. */
+  const thin = resultsAreThin(
+    businesses.length + events.length + listings.length,
+  );
+
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-6">
@@ -593,13 +598,15 @@ export default async function CategoryPage({
           }
         />
 
-        <InlineBanner />
+        {thin ? null : <InlineBanner />}
       </div>
 
-      <SidebarBanners
-        categorySlug={category.slug}
-        parentSlug={category.parent?.slug ?? null}
-      />
+      {thin ? null : (
+        <SidebarBanners
+          categorySlug={category.slug}
+          parentSlug={category.parent?.slug ?? null}
+        />
+      )}
     </div>
   );
 }
