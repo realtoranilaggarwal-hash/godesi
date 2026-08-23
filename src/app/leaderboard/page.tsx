@@ -4,7 +4,6 @@ import Link from "next/link";
 import { topContributors, POINTS } from "@/lib/rewards";
 import { Card, EmptyState } from "@/components/ui";
 import { ContributionScore } from "@/components/ContributionScore";
-import { ChatPanel } from "@/components/ChatPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -109,7 +108,6 @@ export default async function LeaderboardPage() {
         </p>
       </Card>
 
-      <ChatPanel />
     </div>
   );
 }

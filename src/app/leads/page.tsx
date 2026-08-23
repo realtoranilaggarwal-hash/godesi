@@ -19,7 +19,6 @@ import {
   InlineBanner,
   SidebarBanners,
 } from "@/components/Banners";
-import { ChatPanel } from "@/components/ChatPanel";
 import { InArticleAd } from "@/components/InArticleAd";
 
 export const dynamic = "force-dynamic";
@@ -214,7 +213,6 @@ export default async function LeadsPage({
 
         <InArticleAd />
 
-        <ChatPanel />
         <InlineBanner />
       </div>
 

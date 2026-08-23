@@ -37,7 +37,6 @@ const NAV = [
 
 /** Chips beside the search box, for pages the main nav has no room for. */
 const QUICK_LINKS = [
-  { href: "/live", label: "Live", icon: "🟢" },
   { href: "/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top 100", icon: "🏅" },
   { href: "/connect", label: "Connect", icon: "🤝" },

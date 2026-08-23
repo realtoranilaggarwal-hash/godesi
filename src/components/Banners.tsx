@@ -10,10 +10,8 @@ import {
   SKYSCRAPER_SIZE,
   slotSoldCount,
 } from "@/lib/banners";
-import { LiveVisitorMap } from "@/components/LiveVisitorMap";
 import { ActivityWall } from "@/components/ActivityWall";
 import { TelegramJoin } from "@/components/TelegramJoin";
-import { ChatPanel } from "@/components/ChatPanel";
 import { HelpClipCard } from "@/components/HelpClipCard";
 import { CategoryNav } from "@/components/CategoryNav";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
@@ -185,10 +183,6 @@ export async function SidebarBanners({
       <GodesiWikiCard />
 
       <DjsWikiCard />
-
-      <LiveVisitorMap compact />
-
-      <ChatPanel compact />
 
       <TelegramJoin compact />
 

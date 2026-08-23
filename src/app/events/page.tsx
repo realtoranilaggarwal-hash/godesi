@@ -11,7 +11,6 @@ import {
   InlineBanner,
   SidebarBanners,
 } from "@/components/Banners";
-import { ChatPanel } from "@/components/ChatPanel";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 import {
@@ -624,7 +623,6 @@ export default async function EventsPage({
           </Link>{" "}
           and sell tickets with QR check-in.
         </p>
-        <ChatPanel />
         <InlineBanner />
       </div>
 

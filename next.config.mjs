@@ -70,6 +70,13 @@ const nextConfig = {
         permanent: false,
       },
       {
+        // The live visitor map and global chat were retired; live TV replaces
+        // the page anyone reaching /live was looking for.
+        source: "/live",
+        destination: "/live-tv",
+        permanent: false,
+      },
+      {
         // Desi Who's Who was renamed GoDesi Elite before launch.
         source: "/desi-whos-who/:path*",
         destination: "/desi-elite/:path*",

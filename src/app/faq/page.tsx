@@ -45,7 +45,6 @@ const ACTIONS: { href: string; label: string }[] = [
     label: `🌐 Get a website for $${WEBSITE_OFFER.priceUsd}`,
   },
   { href: "/connect", label: "🤝 Connect & meet-ups" },
-  { href: "/live", label: "💬 Global chat & live visitors" },
   { href: "/alumni", label: "🎓 Find your batchmates" },
   { href: "/resources", label: "🔗 Useful resources" },
   { href: "/pricing", label: "💎 Membership plans" },
@@ -395,16 +394,14 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     a: (
       <>
         <p>
-          Yes — the <Link href="/live">live visitor page</Link> has a global chat
-          room where members online right now can chit-chat. Sign in to post,
-          keep it friendly, and use the 🚩 button on any message that breaks the
-          rules; our team reviews reports and can remove messages and accounts.
+          Use <Link href="/connect">Connect</Link> to find people near you for
+          networking, mentorship and meet-ups, or WhatsApp a member straight from
+          their profile — every card has a chat button.
         </p>
         <p>
-          Links are stripped from chat messages to keep spam out. For business
-          conversations use{" "}
-          <Link href="/connect">Connect</Link> or WhatsApp the member directly
-          from their profile.
+          Our community group on{" "}
+          <Link href="/contact">Telegram</Link> is where the chit-chat happens;
+          the old site-wide chat room has been retired.
         </p>
       </>
     ),

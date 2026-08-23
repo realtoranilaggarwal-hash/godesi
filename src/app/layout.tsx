@@ -9,7 +9,6 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
-import { VisitorPinger } from "@/components/VisitorPinger";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
@@ -146,7 +145,6 @@ export default function RootLayout({
         <CookieConsent />
         <RewardsNudge />
         <LiveActivity />
-        <VisitorPinger />
         <GoogleTranslate />
         <BackToTop />
         {aiEnabled() && <AiChat />}

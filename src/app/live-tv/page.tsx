@@ -7,10 +7,8 @@ import { liveVideoIds } from "@/lib/liveTv";
 import { LiveOffAirRow } from "@/components/LiveOffAirRow";
 import { tvEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { SponsoredCard } from "@/components/SponsoredCard";
-import { GlobalChat } from "@/components/GlobalChat";
 import { liveVoteCounts } from "@/lib/liveVotes";
 import { getCurrentUser } from "@/lib/auth";
-import { recentChat } from "@/lib/chat";
 import { liveFavoriteKeys } from "@/lib/liveFavorites";
 import { LiveSignupNudge } from "@/components/LiveSignupNudge";
 
@@ -40,10 +38,7 @@ export default async function LiveTvPage() {
     liveVoteCounts(),
     getCurrentUser(),
   ]);
-  const [messages, favorites] = await Promise.all([
-    recentChat(user?.id ?? null),
-    liveFavoriteKeys(user?.id ?? null),
-  ]);
+  const favorites = await liveFavoriteKeys(user?.id ?? null);
 
   const liveNow = channels.filter((channel) => channel.live);
   const offAir = channels.filter((channel) => !channel.live);
@@ -136,9 +131,6 @@ export default async function LiveTvPage() {
           </ul>
         </Card>
       ) : null}
-
-      {/* Watching together: the same global room as the live visitors page. */}
-      <GlobalChat initial={messages} signedIn={user !== null} />
 
       {user ? null : <LiveSignupNudge kind="tv" />}
 

@@ -9,7 +9,6 @@ import {
   InlineBanner,
   SidebarBanners,
 } from "@/components/Banners";
-import { ChatPanel } from "@/components/ChatPanel";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { JournalistJoinForm } from "@/components/forms/JournalistJoinForm";
 import { JournalistBadge } from "@/components/JournalistBadge";
@@ -392,7 +391,6 @@ export default async function NewsPage({
             </ul>
           </div>
         </Card>
-        <ChatPanel />
         <InlineBanner />
       </div>
 

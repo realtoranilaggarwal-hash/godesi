@@ -71,12 +71,6 @@ const SITE_PAGES: {
     keywords: ["tv", "television", "channel", "news live", "watch"],
   },
   {
-    href: "/live",
-    title: "💬 Live visitors & global chat",
-    subtitle: "Who is online now, and the chit-chat room",
-    keywords: ["chat", "chit chat", "live visitors", "map", "online"],
-  },
-  {
     href: "/journalists",
     title: "🎙 Become a local journalist",
     subtitle: "Report news from your city",
