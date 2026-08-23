@@ -735,6 +735,150 @@ Thank you for the name. Desi Who's Who is for people who have genuinely built so
       "Two nominations asked for from every member you publish",
     ],
   },
+  {
+    slug: "call-list",
+    title: "The call list",
+    icon: "☎️",
+    blurb:
+      "Ring businesses that already pay to advertise elsewhere, and get them to build their own free card.",
+    goal:
+      "Work through the call list at /admin/prospects and turn names into real cards built by the owners themselves. Your week is good if the batch you took is fully called, every call has an outcome written on it, and a handful of owners have created their own card.",
+    whyUs: [
+      "Everybody on this list already pays somebody else — a magazine, a wedding portal, a classifieds site — to be found. You are offering the same thing free.",
+      "The listing is free and stays free: photos, timings, a WhatsApp button, a QR code, offers, and enquiries straight to them with no commission.",
+      "The same card also publishes to godesi.wiki, and to djs.wiki or EventRinger where the trade fits, free for the first year.",
+      "They can be found by town and by trade — a desi customer searching for their trade near them lands on their page.",
+      "Nothing about them is on Godesi until they put it there. That is the honest answer when they ask where you got their number.",
+    ],
+    wherePeopleAre: [
+      { label: "The call list", href: "/admin/prospects" },
+      { label: "Your batch (Mine)", href: "/admin/prospects?mine=1" },
+      { label: "To call back", href: "/admin/prospects?status=CALL_BACK" },
+      { label: "Unclaimed cards to invite instead", href: "/admin/outreach" },
+      { label: "The page they sign up on", href: "/dashboard/business" },
+    ],
+    steps: [
+      {
+        title: "Take a batch, do not browse",
+        detail:
+          "Open /admin/prospects, choose your beat (a trade, or a town from the search box), then press 'Give me this many to call' — 20 is a good morning. Those rows become yours so no two of us ring the same shop.",
+      },
+      {
+        title: "Look at their own website first",
+        detail:
+          "Every row has 'their website' and 'found on'. Thirty seconds on their site tells you what they actually do and who to ask for, and it stops you reading a stale trade back to them.",
+      },
+      {
+        title: "Ring, and use the same opening",
+        detail:
+          "The card shows the standard opening line — press WhatsApp and it is already written. Confirm you have the right business, say the listing is free, and ask if you can send the link.",
+      },
+      {
+        title: "Send the link while you are on the phone",
+        detail:
+          "WhatsApp or email them godesi.com/dashboard/business there and then. A promise to send it later is a call you have to make twice.",
+      },
+      {
+        title: "Never build the page for them from another site",
+        detail:
+          "You may type in what the owner tells you on the call. You may not copy their description or their photos from the directory you found them on — that is the one thing that can get us a legal letter.",
+      },
+      {
+        title: "Write the outcome before the next call",
+        detail:
+          "Set the status — called, call back, interested, not interested, wrong number, listed — and one line of what they said. A call with no note is a call somebody else has to make again.",
+      },
+      {
+        title: "Close the loop when they list",
+        detail:
+          "When their card is live, paste its /b/… address into 'Their card' and set the status to Listed. That is how your week gets counted.",
+      },
+      {
+        title: "Hand back what you cannot finish",
+        detail:
+          "Press 'Put back in the pool' on anything you will not get to, so it goes back on the list instead of sitting on your name.",
+      },
+    ],
+    collect: [
+      "The right person's name and the best number or WhatsApp for them",
+      "What they actually do now, in their words, and the town they serve",
+      "Their email, so you can send the signup link and follow up",
+      "Whether they want their phone and email shown on the card or kept private",
+      "Whether they have photos and a logo ready to upload themselves",
+      "Any correction to the phone, town or street we had — put it in the note",
+      "A time to call back, if they are busy — and put it in the note",
+    ],
+    scripts: [
+      {
+        label: "Phone — the opening",
+        hint: "The card's WhatsApp button already fills this in for you.",
+        text: `Namaste 🙏 Is this [BUSINESS]?
+
+I am [NAME] from Godesi.com — the desi directory for [TOWN] and around. We list desi businesses free, and I can send you the link to set your page up today: your own photos, timings, a WhatsApp button and your offers, so desi customers near you find you and message you.
+
+It costs nothing to be listed. Shall I send you the link on WhatsApp?
+
+godesi.com/dashboard/business`,
+      },
+      {
+        label: "WhatsApp — after a yes",
+        text: `Thank you for your time 🙏
+
+Here is the link to create your free Godesi page: godesi.com/dashboard/business
+
+Put in your own photos, your timings and your WhatsApp number. It is free and stays free, enquiries come straight to you and we take no commission. Your page also publishes on godesi.wiki free for the first year.
+
+Any trouble, message me here and I will walk you through it.`,
+      },
+      {
+        label: "WhatsApp — the follow-up two days later",
+        text: `Namaste 🙏 [NAME] from Godesi here — just checking you managed to create the page: godesi.com/dashboard/business
+
+If it is easier, send me your timings and three photos and I will set it up with you on a five-minute call.`,
+      },
+    ],
+    objections: [
+      {
+        question: "Where did you get my number?",
+        answer:
+          "From your public listing on [SOURCE] and your own website — say exactly which one, it is on the row in front of you. Nothing about you is on Godesi; that is why I am ringing.",
+      },
+      {
+        question: "I already advertise in the magazine / on that wedding site.",
+        answer:
+          "Good — keep it. This is free, so it costs you nothing to also be found by people searching your trade in your town. You are paying them for the same thing.",
+      },
+      {
+        question: "What does it cost, really?",
+        answer:
+          "The listing is free forever. If they later want the gold Featured ring, contact shown to everyone and top of category, that is $50 a month or $600 a year — but do not sell that on the first call.",
+      },
+      {
+        question: "I don't have time for this.",
+        answer:
+          "Two minutes: send me three photos and your timings on WhatsApp and I will sit with you on a short call and it is done.",
+      },
+      {
+        question: "Take me off your list.",
+        answer:
+          "Apologise, mark it Not interested with 'asked not to be contacted' in the note, and never ring again. This one is not negotiable.",
+      },
+    ],
+    rules: [
+      "Never copy a photo, a logo or a written advert from the directory you found them on, even if the owner says 'just take it from there' — ask them to send it to you.",
+      "Never create a card for a business that has not agreed to it on the call.",
+      "Never ring the same business twice in a week, and never at all once it is marked Not interested or 'do not contact'.",
+      "Never read out or share the call list outside the admin — it is our own working list, not a published directory.",
+      "Never say we are calling on behalf of the magazine, portal or site you found them on. We are Godesi and nobody else.",
+      "Never promise a placement, a price or a refund that is not written on godesi.com/pricing.",
+    ],
+    targets: [
+      "One batch of 20 taken and fully called each morning",
+      "40–60 calls a day once you are used to the opening",
+      "Every row you touched has a status and a note — no blanks left behind",
+      "5 owners a week with a live card of their own, marked Listed with the /b/ link",
+    ],
+  },
 ];
 
 export function playbookBySlug(slug: string) {

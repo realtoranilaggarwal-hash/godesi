@@ -25,6 +25,7 @@ export const ADMIN_SECTIONS = [
   { href: "/admin/live-channels", label: "Radio & TV", icon: "🎧" },
   { href: "/admin/help-clips", label: "Help clips", icon: "▶️" },
   { href: "/admin/outreach", label: "Outreach", icon: "📣" },
+  { href: "/admin/prospects", label: "Call list", icon: "☎️" },
   { href: "/admin/team", label: "Team", icon: "🔑" },
   { href: "/admin/handbook", label: "Handbook", icon: "📗" },
 ];

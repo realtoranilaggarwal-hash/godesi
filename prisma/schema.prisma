@@ -304,6 +304,9 @@ model User {
   eventClaims  EventClaim[]
   eliteOrders  EliteOrder[]
 
+  /// Sales prospects this moderator is working through.
+  prospects Prospect[]
+
   liveChannels       LiveChannel[]
   liveChannelOrders  LiveChannelOrder[]
   liveChannelReports LiveChannelReport[]
@@ -2083,6 +2086,58 @@ model PartnerKit {
   banner728Url  String?
   note          String?
   updatedAt     DateTime @updatedAt
+}
+
+/// A business worth ringing: found on a public advertiser directory, so we know
+/// it already pays to advertise somewhere. Nothing here is published — a
+/// prospect only becomes a card when the owner claims and fills one in
+/// themselves. Facts are kept so a moderator can make the call, and the row is
+/// keyed by the page it was found on so a re-run updates instead of duplicating.
+model Prospect {
+  id    String @id @default(cuid())
+  name  String
+  /// The trade in the source directory's words, e.g. "Disc Jockey".
+  trade String
+  /// Our own taxonomy, guessed from the trade so a beat can be filtered.
+  categorySlug    String?
+  subcategorySlug String?
+  city            String?
+  state           String?
+  address         String?
+  /// Read from the business's own website, not from the directory.
+  phone           String?
+  email           String?
+  websiteUrl      String?
+  /// The public page the name was found on. Unique, so an import is re-runnable.
+  sourceUrl       String  @unique
+  /// Host of that page, e.g. "deshvidesh.com", for crediting where it came from.
+  source          String
+
+  status ProspectStatus @default(NEW)
+  /// Moderator working this row, so two people never ring the same business.
+  ownerId String?
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  /// What the business said, in the moderator's words.
+  note         String?
+  calledAt     DateTime?
+  /// Slug of the card they created, once they list.
+  listedSlug   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, categorySlug])
+  @@index([ownerId, status])
+  @@index([city])
+}
+
+enum ProspectStatus {
+  NEW
+  CALLED
+  INTERESTED
+  CALL_BACK
+  NOT_INTERESTED
+  WRONG_NUMBER
+  LISTED
 }
 
 /// A short "how Godesi works" clip shown in the sidebar. The video stays on

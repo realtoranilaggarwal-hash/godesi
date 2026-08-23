@@ -18,6 +18,8 @@ export type BusinessDraft = {
   /** What the source says about them, shown to the desk to rewrite, not saved. */
   about: string;
   phone: string;
+  /** The enquiry address the page publishes, if it prints one. */
+  email: string;
   websiteUrl: string;
   address: string;
   city: string;
@@ -73,7 +75,8 @@ const CATEGORY_WORDS: [RegExp, string][] = [
 const PROFESSIONAL_WORDS =
   /priest|pandit|astrolog|realtor|agent|attorney|lawyer|tutor|teacher|consultant|photograph|artist|therapist|doctor|dentist|cpa|accountant|advisor/i;
 
-function guessCategory(...hints: string[]) {
+/** Our top category for any words that name a trade, e.g. a directory heading. */
+export function guessCategory(...hints: string[]) {
   const haystack = hints.join(" ").replace(/[-_/]+/g, " ");
   for (const [words, slug] of CATEGORY_WORDS) {
     if (words.test(haystack)) return slug;
@@ -327,6 +330,30 @@ function phoneOf(value: unknown) {
   return digits.length >= 10 ? raw.slice(0, 30) : "";
 }
 
+/**
+ * The enquiry address the page publishes. An address on the business's own
+ * domain comes first, since sites often also carry their web designer's.
+ */
+function emailOnPage(page: string, host: string) {
+  const found = page.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) ?? [];
+  const usable = found
+    .map((value) => value.toLowerCase())
+    .filter(
+      (value) =>
+        !/\.(png|jpe?g|gif|webp|svg|css|js)$/.test(value) &&
+        !/(example|sentry|wixpress|godaddy|wordpress|squarespace|no-?reply)/.test(value),
+    );
+  const domain = host.replace(/^www\./, "");
+  return (
+    usable.find((value) => value.endsWith(`@${domain}`)) ??
+    usable.find((value) =>
+      /^(info|contact|sales|hello|admin|office|enquir)/.test(value),
+    ) ??
+    usable[0] ??
+    ""
+  ).slice(0, 120);
+}
+
 /** The first published number on the page, when there is no JSON-LD to read. */
 function phoneOnPage(readable: string) {
   const match =
@@ -465,6 +492,7 @@ async function googleDraft(target: URL, page: string): Promise<BusinessDraft> {
     name: google.name,
     about: google.about,
     phone: google.phone || osm?.phone || "",
+    email: "",
     websiteUrl: osm?.websiteUrl ?? "",
     address: google.address || osm?.street || "",
     city,
@@ -542,6 +570,7 @@ export async function readBusinessLink(link: string): Promise<BusinessDraft> {
     name,
     about,
     phone: phoneOf(ld?.telephone) || phoneOnPage(readable.slice(0, 4000)),
+    email: text(ld?.email).replace(/^mailto:/i, "") || emailOnPage(page, target.hostname),
     // Their own site if the page names one, never the page we read.
     websiteUrl: (() => {
       const url = text(ld?.url);
