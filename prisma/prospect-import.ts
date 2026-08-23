@@ -129,7 +129,7 @@ async function contact(lead: Lead) {
     about: own.about,
     logoUrl: logo,
     // A number a moderator can't dial is worse than a blank: it wastes a call.
-    phone: dialable(lead.phone) || dialable(own.phone),
+    phone: dialable(lead.phone ?? "") || dialable(own.phone),
     email: lead.email || own.email,
     city: lead.city || own.city,
     state: lead.state || own.state,
