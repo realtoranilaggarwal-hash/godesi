@@ -139,11 +139,10 @@ export const ELITE_PACKAGES: Record<
   },
 };
 
-export function elitePackageOrThrow(value: string) {
+export function elitePackageOrNull(value: string) {
   const id = value as ElitePackageId;
   const item = ELITE_PACKAGES[id];
-  if (!item) throw new Error("Unknown Elite package");
-  return { id, ...item };
+  return item ? { id, ...item } : null;
 }
 
 /**

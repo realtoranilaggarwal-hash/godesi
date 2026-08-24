@@ -15,7 +15,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import {
   INTERVIEW_TYPES,
   ELITE_CATEGORIES,
-  elitePackageOrThrow,
+  elitePackageOrNull,
 } from "@/lib/elite";
 import { uniqueEliteSlug } from "@/lib/eliteSlug";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
@@ -228,7 +228,9 @@ export async function submitEliteAction(
 export async function startEliteCheckoutAction(formData: FormData) {
   const user = await requireUser();
   const entryId = String(formData.get("entryId") ?? "");
-  const item = elitePackageOrThrow(String(formData.get("packageId") ?? ""));
+  const item =
+    elitePackageOrNull(String(formData.get("packageId") ?? "")) ??
+    redirect("/desi-elite/apply?error=package");
 
   const entry = await db.eliteEntry.findFirst({
     where: { id: entryId, userId: user.id },

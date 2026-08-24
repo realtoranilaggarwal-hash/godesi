@@ -79,10 +79,10 @@ export const CART_ITEMS: CartItem[] = [
   bannerItem("banner-fullbanner", "FULLBANNER", false),
   {
     key: "elite",
-    label: "GoDesi Elite interview + profile for 5 years",
+    label: "GoDesi Elite interview + profile for 5 years — launch offer",
     blurb:
-      "One-time. We interview you by phone, WhatsApp, Zoom or Facebook Live and publish your GoDesi Elite profile with a 30–60 second video, held for five years.",
-    inr: 39_999,
+      "One-time. We interview you by phone, WhatsApp, Zoom or Facebook Live and publish your GoDesi Elite profile with a 30–60 second video, held for five years. Normally $500 for one year.",
+    inr: 19_999,
     usd: ELITE_PACKAGES.INTERVIEW.usd,
     inBundle: true,
   },
@@ -118,7 +118,7 @@ export function bundleListPrice(currency: Currency) {
 }
 
 export function bundlePrice(currency: Currency) {
-  return currency === "INR" ? 34_999 : 750;
+  return currency === "INR" ? 21_999 : 750;
 }
 
 export function bundleSaving(currency: Currency) {
