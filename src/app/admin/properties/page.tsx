@@ -12,6 +12,7 @@ import { Badge, Card } from "@/components/ui";
 import { formatMoney } from "@/lib/format";
 import { KIND_LABELS } from "@/lib/listings";
 import { POSTED_BY_LABELS, propertyTypeLabel } from "@/lib/property";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Property desk" };
@@ -30,7 +31,9 @@ export default async function PropertyDeskPage({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/properties");
-  if (!isStaff(user) || !can(user, "listings")) redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
+  if (!can(user, "listings"))
+    redirect(deskFallback(user, "Property"));
 
   const status = FILTERS.some((filter) => filter.id === searchParams.status)
     ? searchParams.status

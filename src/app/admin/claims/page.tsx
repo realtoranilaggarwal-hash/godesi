@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { reviewClaimAction } from "@/app/actions/claims";
 import { reviewEventClaimAction } from "@/app/actions/eventClaims";
 import { Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Claims" };
@@ -13,7 +14,8 @@ export const metadata: Metadata = { title: "Claims" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/claims");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Claims"));
 
   const [claims, eventClaims] = await Promise.all([
     db.businessClaim.findMany({

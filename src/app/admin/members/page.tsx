@@ -8,6 +8,7 @@ import { deleteMembersAction } from "@/app/actions/members";
 import { formatMinor } from "@/lib/format";
 import { looksLikeSpam, spamSignals } from "@/lib/signupGuard";
 import { Badge, Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Members & payments" };
@@ -37,7 +38,8 @@ export default async function Page({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/members");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Members"));
 
   const q = (searchParams.q ?? "").trim();
   const filter = (FILTERS.find((entry) => entry.key === searchParams.filter)

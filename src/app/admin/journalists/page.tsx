@@ -7,6 +7,7 @@ import {
   verifyJournalistAction,
 } from "@/app/actions/admin";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Local journalists" };
@@ -14,7 +15,8 @@ export const metadata: Metadata = { title: "Local journalists" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/journalists");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Journalists"));
 
   const journalists = await db.user.findMany({
     where: { journalistSince: { not: null } },

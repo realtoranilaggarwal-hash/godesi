@@ -12,6 +12,7 @@ import {
 } from "@/components/forms/RewardAdminForms";
 import { pointValues } from "@/lib/rewardsQueries";
 import { Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Rewards" };
@@ -19,7 +20,8 @@ export const metadata: Metadata = { title: "Rewards" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/rewards");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Rewards"));
 
   const [rewardPoints, flaggedReferrals, openRedemptions] = await Promise.all([
     pointValues(),

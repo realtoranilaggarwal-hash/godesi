@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/auth";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
 import { whatsappLink, siteUrl } from "@/lib/format";
 import { markOutreachAction } from "@/app/actions/outreach";
@@ -34,7 +35,9 @@ export default async function AdminOutreachPage({
     page?: string;
   };
 }) {
-  await requireStaff();
+  const staff = await getCurrentUser();
+  if (!staff) redirect("/login?next=/admin/outreach");
+  if (!isStaff(staff)) redirect("/dashboard");
 
   const status = searchParams.status === "contacted" ? "contacted" : "todo";
   const page = Math.max(1, Number(searchParams.page ?? "1") || 1);

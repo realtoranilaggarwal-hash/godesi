@@ -14,6 +14,7 @@ import {
 } from "@/components/forms/SeedListingForm";
 import { getCategoryTree } from "@/lib/directory";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Listings" };
@@ -21,7 +22,8 @@ export const metadata: Metadata = { title: "Listings" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/listings");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Listings"));
 
   const [businesses, businessCount, categories] = await Promise.all([
     db.business.findMany({

@@ -12,6 +12,7 @@ import {
   saveLinkedBusinessAction,
 } from "@/app/actions/businessLink";
 import { Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 function Field({
   label,
@@ -63,7 +64,9 @@ export default async function Page({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/listings/wire");
-  if (!isStaff(user) || !can(user, "listings")) redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
+  if (!can(user, "listings"))
+    redirect(deskFallback(user, "Listing wire"));
 
   const picked = searchParams.sub ?? "";
   const ticked = new Set((searchParams.services ?? "").split("|").filter(Boolean));

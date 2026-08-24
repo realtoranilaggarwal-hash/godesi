@@ -11,6 +11,7 @@ import {
   xConfigured,
 } from "@/lib/autoShare";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Auto-share" };
@@ -18,7 +19,8 @@ export const metadata: Metadata = { title: "Auto-share" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/auto-share");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Auto-share"));
 
   const [autoShare, shareLogs] = await Promise.all([
     shareSettings(),

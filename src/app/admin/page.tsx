@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { Card } from "@/components/ui";
-import { ADMIN_SECTIONS } from "@/lib/adminSections";
+import { ADMIN_SECTIONS, deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" };
@@ -13,7 +13,8 @@ export const metadata: Metadata = { title: "Admin" };
 export default async function AdminPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Overview"));
 
   const [
     businessCount,

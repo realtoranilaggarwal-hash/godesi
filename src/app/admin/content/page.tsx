@@ -25,9 +25,13 @@ import { Badge, Card } from "@/components/ui";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Content desk" };
 
-export default async function ContentDeskPage() {
+export default async function ContentDeskPage({
+  searchParams,
+}: {
+  searchParams: { denied?: string };
+}) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login?next=/admin/content");
   if (!isStaff(user)) redirect("/dashboard");
 
   const allowed = {
@@ -87,6 +91,14 @@ export default async function ContentDeskPage() {
           first.
         </p>
       </div>
+
+      {searchParams.denied ? (
+        <p className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <strong>{searchParams.denied}</strong> is an admin desk, so it sent you
+          back here. Ask an admin to open it for you — the desks you can use are
+          in the row above.
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap gap-2 text-sm font-semibold">
         <Link

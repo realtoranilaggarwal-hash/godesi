@@ -12,6 +12,7 @@ import {
 import { formatMinor } from "@/lib/format";
 import { AdminTabs } from "@/components/AdminTabs";
 import { OffsiteReviewForm } from "@/components/forms/OffsiteReviewForm";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Review desk" };
@@ -19,7 +20,9 @@ export const metadata: Metadata = { title: "Review desk" };
 export default async function ReviewDeskPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!isStaff(user) || !can(user, "reviews")) redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
+  if (!can(user, "reviews"))
+    redirect(deskFallback(user, "Reviews"));
 
   const [disputes, reviews] = await Promise.all([
     db.reviewDispute.findMany({

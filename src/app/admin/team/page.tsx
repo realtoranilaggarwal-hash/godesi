@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { ModeratorForm } from "@/components/forms/ModeratorForm";
 import { ALL_PERMISSIONS, STAFF_PERMISSIONS } from "@/lib/permissions";
 import { Badge, Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Team access" };
@@ -18,7 +19,8 @@ export default async function Page({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/team");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Team"));
 
   const q = (searchParams.q ?? "").trim();
 

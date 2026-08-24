@@ -20,6 +20,7 @@ import { getCategoryTree } from "@/lib/directory";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 function Field({
   label,
@@ -70,7 +71,9 @@ export default async function Page({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/events/wire");
-  if (!isStaff(user) || !can(user, "events")) redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
+  if (!can(user, "events"))
+    redirect(deskFallback(user, "Event wire"));
 
   const [categories, sources, imported] = await Promise.all([
     getCategoryTree(),

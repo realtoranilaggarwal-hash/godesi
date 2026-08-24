@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/auth";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
 import {
   updateLiveChannelAction,
@@ -25,7 +26,9 @@ function when(date: Date) {
 }
 
 export default async function AdminLiveChannelsPage() {
-  await requireStaff();
+  const staff = await getCurrentUser();
+  if (!staff) redirect("/login?next=/admin/live-channels");
+  if (!isStaff(staff)) redirect("/dashboard");
 
   const [channels, reports] = await Promise.all([
     db.liveChannel.findMany({

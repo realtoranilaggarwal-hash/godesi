@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { AdminBannersCard } from "@/components/AdminBannersCard";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Banners" };
@@ -12,7 +13,8 @@ export const metadata: Metadata = { title: "Banners" };
 export default async function AdminBannersPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/banners");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Banners"));
 
   const banners = await db.banner.findMany({
     orderBy: [{ slot: "asc" }, { position: "asc" }],

@@ -17,6 +17,7 @@ import { spamSignals } from "@/lib/signupGuard";
 import { MEMBER_EMAIL_TEMPLATES } from "@/lib/memberEmails";
 import { MemberEmailForm } from "@/components/admin/MemberEmailForm";
 import { Badge, Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Member | Godesi admin" };
@@ -39,7 +40,8 @@ export default async function MemberPage({
 }) {
   const admin = await getCurrentUser();
   if (!admin) redirect(`/login?next=/admin/members/${params.id}`);
-  if (admin.role !== "ADMIN") redirect("/dashboard");
+  if (admin.role !== "ADMIN")
+    redirect(deskFallback(admin, "Members"));
 
   const member = await db.user.findUnique({
     where: { id: params.id },

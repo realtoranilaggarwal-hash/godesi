@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/admin";
 import { formatEventDate } from "@/lib/events";
 import { Badge, Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Events" };
@@ -17,7 +18,8 @@ export const metadata: Metadata = { title: "Events" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/events-desk");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Events"));
 
   const kit = await db.partnerKit.findUnique({ where: { id: "default" } });
   const events = await db.event.findMany({

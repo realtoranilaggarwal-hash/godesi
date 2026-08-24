@@ -11,6 +11,7 @@ import {
 import { NewsFeedForm } from "@/components/forms/NewsFeedForm";
 import { Badge, Card } from "@/components/ui";
 import { newsPath } from "@/lib/newsLinks";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "News desk" };
@@ -61,7 +62,8 @@ function StoryEditor({
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/news");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "News"));
 
   // Member reports must never be buried under the crawler's newest 40 items,
   // so pending stories are queried on their own and shown first.

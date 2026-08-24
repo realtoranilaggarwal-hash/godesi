@@ -10,6 +10,7 @@ import {
 import { ResourceLinkForm } from "@/components/forms/ResourceLinkForm";
 import { getCategoryTree } from "@/lib/directory";
 import { Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Resources" };
@@ -17,7 +18,8 @@ export const metadata: Metadata = { title: "Resources" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/resources");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Resources"));
 
   const [resourceLinks, categories] = await Promise.all([
     db.resourceLink.findMany({

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ADMIN_SECTIONS } from "@/lib/adminSections";
+import type { AdminSection } from "@/lib/adminSections";
 
-export function AdminNav() {
+export function AdminNav({ sections }: { sections: AdminSection[] }) {
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-wrap gap-1.5 text-sm font-semibold">
-      {ADMIN_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <Link
           key={section.href}
           href={section.href}

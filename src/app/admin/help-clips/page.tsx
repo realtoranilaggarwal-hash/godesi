@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/helpClips";
 import { HelpClipForm } from "@/components/forms/HelpClipForm";
 import { Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Help clips" };
@@ -16,7 +17,8 @@ export const metadata: Metadata = { title: "Help clips" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/help-clips");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Help clips"));
 
   const [clips, tree] = await Promise.all([
     db.helpClip.findMany({

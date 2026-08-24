@@ -8,6 +8,7 @@ import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { formatMinor } from "@/lib/format";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Ad orders" };
@@ -15,7 +16,8 @@ export const metadata: Metadata = { title: "Ad orders" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/ads");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Ad orders"));
 
   const [pendingAds, adOrders] = await Promise.all([
     db.banner.findMany({

@@ -6,6 +6,7 @@ import { reviewUpiPaymentAction } from "@/app/actions/upi";
 import { upiEnabled, upiVpa } from "@/lib/upi";
 import { formatMinor } from "@/lib/format";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "UPI payments" };
@@ -13,7 +14,8 @@ export const metadata: Metadata = { title: "UPI payments" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/upi");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "UPI payments"));
 
   const upiRequests = await db.upiRequest.findMany({
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
