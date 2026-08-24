@@ -23,12 +23,15 @@ export function CategoryPicker({
   quickCount = 8,
   label = "All categories",
   onNavigate,
+  big = false,
 }: {
   groups: PickerGroup[];
   /** How many categories to show as short links before the tree opens. */
   quickCount?: number;
   label?: string;
   onNavigate?: () => void;
+  /** Home page size: bigger pills and a button you cannot miss. */
+  big?: boolean;
 }) {
   const [openTree, setOpenTree] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -43,7 +46,9 @@ export function CategoryPicker({
             <Link
               href={`/categories/${group.slug}`}
               onClick={onNavigate}
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${group.className}`}
+              className={`inline-flex items-center gap-1 rounded-full font-bold ${
+                big ? "px-3.5 py-1.5 text-sm" : "px-2.5 py-1 text-xs"
+              } ${group.className}`}
             >
               <span aria-hidden>{group.icon}</span>
               {group.name}
@@ -56,14 +61,24 @@ export function CategoryPicker({
         type="button"
         onClick={() => setOpenTree((value) => !value)}
         aria-expanded={openTree}
-        className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+        className={`mt-2 flex w-full items-center justify-between rounded-xl font-bold ${
+          big
+            ? "border-2 border-slate-900 bg-slate-900 px-4 py-3 text-base text-white hover:bg-slate-800"
+            : "border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50"
+        }`}
       >
         {label}
         <span aria-hidden>{openTree ? "▴" : "▾"}</span>
       </button>
 
       {openTree ? (
-        <ul className="mt-1 max-h-[60vh] space-y-0.5 overflow-y-auto pr-1">
+        <ul
+          className={`max-h-[60vh] space-y-0.5 overflow-y-auto pr-1 ${
+            big
+              ? "mt-2 rounded-xl border border-slate-200 bg-white p-2 sm:columns-2 sm:gap-4 lg:columns-3"
+              : "mt-1"
+          }`}
+        >
           {groups.map((group) => {
             const open = openGroup === group.slug;
             return (
@@ -72,7 +87,9 @@ export function CategoryPicker({
                   <Link
                     href={`/categories/${group.slug}`}
                     onClick={onNavigate}
-                    className="min-w-0 flex-1 truncate rounded-lg px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                    className={`min-w-0 flex-1 truncate rounded-lg px-2 py-1 font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 ${
+                      big ? "text-sm" : "text-xs"
+                    }`}
                   >
                     <span aria-hidden className="mr-1">
                       {group.icon}
@@ -99,7 +116,9 @@ export function CategoryPicker({
                         <Link
                           href={`/categories/${child.slug}`}
                           onClick={onNavigate}
-                          className="block truncate rounded-lg px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                          className={`block truncate rounded-lg px-2 py-1 text-slate-600 hover:bg-slate-50 hover:text-indigo-600 ${
+                            big ? "text-sm" : "text-xs"
+                          }`}
                         >
                           {child.name}
                         </Link>

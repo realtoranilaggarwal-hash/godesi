@@ -44,6 +44,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Community",
       links: [
         { href: "/connect", label: "Connect" },
+        { href: "/people", label: "People on GoDesi" },
         { href: "/alumni", label: "Find your batchmates" },
         { href: "/buzz", label: "#godesi social wall" },
         { href: "/news/report", label: "Share news" },

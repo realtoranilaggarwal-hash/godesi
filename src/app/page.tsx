@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
-import { getCategoryCounts, getCategoryTree } from "@/lib/directory";
+import { getCategoryTree } from "@/lib/directory";
 import { BusinessTile } from "@/components/BusinessTile";
-import { CategoryTiles } from "@/components/CategoryTiles";
+import { MemberTile } from "@/components/MemberTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
@@ -19,6 +19,7 @@ import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
+import { newestMembers, publicMemberCount } from "@/lib/membersQueries";
 
 export const dynamic = "force-dynamic";
 
@@ -65,17 +66,17 @@ const HERO_ACTIONS: { href: string; label: string }[] = [
 export default async function HomePage() {
   const [
     categories,
-    counts,
     businesses,
     events,
     news,
     members,
     memberCount,
+    joined,
+    joinedCount,
     spaCount,
   ] = await Promise.all([
     getCategoryTree(),
-    getCategoryCounts(),
-    searchBusinesses({ take: 12, sort: "recent" }),
+    searchBusinesses({ take: 6, sort: "recent" }),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
@@ -102,6 +103,8 @@ export default async function HomePage() {
       },
     }),
     db.user.count(),
+    newestMembers(12),
+    publicMemberCount(),
     db.business.count({
       where: {
         status: "APPROVED",
@@ -176,6 +179,28 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* One bold box instead of a wall of category tiles: the whole taxonomy
+          is one click down, and nothing else competes with it. */}
+      <section className="rounded-3xl border-2 border-slate-900 bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-black">
+            What do you need? Pick a service 👇
+          </h2>
+          <Link
+            href="/categories"
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            All {categories.length} categories →
+          </Link>
+        </div>
+        <CategoryPicker
+          groups={pickerGroups}
+          quickCount={10}
+          label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
+          big
+        />
+      </section>
+
       <GodesiWikiBanner />
 
       <FeaturedStrip />
@@ -216,49 +241,28 @@ export default async function HomePage() {
           />
         </div>
 
-        {/* A handful of shelves, with the rest a click away: the page should
-            not open on a wall of forty categories. */}
-        <section>
-          <SectionHeading
-            title="Browse by category"
-            href="/categories"
-            linkLabel="All categories"
-          />
-          <CategoryTiles
-            categories={categories.slice(0, 6)}
-            counts={counts}
-            dense
-          />
-          <details className="group mt-3">
-            <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-800 hover:bg-slate-50">
-              <span className="group-open:hidden">
-                More categories ({categories.length - 6}) ↓
-              </span>
-              <span className="hidden group-open:inline">Fewer categories ↑</span>
-            </summary>
-            <div className="mt-3">
-              <CategoryTiles
-                categories={categories.slice(6)}
-                counts={counts}
-                extra={
-                  <>
-                    <SpaSpotlight listings={spaCount} />
-                    <ReferEarnTile />
-                    <WebsiteOfferTile />
-                  </>
-                }
-                dense
-              />
-            </div>
-          </details>
-          <div className="mt-3 max-w-md">
-            <CategoryPicker
-              groups={pickerGroups}
-              quickCount={0}
-              label="Pick a service from the full list"
+        {joined.length ? (
+          <section>
+            <SectionHeading
+              title="Who just joined GoDesi 👋"
+              href="/people"
+              linkLabel={`All ${joinedCount.toLocaleString()} people`}
             />
-          </div>
-        </section>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {joined.map((member) => (
+                <MemberTile key={member.id} member={member} />
+              ))}
+            </div>
+            <p className="mt-3 text-sm text-slate-600">
+              Pick a handle and you get your own page at godesi.com/your-name,
+              with a QR code to share.{" "}
+              <Link href="/signup" className="font-semibold text-indigo-600">
+                Join free
+              </Link>{" "}
+              and your face shows up here.
+            </p>
+          </section>
+        ) : null}
 
         <section>
           <SectionHeading
@@ -287,6 +291,12 @@ export default async function HomePage() {
             </Card>
           )}
         </section>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <SpaSpotlight listings={spaCount} />
+          <ReferEarnTile />
+          <WebsiteOfferTile />
+        </div>
 
         <Card className="border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50">
           <div className="flex flex-wrap items-center justify-between gap-3">
