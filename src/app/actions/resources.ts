@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
 import { siteUrl, toMinor } from "@/lib/format";
@@ -136,7 +136,7 @@ export async function saveResourceLinkAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
+    if (!can(user, "resources")) throw new Error("FORBIDDEN");
 
     const parsed = parseLink(formData);
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -174,7 +174,7 @@ export async function saveResourceLinkAction(
 
 export async function toggleResourceLinkAction(formData: FormData) {
   const user = await requireUser();
-  if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
+  if (!can(user, "resources")) throw new Error("FORBIDDEN");
 
   const id = String(formData.get("id") ?? "");
   const link = await db.resourceLink.findUnique({ where: { id } });
@@ -192,7 +192,7 @@ export async function toggleResourceLinkAction(formData: FormData) {
 /** Admin: approve or reject a paid submission before it enters the rotation. */
 export async function reviewResourceLinkAction(formData: FormData) {
   const user = await requireUser();
-  if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
+  if (!can(user, "resources")) throw new Error("FORBIDDEN");
 
   const id = String(formData.get("id") ?? "");
   const approve = formData.get("decision") === "approve";
@@ -210,7 +210,7 @@ export async function reviewResourceLinkAction(formData: FormData) {
 
 export async function deleteResourceLinkAction(formData: FormData) {
   const user = await requireUser();
-  if (user.role !== "ADMIN") throw new Error("FORBIDDEN");
+  if (!can(user, "resources")) throw new Error("FORBIDDEN");
 
   await db.resourceLink.deleteMany({ where: { id: String(formData.get("id") ?? "") } });
 
