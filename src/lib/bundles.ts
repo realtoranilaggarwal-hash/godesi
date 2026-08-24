@@ -117,8 +117,12 @@ export function bundleListPrice(currency: Currency) {
   );
 }
 
+/**
+ * The package price, set to hold roughly a third off the two lines bought
+ * separately — so it moves when the Elite launch offer does.
+ */
 export function bundlePrice(currency: Currency) {
-  return currency === "INR" ? 21_999 : 750;
+  return currency === "INR" ? 16_999 : 575;
 }
 
 export function bundleSaving(currency: Currency) {
