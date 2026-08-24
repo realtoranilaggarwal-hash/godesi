@@ -5,6 +5,8 @@ import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
 import { popularCities } from "@/lib/cities";
 import { businessIsThin, eventIsThin } from "@/lib/thinContent";
+import { professionalCount } from "@/lib/professionalsQueries";
+import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 
 export const dynamic = "force-dynamic";
 
@@ -87,10 +89,19 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  const [{ businesses, categories, events, reports }, cities] =
-    await Promise.all([sitemapRows(), popularCities(200)]);
+  const [{ businesses, categories, events, reports }, cities, professionals] =
+    await Promise.all([sitemapRows(), popularCities(200), professionalCount()]);
 
   return [
+    ...(professionals >= PROFESSIONALS_INDEX_FROM
+      ? [
+          {
+            url: `${base}/professionals`,
+            changeFrequency: "daily" as const,
+            priority: 0.7,
+          },
+        ]
+      : []),
     { url: base, changeFrequency: "daily", priority: 1 },
     { url: `${base}/search`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/leads`, changeFrequency: "hourly", priority: 0.8 },
@@ -127,8 +138,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/live-tv`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/categories`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/connect`, changeFrequency: "daily", priority: 0.6 },
-    { url: `${base}/people`, changeFrequency: "daily", priority: 0.6 },
-    { url: `${base}/professionals`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/alumni`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "weekly", priority: 0.5 },
     { url: `${base}/pricing`, changeFrequency: "monthly", priority: 0.5 },

@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description:
     "Members of the GoDesi community — business owners, professionals and neighbours, newest first.",
   alternates: { canonical: "/people" },
+  // Faces and handles, no written content: useful to visitors, not to search.
+  robots: { index: false, follow: true },
 };
 
 export default async function PeoplePage({

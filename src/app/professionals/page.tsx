@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { professionalPage } from "@/lib/professionalsQueries";
+import {
+  professionalCount,
+  professionalPage,
+} from "@/lib/professionalsQueries";
+import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { ProfessionalCard } from "@/components/ProfessionalCard";
 import { Card, LinkButton, inputClass } from "@/components/ui";
 
@@ -8,12 +12,25 @@ export const dynamic = "force-dynamic";
 
 const PER_PAGE = 36;
 
-export const metadata: Metadata = {
-  title: "GoDesi Professionals — desi founders, agents, doctors and engineers",
-  description:
-    "The free GoDesi Professionals directory: every member who has completed their profile, searchable by trade and city. Recognition beyond it is GoDesi Elite.",
-  alternates: { canonical: "/professionals" },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { q?: string; city?: string; open?: string; page?: string };
+}): Promise<Metadata> {
+  const total = await professionalCount();
+  // Filtered and paged views are near-duplicates; only the plain list is indexed.
+  const plain = !Object.values(searchParams).some(Boolean);
+  return {
+    title: "GoDesi Professionals — desi founders, agents, doctors and engineers",
+    description:
+      "The free GoDesi Professionals directory: every member who has completed their profile, searchable by trade and city. Recognition beyond it is GoDesi Elite.",
+    alternates: { canonical: "/professionals" },
+    robots:
+      plain && total >= PROFESSIONALS_INDEX_FROM
+        ? undefined
+        : { index: false, follow: true },
+  };
+}
 
 export default async function ProfessionalsPage({
   searchParams,
