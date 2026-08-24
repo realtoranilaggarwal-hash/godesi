@@ -31,6 +31,7 @@ const NAV = [
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/people", label: "People", icon: "👥" },
+  { href: "/professionals", label: "Professionals", icon: "👔" },
   { href: "/news", label: "News", icon: "📰" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top contributors", icon: "🏅" },

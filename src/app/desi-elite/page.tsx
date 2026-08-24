@@ -3,6 +3,11 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { Card, LinkButton, inputClass } from "@/components/ui";
 import { EliteCard } from "@/components/EliteCard";
+import { ProfessionalCard } from "@/components/ProfessionalCard";
+import {
+  newestProfessionals,
+  professionalCount,
+} from "@/lib/professionalsQueries";
 import { ELITE_CATEGORIES, ELITE_ORDER, eliteWhere } from "@/lib/elite";
 
 export const dynamic = "force-dynamic";
@@ -18,11 +23,15 @@ export default async function EliteDirectoryPage({
   searchParams: { category?: string; city?: string; country?: string; badge?: string; q?: string };
 }) {
   const where = eliteWhere(searchParams);
-  const entries = await db.eliteEntry.findMany({
-    where,
-    orderBy: [{ badge: "desc" }, ...ELITE_ORDER],
-    take: 200,
-  });
+  const [entries, professionals, professionalTotal] = await Promise.all([
+    db.eliteEntry.findMany({
+      where,
+      orderBy: [{ badge: "desc" }, ...ELITE_ORDER],
+      take: 200,
+    }),
+    newestProfessionals(6),
+    professionalCount(),
+  ]);
 
   const featured = entries.filter((entry) => entry.badge === "FEATURED");
   const premium = entries.filter((entry) => entry.badge === "PREMIUM");
@@ -37,7 +46,12 @@ export default async function EliteDirectoryPage({
           worldwide. Apply or nominate someone — our team reviews the entry,
           interviews them and publishes a profile with video. Some profiles are
           written by us from public record and marked <b>unclaimed</b> until the
-          person takes theirs over.
+          person takes theirs over. Not ready for that? Completing your profile
+          lists you free in{" "}
+          <Link href="/professionals" className="font-bold underline">
+            GoDesi Professionals
+          </Link>{" "}
+          straight away.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <LinkButton href="/desi-elite/apply">Apply now</LinkButton>
@@ -136,6 +150,33 @@ export default async function EliteDirectoryPage({
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {basic.map((entry) => (
               <EliteCard key={entry.id} entry={entry} size="small" />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {professionals.length ? (
+        <section>
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 className="text-lg font-black text-slate-900">
+                👔 GoDesi Professionals — free, and growing on its own
+              </h2>
+              <p className="text-sm text-slate-600">
+                Every member who completes their profile is listed, no review
+                needed. Elite above is the reviewed recognition.
+              </p>
+            </div>
+            <Link
+              href="/professionals"
+              className="text-sm font-bold text-indigo-600 hover:underline"
+            >
+              All {professionalTotal.toLocaleString()} professionals →
+            </Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {professionals.map((person) => (
+              <ProfessionalCard key={person.id} person={person} />
             ))}
           </div>
         </section>

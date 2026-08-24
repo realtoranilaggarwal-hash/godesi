@@ -36,7 +36,15 @@ export default async function PersonalProfilePage() {
             <h1 className="text-2xl font-bold">My personal profile</h1>
             <p className="text-sm text-slate-600">
               This is the social side of Godesi — your photo, bio and everything
-              you have posted, all on one shareable page.
+              you have posted, all on one shareable page. Fill in a handle, a
+              headline and your skills and you are listed free in{" "}
+              <Link
+                href="/professionals"
+                className="font-semibold text-indigo-600 underline"
+              >
+                GoDesi Professionals
+              </Link>
+              .
             </p>
           </div>
           <SignOutButton />

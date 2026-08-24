@@ -34,6 +34,10 @@ export default async function PeoplePage({
           <Link href="/signup" className="font-semibold text-indigo-600">
             Join them free
           </Link>
+          . Finished profiles also appear in{" "}
+          <Link href="/professionals" className="font-semibold text-indigo-600">
+            GoDesi Professionals
+          </Link>
           .
         </p>
       </header>
