@@ -377,8 +377,8 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
         </p>
         <ul>
           <li>
-            One-time interview fee including a 30–60 second video — $250 for a
-            year, $500 for five years
+            One-time interview fee including a 30–60 second video — $500 for a
+            year, or $250 for five years while the launch offer runs
           </li>
           <li>$500 three-minute professional film from the content you supply</li>
           <li>$100 / $250 / $500 placement boosts — higher spend ranks higher</li>

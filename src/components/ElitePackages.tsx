@@ -54,7 +54,13 @@ export function ElitePackages({
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold">
-                  {item.label} — ${item.usd.toLocaleString()}
+                  {item.label} —{" "}
+                  {item.listUsd ? (
+                    <span className="font-semibold text-slate-400 line-through">
+                      ${item.listUsd.toLocaleString()}
+                    </span>
+                  ) : null}{" "}
+                  ${item.usd.toLocaleString()}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-600">{item.blurb}</p>
               </div>

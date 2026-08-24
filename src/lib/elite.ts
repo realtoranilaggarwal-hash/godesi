@@ -87,6 +87,8 @@ export const ELITE_PACKAGES: Record<
   {
     label: string;
     usd: number;
+    /** Set while an offer runs: the price the package normally sells at. */
+    listUsd?: number;
     blurb: string;
     kind: "INTERVIEW" | "VIDEO" | "BOOST";
     /** Years the Elite profile and its top slot are held for. */
@@ -94,16 +96,17 @@ export const ELITE_PACKAGES: Record<
   }
 > = {
   INTERVIEW: {
-    label: "Elite interview + profile for 5 years",
-    usd: 500,
+    label: "Elite interview + profile for 5 years — launch offer",
+    usd: 250,
+    listUsd: 500,
     years: 5,
     blurb:
-      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live, publishes your Elite profile with a 30–60 second video, and holds your top slot for five years.",
+      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live, publishes your Elite profile with a 30–60 second video, and holds your top slot for five years — five years for less than the price of one while the launch offer runs.",
     kind: "INTERVIEW",
   },
   INTERVIEW_1Y: {
     label: "Elite interview + profile for 1 year",
-    usd: 250,
+    usd: 500,
     years: 1,
     blurb:
       "The same interview and published profile, held for one year. Renew at the price of the day.",
