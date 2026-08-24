@@ -2,6 +2,7 @@ import { db } from "../src/lib/db";
 import { guessCategory, readBusinessLink } from "../src/lib/businessLink";
 import { titleCase } from "../src/lib/titlecase";
 import { deshvidesh } from "./prospects/deshvidesh";
+import { h1b } from "./prospects/h1b";
 import { indianweddings } from "./prospects/indianweddings";
 import { jabwewed } from "./prospects/jabwewed";
 import { localfiles } from "./prospects/localfiles";
@@ -27,6 +28,7 @@ import {
  *   npm run db:prospects -- indianweddings              # US wedding vendors
  *   npm run db:prospects -- shaadishop texas             # one region's list
  *   npm run db:prospects -- weddingconnect               # US wedding suppliers
+ *   npm run db:prospects -- h1b nj                       # US IT firms, NJ
  *
  * A business already listed somewhere is the warmest lead we have, so we read
  * these directories for facts only: who exists, what they do, and how to ring
@@ -42,6 +44,7 @@ import {
 
 const READERS: Record<string, Reader> = {
   deshvidesh,
+  h1b,
   indianweddings,
   jabwewed,
   localfiles,

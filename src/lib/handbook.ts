@@ -784,6 +784,11 @@ Thank you for the name. Desi Who's Who is for people who have genuinely built so
           "You may type in what the owner tells you on the call. You may not copy their description or their photos from the directory you found them on — that is the one thing that can get us a legal letter.",
       },
       {
+        title: "IT firms are a different call",
+        detail:
+          "The IT and staffing rows come from the Labor Department's own H-1B filings, so the number is a switchboard and the trade says IT Services, Software or Staffing. Ask for marketing or recruitment, not the owner, and lead with who reads Godesi: desi engineers looking for work and desi families near their office. A free company page, and their vacancies in front of that audience.",
+      },
+      {
         title: "Write the outcome before the next call",
         detail:
           "Set the status — called, call back, interested, not interested, wrong number, listed — and one line of what they said. A call with no note is a call somebody else has to make again.",
@@ -817,6 +822,17 @@ Thank you for the name. Desi Who's Who is for people who have genuinely built so
 I am [NAME] from Godesi.com — the desi directory for [TOWN] and around. We list desi businesses free, and I can send you the link to set your page up today: your own photos, timings, a WhatsApp button and your offers, so desi customers near you find you and message you.
 
 It costs nothing to be listed. Shall I send you the link on WhatsApp?
+
+godesi.com/dashboard/business`,
+      },
+      {
+        label: "Phone — an IT or staffing firm",
+        hint: "Ask the switchboard for marketing or recruitment.",
+        text: `Good morning — may I speak to whoever looks after marketing or recruitment?
+
+I am [NAME] from Godesi.com, the desi directory and jobs board for [TOWN]. Our readers are desi engineers and desi families in your area, so your company page and your open roles land in front of exactly the people you hire and sell to. The page is free to set up.
+
+May I send you the link, and who should I address it to?
 
 godesi.com/dashboard/business`,
       },

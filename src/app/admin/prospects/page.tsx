@@ -275,7 +275,9 @@ export default async function AdminProspectsPage({
             npm run db:prospects -- localfiles
           </code>{" "}
           (or <code className="rounded bg-slate-100 px-1">deshvidesh</code>,{" "}
-          <code className="rounded bg-slate-100 px-1">jabwewed</code>).
+          <code className="rounded bg-slate-100 px-1">jabwewed</code>, or{" "}
+          <code className="rounded bg-slate-100 px-1">h1b nj</code> for the US IT
+          firms).
         </p>
       </Card>
 
