@@ -13,6 +13,8 @@ import { findBlockedTerm } from "@/lib/moderation";
 import {
   RESOURCE_PLACEMENTS,
   type ResourcePlacement,
+  duplicateLinkIds,
+  normalizeLinkUrl,
   resourcePackOrThrow,
   resourcePrice,
 } from "@/lib/resources";
@@ -62,6 +64,19 @@ function parseLink(formData: FormData) {
   });
 }
 
+/** The id of a link already pointing at this address, ignoring one being edited. */
+async function existingLinkId(url: string, exceptId?: string) {
+  const wanted = normalizeLinkUrl(url);
+  const rows = await db.resourceLink.findMany({
+    select: { id: true, url: true },
+  });
+  return (
+    rows.find(
+      (row) => row.id !== exceptId && normalizeLinkUrl(row.url) === wanted,
+    )?.id ?? null
+  );
+}
+
 /**
  * Buys a views pack for a submitted link. The link stays pending until payment
  * clears and an admin approves it, so nothing unreviewed can appear in a box.
@@ -74,7 +89,13 @@ export async function startLinkCheckoutAction(formData: FormData) {
   const blocked = findBlockedTerm(`${parsed.data.title} ${parsed.data.url}`);
   if (blocked) redirect("/resources/new?error=blocked");
 
-  const impressions = resourcePackOrThrow(String(formData.get("impressions") ?? ""));
+  if (await existingLinkId(parsed.data.url)) {
+    redirect("/resources/new?error=duplicate");
+  }
+
+  const impressions = resourcePackOrThrow(
+    String(formData.get("impressions") ?? ""),
+  );
   const currency = requestCurrency();
   const amountMinor = toMinor(resourcePrice(currency, impressions));
 
@@ -95,7 +116,13 @@ export async function startLinkCheckoutAction(formData: FormData) {
   });
 
   const order = await db.resourceOrder.create({
-    data: { linkId: link.id, userId: user.id, impressions, amountMinor, currency },
+    data: {
+      linkId: link.id,
+      userId: user.id,
+      impressions,
+      amountMinor,
+      currency,
+    },
   });
 
   const session = await getStripe().checkout.sessions.create({
@@ -143,11 +170,18 @@ export async function saveResourceLinkAction(
 
     const capValue = String(formData.get("impressionCap") ?? "").trim();
     const impressionCap = capValue ? Number(capValue) : null;
-    if (impressionCap !== null && (!Number.isInteger(impressionCap) || impressionCap < 1)) {
+    if (
+      impressionCap !== null &&
+      (!Number.isInteger(impressionCap) || impressionCap < 1)
+    ) {
       return { error: "Views must be a whole number, or blank for unlimited." };
     }
 
     const id = String(formData.get("id") ?? "");
+    if (await existingLinkId(parsed.data.url, id || undefined)) {
+      return { error: "That web address is already in the list." };
+    }
+
     const data = {
       title: parsed.data.title,
       url: parsed.data.url,
@@ -182,7 +216,10 @@ export async function toggleResourceLinkAction(formData: FormData) {
 
   await db.resourceLink.update({
     where: { id },
-    data: { active: !link.active, status: link.active ? link.status : "APPROVED" },
+    data: {
+      active: !link.active,
+      status: link.active ? link.status : "APPROVED",
+    },
   });
 
   revalidatePath("/resources");
@@ -208,11 +245,50 @@ export async function reviewResourceLinkAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
+/**
+ * Admin: drop every extra copy of a link that is already in the list, keeping
+ * the copy an advertiser paid for or the one carrying the traffic.
+ */
+export async function removeDuplicateResourceLinksAction() {
+  const user = await requireUser();
+  if (!can(user, "resources")) throw new Error("FORBIDDEN");
+
+  const links = await db.resourceLink.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      url: true,
+      impressions: true,
+      clicks: true,
+      _count: { select: { orders: true } },
+    },
+  });
+
+  const extras = duplicateLinkIds(
+    links.map((link) => ({
+      id: link.id,
+      url: link.url,
+      impressions: link.impressions,
+      clicks: link.clicks,
+      paid: link._count.orders > 0,
+    })),
+  );
+  if (extras.length) {
+    await db.resourceLink.deleteMany({ where: { id: { in: extras } } });
+  }
+
+  revalidatePath("/resources");
+  revalidatePath("/admin/resources");
+  revalidatePath("/admin");
+}
+
 export async function deleteResourceLinkAction(formData: FormData) {
   const user = await requireUser();
   if (!can(user, "resources")) throw new Error("FORBIDDEN");
 
-  await db.resourceLink.deleteMany({ where: { id: String(formData.get("id") ?? "") } });
+  await db.resourceLink.deleteMany({
+    where: { id: String(formData.get("id") ?? "") },
+  });
 
   revalidatePath("/resources");
   revalidatePath("/admin");

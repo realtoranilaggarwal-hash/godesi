@@ -49,6 +49,63 @@ export function formatResourcePrice(currency: Currency, impressions: number) {
   return formatMoney(resourcePrice(currency, impressions), currency);
 }
 
+/**
+ * Two links point at the same place even when one carries www., a trailing
+ * slash or http:// — comparing the tidied form is what catches a link that was
+ * added twice.
+ */
+export function normalizeLinkUrl(value: string) {
+  const raw = value.trim();
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+    const path = url.pathname.replace(/\/+$/, "").toLowerCase();
+    return `${host}${path}${url.search}`;
+  } catch {
+    return raw.toLowerCase();
+  }
+}
+
+export type DedupeRow = {
+  id: string;
+  url: string;
+  impressions: number;
+  clicks: number;
+  paid: boolean;
+};
+
+/**
+ * Ids of every extra copy of a link. The copy worth keeping is the one someone
+ * paid for, else the one with the most traffic behind it, else the oldest —
+ * rows are expected in the order they were created.
+ */
+export function duplicateLinkIds(rows: DedupeRow[]) {
+  const groups = new Map<string, DedupeRow[]>();
+  for (const row of rows) {
+    const key = normalizeLinkUrl(row.url);
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
+  }
+
+  const extras: string[] = [];
+  for (const group of Array.from(groups.values())) {
+    if (group.length < 2) continue;
+    const ranked = group
+      .map((row, index) => ({ row, index }))
+      .sort(
+        (a, b) =>
+          Number(b.row.paid) - Number(a.row.paid) ||
+          b.row.impressions +
+            b.row.clicks -
+            (a.row.impressions + a.row.clicks) ||
+          a.index - b.index,
+      );
+    extras.push(...ranked.slice(1).map((entry) => entry.row.id));
+  }
+  return extras;
+}
+
 export type TagCount = { tag: string; count: number };
 
 /**
