@@ -102,6 +102,13 @@ export function BusinessProfileForm({
     .filter((item) => !offered.includes(item))
     .join(", ");
 
+  /**
+   * A starter card we put up from a public listing: staff tidy it up before the
+   * owner claims it, so we cannot ask for the trade or a WhatsApp number they
+   * have not given us — least of all the number we are keeping hidden.
+   */
+  const starterCard = staffEdit && business !== null && !business.ownerId;
+
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
@@ -131,6 +138,7 @@ export function BusinessProfileForm({
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
         <CategorySelect
+          required={!starterCard}
           categories={categories}
           defaultCategory={business?.categorySlug ?? defaultCategory}
           defaultSubcategory={business?.subcategorySlug ?? defaultSubcategory}
@@ -220,10 +228,14 @@ export function BusinessProfileForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="WhatsApp number" hint={DIAL_CODE_HINT} required>
+        <Field
+          label="WhatsApp number"
+          hint={starterCard ? "Only what the owner tells you to show." : DIAL_CODE_HINT}
+          required={!starterCard}
+        >
           <PhoneInput
             name="whatsappNumber"
-            required
+            required={!starterCard}
             defaultValue={business?.whatsappNumber ?? ""}
           />
         </Field>

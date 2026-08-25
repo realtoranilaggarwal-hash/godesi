@@ -130,11 +130,12 @@ const profileSchema = z.object({
   state: z.string().trim().optional(),
   country: z.string().trim().max(60).optional(),
   description: z.string().trim().max(2000).optional(),
+  /** Left blank only on a starter card nobody has claimed — see below. */
   whatsappNumber: z
     .string()
     .trim()
     .refine(
-      (v) => normalizeWhatsApp(v).length >= 10,
+      (v) => !v || normalizeWhatsApp(v).length >= 10,
       "Enter a valid WhatsApp number",
     ),
   phone: z.string().trim().optional(),
@@ -452,8 +453,16 @@ export async function saveBusinessProfileAction(
         ? (parsed.data.priceCurrency ?? "USD")
         : null,
       customQuote: parsed.data.customQuote ?? false,
-      whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber),
+      whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber) || null,
     };
+
+    /**
+     * An owner has to give us a WhatsApp number — it is how customers reach
+     * them. Staff tidying up an unclaimed starter card must not have to invent
+     * one, and must never put the business's own number up before it claims.
+     */
+    if (!data.whatsappNumber && !(staffEdit && target && !target.ownerId))
+      return { error: "Enter a valid WhatsApp number" };
 
     const isVehicle = isVehicleCard(subcategory?.slug);
     const vehicle = isVehicle ? readVehicleForm(formData) : null;
