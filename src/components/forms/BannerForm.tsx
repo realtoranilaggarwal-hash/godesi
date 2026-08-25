@@ -10,7 +10,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
-export function BannerForm() {
+export function BannerForm({ slot }: { slot?: string }) {
   const [state, formAction] = useFormState(saveBannerAction, emptyState);
   const form = useRef<HTMLFormElement>(null);
 
@@ -26,11 +26,15 @@ export function BannerForm() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Slot">
-          <select name="slot" defaultValue="SIDEBAR" className={inputClass}>
-            {AD_SLOT_ORDER.map((slot) => {
-              const placement = AD_PLACEMENTS[slot];
+          <select
+            name="slot"
+            defaultValue={slot ?? "SIDEBAR"}
+            className={inputClass}
+          >
+            {AD_SLOT_ORDER.map((option) => {
+              const placement = AD_PLACEMENTS[option];
               return (
-                <option key={slot} value={slot}>
+                <option key={option} value={option}>
                   {placement.name} — {placement.size.width}×
                   {placement.size.height} ({placement.slots} shown at a time)
                 </option>

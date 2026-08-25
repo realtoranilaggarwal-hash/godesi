@@ -14,7 +14,14 @@ type BannerRow = Prisma.BannerGetPayload<{
 }>;
 
 /** Own component so the banner desk can load without the whole admin panel. */
-export function AdminBannersCard({ banners }: { banners: BannerRow[] }) {
+export function AdminBannersCard({
+  banners,
+  slot,
+}: {
+  banners: BannerRow[];
+  /** Preselects the size when arriving from a placement page. */
+  slot?: string;
+}) {
   return (
     <Card id="banners">
       <h2 className="mb-1 text-lg font-bold">Banners</h2>
@@ -23,7 +30,7 @@ export function AdminBannersCard({ banners }: { banners: BannerRow[] }) {
         and it takes the next free slot. Banners sharing a size rotate, and the
         views and clicks of each are counted below.
       </p>
-      <BannerForm />
+      <BannerForm slot={slot} />
 
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">

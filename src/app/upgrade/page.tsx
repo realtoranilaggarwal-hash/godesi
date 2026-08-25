@@ -153,7 +153,15 @@ export default async function UpgradePage({
             <Link href="/advertise" className="font-semibold text-indigo-600">
               Banner advertising only
             </Link>{" "}
-            — pick a placement and the number of months
+            — pick a placement and the number of months; each one has a{" "}
+            <Link
+              href="/advertise#placements"
+              className="font-semibold text-indigo-600"
+            >
+              &ldquo;see where this shows&rdquo;
+            </Link>{" "}
+            page with a map of the page, and every spot rotates, so none is ever
+            sold out
           </li>
           <li>
             <Link

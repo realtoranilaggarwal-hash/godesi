@@ -89,9 +89,9 @@ export default async function AdvertisePage({
 
       {user?.role === "ADMIN" ? (
         <Alert tone="success">
-          Admin: add a banner to any slot without payment from{" "}
-          <Link href="/admin#banners" className="font-semibold underline">
-            Admin → Banners
+          Admin: add a banner to any spot without payment from{" "}
+          <Link href="/admin/banners" className="font-semibold underline">
+            the banner desk
           </Link>
           .
         </Alert>
@@ -170,6 +170,13 @@ export default async function AdvertisePage({
                 height={placement.size.height}
                 className="mt-4"
               />
+
+              <Link
+                href={`/advertise/where/${slot.toLowerCase()}`}
+                className="mt-3 text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                See where this shows →
+              </Link>
 
               <p className="mt-4 text-sm text-slate-600">{placement.blurb}</p>
 

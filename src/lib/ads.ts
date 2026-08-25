@@ -16,7 +16,20 @@ export type AdPlacement = {
   cpmInr: number;
   cpmUsd: number;
   highlights: string[];
+  /** Where the unit sits on a page, used to draw the placement map. */
+  region: AdRegion;
+  /** Real pages the unit appears on, so an advertiser can go and look. */
+  where: { label: string; href: string }[];
 };
+
+/** The part of a page a placement occupies, drawn on the placement map. */
+export type AdRegion =
+  | "header"
+  | "hero"
+  | "top"
+  | "incontent"
+  | "rail"
+  | "phone";
 
 export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   HEADER: {
@@ -35,6 +48,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Only one advertiser at a time",
       "Best for brand launches and offers",
     ],
+    region: "header",
+    where: [
+      { label: "Every page on Godesi", href: "/" },
+      { label: "Business cards", href: "/categories" },
+      { label: "News", href: "/news" },
+    ],
   },
   HERO: {
     slot: "HERO",
@@ -51,6 +70,10 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "First thing every visitor sees",
       "Full width on desktop and mobile",
       "Rotates between three advertisers",
+    ],
+    region: "hero",
+    where: [
+      { label: "Homepage", href: "/" },
     ],
   },
   SIDEBAR: {
@@ -69,6 +92,14 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Shown on category, search, events and news pages",
       "Great value for local businesses",
     ],
+    region: "rail",
+    where: [
+      { label: "Category pages", href: "/categories" },
+      { label: "Search results", href: "/search" },
+      { label: "News", href: "/news" },
+      { label: "Events", href: "/events" },
+      { label: "Business cards", href: "/categories" },
+    ],
   },
   SKYSCRAPER: {
     slot: "SKYSCRAPER",
@@ -85,6 +116,13 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Long dwell time on scroll-heavy pages",
       "Four shown at a time, rotating — never sold out",
       "Ideal for events, courses and offers",
+    ],
+    region: "rail",
+    where: [
+      { label: "Category pages", href: "/categories" },
+      { label: "Search results", href: "/search" },
+      { label: "News", href: "/news" },
+      { label: "Events", href: "/events" },
     ],
   },
   BILLBOARD: {
@@ -103,6 +141,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Top of the busiest listing pages",
       "Two advertisers in rotation",
     ],
+    region: "top",
+    where: [
+      { label: "Category pages", href: "/categories" },
+      { label: "Search results", href: "/search" },
+      { label: "News", href: "/news" },
+    ],
   },
   LEADERBOARD: {
     slot: "LEADERBOARD",
@@ -119,6 +163,13 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Sits inside the results, not beside them",
       "Six advertisers share the rotation",
       "Standard size — reuse your existing creative",
+    ],
+    region: "incontent",
+    where: [
+      { label: "Events", href: "/events" },
+      { label: "News", href: "/news" },
+      { label: "Category pages", href: "/categories" },
+      { label: "Property listings", href: "/real-estate" },
     ],
   },
   INCONTENT: {
@@ -137,6 +188,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Appears mid-page on desktop and mobile",
       "Eight advertisers in rotation",
     ],
+    region: "incontent",
+    where: [
+      { label: "News", href: "/news" },
+      { label: "Events", href: "/events" },
+      { label: "Category pages", href: "/categories" },
+    ],
   },
   HALFPAGE: {
     slot: "HALFPAGE",
@@ -153,6 +210,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Dominates the sidebar as visitors scroll",
       "Four shown at a time, rotating — never sold out",
       "Good for offers with a lot to say",
+    ],
+    region: "rail",
+    where: [
+      { label: "Category pages", href: "/categories" },
+      { label: "Search results", href: "/search" },
+      { label: "Business cards", href: "/categories" },
     ],
   },
   FULLBANNER: {
@@ -171,6 +234,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Sits inside the results, not beside them",
       "Six advertisers share the rotation",
     ],
+    region: "incontent",
+    where: [
+      { label: "Category pages", href: "/categories" },
+      { label: "News", href: "/news" },
+      { label: "Events", href: "/events" },
+    ],
   },
   MOBILE: {
     slot: "MOBILE",
@@ -187,6 +256,12 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Phone-only placement",
       "Most of our traffic is mobile",
       "Cheapest way to start",
+    ],
+    region: "phone",
+    where: [
+      { label: "Every page, on a phone", href: "/" },
+      { label: "Category pages", href: "/categories" },
+      { label: "News", href: "/news" },
     ],
   },
 };

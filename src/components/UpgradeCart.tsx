@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Currency } from "@/lib/currency";
 import {
@@ -146,6 +147,16 @@ export function UpgradeCart({
                         <span className="mt-1 inline-block rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
                           in the deal
                         </span>
+                      ) : null}
+                      {item.slot ? (
+                        <Link
+                          href={`/advertise/where/${item.slot.toLowerCase()}`}
+                          // Inside the label, so the click must not tick the box.
+                          onClick={(event) => event.stopPropagation()}
+                          className="mt-1 block text-xs font-semibold text-indigo-600 hover:underline"
+                        >
+                          See what it looks like and where it shows →
+                        </Link>
                       ) : null}
                     </span>
                   </label>
