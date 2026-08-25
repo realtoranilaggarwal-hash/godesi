@@ -25,6 +25,41 @@ const featureCount = EVENT_FEATURE_GROUPS.reduce(
   0,
 );
 
+const COMPARISON = [
+  {
+    label: "Listing an event",
+    godesi: "Free on every plan.",
+    other: "Free.",
+  },
+  {
+    label: "Fee on a paid ticket",
+    godesi: `${fee}% on the free plan; nothing on a paid plan.`,
+    other: "3.7% + $1.79 per ticket, plus 2.9% payment processing (US).",
+  },
+  {
+    label: "Free events / RSVPs",
+    godesi: "Free, and a free RSVP type can sit next to paid types.",
+    other: "Free.",
+  },
+  {
+    label: "Ticket types per event",
+    godesi: "Up to 8, editable after publishing.",
+    other: "Multiple types.",
+  },
+  {
+    label: "Who the audience is",
+    godesi:
+      "Desi families, businesses and professionals already on Godesi, plus GoDesi.wiki.",
+    other: "General public marketplace, much larger and not desi-specific.",
+  },
+  {
+    label: "Payouts",
+    godesi:
+      "Your own Stripe account on Premium, or settled by Godesi after the event.",
+    other: "Their own payout schedule.",
+  },
+];
+
 const STEPS = [
   {
     title: "Post the event",
@@ -52,57 +87,61 @@ const STEPS = [
   },
 ];
 
-const FEE_ROWS: { label: string; free: string; pro: string; premium: string }[] =
-  [
-    {
-      label: "Listing an event",
-      free: "Free, unlimited",
-      pro: "Free, unlimited",
-      premium: "Free, unlimited",
-    },
-    {
-      label: "A free-entry event (no tickets)",
-      free: "No fee at all",
-      pro: "No fee at all",
-      premium: "No fee at all",
-    },
-    {
-      label: "Godesi service fee on paid tickets",
-      free: `${fee}% of the ticket`,
-      pro: "None",
-      premium: "None",
-    },
-    {
-      label: "Card processing (Stripe / PayPal)",
-      free: "About 3%, paid to them",
-      pro: "About 3%, paid to them",
-      premium: "About 3%, paid to them",
-    },
-    {
-      label: "When you get the money",
-      free: "We collect it and send it after the event",
-      pro: "We collect it and send it after the event",
-      premium: "Straight into your own Stripe account",
-    },
-    {
-      label: "Extra categories per event",
-      free: "One category",
-      pro: "Two extra",
-      premium: "Five extra",
-    },
-    {
-      label: "Coupon codes and reward bonuses",
-      free: "Yes",
-      pro: "Yes",
-      premium: "Yes",
-    },
-    {
-      label: "QR tickets with a check page for the door",
-      free: "Yes",
-      pro: "Yes",
-      premium: "Yes",
-    },
-  ];
+const FEE_ROWS: {
+  label: string;
+  free: string;
+  pro: string;
+  premium: string;
+}[] = [
+  {
+    label: "Listing an event",
+    free: "Free, unlimited",
+    pro: "Free, unlimited",
+    premium: "Free, unlimited",
+  },
+  {
+    label: "A free-entry event (no tickets)",
+    free: "No fee at all",
+    pro: "No fee at all",
+    premium: "No fee at all",
+  },
+  {
+    label: "Godesi service fee on paid tickets",
+    free: `${fee}% of the ticket`,
+    pro: "None",
+    premium: "None",
+  },
+  {
+    label: "Card processing (Stripe / PayPal)",
+    free: "About 3%, paid to them",
+    pro: "About 3%, paid to them",
+    premium: "About 3%, paid to them",
+  },
+  {
+    label: "When you get the money",
+    free: "We collect it and send it after the event",
+    pro: "We collect it and send it after the event",
+    premium: "Straight into your own Stripe account",
+  },
+  {
+    label: "Extra categories per event",
+    free: "One category",
+    pro: "Two extra",
+    premium: "Five extra",
+  },
+  {
+    label: "Coupon codes and reward bonuses",
+    free: "Yes",
+    pro: "Yes",
+    premium: "Yes",
+  },
+  {
+    label: "QR tickets with a check page for the door",
+    free: "Yes",
+    pro: "Yes",
+    premium: "Yes",
+  },
+];
 
 const REASONS = [
   {
@@ -238,7 +277,9 @@ export default function EventFeesPage() {
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="border-b border-slate-200 px-3 py-2">&nbsp;</th>
+                  <th className="border-b border-slate-200 px-3 py-2">
+                    &nbsp;
+                  </th>
                   <th className="border-b border-slate-200 px-3 py-2">
                     Free — $0 / ₹0
                   </th>
@@ -322,10 +363,172 @@ export default function EventFeesPage() {
         </Card>
 
         <Card>
+          <h2 className="text-lg font-bold">
+            Ticket types, RSVPs and hybrid events
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm text-slate-700">
+            <li>
+              <span className="font-semibold text-slate-900">
+                As many ticket types as you sell.
+              </span>{" "}
+              Early bird, standard, couple pass, VIP, student, an online seat —
+              each with its own price and its own quantity. Buyers pick the type
+              on the event page and each type sells out on its own.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-900">
+                Free RSVP on the same event.
+              </span>{" "}
+              Price a type at 0 and it becomes an RSVP: the guest registers,
+              gets the same QR pass, no card is asked for. A satsang can take
+              free RSVPs for the hall and sell paid dinner seats side by side.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-900">
+                In person, online or hybrid.
+              </span>{" "}
+              Pick the mode when you post. Online and hybrid events carry a join
+              link that only ticket holders see, so a hybrid mela can sell hall
+              seats and stream seats at different prices.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-900">
+                Change it after you publish.
+              </span>{" "}
+              Add a type, raise the seat count or delete an unsold type from{" "}
+              <Link
+                href="/dashboard/tickets"
+                className="font-semibold text-indigo-600"
+              >
+                your ticket desk
+              </Link>{" "}
+              — no need to repost the event. A type that has already sold seats
+              can only be reduced to the number sold, so nobody loses a pass.
+            </li>
+          </ul>
+        </Card>
+
+        <Card>
+          <h2 className="text-lg font-bold">How you get paid</h2>
+          <ol className="mt-3 space-y-2 text-sm text-slate-700">
+            <li>
+              <span className="font-semibold text-slate-900">1.</span> A buyer
+              pays by card on Godesi (Stripe) and gets a QR pass by email
+              instantly. Free RSVPs skip payment entirely.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-900">2.</span> If you
+              connect your own Stripe account under Ticket payouts — a Premium
+              benefit — the money lands in your account directly, on
+              Stripe&apos;s own payout schedule, and Godesi never holds it.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-900">3.</span> Otherwise
+              Godesi collects and settles to you after the event, minus the card
+              processor&apos;s charge (roughly 3%) and the {fee}% service fee
+              that a paid plan removes.
+            </li>
+            <li>
+              <span className="font-semibold text-slate-900">4.</span> You scan
+              passes at the door from your phone and see who came.
+            </li>
+          </ol>
+          <p className="mt-3 text-xs text-slate-500">
+            Refunds and attendee disputes stay your decision — Godesi is not a
+            party to the sale and does not hold your money in escrow. Card
+            processing is Stripe&apos;s, at Stripe&apos;s published rates.
+          </p>
+        </Card>
+
+        <Card>
+          <h2 className="text-lg font-bold">Godesi next to the ticket sites</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            The honest comparison, so you can do your own sum.
+          </p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="w-full min-w-[560px] border-collapse text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
+                  <th className="border-b border-slate-200 px-3 py-2">
+                    &nbsp;
+                  </th>
+                  <th className="border-b border-slate-200 px-3 py-2">
+                    Godesi
+                  </th>
+                  <th className="border-b border-slate-200 px-3 py-2">
+                    Eventbrite (US)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON.map((row) => (
+                  <tr key={row.label} className="align-top">
+                    <th className="border-b border-slate-100 px-3 py-2 text-left font-semibold text-slate-900">
+                      {row.label}
+                    </th>
+                    <td className="border-b border-slate-100 px-3 py-2 text-slate-700">
+                      {row.godesi}
+                    </td>
+                    <td className="border-b border-slate-100 px-3 py-2 text-slate-600">
+                      {row.other}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
+            <p className="font-bold text-slate-900">
+              The same 100 tickets at $20
+            </p>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>
+                Godesi, free plan: {fee}% (${20 * 100 * 0.02}) plus card
+                processing — the buyer sees $20.
+              </li>
+              <li>Godesi, Pro: no Godesi fee at all, only card processing.</li>
+              <li>
+                Eventbrite&apos;s published US fee is 3.7% + $1.79 a ticket plus
+                2.9% processing — on a $20 ticket that is about $3.11, so either
+                the buyer pays $23.11 or you keep about $311 less.
+              </li>
+            </ul>
+            <p className="mt-2 text-xs text-slate-500">
+              Eventbrite&apos;s figures are their own published US ticketing
+              fees (read on 26 July 2026,{" "}
+              <a
+                href="https://www.eventbrite.com/help/en-us/articles/755615/how-much-does-it-cost-for-organizers-to-use-eventbrite/"
+                rel="nofollow noopener"
+                target="_blank"
+                className="font-semibold text-indigo-600"
+              >
+                their fee page
+              </a>
+              ) and can change — check them yourself. Free events are free on
+              both. Sulekha and the classifieds portals are not compared on fees
+              because they do not publish ticketing rates; what they sell is
+              promotion and enquiry forms, not a QR pass at the door.
+            </p>
+          </div>
+          <p className="mt-3 text-sm text-slate-700">
+            Where Godesi genuinely differs: the audience is desi by default,
+            your event sits beside your own business card and your listing, and
+            the same post reaches GoDesi.wiki and the event wire. Where the big
+            sites genuinely win: a far larger general-public marketplace, paid
+            ad tools, and reserved seating. If you are selling a stadium show,
+            use them. For a garba night, a satsang, a bridal show or a startup
+            meet-up, the desi audience and the lower fee are worth more.
+          </p>
+        </Card>
+
+        <Card>
           <h2 className="text-lg font-bold">Why post on Godesi</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {REASONS.map((reason) => (
-              <div key={reason.title} className="rounded-2xl border border-slate-200 p-4">
+              <div
+                key={reason.title}
+                className="rounded-2xl border border-slate-200 p-4"
+              >
                 <p className="font-bold text-slate-900">{reason.title}</p>
                 <p className="mt-1 text-sm text-slate-600">{reason.body}</p>
               </div>
@@ -388,8 +591,8 @@ export default function EventFeesPage() {
               <span className="font-semibold text-slate-900">
                 Language, city, state and free tags
               </span>{" "}
-              — the language the programme is in, the town it is in, and your own
-              tags (Navratri, Tamil, live dhol) for the search box.
+              — the language the programme is in, the town it is in, and your
+              own tags (Navratri, Tamil, live dhol) for the search box.
             </li>
           </ul>
         </Card>
@@ -445,8 +648,8 @@ export default function EventFeesPage() {
             ))}
           </div>
           <p className="mt-3 text-xs text-slate-500">
-            Upload the clips to YouTube (public or unlisted, Shorts are fine) and
-            share the album from Google Photos — we store only the links, so
+            Upload the clips to YouTube (public or unlisted, Shorts are fine)
+            and share the album from Google Photos — we store only the links, so
             your pages stay fast and you keep control of the files. Your
             business card on Godesi can carry more videos and album photos on a
             paid plan; an event page shows one clip and one album.
@@ -487,12 +690,13 @@ export default function EventFeesPage() {
             Put your event on your own website — we give you the code
           </h2>
           <p className="mt-2 text-sm text-slate-700">
-            Every event page has a <strong>&ldquo;Put this on your
-            website&rdquo;</strong> box with a ready-made snippet. Paste it into
-            your own site, your WordPress page, your temple&apos;s site or your
-            society newsletter page and visitors see the poster, the date, the
-            venue and a live seat count — and book without leaving your page.
-            Light and dark versions, and a copy button so you never type it.
+            Every event page has a{" "}
+            <strong>&ldquo;Put this on your website&rdquo;</strong> box with a
+            ready-made snippet. Paste it into your own site, your WordPress
+            page, your temple&apos;s site or your society newsletter page and
+            visitors see the poster, the date, the venue and a live seat count —
+            and book without leaving your page. Light and dark versions, and a
+            copy button so you never type it.
           </p>
           <div className="mt-3 rounded-2xl bg-slate-900 p-4">
             <div className="flex items-center justify-between gap-2">
@@ -527,9 +731,7 @@ export default function EventFeesPage() {
         </Card>
 
         <Card>
-          <h2 className="text-lg font-bold">
-            Where your event gets published
-          </h2>
+          <h2 className="text-lg font-bold">Where your event gets published</h2>
           <div className="mt-3 space-y-3">
             {NETWORK.map((item) => (
               <div

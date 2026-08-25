@@ -8,7 +8,12 @@ import { db } from "@/lib/db";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
-import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
+import {
+  confirmTicket,
+  seatsLeft,
+  ticketCode,
+  uniqueEventSlug,
+} from "@/lib/events";
 import { instantFrom, isEventZone, zoneForPlace } from "@/lib/time";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
@@ -25,8 +30,8 @@ import { rememberVenue } from "@/lib/venues";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
 
-/** Up to three seat types per event, e.g. Basic / Webinar / Premium. */
-const MAX_TIERS = 3;
+/** Seat types per event, e.g. Early bird / Couple / Online / VIP. */
+const MAX_TIERS = 8;
 
 type TierInput = { name: string; price: number; seatsTotal: number };
 
@@ -35,12 +40,22 @@ type TierInput = { name: string; price: number; seatsTotal: number };
  * ignored, so organisers can leave the tier block empty for a flat-priced event.
  */
 function readTiers(formData: FormData): TierInput[] | { error: string } {
-  const names = formData.getAll("tierName").map((value) => String(value).trim());
-  const prices = formData.getAll("tierPrice").map((value) => String(value).trim());
-  const seats = formData.getAll("tierSeats").map((value) => String(value).trim());
+  const names = formData
+    .getAll("tierName")
+    .map((value) => String(value).trim());
+  const prices = formData
+    .getAll("tierPrice")
+    .map((value) => String(value).trim());
+  const seats = formData
+    .getAll("tierSeats")
+    .map((value) => String(value).trim());
 
   const tiers: TierInput[] = [];
-  for (let index = 0; index < names.length && tiers.length < MAX_TIERS; index += 1) {
+  for (
+    let index = 0;
+    index < names.length && tiers.length < MAX_TIERS;
+    index += 1
+  ) {
     const name = names[index];
     if (!name) continue;
 
@@ -64,7 +79,11 @@ const optionalUrl = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
-type SpeakerInput = { name: string; bio: string | null; photoUrl: string | null };
+type SpeakerInput = {
+  name: string;
+  bio: string | null;
+  photoUrl: string | null;
+};
 type SessionInput = {
   title: string;
   stage: string | null;
@@ -78,12 +97,22 @@ const MAX_SESSIONS = 20;
 
 /** Repeated speaker rows; rows without a name are skipped. */
 function readSpeakers(formData: FormData): SpeakerInput[] {
-  const names = formData.getAll("speakerName").map((value) => String(value).trim());
-  const bios = formData.getAll("speakerBio").map((value) => String(value).trim());
-  const photos = formData.getAll("speakerPhoto").map((value) => String(value).trim());
+  const names = formData
+    .getAll("speakerName")
+    .map((value) => String(value).trim());
+  const bios = formData
+    .getAll("speakerBio")
+    .map((value) => String(value).trim());
+  const photos = formData
+    .getAll("speakerPhoto")
+    .map((value) => String(value).trim());
 
   const speakers: SpeakerInput[] = [];
-  for (let index = 0; index < names.length && speakers.length < MAX_SPEAKERS; index += 1) {
+  for (
+    let index = 0;
+    index < names.length && speakers.length < MAX_SPEAKERS;
+    index += 1
+  ) {
     if (!names[index]) continue;
     speakers.push({
       name: names[index].slice(0, 120),
@@ -96,14 +125,28 @@ function readSpeakers(formData: FormData): SpeakerInput[] {
 
 /** Repeated agenda rows; rows without a title are skipped. */
 function readSessions(formData: FormData): SessionInput[] {
-  const titles = formData.getAll("sessionTitle").map((value) => String(value).trim());
-  const stages = formData.getAll("sessionStage").map((value) => String(value).trim());
-  const speakers = formData.getAll("sessionSpeaker").map((value) => String(value).trim());
-  const starts = formData.getAll("sessionStart").map((value) => String(value).trim());
-  const ends = formData.getAll("sessionEnd").map((value) => String(value).trim());
+  const titles = formData
+    .getAll("sessionTitle")
+    .map((value) => String(value).trim());
+  const stages = formData
+    .getAll("sessionStage")
+    .map((value) => String(value).trim());
+  const speakers = formData
+    .getAll("sessionSpeaker")
+    .map((value) => String(value).trim());
+  const starts = formData
+    .getAll("sessionStart")
+    .map((value) => String(value).trim());
+  const ends = formData
+    .getAll("sessionEnd")
+    .map((value) => String(value).trim());
 
   const sessions: SessionInput[] = [];
-  for (let index = 0; index < titles.length && sessions.length < MAX_SESSIONS; index += 1) {
+  for (
+    let index = 0;
+    index < titles.length && sessions.length < MAX_SESSIONS;
+    index += 1
+  ) {
     if (!titles[index]) continue;
     sessions.push({
       title: titles[index].slice(0, 160),
@@ -163,7 +206,11 @@ const eventSchema = z.object({
  * Turns the optional coupon box on the event form into a live TICKETS code. A
  * clashing or malformed code is skipped rather than losing the whole event.
  */
-async function createLaunchCoupon(eventId: string, userId: string, formData: FormData) {
+async function createLaunchCoupon(
+  eventId: string,
+  userId: string,
+  formData: FormData,
+) {
   const code = normalizeCouponCode(String(formData.get("couponCode") ?? ""));
   const percent = Number(formData.get("couponPercent") ?? 0);
   if (!code || !/^[A-Z0-9-]{3,24}$/.test(code)) return;
@@ -227,7 +274,9 @@ export async function createEventAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
     if (formData.get("acceptPayoutTerms") !== "on") {
-      return { error: "Please confirm you understand how ticket money and fees work." };
+      return {
+        error: "Please confirm you understand how ticket money and fees work.",
+      };
     }
 
     // An organiser types the time of the town the event is in; the zone box
@@ -286,7 +335,9 @@ export async function createEventAction(
       .map((value) => String(value).trim())
       .filter(Boolean);
     const categorySlugs = Array.from(
-      new Set([primaryCategory, ...extraCategories].filter(Boolean) as string[]),
+      new Set(
+        [primaryCategory, ...extraCategories].filter(Boolean) as string[],
+      ),
     );
     // Untouched by the organiser, the title still puts the event in a list.
     const picked = cleanEventCategories(
@@ -308,7 +359,9 @@ export async function createEventAction(
       .filter(Boolean)
       .slice(0, 10);
 
-    const business = await db.business.findUnique({ where: { ownerId: user.id } });
+    const business = await db.business.findUnique({
+      where: { ownerId: user.id },
+    });
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
 
     const venueRef =
@@ -359,7 +412,10 @@ export async function createEventAction(
         mode: parsed.data.mode,
         onlineUrl: parsed.data.onlineUrl ?? null,
         websiteUrl: parsed.data.websiteUrl ?? null,
-        bonusNote: String(formData.get("bonusNote") ?? "").trim().slice(0, 200) || null,
+        bonusNote:
+          String(formData.get("bonusNote") ?? "")
+            .trim()
+            .slice(0, 200) || null,
         payoutTermsAt: new Date(),
         frequency: parsed.data.frequency,
         recurrence:
@@ -420,7 +476,11 @@ const bookingSchema = z.object({
   eventId: z.string().min(1),
   tierId: z.string().trim().optional(),
   couponCode: z.string().trim().optional(),
-  quantity: z.coerce.number().int().min(1, "Book at least 1 seat").max(10, "Maximum 10 seats"),
+  quantity: z.coerce
+    .number()
+    .int()
+    .min(1, "Book at least 1 seat")
+    .max(10, "Maximum 10 seats"),
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
   buyerPhone: z.string().trim().optional(),
@@ -464,8 +524,10 @@ export async function bookTicketAction(
       },
     });
     if (!event) return { error: "This event no longer exists." };
-    if (event.status !== "APPROVED") return { error: "This event is not open for booking." };
-    if (event.startsAt.getTime() < Date.now()) return { error: "This event has already ended." };
+    if (event.status !== "APPROVED")
+      return { error: "This event is not open for booking." };
+    if (event.startsAt.getTime() < Date.now())
+      return { error: "This event has already ended." };
 
     const tier = event.tiers.length
       ? event.tiers.find((candidate) => candidate.id === parsed.data.tierId)
@@ -534,7 +596,9 @@ export async function bookTicketAction(
       destination = `/tickets/${ticket.code}`;
     } else {
       if (!stripeEnabled()) {
-        return { error: "Ticket payments are not configured yet. Please try later." };
+        return {
+          error: "Ticket payments are not configured yet. Please try later.",
+        };
       }
 
       /**
@@ -575,7 +639,8 @@ export async function bookTicketAction(
         cancel_url: `${siteUrl()}/events/${event.slug}?error=cancelled`,
       });
 
-      if (!session.url) return { error: "We could not start the payment. Please try again." };
+      if (!session.url)
+        return { error: "We could not start the payment. Please try again." };
       destination = session.url;
     }
   } catch (error) {
@@ -612,7 +677,9 @@ export async function submitPartnerProofAction(
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const event = await db.event.findUnique({ where: { id: parsed.data.eventId } });
+    const event = await db.event.findUnique({
+      where: { id: parsed.data.eventId },
+    });
     if (!event) return { error: "This event no longer exists." };
     if (event.organizerId !== user.id && !can(user, "events")) {
       return { error: "Only the organiser can upload proof for this event." };
@@ -627,11 +694,14 @@ export async function submitPartnerProofAction(
     await db.event.update({
       where: { id: event.id },
       data: {
-        partnerBannerUrl: parsed.data.partnerBannerUrl ?? event.partnerBannerUrl,
-        partnerStandeeUrl: parsed.data.partnerStandeeUrl ?? event.partnerStandeeUrl,
+        partnerBannerUrl:
+          parsed.data.partnerBannerUrl ?? event.partnerBannerUrl,
+        partnerStandeeUrl:
+          parsed.data.partnerStandeeUrl ?? event.partnerStandeeUrl,
         partnerSalesUrl: parsed.data.partnerSalesUrl ?? event.partnerSalesUrl,
         partnerProofAt: new Date(),
-        partnerStatus: event.partnerStatus === "APPROVED" ? "APPROVED" : "REQUESTED",
+        partnerStatus:
+          event.partnerStatus === "APPROVED" ? "APPROVED" : "REQUESTED",
       },
     });
   } catch (error) {
@@ -657,7 +727,8 @@ export async function reviewPartnerAction(formData: FormData) {
     where: { id },
     data: {
       partnerStatus: decision,
-      partnerNote: String(formData.get("partnerNote") ?? "").slice(0, 500) || null,
+      partnerNote:
+        String(formData.get("partnerNote") ?? "").slice(0, 500) || null,
     },
   });
 
@@ -675,4 +746,103 @@ export async function cancelEventAction(formData: FormData) {
   await db.event.update({ where: { id }, data: { status: "REJECTED" } });
   revalidatePath("/events");
   revalidatePath("/dashboard/events");
+}
+
+/** Keeps the event's own seat and price columns in step with its ticket types. */
+async function syncEventFromTiers(eventId: string) {
+  const tiers = await db.ticketTier.findMany({ where: { eventId } });
+  if (!tiers.length) return;
+  await db.event.update({
+    where: { id: eventId },
+    data: {
+      seatsTotal: tiers.reduce((sum, tier) => sum + tier.seatsTotal, 0),
+      seatsBooked: tiers.reduce((sum, tier) => sum + tier.seatsBooked, 0),
+      price: Math.min(...tiers.map((tier) => tier.price)),
+    },
+  });
+}
+
+async function ownedEvent(id: string) {
+  const user = await requireUser();
+  const event = await db.event.findUnique({
+    where: { id },
+    select: { id: true, slug: true, organizerId: true, currency: true },
+  });
+  if (!event || (event.organizerId !== user.id && !can(user, "events"))) {
+    throw new Error("FORBIDDEN");
+  }
+  return event;
+}
+
+const tierSchema = z.object({
+  name: z.string().trim().min(1, "Name the ticket type.").max(40),
+  price: z.coerce.number().min(0).max(1_000_000),
+  seatsTotal: z.coerce.number().int().min(1).max(200_000),
+});
+
+/**
+ * Adds or edits one ticket type after the event is live, so an organiser can
+ * open a second batch — an online seat, a couple pass, a free RSVP row — without
+ * reposting the event.
+ */
+export async function saveTicketTypeAction(
+  _state: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const event = await ownedEvent(String(formData.get("eventId") ?? ""));
+  const parsed = tierSchema.safeParse({
+    name: formData.get("name"),
+    price: formData.get("price"),
+    seatsTotal: formData.get("seatsTotal"),
+  });
+  if (!parsed.success) return fieldError(parsed.error);
+
+  const tierId = String(formData.get("tierId") ?? "");
+  if (tierId) {
+    const tier = await db.ticketTier.findUnique({ where: { id: tierId } });
+    if (!tier || tier.eventId !== event.id)
+      return { error: "Ticket type not found." };
+    if (parsed.data.seatsTotal < tier.seatsBooked) {
+      return {
+        error: `${tier.seatsBooked} seat(s) are already booked on ${tier.name}, so it cannot hold fewer.`,
+      };
+    }
+    await db.ticketTier.update({ where: { id: tierId }, data: parsed.data });
+  } else {
+    const count = await db.ticketTier.count({ where: { eventId: event.id } });
+    if (count >= MAX_TIERS) {
+      return { error: `An event can have ${MAX_TIERS} ticket types.` };
+    }
+    await db.ticketTier.create({
+      data: { ...parsed.data, eventId: event.id, sortOrder: count },
+    });
+  }
+
+  await syncEventFromTiers(event.id);
+  revalidatePath(`/events/${event.slug}`);
+  revalidatePath("/dashboard/tickets");
+  return { success: `Saved ${parsed.data.name}.` };
+}
+
+/** Removes a ticket type, provided nobody has booked one of its seats. */
+export async function removeTicketTypeAction(
+  _state: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const event = await ownedEvent(String(formData.get("eventId") ?? ""));
+  const tier = await db.ticketTier.findUnique({
+    where: { id: String(formData.get("tierId") ?? "") },
+  });
+  if (!tier || tier.eventId !== event.id)
+    return { error: "Ticket type not found." };
+  if (tier.seatsBooked > 0) {
+    return {
+      error: `${tier.name} has ${tier.seatsBooked} booking(s), so it cannot be deleted. Set its seats to the number sold instead.`,
+    };
+  }
+  await db.ticketTier.delete({ where: { id: tier.id } });
+  await syncEventFromTiers(event.id);
+  revalidatePath(`/events/${event.slug}`);
+  revalidatePath("/dashboard/tickets");
+  return { success: `${tier.name} removed.` };
 }
