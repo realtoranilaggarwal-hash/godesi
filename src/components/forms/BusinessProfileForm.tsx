@@ -19,7 +19,7 @@ import { COUNTRIES } from "@/lib/countries";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
-import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { DIAL_CODE_HINT, dialCodeForCountry } from "@/lib/dialCodes";
 
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
@@ -108,6 +108,13 @@ export function BusinessProfileForm({
    * have not given us — least of all the number we are keeping hidden.
    */
   const starterCard = staffEdit && business !== null && !business.ownerId;
+
+  /**
+   * Numbers we read off a public listing are national, so the picker starts on
+   * the card's own country — otherwise a save either blocks on an empty picker
+   * or writes the area code as if it were a dial code.
+   */
+  const homeCode = dialCodeForCountry(business?.country ?? defaultCountry);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -237,10 +244,15 @@ export function BusinessProfileForm({
             name="whatsappNumber"
             required={!starterCard}
             defaultValue={business?.whatsappNumber ?? ""}
+            fallbackCode={homeCode}
           />
         </Field>
         <Field label="Phone" hint={DIAL_CODE_HINT}>
-          <PhoneInput name="phone" defaultValue={business?.phone ?? ""} />
+          <PhoneInput
+            name="phone"
+            defaultValue={business?.phone ?? ""}
+            fallbackCode={homeCode}
+          />
         </Field>
         <Field label="Public email">
           <input

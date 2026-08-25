@@ -12,12 +12,15 @@ export function PhoneInput({
   name,
   defaultValue = "",
   required = false,
+  fallbackCode = "",
 }: {
   name: string;
   defaultValue?: string | null;
   required?: boolean;
+  /** Used when the saved number has no country code, e.g. an imported US number. */
+  fallbackCode?: string;
 }) {
-  const parsed = splitDialCode(defaultValue ?? "");
+  const parsed = splitDialCode(defaultValue ?? "", fallbackCode);
   const [code, setCode] = useState(parsed.code);
   const [local, setLocal] = useState(parsed.rest);
 
