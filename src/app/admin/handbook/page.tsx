@@ -44,6 +44,20 @@ export default async function AdminHandbookPage() {
       </Card>
 
       <Card>
+        <h2 className="text-lg font-bold">Emails and scripts by category</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          The wording for every beat on the call list — caterers, IT firms,
+          pandits, salons, agents — ready to copy.{" "}
+          <Link
+            href="/admin/handbook/emails"
+            className="font-semibold text-indigo-600"
+          >
+            Open them →
+          </Link>
+        </p>
+      </Card>
+
+      <Card>
         <h2 className="text-lg font-bold">Your section</h2>
         <p className="mb-3 mt-1 text-sm text-slate-500">
           Each one has the pitch, the step-by-step, the messages to send, the

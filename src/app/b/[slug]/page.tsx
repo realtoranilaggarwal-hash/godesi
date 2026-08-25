@@ -624,9 +624,9 @@ export default async function BusinessProfilePage({
       {!paidContact && (business.phone || business.publicEmail) ? (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">
           <p className="text-sm text-amber-900">
-            📞 Pro and Featured members can show their phone and email here, and
-            switch them off again whenever they like. Meanwhile you can chat on
-            WhatsApp.
+            {business.owner
+              ? "📞 Pro and Featured members can show their phone and email here, and switch them off again whenever they like. Meanwhile you can chat on WhatsApp."
+              : `📞 Contact details are hidden. We hold a phone number and email for ${business.name} but we only show them once the owner has claimed this page — claim it to put your number and email up.`}
           </p>
           {isOwner ? (
             <LinkButton href="/dashboard/profile">

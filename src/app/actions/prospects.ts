@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { ProspectStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireStaff } from "@/lib/auth";
+import { publishProspectCard } from "@/lib/prospectCard";
 
 const DESK = "/admin/prospects";
 
@@ -47,6 +48,45 @@ export async function saveProspectCallAction(formData: FormData) {
   });
 
   revalidatePath(DESK);
+}
+
+/**
+ * Puts the row on the site as an unclaimed card so the owner has something to
+ * look at while the girl is on the phone. Contact details stay hidden until they
+ * claim it, and the page stays out of Google until they write it.
+ */
+export async function publishProspectCardAction(formData: FormData) {
+  const staff = await requireStaff();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const prospect = await db.prospect.findUnique({ where: { id } });
+  if (!prospect) return;
+
+  const outcome = await publishProspectCard(prospect);
+  if (!outcome.ok) {
+    await db.prospect.update({
+      where: { id },
+      data: {
+        note:
+          outcome.reason === "duplicate"
+            ? "Already on Godesi — card linked instead of a second one."
+            : outcome.reason === "no-phone"
+              ? "No phone, so no card: find the number first."
+              : "No beat set, so no card: pick the category first.",
+      },
+    });
+    revalidatePath(DESK);
+    return;
+  }
+
+  await db.prospect.update({
+    where: { id },
+    data: { ownerId: prospect.ownerId ?? staff.id },
+  });
+
+  revalidatePath(DESK);
+  revalidatePath(`/b/${outcome.slug}`);
 }
 
 /** Puts a row back in the pool, e.g. when a moderator leaves or is off. */

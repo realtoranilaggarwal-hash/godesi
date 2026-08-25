@@ -16,6 +16,7 @@
     "db:businesses": "tsx prisma/business-import.ts",
     "db:community": "tsx prisma/community-import.ts",
     "db:prospects": "tsx prisma/prospect-import.ts",
+    "db:prospect-cards": "tsx prisma/prospect-publish.ts",
     "db:elite": "tsx prisma/elite-import.ts",
     "db:elite-photos": "tsx prisma/elite-photos.ts",
     "db:updates": "tsx prisma/whats-new.ts"

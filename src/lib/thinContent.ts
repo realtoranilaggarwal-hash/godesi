@@ -40,6 +40,14 @@ export function businessIsThin(business: ThinBusiness): boolean {
     (business.description?.trim().length ?? 0) >= MIN_DESCRIPTION_CHARS;
   if (described) return false;
 
+  /**
+   * Starter cards we built from public listings are useful to a visitor who
+   * searches the name, and they are what a caller asks the owner to claim — but
+   * until that owner writes something they are facts on a page, so they stay out
+   * of the index however many facts we have.
+   */
+  if (!business.ownerId) return true;
+
   const substance = [
     business.logoUrl,
     business.websiteUrl,

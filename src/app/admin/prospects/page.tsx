@@ -7,7 +7,9 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
 import { CATEGORY_TREE } from "@/lib/categories";
 import { siteUrl, whatsappLink } from "@/lib/format";
+import { pitchFor } from "@/lib/prospectEmails";
 import {
+  publishProspectCardAction,
   releaseProspectAction,
   saveProspectCallAction,
   takeProspectsAction,
@@ -28,19 +30,6 @@ const STATUSES = [
   { key: "WRONG_NUMBER", label: "Wrong number" },
 ] as const;
 
-/** The opening line, so every moderator pitches the same thing. */
-function pitch(name: string, city: string | null) {
-  return [
-    `Namaste 🙏 Is this ${name}?`,
-    "",
-    `I'm calling from Godesi (godesi.com) — the desi directory${
-      city ? ` for ${city} and around` : ""
-    }. We list desi businesses free, and I can set your page up for you today: your photos, timings, WhatsApp button and offers, so desi customers near you can find and message you.`,
-    "",
-    "It costs nothing to be listed. Shall I send you the link to create it?",
-    `${siteUrl()}/dashboard/business`,
-  ].join("\n");
-}
 
 export default async function AdminProspectsPage({
   searchParams,
@@ -134,16 +123,24 @@ export default async function AdminProspectsPage({
         <h1 className="text-xl font-black">☎️ Call list</h1>
         <p className="text-sm text-slate-600">
           Businesses that already pay to advertise elsewhere — the warmest leads
-          we have. Nothing here is published on Godesi: you ring them, and{" "}
-          <strong>they</strong> create their own free card with their own photos
-          and words. The phone, town and street come from the public listing or
-          the business&apos;s own website, so read them back and correct them if
-          the owner says otherwise.{" "}
+          we have. A row with a number can go up as a starter card: it shows the
+          name, trade, town and street only, and{" "}
+          <strong>the phone and email stay hidden</strong> until the owner claims
+          the page and takes a plan — which is exactly what you ring them to do.
+          Nothing written or photographed by anyone else is copied, and the page
+          stays out of Google until the owner fills it in. Read the details back
+          on the call and correct them if the owner says otherwise.{" "}
           <Link
             href="/admin/handbook/call-list"
             className="font-semibold text-indigo-600"
           >
-            Read how to work this list →
+            How to work this list →
+          </Link>{" "}
+          <Link
+            href="/admin/handbook/emails"
+            className="font-semibold text-indigo-600"
+          >
+            Emails and scripts for every category →
           </Link>
         </p>
         <p className="text-sm font-semibold">
@@ -281,7 +278,18 @@ export default async function AdminProspectsPage({
         </p>
       </Card>
 
-      {rows.map((row) => (
+      {rows.map((row) => {
+        const pitch = pitchFor(row.categorySlug);
+        const context = {
+          business: row.name,
+          city: row.city,
+          cardUrl: row.listedSlug
+            ? `${siteUrl()}/b/${row.listedSlug}?claim=1`
+            : null,
+          from: staff.name ?? "the Godesi team",
+        };
+
+        return (
         <Card key={row.id} className="space-y-2">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
@@ -357,12 +365,39 @@ export default async function AdminProspectsPage({
               ) : null}
               {row.listedSlug ? (
                 <p className="text-xs font-semibold text-emerald-700">
-                  Listed:{" "}
+                  Card live:{" "}
                   <Link href={`/b/${row.listedSlug}`} className="text-indigo-600">
                     /b/{row.listedSlug}
+                  </Link>{" "}
+                  ·{" "}
+                  <Link
+                    href={`/admin/business/${row.listedSlug}`}
+                    className="text-indigo-600"
+                  >
+                    edit or feature it →
                   </Link>
                 </p>
               ) : null}
+              <details className="mt-1 text-xs text-slate-600">
+                <summary className="cursor-pointer font-semibold text-slate-700">
+                  {pitch.icon} What to say to a {pitch.label.toLowerCase()} row
+                </summary>
+                <p className="mt-1 font-semibold text-slate-700">{pitch.hook}</p>
+                <p className="mt-1 whitespace-pre-line rounded-xl bg-slate-50 p-2">
+                  {pitch.call(context)}
+                </p>
+                <p className="mt-1 font-semibold text-slate-700">
+                  Email — subject: {pitch.subject(context)}
+                </p>
+                <p className="mt-1 whitespace-pre-line rounded-xl bg-slate-50 p-2">
+                  {pitch.email(context)}
+                </p>
+                {pitch.objections.map((objection) => (
+                  <p key={objection.question} className="mt-1">
+                    <strong>{objection.question}</strong> {objection.answer}
+                  </p>
+                ))}
+              </details>
             </div>
 
             <div className="flex flex-wrap gap-2 text-xs font-bold">
@@ -375,7 +410,7 @@ export default async function AdminProspectsPage({
                     Call
                   </a>
                   <a
-                    href={whatsappLink(row.phone, pitch(row.name, row.city))}
+                    href={whatsappLink(row.phone, pitch.call(context))}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-lg bg-emerald-500 px-3 py-1.5 text-white"
@@ -384,11 +419,22 @@ export default async function AdminProspectsPage({
                   </a>
                 </>
               ) : null}
+              {row.phone && !row.listedSlug ? (
+                <form action={publishProspectCardAction}>
+                  <input type="hidden" name="id" value={row.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-amber-500 px-3 py-1.5 text-white"
+                  >
+                    Put a card up
+                  </button>
+                </form>
+              ) : null}
               {row.email ? (
                 <a
                   href={`mailto:${row.email}?subject=${encodeURIComponent(
-                    `Free Godesi listing for ${row.name}`,
-                  )}&body=${encodeURIComponent(pitch(row.name, row.city))}`}
+                    pitch.subject(context),
+                  )}&body=${encodeURIComponent(pitch.email(context))}`}
                   className="rounded-lg bg-indigo-600 px-3 py-1.5 text-white"
                 >
                   Email
@@ -441,7 +487,8 @@ export default async function AdminProspectsPage({
             </form>
           ) : null}
         </Card>
-      ))}
+        );
+      })}
 
       {!rows.length ? (
         <Card>
