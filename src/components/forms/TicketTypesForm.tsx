@@ -97,7 +97,11 @@ export function TicketTypesForm({
         </div>
       ))}
 
-      <form action={save} className="flex flex-wrap items-end gap-2">
+      <form
+        action={save}
+        key={saved.success ?? "new"}
+        className="flex flex-wrap items-end gap-2"
+      >
         <input type="hidden" name="eventId" value={eventId} />
         <input
           name="name"

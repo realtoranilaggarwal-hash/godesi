@@ -501,11 +501,11 @@ export async function bookTicketAction(
     const parsed = bookingSchema.safeParse({
       eventId: formData.get("eventId"),
       tierId: formData.get("tierId"),
-      couponCode: formData.get("couponCode"),
+      couponCode: formData.get("couponCode") ?? undefined,
       quantity: formData.get("quantity") || 1,
       buyerName: formData.get("buyerName") || user.name,
       buyerEmail: formData.get("buyerEmail") || user.email,
-      buyerPhone: formData.get("buyerPhone"),
+      buyerPhone: formData.get("buyerPhone") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -776,8 +776,15 @@ async function ownedEvent(id: string) {
 
 const tierSchema = z.object({
   name: z.string().trim().min(1, "Name the ticket type.").max(40),
-  price: z.coerce.number().min(0).max(1_000_000),
-  seatsTotal: z.coerce.number().int().min(1).max(200_000),
+  price: z.coerce
+    .number()
+    .min(0, "A price cannot be negative.")
+    .max(1_000_000, "That price is too high — check the figure."),
+  seatsTotal: z.coerce
+    .number()
+    .int("Seats must be a whole number.")
+    .min(1, "A ticket type needs at least one seat.")
+    .max(200_000, "That is more seats than any venue holds."),
 });
 
 /**
@@ -795,9 +802,22 @@ export async function saveTicketTypeAction(
     price: formData.get("price"),
     seatsTotal: formData.get("seatsTotal"),
   });
-  if (!parsed.success) return fieldError(parsed.error);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   const tierId = String(formData.get("tierId") ?? "");
+  const clash = await db.ticketTier.findFirst({
+    where: {
+      eventId: event.id,
+      name: { equals: parsed.data.name, mode: "insensitive" },
+      ...(tierId ? { id: { not: tierId } } : {}),
+    },
+    select: { id: true },
+  });
+  if (clash) {
+    return {
+      error: `You already have a ticket type called ${parsed.data.name}.`,
+    };
+  }
   if (tierId) {
     const tier = await db.ticketTier.findUnique({ where: { id: tierId } });
     if (!tier || tier.eventId !== event.id)

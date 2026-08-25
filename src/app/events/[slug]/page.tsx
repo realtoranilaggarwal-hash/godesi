@@ -3,9 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { can } from "@/lib/permissions";
 import { formatMoney, siteUrl } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { formatEventDate, formatEventEnd, isPast, seatsLeft } from "@/lib/events";
+import {
+  formatEventDate,
+  formatEventEnd,
+  isPast,
+  seatsLeft,
+} from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
@@ -48,7 +54,9 @@ async function loadEvent(slug: string) {
       organizer: {
         select: { name: true, username: true, avatarUrl: true },
       },
-      business: { select: { slug: true, name: true, logoUrl: true, city: true } },
+      business: {
+        select: { slug: true, name: true, logoUrl: true, city: true },
+      },
       source: { select: { name: true, websiteUrl: true } },
     },
   });
@@ -85,6 +93,25 @@ export default async function EventPage({
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
+  const isOwnerOrDesk = Boolean(
+    user && (user.id === event.organizerId || can(user, "events")),
+  );
+  // An event waiting on moderation is only visible to its organiser and the desk.
+  if (event.status !== "APPROVED" && !isOwnerOrDesk) notFound();
+  // The join link is what an online seat buys, so only a ticket holder, the
+  // organiser and the events desk may see it.
+  const joinUrl =
+    isOwnerOrDesk ||
+    (user &&
+      (await db.ticket.count({
+        where: {
+          eventId: event.id,
+          userId: user.id,
+          status: "CONFIRMED",
+        },
+      })) > 0)
+      ? event.onlineUrl
+      : null;
   // Imported from someone else's public calendar: we list it and send people to
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
@@ -145,7 +172,7 @@ export default async function EventPage({
       ? {
           location: {
             "@type": "VirtualLocation",
-            url: event.onlineUrl ?? `${siteUrl()}/events/${event.slug}`,
+            url: `${siteUrl()}/events/${event.slug}`,
           },
         }
       : {
@@ -164,9 +191,7 @@ export default async function EventPage({
     organizer: {
       "@type": "Organization",
       name: event.business?.name ?? event.organizer?.name ?? "Godesi",
-      url: event.business
-        ? `${siteUrl()}/b/${event.business.slug}`
-        : siteUrl(),
+      url: event.business ? `${siteUrl()}/b/${event.business.slug}` : siteUrl(),
     },
     // Imported events are ticketed elsewhere, so no offer is claimed for them.
     ...(imported
@@ -201,7 +226,10 @@ export default async function EventPage({
           aria-label="Breadcrumb"
           className="flex flex-wrap items-center gap-1 text-sm text-slate-500"
         >
-          <Link href="/events" className="font-semibold text-indigo-600 hover:underline">
+          <Link
+            href="/events"
+            className="font-semibold text-indigo-600 hover:underline"
+          >
             ← All events
           </Link>
           {event.genres.length ? (
@@ -239,7 +267,11 @@ export default async function EventPage({
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           {event.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={event.imageUrl} alt={event.title} className="h-56 w-full object-cover" />
+            <img
+              src={event.imageUrl}
+              alt={event.title}
+              className="h-56 w-full object-cover"
+            />
           ) : null}
           <div className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
@@ -269,9 +301,7 @@ export default async function EventPage({
                 {eventModeIcon(event.mode)} {eventModeLabel(event.mode)}
               </Badge>
               {event.frequency === "RECURRING" ? (
-                <Badge tone="green">
-                  🔁 {event.recurrence || "Recurring"}
-                </Badge>
+                <Badge tone="green">🔁 {event.recurrence || "Recurring"}</Badge>
               ) : null}
               {event.partnerStatus === "APPROVED" ? (
                 <Badge tone="amber">🔥 Godesi Partner Event</Badge>
@@ -280,14 +310,14 @@ export default async function EventPage({
               {left === 0 && !past && !imported ? (
                 <Badge tone="red">Sold out</Badge>
               ) : null}
-              {imported ? <Badge tone="slate">📅 Community calendar</Badge> : null}
+              {imported ? (
+                <Badge tone="slate">📅 Community calendar</Badge>
+              ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="flex items-center gap-2 text-2xl font-black sm:text-3xl">
-                {event.imageUrl ? null : (
-                  <span aria-hidden>{theme.icon}</span>
-                )}
+                {event.imageUrl ? null : <span aria-hidden>{theme.icon}</span>}
                 {event.title}
               </h1>
               <StaffEditLink href={`/admin/events/${event.id}`} />
@@ -361,11 +391,11 @@ export default async function EventPage({
                   </a>
                 </p>
               ) : null}
-              {event.onlineUrl ? (
+              {joinUrl ? (
                 <p>
                   🔗{" "}
                   <a
-                    href={event.onlineUrl}
+                    href={joinUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="font-semibold text-indigo-600 hover:underline"
@@ -373,9 +403,13 @@ export default async function EventPage({
                     Join link
                   </a>
                 </p>
+              ) : event.onlineUrl ? (
+                <p>🔗 Join link — shown here once you have a ticket</p>
               ) : null}
               {event.bonusNote ? (
-                <p className="font-semibold text-emerald-700">🎁 {event.bonusNote}</p>
+                <p className="font-semibold text-emerald-700">
+                  🎁 {event.bonusNote}
+                </p>
               ) : null}
               {event.websiteUrl ? (
                 <p>
@@ -409,7 +443,9 @@ export default async function EventPage({
                 )}
               </p>
               {imported ? null : (
-                <p>🪑 {left} of {event.seatsTotal} seats available</p>
+                <p>
+                  🪑 {left} of {event.seatsTotal} seats available
+                </p>
               )}
             </div>
 
@@ -444,7 +480,9 @@ export default async function EventPage({
                 ))}
               </div>
             ) : null}
-            <p className="whitespace-pre-line text-slate-700">{event.description}</p>
+            <p className="whitespace-pre-line text-slate-700">
+              {event.description}
+            </p>
             {event.tags.length ? (
               <div className="flex flex-wrap gap-1.5">
                 {event.tags.map((tag) => (
@@ -498,13 +536,14 @@ export default async function EventPage({
                   Running your own event?
                 </h3>
                 <p className="mt-2">
-                  Listing is free and unlimited. We keep{" "}
-                  {platformFeePercent()}% of tickets you sell on the free plan
-                  and nothing on a paid plan, and free-entry events never cost
-                  anything.
+                  Listing is free and unlimited. We keep {platformFeePercent()}%
+                  of tickets you sell on the free plan and nothing on a paid
+                  plan, and free-entry events never cost anything.
                 </p>
                 <div className="mt-3 flex flex-col gap-2">
-                  <LinkButton href="/events/new">Post your event free</LinkButton>
+                  <LinkButton href="/events/new">
+                    Post your event free
+                  </LinkButton>
                   <Link
                     href="/events/how-it-works"
                     className="text-sm font-bold text-indigo-600 hover:underline"
@@ -532,16 +571,23 @@ export default async function EventPage({
             <h2 className="font-bold">Agenda</h2>
             <ul className="mt-3 divide-y divide-slate-100">
               {event.sessions.map((session) => (
-                <li key={session.id} className="flex flex-wrap gap-x-3 gap-y-1 py-2">
+                <li
+                  key={session.id}
+                  className="flex flex-wrap gap-x-3 gap-y-1 py-2"
+                >
                   <p className="w-28 shrink-0 text-sm font-semibold text-indigo-700">
                     {session.startTime
                       ? `${session.startTime}${session.endTime ? `–${session.endTime}` : ""}`
                       : "—"}
                   </p>
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">{session.title}</p>
+                    <p className="font-semibold text-slate-900">
+                      {session.title}
+                    </p>
                     <p className="text-sm text-slate-500">
-                      {[session.stage, session.speaker].filter(Boolean).join(" · ")}
+                      {[session.stage, session.speaker]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </p>
                   </div>
                 </li>
@@ -569,7 +615,9 @@ export default async function EventPage({
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">{speaker.name}</p>
+                    <p className="font-semibold text-slate-900">
+                      {speaker.name}
+                    </p>
                     {speaker.bio ? (
                       <p className="text-sm text-slate-600">{speaker.bio}</p>
                     ) : null}
@@ -585,7 +633,10 @@ export default async function EventPage({
             <h2 className="font-bold">Ticket types</h2>
             <ul className="mt-3 divide-y divide-slate-100">
               {event.tiers.map((tier) => (
-                <li key={tier.id} className="flex items-center justify-between gap-3 py-2">
+                <li
+                  key={tier.id}
+                  className="flex items-center justify-between gap-3 py-2"
+                >
                   <div>
                     <p className="font-semibold">{tier.name}</p>
                     <p className="text-sm text-slate-500">
@@ -593,7 +644,9 @@ export default async function EventPage({
                     </p>
                   </div>
                   <p className="font-bold">
-                    {tier.price ? formatMoney(tier.price, event.currency) : "Free"}
+                    {tier.price
+                      ? formatMoney(tier.price, event.currency)
+                      : "Free"}
                   </p>
                 </li>
               ))}
@@ -648,53 +701,58 @@ export default async function EventPage({
             ) : null}
             <p className="mt-3 text-sm text-emerald-800">
               <span className="font-bold">Is this your event?</span> Claim it
-              free and sell these seats here instead — {platformFeePercent()}% on
-              the free plan, nothing on a paid one.{" "}
+              free and sell these seats here instead — {platformFeePercent()}%
+              on the free plan, nothing on a paid one.{" "}
               <a href="#claim-event" className="font-bold underline">
                 Claim it below
               </a>{" "}
               or read{" "}
-              <Link
-                href="/events/how-it-works"
-                className="font-bold underline"
-              >
+              <Link href="/events/how-it-works" className="font-bold underline">
                 how events work on Godesi
               </Link>
               .
             </p>
           </Card>
         ) : (
-        <Card>
-          <h2 className="font-bold">Book your seats</h2>
-          {past ? (
-            <p className="mt-2 text-sm text-slate-600">This event has already taken place.</p>
-          ) : left === 0 ? (
-            <p className="mt-2 text-sm text-slate-600">All seats are booked.</p>
-          ) : !user ? (
-            <div className="mt-3 space-y-2">
-              <p className="text-sm text-slate-600">Sign in to book a seat.</p>
-              <LinkButton href={`/login?next=/events/${event.slug}`}>Sign in to book</LinkButton>
-            </div>
-          ) : (
-            <div className="mt-3">
-              <TicketForm
-                eventId={event.id}
-                price={event.price}
-                currency={event.currency}
-                seatsLeft={left}
-                maxPerBooking={maxPerBooking}
-                tiers={event.tiers.map((tier) => ({
-                  id: tier.id,
-                  name: tier.name,
-                  price: tier.price,
-                  seatsLeft: seatsLeft(tier),
-                }))}
-                defaultName={user.name}
-                defaultEmail={user.email}
-              />
-            </div>
-          )}
-        </Card>
+          <Card>
+            <h2 className="font-bold">Book your seats</h2>
+            {past ? (
+              <p className="mt-2 text-sm text-slate-600">
+                This event has already taken place.
+              </p>
+            ) : left === 0 ? (
+              <p className="mt-2 text-sm text-slate-600">
+                All seats are booked.
+              </p>
+            ) : !user ? (
+              <div className="mt-3 space-y-2">
+                <p className="text-sm text-slate-600">
+                  Sign in to book a seat.
+                </p>
+                <LinkButton href={`/login?next=/events/${event.slug}`}>
+                  Sign in to book
+                </LinkButton>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <TicketForm
+                  eventId={event.id}
+                  price={event.price}
+                  currency={event.currency}
+                  seatsLeft={left}
+                  maxPerBooking={maxPerBooking}
+                  tiers={event.tiers.map((tier) => ({
+                    id: tier.id,
+                    name: tier.name,
+                    price: tier.price,
+                    seatsLeft: seatsLeft(tier),
+                  }))}
+                  defaultName={user.name}
+                  defaultEmail={user.email}
+                />
+              </div>
+            )}
+          </Card>
         )}
 
         {thin ? null : <InContentBanner size="leaderboard" />}
