@@ -419,7 +419,7 @@ export default async function AdminProspectsPage({
                   </a>
                 </>
               ) : null}
-              {row.phone && !row.listedSlug ? (
+              {row.phone && row.city && !row.listedSlug ? (
                 <form action={publishProspectCardAction}>
                   <input type="hidden" name="id" value={row.id} />
                   <button

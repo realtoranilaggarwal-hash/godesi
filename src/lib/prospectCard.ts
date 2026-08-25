@@ -17,7 +17,7 @@ import { slugify } from "@/lib/slug";
 
 export type PublishOutcome =
   | { ok: true; slug: string; created: boolean }
-  | { ok: false; reason: "no-phone" | "no-beat" | "duplicate" };
+  | { ok: false; reason: "no-phone" | "no-beat" | "no-town" | "duplicate" };
 
 type PublishableProspect = Pick<
   Prospect,
@@ -84,12 +84,12 @@ export async function publishProspectCard(
     return { ok: true, slug: fromSameSource.slug, created: false };
   }
 
+  /** A card has to say where the business is, or it is no use to a visitor. */
   const city = prospect.city?.trim() || null;
+  if (!city) return { ok: false, reason: "no-town" };
+
   const sameName = await db.business.findFirst({
-    where: {
-      name: prospect.name,
-      ...(city ? { city } : {}),
-    },
+    where: { name: prospect.name, city },
     select: { slug: true },
   });
   if (sameName) {
@@ -109,7 +109,7 @@ export async function publishProspectCard(
       category: beat,
       categorySlug: beat,
       subcategorySlug: beatChild(beat, prospect),
-      city: city ?? "USA",
+      city,
       state: prospect.state,
       country: "USA",
       address: prospect.address,

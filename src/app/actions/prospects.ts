@@ -73,7 +73,9 @@ export async function publishProspectCardAction(formData: FormData) {
             ? "Already on Godesi — card linked instead of a second one."
             : outcome.reason === "no-phone"
               ? "No phone, so no card: find the number first."
-              : "No beat set, so no card: pick the category first.",
+              : outcome.reason === "no-town"
+                ? "No town, so no card: ask them which town they work in."
+                : "No beat set, so no card: pick the category first.",
       },
     });
     revalidatePath(DESK);

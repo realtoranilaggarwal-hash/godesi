@@ -10,9 +10,10 @@ import { publishProspectCard } from "../src/lib/prospectCard";
  *   npm run db:prospect-cards -- all 500         # cap the run
  *
  * Only the facts go up (name, trade, town, street, website); the phone and email
- * are stored hidden until the owner claims the card. Rows without a phone or
- * without a beat are left alone: nobody can ring them and we will not guess a
- * category. Re-running is safe — a row that already has a card is skipped.
+ * are stored hidden until the owner claims the card. Rows without a phone, a
+ * town or a beat are left alone: nobody can ring them, a card with no town is no
+ * use, and we will not guess a category. Re-running is safe — a row that already
+ * has a card is skipped.
  */
 
 async function main() {
@@ -22,6 +23,7 @@ async function main() {
   const rows = await db.prospect.findMany({
     where: {
       phone: { not: null },
+      city: { not: null },
       listedSlug: null,
       categorySlug: beat ?? { not: null },
     },
@@ -48,7 +50,7 @@ async function main() {
   }
 
   console.log(
-    `Done: ${created} cards published, ${linked} linked to a card that already existed, ${skipped} skipped (duplicate name in the same town).`,
+    `Done: ${created} cards published, ${linked} linked to a card that already existed, ${skipped} skipped (a business of that name is already in that town).`,
   );
 }
 
