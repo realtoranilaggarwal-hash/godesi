@@ -10,6 +10,7 @@ import {
 import { effectivePlan } from "@/lib/plans";
 import { formatEventDate } from "@/lib/events";
 import { siteUrl, whatsappLink } from "@/lib/format";
+import { properName } from "@/lib/names";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, EmptyState, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
@@ -39,10 +40,10 @@ export async function generateMetadata({
   if (!profile) return { title: "Profile not found" };
   const { user } = profile;
   return {
-    title: `${user.name} on Godesi`,
+    title: `${properName(user.name)} on Godesi`,
     description:
       user.bio ??
-      `${user.name}${user.location ? ` from ${user.location}` : ""} on Godesi — businesses, events and requirements.`,
+      `${properName(user.name)}${user.location ? ` from ${user.location}` : ""} on Godesi — businesses, events and requirements.`,
     alternates: { canonical: `/${user.username}` },
   };
 }
@@ -97,7 +98,7 @@ export default async function PublicProfilePage({
             )}
             <div className="min-w-0">
               <h1 className="text-2xl font-black text-slate-900">
-                {user.name}
+                {properName(user.name)}
               </h1>
               {user.headline ? (
                 <p className="text-sm font-semibold text-slate-700">
@@ -129,7 +130,10 @@ export default async function PublicProfilePage({
               </div>
             </div>
           </div>
-          <ShareButtons url={shareUrl} title={`${user.name} on Godesi`} />
+          <ShareButtons
+            url={shareUrl}
+            title={`${properName(user.name)} on Godesi`}
+          />
         </div>
         {user.bio ? (
           <p className="border-t border-slate-100 px-5 py-4 text-sm text-slate-700">
@@ -143,7 +147,7 @@ export default async function PublicProfilePage({
               <a
                 href={whatsappLink(
                   user.whatsappNumber,
-                  `Hi ${user.name}, I found you on Godesi.`,
+                  `Hi ${properName(user.name)}, I found you on Godesi.`,
                 )}
                 target="_blank"
                 rel="noreferrer"

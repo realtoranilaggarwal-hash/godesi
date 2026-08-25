@@ -46,7 +46,12 @@ export async function SiteTicker() {
           today
         </span>
         <div className="ticker-window min-w-0 flex-1 py-1.5">
-          <div className="ticker-track flex items-center gap-6 text-xs">
+          <div
+            className="ticker-track flex items-center gap-6 text-xs"
+            /* Roughly four seconds per item, so a short strip is not glacial
+               and a long one is still readable. */
+            style={{ animationDuration: `${Math.max(30, items.length * 4)}s` }}
+          >
             {items}
             {/* Repeated once so the loop has no visible gap. */}
             {items.map((item, index) => (

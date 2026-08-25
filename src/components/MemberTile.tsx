@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { MemberCard } from "@/lib/membersQueries";
 import { thumbImage } from "@/lib/proxyImage";
+import { properName } from "@/lib/names";
 
 function initials(name: string) {
   return (
@@ -50,7 +51,7 @@ export function MemberTile({ member }: { member: MemberCard }) {
 
       <span className="w-full">
         <span className="block truncate text-sm font-bold text-slate-900">
-          {member.name}
+          {properName(member.name)}
         </span>
         {line ? (
           <span className="mt-0.5 line-clamp-2 block text-xs text-slate-600">

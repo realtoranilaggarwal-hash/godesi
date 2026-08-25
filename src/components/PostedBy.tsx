@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PostedBy as PostedByUser } from "@/lib/profiles";
+import { properName } from "@/lib/names";
 
 /** Byline avatar + name, linking to the member's personal profile when set. */
 export function PostedBy({
@@ -29,7 +30,9 @@ export function PostedBy({
         </span>
       )}
       <span className="text-xs text-slate-600">
-        {prefix} <span className="font-semibold text-slate-800">{user.name}</span>
+        {prefix} <span className="font-semibold text-slate-800">
+          {properName(user.name)}
+        </span>
       </span>
     </>
   );

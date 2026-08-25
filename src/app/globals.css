@@ -149,12 +149,12 @@ html.consent-open {
   }
 }
 
+/*
+ * Even with reduced motion the strip still drifts, only slower: a stopped
+ * ticker looked broken and left people dragging it by hand.
+ */
 @media (prefers-reduced-motion: reduce) {
   .ticker-track {
-    animation: none;
-  }
-
-  .ticker-window {
-    overflow-x: auto;
+    animation-duration: 240s;
   }
 }

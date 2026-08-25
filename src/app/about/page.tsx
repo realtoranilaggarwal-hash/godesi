@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
 import { publicTeam } from "@/lib/team";
+import { properName } from "@/lib/names";
 
 export const metadata: Metadata = {
   title: "About Godesi — our story and mission",
@@ -110,7 +111,7 @@ export default async function AboutPage() {
                   )}
                   <span className="min-w-0">
                     <span className="block font-semibold text-slate-900">
-                      {member.name}
+                      {properName(member.name)}
                     </span>
                     <span className="block text-xs font-semibold uppercase tracking-wide text-indigo-600">
                       {member.teamTitle ??

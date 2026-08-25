@@ -95,6 +95,13 @@ export async function SiteHeader() {
       className:
         "bg-gradient-to-r from-slate-900 to-indigo-800 text-white hover:opacity-90",
     },
+    {
+      href: "/desi-elite",
+      label: "Desi Elite",
+      icon: "🏆",
+      className:
+        "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 hover:opacity-90",
+    },
     ...categories.map((category) => ({
       href: `/categories/${category.slug}`,
       label: category.name,

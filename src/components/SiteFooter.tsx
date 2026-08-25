@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
-import { VisitCounter } from "@/components/VisitCounter";
+import { TrafficCounter } from "@/components/TrafficCounter";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
@@ -172,7 +172,7 @@ export function SiteFooter() {
       <div className="border-t border-slate-100">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
           <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
-          <VisitCounter />
+          <TrafficCounter />
           <LocalePicker currency={displayCurrency()} open />
           <span>
             Designed by{" "}

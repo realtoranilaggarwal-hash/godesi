@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ProfessionalCardData } from "@/lib/professionalsQueries";
 import { thumbImage } from "@/lib/proxyImage";
 import { Card } from "@/components/ui";
+import { properName } from "@/lib/names";
 
 /** Portrait, what they do, where, and the skills they listed. */
 export function ProfessionalCard({
@@ -28,7 +29,7 @@ export function ProfessionalCard({
             href={`/${person.username}`}
             className="block truncate font-bold text-slate-900 hover:text-indigo-600"
           >
-            {person.name}
+            {properName(person.name)}
           </Link>
           {person.headline ? (
             <p className="line-clamp-2 text-sm text-slate-700">
