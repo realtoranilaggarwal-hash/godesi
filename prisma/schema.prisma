@@ -329,6 +329,12 @@ model User {
   /// What a MODERATOR may manage; ignored for other roles. See lib/permissions.
   staffPermissions String[] @default([])
 
+  /// Shown in the team list on /about, with the job title to print there.
+  /// Cleared the moment staff access is taken away.
+  teamPublic Boolean @default(false)
+  teamTitle  String?
+  teamRank   Int     @default(0)
+
   /// Paid for the Elite interview inside a package, before applying.
   elitePrepaid Boolean @default(false)
 
@@ -918,6 +924,15 @@ model VisitorPing {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/// One row per day of site traffic, for the "visitors so far" counter in the
+/// footer. Counted in the browser and deduplicated per device per day, so it is
+/// visits and returning-device counts, never anything identifying.
+model VisitDay {
+  day      DateTime @id @db.Date
+  views    Int      @default(0)
+  visitors Int      @default(0)
 }
 
 /// A public event listing with ticket booking.

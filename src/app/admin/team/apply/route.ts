@@ -54,11 +54,43 @@ export async function POST(request: NextRequest) {
     }
     await db.user.update({
       where: { id: member.id },
-      data: { role: "BUSINESS", staffPermissions: [] },
+      data: {
+        role: "BUSINESS",
+        staffPermissions: [],
+        // Somebody who has left the team comes off the public page with them.
+        teamPublic: false,
+      },
     });
     revalidatePath("/admin");
     revalidatePath("/admin/team");
-    return back({ done: `${who} no longer has staff access.` });
+    revalidatePath("/about");
+    return back({ done: `${who} no longer has staff access, and is off the team page.` });
+  }
+
+  if (intent === "team") {
+    if (member.role !== "MODERATOR" && member.role !== "ADMIN") {
+      return back({ error: `${who} is not on the team.` });
+    }
+    const teamPublic = form.get("teamPublic") !== null;
+    const title = String(form.get("teamTitle") ?? "")
+      .trim()
+      .slice(0, 60);
+    const rank = Number(form.get("teamRank") ?? 0);
+    await db.user.update({
+      where: { id: member.id },
+      data: {
+        teamPublic,
+        teamTitle: title || null,
+        teamRank: Number.isFinite(rank) ? Math.trunc(rank) : 0,
+      },
+    });
+    revalidatePath("/admin/team");
+    revalidatePath("/about");
+    return back({
+      done: teamPublic
+        ? `${who} is on the team page as ${title || "team"}.`
+        : `${who} is not shown on the team page.`,
+    });
   }
 
   if (intent === "permissions") {

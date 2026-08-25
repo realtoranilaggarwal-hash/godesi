@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -139,6 +140,7 @@ export default function RootLayout({
         />
         <UnregisterServiceWorkers />
         <SiteHeader />
+        <SiteTicker />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
         <LiveMediaPlayer />

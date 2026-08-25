@@ -7,6 +7,7 @@ import { blogBlocks, blogSummary } from "@/lib/blog";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
 import { ShareButtons } from "@/components/ShareButtons";
+import { ShareRail } from "@/components/ShareRail";
 import { SidebarBanners } from "@/components/Banners";
 import { siteUrl } from "@/lib/format";
 
@@ -128,6 +129,7 @@ export default async function BlogPostPage({
           <InArticleAd className="mt-5" />
 
           <div className="mt-5 border-t border-slate-100 pt-4">
+            <ShareRail title={post.title} />
             <ShareButtons
               url={`${siteUrl()}/blog/${post.slug}`}
               title={post.title}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 import { SITE } from "@/lib/site";
+import { publicTeam } from "@/lib/team";
 
 export const metadata: Metadata = {
   title: "About Godesi — our story and mission",
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
     "Godesi is a global desi marketplace: business listings, buyer requirements, events, real estate, wedding services, temples and community news.",
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const team = await publicTeam();
   const shareUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL;
 
   return (
@@ -80,6 +82,70 @@ export default function AboutPage() {
             — visitors, countries and referrers, updated in real time. No personal data,
             no cross-site tracking.
           </p>
+        </>
+      ) : null}
+
+      {team.length ? (
+        <>
+          <h2 id="team">Our team</h2>
+          <p>
+            The people who look after Godesi — they check every listing, answer
+            your calls and put your business up. Say hello.
+          </p>
+          <div className="not-prose grid gap-3 sm:grid-cols-2">
+            {team.map((member) => {
+              const inside = (
+                <>
+                  {member.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={member.avatarUrl}
+                      alt={member.name}
+                      className="h-12 w-12 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-700">
+                      {member.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="min-w-0">
+                    <span className="block font-semibold text-slate-900">
+                      {member.name}
+                    </span>
+                    <span className="block text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                      {member.teamTitle ??
+                        (member.role === "ADMIN" ? "Founder" : "Community team")}
+                    </span>
+                    {member.headline ? (
+                      <span className="block text-xs text-slate-500">
+                        {member.headline}
+                      </span>
+                    ) : null}
+                    {member.location ? (
+                      <span className="block text-xs text-slate-400">
+                        {member.location}
+                      </span>
+                    ) : null}
+                  </span>
+                </>
+              );
+              const className =
+                "flex items-center gap-3 rounded-2xl border border-slate-200 p-3";
+              return member.username ? (
+                <Link
+                  key={member.id}
+                  href={`/${member.username}`}
+                  className={`${className} hover:border-indigo-300 hover:bg-indigo-50/40`}
+                >
+                  {inside}
+                </Link>
+              ) : (
+                <div key={member.id} className={className}>
+                  {inside}
+                </div>
+              );
+            })}
+          </div>
         </>
       ) : null}
 

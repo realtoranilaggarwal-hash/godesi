@@ -18,6 +18,7 @@ import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
 import { PlaceLink } from "@/components/PlaceLink";
 import { ShareButtons } from "@/components/ShareButtons";
+import { ShareRail } from "@/components/ShareRail";
 import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
@@ -525,6 +526,7 @@ export default async function BusinessProfilePage({
               ) : (
                 <p className="text-sm text-slate-500">Not claimed yet</p>
               )}
+              <ShareRail title={business.name} />
               <ShareButtons
                 url={`${siteUrl()}/b/${business.slug}`}
                 title={business.name}

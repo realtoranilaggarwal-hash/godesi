@@ -11,6 +11,7 @@ import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
+import { ShareRail } from "@/components/ShareRail";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
 import { EventClaimPitch } from "@/components/EventClaimPitch";
@@ -457,6 +458,7 @@ export default async function EventPage({
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
+              <ShareRail title={event.title} />
               <ShareButtons
                 url={`${siteUrl()}/events/${event.slug}`}
                 title={event.title}

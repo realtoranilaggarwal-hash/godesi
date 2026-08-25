@@ -120,3 +120,41 @@ html.consent-open {
 .fab-anchor {
   margin-bottom: var(--fab-offset);
 }
+
+/*
+ * The "today" strip under the header: rates and headlines drift leftwards for
+ * ever. The row is rendered twice, so shifting by half its width loops without
+ * a gap. Hovering stops it so a headline can be read and clicked.
+ */
+.ticker-window {
+  overflow: hidden;
+}
+
+.ticker-track {
+  width: max-content;
+  animation: ticker-drift 90s linear infinite;
+}
+
+.ticker-window:hover .ticker-track,
+.ticker-window:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes ticker-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+
+  .ticker-window {
+    overflow-x: auto;
+  }
+}

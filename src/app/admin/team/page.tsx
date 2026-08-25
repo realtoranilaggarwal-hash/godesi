@@ -37,7 +37,7 @@ export default async function Page({
       : {}),
   };
 
-  const [moderators, candidates] = await Promise.all([
+  const [moderators, candidates, team] = await Promise.all([
     db.user.findMany({
       where: { role: "MODERATOR" },
       orderBy: { createdAt: "desc" },
@@ -53,6 +53,20 @@ export default async function Page({
         email: true,
         createdAt: true,
         emailVerifiedAt: true,
+      },
+    }),
+    db.user.findMany({
+      where: { role: { in: ["ADMIN", "MODERATOR"] } },
+      orderBy: [{ teamRank: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        username: true,
+        teamPublic: true,
+        teamTitle: true,
+        teamRank: true,
       },
     }),
   ]);
@@ -245,6 +259,73 @@ export default async function Page({
           {moderators.length === 0 ? (
             <li className="py-2 text-slate-500">No moderators yet.</li>
           ) : null}
+        </ul>
+      </Card>
+
+      <Card id="team-page">
+        <h2 className="mb-1 text-lg font-bold">Show on the team page</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          Tick who appears as{" "}
+          <Link href="/about#team" className="font-semibold text-indigo-600">
+            our team on the About page
+          </Link>{" "}
+          and give each one a job title. Nobody is shown until you tick them,
+          and taking staff access away takes them off the page at the same time.
+          Their photo and one-line headline come from their own profile, so ask
+          them to fill that in first. Smallest number is shown first.
+        </p>
+        <ul className="divide-y divide-slate-100 text-sm">
+          {team.map((member) => (
+            <li key={member.id} className="py-2">
+              <form
+                method="post"
+                action="/admin/team/apply"
+                className="flex flex-wrap items-center gap-2"
+              >
+                <input type="hidden" name="intent" value="team" />
+                <input type="hidden" name="id" value={member.id} />
+                <label className="flex items-center gap-1 text-xs font-semibold text-slate-600">
+                  <input
+                    type="checkbox"
+                    name="teamPublic"
+                    defaultChecked={member.teamPublic}
+                  />
+                  show
+                </label>
+                <span className="min-w-0 flex-1">
+                  <span className="font-medium">{member.name ?? "Member"}</span>{" "}
+                  <Badge tone={member.role === "ADMIN" ? "indigo" : "slate"}>
+                    {member.role === "ADMIN" ? "admin" : "moderator"}
+                  </Badge>
+                  <span className="block text-xs text-slate-400">
+                    {member.email}
+                    {member.username
+                      ? ` · @${member.username}`
+                      : " · no public profile yet"}
+                  </span>
+                </span>
+                <input
+                  name="teamTitle"
+                  defaultValue={member.teamTitle ?? ""}
+                  placeholder="Job title, e.g. community manager"
+                  className={`${inputClass} sm:max-w-xs`}
+                />
+                <input
+                  name="teamRank"
+                  type="number"
+                  defaultValue={member.teamRank}
+                  aria-label="Order on the page"
+                  className={`${inputClass} w-20`}
+                />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-indigo-200 px-2 py-1 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
+                >
+                  save
+                </button>
+              </form>
+            </li>
+          ))}
         </ul>
       </Card>
 
