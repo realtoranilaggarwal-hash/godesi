@@ -10,8 +10,9 @@ export function properName(name: string): string {
     .map((part) => {
       if (!part.trim()) return part;
       if (part !== part.toLowerCase()) return part;
-      return part.replace(/(^|[-'’.])([a-z])/g, (_match, lead, letter) =>
-        `${lead}${(letter as string).toUpperCase()}`,
+      return part.replace(
+        /(^|[-'’.])([a-z])/g,
+        (_match, lead, letter) => `${lead}${(letter as string).toUpperCase()}`,
       );
     })
     .join("");

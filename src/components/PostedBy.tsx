@@ -30,7 +30,8 @@ export function PostedBy({
         </span>
       )}
       <span className="text-xs text-slate-600">
-        {prefix} <span className="font-semibold text-slate-800">
+        {prefix}{" "}
+        <span className="font-semibold text-slate-800">
           {properName(user.name)}
         </span>
       </span>
@@ -38,7 +39,11 @@ export function PostedBy({
   );
 
   if (!user.username) {
-    return <span className={`inline-flex items-center gap-2 ${className}`}>{inner}</span>;
+    return (
+      <span className={`inline-flex items-center gap-2 ${className}`}>
+        {inner}
+      </span>
+    );
   }
 
   return (
