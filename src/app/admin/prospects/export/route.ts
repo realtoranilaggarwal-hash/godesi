@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ProspectStatus, type Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
+import { reachKey, reachWhere } from "@/lib/prospectReach";
 
 /**
  * The same call list as a spreadsheet, so a moderator can work through it on
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
   const mine = params.get("mine") === "1";
 
   const where: Prisma.ProspectWhereInput = {
+    ...reachWhere(reachKey(params.get("reach"))),
     ...(category ? { categorySlug: category } : {}),
     ...(city ? { city } : {}),
     ...(source ? { source } : {}),

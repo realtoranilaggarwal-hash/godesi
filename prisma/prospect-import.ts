@@ -169,6 +169,7 @@ async function main() {
   let seen = 0;
   let saved = 0;
   let reachable = 0;
+  let skipped = 0;
 
   for await (const lead of reader.read(only)) {
     seen += 1;
@@ -183,7 +184,12 @@ async function main() {
     if (existing && existing.status !== "NEW") continue;
 
     const found = await contact(lead);
-    if (found.phone || found.email) reachable += 1;
+    // Nothing to ring and nothing to write to: not a lead, so it is not stored.
+    if (!found.phone && !found.email) {
+      skipped += 1;
+      continue;
+    }
+    reachable += 1;
 
     const data = {
       name: titleCase(lead.name),
@@ -220,7 +226,7 @@ async function main() {
   }
 
   console.log(
-    `${seen} listings read, ${saved} saved, ${reachable} with a phone or email to ring.`,
+    `${seen} listings read, ${saved} saved, ${reachable} with a phone or email to ring, ${skipped} skipped with neither.`,
   );
 }
 
