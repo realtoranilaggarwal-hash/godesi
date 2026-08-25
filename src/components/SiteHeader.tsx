@@ -89,6 +89,13 @@ export async function SiteHeader() {
 
   const categoryItems = [
     {
+      href: "/categories",
+      label: "All categories",
+      icon: "🧭",
+      className:
+        "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+    },
+    {
       href: "/blog",
       label: "Blog",
       icon: "✍️",
@@ -108,13 +115,6 @@ export async function SiteHeader() {
       icon: category.icon,
       className: `bg-gradient-to-r ${gradientFor(category.color)} text-white opacity-90 hover:opacity-100`,
     })),
-    {
-      href: "/categories",
-      label: "All categories",
-      icon: "🧭",
-      className:
-        "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-    },
   ];
   const pickerGroups = categories.map((category) => ({
     slug: category.slug,
