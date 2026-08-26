@@ -68,6 +68,18 @@ export const REWARDS = [
     points: 400,
     auto: true,
   },
+  {
+    key: "connect-promo",
+    label: "Your Connect meet-up sent to members in the weekly email",
+    points: 200,
+    auto: false,
+  },
+  {
+    key: "elite-review",
+    label: "GoDesi Elite review and interview fee covered",
+    points: 2500,
+    auto: false,
+  },
 ] as const;
 
 /** Points it costs to unlock one requirement's contact details. */

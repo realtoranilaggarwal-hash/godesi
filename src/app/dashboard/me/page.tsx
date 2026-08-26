@@ -9,6 +9,8 @@ import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { alumniFor } from "@/lib/alumniQueries";
 import { SignOutButton } from "@/components/SignOutButton";
+import { EarnStrip } from "@/components/EarnStrip";
+import { pointValues, wallet } from "@/lib/rewardsQueries";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My profile" };
@@ -19,6 +21,10 @@ export default async function PersonalProfilePage() {
 
   const suggested =
     user.username ?? (await suggestUsername(user.name, user.email));
+  const [balance, points] = await Promise.all([
+    wallet(user.id),
+    pointValues(),
+  ]);
   const alumni = (await alumniFor(user.id)).map((row) => ({
     institution: row.institution,
     degree: row.degree ?? "",
@@ -49,6 +55,13 @@ export default async function PersonalProfilePage() {
           </div>
           <SignOutButton />
         </div>
+
+        <EarnStrip
+          user={user}
+          balance={balance.balance}
+          signupPoints={points.REFERRAL_SIGNUP}
+          profilePoints={points.PROFILE_CREATED}
+        />
 
         {user.username ? (
           <Card className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-indigo-50 to-fuchsia-50">

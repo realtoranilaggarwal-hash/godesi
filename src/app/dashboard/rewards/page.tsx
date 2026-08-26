@@ -11,6 +11,7 @@ import { effectivePlan } from "@/lib/plans";
 import { Badge, Card } from "@/components/ui";
 import { ShareButtons } from "@/components/ShareButtons";
 import { RedeemPanel } from "@/components/forms/RedeemPanel";
+import { InviteFriends } from "@/components/forms/InviteFriends";
 import { SidebarBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,8 @@ export default async function RewardsPage() {
   if (!user) redirect("/login?next=/dashboard/rewards");
   if (!user.username) redirect("/dashboard/me?needsUsername=1");
 
-  const [balance, stats, points, entries, redemptions] = await Promise.all([
+  const [balance, stats, points, entries, redemptions, invites, invitesJoined] =
+    await Promise.all([
     wallet(user.id),
     referralStats(user.id),
     pointValues(),
@@ -34,6 +36,10 @@ export default async function RewardsPage() {
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 10,
+    }),
+    db.invite.count({ where: { inviterId: user.id } }),
+    db.invite.count({
+      where: { inviterId: user.id, joinedUserId: { not: null } },
     }),
   ]);
 
@@ -81,6 +87,22 @@ export default async function RewardsPage() {
             Share it on WhatsApp — you earn points the moment someone signs up,
             and again when they upgrade.
           </p>
+        </Card>
+
+        <Card id="invite" className="space-y-3">
+          <div>
+            <h2 className="font-bold">Invite your friends by email</h2>
+            <p className="text-sm text-slate-600">
+              Type the addresses of friends who would want their own
+              godesi.com/name. We send one plain email each with your link, and
+              nothing more — we never read your contacts and never email an
+              address twice.
+              {invites
+                ? ` You have invited ${invites} so far; ${invitesJoined} joined.`
+                : ""}
+            </p>
+          </div>
+          <InviteFriends signupPoints={points.REFERRAL_SIGNUP} />
         </Card>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
