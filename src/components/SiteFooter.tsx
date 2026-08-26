@@ -28,7 +28,9 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
     {
       title: "For business",
       links: [
+        { href: "/claim", label: "Claim godesi.com/yourname" },
         { href: "/signup", label: "List your business free" },
+        { href: "/why-godesi", label: "Why Godesi — everything you get" },
         { href: "/why-list", label: "Why list on Godesi?" },
         { href: "/pricing", label: "Membership plans" },
         {

@@ -164,3 +164,36 @@ export async function savePersonalProfileAction(
     return fieldError(error);
   }
 }
+
+/** Takes a handle for the signed-in member straight from the claim page. */
+export async function claimHandleAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const username = normalizeUsername(String(formData.get("username") ?? ""));
+    const invalid = usernameError(username);
+    if (invalid) return { error: invalid };
+
+    const taken = await db.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+    if (taken) {
+      return taken.id === user.id
+        ? { success: `That is already yours — godesi.com/${username}` }
+        : { error: "Someone claimed that one first — try another." };
+    }
+
+    const previous = user.username;
+    await db.user.update({ where: { id: user.id }, data: { username } });
+
+    revalidatePath("/dashboard/me");
+    revalidatePath(`/${username}`);
+    if (previous && previous !== username) revalidatePath(`/${previous}`);
+    return { success: `Yours — your page is live at godesi.com/${username}` };
+  } catch (error) {
+    return fieldError(error);
+  }
+}

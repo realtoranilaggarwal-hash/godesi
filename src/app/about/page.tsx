@@ -24,7 +24,18 @@ export default async function AboutPage() {
       </p>
 
       <h2>What you can do here</h2>
+      <p>
+        It all starts with a name: take <strong>godesi.com/yourname</strong> and
+        that page is yours.{" "}
+        <Link href="/claim">Claim your name</Link> — or read{" "}
+        <Link href="/why-godesi">everything Godesi gives you</Link>, service by
+        service.
+      </p>
       <ul>
+        <li>
+          <strong>Your own godesi.com/name page</strong> — photo, headline, what
+          you do, links, videos, personal and business QR codes.
+        </li>
         <li>
           <strong>Get a free digital business card</strong> — profile page, gallery, QR
           code and a WhatsApp button you can share anywhere.

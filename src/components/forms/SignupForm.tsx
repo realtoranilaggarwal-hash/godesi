@@ -10,9 +10,12 @@ import { FormError } from "@/components/forms/FormError";
 export function SignupForm({
   defaultRole = "BUSINESS",
   next,
+  handle,
 }: {
   defaultRole?: string;
   next?: string;
+  /** A name claimed on the homepage; saved as the member's godesi.com/<name>. */
+  handle?: string;
 }) {
   const [state, formAction] = useFormState(signupAction, emptyState);
 
@@ -20,6 +23,9 @@ export function SignupForm({
     <form action={formAction} className="space-y-3">
       <FormError>{state.error}</FormError>
       {next ? <input type="hidden" name="next" value={next} /> : null}
+      {handle ? (
+        <input type="hidden" name="username" value={handle} />
+      ) : null}
 
       {/* Bots fill every field they find; people never see this one. */}
       <input

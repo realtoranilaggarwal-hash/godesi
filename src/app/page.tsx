@@ -20,6 +20,7 @@ import { ActivityWall } from "@/components/ActivityWall";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { newestMembers, publicMemberCount } from "@/lib/membersQueries";
+import { HandleClaim } from "@/components/HandleClaim";
 
 export const dynamic = "force-dynamic";
 
@@ -45,22 +46,28 @@ function SectionHeading({
   );
 }
 
-/** Hero call-to-action chips, newest services included. */
-const HERO_ACTIONS: { href: string; label: string }[] = [
-  { href: "/events/new", label: "Post an event" },
-  { href: "/leads/new", label: "Request a service" },
-  { href: "/desi-elite/apply", label: "🏆 Apply for GoDesi Elite" },
-  { href: "/live/submit", label: "🎧 Host your radio or TV channel" },
-  { href: "/live-radio", label: "🎧 Listen live" },
-  { href: "/live-tv", label: "📺 Watch live TV" },
-  { href: "/leaderboard", label: "🏅 Top contributors" },
-  { href: "/connect", label: "🤝 Meet someone local" },
-  { href: "/journalists", label: "🗞️ Become a journalist" },
-  { href: "/rewards", label: "🎁 Earn points" },
-  { href: "/alumni", label: "🎓 Find batchmates" },
-  { href: "/website", label: "🌐 Get a website" },
-  { href: "/trending", label: "#️⃣ Trending hashtags" },
-  { href: "/wall", label: "🧱 Desi news wall" },
+/** What a claimed name actually gives you, said in four lines. */
+const HERO_PROOF: string[] = [
+  "Free forever — no card",
+  "One name, one page: photo, services, links",
+  "QR code for your visiting card",
+  "WhatsApp button so customers message you",
+];
+
+/** The short version of the whole site; the long version lives on /why-godesi. */
+const STEPS: { title: string; body: string }[] = [
+  {
+    title: "1. Claim your name",
+    body: "Type it above. If nobody has it, it is yours — godesi.com/yourname, free.",
+  },
+  {
+    title: "2. Fill your page",
+    body: "Photo, what you do, your town, WhatsApp, links, videos — and a business card if you run a shop or work for clients.",
+  },
+  {
+    title: "3. Share it and get found",
+    body: "Send the link or show your QR. You are also in the directory, so people searching your trade or town find you.",
+  },
 ];
 
 export default async function HomePage() {
@@ -120,42 +127,27 @@ export default async function HomePage() {
         <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-              The desi directory
+              Free desi page · first come, first served
             </p>
-            <h1 className="mt-1 max-w-2xl text-2xl font-black leading-tight sm:text-4xl">
-              Find plumbers, pandits, caterers, tutors — and book events near
-              you.
+            <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-5xl">
+              Get your name:{" "}
+              <span className="whitespace-nowrap">godesi.com/you</span>
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/90">
-              {categories.length} categories,{" "}
-              {categories.reduce((s, c) => s + c.children.length, 0)}{" "}
-              subcategories, verified listings, buyer requirements, community
-              events and daily news.
+            <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
+              One short link for everything you do — your work, your shop, your
+              WhatsApp, your links. Names go once. Take yours before somebody
+              else does.
             </p>
 
-            <form
-              action="/search"
-              className="mt-4 flex max-w-2xl flex-col gap-2 sm:flex-row"
-            >
-              <input
-                name="q"
-                placeholder="What do you need? e.g. electrician, mehndi artist, tiffin"
-                className="w-full rounded-xl px-4 py-2.5 text-sm text-slate-900 outline-none"
-                aria-label="Search businesses"
-              />
-              <input
-                name="city"
-                placeholder="City"
-                className="rounded-xl px-4 py-2.5 text-sm text-slate-900 outline-none sm:w-40"
-                aria-label="City"
-              />
-              <button
-                type="submit"
-                className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
-              >
-                Search
-              </button>
-            </form>
+            <div className="mt-4">
+              <HandleClaim />
+            </div>
+
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
+              {HERO_PROOF.map((line) => (
+                <li key={line}>✓ {line}</li>
+              ))}
+            </ul>
 
             <div className="mt-3 flex flex-wrap items-center gap-1.5">
               <Link
@@ -164,19 +156,34 @@ export default async function HomePage() {
               >
                 Add your business free
               </Link>
-              {HERO_ACTIONS.map((action) => (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                >
-                  {action.label}
-                </Link>
-              ))}
+              <Link
+                href="/why-godesi"
+                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+              >
+                Everything you get on GoDesi
+              </Link>
+              <Link
+                href="/people"
+                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+              >
+                See members&rsquo; pages
+              </Link>
             </div>
           </div>
           <MemberBubbles members={members} total={memberCount} />
         </div>
+      </section>
+
+      {/* Three lines on how it works, so the hero can stay a single promise. */}
+      <section className="grid gap-3 sm:grid-cols-3">
+        {STEPS.map((step) => (
+          <Card key={step.title}>
+            <h2 className="text-base font-black text-slate-900">
+              {step.title}
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">{step.body}</p>
+          </Card>
+        ))}
       </section>
 
       {/* One bold box instead of a wall of category tiles: the whole taxonomy
@@ -184,7 +191,7 @@ export default async function HomePage() {
       <section className="rounded-3xl border-2 border-slate-900 bg-white p-4 shadow-sm sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-black">
-            What do you need? Pick a service 👇
+            Looking for someone? Pick a service 👇
           </h2>
           <Link
             href="/categories"

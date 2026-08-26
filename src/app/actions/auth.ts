@@ -16,6 +16,21 @@ import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
 import { canonicalEmail, screenSignup } from "@/lib/signupGuard";
+import { normalizeUsername, usernameError } from "@/lib/profiles";
+
+/**
+ * A name claimed on the homepage. It is only kept if it is still free when the
+ * account is created, so two people racing for one name cannot both get it.
+ */
+async function claimedUsername(value: FormDataEntryValue | null) {
+  const username = normalizeUsername(typeof value === "string" ? value : "");
+  if (!username || usernameError(username)) return null;
+  const taken = await db.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+  return taken ? null : username;
+}
 
 /** The visitor's address, as Vercel forwards it. */
 function clientIp() {
@@ -62,6 +77,7 @@ export async function signupAction(
     });
     if (!verdict.ok) return { error: verdict.reason };
 
+    const username = await claimedUsername(formData.get("username"));
     const user = await db.user.create({
       data: {
         name: parsed.data.name.trim(),
@@ -70,6 +86,7 @@ export async function signupAction(
         signupIp: ip,
         role: parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS",
         passwordHash: await hashPassword(parsed.data.password),
+        username,
       },
     });
     await createSession(user.id);
@@ -80,8 +97,9 @@ export async function signupAction(
       await issueEmailOtp(email);
       target = "/verify-email";
     } else {
-      const home =
-        parsed.data.role === "CLIENT"
+      const home = username
+        ? "/dashboard/me"
+        : parsed.data.role === "CLIENT"
           ? "/leads/new"
           : parsed.data.role === "PROFESSIONAL"
             ? "/dashboard/profile?type=professional"
