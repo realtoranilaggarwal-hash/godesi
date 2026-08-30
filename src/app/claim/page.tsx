@@ -73,11 +73,11 @@ export default async function ClaimPage({
       ) : (
         <>
           <p className="text-sm font-bold uppercase tracking-widest text-emerald-600">
-            Available
+            {mine ? "Yours" : "Available"}
           </p>
           <h1 className="text-3xl font-black">
-            godesi.com/<span className="text-indigo-600">{handle}</span> is
-            yours to take
+            godesi.com/<span className="text-indigo-600">{handle}</span>{" "}
+            {mine ? "is your page" : "is yours to take"}
           </h1>
           <ul className="space-y-1 text-sm text-slate-700">
             {PERKS.map((perk) => (

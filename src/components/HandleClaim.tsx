@@ -15,7 +15,13 @@ export function HandleClaim({ tone = "hero" }: { tone?: "hero" | "plain" }) {
   const [state, setState] = useState<State>("empty");
   const [message, setMessage] = useState<string | null>(null);
 
-  const handle = value.trim().toLowerCase().replace(/\s+/g, "-");
+  // Same normalisation the server applies, so the box never shows a name that
+  // differs from the one that would be claimed.
+  const handle = value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/^@+/, "");
 
   useEffect(() => {
     if (!handle) {

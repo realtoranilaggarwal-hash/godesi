@@ -10,7 +10,8 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
-import { type ActionState, fieldError } from "@/lib/actions";
+import type { Role } from "@prisma/client";
+import { type ActionState, fieldError, uniqueViolation } from "@/lib/actions";
 import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
@@ -77,18 +78,31 @@ export async function signupAction(
     });
     if (!verdict.ok) return { error: verdict.reason };
 
-    const username = await claimedUsername(formData.get("username"));
-    const user = await db.user.create({
-      data: {
-        name: parsed.data.name.trim(),
-        email,
-        emailCanonical: canonicalEmail(email),
-        signupIp: ip,
-        role: parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS",
-        passwordHash: await hashPassword(parsed.data.password),
-        username,
-      },
-    });
+    const role: Role = parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS";
+    const claimed = await claimedUsername(formData.get("username"));
+    const account = {
+      name: parsed.data.name.trim(),
+      email,
+      emailCanonical: canonicalEmail(email),
+      signupIp: ip,
+      role,
+      passwordHash: await hashPassword(parsed.data.password),
+    };
+
+    // The name may be gone between the check and the insert. Losing that race
+    // must not lose the signup, so the account is created without a name and
+    // the member picks another one on their profile.
+    let username = claimed;
+    let user = await db.user
+      .create({ data: { ...account, username } })
+      .catch((error: unknown) => {
+        if (username && uniqueViolation(error)) return null;
+        throw error;
+      });
+    if (!user) {
+      username = null;
+      user = await db.user.create({ data: { ...account, username: null } });
+    }
     await createSession(user.id);
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
