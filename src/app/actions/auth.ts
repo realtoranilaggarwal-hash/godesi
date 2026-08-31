@@ -10,12 +10,28 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
-import { type ActionState, fieldError } from "@/lib/actions";
+import type { Role } from "@prisma/client";
+import { type ActionState, fieldError, uniqueViolation } from "@/lib/actions";
 import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
 import { canonicalEmail, screenSignup } from "@/lib/signupGuard";
+import { normalizeUsername, usernameError } from "@/lib/profiles";
+
+/**
+ * A name claimed on the homepage. It is only kept if it is still free when the
+ * account is created, so two people racing for one name cannot both get it.
+ */
+async function claimedUsername(value: FormDataEntryValue | null) {
+  const username = normalizeUsername(typeof value === "string" ? value : "");
+  if (!username || usernameError(username)) return null;
+  const taken = await db.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+  return taken ? null : username;
+}
 
 /** The visitor's address, as Vercel forwards it. */
 function clientIp() {
@@ -62,16 +78,31 @@ export async function signupAction(
     });
     if (!verdict.ok) return { error: verdict.reason };
 
-    const user = await db.user.create({
-      data: {
-        name: parsed.data.name.trim(),
-        email,
-        emailCanonical: canonicalEmail(email),
-        signupIp: ip,
-        role: parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS",
-        passwordHash: await hashPassword(parsed.data.password),
-      },
-    });
+    const role: Role = parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS";
+    const claimed = await claimedUsername(formData.get("username"));
+    const account = {
+      name: parsed.data.name.trim(),
+      email,
+      emailCanonical: canonicalEmail(email),
+      signupIp: ip,
+      role,
+      passwordHash: await hashPassword(parsed.data.password),
+    };
+
+    // The name may be gone between the check and the insert. Losing that race
+    // must not lose the signup, so the account is created without a name and
+    // the member picks another one on their profile.
+    let username = claimed;
+    let user = await db.user
+      .create({ data: { ...account, username } })
+      .catch((error: unknown) => {
+        if (username && uniqueViolation(error)) return null;
+        throw error;
+      });
+    if (!user) {
+      username = null;
+      user = await db.user.create({ data: { ...account, username: null } });
+    }
     await createSession(user.id);
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
@@ -80,8 +111,9 @@ export async function signupAction(
       await issueEmailOtp(email);
       target = "/verify-email";
     } else {
-      const home =
-        parsed.data.role === "CLIENT"
+      const home = username
+        ? "/dashboard/me"
+        : parsed.data.role === "CLIENT"
           ? "/leads/new"
           : parsed.data.role === "PROFESSIONAL"
             ? "/dashboard/profile?type=professional"

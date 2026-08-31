@@ -4,11 +4,8 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import {
-  journalistStats,
-  nextPressCardId,
-  pressCardEligibility,
-} from "@/lib/journalists";
+import { pressCardEligibility } from "@/lib/journalists";
+import { journalistStats, nextPressCardId } from "@/lib/journalistsQueries";
 
 /** Opts a member into the local journalist programme. */
 export async function joinJournalistAction(

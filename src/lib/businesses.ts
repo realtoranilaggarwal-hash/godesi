@@ -1,7 +1,7 @@
 import type { Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
-import { planRank } from "@/lib/plans";
+import { effectivePlan, planRank } from "@/lib/plans";
 
 export type BusinessListItem = {
   id: string;
@@ -64,6 +64,8 @@ export type SearchFilters = {
   country?: string;
   minRating?: number;
   premiumOnly?: boolean;
+  /** Only cards an owner has claimed — never an unclaimed row seeded from public data. */
+  claimedOnly?: boolean;
   /** Sub-services the card must offer (all of them).  */
   specialties?: string[];
   /** Certifications the card must hold (all of them). */
@@ -119,6 +121,7 @@ async function runSearchBusinesses(
     country,
     minRating = 0,
     premiumOnly = false,
+    claimedOnly = false,
     specialties,
     certifications,
     serviceOptionGroups,
@@ -138,6 +141,7 @@ async function runSearchBusinesses(
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
       ...(country ? { country: { equals: country, mode: "insensitive" } } : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
+      ...(claimedOnly ? { ownerId: { not: null } } : {}),
       ...(specialties?.length ? { specialties: { hasEvery: specialties } } : {}),
       ...(certifications?.length
         ? { certifications: { hasEvery: certifications } }
@@ -229,7 +233,7 @@ async function runSearchBusinesses(
     },
     include: {
       vehicle: true,
-      owner: { select: { plan: true } },
+      owner: { select: { plan: true, planExpiresAt: true } },
       reviews: { where: { hidden: false }, select: { rating: true } },
       categoryRef: { select: { name: true, color: true, icon: true } },
       subcategoryRef: { select: { name: true } },
@@ -296,7 +300,7 @@ async function runSearchBusinesses(
               negotiable: row.vehicle.negotiable,
             }
           : null,
-        plan: row.owner?.plan ?? "FREE",
+        plan: row.owner ? effectivePlan(row.owner) : "FREE",
         rating,
         reviewCount,
       };

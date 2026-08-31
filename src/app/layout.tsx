@@ -3,13 +3,13 @@ import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
-import { VisitorPinger } from "@/components/VisitorPinger";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
@@ -35,7 +35,11 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image" },
   verification: {
-    other: { "msvalidate.01": "9AC0C1E8C5BEEC4E0EF93C0575F608AE" },
+    other: {
+      "msvalidate.01": "9AC0C1E8C5BEEC4E0EF93C0575F608AE",
+      // Impact.com — proves site ownership for the affiliate partnerships.
+      "impact-site-verification": "b1bd1fb0-8d97-492f-9688-4ce75f5da2c6",
+    },
   },
 };
 
@@ -48,10 +52,11 @@ export default function RootLayout({
   const umamiId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   const umamiSrc =
     process.env.NEXT_PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js";
+  const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
 
   return (
     <html lang="en" className="overflow-x-hidden">
-      {adsenseClient || umamiId ? (
+      {adsenseClient || umamiId || clarityId ? (
         <head>
           {adsenseClient ? (
             <Script
@@ -67,6 +72,16 @@ export default function RootLayout({
               src={umamiSrc}
               data-website-id={umamiId}
               strategy="afterInteractive"
+            />
+          ) : null}
+          {/* Microsoft Clarity: heatmaps and session replay of the layout. */}
+          {clarityId ? (
+            <Script
+              id="clarity"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script",${JSON.stringify(clarityId)});`,
+              }}
             />
           ) : null}
         </head>
@@ -125,13 +140,13 @@ export default function RootLayout({
         />
         <UnregisterServiceWorkers />
         <SiteHeader />
+        <SiteTicker />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
         <LiveMediaPlayer />
         <CookieConsent />
         <RewardsNudge />
         <LiveActivity />
-        <VisitorPinger />
         <GoogleTranslate />
         <BackToTop />
         {aiEnabled() && <AiChat />}

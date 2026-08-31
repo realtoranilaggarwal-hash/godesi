@@ -14,6 +14,7 @@ import {
 } from "@/components/forms/SeedListingForm";
 import { getCategoryTree } from "@/lib/directory";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Listings" };
@@ -21,7 +22,8 @@ export const metadata: Metadata = { title: "Listings" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/listings");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Listings"));
 
   const [businesses, businessCount, categories] = await Promise.all([
     db.business.findMany({
@@ -35,7 +37,15 @@ export default async function Page() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Listings</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">Listings</h1>
+        <Link
+          href="/admin/listings/wire"
+          className="text-sm font-semibold text-indigo-700"
+        >
+          Add one from a link →
+        </Link>
+      </div>
       <Card id="listings">
         <h2 className="text-lg font-bold">Listings</h2>
         <p className="mb-3 text-xs text-slate-500">

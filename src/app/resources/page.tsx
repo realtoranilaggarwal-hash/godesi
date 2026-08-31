@@ -44,7 +44,14 @@ export default async function ResourcesPage({
           where: { status: "APPROVED", tags: { has: tag }, startsAt: { gte: new Date() } },
           orderBy: { startsAt: "asc" },
           take: 6,
-          select: { id: true, slug: true, title: true, city: true, startsAt: true },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            city: true,
+            startsAt: true,
+            timeZone: true,
+          },
         })
       : Promise.resolve([]),
   ]);
@@ -112,7 +119,7 @@ export default async function ResourcesPage({
                     {event.title}
                   </Link>
                   <p className="text-xs text-slate-500">
-                    {formatEventDate(event.startsAt)} · {event.city}
+                    {formatEventDate(event.startsAt, event.timeZone)} · {event.city}
                   </p>
                 </li>
               ))}

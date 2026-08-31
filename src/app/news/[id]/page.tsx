@@ -7,6 +7,7 @@ import { levelFor } from "@/lib/journalists";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
+import { ShareRail } from "@/components/ShareRail";
 import { StoryBody } from "@/components/StoryBody";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
@@ -306,6 +307,7 @@ export default async function ReportPage({
             isAuthor={isAuthor}
           />
 
+          <ShareRail title={report.title} />
           <ShareButtons url={`${siteUrl()}${canonical}`} title={report.title} />
 
           <p className="text-xs text-slate-500">

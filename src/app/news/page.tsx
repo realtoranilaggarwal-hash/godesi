@@ -9,11 +9,11 @@ import {
   InlineBanner,
   SidebarBanners,
 } from "@/components/Banners";
-import { ChatPanel } from "@/components/ChatPanel";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { JournalistJoinForm } from "@/components/forms/JournalistJoinForm";
 import { JournalistBadge } from "@/components/JournalistBadge";
-import { JOURNALIST_RULES, levelFor, topJournalists } from "@/lib/journalists";
+import { JOURNALIST_RULES, levelFor } from "@/lib/journalists";
+import { topJournalists } from "@/lib/journalistsQueries";
 import { gradientFor } from "@/lib/categories";
 import { freshNewsCutoff } from "@/lib/news";
 import { NEWS_TOPICS, topicSlug } from "@/lib/newsTopics";
@@ -392,7 +392,6 @@ export default async function NewsPage({
             </ul>
           </div>
         </Card>
-        <ChatPanel />
         <InlineBanner />
       </div>
 

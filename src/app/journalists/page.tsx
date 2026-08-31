@@ -5,10 +5,9 @@ import {
   JOURNALIST_LEVELS,
   JOURNALIST_RULES,
   PRESS_CARD_LEVEL,
-  journalistStats,
   pressCardEligibility,
-  topJournalists,
 } from "@/lib/journalists";
+import { journalistStats, topJournalists } from "@/lib/journalistsQueries";
 import { PressCard } from "@/components/PressCard";
 import {
   ClaimPressCardForm,
@@ -45,9 +44,9 @@ export default async function JournalistsPage() {
           <h1 className="text-3xl font-black">Become a local journalist 🗞️</h1>
           <p className="mt-2 max-w-2xl text-white/90">
             Know what is happening in your desi neighbourhood — a new temple
-            event, a store opening, a community win, a scam warning? Cover it for
-            Godesi. Every approved story earns reward points and stars on your
-            profile, and your photo and name run with the story.
+            event, a store opening, a community win, a scam warning? Cover it
+            for Godesi. Every approved story earns reward points and stars on
+            your profile, and your photo and name run with the story.
           </p>
         </section>
 
@@ -193,7 +192,10 @@ export default async function JournalistsPage() {
                   {[
                     { label: "Email verified", done: stats.checks.email },
                     { label: "Mobile verified", done: stats.checks.phone },
-                    { label: "No fake history", done: stats.checks.cleanRecord },
+                    {
+                      label: "No fake history",
+                      done: stats.checks.cleanRecord,
+                    },
                     { label: "ID check (optional)", done: stats.checks.kyc },
                   ].map((check) => (
                     <li
@@ -243,7 +245,9 @@ export default async function JournalistsPage() {
             ))}
           </ul>
           <ul className="mt-4 space-y-1 text-sm text-slate-600">
-            <li>+{POINTS.NEWS_PUBLISHED} points every time a story is approved</li>
+            <li>
+              +{POINTS.NEWS_PUBLISHED} points every time a story is approved
+            </li>
             <li>
               +{POINTS.NEWS_UPVOTED} points when a story reaches 5 net upvotes
             </li>

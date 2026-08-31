@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { digestTokenValid } from "@/lib/digest";
+import { canonicalEmail, inviteOptOutValid } from "@/lib/invites";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -16,13 +17,27 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { u?: string; t?: string };
+  searchParams: { u?: string; t?: string; e?: string };
 }) {
   const userId = searchParams.u ?? "";
   const token = searchParams.t ?? "";
-  const ok = Boolean(userId && token && digestTokenValid(userId, token));
+  const email = canonicalEmail(searchParams.e ?? "");
 
-  if (ok) {
+  // Two kinds of link land here: a member stopping the weekly digest, and a
+  // friend asking never to be invited again.
+  const invite = Boolean(email && token && inviteOptOutValid(email, token));
+  const digest = Boolean(userId && token && digestTokenValid(userId, token));
+  const ok = invite || digest;
+
+  if (invite) {
+    await db.inviteOptOut
+      .upsert({
+        where: { emailCanonical: email },
+        update: {},
+        create: { emailCanonical: email },
+      })
+      .catch(() => null);
+  } else if (digest) {
     await db.user
       .update({
         where: { id: userId },
@@ -37,7 +52,9 @@ export default async function Page({
         {ok ? "You're unsubscribed" : "That link didn't work"}
       </h1>
       <p className="text-sm text-slate-600">
-        {ok
+        {invite
+          ? "Done — nobody on Godesi can send an invitation to that address again. We keep only the address itself, so we can honour this."
+          : ok
           ? "No more weekly digests. Your account, business card and listings are untouched, and you'll still get emails about things you do — bookings, payments and replies."
           : "The link may have been cut in half by your email app. Copy the whole link, or email us and we'll take you off the list."}
       </p>

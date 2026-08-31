@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
-import { uniqueSlug } from "@/lib/slug";
+import { uniqueSlug } from "@/lib/uniqueSlug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { type ActionState, fieldError } from "@/lib/actions";
 

@@ -70,7 +70,6 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Company",
       links: [
         { href: "/about", label: "About us" },
-        { href: "/live", label: "Live visitor map" },
         { href: "/journalists", label: "Become a local journalist" },
         { href: "/buzz", label: "#godesi social wall" },
         { href: "/alumni", label: "Find your batchmates" },

@@ -4,6 +4,7 @@ import { startEliteCheckoutAction } from "@/app/actions/elite";
 
 const ORDER: ElitePackageId[] = [
   "INTERVIEW",
+  "INTERVIEW_1Y",
   "VIDEO_PRO",
   "BOOST_100",
   "BOOST_250",
@@ -29,9 +30,9 @@ export function ElitePackages({
     <Card className="border-amber-200 bg-gradient-to-br from-amber-50 via-white to-white">
       <h2 className="text-lg font-black">Elite fees</h2>
       <p className="mt-1 text-sm text-slate-700">
-        Applying and being nominated is free. These one-time fees cover the
-        interview and the film — and the more you invest, the higher your profile
-        sits in its section.
+        Applying and being nominated is free. These fees cover the interview,
+        the term your profile is held for and the film — and the more you invest,
+        the higher your profile sits in its section.
       </p>
       {paidCents > 0 ? (
         <p className="mt-2 text-xs font-bold text-amber-800">
@@ -53,7 +54,13 @@ export function ElitePackages({
             >
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold">
-                  {item.label} — ${item.usd.toLocaleString()}
+                  {item.label} —{" "}
+                  {item.listUsd ? (
+                    <span className="font-semibold text-slate-400 line-through">
+                      ${item.listUsd.toLocaleString()}
+                    </span>
+                  ) : null}{" "}
+                  ${item.usd.toLocaleString()}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-600">{item.blurb}</p>
               </div>

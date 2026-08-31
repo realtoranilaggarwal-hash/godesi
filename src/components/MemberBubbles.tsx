@@ -11,19 +11,26 @@ export type BubbleMember = {
   location: string | null;
 };
 
-/** Scattered spots inside the hero so bubbles never sit on top of each other. */
-const SPOTS = [
-  { left: 8, top: 6, size: 48, delay: 0 },
-  { left: 46, top: 0, size: 40, delay: 1.4 },
-  { left: 74, top: 14, size: 54, delay: 0.6 },
-  { left: 22, top: 34, size: 62, delay: 2.1 },
-  { left: 58, top: 40, size: 46, delay: 0.9 },
-  { left: 4, top: 62, size: 42, delay: 1.8 },
-  { left: 38, top: 68, size: 54, delay: 0.3 },
-  { left: 72, top: 62, size: 40, delay: 2.6 },
-  { left: 88, top: 40, size: 34, delay: 1.1 },
-  { left: 56, top: 20, size: 32, delay: 3.1 },
-];
+/**
+ * Spots inside the hero so bubbles never sit on top of each other: five
+ * columns over four rows, nudged off the grid so it still reads as a scatter.
+ * The last slot stays empty for the member counter in the bottom corner.
+ */
+const COLUMNS = [1, 20, 39, 58, 77];
+const ROWS = [1, 24, 47, 70];
+const SIZES = [38, 30, 42, 32, 36];
+
+const SPOTS = ROWS.flatMap((top, row) =>
+  COLUMNS.map((left, column) => {
+    const index = row * COLUMNS.length + column;
+    return {
+      left: left + (row % 2 ? 3 : 0),
+      top: top + (column % 2 ? 4 : 0),
+      size: SIZES[(index + row) % SIZES.length],
+      delay: (index % 7) * 0.45,
+    };
+  }),
+).slice(0, ROWS.length * COLUMNS.length - 1);
 
 function initials(name: string) {
   return name
@@ -52,8 +59,10 @@ export function MemberBubbles({
 
   useEffect(() => {
     const load = async () => {
+      // A tab left open in the background does not need fresh bubbles.
+      if (document.visibilityState !== "visible") return;
       try {
-        const response = await fetch("/api/members", { cache: "no-store" });
+        const response = await fetch("/api/members");
         if (!response.ok) return;
         const data = (await response.json()) as {
           members?: BubbleMember[];
@@ -74,7 +83,7 @@ export function MemberBubbles({
       }
     };
 
-    const timer = window.setInterval(load, 30000);
+    const timer = window.setInterval(load, 600_000);
     return () => window.clearInterval(timer);
   }, []);
 
@@ -93,7 +102,7 @@ export function MemberBubbles({
       <style>{`
         @keyframes godesi-float {
           0%, 100% { transform: translateY(0) }
-          50% { transform: translateY(-14px) }
+          50% { transform: translateY(-7px) }
         }
         @keyframes godesi-pop {
           0% { transform: scale(0); opacity: 0 }

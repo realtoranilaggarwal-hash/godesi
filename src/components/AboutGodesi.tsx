@@ -15,6 +15,12 @@ export function AboutGodesi() {
         <Link href="/about" className="text-indigo-600 hover:underline">
           About Godesi
         </Link>
+        <Link href="/why-godesi" className="text-indigo-600 hover:underline">
+          Everything you get
+        </Link>
+        <Link href="/claim" className="text-indigo-600 hover:underline">
+          Claim godesi.com/yourname
+        </Link>
         <Link href="/faq" className="text-indigo-600 hover:underline">
           How it works
         </Link>

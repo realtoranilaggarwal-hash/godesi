@@ -5,7 +5,8 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { whatsappLink } from "@/lib/format";
 import { StaffEditLink } from "@/components/StaffEditLink";
-import { thumbImage } from "@/lib/proxyImage";
+import { LogoTile } from "@/components/LogoTile";
+import { PLANS } from "@/lib/plans";
 
 /**
  * `premium` frames a paid or hand-picked card with a ribbon so it reads as an
@@ -18,8 +19,10 @@ export function BusinessCard({
   business: BusinessListItem;
   variant?: "default" | "compact" | "premium";
 }) {
-  const premium = variant === "premium";
   const compact = variant === "compact";
+  /** A paid Featured card carries the gold treatment wherever it appears. */
+  const gold = business.plan === "PREMIUM";
+  const premium = variant === "premium" || gold;
 
   return (
     <Card
@@ -31,21 +34,18 @@ export function BusinessCard({
     >
       {premium ? (
         <span className="absolute -top-2.5 left-4 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white shadow">
-          ⭐ Premium
+          ⭐ {gold ? "Featured" : "Premium"}
         </span>
       ) : null}
       <div className={`flex items-start gap-3 ${premium ? "pt-2" : ""}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={
-            business.logoUrl
-              ? thumbImage(business.logoUrl, 384)
-              : "/placeholder-logo.svg"
-          }
-          alt=""
+        <LogoTile
+          name={business.name}
+          icon={business.categoryIcon}
+          imageUrl={business.logoUrl}
           className={`${
-            compact ? "h-10 w-10" : "h-12 w-12"
-          } shrink-0 rounded-xl border border-slate-200 object-cover`}
+            premium ? "h-16 w-16" : compact ? "h-10 w-10" : "h-12 w-12"
+          } ${gold ? "ring-2 ring-amber-400 ring-offset-2" : ""}`}
+          emojiClassName={compact ? "text-xl" : premium ? "text-3xl" : "text-2xl"}
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -56,7 +56,7 @@ export function BusinessCard({
               {business.name}
             </Link>
             {business.plan !== "FREE" ? (
-              <Badge tone="indigo">{business.plan}</Badge>
+              <Badge tone="indigo">{PLANS[business.plan].name}</Badge>
             ) : null}
             {premium && business.verifiedProvider ? (
               <Badge tone="green">✅ Verified</Badge>

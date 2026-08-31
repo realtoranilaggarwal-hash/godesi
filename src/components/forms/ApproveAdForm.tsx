@@ -7,19 +7,19 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
-export function ApproveAdForm({ id, capacity }: { id: string; capacity: number }) {
+/** The number only orders the rotation, so there is no ceiling to enforce. */
+export function ApproveAdForm({ id }: { id: string }) {
   const [state, formAction] = useFormState(approveBannerAction, emptyState);
 
   return (
     <form action={formAction} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="id" value={id} />
       <label className="text-xs font-medium text-slate-600">
-        Slot
+        Order
         <input
           name="position"
           type="number"
           min={1}
-          max={capacity}
           placeholder="auto"
           className="ml-1 w-20 rounded-lg border border-slate-300 px-2 py-1 text-xs"
         />

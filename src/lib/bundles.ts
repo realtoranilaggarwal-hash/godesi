@@ -5,8 +5,11 @@ import { ELITE_PACKAGES } from "@/lib/elite";
 import { PLANS } from "@/lib/plans";
 import { formatInr, formatUsd } from "@/lib/format";
 
-/** The package and every add-on are sold by the year. */
-export const BUNDLE_MONTHS = 12;
+/** The founding package sells five years of membership and Elite in one go. */
+export const BUNDLE_MONTHS = 60;
+
+/** Banner add-ons are still booked a year at a time. */
+export const BANNER_TERM_MONTHS = 12;
 
 export type CartItemKey =
   | "membership"
@@ -35,7 +38,7 @@ export type CartItem = {
   inBundle: boolean;
 };
 
-const premium = PLANS.PREMIUM;
+const featured = PLANS.PREMIUM;
 
 function bannerItem(
   key: CartItemKey,
@@ -47,8 +50,8 @@ function bannerItem(
     key,
     label: `${placement.name} — 12 months`,
     blurb: `${placement.size.width}x${placement.size.height} · ${placement.blurb}`,
-    inr: placement.priceInr * BUNDLE_MONTHS,
-    usd: placement.priceUsd * BUNDLE_MONTHS,
+    inr: placement.priceInr * BANNER_TERM_MONTHS,
+    usd: placement.priceUsd * BANNER_TERM_MONTHS,
     slot,
     inBundle,
   };
@@ -57,14 +60,14 @@ function bannerItem(
 export const CART_ITEMS: CartItem[] = [
   {
     key: "membership",
-    label: "Premium membership — 12 months",
+    label: "Featured membership — 5 years",
     blurb:
-      "Featured listing, phone, email and website shown, 20 photos, 5 extra categories, unlimited enquiries with contact details unlocked, analytics, priority ranking",
-    inr: premium.priceInr * BUNDLE_MONTHS,
-    usd: premium.priceUsd * BUNDLE_MONTHS,
+      "Gold ring and Featured ribbon, top of your category, phone and email shown, 5 photos, 3 videos, 30 album photos, 10 categories, enquiry contacts unlocked, analytics and your own Stripe payouts",
+    inr: featured.terms.FIVE_YEAR?.inr ?? featured.priceInr,
+    usd: featured.terms.FIVE_YEAR?.usd ?? featured.priceUsd,
     inBundle: true,
   },
-  bannerItem("banner-sidebar", "SIDEBAR", true),
+  bannerItem("banner-sidebar", "SIDEBAR", false),
   bannerItem("banner-header", "HEADER", false),
   bannerItem("banner-hero", "HERO", false),
   bannerItem("banner-skyscraper", "SKYSCRAPER", false),
@@ -76,17 +79,18 @@ export const CART_ITEMS: CartItem[] = [
   bannerItem("banner-fullbanner", "FULLBANNER", false),
   {
     key: "elite",
-    label: "GoDesi Elite interview + video",
+    label: "GoDesi Elite interview + profile for 5 years — launch offer",
     blurb:
-      "One-time. We interview you by phone, WhatsApp, Zoom or Facebook Live and publish your GoDesi Elite profile with a 30–60 second video.",
-    inr: 3_999,
+      "One-time. We interview you by phone, WhatsApp, Zoom or Facebook Live and publish your GoDesi Elite profile with a 30–60 second video, held for five years. Normally $500 for one year.",
+    inr: 19_999,
     usd: ELITE_PACKAGES.INTERVIEW.usd,
-    inBundle: false,
+    inBundle: true,
   },
 ];
 
 /** Thrown in with the membership at no extra charge. */
 export const BUNDLE_EXTRAS = [
+  "Gold ring and Featured ribbon for the whole five years",
   "⭐ Featured badge on the homepage and at the top of your category",
   "Unlimited enquiries — every requirement unlocked with phone and email",
   "WhatsApp button and QR code on your card",
@@ -113,8 +117,12 @@ export function bundleListPrice(currency: Currency) {
   );
 }
 
+/**
+ * The package price, set to hold roughly a third off the two lines bought
+ * separately — so it moves when the Elite launch offer does.
+ */
 export function bundlePrice(currency: Currency) {
-  return currency === "INR" ? 24_999 : 299;
+  return currency === "INR" ? 16_999 : 575;
 }
 
 export function bundleSaving(currency: Currency) {

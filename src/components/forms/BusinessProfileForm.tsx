@@ -19,7 +19,7 @@ import { COUNTRIES } from "@/lib/countries";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
-import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { DIAL_CODE_HINT, dialCodeForCountry } from "@/lib/dialCodes";
 
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
@@ -54,6 +54,8 @@ export function BusinessProfileForm({
   extraCategoryLimit = 0,
   foundingMember = false,
   staffEdit = false,
+  videoLimit = 1,
+  albumPhotoLimit = 6,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -72,6 +74,10 @@ export function BusinessProfileForm({
   foundingMember?: boolean;
   /** Staff editing somebody else's card: posts the id and skips plan limits. */
   staffEdit?: boolean;
+  /** Showcase videos the plan allows; extras beyond it are kept but not shown. */
+  videoLimit?: number;
+  /** Album thumbnails the plan shows before the "see all photos" link. */
+  albumPhotoLimit?: number;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -95,6 +101,20 @@ export function BusinessProfileForm({
   const otherCertifications = saved
     .filter((item) => !offered.includes(item))
     .join(", ");
+
+  /**
+   * A starter card we put up from a public listing: staff tidy it up before the
+   * owner claims it, so we cannot ask for the trade or a WhatsApp number they
+   * have not given us — least of all the number we are keeping hidden.
+   */
+  const starterCard = staffEdit && business !== null && !business.ownerId;
+
+  /**
+   * Numbers we read off a public listing are national, so the picker starts on
+   * the card's own country — otherwise a save either blocks on an empty picker
+   * or writes the area code as if it were a dial code.
+   */
+  const homeCode = dialCodeForCountry(business?.country ?? defaultCountry);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -125,6 +145,7 @@ export function BusinessProfileForm({
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
         <CategorySelect
+          required={!starterCard}
           categories={categories}
           defaultCategory={business?.categorySlug ?? defaultCategory}
           defaultSubcategory={business?.subcategorySlug ?? defaultSubcategory}
@@ -214,15 +235,24 @@ export function BusinessProfileForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="WhatsApp number" hint={DIAL_CODE_HINT} required>
+        <Field
+          label="WhatsApp number"
+          hint={starterCard ? "Only what the owner tells you to show." : DIAL_CODE_HINT}
+          required={!starterCard}
+        >
           <PhoneInput
             name="whatsappNumber"
-            required
+            required={!starterCard}
             defaultValue={business?.whatsappNumber ?? ""}
+            fallbackCode={homeCode}
           />
         </Field>
         <Field label="Phone" hint={DIAL_CODE_HINT}>
-          <PhoneInput name="phone" defaultValue={business?.phone ?? ""} />
+          <PhoneInput
+            name="phone"
+            defaultValue={business?.phone ?? ""}
+            fallbackCode={homeCode}
+          />
         </Field>
         <Field label="Public email">
           <input
@@ -241,15 +271,29 @@ export function BusinessProfileForm({
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
-          hint="Your card holds one picture. Paste a public Google Photos album link and Godesi shows a 3×3 gallery of your work that opens the full album — no upload limit, no storage cost."
+          hint={`Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`}
         />
         <Field
-          label="Video link (YouTube or Vimeo)"
-          hint="Paste a link like https://youtu.be/abc123 or https://vimeo.com/123456 — it plays on your page."
+          label={
+            videoLimit > 1
+              ? `Video links (up to ${videoLimit}, one per line)`
+              : "Video link (YouTube or Vimeo)"
+          }
+          hint={
+            videoLimit > 1
+              ? `Paste up to ${videoLimit} YouTube or Vimeo links, one per line — they play on your page as a showreel.`
+              : "Paste a link like https://youtu.be/abc123 — it plays on your page. Upgrade to show several videos."
+          }
         >
-          <input
-            name="videoUrl"
-            defaultValue={business?.videoUrl ?? ""}
+          <textarea
+            name="videoUrls"
+            rows={videoLimit > 1 ? 4 : 2}
+            defaultValue={(business?.videoUrls?.length
+              ? business.videoUrls
+              : business?.videoUrl
+                ? [business.videoUrl]
+                : []
+            ).join("\n")}
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />
@@ -276,6 +320,18 @@ export function BusinessProfileForm({
               <option value="INR">INR</option>
             </select>
           </div>
+        </Field>
+        <Field label="Show my phone and email">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              name="showContact"
+              defaultChecked={business ? !business.hideContact : true}
+              className="h-4 w-4"
+            />
+            Show them on my card (Pro and Featured only — free cards keep
+            WhatsApp)
+          </label>
         </Field>
         <Field label="Custom quotes">
           <label className="flex items-center gap-2 text-sm text-slate-700">

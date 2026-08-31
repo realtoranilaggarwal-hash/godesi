@@ -17,10 +17,18 @@ export const metadata: Metadata = {
     "Apply or nominate someone for GoDesi Elite: the recognition directory of desi entrepreneurs, professionals and community leaders, with interviews and video profiles.",
 };
 
+/** Why a checkout bounced back here, in words a member can act on. */
+const ERRORS: Record<string, string> = {
+  package: "That package is no longer available — pick one of the fees below.",
+  not_found: "We could not find your Elite entry. Apply below and try again.",
+  stripe_unavailable:
+    "Card payments are unavailable for a moment. Please try again shortly.",
+};
+
 export default async function EliteApplyPage({
   searchParams,
 }: {
-  searchParams: { nominate?: string };
+  searchParams: { nominate?: string; error?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=${encodeURIComponent("/desi-elite/apply")}`);
@@ -51,6 +59,14 @@ export default async function EliteApplyPage({
         a profile with your video.
       </p>
 
+      {searchParams.error && ERRORS[searchParams.error] ? (
+        <Card className="border-rose-200 bg-rose-50">
+          <p className="text-sm font-bold text-rose-900">
+            {ERRORS[searchParams.error]}
+          </p>
+        </Card>
+      ) : null}
+
       {existing ? (
         <Card className="border-indigo-200 bg-indigo-50">
           <p className="text-sm font-bold text-indigo-900">
@@ -80,9 +96,11 @@ export default async function EliteApplyPage({
       ) : (
         <Card className="border-amber-200 bg-amber-50">
           <p className="text-sm font-bold text-amber-900">
-            Applying is free. After you apply you can add the $50 interview
-            (with a 30–60 second video) or a $500 three-minute professional film,
-            and any amount you invest lifts your profile higher in its section.
+            Applying is free. After you apply you can add the interview with a
+            30–60 second video — normally $500 for a year, and while the launch
+            offer runs $250 holds your profile for five years — or a $500
+            three-minute professional film, and any amount you invest lifts your
+            profile higher in its section.
           </p>
         </Card>
       )}

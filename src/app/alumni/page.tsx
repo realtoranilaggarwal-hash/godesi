@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { findAlumni, topInstitutions, MIN_YEAR } from "@/lib/alumni";
+import { MIN_YEAR } from "@/lib/alumni";
+import { findAlumni, topInstitutions } from "@/lib/alumniQueries";
 import { Badge, Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 
@@ -146,7 +147,9 @@ export default async function AlumniPage({
                     ) : row.current ? (
                       <Badge tone="green">Studying now</Badge>
                     ) : null}
-                    {row.fieldOfStudy ? <Badge>{row.fieldOfStudy}</Badge> : null}
+                    {row.fieldOfStudy ? (
+                      <Badge>{row.fieldOfStudy}</Badge>
+                    ) : null}
                     {row.user.location ? (
                       <Badge>📍 {row.user.location}</Badge>
                     ) : null}

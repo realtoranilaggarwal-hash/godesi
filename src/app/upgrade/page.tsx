@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Everything included — one price",
   description:
-    "Build your Godesi package: Premium membership, featured listing, banner advertising and unlimited enquiries, with the savings shown as you go.",
+    "Build your Godesi package: Featured membership and GoDesi Elite for five years, banner advertising and unlimited enquiries, with the savings shown as you go.",
 };
 
 const ERRORS: Record<string, string> = {
@@ -118,10 +118,11 @@ export default async function UpgradePage({
           Everything you would buy separately, in one price
         </h2>
         <p className="mt-2 text-sm text-white/90">
-          Premium membership, featured listing, your own banner on the site and
-          unlimited enquiries —{" "}
-          {formatBundleMoney(bundlePrice(currency), currency)} for a year
-          instead of {formatBundleMoney(bundleListPrice(currency), currency)}.
+          Featured membership and a GoDesi Elite interview, both held for five
+          years, with enquiry contacts unlocked —{" "}
+          {formatBundleMoney(bundlePrice(currency), currency)} instead of{" "}
+          {formatBundleMoney(bundleListPrice(currency), currency)} bought
+          separately.
           You save {formatBundleMoney(saving.amount, currency)} (
           {saving.percent}%).
         </p>
@@ -144,14 +145,23 @@ export default async function UpgradePage({
             <Link href="/pricing" className="font-semibold text-indigo-600">
               Membership only
             </Link>{" "}
-            — Pro {formatPlanPrice(PLANS.PRO, currency)} or Premium{" "}
-            {formatPlanPrice(PLANS.PREMIUM, currency)} a month
+            — Pro {formatPlanPrice(PLANS.PRO, currency)} or Featured{" "}
+            {formatPlanPrice(PLANS.PREMIUM, currency)} a month, or a year and
+            five-year founding terms
           </li>
           <li>
             <Link href="/advertise" className="font-semibold text-indigo-600">
               Banner advertising only
             </Link>{" "}
-            — pick a placement and the number of months
+            — pick a placement and the number of months; each one has a{" "}
+            <Link
+              href="/advertise#placements"
+              className="font-semibold text-indigo-600"
+            >
+              &ldquo;see where this shows&rdquo;
+            </Link>{" "}
+            page with a map of the page, and every spot rotates, so none is ever
+            sold out
           </li>
           <li>
             <Link

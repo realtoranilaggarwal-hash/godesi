@@ -18,7 +18,7 @@ const ERRORS: Record<string, string> = {
   stripe_unavailable: "Card payments are not configured yet — please try again later.",
   not_connected: "Connect your Stripe account first.",
   premium_only:
-    "Direct payouts are a Premium benefit — upgrade to be paid into your own Stripe account.",
+    "Direct payouts are a Featured benefit — upgrade to be paid into your own Stripe account.",
 };
 
 export default async function PayoutsPage({
@@ -114,7 +114,7 @@ export default async function PayoutsPage({
               href="/pricing"
               className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
             >
-              Premium benefit — upgrade to be paid directly
+              Featured benefit — upgrade to be paid directly
             </a>
           )}
           {canDirect && user.stripeAccountId ? (

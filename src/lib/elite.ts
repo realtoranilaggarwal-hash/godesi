@@ -1,6 +1,4 @@
 import type { Prisma, EliteBadge, EliteStatus } from "@prisma/client";
-import { db } from "@/lib/db";
-import { slugify } from "@/lib/slug";
 
 export const ELITE_STATUS_LABELS: Record<EliteStatus, string> = {
   PENDING: "Waiting for review",
@@ -13,22 +11,35 @@ export const ELITE_STATUS_LABELS: Record<EliteStatus, string> = {
 
 export const ELITE_BADGES: Record<
   EliteBadge,
-  { label: string; ribbon: string; card: string }
+  {
+    label: string;
+    ribbon: string;
+    card: string;
+    /** Ring around the portrait, and how large it is: paid tiers show a bigger face. */
+    photo: string;
+    photoSize: string;
+  }
 > = {
   FEATURED: {
     label: "⭐ Elite",
     ribbon: "bg-gradient-to-r from-amber-500 to-rose-500 text-white",
-    card: "border-2 border-amber-300 bg-gradient-to-br from-amber-50 via-white to-white shadow-md",
+    card: "border-[3px] border-amber-400 bg-gradient-to-br from-amber-50 via-white to-white shadow-[0_0_0_1px_rgba(180,131,10,0.25),0_8px_20px_-8px_rgba(180,131,10,0.45)]",
+    photo: "ring-2 ring-amber-400 ring-offset-2",
+    photoSize: "h-20 w-20",
   },
   PREMIUM: {
     label: "💎 Premium",
     ribbon: "bg-gradient-to-r from-indigo-500 to-sky-500 text-white",
-    card: "border-2 border-indigo-200 bg-indigo-50/40",
+    card: "border-2 border-amber-300 bg-gradient-to-br from-amber-50/70 via-white to-white shadow-sm",
+    photo: "ring-2 ring-amber-300 ring-offset-2",
+    photoSize: "h-16 w-16",
   },
   BASIC: {
     label: "Member",
-    ribbon: "bg-slate-200 text-slate-700",
-    card: "",
+    ribbon: "bg-amber-100 text-amber-900",
+    card: "border border-amber-200 bg-amber-50/20",
+    photo: "ring-1 ring-amber-200 ring-offset-1",
+    photoSize: "h-12 w-12",
   },
 };
 
@@ -60,6 +71,7 @@ export const ELITE_CATEGORIES = [
 
 export type ElitePackageId =
   | "INTERVIEW"
+  | "INTERVIEW_1Y"
   | "VIDEO_PRO"
   | "BOOST_100"
   | "BOOST_250"
@@ -72,13 +84,32 @@ export type ElitePackageId =
  */
 export const ELITE_PACKAGES: Record<
   ElitePackageId,
-  { label: string; usd: number; blurb: string; kind: "INTERVIEW" | "VIDEO" | "BOOST" }
+  {
+    label: string;
+    usd: number;
+    /** Set while an offer runs: the price the package normally sells at. */
+    listUsd?: number;
+    blurb: string;
+    kind: "INTERVIEW" | "VIDEO" | "BOOST";
+    /** Years the Elite profile and its top slot are held for. */
+    years?: number;
+  }
 > = {
   INTERVIEW: {
-    label: "Elite interview + 30–60 second video",
-    usd: 50,
+    label: "Elite interview + profile for 5 years — launch offer",
+    usd: 250,
+    listUsd: 500,
+    years: 5,
     blurb:
-      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live and publishes your Elite profile with a 30–60 second video.",
+      "One-time. Our team interviews you by phone, WhatsApp, Zoom or Facebook Live, publishes your Elite profile with a 30–60 second video, and holds your top slot for five years — five years for less than the price of one while the launch offer runs.",
+    kind: "INTERVIEW",
+  },
+  INTERVIEW_1Y: {
+    label: "Elite interview + profile for 1 year",
+    usd: 500,
+    years: 1,
+    blurb:
+      "The same interview and published profile, held for one year. Renew at the price of the day.",
     kind: "INTERVIEW",
   },
   VIDEO_PRO: {
@@ -108,16 +139,18 @@ export const ELITE_PACKAGES: Record<
   },
 };
 
-export function elitePackageOrThrow(value: string) {
+export function elitePackageOrNull(value: string) {
   const id = value as ElitePackageId;
   const item = ELITE_PACKAGES[id];
-  if (!item) throw new Error("Unknown Elite package");
-  return { id, ...item };
+  return item ? { id, ...item } : null;
 }
 
-/** Spend first, then badge, then newest — so paying members sit on top. */
+/**
+ * Spend inside a live term first, then newest — so paying members sit on top
+ * while their term runs and drop back to date order once it lapses.
+ */
 export const ELITE_ORDER: Prisma.EliteEntryOrderByWithRelationInput[] = [
-  { paidCents: "desc" },
+  { rankCents: "desc" },
   { publishedAt: "desc" },
 ];
 
@@ -147,17 +180,6 @@ export function eliteWhere(filters: EliteFilters): Prisma.EliteEntryWhereInput {
     ];
   }
   return where;
-}
-
-export async function uniqueEliteSlug(name: string, city?: string) {
-  const base = slugify(city ? `${name}-${city}` : name) || "member";
-  let slug = base;
-  let suffix = 1;
-  while (await db.eliteEntry.findUnique({ where: { slug } })) {
-    suffix += 1;
-    slug = `${base}-${suffix}`;
-  }
-  return slug;
 }
 
 /** Contact details are only shown for Premium and Featured entries. */

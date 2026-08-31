@@ -12,29 +12,21 @@ import {
   LinkButton,
   inputClass,
 } from "@/components/ui";
-import { formatInr } from "@/lib/format";
+import { budgetRange } from "@/lib/budget";
 import { PostedBy } from "@/components/PostedBy";
 import {
   InContentBanner,
   InlineBanner,
   SidebarBanners,
 } from "@/components/Banners";
-import { ChatPanel } from "@/components/ChatPanel";
 import { InArticleAd } from "@/components/InArticleAd";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Lead marketplace — live buyer requirements",
   description:
-    "Live buyer requirements from desi customers: quotes for home services, catering, weddings, travel and trade. Premium members unlock contact details instantly.",
+    "Live buyer requirements from desi customers: quotes for home services, catering, weddings, travel and trade. Featured members unlock contact details instantly.",
 };
-
-function budgetLabel(min: number | null, max: number | null) {
-  if (min === null && max === null) return "Budget not specified";
-  if (min !== null && max !== null)
-    return `${formatInr(min)} – ${formatInr(max)}`;
-  return formatInr((min ?? max) as number);
-}
 
 export default async function LeadsPage({
   searchParams,
@@ -90,7 +82,7 @@ export default async function LeadsPage({
           <Alert tone="info">
             Contact details are hidden on your current plan.{" "}
             <Link href="/pricing" className="font-semibold underline">
-              Upgrade to Premium
+              Upgrade to Featured
             </Link>{" "}
             to unlock leads.
           </Alert>
@@ -147,7 +139,12 @@ export default async function LeadsPage({
                     <Badge tone="slate">{lead.category}</Badge>
                   </div>
                   <p className="text-sm text-slate-500">
-                    {lead.city} · {budgetLabel(lead.budgetMin, lead.budgetMax)}
+                    {lead.city} ·{" "}
+                    {budgetRange(
+                      lead.budgetMin,
+                      lead.budgetMax,
+                      lead.budgetCurrency,
+                    )}
                   </p>
                   <p className="line-clamp-3 text-sm text-slate-700">
                     {lead.description}
@@ -194,7 +191,7 @@ export default async function LeadsPage({
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                         >
-                          {premium ? "Unlock contact" : "Unlock with Premium"}
+                          {premium ? "Unlock contact" : "Unlock with Featured"}
                         </button>
                       </form>
                     ) : (
@@ -216,7 +213,6 @@ export default async function LeadsPage({
 
         <InArticleAd />
 
-        <ChatPanel />
         <InlineBanner />
       </div>
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { tagCloud } from "@/lib/resources";
+import { tagCloud } from "@/lib/resourcesQueries";
 
 /** Bigger, bolder chips mean more links and events filed under that tag. */
 function sizeFor(count: number, max: number) {

@@ -8,6 +8,7 @@ import { deleteMembersAction } from "@/app/actions/members";
 import { formatMinor } from "@/lib/format";
 import { looksLikeSpam, spamSignals } from "@/lib/signupGuard";
 import { Badge, Card, inputClass } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Members & payments" };
@@ -37,7 +38,8 @@ export default async function Page({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/members");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Members"));
 
   const q = (searchParams.q ?? "").trim();
   const filter = (FILTERS.find((entry) => entry.key === searchParams.filter)
@@ -238,7 +240,23 @@ export default async function Page({
                         <td className="whitespace-nowrap text-xs text-slate-500">
                           {row.createdAt.toLocaleDateString("en-IN")}
                         </td>
-                        <td className="text-xs">{row.role}</td>
+                        <td className="text-xs">
+                          {row.role}
+                          {row.role === "CLIENT" || row.role === "BUSINESS" ? (
+                            <div className="mt-1">
+                              <button
+                                type="submit"
+                                formMethod="post"
+                                formAction="/admin/team/apply"
+                                name="id"
+                                value={row.id}
+                                className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                              >
+                                make moderator
+                              </button>
+                            </div>
+                          ) : null}
+                        </td>
                         <td>
                           <Badge tone={row.plan === "FREE" ? "slate" : "indigo"}>
                             {row.plan}

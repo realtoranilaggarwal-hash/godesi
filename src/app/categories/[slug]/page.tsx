@@ -10,11 +10,13 @@ import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { DJ_CATEGORY_SLUGS, DjsWikiBanner } from "@/components/DjsWikiPromo";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 import { metaDescription } from "@/lib/seo";
+import { resultsAreThin, robotsFor } from "@/lib/thinContent";
 import { cleanSpecialties, specialtySet } from "@/lib/specialties";
 import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { VehicleFilters } from "@/components/VehicleFilters";
@@ -52,13 +54,26 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: Record<string, string | string[] | undefined>;
 }): Promise<Metadata> {
   const category = await getCategory(params.slug);
   if (!category) return { title: "Category not found" };
   const names = category.children.slice(0, 6).map((child) => child.name);
+  /**
+   * A filtered view and a category nobody has listed in yet are both thin to a
+   * search engine; the plain category page is the one worth indexing.
+   */
+  const filtered = Object.values(searchParams).some(
+    (value) => value !== undefined && value !== "",
+  );
+  const listed = filtered
+    ? []
+    : await searchBusinesses({ categorySlugs: categoryScopeSlugs(category) });
   return {
+    robots: robotsFor(filtered || resultsAreThin(listed.length)),
     title: `${category.name} in India — Godesi directory`,
     description: metaDescription(
       category.blurb,
@@ -214,6 +229,11 @@ export default async function CategoryPage({
       : Promise.resolve([]),
   ]);
 
+  /** Ads stay off pages with almost nothing on them, matching the noindex above. */
+  const thin = resultsAreThin(
+    businesses.length + events.length + listings.length,
+  );
+
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-6">
@@ -265,6 +285,8 @@ export default async function CategoryPage({
             ) : null}
           </div>
         </section>
+
+        {DJ_CATEGORY_SLUGS.includes(category.slug) ? <DjsWikiBanner /> : null}
 
         <FeaturedStrip
           categorySlugs={scope}
@@ -489,6 +511,42 @@ export default async function CategoryPage({
           </Card>
         ) : null}
 
+        {category.slug === "real-estate" ? (
+          <Card className="bg-gradient-to-r from-orange-50 to-fuchsia-50">
+            <h2 className="font-bold">Godesi property marketplace 🏢</h2>
+            <p className="mt-1 text-sm text-slate-700">
+              Buy, sell or rent — flats, villas, plots, shops, offices and new
+              projects from owners, agents and builders in India and the USA.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+              <Link
+                href="/real-estate/start"
+                className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+              >
+                What do you want to do?
+              </Link>
+              <Link
+                href="/real-estate?kind=PROPERTY_SALE"
+                className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-white"
+              >
+                🔍 Buy
+              </Link>
+              <Link
+                href="/real-estate?kind=PROPERTY_RENT"
+                className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-white"
+              >
+                🔑 Rent
+              </Link>
+              <Link
+                href="/listings/new?kind=PROPERTY_SALE"
+                className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-white"
+              >
+                🏷️ Post a property free
+              </Link>
+            </div>
+          </Card>
+        ) : null}
+
         {memberListings && listings.length ? (
           <section>
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -540,10 +598,15 @@ export default async function CategoryPage({
           }
         />
 
-        <InlineBanner />
+        {thin ? null : <InlineBanner />}
       </div>
 
-      <SidebarBanners />
+      {thin ? null : (
+        <SidebarBanners
+          categorySlug={category.slug}
+          parentSlug={category.parent?.slug ?? null}
+        />
+      )}
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { rewardFor, wallet } from "@/lib/rewards";
+import { rewardFor } from "@/lib/rewards";
+import { wallet } from "@/lib/rewardsQueries";
 import { notify } from "@/lib/notifications";
 import { type ActionState, fieldError } from "@/lib/actions";
 

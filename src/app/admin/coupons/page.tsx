@@ -6,6 +6,7 @@ import { CouponForm } from "@/components/forms/CouponForms";
 import { toggleCouponAction } from "@/app/actions/coupons";
 import { describeCoupon } from "@/lib/coupons";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Coupons" };
@@ -13,7 +14,8 @@ export const metadata: Metadata = { title: "Coupons" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/coupons");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Coupons"));
 
   const coupons = await db.coupon.findMany({
     orderBy: { createdAt: "desc" },

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireStaff } from "@/lib/auth";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
 import {
   updateLiveChannelAction,
@@ -25,7 +26,9 @@ function when(date: Date) {
 }
 
 export default async function AdminLiveChannelsPage() {
-  await requireStaff();
+  const staff = await getCurrentUser();
+  if (!staff) redirect("/login?next=/admin/live-channels");
+  if (!isStaff(staff)) redirect("/dashboard");
 
   const [channels, reports] = await Promise.all([
     db.liveChannel.findMany({
@@ -49,7 +52,7 @@ export default async function AdminLiveChannelsPage() {
         <p className="mt-1 text-sm text-slate-600">
           Approve member-submitted stations, feature paid ones and clear
           &ldquo;not working&rdquo; reports. Carriage is $50/month; charity and
-          non-profit suggestions are free. Featuring is for Premium members.
+          non-profit suggestions are free. Featuring is for Featured members.
         </p>
         <div className="mt-2 flex gap-3 text-sm font-semibold text-indigo-600">
           <Link href="/live-radio">Live radio →</Link>

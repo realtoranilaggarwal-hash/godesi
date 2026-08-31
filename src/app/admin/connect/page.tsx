@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { reviewMeetupProfileAction } from "@/app/actions/meetups";
 import { GENDER_LABELS, MARITAL_LABELS, intentLabels } from "@/lib/meetups";
 import { Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Connect" };
@@ -12,7 +13,8 @@ export const metadata: Metadata = { title: "Connect" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/connect");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Connect"));
 
   const [pendingMeetups, reportedMeetups] = await Promise.all([
     db.meetupProfile.findMany({

@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { siteUrl } from "@/lib/format";
 import { newsPath } from "@/lib/newsLinks";
+import { budgetCurrencyOf } from "@/lib/budget";
 
 export const dynamic = "force-dynamic";
 
-const KINDS = ["news", "events", "businesses", "leads"] as const;
+const KINDS = ["news", "events", "businesses", "leads", "elite"] as const;
 type Kind = (typeof KINDS)[number];
 
 function isKind(value: string | null): value is Kind {
@@ -157,6 +158,74 @@ export async function GET(request: Request) {
     );
   }
 
+  if (kind === "elite") {
+    // GoDesi Elite profiles for desiwhoswho.com: the teaser and where to claim,
+    // with the full profile (and the claim form) staying on Godesi.
+    const items = await db.eliteEntry.findMany({
+      where: {
+        status: "PUBLISHED",
+        ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
+        // Elite categories contain commas ("Arts, Media & Music"), so several
+        // are passed pipe-separated.
+        ...(category ? { category: { in: category.split("|") } } : {}),
+        ...(query
+          ? {
+              OR: [
+                { fullName: { contains: query, mode: "insensitive" as const } },
+                { businessName: { contains: query, mode: "insensitive" as const } },
+                { shortBio: { contains: query, mode: "insensitive" as const } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ badge: "desc" }, { rankCents: "desc" }, { publishedAt: "desc" }],
+      take: limit,
+      select: {
+        slug: true,
+        fullName: true,
+        businessName: true,
+        shortBio: true,
+        category: true,
+        city: true,
+        state: true,
+        country: true,
+        photoUrl: true,
+        photoCredit: true,
+        badge: true,
+        sourceUrl: true,
+        sourceName: true,
+        userId: true,
+        publishedAt: true,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        kind,
+        items: items.map((item) => ({
+          slug: item.slug,
+          name: item.fullName,
+          org: item.businessName,
+          teaser: teaser(item.shortBio, 200),
+          category: item.category,
+          city: item.city,
+          state: item.state,
+          country: item.country,
+          imageUrl: item.photoUrl,
+          imageCredit: item.photoCredit,
+          badge: item.badge,
+          claimed: item.userId !== null,
+          sourceUrl: item.sourceUrl,
+          sourceName: item.sourceName,
+          publishedAt: item.publishedAt,
+          url: `${base}/desi-elite/${item.slug}`,
+          claimUrl: `${base}/desi-elite/${item.slug}?claim=1`,
+        })),
+      },
+      { headers },
+    );
+  }
+
   if (kind === "leads") {
     // Requirements are teasers only: the client's name, phone and email stay on
     // Godesi, where a paid member unlocks them.
@@ -215,6 +284,7 @@ export async function GET(request: Request) {
         city: true,
         budgetMin: true,
         budgetMax: true,
+        budgetCurrency: true,
         createdAt: true,
       },
     });
@@ -231,6 +301,7 @@ export async function GET(request: Request) {
           city: item.city,
           budgetMin: item.budgetMin,
           budgetMax: item.budgetMax,
+          budgetCurrency: budgetCurrencyOf(item.budgetCurrency),
           postedAt: item.createdAt,
           url: `${base}/leads/${item.id}`,
         })),
@@ -245,14 +316,27 @@ export async function GET(request: Request) {
       ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
       ...(category ? { categorySlug: { in: category.split(",") } } : {}),
       ...(subcategory
-        ? { subcategorySlug: { in: subcategory.split(",") } }
+        ? {
+            OR: [
+              { subcategorySlug: { in: subcategory.split(",") } },
+              { extraCategorySlugs: { hasSome: subcategory.split(",") } },
+            ],
+          }
         : {}),
       ...(query
         ? {
-            OR: [
-              { name: { contains: query, mode: "insensitive" as const } },
+            AND: [
               {
-                description: { contains: query, mode: "insensitive" as const },
+                OR: [
+                  { name: { contains: query, mode: "insensitive" as const } },
+                  {
+                    description: {
+                      contains: query,
+                      mode: "insensitive" as const,
+                    },
+                  },
+                  { specialties: { has: query } },
+                ],
               },
             ],
           }
@@ -270,6 +354,10 @@ export async function GET(request: Request) {
       country: true,
       categorySlug: true,
       subcategorySlug: true,
+      specialties: true,
+      serviceOptions: true,
+      yearsExperience: true,
+      verifiedProvider: true,
       ownerId: true,
       featured: true,
     },
@@ -288,6 +376,9 @@ export async function GET(request: Request) {
         country: item.country,
         categorySlug: item.categorySlug,
         subcategory: item.subcategorySlug,
+        services: [...item.specialties, ...item.serviceOptions].slice(0, 8),
+        yearsExperience: item.yearsExperience,
+        verified: item.verifiedProvider,
         claimed: Boolean(item.ownerId),
         featured: item.featured,
         url: `${base}/b/${item.slug}`,

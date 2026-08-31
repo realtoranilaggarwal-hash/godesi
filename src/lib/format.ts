@@ -42,9 +42,16 @@ export const PHONE_PATTERN = "(?:\\D*\\d){10,}\\D*";
 export const PHONE_PATTERN_HINT =
   "Enter at least 10 digits — a 10-digit mobile, or the full number with country code.";
 
+/**
+ * A wa.me number. GoDesi is a US directory, so a bare ten-digit number is read
+ * as American; anything already carrying a country code is left alone, and an
+ * Indian number is written the way it is dialled, with the 91.
+ */
 export function normalizeWhatsApp(input: string) {
   const digits = input.replace(/\D/g, "");
-  if (digits.length === 10) return `91${digits}`;
+  if (digits.length === 10) return `1${digits}`;
+  if (digits.length === 11 && digits.startsWith("0"))
+    return `91${digits.slice(1)}`;
   return digits;
 }
 

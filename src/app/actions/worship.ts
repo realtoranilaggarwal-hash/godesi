@@ -8,12 +8,16 @@ import { db } from "@/lib/db";
 import { requestCountry } from "@/lib/currency";
 import { can, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
-import { FAITHS, uniqueWorshipSlug } from "@/lib/worship";
+import { FAITHS } from "@/lib/worship";
+import { uniqueWorshipSlug } from "@/lib/worshipQueries";
 import { type ActionState, fieldError } from "@/lib/actions";
 
 const schema = z.object({
   faith: z.enum(FAITHS as [string, ...string[]]),
-  name: z.string().trim().min(3, "Name of the temple, gurudwara, mosque or church"),
+  name: z
+    .string()
+    .trim()
+    .min(3, "Name of the temple, gurudwara, mosque or church"),
   description: z.string().trim().max(1200).optional(),
   address: z.string().trim().max(300).optional(),
   city: z.string().trim().min(2, "Which city?"),
@@ -68,13 +72,17 @@ export async function submitWorshipAction(
         city: parsed.data.city,
         state: parsed.data.state ?? null,
         country: parsed.data.country,
-        whatsapp: parsed.data.whatsapp ? normalizeWhatsApp(parsed.data.whatsapp) : null,
+        whatsapp: parsed.data.whatsapp
+          ? normalizeWhatsApp(parsed.data.whatsapp)
+          : null,
         phone: parsed.data.phone ?? null,
         websiteUrl: parsed.data.websiteUrl ?? null,
         source: "user",
         status: isAdmin ? "APPROVED" : "PENDING",
         submittedById: user.id,
-        images: { create: images.map((url, index) => ({ url, sortOrder: index })) },
+        images: {
+          create: images.map((url, index) => ({ url, sortOrder: index })),
+        },
       },
     });
 
@@ -84,7 +92,8 @@ export async function submitWorshipAction(
     if (isAdmin) destination = `/religious/${place.slug}`;
     else {
       return {
-        success: "Thanks! Your listing is queued for review and goes live once approved.",
+        success:
+          "Thanks! Your listing is queued for review and goes live once approved.",
       };
     }
   } catch (error) {

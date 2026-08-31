@@ -7,7 +7,7 @@ import { effectivePlan } from "@/lib/plans";
 import { getCategoryTree } from "@/lib/directory";
 import { optionalRead } from "@/lib/resilient";
 import { unreadCount } from "@/lib/notifications";
-import { gradientFor } from "@/lib/categories";
+import { gradientFor, softFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { HeaderShell } from "@/components/HeaderShell";
 import { MobileMenu } from "@/components/MobileMenu";
@@ -23,12 +23,15 @@ const NAV = [
   { href: "/search", label: "Businesses", icon: "🏪" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
+  { href: "/blog", label: "Blog", icon: "✍️" },
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
   { href: "/marketplace", label: "Buy & Sell", icon: "🛍️" },
   { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/people", label: "People", icon: "👥" },
+  { href: "/professionals", label: "Professionals", icon: "👔" },
   { href: "/news", label: "News", icon: "📰" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top contributors", icon: "🏅" },
@@ -36,7 +39,6 @@ const NAV = [
 
 /** Chips beside the search box, for pages the main nav has no room for. */
 const QUICK_LINKS = [
-  { href: "/live", label: "Live", icon: "🟢" },
   { href: "/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top 100", icon: "🏅" },
   { href: "/connect", label: "Connect", icon: "🤝" },
@@ -50,8 +52,9 @@ const QUICK_LINKS = [
  */
 const BAR_NAV = [
   { href: "/search", label: "Businesses" },
-  { href: "/leads", label: "Leads" },
   { href: "/events", label: "Events" },
+  { href: "/blog", label: "Blog" },
+  { href: "/leads", label: "Leads" },
   { href: "/real-estate", label: "Property" },
   { href: "/rooms", label: "Rooms" },
   { href: "/marketplace", label: "Buy & Sell" },
@@ -85,12 +88,6 @@ export async function SiteHeader() {
   const firstName = user ? (user.name || user.email).split(/[\s@]/)[0] : null;
 
   const categoryItems = [
-    ...categories.map((category) => ({
-      href: `/categories/${category.slug}`,
-      label: category.name,
-      icon: category.icon,
-      className: `bg-gradient-to-r ${gradientFor(category.color)} text-white opacity-90 hover:opacity-100`,
-    })),
     {
       href: "/categories",
       label: "All categories",
@@ -98,14 +95,44 @@ export async function SiteHeader() {
       className:
         "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
     },
+    {
+      href: "/blog",
+      label: "Blog",
+      icon: "✍️",
+      className:
+        "bg-gradient-to-r from-slate-900 to-indigo-800 text-white hover:opacity-90",
+    },
+    {
+      href: "/desi-elite",
+      label: "Desi Elite",
+      icon: "🏆",
+      className:
+        "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 hover:opacity-90",
+    },
+    ...categories.map((category) => ({
+      href: `/categories/${category.slug}`,
+      label: category.name,
+      icon: category.icon,
+      className: `bg-gradient-to-r ${gradientFor(category.color)} text-white opacity-90 hover:opacity-100`,
+    })),
   ];
+  const pickerGroups = categories.map((category) => ({
+    slug: category.slug,
+    name: category.name,
+    icon: category.icon,
+    className: softFor(category.color),
+    children: category.children.map((child) => ({
+      slug: child.slug,
+      name: child.name,
+    })),
+  }));
   const menuLinks = [
     ...NAV,
-    { href: "/blog", label: "Blog", icon: "✍️" },
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
     { href: "/resources", label: "Resources", icon: "🔗" },
+    { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
     { href: "/rewards", label: "Refer & earn", icon: "🎁" },
@@ -209,6 +236,7 @@ export async function SiteHeader() {
               <MobileMenu
                 links={menuLinks}
                 categories={categoryItems}
+                groups={pickerGroups}
                 account={
                   user
                     ? {

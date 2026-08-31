@@ -10,13 +10,16 @@ import {
   SKYSCRAPER_SIZE,
   slotSoldCount,
 } from "@/lib/banners";
-import { LiveVisitorMap } from "@/components/LiveVisitorMap";
 import { ActivityWall } from "@/components/ActivityWall";
 import { TelegramJoin } from "@/components/TelegramJoin";
-import { ChatPanel } from "@/components/ChatPanel";
+import { HelpClipCard } from "@/components/HelpClipCard";
+import { CategoryNav } from "@/components/CategoryNav";
+import { DjsWikiCard } from "@/components/DjsWikiPromo";
+import { GodesiWikiCard } from "@/components/GodesiWikiPromo";
+import { isPhoneRequest } from "@/lib/device";
 import { BannerImpression } from "@/components/BannerImpression";
 import { AdSenseUnit } from "@/components/AdSenseUnit";
-import { AdPreview } from "@/components/AdPreview";
+import { HousePromo } from "@/components/HousePromo";
 import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
 
@@ -26,10 +29,10 @@ const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
   HEADER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER,
   SIDEBAR: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
   SKYSCRAPER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SKYSCRAPER,
-  LEADERBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
-  INCONTENT: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
-  MOBILE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
-  FULLBANNER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT,
+  LEADERBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE,
+  INCONTENT: process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE,
+  MOBILE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE,
+  FULLBANNER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE,
   BILLBOARD: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HERO,
   HALFPAGE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
 };
@@ -115,7 +118,7 @@ function AdvertiseHere({
           client={client}
           slotId={adsenseSlot}
           height={height}
-          fallback={<AdPreview width={width} height={height} />}
+          fallback={<HousePromo width={width} height={height} seed={label} />}
         />
         <BookThisSpot slot={slot} label={label} />
       </div>
@@ -123,16 +126,11 @@ function AdvertiseHere({
   }
 
   return (
-    <Link
-      href={`/advertise?slot=${slot}#book`}
-      className={`block transition hover:opacity-90 ${className}`}
-    >
-      <AdPreview width={width} height={height} />
+    <div className={className}>
+      <HousePromo width={width} height={height} seed={label} />
       <span className="sr-only">{label}</span>
-      <span className="mt-1 block text-center text-xs font-semibold text-indigo-600">
-        Book this spot — monthly or pay per views →
-      </span>
-    </Link>
+      <BookThisSpot slot={slot} label={label} />
+    </div>
   );
 }
 
@@ -153,7 +151,18 @@ function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
  * Showing a couple per view lets ten advertisers share the slot and keeps each
  * page view from burning everyone's impression quota at once.
  */
-export async function SidebarBanners() {
+export async function SidebarBanners({
+  categorySlug = null,
+  parentSlug = null,
+}: {
+  /** Lets a category page offer its own "how it works" clip. */
+  categorySlug?: string | null;
+  parentSlug?: string | null;
+} = {}) {
+  // The rail is hidden below lg, and rendering it for a phone anyway shipped a
+  // live map, a chat poll, banner impressions and ad units nobody could see.
+  if (isPhoneRequest()) return null;
+
   const [rectangles, halfPages, skyscrapers, rectanglesSold] =
     await Promise.all([
       activeBanners("SIDEBAR", 2),
@@ -167,9 +176,13 @@ export async function SidebarBanners() {
       className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
       aria-label="Sponsored"
     >
-      <LiveVisitorMap compact />
+      <CategoryNav />
 
-      <ChatPanel compact />
+      <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
+
+      <GodesiWikiCard />
+
+      <DjsWikiCard />
 
       <TelegramJoin compact />
 
@@ -272,7 +285,11 @@ export async function HeroBanner() {
           height={HERO_SIZE.height}
           className="rounded-3xl"
           fallback={
-            <AdPreview width={HERO_SIZE.width} height={HERO_SIZE.height} />
+            <HousePromo
+              width={HERO_SIZE.width}
+              height={HERO_SIZE.height}
+              seed="hero"
+            />
           }
         />
         <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />

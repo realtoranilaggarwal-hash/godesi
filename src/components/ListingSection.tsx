@@ -4,10 +4,10 @@ import { gradientFor } from "@/lib/categories";
 import {
   LISTING_INCLUDE,
   listingWhere,
-  marketplaceCategories,
   type ListingFilters as Filters,
   type ListingSection as Section,
 } from "@/lib/listings";
+import { marketplaceCategories } from "@/lib/listingsQueries";
 import { ListingCard } from "@/components/ListingCard";
 import { ListingFilters } from "@/components/ListingFilters";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";

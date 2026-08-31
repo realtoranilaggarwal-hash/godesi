@@ -8,8 +8,11 @@ import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
 import { EVENT_TYPES } from "@/lib/eventOptions";
+import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
+import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export type AdminEventValues = {
@@ -18,11 +21,21 @@ export type AdminEventValues = {
   description: string;
   date: string;
   time: string;
+  endDate: string;
+  endTime: string;
+  timeZone: string;
   venue: string;
+  hallName: string;
+  hallCapacity: number | null;
+  venueUrl: string;
   city: string;
+  frequency: "ONE_TIME" | "RECURRING";
+  recurrence: string;
   categorySlug: string;
   subcategorySlug: string;
   eventType: string;
+  genres: string[];
+  languages: string[];
   websiteUrl: string;
   price: number;
   currency: string;
@@ -30,6 +43,8 @@ export type AdminEventValues = {
   seatsBooked: number;
   imageUrl: string;
   videoUrl: string;
+  albumUrl: string;
+  featured: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
 };
 
@@ -70,7 +85,7 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Start time" hint="India Standard Time">
+        <Field label="Start time" hint="The time where the event happens">
           <input
             name="time"
             type="time"
@@ -79,17 +94,94 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
+        <Field
+          label="Times are in"
+          hint="The venue's own zone — shown to everyone as that"
+        >
+          <select
+            name="timeZone"
+            defaultValue={event.timeZone}
+            className={inputClass}
+          >
+            {EVENT_TIME_ZONES.map((zone) => (
+              <option key={zone.value} value={zone.value}>
+                {zone.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="End date" hint="Optional — for events that run past midnight or over days">
+          <input
+            name="endDate"
+            type="date"
+            defaultValue={event.endDate}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="End time" hint="Optional — shown as “7:00 pm – 11:00 pm”">
+          <input
+            name="endTime"
+            type="time"
+            defaultValue={event.endTime}
+            className={inputClass}
+          />
+        </Field>
         <Field label="Venue">
           <input name="venue" defaultValue={event.venue} required className={inputClass} />
         </Field>
+        <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
+          <input name="hallName" defaultValue={event.hallName} className={inputClass} />
+        </Field>
+        <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
+          <input
+            name="hallCapacity"
+            type="number"
+            min={0}
+            defaultValue={event.hallCapacity ?? ""}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
+          <input
+            name="venueUrl"
+            defaultValue={event.venueUrl}
+            placeholder="https://royalalbertspalace.com"
+            className={inputClass}
+          />
+        </Field>
         <Field label="City">
           <input name="city" defaultValue={event.city} required className={inputClass} />
+        </Field>
+        <Field label="Repeats">
+          <select
+            name="frequency"
+            defaultValue={event.frequency}
+            className={inputClass}
+          >
+            <option value="ONE_TIME">One-time event</option>
+            <option value="RECURRING">Repeats</option>
+          </select>
+        </Field>
+        <Field
+          label="How often it repeats"
+          hint="Plain English, e.g. “Every Sunday 10am” — only used when it repeats"
+        >
+          <input
+            name="recurrence"
+            defaultValue={event.recurrence}
+            placeholder="Every Sunday 10am"
+            className={inputClass}
+          />
         </Field>
         <CategorySelect
           categories={categories}
           required={false}
           defaultCategory={event.categorySlug}
           defaultSubcategory={event.subcategorySlug}
+        />
+        <EventCategoryPicker
+          defaultCategories={event.genres}
+          defaultLanguages={event.languages}
         />
         <Field label="Event type">
           <select
@@ -153,6 +245,26 @@ export function AdminEventForm({
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />
+        </Field>
+        <div className="sm:col-span-2">
+          <PhotoAlbumField
+            defaultValue={event.albumUrl}
+            hint="Paste a public Google Photos album link and the event page shows a 3×3 gallery that opens the album."
+          />
+        </div>
+        <Field
+          label="Feature this event"
+          hint="Pins it to the featured strip at the top of /events, ahead of paid plans."
+        >
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input
+              type="checkbox"
+              name="featured"
+              defaultChecked={event.featured}
+              className="h-4 w-4"
+            />
+            Show in featured events
+          </label>
         </Field>
         <Field label="Status">
           <select name="status" defaultValue={event.status} className={inputClass}>

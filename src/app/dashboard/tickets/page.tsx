@@ -7,6 +7,7 @@ import { formatMinor } from "@/lib/format";
 import { formatEventDate, seatsLeft } from "@/lib/events";
 import { cancelEventAction } from "@/app/actions/events";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
+import { TicketTypesForm } from "@/components/forms/TicketTypesForm";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My tickets & events" };
@@ -19,12 +20,25 @@ export default async function MyTicketsPage() {
     db.ticket.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
-      include: { event: { select: { title: true, slug: true, startsAt: true, city: true } } },
+      include: {
+        event: {
+          select: {
+            title: true,
+            slug: true,
+            startsAt: true,
+            timeZone: true,
+            city: true,
+          },
+        },
+      },
     }),
     db.event.findMany({
       where: { organizerId: user.id },
       orderBy: { startsAt: "desc" },
-      include: { _count: { select: { tickets: true } } },
+      include: {
+        _count: { select: { tickets: true } },
+        tiers: { orderBy: { sortOrder: "asc" } },
+      },
     }),
   ]);
 
@@ -40,17 +54,27 @@ export default async function MyTicketsPage() {
         {tickets.length ? (
           <ul className="divide-y divide-slate-100">
             {tickets.map((ticket) => (
-              <li key={ticket.id} className="flex items-center justify-between gap-3 py-3">
+              <li
+                key={ticket.id}
+                className="flex items-center justify-between gap-3 py-3"
+              >
                 <div>
                   <p className="font-medium">{ticket.event.title}</p>
                   <p className="text-sm text-slate-500">
-                    {formatEventDate(ticket.event.startsAt)} · {ticket.event.city} ·{" "}
-                    {ticket.quantity} seat(s) ·{" "}
-                    {ticket.amountMinor ? formatMinor(ticket.amountMinor, ticket.currency) : "Free"}
+                    {formatEventDate(
+                      ticket.event.startsAt,
+                      ticket.event.timeZone,
+                    )}{" "}
+                    · {ticket.event.city} · {ticket.quantity} seat(s) ·{" "}
+                    {ticket.amountMinor
+                      ? formatMinor(ticket.amountMinor, ticket.currency)
+                      : "Free"}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge tone={ticket.status === "CONFIRMED" ? "green" : "amber"}>
+                  <Badge
+                    tone={ticket.status === "CONFIRMED" ? "green" : "amber"}
+                  >
                     {ticket.status}
                   </Badge>
                   <Link
@@ -64,7 +88,10 @@ export default async function MyTicketsPage() {
             ))}
           </ul>
         ) : (
-          <EmptyState title="No tickets yet" body="Browse events and book your first seat." />
+          <EmptyState
+            title="No tickets yet"
+            body="Browse events and book your first seat."
+          />
         )}
       </Card>
 
@@ -73,45 +100,65 @@ export default async function MyTicketsPage() {
         {events.length ? (
           <ul className="divide-y divide-slate-100">
             {events.map((event) => (
-              <li key={event.id} className="flex items-center justify-between gap-3 py-3">
-                <div>
-                  <Link href={`/events/${event.slug}`} className="font-medium text-indigo-600">
-                    {event.title}
-                  </Link>
-                  <p className="text-sm text-slate-500">
-                    {formatEventDate(event.startsAt)} · {event.seatsBooked}/{event.seatsTotal}{" "}
-                    booked · {seatsLeft(event)} left · {event._count.tickets} bookings
-                  </p>
+              <li key={event.id} className="py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className="font-medium text-indigo-600"
+                    >
+                      {event.title}
+                    </Link>
+                    <p className="text-sm text-slate-500">
+                      {formatEventDate(event.startsAt, event.timeZone)} ·{" "}
+                      {event.seatsBooked}/{event.seatsTotal} booked ·{" "}
+                      {seatsLeft(event)} left · {event._count.tickets} bookings
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      tone={
+                        event.status === "APPROVED"
+                          ? "green"
+                          : event.status === "PENDING"
+                            ? "amber"
+                            : "red"
+                      }
+                    >
+                      {event.status}
+                    </Badge>
+                    {event.status !== "REJECTED" ? (
+                      <form action={cancelEventAction}>
+                        <input type="hidden" name="id" value={event.id} />
+                        <button
+                          type="submit"
+                          className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold hover:bg-slate-50"
+                        >
+                          Cancel
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    tone={
-                      event.status === "APPROVED"
-                        ? "green"
-                        : event.status === "PENDING"
-                          ? "amber"
-                          : "red"
-                    }
-                  >
-                    {event.status}
-                  </Badge>
-                  {event.status !== "REJECTED" ? (
-                    <form action={cancelEventAction}>
-                      <input type="hidden" name="id" value={event.id} />
-                      <button
-                        type="submit"
-                        className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold hover:bg-slate-50"
-                      >
-                        Cancel
-                      </button>
-                    </form>
-                  ) : null}
-                </div>
+                <TicketTypesForm
+                  eventId={event.id}
+                  currency={event.currency}
+                  tiers={event.tiers.map((tier) => ({
+                    id: tier.id,
+                    name: tier.name,
+                    price: tier.price,
+                    seatsTotal: tier.seatsTotal,
+                    seatsBooked: tier.seatsBooked,
+                  }))}
+                />
               </li>
             ))}
           </ul>
         ) : (
-          <EmptyState title="No events yet" body="Publishing an event is free." />
+          <EmptyState
+            title="No events yet"
+            body="Publishing an event is free."
+          />
         )}
       </Card>
     </div>

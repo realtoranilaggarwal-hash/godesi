@@ -118,6 +118,21 @@ enum Furnishing {
   UNFURNISHED
 }
 
+/// Top branch of the property tree a listing sits in.
+enum PropertyGroup {
+  RESIDENTIAL
+  COMMERCIAL
+  LAND
+  NEW_PROJECT
+}
+
+/// Who is behind a property listing — buyers filter hard on this.
+enum PostedByRole {
+  OWNER
+  AGENT
+  BUILDER
+}
+
 enum GenderPreference {
   ANY
   MALE
@@ -172,14 +187,14 @@ model User {
 
   /// Dots and +tags stripped where the provider ignores them, so one mailbox
   /// cannot open a dozen accounts that look unrelated.
-  emailCanonical String?
+  emailCanonical  String?
   /// Address the account was created from, used only to rate-limit signups.
-  signupIp       String?
+  signupIp        String?
   /// Set by an admin to lock the account out without deleting its content.
-  bannedAt       DateTime?
-  bannedReason   String?
+  bannedAt        DateTime?
+  bannedReason    String?
   /// Private admin note about the member, never shown publicly.
-  adminNote      String?
+  adminNote       String?
   /// Last time an admin emailed this member from the members desk.
   lastContactedAt DateTime?
   /// Set when the member unsubscribes from the weekly community digest.
@@ -259,10 +274,11 @@ model User {
   banners        Banner[]
   adOrders       AdOrder[]
 
-  listings    Listing[]
-  worship     WorshipPlace[]
-  points      PointsEntry[]
-  redemptions Redemption[]
+  listings     Listing[]
+  listingLeads ListingLead[]
+  worship      WorshipPlace[]
+  points       PointsEntry[]
+  redemptions  Redemption[]
 
   referredById String?
   referredBy   User?   @relation("Referrals", fields: [referredById], references: [id], onDelete: SetNull)
@@ -270,6 +286,9 @@ model User {
 
   referralMade     Referral?  @relation("ReferralInvitee")
   referralsTracked Referral[] @relation("ReferralInviter")
+
+  invitesSent  Invite[] @relation("InvitesSent")
+  inviteJoined Invite?  @relation("InviteJoined")
 
   notifications Notification[]
 
@@ -284,7 +303,12 @@ model User {
   /// Answer to the "want to be in GoDesi Elite?" prompt: SELF, OTHER or LATER.
   elitePrompt  String?
   eliteEntries EliteEntry[]
+  eliteClaims  EliteClaim[]
+  eventClaims  EventClaim[]
   eliteOrders  EliteOrder[]
+
+  /// Sales prospects this moderator is working through.
+  prospects Prospect[]
 
   liveChannels       LiveChannel[]
   liveChannelOrders  LiveChannelOrder[]
@@ -307,6 +331,12 @@ model User {
 
   /// What a MODERATOR may manage; ignored for other roles. See lib/permissions.
   staffPermissions String[] @default([])
+
+  /// Shown in the team list on /about, with the job title to print there.
+  /// Cleared the moment staff access is taken away.
+  teamPublic Boolean @default(false)
+  teamTitle  String?
+  teamRank   Int     @default(0)
 
   /// Paid for the Elite interview inside a package, before applying.
   elitePrepaid Boolean @default(false)
@@ -377,26 +407,118 @@ model Listing {
   bedrooms    Int?
   furnishing  Furnishing?
   genderPref  GenderPreference?
+
+  /// Property fields below are set only on PROPERTY_SALE / PROPERTY_RENT.
+  propertyGroup     PropertyGroup?
+  /// Slug from PROPERTY_TYPES, e.g. "apartment", "office-space", "agricultural-land".
+  propertyType      String?
+  postedByRole      PostedByRole?
+  bathrooms         Int?
+  balconies         Int?
+  builtUpArea       Int?
+  carpetArea        Int?
+  /// Unit both areas are given in: "sqft", "sqm", "sqyd", "acre", "guntha".
+  areaUnit          String?
+  /// Bracket slug from PROPERTY_AGES, e.g. "under-construction", "0-5".
+  propertyAge       String?
+  floor             Int?
+  totalFloors       Int?
+  /// Compass slug from FACINGS, e.g. "north-east".
+  facing            String?
+  /// Slug from OWNERSHIPS, e.g. "freehold", "leasehold".
+  ownership         String?
+  negotiable        Boolean        @default(false)
+  underLoan         Boolean        @default(false)
+  /// Refundable deposit and monthly maintenance, in the same currency as price.
+  deposit           Int?
+  maintenance       Int?
+  /// US market fields. Lot size is the plot; `builtUpArea` is finished space.
+  lotSize           Int?
+  /// Unit of `lotSize` alone: "sqft" or "acre".
+  lotUnit           String?
+  /// Baths counted the American way: full (bath + shower), three-quarter
+  /// (shower, no tub) and half (no bathing). `bathrooms` stays the full count.
+  threeQuarterBaths Int?
+  halfBaths         Int?
+  yearBuilt         Int?
+  /// Slug from SALE_TYPES, e.g. "resale", "new-construction", "foreclosure".
+  saleType          String?
+  /// Slugs from CONSTRUCTION_TYPES, FLOORING_TYPES, PARKING_TYPES and
+  /// PROPERTY_HIGHLIGHTS; unknown values are dropped on save.
+  construction      String[]       @default([])
+  flooring          String[]       @default([])
+  parkingTypes      String[]       @default([])
+  highlights        String[]       @default([])
+  /// Monthly HOA or condo fee and the yearly property tax, in `currency`.
+  hoaFee            Int?
+  propertyTax       Int?
+  /// Next open house, and when it ends the same day.
+  openHouseAt       DateTime?
+  openHouseEndsAt   DateTime?
+  /// Local school district, which US buyers search on as hard as price.
+  schoolDistrict    String?
+  /// MLS number so a listing can be matched against the public record.
+  mlsNumber         String?
+  parkingCar        Int?
+  parkingBike       Int?
+  /// Slugs from AMENITIES and UTILITIES; unknown values are dropped on save.
+  amenities         String[]       @default([])
+  utilities         String[]       @default([])
+  /// Matterport/YouTube-style walkthrough, and a Google Maps pin.
+  tourUrl           String?
+  mapUrl            String?
+  state             String?
+  country           String?
+  availableFrom     DateTime?
+  /// Slug from TENANT_PREFS, e.g. "family", "bachelors", "company".
+  tenantPref        String?
+  /// Cross-border buyers and investors browse these as their own sections.
+  nriFriendly       Boolean        @default(false)
+  investmentDeal    Boolean        @default(false)
+  /// Direct contact, revealed to signed-in members only; guests get WhatsApp.
+  contactName       String?
+  contactPhone      String?
+  contactEmail      String?
   /// Buy & sell items pick a subcategory of "buy-sell" (jewellery, furniture…).
-  categorySlug String?
-  whatsapp    String
+  categorySlug      String?
+  whatsapp          String
   /// Walkthrough video pasted from YouTube or Vimeo.
-  videoUrl    String?
+  videoUrl          String?
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
-  albumUrl    String?
-  status      ListingStatus     @default(APPROVED)
-  featured    Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  albumUrl          String?
+  status            ListingStatus  @default(APPROVED)
+  featured          Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   images ListingImage[]
+  leads  ListingLead[]
 
   @@index([kind, city])
   @@index([kind, status, featured])
   @@index([kind, categorySlug])
+  @@index([status, propertyGroup, propertyType])
+  @@index([openHouseAt])
+  @@index([builtUpArea])
+}
+
+/// One recorded enquiry on a listing: who asked, and how they reached out.
+model ListingLead {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  /// Null when a signed-out visitor tapped WhatsApp.
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// "whatsapp", "phone" or "email" — which detail the visitor took.
+  channel   String
+  createdAt DateTime @default(now())
+
+  @@index([listingId, createdAt])
+  @@index([userId])
 }
 
 model ListingImage {
@@ -561,8 +683,10 @@ model Business {
   yelpUrl            String?
   zillowUrl          String?
   realtorUrl         String?
-  /// Intro/showcase video pasted from YouTube or Vimeo.
+  /// Intro/showcase video pasted from YouTube or Vimeo. The first of `videoUrls`.
   videoUrl           String?
+  /// Every showcase video, in order. A free card shows one; paid plans show more.
+  videoUrls          String[]      @default([])
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl           String?
   mapsUrl            String?
@@ -599,8 +723,17 @@ model Business {
   yearsExperience    Int?
   status             ListingStatus @default(PENDING)
   featured           Boolean       @default(false)
+  /// 0 free, 1 Pro, 2 Featured — decides card order and the gold treatment.
+  featuredRank       Int           @default(0)
+  /// When the paid term runs out; null on a card that was never paid for.
+  featuredUntil      DateTime?
+  /// Paid cards show phone and email unless the owner switches them off here.
+  hideContact        Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.
   source             String?
+  /// The public page a starter row's facts were read from, credited on the card
+  /// and used to refuse the same page twice.
+  sourceUrl          String?       @unique
   /// OpenStreetMap element id, so imports stay re-runnable without duplicates.
   osmId              String?       @unique
   /// Owner-invite outreach on unclaimed starter listings: when we last reached
@@ -651,11 +784,11 @@ model Media {
 }
 
 model Review {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   businessId       String
-  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business         Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   authorId         String?
-  author           User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author           User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorName       String
   rating           Int
   comment          String?
@@ -664,10 +797,16 @@ model Review {
   processExpertise Int?
   responsiveness   Int?
   negotiation      Int?
+  /// Where the review came from when staff entered it for a customer, e.g.
+  /// WHATSAPP or EMAIL. Null means the customer posted it here themselves.
+  source           String?
+  /// Staff member who typed it in, and when the customer agreed to publish it.
+  addedById        String?
+  consentAt        DateTime?
   /// Taken down by staff (fake, abusive or successfully disputed) but kept for audit.
-  hidden           Boolean  @default(false)
+  hidden           Boolean   @default(false)
   hiddenReason     String?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
 
   disputes ReviewDispute[]
 
@@ -790,6 +929,15 @@ model VisitorPing {
   @@index([createdAt])
 }
 
+/// One row per day of site traffic, for the "visitors so far" counter in the
+/// footer. Counted in the browser and deduplicated per device per day, so it is
+/// visits and returning-device counts, never anything identifying.
+model VisitDay {
+  day      DateTime @id @db.Date
+  views    Int      @default(0)
+  visitors Int      @default(0)
+}
+
 /// A public event listing with ticket booking.
 model Event {
   id                String             @id @default(cuid())
@@ -798,9 +946,17 @@ model Event {
   description       String
   startsAt          DateTime
   endsAt            DateTime?
+  /// IANA zone the times were written in, e.g. "America/New_York". Events from
+  /// before this was recorded are read as India time, which is what they were
+  /// entered as.
+  timeZone          String?
   venue             String
   /// Hall, banquet room or ground inside a venue that has several.
   hallName          String?
+  /// How many people the hall holds, as quoted by the venue.
+  hallCapacity      Int?
+  /// The venue's or hall's own page, so people can check the space themselves.
+  venueUrl          String?
   address           String?
   mapsUrl           String?
   city              String
@@ -811,6 +967,8 @@ model Event {
   venueRef          Venue?             @relation(fields: [venueRefId], references: [id], onDelete: SetNull)
   /// Facilities, food, crowd and ticketing ticks — also the /events filters.
   features          String[]           @default([])
+  /// Editor's pick: pinned to the featured strip regardless of the plan.
+  featured          Boolean            @default(false)
   /// Godesi promotion partnership: branding at the venue in return for reach.
   partnerStatus     EventPartnerStatus @default(NONE)
   partnerAgreedAt   DateTime?
@@ -821,6 +979,11 @@ model Event {
   partnerNote       String?
   /// Conference, workshop, concert… drives the badge and the type filter.
   eventType         String?
+  /// The event's own categories from `lib/eventCategories` (garba-dandiya,
+  /// standup-comedy, devotional…), several per event, browsable on /events.
+  genres            String[]           @default([])
+  /// Languages it is performed in, e.g. hindi, tamil — a facet on /events.
+  languages         String[]           @default([])
   mode              EventMode          @default(OFFLINE)
   /// Join link for online and hybrid events.
   onlineUrl         String?
@@ -858,18 +1021,65 @@ model Event {
   /// Every category the event should appear under, including the primary one.
   categorySlugs String[]  @default([])
 
+  /// Kept when an imported event is claimed, so the original listing is still
+  /// credited after the organiser takes the page over.
+  importedFrom String?
+  /// When the real organiser took over an imported event.
+  claimedAt    DateTime?
+
+  /// Set when the event was imported from a public calendar rather than posted.
+  sourceId  String?
+  source    EventSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  /// The calendar's own id for this entry, so a re-import updates one row.
+  sourceUid String?
+
   speakers EventSpeaker[]
   sessions EventSession[]
+  claims   EventClaim[]
   tickets  Ticket[]
   /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
   tiers    TicketTier[]
   coupons  Coupon[]
 
+  @@unique([sourceId, sourceUid])
   @@index([startsAt])
   @@index([categorySlug])
   @@index([city])
   @@index([venueRefId])
+  @@index([genres], type: Gin)
+  @@index([languages], type: Gin)
   @@map("EventListing")
+}
+
+/// A public calendar we import community events from — a temple's iCal feed, a
+/// cultural association's Google Calendar, an organiser's event RSS.
+model EventSource {
+  id            String          @id @default(cuid())
+  /// Shown on every imported event as the credit, e.g. "Umiya Dham, Edison".
+  name          String
+  url           String          @unique
+  kind          EventSourceKind @default(ICS)
+  /// Where the organisation is, used when a calendar entry gives no place.
+  city          String
+  state         String?
+  country       String          @default("USA")
+  /// Link back to the organisation, shown as "Details on their website".
+  websiteUrl    String?
+  categorySlugs String[]        @default([])
+  tags          String[]        @default([])
+  active        Boolean         @default(true)
+  lastRunAt     DateTime?
+  /// Human-readable outcome of the last run, including the failure if it failed.
+  lastStatus    String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  events Event[]
+}
+
+enum EventSourceKind {
+  ICS
+  RSS
 }
 
 /// Whether the organiser has signed up to — and delivered — the branding deal.
@@ -1116,6 +1326,9 @@ model Lead {
   city           String
   budgetMin      Int?
   budgetMax      Int?
+  /// The currency the poster typed the budget in; null reads as INR, the only
+  /// currency the form offered before.
+  budgetCurrency String?
   /// Wedding/event date the requirement is for.
   eventDate      DateTime?
   contactName    String
@@ -1218,6 +1431,26 @@ model BusinessClaim {
   createdAt  DateTime    @default(now())
 
   @@unique([businessId, userId])
+  @@index([status])
+}
+
+/// An organiser asks for an event we listed from a public calendar, so they can
+/// run their own ticketing on Godesi instead of the site we found it on.
+model EventClaim {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// How the claimant runs the event.
+  message String
+  phone   String?
+  email   String?
+
+  status    ClaimStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  @@unique([eventId, userId])
   @@index([status])
 }
 
@@ -1574,6 +1807,8 @@ model UpiRequest {
   userId       String
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan         Plan
+  /// Months of membership the buyer is paying for: 1, 12 or 60.
+  months       Int              @default(1)
   amountMinor  Int
   currency     String           @default("INR")
   /// Short code the buyer puts in the UPI note, e.g. GD7K3QF2.
@@ -1659,10 +1894,23 @@ model EliteEntry {
   /// NONE, BASIC (30-60s edit) or PRO (3-minute professional film).
   videoPackage  String  @default("NONE")
   /// Everything this member has paid towards their Elite profile, in cents.
-  /// Higher spend ranks the profile above others in its section.
   paidCents     Int     @default(0)
+  /// The part of that spend still inside its paid term; higher spend ranks the
+  /// profile above others in its section, and expiry drops it back to zero.
+  rankCents     Int     @default(0)
+  /// End of the paid Elite term; null for staff-compiled and unpaid profiles.
+  eliteUntil    DateTime?
 
   orders EliteOrder[]
+  claims EliteClaim[]
+
+  /// Where a staff-compiled profile's facts came from, e.g. the person's own
+  /// site or their Wikipedia page. Unique, so a source is only compiled once.
+  sourceUrl   String? @unique
+  /// How the source is credited on the profile, e.g. "Wikipedia".
+  sourceName  String?
+  /// Photographer and licence for a freely-licensed portrait, shown under it.
+  photoCredit String?
 
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?
@@ -1674,8 +1922,29 @@ model EliteEntry {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([status, badge, rankCents])
   @@index([status, badge, publishedAt])
   @@index([userId])
+}
+
+/// Somebody asking to take over a profile our team compiled from public
+/// sources, so the person themselves owns and edits it from then on.
+model EliteClaim {
+  id      String     @id @default(cuid())
+  entryId String
+  entry   EliteEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// How the claimant is the person, or represents them.
+  message String
+  phone   String?
+  email   String?
+
+  status    ClaimStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  @@unique([entryId, userId])
+  @@index([status])
 }
 
 enum LiveMediaKind {
@@ -1809,3 +2078,133 @@ model ChatMessage {
   @@index([userId, createdAt])
 }
 
+/// One box on the topic wall: a keyword polled against Google News and
+/// Mastodon. Editable in the admin desk because the topics that matter shift
+/// with the news, not with releases.
+model WallTopic {
+  id        String   @id @default(cuid())
+  label     String
+  /// What is sent to the search sources — usually the label without the emoji.
+  query     String
+  emoji     String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([active, sortOrder])
+}
+
+/// Single row of artwork for the standee deal: the printable standee, the
+/// banners Godesi designs for the organiser, and where to get them printed.
+model PartnerKit {
+  id            String   @id @default("default")
+  standeePdfUrl String?
+  printerUrl    String?
+  banner160Url  String?
+  banner728Url  String?
+  note          String?
+  updatedAt     DateTime @updatedAt
+}
+
+/// A business worth ringing: found on a public advertiser directory, so we know
+/// it already pays to advertise somewhere. Nothing here is published — a
+/// prospect only becomes a card when the owner claims and fills one in
+/// themselves. Facts are kept so a moderator can make the call, and the row is
+/// keyed by the page it was found on so a re-run updates instead of duplicating.
+model Prospect {
+  id    String @id @default(cuid())
+  name  String
+  /// The trade in the source directory's words, e.g. "Disc Jockey".
+  trade String
+  /// Our own taxonomy, guessed from the trade so a beat can be filtered.
+  categorySlug    String?
+  subcategorySlug String?
+  city            String?
+  state           String?
+  address         String?
+  /// Read from the business's own website, not from the directory.
+  phone           String?
+  email           String?
+  websiteUrl      String?
+  /// The public page the name was found on. Unique, so an import is re-runnable.
+  sourceUrl       String  @unique
+  /// Host of that page, e.g. "deshvidesh.com", for crediting where it came from.
+  source          String
+  /// How the business describes itself on its own website. Read to the owner on
+  /// the call as a starting draft; it goes on a card only if the owner says yes.
+  draftAbout      String?
+  /// Logo the business publishes on its own domain, offered to the owner the
+  /// same way. Never a photo lifted from a directory.
+  draftLogoUrl    String?
+
+  status ProspectStatus @default(NEW)
+  /// Moderator working this row, so two people never ring the same business.
+  ownerId String?
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  /// What the business said, in the moderator's words.
+  note         String?
+  calledAt     DateTime?
+  /// Slug of the card they created, once they list.
+  listedSlug   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, categorySlug])
+  @@index([ownerId, status])
+  @@index([city])
+}
+
+enum ProspectStatus {
+  NEW
+  CALLED
+  INTERESTED
+  CALL_BACK
+  NOT_INTERESTED
+  WRONG_NUMBER
+  LISTED
+}
+
+/// A short "how Godesi works" clip shown in the sidebar. The video stays on
+/// YouTube or Vimeo — we only keep the link, where it belongs and how often it
+/// was played. A visitor sees the card once and nothing loads until they click.
+model HelpClip {
+  id           String   @id @default(cuid())
+  title        String
+  /// YouTube or Vimeo link, including Shorts.
+  url          String
+  /// One line under the title, e.g. "10 seconds — how to post a requirement".
+  note         String?
+  /// Category or subcategory slug this clip belongs to; null shows it sitewide.
+  categorySlug String?
+  sortOrder    Int      @default(0)
+  active       Boolean  @default(true)
+  /// How many visitors pressed play.
+  plays        Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([active, categorySlug, sortOrder])
+}
+
+/// One invitation email a member sent to a friend, so the same address is never
+/// mailed twice and the join can be credited back to whoever invited them.
+model Invite {
+  id             String    @id @default(cuid())
+  inviterId      String
+  inviter        User      @relation("InvitesSent", fields: [inviterId], references: [id], onDelete: Cascade)
+  email          String
+  emailCanonical String
+  sentAt         DateTime  @default(now())
+  joinedUserId   String?   @unique
+  joinedUser     User?     @relation("InviteJoined", fields: [joinedUserId], references: [id], onDelete: SetNull)
+  joinedAt       DateTime?
+
+  @@unique([inviterId, emailCanonical])
+  @@index([emailCanonical])
+  @@index([sentAt])
+}
+
+/// An address that asked never to be invited again. Checked before every send.
+model InviteOptOut {
+  emailCanonical String   @id
+  createdAt      DateTime @default(now())
+}

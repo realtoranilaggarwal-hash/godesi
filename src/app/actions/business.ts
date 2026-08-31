@@ -8,7 +8,13 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { isStaff, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { effectivePlan, extraCategoryLimit, mediaLimit } from "@/lib/plans";
+import {
+  MAX_VIDEO_LIMIT,
+  effectivePlan,
+  extraCategoryLimit,
+  mediaLimit,
+  videoLimit,
+} from "@/lib/plans";
 import { contactDetailKind } from "@/lib/moderation";
 import { autoApproveStatus } from "@/lib/autoApprove";
 import {
@@ -19,9 +25,9 @@ import {
   missingChoiceGroups,
   specialtySet,
 } from "@/lib/specialties";
-import { uniqueSlug } from "@/lib/slug";
+import { uniqueSlug } from "@/lib/uniqueSlug";
 import { normalizeWhatsApp } from "@/lib/format";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { titleCase } from "@/lib/titlecase";
@@ -124,11 +130,12 @@ const profileSchema = z.object({
   state: z.string().trim().optional(),
   country: z.string().trim().max(60).optional(),
   description: z.string().trim().max(2000).optional(),
+  /** Left blank only on a starter card nobody has claimed — see below. */
   whatsappNumber: z
     .string()
     .trim()
     .refine(
-      (v) => normalizeWhatsApp(v).length >= 10,
+      (v) => !v || normalizeWhatsApp(v).length >= 10,
       "Enter a valid WhatsApp number",
     ),
   phone: z.string().trim().optional(),
@@ -138,6 +145,8 @@ const profileSchema = z.object({
     .email("Enter a valid email")
     .optional()
     .or(z.literal("").transform(() => undefined)),
+  /** Paid members choose whether the public sees their phone and email. */
+  showContact: z.boolean(),
   address: z.string().trim().optional(),
   logoUrl: optionalUrl,
   websiteUrl: optionalUrl,
@@ -148,6 +157,7 @@ const profileSchema = z.object({
     (value) => !value || isSupportedVideoUrl(value),
     "Paste a YouTube or Vimeo video link",
   ),
+  videoUrls: z.string().optional(),
   albumUrl: optionalUrl.refine(
     (value) => !value || isAlbumLink(value),
     "Paste a Google Photos album link (photos.app.goo.gl/…)",
@@ -174,6 +184,24 @@ const profileSchema = z.object({
   customQuote: z.coerce.boolean().optional(),
 });
 
+/**
+ * The video box takes one link per line. A free card keeps the first; the rest
+ * are held until the member upgrades rather than thrown away, so nothing they
+ * typed disappears.
+ */
+function readVideoLinks(raw: string | undefined) {
+  const links: string[] = [];
+  for (const line of (raw ?? "").split(/[\n,]/)) {
+    const link = line.trim();
+    if (!link || links.includes(link)) continue;
+    if (!isSupportedVideoUrl(link)) {
+      return { error: `"${link}" is not a YouTube or Vimeo link.` };
+    }
+    links.push(link);
+  }
+  return { links };
+}
+
 function readProfileForm(formData: FormData) {
   const value = (key: string) => {
     const raw = formData.get(key);
@@ -191,6 +219,7 @@ function readProfileForm(formData: FormData) {
     whatsappNumber: value("whatsappNumber"),
     phone: value("phone"),
     publicEmail: value("publicEmail"),
+    showContact: formData.get("showContact") !== null,
     address: value("address"),
     logoUrl: value("logoUrl"),
     websiteUrl: value("websiteUrl"),
@@ -198,6 +227,7 @@ function readProfileForm(formData: FormData) {
     facebookUrl: value("facebookUrl"),
     youtubeUrl: value("youtubeUrl"),
     videoUrl: value("videoUrl"),
+    videoUrls: value("videoUrls"),
     albumUrl: value("albumUrl"),
     linkedinUrl: value("linkedinUrl"),
     xUrl: value("xUrl"),
@@ -353,8 +383,20 @@ export async function saveBusinessProfileAction(
       return { error: "Years of experience must be between 0 and 70." };
     }
 
+    const pasted = readVideoLinks(parsed.data.videoUrls);
+    if ("error" in pasted) return { error: pasted.error };
+    const videos = (
+      pasted.links.length
+        ? pasted.links
+        : parsed.data.videoUrl
+          ? [parsed.data.videoUrl]
+          : []
+    ).slice(0, staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user));
+
+    // showContact is the form's wording; the column stores the opposite.
+    const { showContact, ...fields } = parsed.data;
     const data = {
-      ...parsed.data,
+      ...fields,
       name: titleCase(parsed.data.name),
       city: titleCase(parsed.data.city),
       specialties,
@@ -385,12 +427,14 @@ export async function saveBusinessProfileAction(
       phone: parsed.data.phone || null,
       address: parsed.data.address || null,
       publicEmail: parsed.data.publicEmail ?? null,
+      hideContact: !showContact,
       logoUrl: parsed.data.logoUrl ?? null,
       websiteUrl: parsed.data.websiteUrl ?? null,
       instagramUrl: parsed.data.instagramUrl ?? null,
       facebookUrl: parsed.data.facebookUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,
-      videoUrl: parsed.data.videoUrl ?? null,
+      videoUrl: videos[0] ?? null,
+      videoUrls: videos,
       albumUrl: parsed.data.albumUrl ?? null,
       linkedinUrl: parsed.data.linkedinUrl ?? null,
       xUrl: parsed.data.xUrl ?? null,
@@ -409,8 +453,16 @@ export async function saveBusinessProfileAction(
         ? (parsed.data.priceCurrency ?? "USD")
         : null,
       customQuote: parsed.data.customQuote ?? false,
-      whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber),
+      whatsappNumber: normalizeWhatsApp(parsed.data.whatsappNumber) || null,
     };
+
+    /**
+     * An owner has to give us a WhatsApp number — it is how customers reach
+     * them. Staff tidying up an unclaimed starter card must not have to invent
+     * one, and must never put the business's own number up before it claims.
+     */
+    if (!data.whatsappNumber && !(staffEdit && target && !target.ownerId))
+      return { error: "Enter a valid WhatsApp number" };
 
     const isVehicle = isVehicleCard(subcategory?.slug);
     const vehicle = isVehicle ? readVehicleForm(formData) : null;

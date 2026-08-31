@@ -21,6 +21,7 @@ const ERRORS: Record<string, string> = {
   cancelled: "Checkout was cancelled — you have not been charged.",
   invalid: "Please check the title and URL and try again.",
   blocked: "That link cannot be promoted on Godesi.",
+  duplicate: "That web address is already on Godesi — email us to extend it.",
   stripe_unavailable: "Card payments are not configured yet. Please email us.",
   stripe_session: "We could not start the checkout. Please try again.",
 };
@@ -118,7 +119,11 @@ export default async function AdvertiseLinkPage({
                 label="One-line description"
                 hint="Shown next to your link — max 140 characters"
               >
-                <input name="description" maxLength={140} className={inputClass} />
+                <input
+                  name="description"
+                  maxLength={140}
+                  className={inputClass}
+                />
               </Field>
               <Field label="Link type">
                 <select

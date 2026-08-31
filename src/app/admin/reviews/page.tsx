@@ -11,6 +11,8 @@ import {
 } from "@/app/actions/reviews";
 import { formatMinor } from "@/lib/format";
 import { AdminTabs } from "@/components/AdminTabs";
+import { OffsiteReviewForm } from "@/components/forms/OffsiteReviewForm";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Review desk" };
@@ -18,7 +20,9 @@ export const metadata: Metadata = { title: "Review desk" };
 export default async function ReviewDeskPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!isStaff(user) || !can(user, "reviews")) redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
+  if (!can(user, "reviews"))
+    redirect(deskFallback(user, "Reviews"));
 
   const [disputes, reviews] = await Promise.all([
     db.reviewDispute.findMany({
@@ -57,8 +61,21 @@ export default async function ReviewDeskPage() {
             count: disputes.length,
           },
           { id: "latest", label: "Latest reviews" },
+          { id: "offsite", label: "Add a WhatsApp review" },
         ]}
       />
+
+      <Card id="offsite">
+        <h2 className="mb-1 text-lg font-bold">
+          Add a review a customer sent you
+        </h2>
+        <p className="mb-3 text-sm text-slate-600">
+          For praise that arrived on WhatsApp instead of the card. It shows on
+          the business page marked “Shared over WhatsApp · added by Godesi”, so
+          nobody is misled — only add it with the customer’s permission.
+        </p>
+        <OffsiteReviewForm />
+      </Card>
 
       <Card id="requests">
         <h2 className="mb-3 text-lg font-bold">Takedown requests</h2>

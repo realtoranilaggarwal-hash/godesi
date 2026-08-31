@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
-import { awardPoints, POINTS } from "@/lib/rewards";
+import { POINTS } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 
 /** How many members get the 🏅 Founding member badge. */
 export const FOUNDING_LIMIT = 1000;
@@ -54,8 +55,14 @@ export async function claimFoundingFeature(userId: string) {
       where: { id: userId },
       data: { foundingFeatureUntil: until },
     }),
-    db.business.updateMany({ where: { ownerId: userId }, data: { featured: true } }),
-    db.listing.updateMany({ where: { ownerId: userId }, data: { featured: true } }),
+    db.business.updateMany({
+      where: { ownerId: userId },
+      data: { featured: true },
+    }),
+    db.listing.updateMany({
+      where: { ownerId: userId },
+      data: { featured: true },
+    }),
   ]);
 
   return until;
@@ -98,7 +105,9 @@ export async function expireFoundingFeatures() {
 }
 
 export async function foundingSpotsLeft() {
-  const taken = await db.user.count({ where: { foundingNumber: { not: null } } });
+  const taken = await db.user.count({
+    where: { foundingNumber: { not: null } },
+  });
   return Math.max(0, FOUNDING_LIMIT - taken);
 }
 

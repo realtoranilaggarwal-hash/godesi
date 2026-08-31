@@ -7,8 +7,10 @@ import { PersonalProfileForm } from "@/components/forms/PersonalProfileForm";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
-import { alumniFor } from "@/lib/alumni";
+import { alumniFor } from "@/lib/alumniQueries";
 import { SignOutButton } from "@/components/SignOutButton";
+import { EarnStrip } from "@/components/EarnStrip";
+import { pointValues, wallet } from "@/lib/rewardsQueries";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My profile" };
@@ -19,6 +21,10 @@ export default async function PersonalProfilePage() {
 
   const suggested =
     user.username ?? (await suggestUsername(user.name, user.email));
+  const [balance, points] = await Promise.all([
+    wallet(user.id),
+    pointValues(),
+  ]);
   const alumni = (await alumniFor(user.id)).map((row) => ({
     institution: row.institution,
     degree: row.degree ?? "",
@@ -36,11 +42,26 @@ export default async function PersonalProfilePage() {
             <h1 className="text-2xl font-bold">My personal profile</h1>
             <p className="text-sm text-slate-600">
               This is the social side of Godesi — your photo, bio and everything
-              you have posted, all on one shareable page.
+              you have posted, all on one shareable page. Fill in a handle, a
+              headline and your skills and you are listed free in{" "}
+              <Link
+                href="/professionals"
+                className="font-semibold text-indigo-600 underline"
+              >
+                GoDesi Professionals
+              </Link>
+              .
             </p>
           </div>
           <SignOutButton />
         </div>
+
+        <EarnStrip
+          user={user}
+          balance={balance.balance}
+          signupPoints={points.REFERRAL_SIGNUP}
+          profilePoints={points.PROFILE_CREATED}
+        />
 
         {user.username ? (
           <Card className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-indigo-50 to-fuchsia-50">

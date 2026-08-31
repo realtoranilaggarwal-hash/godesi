@@ -1,7 +1,8 @@
 import { cookies, headers } from "next/headers";
 import { db } from "@/lib/db";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 import { notify } from "@/lib/notifications";
+import { markInviteJoined } from "@/lib/invites";
 
 export const REFERRAL_COOKIE = "godesi_ref";
 
@@ -38,16 +39,19 @@ async function suspicionReason(referrerId: string, ip: string | null) {
  * recorded as PENDING and pay nothing until an admin approves them.
  */
 export async function creditReferral(newUserId: string) {
+  const invite = await markInviteJoined(newUserId);
+
   const jar = cookies();
   const username = jar.get(REFERRAL_COOKIE)?.value;
-  if (!username) return;
+  if (username) jar.delete(REFERRAL_COOKIE);
 
-  jar.delete(REFERRAL_COOKIE);
-
-  const referrer = await db.user.findUnique({
-    where: { username },
-    select: { id: true },
-  });
+  // The link is the usual path in; an invitation sent to this exact address
+  // counts too, so a friend who typed the site name still credits the inviter.
+  const referrer = username
+    ? await db.user.findUnique({ where: { username }, select: { id: true } })
+    : invite
+      ? { id: invite.inviterId }
+      : null;
   if (!referrer || referrer.id === newUserId) return;
 
   const updated = await db.user.updateMany({

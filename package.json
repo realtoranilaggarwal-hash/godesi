@@ -13,7 +13,13 @@
     "postinstall": "prisma generate",
     "db:categories": "tsx prisma/categories.ts",
     "db:worship": "tsx prisma/worship-import.ts",
-    "db:businesses": "tsx prisma/business-import.ts"
+    "db:businesses": "tsx prisma/business-import.ts",
+    "db:community": "tsx prisma/community-import.ts",
+    "db:prospects": "tsx prisma/prospect-import.ts",
+    "db:prospect-cards": "tsx prisma/prospect-publish.ts",
+    "db:elite": "tsx prisma/elite-import.ts",
+    "db:elite-photos": "tsx prisma/elite-photos.ts",
+    "db:updates": "tsx prisma/whats-new.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -39,6 +45,7 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
+    "exceljs": "^4.4.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.23.1",

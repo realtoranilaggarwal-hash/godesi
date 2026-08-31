@@ -8,6 +8,7 @@ import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { formatMinor } from "@/lib/format";
 import { Badge, Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Ad orders" };
@@ -15,7 +16,8 @@ export const metadata: Metadata = { title: "Ad orders" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/ads");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (user.role !== "ADMIN")
+    redirect(deskFallback(user, "Ad orders"));
 
   const [pendingAds, adOrders] = await Promise.all([
     db.banner.findMany({
@@ -36,8 +38,8 @@ export default async function Page() {
       <Card id="ads-awaiting-approval">
         <h2 className="mb-1 text-lg font-bold">Ads awaiting approval</h2>
         <p className="mb-3 text-sm text-slate-500">
-          Paid bookings whose creative needs a check. Approving assigns a free
-          slot and puts the ad live.
+          Paid bookings whose creative needs a check. Approving puts the ad live
+          in the placement&apos;s rotation — a placement never runs out of room.
         </p>
         {pendingAds.length ? (
           <ul className="divide-y divide-slate-100">
@@ -71,10 +73,7 @@ export default async function Page() {
                   </a>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <ApproveAdForm
-                    id={banner.id}
-                    capacity={AD_PLACEMENTS[banner.slot].slots}
-                  />
+                  <ApproveAdForm id={banner.id} />
                   <form action={rejectBannerAction}>
                     <input type="hidden" name="id" value={banner.id} />
                     <button

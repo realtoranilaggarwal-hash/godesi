@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { type ActionState, fieldError } from "@/lib/actions";
+import { type ActionState, fieldError, uniqueViolation } from "@/lib/actions";
 import { normalizeUsername, usernameError } from "@/lib/profiles";
 import {
   PERSONAL_SOCIALS,
@@ -123,7 +123,8 @@ export async function savePersonalProfileAction(
     }
 
     const previous = user.username;
-    await db.user.update({
+    try {
+      await db.user.update({
       where: { id: user.id },
       data: {
         name: parsed.data.name,
@@ -142,7 +143,14 @@ export async function savePersonalProfileAction(
         avatarUrl: parsed.data.avatarUrl ?? null,
         ...socials,
       },
-    });
+      });
+    } catch (error) {
+      // Somebody may have taken the name between the check above and here.
+      if (uniqueViolation(error)) {
+        return { error: "That username is already taken — try another." };
+      }
+      throw error;
+    }
 
     await db.$transaction([
       db.alumniRecord.deleteMany({ where: { userId: user.id } }),
@@ -160,6 +168,49 @@ export async function savePersonalProfileAction(
     revalidatePath(`/${username}`);
     if (previous && previous !== username) revalidatePath(`/${previous}`);
     return { success: `Saved. Your profile is live at godesi.com/${username}` };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+/** Takes a handle for the signed-in member straight from the claim page. */
+export async function claimHandleAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const username = normalizeUsername(String(formData.get("username") ?? ""));
+    const invalid = usernameError(username);
+    if (invalid) return { error: invalid };
+
+    const taken = await db.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+    if (taken) {
+      return taken.id === user.id
+        ? { success: `That is already yours — godesi.com/${username}` }
+        : { error: "Someone claimed that one first — try another." };
+    }
+
+    const previous = user.username;
+    try {
+      await db.user.update({ where: { id: user.id }, data: { username } });
+    } catch (error) {
+      // The unique index is the real arbiter: two people can pass the check
+      // above in the same instant, and the loser must not see a raw database
+      // error.
+      if (uniqueViolation(error)) {
+        return { error: "Someone claimed that one first — try another." };
+      }
+      throw error;
+    }
+
+    revalidatePath("/dashboard/me");
+    revalidatePath(`/${username}`);
+    if (previous && previous !== username) revalidatePath(`/${previous}`);
+    return { success: `Yours — your page is live at godesi.com/${username}` };
   } catch (error) {
     return fieldError(error);
   }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
+import { TrafficCounter } from "@/components/TrafficCounter";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
@@ -27,7 +28,9 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
     {
       title: "For business",
       links: [
+        { href: "/claim", label: "Claim godesi.com/yourname" },
         { href: "/signup", label: "List your business free" },
+        { href: "/why-godesi", label: "Why Godesi — everything you get" },
         { href: "/why-list", label: "Why list on Godesi?" },
         { href: "/pricing", label: "Membership plans" },
         {
@@ -44,6 +47,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Community",
       links: [
         { href: "/connect", label: "Connect" },
+        { href: "/people", label: "People on GoDesi" },
+        { href: "/professionals", label: "GoDesi Professionals" },
         { href: "/alumni", label: "Find your batchmates" },
         { href: "/buzz", label: "#godesi social wall" },
         { href: "/news/report", label: "Share news" },
@@ -59,7 +64,6 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/live-radio", label: "🎧 Listen live — desi radio" },
         { href: "/live-tv", label: "📺 Watch live — desi TV" },
         { href: "/live/submit", label: "Add your radio or TV channel" },
-        { href: "/live", label: "Live visitor map" },
         { href: "/desi-elite", label: "GoDesi Elite" },
         { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
         { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
@@ -170,6 +174,7 @@ export function SiteFooter() {
       <div className="border-t border-slate-100">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
           <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
+          <TrafficCounter />
           <LocalePicker currency={displayCurrency()} open />
           <span>
             Designed by{" "}

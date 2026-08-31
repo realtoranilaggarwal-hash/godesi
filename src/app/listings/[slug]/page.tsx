@@ -7,9 +7,9 @@ import {
   GENDER_LABELS,
   KIND_LABELS,
   LISTING_INCLUDE,
-  marketplaceCategories,
   priceLabel,
 } from "@/lib/listings";
+import { marketplaceCategories } from "@/lib/listingsQueries";
 import { Badge, Card } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
 import { PlaceLink } from "@/components/PlaceLink";
@@ -25,6 +25,13 @@ import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { effectivePlan } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
+import { PropertySpec } from "@/components/PropertySpec";
+import { PropertyContact } from "@/components/PropertyContact";
+import { WhatsAppLead } from "@/components/WhatsAppLead";
+import { ListingCard } from "@/components/ListingCard";
+import { getCurrentUser } from "@/lib/auth";
+import { PROPERTY_GROUP_LABELS } from "@/lib/property";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -55,13 +62,45 @@ export async function generateMetadata({
   };
 }
 
-export default async function ListingPage({ params }: { params: { slug: string } }) {
+export default async function ListingPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const listing = await getListing(params.slug);
   if (!listing) notFound();
 
-  const isRoom = listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED";
+  const viewer = await getCurrentUser();
+  const isProperty =
+    listing.kind === "PROPERTY_SALE" || listing.kind === "PROPERTY_RENT";
+  // Similar property in the same city, same branch of the tree, similar budget.
+  const similar = isProperty
+    ? await db.listing.findMany({
+        where: {
+          status: "APPROVED",
+          kind: listing.kind,
+          id: { not: listing.id },
+          OR: [
+            { city: { equals: listing.city, mode: "insensitive" } },
+            listing.propertyGroup
+              ? { propertyGroup: listing.propertyGroup }
+              : {},
+          ],
+        },
+        orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+        include: LISTING_INCLUDE,
+        take: 3,
+      })
+    : [];
+
+  const isRoom =
+    listing.kind === "ROOM_OFFERED" || listing.kind === "ROOM_WANTED";
   const isItem = listing.kind === "MARKETPLACE";
-  const sectionHref = isItem ? "/marketplace" : isRoom ? "/rooms" : "/real-estate";
+  const sectionHref = isItem
+    ? "/marketplace"
+    : isRoom
+      ? "/rooms"
+      : "/real-estate";
   const category = listing.categorySlug
     ? (await marketplaceCategories()).find(
         (row) => row.slug === listing.categorySlug,
@@ -78,7 +117,9 @@ export default async function ListingPage({ params }: { params: { slug: string }
     ["Location", `${listing.area ? `${listing.area}, ` : ""}${listing.city}`],
     ["Price", priceLabel(listing)],
     listing.bedrooms ? ["Bedrooms", `${listing.bedrooms} BHK`] : null,
-    listing.furnishing ? ["Furnishing", FURNISHING_LABELS[listing.furnishing]] : null,
+    listing.furnishing
+      ? ["Furnishing", FURNISHING_LABELS[listing.furnishing]]
+      : null,
     listing.genderPref ? ["Flatmate", GENDER_LABELS[listing.genderPref]] : null,
   ].filter((row): row is [string, string] => Boolean(row));
 
@@ -97,7 +138,9 @@ export default async function ListingPage({ params }: { params: { slug: string }
               <PlaceLink city={listing.city} base={sectionHref} />
             </p>
           </div>
-          <p className="text-2xl font-black text-emerald-700">{priceLabel(listing)}</p>
+          <p className="text-2xl font-black text-emerald-700">
+            {priceLabel(listing)}
+          </p>
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
             <PostedBy user={listing.owner} prefix="Listed by" />
@@ -107,17 +150,25 @@ export default async function ListingPage({ params }: { params: { slug: string }
             />
           </div>
 
-          <a
+          <WhatsAppLead
+            listingId={listing.id}
             href={whatsappLink(
               listing.whatsapp,
               `Hi, I saw your listing "${listing.title}" on Godesi.`,
             )}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700 sm:w-auto"
           >
             💬 Chat on WhatsApp
-          </a>
+          </WhatsAppLead>
+
+          {isProperty ? (
+            <PropertyContact
+              listingId={listing.id}
+              listingSlug={listing.slug}
+              hasPhone={Boolean(listing.contactPhone)}
+              hasEmail={Boolean(listing.contactEmail)}
+              signedIn={Boolean(viewer)}
+            />
+          ) : null}
         </Card>
 
         {listing.images.length ? (
@@ -135,9 +186,13 @@ export default async function ListingPage({ params }: { params: { slug: string }
           </div>
         ) : null}
 
-        {listing.videoUrl ? <VideoEmbed url={listing.videoUrl} title={listing.title} /> : null}
+        {listing.videoUrl ? (
+          <VideoEmbed url={listing.videoUrl} title={listing.title} />
+        ) : null}
 
         <PhotoAlbumGallery url={listing.albumUrl} heading="More photos" />
+
+        {isProperty ? <PropertySpec listing={listing} /> : null}
 
         <Card>
           <h2 className="mb-2 font-bold">Details</h2>
@@ -157,16 +212,42 @@ export default async function ListingPage({ params }: { params: { slug: string }
             {description}
           </p>
         </Card>
-      <RecommendedLinks
-        categorySlug={isRoom ? "rooms-roommates" : "real-estate"}
-      />
+        {similar.length ? (
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-lg font-bold">Similar property</h2>
+              <Link
+                href={`/real-estate?city=${encodeURIComponent(listing.city)}${
+                  listing.propertyGroup ? `&group=${listing.propertyGroup}` : ""
+                }`}
+                className="text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                {listing.propertyGroup
+                  ? `All ${PROPERTY_GROUP_LABELS[listing.propertyGroup].toLowerCase()} in ${listing.city}`
+                  : `All property in ${listing.city}`}{" "}
+                →
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {similar.map((item) => (
+                <ListingCard key={item.id} listing={item} />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-      {isRoom || listing.kind.startsWith("PROPERTY") ? <FairHousingNotice /> : null}
-      {isRoom ? <RoomSharingNotice /> : null}
+        <RecommendedLinks
+          categorySlug={isRoom ? "rooms-roommates" : "real-estate"}
+        />
 
-      <TradingTips />
+        {isRoom || listing.kind.startsWith("PROPERTY") ? (
+          <FairHousingNotice />
+        ) : null}
+        {isRoom ? <RoomSharingNotice /> : null}
 
-      <InlineBanner />
+        <TradingTips />
+
+        <InlineBanner />
       </div>
 
       <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">

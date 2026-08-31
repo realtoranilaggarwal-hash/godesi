@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan, grantBundle } from "@/lib/billing";
-import { describeTerm } from "@/lib/bundles";
+import { BUNDLE_MONTHS, describeTerm } from "@/lib/bundles";
+import { PLANS } from "@/lib/plans";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { Alert, Card, LinkButton } from "@/components/ui";
 
@@ -47,7 +48,8 @@ export default async function CheckoutSuccessPage({
       if (isBundle) {
         await grantBundle({
           userId: user.id,
-          months: Number.isFinite(months) && months > 0 ? months : 12,
+          months:
+            Number.isFinite(months) && months > 0 ? months : BUNDLE_MONTHS,
           itemKeys: (session.metadata?.items ?? "membership").split(","),
           provider: "stripe",
           reference: session.id,
@@ -55,9 +57,11 @@ export default async function CheckoutSuccessPage({
           currency: (session.currency ?? "inr").toUpperCase(),
         });
         term = describeTerm(
-          Number.isFinite(months) && months > 0 ? months : 12,
+          Number.isFinite(months) && months > 0 ? months : BUNDLE_MONTHS,
         );
       } else {
+        const planMonths =
+          Number.isFinite(months) && months > 0 ? months : 1;
         await activatePlan({
           userId: user.id,
           plan: assertPaidPlan(plan as string),
@@ -65,7 +69,9 @@ export default async function CheckoutSuccessPage({
           reference: session.id,
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
+          months: planMonths,
         });
+        term = planMonths === 1 ? "30 days" : describeTerm(planMonths);
       }
       await recordCouponFromMetadata({
         metadata: session.metadata,
@@ -73,7 +79,9 @@ export default async function CheckoutSuccessPage({
         currency: (session.currency ?? "inr").toUpperCase(),
         reference: session.id,
       });
-      granted = isBundle ? "Complete package" : (plan as string);
+      granted = isBundle
+        ? "Complete package"
+        : `${PLANS[assertPaidPlan(plan as string)].name} membership`;
     }
   } catch {
     error = "We could not verify this payment. Please contact support.";

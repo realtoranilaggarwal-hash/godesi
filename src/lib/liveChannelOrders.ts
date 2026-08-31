@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { notify } from "@/lib/notifications";
-import { awardSpendPoints } from "@/lib/rewards";
+import { awardSpendPoints } from "@/lib/rewardsQueries";
 
 const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -36,7 +36,9 @@ export async function confirmLiveChannelOrder({
     return db.liveChannelOrder.findUnique({ where: { id: order.id } });
   }
 
-  const channel = await db.liveChannel.findUnique({ where: { id: order.channelId } });
+  const channel = await db.liveChannel.findUnique({
+    where: { id: order.channelId },
+  });
   if (channel) {
     await db.liveChannel.update({
       where: { id: channel.id },

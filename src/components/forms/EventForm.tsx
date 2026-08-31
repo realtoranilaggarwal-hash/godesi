@@ -8,7 +8,10 @@ import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
 import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
-import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
+import {
+  CategorySelect,
+  type CategoryOption,
+} from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import {
   EVENT_FEATURE_GROUPS,
@@ -16,6 +19,7 @@ import {
   EVENT_MODES,
   EVENT_TYPES,
 } from "@/lib/eventOptions";
+import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { FormError } from "@/components/forms/FormError";
 import {
   EventVenueFields,
@@ -24,9 +28,20 @@ import {
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 
 /** Suggested seat types; organisers can rename them to anything. */
-const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
+const TIER_PRESETS = [
+  "Early bird",
+  "Standard",
+  "Online seat",
+  "VIP",
+  "Couple",
+  "Family",
+  "Student",
+  "Free RSVP",
+];
+const MAX_TIERS = TIER_PRESETS.length;
 
 export function EventForm({
   categories,
@@ -55,6 +70,7 @@ export function EventForm({
   const [frequency, setFrequency] = useState<string>("ONE_TIME");
   const [speakers, setSpeakers] = useState([0]);
   const [sessions, setSessions] = useState([0]);
+  const [tiers, setTiers] = useState([0, 1, 2]);
   const [extraCategories, setExtraCategories] = useState<string[]>([]);
 
   const toggleCategory = (slug: string) =>
@@ -68,7 +84,10 @@ export function EventForm({
     <form action={formAction} name="event-form" className="space-y-4">
       <FormError>{state.error}</FormError>
 
-      <Field label="Event title" hint="e.g. Diwali Mela 2026 — food stalls & live music">
+      <Field
+        label="Event title"
+        hint="e.g. Diwali Mela 2026 — food stalls & live music"
+      >
         <input name="title" required className={inputClass} />
       </Field>
       <Field label="Description">
@@ -89,9 +108,32 @@ export function EventForm({
         <Field label="Date">
           <input name="date" type="date" required className={inputClass} />
         </Field>
-        <Field label="Start time" hint="India Standard Time">
+        <Field label="Start time" hint="The time where your event happens">
           <input name="time" type="time" required className={inputClass} />
         </Field>
+        <Field label="Times are in" hint="Your venue's own zone">
+          <select
+            name="timeZone"
+            defaultValue={DEFAULT_EVENT_ZONE}
+            className={inputClass}
+          >
+            {EVENT_TIME_ZONES.map((zone) => (
+              <option key={zone.value} value={zone.value}>
+                {zone.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="End time" hint="Optional — when it finishes">
+          <input name="endTime" type="time" className={inputClass} />
+        </Field>
+        <Field
+          label="End date"
+          hint="Only for events that run over more than one day"
+        >
+          <input name="endDate" type="date" className={inputClass} />
+        </Field>
+        <EventCategoryPicker />
         <Field label="Event type">
           <select name="eventType" required className={inputClass}>
             <option value="">Select a type</option>
@@ -138,7 +180,11 @@ export function EventForm({
           />
           <p className="mt-1 text-xs text-slate-500">
             No website?{" "}
-            <a href="/website" target="_blank" className="font-semibold text-indigo-600">
+            <a
+              href="/website"
+              target="_blank"
+              className="font-semibold text-indigo-600"
+            >
               Godesi can build you one for ${WEBSITE_OFFER.priceUsd}
             </a>
             .
@@ -183,11 +229,20 @@ export function EventForm({
           defaultCategory={defaultCategory}
           defaultSubcategory={defaultSubcategory}
         />
-        <Field label="Tags" hint="Comma separated — e.g. garba, live music, family">
+        <Field
+          label="Tags"
+          hint="Comma separated — e.g. garba, live music, family"
+        >
           <input name="tags" className={inputClass} />
         </Field>
         <Field label="Ticket price" hint="Leave 0 for a free event">
-          <input name="price" type="number" min={0} defaultValue={0} className={inputClass} />
+          <input
+            name="price"
+            type="number"
+            min={0}
+            defaultValue={0}
+            className={inputClass}
+          />
         </Field>
         <CurrencySelect defaultValue={defaultCurrency} />
         <Field label="Capacity" hint="Total seats or spots available">
@@ -285,7 +340,12 @@ export function EventForm({
           })}
         </div>
         {extraCategories.map((slug) => (
-          <input key={slug} type="hidden" name="extraCategorySlugs" value={slug} />
+          <input
+            key={slug}
+            type="hidden"
+            name="extraCategorySlugs"
+            value={slug}
+          />
         ))}
       </fieldset>
 
@@ -380,22 +440,27 @@ export function EventForm({
           Ticket types (optional)
         </legend>
         <p className="text-xs text-slate-500">
-          Add Basic / Webinar / Premium seats with their own price and quantity. Leave
-          blank to sell all seats at the single price above. Connect your own Stripe
-          account under{" "}
-          <a href="/dashboard/payouts" className="font-semibold text-indigo-600">
+          Add as many seat types as you sell — early bird, couple pass, VIP, an
+          online seat for a hybrid event — each with its own price and quantity.
+          Price 0 makes it a free RSVP seat, so you can take registrations and
+          paid seats on the same event. Leave the block blank to sell every seat
+          at the single price above. Connect your own Stripe account under{" "}
+          <a
+            href="/dashboard/payouts"
+            className="font-semibold text-indigo-600"
+          >
             Ticket payouts
           </a>{" "}
           and buyers pay you directly.
         </p>
-        {TIER_PRESETS.map((preset) => (
-          <div key={preset} className="grid gap-2 sm:grid-cols-3">
+        {tiers.map((row) => (
+          <div key={row} className="grid gap-2 sm:grid-cols-3">
             <input
               name="tierName"
               defaultValue=""
-              placeholder={`Name — e.g. ${preset}`}
+              placeholder={`Name — e.g. ${TIER_PRESETS[row % MAX_TIERS]}`}
               className={inputClass}
-              aria-label={`Ticket type name (${preset})`}
+              aria-label={`Ticket type ${row + 1} name`}
             />
             <input
               name="tierPrice"
@@ -403,7 +468,7 @@ export function EventForm({
               min={0}
               placeholder="Price"
               className={inputClass}
-              aria-label={`Ticket type price (${preset})`}
+              aria-label={`Ticket type ${row + 1} price`}
             />
             <input
               name="tierSeats"
@@ -411,10 +476,19 @@ export function EventForm({
               min={1}
               placeholder="Seats"
               className={inputClass}
-              aria-label={`Ticket type seats (${preset})`}
+              aria-label={`Ticket type ${row + 1} seats`}
             />
           </div>
         ))}
+        {tiers.length < MAX_TIERS ? (
+          <button
+            type="button"
+            onClick={() => setTiers((rows) => [...rows, rows.length])}
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            + Add another ticket type
+          </button>
+        ) : null}
       </fieldset>
 
       <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
@@ -424,13 +498,14 @@ export function EventForm({
         <ul className="list-disc space-y-1 pl-5 text-slate-700">
           <li>Buyers pay by card on Godesi and get a QR ticket instantly.</li>
           <li>
-            Godesi collects the money and sends it to you after the event, minus the
-            card processor&apos;s charge (Stripe/PayPal, roughly 3%).
+            Godesi collects the money and sends it to you after the event, minus
+            the card processor&apos;s charge (Stripe/PayPal, roughly 3%).
           </li>
           <li>
             {feeWaived ? (
               <span className="font-semibold text-emerald-700">
-                Your paid plan means Godesi takes no service fee — you keep the rest.
+                Your paid plan means Godesi takes no service fee — you keep the
+                rest.
               </span>
             ) : (
               <>
@@ -442,8 +517,8 @@ export function EventForm({
             )}
           </li>
           <li>
-            Refunds and attendee disputes are yours to decide — Godesi is not a party
-            to the sale and does not hold your money in escrow.
+            Refunds and attendee disputes are yours to decide — Godesi is not a
+            party to the sale and does not hold your money in escrow.
           </li>
         </ul>
         <label className="flex items-start gap-2 font-semibold text-slate-800">
@@ -462,11 +537,15 @@ export function EventForm({
           Coupon or bonus (optional)
         </legend>
         <p className="text-xs text-amber-900">
-          Offering something extra or a discount? Put it here instead of inside the
-          description, and let people book with the ticket button — typing “call me to
-          register” loses you the sale and hides your seats from search.
+          Offering something extra or a discount? Put it here instead of inside
+          the description, and let people book with the ticket button — typing
+          “call me to register” loses you the sale and hides your seats from
+          search.
         </p>
-        <Field label="Bonus included" hint="e.g. Parents get 2 free yoga classes">
+        <Field
+          label="Bonus included"
+          hint="e.g. Parents get 2 free yoga classes"
+        >
           <input
             name="bonusNote"
             maxLength={200}

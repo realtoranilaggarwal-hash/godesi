@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { topContributors, POINTS } from "@/lib/rewards";
+import { POINTS } from "@/lib/rewards";
+import { topContributors } from "@/lib/rewardsQueries";
 import { Card, EmptyState } from "@/components/ui";
 import { ContributionScore } from "@/components/ContributionScore";
-import { ChatPanel } from "@/components/ChatPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +27,8 @@ export default async function LeaderboardPage() {
         <p className="mt-2 max-w-3xl text-sm text-slate-700">
           Godesi points recognise the people who build the community — inviting
           members, listing businesses, reviewing honestly and reporting local
-          news. Points are a recognition and rewards programme only; they are not
-          money and carry no cash value.
+          news. Points are a recognition and rewards programme only; they are
+          not money and carry no cash value.
         </p>
         <div className="mt-3 grid gap-2 text-xs sm:grid-cols-4">
           <p className="rounded-xl bg-white/70 p-2">
@@ -69,7 +69,10 @@ export default async function LeaderboardPage() {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-slate-900">
                   {member.username ? (
-                    <Link href={`/${member.username}`} className="hover:underline">
+                    <Link
+                      href={`/${member.username}`}
+                      className="hover:underline"
+                    >
                       {member.name}
                     </Link>
                   ) : (
@@ -104,12 +107,10 @@ export default async function LeaderboardPage() {
             Your points wallet →
           </Link>{" "}
           shows what you have earned, what you spent, and what you can spend it
-          on: featuring a listing, unlocking a requirement&apos;s contact details
-          or buying an ad.
+          on: featuring a listing, unlocking a requirement&apos;s contact
+          details or buying an ad.
         </p>
       </Card>
-
-      <ChatPanel />
     </div>
   );
 }

@@ -61,7 +61,7 @@ export function TicketForm({
             {bookable.map((tier) => (
               <option key={tier.id} value={tier.id}>
                 {tier.name} —{" "}
-                {tier.price ? formatMoney(tier.price, currency) : "Free"} ·{" "}
+                {tier.price ? formatMoney(tier.price, currency) : "Free RSVP"} ·{" "}
                 {tier.seatsLeft} left
               </option>
             ))}
@@ -71,7 +71,12 @@ export function TicketForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Your name">
-          <input name="buyerName" required defaultValue={defaultName ?? ""} className={inputClass} />
+          <input
+            name="buyerName"
+            required
+            defaultValue={defaultName ?? ""}
+            className={inputClass}
+          />
         </Field>
         <Field label="Email">
           <input
@@ -107,11 +112,14 @@ export function TicketForm({
         ) : null}
       </div>
 
-      <SubmitButton pendingLabel="Booking...">
-        {unitPrice ? "Book & pay" : "Get free ticket"}
+      <SubmitButton
+        pendingLabel={unitPrice ? "Booking..." : "Saving your RSVP..."}
+      >
+        {unitPrice ? "Book & pay" : "RSVP free"}
       </SubmitButton>
       <p className="text-xs text-slate-500">
-        {available} seat(s) left · max {maxSeats} per booking
+        {available} seat(s) left · max {maxSeats} per{" "}
+        {unitPrice ? "booking" : "RSVP"}
         {unitPrice ? ` · ${formatMoney(unitPrice, currency)} per seat` : ""}
         {unitPrice ? " · payment handled securely by Stripe" : ""}
       </p>

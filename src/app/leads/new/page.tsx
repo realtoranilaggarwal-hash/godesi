@@ -9,13 +9,14 @@ import { LeadForm } from "@/components/forms/LeadForm";
 import type { RequirementOptionSet } from "@/components/forms/RequirementOptions";
 import { specialtySet } from "@/lib/specialties";
 import { Card } from "@/components/ui";
+import { displayCurrency } from "@/lib/displayCurrency";
 import { PostingSidebar } from "@/components/PostingSidebar";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Post a requirement — get quotes from desi businesses",
   description:
-    "Tell desi businesses what you need — pick the services, add your city, budget and date, and get quotes. Your contact stays private until a Premium business unlocks it.",
+    "Tell desi businesses what you need — pick the services, add your city, budget and date, and get quotes. Your contact stays private until a Featured business unlocks it.",
   alternates: { canonical: "/leads/new" },
 };
 
@@ -57,7 +58,7 @@ export default async function NewLeadPage({
         <div>
           <h1 className="text-2xl font-bold">Post your requirement</h1>
           <p className="text-sm text-slate-600">
-            Businesses see your requirement instantly. Only Premium members can
+            Businesses see your requirement instantly. Only Featured members can
             view your contact details.
           </p>
         </div>
@@ -69,6 +70,7 @@ export default async function NewLeadPage({
             groups={groups.filter((group) => group.items.length)}
             optionSets={optionSets}
             defaultOptionSlug={category?.slug}
+            currency={displayCurrency()}
           />
         </Card>
       </div>

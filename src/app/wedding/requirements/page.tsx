@@ -3,7 +3,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { canUnlockLeads } from "@/lib/plans";
-import { formatInr, whatsappLink } from "@/lib/format";
+import { whatsappLink } from "@/lib/format";
+import { budgetRange } from "@/lib/budget";
 import { unlockLeadAction } from "@/app/actions/leads";
 import { PostedBy } from "@/components/PostedBy";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
@@ -22,14 +23,8 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Wedding requirements from couples",
   description:
-    "Live wedding requirements posted by brides, grooms and families — budget, city and date. Premium vendors unlock the contact and reply on WhatsApp.",
+    "Live wedding requirements posted by brides, grooms and families — budget, city and date. Featured vendors unlock the contact and reply on WhatsApp.",
 };
-
-function budgetLabel(min: number | null, max: number | null) {
-  if (min === null && max === null) return "Budget open";
-  if (min !== null && max !== null) return `${formatInr(min)} – ${formatInr(max)}`;
-  return formatInr((min ?? max) as number);
-}
 
 export default async function WeddingRequirementsPage({
   searchParams,
@@ -70,7 +65,7 @@ export default async function WeddingRequirementsPage({
           <div>
             <h1 className="text-2xl font-bold">Wedding requirements 💍</h1>
             <p className="text-sm text-slate-600">
-              What couples are looking for right now. Premium vendors unlock the
+              What couples are looking for right now. Featured vendors unlock the
               contact and reply on WhatsApp.
             </p>
           </div>
@@ -91,7 +86,7 @@ export default async function WeddingRequirementsPage({
           <Alert tone="info">
             Contact details are hidden on your plan.{" "}
             <Link href="/pricing" className="font-semibold underline">
-              Upgrade to Premium
+              Upgrade to Featured
             </Link>{" "}
             to unlock couples&apos; numbers and message them on WhatsApp.
           </Alert>
@@ -138,7 +133,13 @@ export default async function WeddingRequirementsPage({
                     <Badge tone="slate">{lead.category}</Badge>
                   </div>
                   <p className="text-sm text-slate-500">
-                    📍 {lead.city} · {budgetLabel(lead.budgetMin, lead.budgetMax)}
+                    📍 {lead.city} ·{" "}
+                    {budgetRange(
+                      lead.budgetMin,
+                      lead.budgetMax,
+                      lead.budgetCurrency,
+                      "Budget open",
+                    )}
                     {lead.eventDate
                       ? ` · 📅 ${lead.eventDate.toLocaleDateString()}`
                       : ""}
@@ -169,7 +170,7 @@ export default async function WeddingRequirementsPage({
                     <div className="rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
                       <p className="select-none blur-sm">+1 9XX XXX XXXX</p>
                       <p className="mt-1 text-xs">
-                        Contact locked — Premium vendors only
+                        Contact locked — Featured vendors only
                       </p>
                     </div>
                   )}
@@ -189,7 +190,7 @@ export default async function WeddingRequirementsPage({
                           type="submit"
                           className="w-full rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700"
                         >
-                          {premium ? "Unlock contact" : "Unlock with Premium"}
+                          {premium ? "Unlock contact" : "Unlock with Featured"}
                         </button>
                       </form>
                     ) : (

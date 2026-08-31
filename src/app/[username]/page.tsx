@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { normalizeUsername, publicProfile, RESERVED_USERNAMES } from "@/lib/profiles";
+import {
+  normalizeUsername,
+  publicProfile,
+  RESERVED_USERNAMES,
+} from "@/lib/profiles";
 import { effectivePlan } from "@/lib/plans";
 import { formatEventDate } from "@/lib/events";
 import { siteUrl, whatsappLink } from "@/lib/format";
+import { properName } from "@/lib/names";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, EmptyState, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
@@ -13,9 +18,9 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
-import { journalistStats } from "@/lib/journalists";
-import { alumniFor } from "@/lib/alumni";
-import { wallet } from "@/lib/rewards";
+import { journalistStats } from "@/lib/journalistsQueries";
+import { alumniFor } from "@/lib/alumniQueries";
+import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 
 export const dynamic = "force-dynamic";
@@ -35,10 +40,10 @@ export async function generateMetadata({
   if (!profile) return { title: "Profile not found" };
   const { user } = profile;
   return {
-    title: `${user.name} on Godesi`,
+    title: `${properName(user.name)} on Godesi`,
     description:
       user.bio ??
-      `${user.name}${user.location ? ` from ${user.location}` : ""} on Godesi — businesses, events and requirements.`,
+      `${properName(user.name)}${user.location ? ` from ${user.location}` : ""} on Godesi — businesses, events and requirements.`,
     alternates: { canonical: `/${user.username}` },
   };
 }
@@ -92,7 +97,9 @@ export default async function PublicProfilePage({
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-2xl font-black text-slate-900">{user.name}</h1>
+              <h1 className="text-2xl font-black text-slate-900">
+                {properName(user.name)}
+              </h1>
               {user.headline ? (
                 <p className="text-sm font-semibold text-slate-700">
                   {user.headline}
@@ -111,7 +118,9 @@ export default async function PublicProfilePage({
                     beat={journalist.beat}
                   />
                 ) : null}
-                {plan !== "FREE" ? <Badge tone="indigo">{plan} member</Badge> : null}
+                {plan !== "FREE" ? (
+                  <Badge tone="indigo">{plan} member</Badge>
+                ) : null}
                 <Badge tone="green">
                   Member since {user.createdAt.getFullYear()}
                 </Badge>
@@ -121,7 +130,10 @@ export default async function PublicProfilePage({
               </div>
             </div>
           </div>
-          <ShareButtons url={shareUrl} title={`${user.name} on Godesi`} />
+          <ShareButtons
+            url={shareUrl}
+            title={`${properName(user.name)} on Godesi`}
+          />
         </div>
         {user.bio ? (
           <p className="border-t border-slate-100 px-5 py-4 text-sm text-slate-700">
@@ -135,7 +147,7 @@ export default async function PublicProfilePage({
               <a
                 href={whatsappLink(
                   user.whatsappNumber,
-                  `Hi ${user.name}, I found you on Godesi.`,
+                  `Hi ${properName(user.name)}, I found you on Godesi.`,
                 )}
                 target="_blank"
                 rel="noreferrer"
@@ -187,7 +199,10 @@ export default async function PublicProfilePage({
                     label: "Level",
                     value: journalist.level?.title ?? "Contributor",
                   },
-                  { label: "Confirmed", value: `${journalist.trust.confirmed}` },
+                  {
+                    label: "Confirmed",
+                    value: `${journalist.trust.confirmed}`,
+                  },
                 ].map((cell) => (
                   <div
                     key={cell.label}
@@ -243,7 +258,10 @@ export default async function PublicProfilePage({
               <h2 className="text-lg font-bold">School &amp; college</h2>
               <ul className="mt-2 space-y-2 text-sm text-slate-700">
                 {schools.map((school) => (
-                  <li key={school.id} className="flex flex-wrap items-center gap-2">
+                  <li
+                    key={school.id}
+                    className="flex flex-wrap items-center gap-2"
+                  >
                     <span className="text-indigo-500">🎓</span>
                     <Link
                       href={`/alumni?institution=${encodeURIComponent(school.institution)}${school.endYear ? `&year=${school.endYear}` : ""}`}
@@ -252,7 +270,9 @@ export default async function PublicProfilePage({
                       {school.institution}
                     </Link>
                     {school.degree ? <span>· {school.degree}</span> : null}
-                    {school.fieldOfStudy ? <span>· {school.fieldOfStudy}</span> : null}
+                    {school.fieldOfStudy ? (
+                      <span>· {school.fieldOfStudy}</span>
+                    ) : null}
                     {school.endYear ? (
                       <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700">
                         Batch of {school.endYear}
@@ -353,7 +373,7 @@ export default async function PublicProfilePage({
                   >
                     <p className="font-bold text-slate-900">{event.title}</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      📅 {formatEventDate(event.startsAt)}
+                      📅 {formatEventDate(event.startsAt, event.timeZone)}
                     </p>
                     <p className="text-sm text-slate-600">📍 {event.city}</p>
                   </Link>
@@ -463,7 +483,9 @@ export default async function PublicProfilePage({
 
           {user.business && user.business.status === "APPROVED" ? (
             <Card className="space-y-3 text-center">
-              <p className="text-sm font-bold text-slate-900">Business QR code</p>
+              <p className="text-sm font-bold text-slate-900">
+                Business QR code
+              </p>
               <Image
                 src={`/api/qr/${user.business.slug}`}
                 alt={`QR code for ${user.business.name}`}

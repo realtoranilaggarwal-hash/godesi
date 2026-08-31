@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser, requirePermission } from "@/lib/auth";
-import { awardPoints } from "@/lib/rewards";
+import { awardPoints } from "@/lib/rewardsQueries";
 
 /** Up/down vote on a published story; voting again on the same side clears it. */
 export async function voteNewsAction(formData: FormData) {
@@ -53,7 +53,10 @@ export async function featureNewsAction(formData: FormData) {
   const item = await db.newsItem.findUnique({ where: { id } });
   if (!item) return;
 
-  await db.newsItem.update({ where: { id }, data: { featured: !item.featured } });
+  await db.newsItem.update({
+    where: { id },
+    data: { featured: !item.featured },
+  });
 
   if (!item.featured && item.submittedById) {
     await awardPoints({

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { activeBanners, SIDEBAR_SIZE } from "@/lib/banners";
-import { recommendedLinks } from "@/lib/resources";
+import { recommendedLinks } from "@/lib/resourcesQueries";
 import { BannerImpression } from "@/components/BannerImpression";
 import { LinkImpressions } from "@/components/LinkImpressions";
 import { InArticleAd } from "@/components/InArticleAd";

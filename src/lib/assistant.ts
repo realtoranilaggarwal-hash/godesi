@@ -71,7 +71,7 @@ export async function buildContext(question: string) {
       ? `Upcoming events:\n${events
           .map(
             (e) =>
-              `- ${e.title} — ${formatEventDate(e.startsAt)}, ${e.venue}, ${e.city}, ${
+              `- ${e.title} — ${formatEventDate(e.startsAt, e.timeZone)}, ${e.venue}, ${e.city}, ${
                 e.price > 0 ? formatMoney(e.price, e.currency) : "free"
               }, ${seatsLeft(e)} seats left. Link: /events/${e.slug}`,
           )

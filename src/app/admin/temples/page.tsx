@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { can, getCurrentUser, isStaff } from "@/lib/auth";
 import { reviewWorshipAction } from "@/app/actions/worship";
 import { FAITH_LABELS } from "@/lib/worship";
 import { Card } from "@/components/ui";
+import { deskFallback } from "@/lib/adminSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Places of worship" };
@@ -12,7 +13,8 @@ export const metadata: Metadata = { title: "Places of worship" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/temples");
-  if (user.role !== "ADMIN") redirect("/dashboard");
+  if (!isStaff(user)) redirect("/dashboard");
+  if (!can(user, "worship")) redirect(deskFallback(user, "Temples"));
 
   const pendingWorship = await db.worshipPlace.findMany({
     where: { status: "PENDING" },

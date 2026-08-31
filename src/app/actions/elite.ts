@@ -15,10 +15,12 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import {
   INTERVIEW_TYPES,
   ELITE_CATEGORIES,
-  elitePackageOrThrow,
-  uniqueEliteSlug,
+  elitePackageOrNull,
 } from "@/lib/elite";
+import { uniqueEliteSlug } from "@/lib/eliteSlug";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { termEnd } from "@/lib/billing";
+import { BUNDLE_MONTHS } from "@/lib/bundles";
 
 const optionalUrl = z
   .string()
@@ -141,6 +143,7 @@ export async function submitEliteAction(
     const entry = await db.eliteEntry.create({
       data: {
         interviewPaid: prepaid,
+        eliteUntil: prepaid ? termEnd(BUNDLE_MONTHS) : null,
         slug: await uniqueEliteSlug(name, data.city),
         userId: data.nominationType === "SELF" ? user.id : null,
         nominatedById: data.nominationType === "OTHER" ? user.id : null,
@@ -225,7 +228,9 @@ export async function submitEliteAction(
 export async function startEliteCheckoutAction(formData: FormData) {
   const user = await requireUser();
   const entryId = String(formData.get("entryId") ?? "");
-  const item = elitePackageOrThrow(String(formData.get("packageId") ?? ""));
+  const item =
+    elitePackageOrNull(String(formData.get("packageId") ?? "")) ??
+    redirect("/desi-elite/apply?error=package");
 
   const entry = await db.eliteEntry.findFirst({
     where: { id: entryId, userId: user.id },

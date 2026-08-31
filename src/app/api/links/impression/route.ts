@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { countLinkImpression } from "@/lib/resources";
+import { countLinkImpression } from "@/lib/resourcesQueries";
 
 export async function POST(request: Request) {
   const { ids } = (await request.json().catch(() => ({}))) as { ids?: unknown };
@@ -8,7 +8,9 @@ export async function POST(request: Request) {
   }
 
   const unique = Array.from(
-    new Set(ids.filter((id): id is string => typeof id === "string").slice(0, 10)),
+    new Set(
+      ids.filter((id): id is string => typeof id === "string").slice(0, 10),
+    ),
   );
   await Promise.all(unique.map((id) => countLinkImpression(id)));
 

@@ -22,6 +22,8 @@ import { closeLeadAction } from "@/app/actions/leads";
 import { emailEnabled } from "@/lib/email";
 import { SidebarBanners } from "@/components/Banners";
 import { SignOutButton } from "@/components/SignOutButton";
+import { EarnStrip } from "@/components/EarnStrip";
+import { pointValues, wallet } from "@/lib/rewardsQueries";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -77,6 +79,11 @@ export default async function DashboardPage({
       reviews: { where: { hidden: false }, select: { rating: true } },
     },
   });
+
+  const [balance, pointTable] = await Promise.all([
+    wallet(user.id),
+    pointValues(),
+  ]);
 
   const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats] =
     await Promise.all([
@@ -145,6 +152,13 @@ export default async function DashboardPage({
             <SignOutButton />
           </div>
         </div>
+
+        <EarnStrip
+          user={user}
+          balance={balance.balance}
+          signupPoints={pointTable.REFERRAL_SIGNUP}
+          profilePoints={pointTable.PROFILE_CREATED}
+        />
 
         {searchParams.verified ? (
           <Alert tone="success">Email verified — thanks!</Alert>
