@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { getCurrentUser, isStaff } from "@/lib/auth";
+import { can, getCurrentUser, isStaff } from "@/lib/auth";
+import { deskFallback } from "@/lib/adminSections";
 import { getCategoryTree } from "@/lib/directory";
 import { AdminEventForm } from "@/components/forms/AdminEventForm";
 import { TicketTypesForm } from "@/components/forms/TicketTypesForm";
@@ -21,6 +22,9 @@ export default async function AdminEditEventPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isStaff(user)) redirect("/dashboard");
+  // The ticket-type and partner actions all need the events permission, so a
+  // moderator without it was shown forms every submit refused.
+  if (!can(user, "events")) redirect(deskFallback(user, "Edit event"));
 
   const [event, categories] = await Promise.all([
     db.event.findUnique({
