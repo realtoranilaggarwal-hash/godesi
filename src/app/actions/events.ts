@@ -796,7 +796,12 @@ export async function saveTicketTypeAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const event = await ownedEvent(String(formData.get("eventId") ?? ""));
+  let event;
+  try {
+    event = await ownedEvent(String(formData.get("eventId") ?? ""));
+  } catch (error) {
+    return fieldError(error);
+  }
   const parsed = tierSchema.safeParse({
     name: formData.get("name"),
     price: formData.get("price"),
@@ -841,6 +846,7 @@ export async function saveTicketTypeAction(
   await syncEventFromTiers(event.id);
   revalidatePath(`/events/${event.slug}`);
   revalidatePath("/dashboard/tickets");
+  revalidatePath(`/admin/events/${event.id}`);
   return { success: `Saved ${parsed.data.name}.` };
 }
 
@@ -849,7 +855,12 @@ export async function removeTicketTypeAction(
   _state: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const event = await ownedEvent(String(formData.get("eventId") ?? ""));
+  let event;
+  try {
+    event = await ownedEvent(String(formData.get("eventId") ?? ""));
+  } catch (error) {
+    return fieldError(error);
+  }
   const tier = await db.ticketTier.findUnique({
     where: { id: String(formData.get("tierId") ?? "") },
   });
@@ -864,5 +875,6 @@ export async function removeTicketTypeAction(
   await syncEventFromTiers(event.id);
   revalidatePath(`/events/${event.slug}`);
   revalidatePath("/dashboard/tickets");
+  revalidatePath(`/admin/events/${event.id}`);
   return { success: `${tier.name} removed.` };
 }

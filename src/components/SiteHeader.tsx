@@ -39,6 +39,7 @@ const NAV = [
 
 /** Chips beside the search box, for pages the main nav has no room for. */
 const QUICK_LINKS = [
+  { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top 100", icon: "🏅" },
   { href: "/connect", label: "Connect", icon: "🤝" },
@@ -94,6 +95,13 @@ export async function SiteHeader() {
       icon: "🧭",
       className:
         "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
+    },
+    {
+      href: "/events",
+      label: "Events",
+      icon: "🎟️",
+      className:
+        "bg-gradient-to-r from-rose-600 to-pink-500 text-white hover:opacity-90",
     },
     {
       href: "/blog",

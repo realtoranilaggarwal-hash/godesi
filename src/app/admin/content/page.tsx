@@ -94,9 +94,9 @@ export default async function ContentDeskPage({
 
       {searchParams.denied ? (
         <p className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          <strong>{searchParams.denied}</strong> is an admin desk, so it sent you
-          back here. Ask an admin to open it for you — the desks you can use are
-          in the row above.
+          <strong>{searchParams.denied}</strong> needs access you do not have
+          yet, so it sent you back here. Ask an admin to open it for you — the
+          desks you can use are in the row above.
         </p>
       ) : null}
 
