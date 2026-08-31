@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFormState } from "react-dom";
 import { adminUpdateEventAction } from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
@@ -10,7 +11,7 @@ import { CategorySelect, type CategoryOption } from "@/components/forms/Category
 import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
-import { EVENT_TYPES } from "@/lib/eventOptions";
+import { EVENT_MODES, EVENT_TYPES } from "@/lib/eventOptions";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
@@ -34,6 +35,8 @@ export type AdminEventValues = {
   categorySlug: string;
   subcategorySlug: string;
   eventType: string;
+  mode: "OFFLINE" | "ONLINE" | "HYBRID";
+  onlineUrl: string;
   genres: string[];
   languages: string[];
   websiteUrl: string;
@@ -56,6 +59,7 @@ export function AdminEventForm({
   categories: CategoryOption[];
 }) {
   const [state, formAction] = useFormState(adminUpdateEventAction, emptyState);
+  const [mode, setMode] = useState<string>(event.mode);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -197,6 +201,33 @@ export function AdminEventForm({
             ))}
           </select>
         </Field>
+        <Field label="Event mode" hint="Hybrid means the hall and a stream">
+          <select
+            name="mode"
+            value={mode}
+            onChange={(change) => setMode(change.target.value)}
+            className={inputClass}
+          >
+            {EVENT_MODES.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.icon} {option.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        {mode === "OFFLINE" ? null : (
+          <Field
+            label="Join link"
+            hint="Zoom, Meet or stream URL — only ticket holders and staff see it"
+          >
+            <input
+              name="onlineUrl"
+              defaultValue={event.onlineUrl}
+              placeholder="https://zoom.us/j/…"
+              className={inputClass}
+            />
+          </Field>
+        )}
         <Field
           label="Website or booking link"
           hint="Optional — shown as a button on the event page."

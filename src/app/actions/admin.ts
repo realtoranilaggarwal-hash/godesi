@@ -578,6 +578,13 @@ const adminEventSchema = z.object({
   categorySlug: z.string().trim().optional(),
   subcategorySlug: z.string().trim().optional(),
   eventType: z.string().trim().max(60).optional(),
+  mode: z.enum(["OFFLINE", "ONLINE", "HYBRID"]).default("OFFLINE"),
+  onlineUrl: z
+    .string()
+    .trim()
+    .url("Enter a full join link starting with https://")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   websiteUrl: z
     .string()
     .trim()
@@ -639,6 +646,8 @@ export async function adminUpdateEventAction(
       categorySlug: formData.get("categorySlug"),
       subcategorySlug: formData.get("subcategorySlug"),
       eventType: formData.get("eventType") ?? undefined,
+      mode: formData.get("mode") || "OFFLINE",
+      onlineUrl: formData.get("onlineUrl") ?? undefined,
       websiteUrl: formData.get("websiteUrl") ?? undefined,
       price: formData.get("price") || 0,
       currency: formData.get("currency") || "INR",
@@ -713,6 +722,10 @@ export async function adminUpdateEventAction(
             ? parsed.data.recurrence || null
             : null,
         eventType: parsed.data.eventType || null,
+        mode: parsed.data.mode,
+        // An in-person event keeps no join link, so it cannot leak later.
+        onlineUrl:
+          parsed.data.mode === "OFFLINE" ? null : parsed.data.onlineUrl ?? null,
         genres,
         languages,
         websiteUrl: parsed.data.websiteUrl ?? null,

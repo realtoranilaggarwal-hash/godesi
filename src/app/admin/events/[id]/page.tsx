@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { AdminEventForm } from "@/components/forms/AdminEventForm";
+import { TicketTypesForm } from "@/components/forms/TicketTypesForm";
 import { LEGACY_EVENT_ZONE, wallClockIn } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
 import { reviewPartnerAction } from "@/app/actions/events";
@@ -27,6 +28,16 @@ export default async function AdminEditEventPage({
       include: {
         organizer: { select: { email: true, name: true } },
         category: { select: { slug: true, parentSlug: true } },
+        tiers: {
+          orderBy: [{ sortOrder: "asc" }, { price: "asc" }],
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            seatsTotal: true,
+            seatsBooked: true,
+          },
+        },
         _count: { select: { tickets: true } },
       },
     }),
@@ -80,6 +91,8 @@ export default async function AdminEditEventPage({
             categorySlug: parentSlug,
             subcategorySlug: subSlug,
             eventType: event.eventType ?? "",
+            mode: event.mode,
+            onlineUrl: event.onlineUrl ?? "",
             genres: event.genres,
             languages: event.languages,
             websiteUrl: event.websiteUrl ?? "",
@@ -93,6 +106,20 @@ export default async function AdminEditEventPage({
             featured: event.featured,
             status: event.status,
           }}
+        />
+      </Card>
+
+      <Card>
+        <h2 className="font-bold">🎟️ Ticket types</h2>
+        <p className="text-sm text-slate-600">
+          Early bird, couple pass, online seat — each with its own price and
+          seats. Price a type at 0 and it becomes a free RSVP. With no types at
+          all, the single price and seat count above are used.
+        </p>
+        <TicketTypesForm
+          eventId={event.id}
+          currency={event.currency}
+          tiers={event.tiers}
         />
       </Card>
 

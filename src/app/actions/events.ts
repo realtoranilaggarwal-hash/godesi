@@ -841,6 +841,7 @@ export async function saveTicketTypeAction(
   await syncEventFromTiers(event.id);
   revalidatePath(`/events/${event.slug}`);
   revalidatePath("/dashboard/tickets");
+  revalidatePath(`/admin/events/${event.id}`);
   return { success: `Saved ${parsed.data.name}.` };
 }
 
@@ -864,5 +865,6 @@ export async function removeTicketTypeAction(
   await syncEventFromTiers(event.id);
   revalidatePath(`/events/${event.slug}`);
   revalidatePath("/dashboard/tickets");
+  revalidatePath(`/admin/events/${event.id}`);
   return { success: `${tier.name} removed.` };
 }
