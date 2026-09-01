@@ -5,6 +5,7 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card } from "@/components/ui";
 import { CATEGORY_TREE } from "@/lib/categories";
 import { PROSPECT_PITCHES, DEFAULT_PITCH } from "@/lib/prospectEmails";
+import { PLANS } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Emails and scripts by category | Godesi admin",
@@ -46,9 +47,11 @@ export default async function HandbookEmailsPage() {
         </p>
         <p className="text-sm text-slate-600">
           Everything written here is true on our own pages: a listing is free,
-          Pro is $5.99 a month and Premium $11.99, we take no commission on
-          enquiries, and Elite is $500 for a year or $250 for five years on the
-          current offer. Do not improve on those numbers.
+          Pro is ${PLANS.PRO.priceUsd.toFixed(2)} a month, Featured is $
+          {PLANS.PREMIUM.priceUsd} a month and puts them on the home page in
+          their own category in rotation with the other featured members, we
+          take no commission on enquiries, and Elite is $500 for a year or $250
+          for five years on the current offer. Do not improve on those numbers.
         </p>
         <p className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
           The starter card already carries their phone and email, hidden. That is

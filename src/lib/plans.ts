@@ -133,6 +133,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
     features: [
       "Everything in Pro",
       "Gold ring and Featured ribbon on your card for the whole term",
+      "On the Godesi home page inside your own category, taking turns with the other featured members in your trade",
       "Top of your category, above Pro and free cards",
       "Phone and email shown to everyone (a switch you can turn off)",
       "Up to 5 uploaded photos",
