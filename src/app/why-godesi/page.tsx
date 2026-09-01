@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { HandleClaim } from "@/components/HandleClaim";
 import { Card, LinkButton } from "@/components/ui";
+import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { getCategoryTree } from "@/lib/directory";
 
 export const dynamic = "force-dynamic";
@@ -238,6 +239,8 @@ export default async function WhyGodesiPage() {
           </div>
         </section>
       ))}
+
+      <GodesiWikiBanner />
 
       <section className="flex flex-wrap items-center gap-3 rounded-3xl border border-slate-200 bg-white p-5">
         <LinkButton href="/claim">Claim your name free</LinkButton>

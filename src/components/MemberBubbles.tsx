@@ -12,13 +12,13 @@ export type BubbleMember = {
 };
 
 /**
- * Spots inside the hero so bubbles never sit on top of each other: five
- * columns over four rows, nudged off the grid so it still reads as a scatter.
- * The last slot stays empty for the member counter in the bottom corner.
+ * Spots inside the hero so bubbles never sit on top of each other: six columns
+ * over six rows, nudged off the grid so it still reads as a scatter. The last
+ * two slots stay empty for the member counter in the bottom corner.
  */
-const COLUMNS = [1, 20, 39, 58, 77];
-const ROWS = [1, 24, 47, 70];
-const SIZES = [38, 30, 42, 32, 36];
+const COLUMNS = [0, 17, 34, 51, 68, 85];
+const ROWS = [0, 16, 32, 48, 64, 80];
+const SIZES = [30, 24, 33, 26, 28];
 
 const SPOTS = ROWS.flatMap((top, row) =>
   COLUMNS.map((left, column) => {
@@ -30,7 +30,10 @@ const SPOTS = ROWS.flatMap((top, row) =>
       delay: (index % 7) * 0.45,
     };
   }),
-).slice(0, ROWS.length * COLUMNS.length - 1);
+).slice(0, ROWS.length * COLUMNS.length - 2);
+
+/** A phone has nowhere for a scatter, so the same faces wrap in a row. */
+const PHONE_BUBBLES = 21;
 
 function initials(name: string) {
   return name
@@ -41,10 +44,54 @@ function initials(name: string) {
     .join("");
 }
 
+function Face({
+  member,
+  className,
+}: {
+  member: BubbleMember;
+  className: string;
+}) {
+  return (
+    <span
+      title={`${member.name}${member.location ? ` · ${member.location}` : ""}`}
+      className={`flex items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-white/25 text-xs font-black text-white shadow-lg backdrop-blur ${className}`}
+    >
+      {member.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={member.avatarUrl}
+          alt={member.name}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        initials(member.name) || "🙂"
+      )}
+    </span>
+  );
+}
+
+/** Wraps a face in its own page link when the member has claimed a handle. */
+function FaceLink({
+  member,
+  className,
+}: {
+  member: BubbleMember;
+  className: string;
+}) {
+  const face = <Face member={member} className="h-full w-full" />;
+  if (!member.username) return <span className={className}>{face}</span>;
+  return (
+    <Link href={`/${member.username}`} className={className}>
+      {face}
+    </Link>
+  );
+}
+
 /**
- * Floating photo bubbles of the newest members in the empty half of the home
- * hero. It refreshes every half minute, so a member who signs up drifts in
- * without a reload.
+ * Photo bubbles of the members who just joined, sitting in the home hero: a
+ * floating scatter on a desktop and a wrapped row on a phone. It refreshes on
+ * its own, so a member who signs up drifts in without a reload.
  */
 export function MemberBubbles({
   members: initial,
@@ -98,8 +145,9 @@ export function MemberBubbles({
   if (!bubbles.length) return null;
 
   return (
-    <div className="relative hidden h-52 lg:block" aria-hidden={false}>
-      <style>{`
+    <>
+      <div className="relative hidden h-64 lg:block">
+        <style>{`
         @keyframes godesi-float {
           0%, 100% { transform: translateY(0) }
           50% { transform: translateY(-7px) }
@@ -111,63 +159,52 @@ export function MemberBubbles({
         }
       `}</style>
 
-      {bubbles.map(({ member, spot }) => {
-        const isNew = member.id === arrived;
-        const content = (
-          <span
-            title={`${member.name}${member.location ? ` · ${member.location}` : ""}`}
-            className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white/70 bg-white/25 text-xs font-black text-white shadow-lg backdrop-blur"
-          >
-            {member.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={member.avatarUrl}
-                alt={member.name}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              initials(member.name) || "🙂"
-            )}
-          </span>
-        );
+        {bubbles.map(({ member, spot }) => {
+          const isNew = member.id === arrived;
 
-        return (
-          <div
-            key={member.id}
-            className="absolute"
-            style={{
-              left: `${spot.left}%`,
-              top: `${spot.top}%`,
-              width: spot.size,
-              height: spot.size,
-              animation: isNew
-                ? "godesi-pop 700ms ease-out"
-                : `godesi-float ${6 + (spot.size % 5)}s ease-in-out ${spot.delay}s infinite`,
-            }}
-          >
-            {member.username ? (
-              <Link
-                href={`/${member.username}`}
-                className="block h-full w-full"
-              >
-                {content}
-              </Link>
-            ) : (
-              content
-            )}
-            {isNew ? (
-              <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-rose-600 shadow">
-                just joined
-              </span>
-            ) : null}
-          </div>
-        );
-      })}
+          return (
+            <div
+              key={member.id}
+              className="absolute"
+              style={{
+                left: `${spot.left}%`,
+                top: `${spot.top}%`,
+                width: spot.size,
+                height: spot.size,
+                animation: isNew
+                  ? "godesi-pop 700ms ease-out"
+                  : `godesi-float ${6 + (spot.size % 5)}s ease-in-out ${spot.delay}s infinite`,
+              }}
+            >
+              <FaceLink member={member} className="block h-full w-full" />
+              {isNew ? (
+                <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-rose-600 shadow">
+                  just joined
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
 
-      <div className="absolute bottom-0 right-0 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold text-white backdrop-blur">
-        🎉 {total.toLocaleString()} members and counting
+        <div className="absolute bottom-0 right-0 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold text-white backdrop-blur">
+          🎉 {total.toLocaleString()} members and counting
+        </div>
       </div>
-    </div>
+
+      <div className="lg:hidden">
+        <div className="flex flex-wrap gap-1.5">
+          {members.slice(0, PHONE_BUBBLES).map((member) => (
+            <FaceLink
+              key={member.id}
+              member={member}
+              className="block h-9 w-9 shrink-0"
+            />
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] font-bold text-white/90">
+          🎉 {total.toLocaleString()} members and counting
+        </p>
+      </div>
+    </>
   );
 }
