@@ -3,12 +3,10 @@ import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessTile } from "@/components/BusinessTile";
-import { MemberTile } from "@/components/MemberTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
-import { FeaturedStrip } from "@/components/FeaturedStrip";
+import { CategoryFeatured } from "@/components/CategoryFeatured";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
-import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
@@ -19,7 +17,7 @@ import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
-import { newestMembers, publicMemberCount } from "@/lib/membersQueries";
+import { publicMemberCount } from "@/lib/membersQueries";
 import { HandleClaim } from "@/components/HandleClaim";
 
 export const dynamic = "force-dynamic";
@@ -54,22 +52,6 @@ const HERO_PROOF: string[] = [
   "WhatsApp button so customers message you",
 ];
 
-/** The short version of the whole site; the long version lives on /why-godesi. */
-const STEPS: { title: string; body: string }[] = [
-  {
-    title: "1. Claim your name",
-    body: "Type it above. If nobody has it, it is yours — godesi.com/yourname, free.",
-  },
-  {
-    title: "2. Fill your page",
-    body: "Photo, what you do, your town, WhatsApp, links, videos — and a business card if you run a shop or work for clients.",
-  },
-  {
-    title: "3. Share it and get found",
-    body: "Send the link or show your QR. You are also in the directory, so people searching your trade or town find you.",
-  },
-];
-
 export default async function HomePage() {
   const [
     categories,
@@ -78,8 +60,6 @@ export default async function HomePage() {
     news,
     members,
     memberCount,
-    joined,
-    joinedCount,
     spaCount,
   ] = await Promise.all([
     getCategoryTree(),
@@ -100,7 +80,7 @@ export default async function HomePage() {
     db.user.findMany({
       where: { emailVerifiedAt: { not: null } },
       orderBy: { createdAt: "desc" },
-      take: 24,
+      take: 44,
       select: {
         id: true,
         name: true,
@@ -109,8 +89,6 @@ export default async function HomePage() {
         location: true,
       },
     }),
-    db.user.count(),
-    newestMembers(12),
     publicMemberCount(),
     db.business.count({
       where: {
@@ -174,18 +152,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Three lines on how it works, so the hero can stay a single promise. */}
-      <section className="grid gap-3 sm:grid-cols-3">
-        {STEPS.map((step) => (
-          <Card key={step.title}>
-            <h2 className="text-base font-black text-slate-900">
-              {step.title}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">{step.body}</p>
-          </Card>
-        ))}
-      </section>
-
       {/* One bold box instead of a wall of category tiles: the whole taxonomy
           is one click down, and nothing else competes with it. */}
       <section className="rounded-3xl border-2 border-slate-900 bg-white p-4 shadow-sm sm:p-5">
@@ -208,9 +174,7 @@ export default async function HomePage() {
         />
       </section>
 
-      <GodesiWikiBanner />
-
-      <FeaturedStrip />
+      <CategoryFeatured />
 
       <DjsWikiCard />
 
@@ -247,29 +211,6 @@ export default async function HomePage() {
             className={news.length ? "" : "lg:col-span-3"}
           />
         </div>
-
-        {joined.length ? (
-          <section>
-            <SectionHeading
-              title="Who just joined GoDesi 👋"
-              href="/people"
-              linkLabel={`All ${joinedCount.toLocaleString()} people`}
-            />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {joined.map((member) => (
-                <MemberTile key={member.id} member={member} />
-              ))}
-            </div>
-            <p className="mt-3 text-sm text-slate-600">
-              Pick a handle and you get your own page at godesi.com/your-name,
-              with a QR code to share.{" "}
-              <Link href="/signup" className="font-semibold text-indigo-600">
-                Join free
-              </Link>{" "}
-              and your face shows up here.
-            </p>
-          </section>
-        ) : null}
 
         <section>
           <SectionHeading
