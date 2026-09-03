@@ -156,6 +156,12 @@ const GROUPS: { heading: string; blurb: string; items: Item[] }[] = [
         free: true,
       },
       {
+        title: "Sell your expertise as gigs",
+        body: "List small fixed-price jobs, $5 to $100 — a reading, a resume, a logo. The buyer pays through Godesi, we keep a flat $2 (the card fee), you get the rest.",
+        href: "/gigs/how-it-works",
+        free: true,
+      },
+      {
         title: "Coupons and rewards",
         body: "Publish coupons for your listing, and earn points by referring members, posting and reviewing.",
         href: "/rewards",

@@ -11,11 +11,19 @@ import { canReceiveDirectPayouts } from "@/lib/plans";
 /**
  * Sends an organiser to Stripe to connect (or finish connecting) the account
  * their ticket money is paid into. Godesi never holds the funds.
+ *
+ * Direct ticket payouts are a Featured perk; anyone selling a gig may connect,
+ * since gig money has nowhere else to go.
  */
 export async function startConnectOnboardingAction() {
   const user = await requireUser();
   if (!stripeEnabled()) redirect("/dashboard/payouts?error=stripe_unavailable");
-  if (!canReceiveDirectPayouts(user)) redirect("/dashboard/payouts?error=premium_only");
+  if (!canReceiveDirectPayouts(user)) {
+    const sellsGigs = await db.gig.count({
+      where: { sellerId: user.id, status: { not: "REMOVED" } },
+    });
+    if (sellsGigs === 0) redirect("/dashboard/payouts?error=premium_only");
+  }
 
   let accountId = user.stripeAccountId;
   if (!accountId) {
@@ -23,7 +31,9 @@ export async function startConnectOnboardingAction() {
       type: "express",
       email: user.email,
       capabilities: { transfers: { requested: true }, card_payments: { requested: true } },
-      business_profile: { product_description: "Event tickets sold on Godesi" },
+      business_profile: {
+        product_description: "Event tickets and small services sold on Godesi",
+      },
       metadata: { userId: user.id },
     });
     accountId = account.id;

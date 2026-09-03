@@ -23,6 +23,7 @@ const NAV = [
   { href: "/search", label: "Businesses", icon: "🏪" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
+  { href: "/gigs", label: "Gigs", icon: "🛠️" },
   { href: "/blog", label: "Blog", icon: "✍️" },
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
@@ -40,6 +41,7 @@ const NAV = [
 /** Chips beside the search box, for pages the main nav has no room for. */
 const QUICK_LINKS = [
   { href: "/events", label: "Events", icon: "🎟️" },
+  { href: "/gigs", label: "Gigs", icon: "🛠️" },
   { href: "/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top 100", icon: "🏅" },
   { href: "/connect", label: "Connect", icon: "🤝" },

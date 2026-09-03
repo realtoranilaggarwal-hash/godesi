@@ -341,6 +341,11 @@ model User {
   /// Paid for the Elite interview inside a package, before applying.
   elitePrepaid Boolean @default(false)
 
+  gigs        Gig[]
+  gigSales    GigOrder[]   @relation("GigSeller")
+  gigOrders   GigOrder[]   @relation("GigBuyer")
+  gigMessages GigMessage[]
+
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
 }
@@ -1642,6 +1647,112 @@ model ResourceLink {
 
 /// One-time Elite purchases: the interview fee, the professional film and
 /// placement boosts. Kept separate from memberships, which renew monthly.
+enum GigStatus {
+  ACTIVE
+  PAUSED
+  REMOVED
+}
+
+enum GigOrderStatus {
+  /// Checkout opened, card not yet charged.
+  PENDING
+  /// Buyer's card charged; money sits with Godesi until release.
+  PAID
+  /// Seller says the work is done; buyer has until autoReleaseAt to object.
+  DELIVERED
+  /// Seller's share sent to their Stripe account (or owed, if not connected).
+  RELEASED
+  /// Buyer raised a problem; staff decide between release and refund.
+  DISPUTED
+  /// Buyer's card refunded in full.
+  REFUNDED
+  /// Checkout abandoned or seller declined before starting.
+  CANCELLED
+}
+
+/// A small fixed-price service a member sells from their card, $5–$100.
+model Gig {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  sellerId     String
+  seller       User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  /// What the buyer gets, one item per line.
+  includes     String?
+  /// Whole US dollars; the buyer always pays in USD.
+  priceMinor   Int
+  deliveryDays Int       @default(3)
+  status       GigStatus @default(ACTIVE)
+  orders       GigOrder[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([sellerId, status])
+  @@index([status, createdAt])
+}
+
+model GigOrder {
+  id       String         @id @default(cuid())
+  gigId    String
+  gig      Gig            @relation(fields: [gigId], references: [id], onDelete: Restrict)
+  buyerId  String
+  buyer    User           @relation("GigBuyer", fields: [buyerId], references: [id], onDelete: Restrict)
+  sellerId String
+  seller   User           @relation("GigSeller", fields: [sellerId], references: [id], onDelete: Restrict)
+  status   GigOrderStatus @default(PENDING)
+
+  /// What the buyer paid, Godesi's flat fee, and what the seller receives.
+  priceMinor  Int
+  feeMinor    Int
+  sellerMinor Int
+  currency    String @default("USD")
+
+  /// The buyer's instructions, written at checkout.
+  brief String
+
+  stripeSessionId       String? @unique
+  stripePaymentIntentId String?
+  /// Transfer to the seller's connected account; null when settled by hand.
+  stripeTransferId      String?
+  stripeRefundId        String?
+
+  paidAt        DateTime?
+  dueAt         DateTime?
+  deliveredAt   DateTime?
+  /// Money goes to the seller at this time unless the buyer objects first.
+  autoReleaseAt DateTime?
+  releasedAt    DateTime?
+  disputedAt    DateTime?
+  disputeReason String?
+  /// Staff note on how a dispute was closed.
+  resolution    String?
+
+  messages  GigMessage[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([buyerId, createdAt])
+  @@index([sellerId, status])
+  @@index([status, autoReleaseAt])
+}
+
+/// The order room: buyer and seller talk and hand over files here, in the open
+/// so staff can settle a dispute from the record.
+model GigMessage {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     GigOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body      String
+  /// Set when the message is the seller's delivery.
+  delivery  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
 model EliteOrder {
   id          String        @id @default(cuid())
   entryId     String

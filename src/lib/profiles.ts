@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
+import { GIG_SELECT } from "@/lib/gigs";
 
 /**
  * Paths that already exist at the root of the site. Usernames resolve at
@@ -10,6 +11,7 @@ export const RESERVED_USERNAMES = new Set([
   "advertise",
   "api",
   "b",
+  "gigs",
   "categories",
   "contact",
   "cookies",
@@ -162,7 +164,7 @@ export async function publicProfile(username: string) {
   });
   if (!user) return null;
 
-  const [events, leads, reviews, listings] = await Promise.all([
+  const [events, leads, reviews, listings, gigs] = await Promise.all([
     db.event.findMany({
       where: { organizerId: user.id, status: "APPROVED" },
       orderBy: { startsAt: "desc" },
@@ -200,9 +202,15 @@ export async function publicProfile(username: string) {
       take: 6,
       select: { slug: true, title: true, city: true, kind: true, price: true },
     }),
+    db.gig.findMany({
+      where: { sellerId: user.id, status: "ACTIVE" },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: GIG_SELECT,
+    }),
   ]);
 
-  return { user, events, leads, reviews, listings };
+  return { user, events, leads, reviews, listings, gigs };
 }
 
 export type PostedBy = {
