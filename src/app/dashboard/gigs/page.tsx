@@ -136,6 +136,11 @@ export default async function DashboardGigsPage() {
     .filter((order) => order.status === "RELEASED" && !order.stripeTransferId)
     .reduce((sum, order) => sum + order.sellerMinor, 0);
   const needsAction = sales.filter((order) => order.status === "PAID").length;
+  const pendingMinor = sales
+    .filter((order) => ["PAID", "DELIVERED", "DISPUTED"].includes(order.status))
+    .reduce((sum, order) => sum + order.sellerMinor, 0);
+  const askForStripe =
+    !user.stripePayoutsEnabled && (owed > 0 || pendingMinor > 0);
 
   return (
     <div className="space-y-6">
@@ -172,14 +177,15 @@ export default async function DashboardGigsPage() {
           before listing a gig.
         </Alert>
       ) : null}
-      {gigs.length && !user.stripePayoutsEnabled ? (
+      {askForStripe ? (
         <Alert tone="info">
-          To be paid automatically,{" "}
+          You have sales.{" "}
           <Link href="/dashboard/payouts" className="font-semibold underline">
-            connect your Stripe account
+            Connect your Stripe account
           </Link>{" "}
-          — takes five minutes, any plan.
+          (five minutes, any plan) so your money lands there automatically.
           {owed > 0 ? ` ${usd(owed)} is already owed to you.` : ""}
+          {pendingMinor > 0 ? ` ${usd(pendingMinor)} more is on its way.` : ""}
         </Alert>
       ) : null}
 

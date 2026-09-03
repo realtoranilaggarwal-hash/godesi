@@ -122,10 +122,18 @@ export async function confirmGigOrder({
     return db.gigOrder.findUnique({ where: { id: order.id } });
   }
 
+  const seller = await db.user.findUnique({
+    where: { id: order.sellerId },
+    select: { stripePayoutsEnabled: true },
+  });
   await notify({
     userId: order.sellerId,
     title: `New order: ${order.gig.title}`,
-    body: `${usd(order.priceMinor)} paid. Deliver within ${order.gig.deliveryDays} day(s) and you receive ${usd(order.sellerMinor)}.`,
+    body: `${usd(order.priceMinor)} paid. Deliver within ${order.gig.deliveryDays} day(s) and you receive ${usd(order.sellerMinor)}.${
+      seller?.stripePayoutsEnabled
+        ? ""
+        : " Connect your Stripe account under Payouts so it is paid to you automatically."
+    }`,
     href: `/gigs/orders/${order.id}`,
   });
   await notify({

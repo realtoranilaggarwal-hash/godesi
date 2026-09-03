@@ -104,7 +104,8 @@ export default function GigsHowItWorksPage() {
       <Card>
         <h2 className="text-lg font-bold">Getting paid</h2>
         <p className="mt-1 text-sm text-slate-700">
-          Connect your own Stripe account once under{" "}
+          Listing is free and needs no bank details. Once you have a sale, connect
+          your own Stripe account under{" "}
           <Link href="/dashboard/payouts" className="font-semibold underline">
             Payouts
           </Link>{" "}

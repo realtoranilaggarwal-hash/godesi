@@ -80,6 +80,30 @@ export default async function GigOrderPage({
           seller has been told to start.
         </Alert>
       ) : null}
+      {isSeller &&
+      !user.stripePayoutsEnabled &&
+      ["PAID", "DELIVERED", "DISPUTED"].includes(order.status) ? (
+        <Alert tone="info">
+          You have a paying customer — {usd(order.sellerMinor)} is yours when
+          they confirm.{" "}
+          <Link href="/dashboard/payouts" className="font-semibold underline">
+            Connect your Stripe account
+          </Link>{" "}
+          now so it lands there automatically; otherwise it waits as owed to
+          you.
+        </Alert>
+      ) : null}
+      {isSeller &&
+      order.status === "RELEASED" &&
+      !order.stripeTransferId ? (
+        <Alert tone="info">
+          {usd(order.sellerMinor)} is owed to you.{" "}
+          <Link href="/dashboard/payouts" className="font-semibold underline">
+            Connect Stripe
+          </Link>{" "}
+          to receive it.
+        </Alert>
+      ) : null}
 
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-3">
