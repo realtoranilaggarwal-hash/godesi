@@ -56,6 +56,7 @@ const QUICK_LINKS = [
 const BAR_NAV = [
   { href: "/search", label: "Businesses" },
   { href: "/events", label: "Events" },
+  { href: "/gigs", label: "Gigs" },
   { href: "/blog", label: "Blog" },
   { href: "/leads", label: "Leads" },
   { href: "/real-estate", label: "Property" },

@@ -138,6 +138,12 @@ const GROUPS: { heading: string; blurb: string; items: Item[] }[] = [
         free: true,
       },
       {
+        title: "Gigs — sell your skills",
+        body: "List a fixed-price service from $5 to $100 (kundli, logo, tax check, tutoring) in up to three packages. Buyer pays by card, Godesi holds the money until delivery and keeps a flat $2; the rest is yours, paid to your Stripe account or settled by hand.",
+        href: "/gigs/how-it-works",
+        free: true,
+      },
+      {
         title: "Property and rooms",
         body: "Homes to buy or rent and rooms to share, with the details desi families actually ask for.",
         href: "/real-estate",
