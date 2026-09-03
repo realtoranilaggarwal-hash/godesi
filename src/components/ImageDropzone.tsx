@@ -37,7 +37,8 @@ export type UploadPurpose =
   | "event"
   | "logo"
   | "listing"
-  | "banner";
+  | "banner"
+  | "gig";
 
 export function ImageDropzone({
   purpose,

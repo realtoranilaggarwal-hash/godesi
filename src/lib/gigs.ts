@@ -1,68 +1,11 @@
-import type { GigOrder, GigOrderStatus } from "@prisma/client";
+import type { GigOrder } from "@prisma/client";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { notify } from "@/lib/notifications";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 
-/** Whole dollars. Small enough that a dispute stays small. */
-export const GIG_MIN_USD = 5;
-export const GIG_MAX_USD = 100;
-
-/** Godesi keeps this much of every paid gig; the seller gets the rest. */
-export const GIG_FEE_USD = 2;
-
-/**
- * Stripe's published US card rate, quoted on the site so the seller sees where
- * the $2 goes. Update here if the processor changes it.
- */
-export const CARD_RATE_PERCENT = 2.9;
-export const CARD_RATE_FIXED_USD = 0.3;
-
-/** Days the buyer has to object after a delivery before the money moves. */
-export const AUTO_RELEASE_DAYS = 7;
-
-export const MAX_DELIVERY_DAYS = 30;
-export const MAX_GIGS_PER_SELLER = 10;
-
-export function gigFeeMinor() {
-  return GIG_FEE_USD * 100;
-}
-
-export function sellerShareMinor(priceMinor: number) {
-  return Math.max(0, priceMinor - gigFeeMinor());
-}
-
-/** What the card processor takes from a price, so the fee note can show the sum. */
-export function cardCostUsd(priceUsd: number) {
-  return (priceUsd * CARD_RATE_PERCENT) / 100 + CARD_RATE_FIXED_USD;
-}
-
-export function usd(minor: number) {
-  return `$${(minor / 100).toFixed(minor % 100 === 0 ? 0 : 2)}`;
-}
-
-export const ORDER_LABEL: Record<GigOrderStatus, string> = {
-  PENDING: "Awaiting payment",
-  PAID: "In progress",
-  DELIVERED: "Delivered — awaiting buyer",
-  RELEASED: "Complete",
-  DISPUTED: "In dispute",
-  REFUNDED: "Refunded",
-  CANCELLED: "Cancelled",
-};
-
-export const ORDER_TONE: Record<
-  GigOrderStatus,
-  "slate" | "green" | "amber" | "indigo" | "red"
-> = {
-  PENDING: "slate",
-  PAID: "indigo",
-  DELIVERED: "amber",
-  RELEASED: "green",
-  DISPUTED: "red",
-  REFUNDED: "slate",
-  CANCELLED: "slate",
-};
+export * from "@/lib/gigs-shared";
+import { AUTO_RELEASE_DAYS, averageRating, usd } from "@/lib/gigs-shared";
 
 export async function uniqueGigSlug(title: string, sellerName: string) {
   const base = slugify(`${title} ${sellerName}`) || "gig";
@@ -76,12 +19,6 @@ export async function uniqueGigSlug(title: string, sellerName: string) {
   return candidate;
 }
 
-export function includesList(includes: string | null) {
-  return (includes ?? "")
-    .split(/\n+/)
-    .map((line) => line.trim().replace(/^[-•*]\s*/, ""))
-    .filter(Boolean);
-}
 
 function addDays(from: Date, days: number) {
   return new Date(from.getTime() + days * 86_400_000);
@@ -102,7 +39,7 @@ export async function confirmGigOrder({
 }) {
   const order = await db.gigOrder.findUnique({
     where: { id: orderId },
-    include: { gig: { select: { title: true, deliveryDays: true } } },
+    include: { gig: { select: { title: true } } },
   });
   if (!order) return null;
   if (order.status !== "PENDING") return order;
@@ -115,7 +52,7 @@ export async function confirmGigOrder({
       stripeSessionId: sessionId,
       stripePaymentIntentId: paymentIntentId,
       paidAt: now,
-      dueAt: addDays(now, order.gig.deliveryDays),
+      dueAt: addDays(now, order.deliveryDays),
     },
   });
   if (claimed.count === 0) {
@@ -129,7 +66,7 @@ export async function confirmGigOrder({
   await notify({
     userId: order.sellerId,
     title: `New order: ${order.gig.title}`,
-    body: `${usd(order.priceMinor)} paid. Deliver within ${order.gig.deliveryDays} day(s) and you receive ${usd(order.sellerMinor)}.${
+    body: `${usd(order.priceMinor)} paid${order.packageName ? ` (${order.packageName})` : ""}. Deliver within ${order.deliveryDays} day(s) and you receive ${usd(order.sellerMinor)}.${
       seller?.stripePayoutsEnabled
         ? ""
         : " Connect your Stripe account under Payouts so it is paid to you automatically."
@@ -282,7 +219,24 @@ export const GIG_SELECT = {
   includes: true,
   priceMinor: true,
   deliveryDays: true,
+  images: true,
+  tags: true,
+  faq: true,
+  ratingSum: true,
+  ratingCount: true,
   status: true,
+  packages: {
+    select: {
+      id: true,
+      tier: true,
+      name: true,
+      description: true,
+      includes: true,
+      priceMinor: true,
+      deliveryDays: true,
+      revisions: true,
+    },
+  },
   seller: {
     select: {
       id: true,
@@ -291,6 +245,30 @@ export const GIG_SELECT = {
       avatarUrl: true,
       headline: true,
       location: true,
+      createdAt: true,
     },
   },
 } as const;
+
+
+/** Seller-level trust numbers shown in the gig header, from real orders. */
+export async function sellerStats(sellerId: string) {
+  const [completed, rating, active] = await Promise.all([
+    db.gigOrder.count({ where: { sellerId, status: "RELEASED" } }),
+    db.gig.aggregate({
+      where: { sellerId, status: { not: "REMOVED" } },
+      _sum: { ratingSum: true, ratingCount: true },
+    }),
+    db.gigOrder.count({
+      where: { sellerId, status: { in: ["PAID", "DELIVERED"] } },
+    }),
+  ]);
+  const sum = rating._sum.ratingSum ?? 0;
+  const count = rating._sum.ratingCount ?? 0;
+  return {
+    completed,
+    inProgress: active,
+    ratingCount: count,
+    rating: averageRating(sum, count),
+  };
+}

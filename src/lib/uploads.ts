@@ -46,7 +46,7 @@ export async function storeImage({
   ownerId,
 }: {
   file: File;
-  folder: "avatars" | "gallery" | "events" | "listings" | "classifieds" | "banners";
+  folder: "avatars" | "gallery" | "events" | "listings" | "classifieds" | "banners" | "gigs";
   ownerId: string;
 }) {
   const blob = await put(
