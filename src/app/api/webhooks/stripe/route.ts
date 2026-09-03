@@ -9,6 +9,7 @@ import { confirmEliteOrder } from "@/lib/eliteOrders";
 import { confirmLiveChannelOrder } from "@/lib/liveChannelOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
+import { confirmGigOrder } from "@/lib/gigs";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
       const reviewDisputeId = session.metadata?.reviewDisputeId;
       const eliteOrderId = session.metadata?.eliteOrderId;
       const liveChannelOrderId = session.metadata?.liveChannelOrderId;
+      const gigOrderId = session.metadata?.gigOrderId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
@@ -85,6 +87,15 @@ export async function POST(request: Request) {
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "usd").toUpperCase(),
         });
+      } else if (session.metadata?.kind === "gig" && gigOrderId) {
+        await confirmGigOrder({
+          orderId: gigOrderId,
+          sessionId: session.id,
+          paymentIntentId:
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : session.payment_intent?.id ?? null,
+        });
       } else if (session.metadata?.kind === "review-dispute" && reviewDisputeId) {
         await confirmReviewDispute({ disputeId: reviewDisputeId, reference: session.id });
       } else if (session.metadata?.kind === "bundle" && userId) {
@@ -113,7 +124,11 @@ export async function POST(request: Request) {
       }
 
       /** Ticket coupons are held on the ticket row; plan/ad ones ride the session. */
-      if (userId && session.metadata?.kind !== "ticket") {
+      if (
+        userId &&
+        session.metadata?.kind !== "ticket" &&
+        session.metadata?.kind !== "gig"
+      ) {
         await recordCouponFromMetadata({
           metadata: session.metadata,
           userId,

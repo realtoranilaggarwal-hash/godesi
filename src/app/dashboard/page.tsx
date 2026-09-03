@@ -362,8 +362,11 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/tickets" variant="secondary">
                   My tickets
                 </LinkButton>
+                <LinkButton href="/dashboard/gigs" variant="secondary">
+                  🛠️ My gigs
+                </LinkButton>
                 <LinkButton href="/dashboard/payouts" variant="secondary">
-                  Ticket payouts
+                  Payouts
                 </LinkButton>
                 <LinkButton href="/dashboard/coupons" variant="secondary">
                   Event coupons

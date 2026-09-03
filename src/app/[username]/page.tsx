@@ -18,6 +18,7 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
+import { GigCard } from "@/components/gigs/GigCard";
 import { journalistStats } from "@/lib/journalistsQueries";
 import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
@@ -56,13 +57,17 @@ export default async function PublicProfilePage({
   const profile = await load(params.username);
   if (!profile) notFound();
 
-  const { user, events, leads, reviews, listings } = profile;
+  const { user, events, leads, reviews, listings, gigs } = profile;
   const journalist = await journalistStats(user.id);
   const points = await wallet(user.id);
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
-    events.length + leads.length + reviews.length + listings.length;
+    events.length +
+    leads.length +
+    reviews.length +
+    listings.length +
+    gigs.length;
   const socialLinks = PERSONAL_SOCIALS.map((social) => ({
     ...social,
     url: user[social.key],
@@ -309,6 +314,22 @@ export default async function PublicProfilePage({
                 ))}
               </ul>
             </Card>
+          ) : null}
+
+          {gigs.length ? (
+            <section className="space-y-2">
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-lg font-bold">🛠️ Gigs</h2>
+                <Link href="/gigs/how-it-works" className="text-xs text-slate-500 underline">
+                  Pay safely through Godesi
+                </Link>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {gigs.map((gig) => (
+                  <GigCard key={gig.slug} gig={gig} showSeller={false} />
+                ))}
+              </div>
+            </section>
           ) : null}
 
           {listings.length ? (

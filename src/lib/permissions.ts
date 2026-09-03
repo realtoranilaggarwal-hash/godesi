@@ -17,6 +17,11 @@ export const STAFF_PERMISSIONS = [
   { key: "blog", label: "Blog & updates", hint: "Write and publish blog posts" },
   { key: "resources", label: "Resource links", hint: "Approve and manage recommended links" },
   { key: "worship", label: "Temples & places of worship", hint: "Approve submitted places" },
+  {
+    key: "gigs",
+    label: "Gigs",
+    hint: "Settle gig disputes and record hand payouts",
+  },
 ] as const;
 
 export type StaffPermission = (typeof STAFF_PERMISSIONS)[number]["key"];
