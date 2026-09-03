@@ -120,7 +120,7 @@ export default async function GigPage({
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        <div className="space-y-6">
+        <div className="order-2 space-y-6 lg:order-1">
           <header className="space-y-3">
             <h1 className="text-2xl font-black text-slate-900 sm:text-3xl">
               {gig.title}
@@ -382,8 +382,8 @@ export default async function GigPage({
           ) : null}
         </div>
 
-        <aside>
-          <Card className="sticky top-24 space-y-3">
+        <aside className="order-1 lg:order-2">
+          <Card className="space-y-3 lg:sticky lg:top-24">
             {isSeller ? (
               <>
                 <OrderBox slug={gig.slug} packages={packages} canOrder={false} />

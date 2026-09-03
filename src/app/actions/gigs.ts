@@ -58,7 +58,7 @@ const gigSchema = z.object({
     .trim()
     .min(40, "Say what you will do in at least a couple of sentences")
     .max(3000),
-  tags: z.array(z.string().trim().min(2).max(30)).max(MAX_GIG_TAGS),
+  tags: z.array(z.string().trim().min(2).max(30)).max(MAX_GIG_TAGS, `Up to ${MAX_GIG_TAGS} tags`),
   images: z.array(z.string().url()).max(MAX_GIG_IMAGES),
   faq: z
     .array(

@@ -87,7 +87,7 @@ export default function RootLayout({
         </head>
       ) : null}
       <body
-        className={`${inter.className} min-h-screen overflow-x-hidden bg-slate-50 pb-20 text-slate-900 sm:pb-0`}
+        className={`${inter.className} min-h-screen bg-slate-50 pb-20 text-slate-900 sm:pb-0`}
       >
         {/* Brand identity for Google: "Godesi" the directory, distinct from the
             other Desi brands, plus the search box shown under the result. */}
