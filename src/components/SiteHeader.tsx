@@ -107,6 +107,13 @@ export async function SiteHeader() {
         "bg-gradient-to-r from-rose-600 to-pink-500 text-white hover:opacity-90",
     },
     {
+      href: "/gigs",
+      label: "Gigs",
+      icon: "🛠️",
+      className:
+        "bg-gradient-to-r from-emerald-600 to-teal-500 text-white hover:opacity-90",
+    },
+    {
       href: "/blog",
       label: "Blog",
       icon: "✍️",
