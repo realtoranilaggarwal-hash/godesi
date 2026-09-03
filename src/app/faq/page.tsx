@@ -5,12 +5,19 @@ import { SidebarBanners } from "@/components/Banners";
 import { ShareAnchor } from "@/components/ShareAnchor";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import {
+  AUTO_RELEASE_DAYS,
+  GIG_FEE_USD,
+  GIG_MAX_USD,
+  GIG_MIN_USD,
+  MAX_GIGS_PER_SELLER,
+} from "@/lib/gigs-shared";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "FAQ — everything you need to know",
   description:
-    "What Godesi is, why to use it, and how listings, leads, tickets, property, weddings, temples, ads, points and claims work.",
+    "What Godesi is, why to use it, and how listings, leads, tickets, property, weddings, temples, gigs, ads, points and claims work.",
 };
 
 function slugify(question: string) {
@@ -28,6 +35,7 @@ const ACTIONS: { href: string; label: string }[] = [
   { href: "/leads/new", label: "🎯 Post a requirement / hire someone" },
   { href: "/leads", label: "🔎 Browse buyer requirements" },
   { href: "/events/new", label: "🎉 Post an event & sell tickets" },
+  { href: "/dashboard/gigs", label: "🛠️ Sell a gig ($5–$100)" },
   { href: "/real-estate", label: "🏠 Property, rentals & roommates" },
   { href: "/wedding", label: "💍 Find or offer wedding services" },
   { href: "/religious/new", label: "🛕 Add a temple or religious service" },
@@ -66,6 +74,7 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           <li>Discover businesses and professionals</li>
           <li>Post your requirements and get responses</li>
           <li>Promote and sell event tickets</li>
+          <li>Sell small services as gigs, $5–$100, paid through Godesi</li>
           <li>List real estate, rentals and roommates</li>
           <li>Find wedding vendors and services</li>
           <li>Explore temples, religious services and community events</li>
@@ -190,6 +199,89 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           Customers get an email confirmation and a scannable QR ticket for
           entry — perfect for organisers, temples, communities and businesses.{" "}
           <Link href="/events/new">Post an event</Link>.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🛠️ What are Gigs? Can I sell my skills on Godesi?",
+    id: "gigs",
+    a: (
+      <>
+        <p>
+          Yes. A gig is a small, fixed-price service you sell through Godesi —
+          a kundli reading, a logo, a tax-return check, an hour of tutoring,
+          a resume rewrite. Every gig is priced between ${GIG_MIN_USD} and $
+          {GIG_MAX_USD}, in whole dollars, so buyers know exactly what they pay
+          and disputes stay small.
+        </p>
+        <ul>
+          <li>
+            Any member can list up to {MAX_GIGS_PER_SELLER} gigs from{" "}
+            <Link href="/dashboard/gigs">your dashboard</Link> — free, no bank
+            details needed to start.
+          </li>
+          <li>
+            Offer up to three packages (Basic / Standard / Premium), each with
+            its own price, delivery time, revisions and what is included.
+          </li>
+          <li>
+            Add your own work photos, tags and an FAQ. Only buyers who paid and
+            completed an order can leave a review, and you can reply.
+          </li>
+          <li>
+            Gigs show on <Link href="/gigs">godesi.com/gigs</Link> and on your
+            Godesi card.
+          </li>
+        </ul>
+        <p>
+          Buyers write a short brief and pay by card. The money is held by
+          Godesi until the work is delivered — that guarantee is the reason to
+          pay here instead of on WhatsApp.{" "}
+          <Link href="/gigs/how-it-works">How gigs work</Link>.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "💵 How do gig sellers get paid, and what does Godesi keep?",
+    id: "gig-payouts",
+    a: (
+      <>
+        <p>
+          The buyer pays the package price. Godesi keeps a flat ${GIG_FEE_USD}{" "}
+          per order and the seller gets the rest — on a $50 gig the seller
+          receives $48. The ${GIG_FEE_USD} is not profit: the card processor
+          (Stripe) charges 2.9% + 30¢ on every payment, which on a $100 gig is
+          the whole ${GIG_FEE_USD}. The fee also covers holding the money, the
+          order room and dispute handling.
+        </p>
+        <p>When does the seller receive it?</p>
+        <ul>
+          <li>
+            Money is released when the buyer clicks “release” on the delivered
+            work, or automatically {AUTO_RELEASE_DAYS} days after delivery if
+            the buyer does nothing.
+          </li>
+          <li>
+            Connected a Stripe account under{" "}
+            <Link href="/dashboard/payouts">Payouts</Link>? The released amount
+            is transferred to it the same day and Stripe pays your bank on its
+            normal schedule.
+          </li>
+          <li>
+            Not connected yet? You can still list and sell. After your first
+            paid order we prompt you to connect; until then released money is
+            recorded as owed to you, and Godesi settles it by hand.
+          </li>
+          <li>
+            If the buyer disputes, both sides say their piece in the order room
+            and Godesi decides: pay the seller or refund the buyer.
+          </li>
+        </ul>
+        <p>
+          Full breakdown with worked examples:{" "}
+          <Link href="/gigs/how-it-works">gigs/how-it-works</Link>.
         </p>
       </>
     ),
