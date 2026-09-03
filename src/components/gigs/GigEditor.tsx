@@ -15,7 +15,7 @@ import {
   TIERS,
   TIER_LABEL,
   type GigFaq,
-} from "@/lib/gigs";
+} from "@/lib/gigs-shared";
 
 export type EditablePackage = {
   tier: GigTier;

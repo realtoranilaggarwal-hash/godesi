@@ -5,7 +5,7 @@ import type { GigTier } from "@prisma/client";
 import { buyGigAction } from "@/app/actions/gigs";
 import { ActionForm } from "@/components/gigs/GigForms";
 import { Field, inputClass } from "@/components/ui";
-import { GIG_FEE_USD, includesList, usd } from "@/lib/gigs";
+import { GIG_FEE_USD, includesList, usd } from "@/lib/gigs-shared";
 
 export type PackageView = {
   tier: GigTier;
