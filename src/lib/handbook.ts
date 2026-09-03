@@ -4,6 +4,12 @@
  * it in person. Content only — the pages under /admin/handbook render it.
  */
 
+import { PLANS } from "@/lib/plans";
+
+/** Written once here so no script can quote a stale price. */
+const PRO_PRICE = `$${PLANS.PRO.priceUsd}`;
+const FEATURED_PRICE = `$${PLANS.PREMIUM.priceUsd}`;
+
 export type HandbookScript = { label: string; hint?: string; text: string };
 export type HandbookStep = { title: string; detail: string };
 export type HandbookLink = { label: string; href: string };
@@ -72,7 +78,8 @@ export const HANDBOOK_ONBOARDING: HandbookStep[] = [
 
 export const HANDBOOK_WHAT_WE_ARE = [
   "Godesi.com is a desi directory and marketplace: free digital business cards with a QR code and a WhatsApp button, a requirements board where customers post what they need, events with ticketing, property, rooms, jobs, news and the Elite section.",
-  "A listing is free and stays free. Pro is $5.99 (₹499) and Premium is $11.99 (₹999) — that is the whole price list for a member. We charge no commission on enquiries.",
+  "A listing is free and stays free. Pro is $5.99 (₹499) a month, and Featured is $50 (₹999) a month or $600 (₹4,999) a year — that is the whole price list for a member. We charge no commission on enquiries.",
+  "Featured is the thing to lead with: a featured member is shown on the godesi.com home page inside their own trade — Real Estate, Catering, Salons — up to three at a time, taking turns with the other featured members of that trade so everybody gets home-page time. Never promise an only-you or permanent spot.",
   "Whatever a member puts on Godesi also publishes to our own network — godesi.wiki, eventringer.com for events, djs.wiki for the music trades, desiwhoswho.com for Elite — free for the first year. Nobody else in this market gives a small business four sites for nothing.",
   "Many pages already exist as unclaimed listings we built from public sources. Your job is usually not to sell — it is to tell the real owner that their page is already there, and hand it over.",
 ];
@@ -89,7 +96,7 @@ export const HANDBOOK_PLAYBOOKS: HandbookPlaybook[] = [
     whyUs: [
       "Listing an event costs nothing, on any plan, for as many events as they like.",
       "Free-entry events never pay us anything at all — no ticket, no fee.",
-      "On paid tickets we keep 2% on the free plan and nothing on Pro ($5.99) or Premium ($11.99). The card processor takes its own ~3% whichever plan they are on. Most ticket sites take several times that and add a booking fee on top, which their buyer pays.",
+      `On paid tickets we keep 2% on the free plan and nothing on Pro (${PRO_PRICE}) or Featured (${FEATURED_PRICE}). The card processor takes its own ~3% whichever plan they are on. Most ticket sites take several times that and add a booking fee on top, which their buyer pays.`,
       "100 seats at $20 is $2,000: we keep $40 on the free plan, and nothing at all on a plan that costs less than three tickets. That is the whole argument — say it with their own numbers.",
       "QR tickets by email, price tiers, coupon codes, a live seat count, and on Premium the ticket money goes straight into their own Stripe account.",
       "One post appears on Godesi, EventRinger.com, godesi.wiki and their category page, with add-to-calendar for attendees and an embed code for their own website.",
@@ -555,7 +562,7 @@ Hello [NAME],
 
 I am [NAME] from Godesi.com, a directory and marketplace for the desi community. Businesses on our site post what they need — websites, e-commerce, apps, CRM setups, IT staffing — with a budget and a timeline.
 
-Listing your company is free. Your page shows your services, technologies, industries, team size and the cities you cover, and enquiries come straight to you with no commission. Free plan sees the requirement posts; Premium at $11.99 a month unlocks the requester's contact details.
+Listing your company is free. Your page shows your services, technologies, industries, team size and the cities you cover, and enquiries come straight to you with no commission. Free plan sees the requirement posts; Featured at ${FEATURED_PRICE} a month unlocks the requester's contact details and puts your company on the Godesi home page in your own category, in rotation with the other featured firms.
 
 Here is the section you would sit in: [CATEGORY LINK]
 
@@ -749,6 +756,7 @@ Thank you for the name. Desi Who's Who is for people who have genuinely built so
       "The same card also publishes to godesi.wiki, and to djs.wiki or EventRinger where the trade fits, free for the first year.",
       "They can be found by town and by trade — a desi customer searching for their trade near them lands on their page.",
       "Nothing about them is on Godesi until they put it there. That is the honest answer when they ask where you got their number.",
+      "When they ask how to stand out later: Featured puts them on the home page in their own trade, three at a time, in rotation with the other featured members of that trade. Say 'in rotation' every time — no spot is exclusive and none is permanent.",
     ],
     wherePeopleAre: [
       { label: "The call list", href: "/admin/prospects" },
@@ -867,7 +875,7 @@ If it is easier, send me your timings and three photos and I will set it up with
       {
         question: "What does it cost, really?",
         answer:
-          "The listing is free forever. If they later want the gold Featured ring, contact shown to everyone and top of category, that is $50 a month or $600 a year — but do not sell that on the first call.",
+          "The listing is free forever. If they later want Featured — gold ring, contact shown to everyone, top of their category, and on the home page inside their own trade in rotation with the other featured members — that is $50 a month or $600 a year. Do not sell that on the first call.",
       },
       {
         question: "I don't have time for this.",
@@ -887,6 +895,7 @@ If it is easier, send me your timings and three photos and I will set it up with
       "Never read out or share the call list outside the admin — it is our own working list, not a published directory.",
       "Never say we are calling on behalf of the magazine, portal or site you found them on. We are Godesi and nobody else.",
       "Never promise a placement, a price or a refund that is not written on godesi.com/pricing.",
+      "Never say a featured member will be the only one on the home page, or that their spot is permanent — three per trade show at a time and they rotate. An exclusive promise is a refund waiting to happen.",
     ],
     targets: [
       "One batch of 20 taken and fully called each morning",
