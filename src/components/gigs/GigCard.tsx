@@ -5,6 +5,7 @@ import {
   CARD_RATE_FIXED_USD,
   CARD_RATE_PERCENT,
   GIG_FEE_USD,
+  averageRating,
   cardCostUsd,
   usd,
 } from "@/lib/gigs";
@@ -15,6 +16,10 @@ export type GigCardData = {
   description: string;
   priceMinor: number;
   deliveryDays: number;
+  images: string[];
+  ratingSum: number;
+  ratingCount: number;
+  packages: { tier: string }[];
   seller: {
     name: string;
     username: string | null;
@@ -53,34 +58,51 @@ export function GigCard({
   gig: GigCardData;
   showSeller?: boolean;
 }) {
+  const rating = averageRating(gig.ratingSum, gig.ratingCount);
   return (
     <Link
       href={`/gigs/${gig.slug}`}
-      className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="font-bold leading-snug text-slate-900">{gig.title}</p>
-        <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-sm font-black text-emerald-700">
-          {usd(gig.priceMinor)}
-        </span>
-      </div>
-      <p className="mt-2 line-clamp-3 text-sm text-slate-600">
-        {gig.description}
-      </p>
-      <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-500">
+      {gig.images[0] ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={gig.images[0]}
+          alt=""
+          className="aspect-[16/10] w-full object-cover"
+        />
+      ) : null}
+      <div className="flex flex-1 flex-col p-4">
         {showSeller ? (
-          <span className="flex min-w-0 items-center gap-2">
+          <span className="mb-2 flex min-w-0 items-center gap-2 text-xs">
             <SellerFace seller={gig.seller} size="h-6 w-6" />
             <span className="truncate font-semibold text-slate-700">
               {properName(gig.seller.name)}
             </span>
           </span>
-        ) : (
-          <span />
-        )}
-        <span className="shrink-0">
-          ⏱ {gig.deliveryDays} day{gig.deliveryDays === 1 ? "" : "s"}
-        </span>
+        ) : null}
+        <p className="font-bold leading-snug text-slate-900">{gig.title}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-slate-600">
+          {gig.description}
+        </p>
+        <div className="mt-3 flex items-center justify-between gap-2 text-xs text-slate-500">
+          <span>
+            {gig.ratingCount ? (
+              <span className="font-semibold text-amber-600">
+                ★ {rating.toFixed(1)}{" "}
+                <span className="font-normal text-slate-500">({gig.ratingCount})</span>
+              </span>
+            ) : (
+              <>⏱ {gig.deliveryDays} day{gig.deliveryDays === 1 ? "" : "s"}</>
+            )}
+          </span>
+          <span className="shrink-0 text-sm font-black text-slate-900">
+            {gig.packages.length > 1 ? (
+              <span className="text-xs font-normal text-slate-500">from </span>
+            ) : null}
+            {usd(gig.priceMinor)}
+          </span>
+        </div>
       </div>
     </Link>
   );

@@ -20,11 +20,12 @@ export const metadata: Metadata = {
 const EXAMPLES = [5, 25, 60, 100];
 
 const STEPS = [
-  ["List", "Title, what you will do, what is included, a price and a delivery time. It shows on /gigs and on your Godesi card."],
+  ["List", "Title, what you will do, your own pictures of the work, and up to three packages — Basic, Standard, Premium — each with a price, delivery time, revisions and what is included. Add tags and an FAQ. It shows on /gigs and on your Godesi card."],
   ["Order", "The buyer writes a brief and pays by card. The money is charged straight away and held by Godesi."],
   ["Deliver", "You and the buyer talk in the order room. When done, you post the delivery — a file link, the reading, the document."],
   ["Confirm", `The buyer confirms and you are paid. If they say nothing, it releases on its own ${AUTO_RELEASE_DAYS} days after delivery.`],
   ["Problem?", "The buyer can raise one within that window. Godesi staff read the order room and settle it: release to you or refund to them. No card chargebacks, no shouting on WhatsApp."],
+  ["Review", "Once paid out, the buyer can rate you — one review per completed order, no other way in. Reviews and completed orders show on every gig you sell, and you can reply publicly."],
 ];
 
 export default function GigsHowItWorksPage() {

@@ -24,24 +24,27 @@ export const metadata: Metadata = {
 export default async function GigsPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: { q?: string; tag?: string };
 }) {
   const q = (searchParams.q ?? "").trim().slice(0, 80);
+  const tag = (searchParams.tag ?? "").trim().toLowerCase().slice(0, 30);
   const [gigs, user] = await Promise.all([
     db.gig.findMany({
       where: {
         status: "ACTIVE",
+        ...(tag ? { tags: { has: tag } } : {}),
         ...(q
           ? {
               OR: [
                 { title: { contains: q, mode: "insensitive" } },
                 { description: { contains: q, mode: "insensitive" } },
+                { tags: { has: q.toLowerCase() } },
                 { seller: { name: { contains: q, mode: "insensitive" } } },
               ],
             }
           : {}),
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ ratingCount: "desc" }, { createdAt: "desc" }],
       take: 120,
       select: GIG_SELECT,
     }),
@@ -95,6 +98,15 @@ export default async function GigsPage({
         </button>
       </form>
 
+      {tag ? (
+        <p className="text-sm text-slate-600">
+          Tagged <strong>{tag}</strong> ·{" "}
+          <Link href="/gigs" className="underline">
+            show all
+          </Link>
+        </p>
+      ) : null}
+
       {gigs.length ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {gigs.map((gig) => (
@@ -103,7 +115,7 @@ export default async function GigsPage({
         </div>
       ) : (
         <EmptyState
-          title={q ? `No gigs match “${q}”` : "No gigs yet"}
+          title={q || tag ? `No gigs match “${q || tag}”` : "No gigs yet"}
           body="Be the first: list what you can do for a fixed price and it appears here and on your card."
         />
       )}

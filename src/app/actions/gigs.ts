@@ -15,6 +15,13 @@ import {
   GIG_MIN_USD,
   MAX_DELIVERY_DAYS,
   MAX_GIGS_PER_SELLER,
+  MAX_GIG_FAQ,
+  MAX_GIG_IMAGES,
+  MAX_GIG_TAGS,
+  MAX_REVISIONS,
+  TIERS,
+  TIER_LABEL,
+  type GigFaq,
   autoReleaseDate,
   gigFeeMinor,
   refundGigOrder,
@@ -24,24 +31,147 @@ import {
   usd,
 } from "@/lib/gigs";
 
+const priceSchema = z.coerce
+  .number()
+  .int("Whole dollars only")
+  .min(GIG_MIN_USD, `Gigs start at $${GIG_MIN_USD}`)
+  .max(GIG_MAX_USD, `Gigs are capped at $${GIG_MAX_USD}`);
+
+const packageSchema = z.object({
+  tier: z.enum(["BASIC", "STANDARD", "PREMIUM"]),
+  name: z.string().trim().min(2, "Name each package").max(40),
+  description: z
+    .string()
+    .trim()
+    .min(10, "Say in a line what each package gets the buyer")
+    .max(300),
+  includes: z.string().trim().max(1000).optional(),
+  priceUsd: priceSchema,
+  deliveryDays: z.coerce.number().int().min(1).max(MAX_DELIVERY_DAYS),
+  revisions: z.coerce.number().int().min(0).max(MAX_REVISIONS),
+});
+
 const gigSchema = z.object({
   title: z.string().trim().min(6, "Give the gig a clear title").max(80),
   description: z
     .string()
     .trim()
     .min(40, "Say what you will do in at least a couple of sentences")
-    .max(2000),
-  includes: z.string().trim().max(1000).optional(),
-  priceUsd: z.coerce
-    .number()
-    .int("Whole dollars only")
-    .min(GIG_MIN_USD, `Gigs start at $${GIG_MIN_USD}`)
-    .max(GIG_MAX_USD, `Gigs are capped at $${GIG_MAX_USD}`),
-  deliveryDays: z.coerce.number().int().min(1).max(MAX_DELIVERY_DAYS),
+    .max(3000),
+  tags: z.array(z.string().trim().min(2).max(30)).max(MAX_GIG_TAGS),
+  images: z.array(z.string().url()).max(MAX_GIG_IMAGES),
+  faq: z
+    .array(
+      z.object({
+        q: z.string().trim().min(5, "Write the question in full").max(160),
+        a: z.string().trim().min(5, "Answer each question").max(600),
+      }),
+    )
+    .max(MAX_GIG_FAQ),
+  packages: z
+    .array(packageSchema)
+    .min(1, "Fill in at least the Basic package")
+    .max(3)
+    .refine(
+      (list) => list.some((p) => p.tier === "BASIC"),
+      "The Basic package is required",
+    )
+    .refine((list) => {
+      const prices = TIERS.filter((t) => list.some((p) => p.tier === t)).map(
+        (t) => list.find((p) => p.tier === t)!.priceUsd,
+      );
+      return prices.every((p, i) => i === 0 || p >= prices[i - 1]);
+    }, "Standard must cost at least as much as Basic, and Premium at least Standard"),
 });
 
 function firstIssue(error: z.ZodError) {
   return error.issues[0]?.message ?? "Please check the form.";
+}
+
+function strings(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .map((v) => String(v).trim())
+    .filter(Boolean);
+}
+
+/** Only pictures the seller uploaded here (blob path gigs/<userId>/…) are accepted. */
+function ownGigImage(url: string, userId: string) {
+  try {
+    const { hostname, pathname } = new URL(url);
+    return (
+      hostname.endsWith(".public.blob.vercel-storage.com") &&
+      pathname.startsWith(`/gigs/${userId}/`)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Reads the whole gig editor form. Packages are keyed pkg_<TIER>_<field>. */
+function readGigForm(formData: FormData, userId: string) {
+  const packages = TIERS.filter(
+    (tier) => tier === "BASIC" || formData.get(`pkg_${tier}_on`) === "1",
+  ).map((tier) => ({
+    tier,
+    name: formData.get(`pkg_${tier}_name`) || TIER_LABEL[tier],
+    description: formData.get(`pkg_${tier}_description`),
+    includes: formData.get(`pkg_${tier}_includes`) ?? undefined,
+    priceUsd: formData.get(`pkg_${tier}_priceUsd`),
+    deliveryDays: formData.get(`pkg_${tier}_deliveryDays`),
+    revisions: formData.get(`pkg_${tier}_revisions`) || 0,
+  }));
+  const questions = formData.getAll("faq_q").map(String);
+  const answers = formData.getAll("faq_a").map(String);
+  const faq = questions
+    .map((q, i) => ({ q: q.trim(), a: (answers[i] ?? "").trim() }))
+    .filter((row) => row.q || row.a);
+  const tags = Array.from(
+    new Set(
+      String(formData.get("tags") ?? "")
+        .split(/[,\n]/)
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  );
+  return gigSchema.safeParse({
+    title: formData.get("title"),
+    description: formData.get("description"),
+    tags,
+    images: strings(formData, "images").filter((url) => ownGigImage(url, userId)),
+    faq,
+    packages,
+  });
+}
+
+type GigInput = z.infer<typeof gigSchema>;
+
+/** Top-level price/delivery/includes mirror the cheapest package for cards and lists. */
+function gigColumns(data: GigInput) {
+  const basic = data.packages.find((p) => p.tier === "BASIC")!;
+  const faq: GigFaq[] = data.faq;
+  return {
+    title: sentenceCase(data.title),
+    description: data.description,
+    includes: basic.includes || null,
+    priceMinor: Math.min(...data.packages.map((p) => p.priceUsd)) * 100,
+    deliveryDays: basic.deliveryDays,
+    tags: data.tags,
+    images: data.images,
+    faq,
+  };
+}
+
+function packageRows(data: GigInput) {
+  return data.packages.map((p) => ({
+    tier: p.tier,
+    name: p.name,
+    description: p.description,
+    includes: p.includes || null,
+    priceMinor: p.priceUsd * 100,
+    deliveryDays: p.deliveryDays,
+    revisions: p.revisions,
+  }));
 }
 
 function revalidateGig(slug: string, username: string | null) {
@@ -60,13 +190,7 @@ export async function createGigAction(
     if (!user.emailVerifiedAt) {
       return { error: "Verify your email before selling a gig." };
     }
-    const parsed = gigSchema.safeParse({
-      title: formData.get("title"),
-      description: formData.get("description"),
-      includes: formData.get("includes") ?? undefined,
-      priceUsd: formData.get("priceUsd"),
-      deliveryDays: formData.get("deliveryDays"),
-    });
+    const parsed = readGigForm(formData, user.id);
     if (!parsed.success) return { error: firstIssue(parsed.error) };
 
     const live = await db.gig.count({
@@ -81,11 +205,8 @@ export async function createGigAction(
       data: {
         slug,
         sellerId: user.id,
-        title: sentenceCase(parsed.data.title),
-        description: parsed.data.description,
-        includes: parsed.data.includes || null,
-        priceMinor: parsed.data.priceUsd * 100,
-        deliveryDays: parsed.data.deliveryDays,
+        ...gigColumns(parsed.data),
+        packages: { create: packageRows(parsed.data) },
       },
     });
     revalidateGig(slug, user.username);
@@ -107,25 +228,25 @@ export async function updateGigAction(
     });
     if (!gig) return { error: "Gig not found." };
 
-    const parsed = gigSchema.safeParse({
-      title: formData.get("title"),
-      description: formData.get("description"),
-      includes: formData.get("includes") ?? undefined,
-      priceUsd: formData.get("priceUsd"),
-      deliveryDays: formData.get("deliveryDays"),
-    });
+    const parsed = readGigForm(formData, user.id);
     if (!parsed.success) return { error: firstIssue(parsed.error) };
 
-    await db.gig.update({
-      where: { id: gig.id },
-      data: {
-        title: sentenceCase(parsed.data.title),
-        description: parsed.data.description,
-        includes: parsed.data.includes || null,
-        priceMinor: parsed.data.priceUsd * 100,
-        deliveryDays: parsed.data.deliveryDays,
-      },
-    });
+    // Packages are upserted by tier so open orders keep their packageId;
+    // orders already snapshot name, price and delivery.
+    const rows = packageRows(parsed.data);
+    await db.$transaction([
+      db.gig.update({ where: { id: gig.id }, data: gigColumns(parsed.data) }),
+      db.gigPackage.deleteMany({
+        where: { gigId: gig.id, tier: { notIn: rows.map((r) => r.tier) } },
+      }),
+      ...rows.map((row) =>
+        db.gigPackage.upsert({
+          where: { gigId_tier: { gigId: gig.id, tier: row.tier } },
+          create: { gigId: gig.id, ...row },
+          update: row,
+        }),
+      ),
+    ]);
     revalidateGig(gig.slug, user.username);
     return { success: "Saved." };
   } catch (error) {
@@ -170,24 +291,37 @@ export async function buyGigAction(
       return { error: "Card payments are not available right now." };
     }
     const slug = String(formData.get("slug") ?? "");
+    const tier = String(formData.get("tier") ?? "BASIC");
     const brief = briefSchema.safeParse(formData.get("brief"));
     if (!brief.success) return { error: firstIssue(brief.error) };
 
     const gig = await db.gig.findFirst({
       where: { slug, status: "ACTIVE" },
-      include: { seller: { select: { id: true, name: true } } },
+      include: {
+        seller: { select: { id: true, name: true } },
+        packages: true,
+      },
     });
     if (!gig) return { error: "This gig is no longer available." };
     if (gig.sellerId === user.id) return { error: "You cannot buy your own gig." };
+    const pkg =
+      gig.packages.find((p) => p.tier === tier) ??
+      gig.packages.find((p) => p.tier === "BASIC") ??
+      gig.packages[0];
+    if (!pkg) return { error: "This gig has no package to buy yet." };
 
     const order = await db.gigOrder.create({
       data: {
         gigId: gig.id,
         buyerId: user.id,
         sellerId: gig.sellerId,
-        priceMinor: gig.priceMinor,
+        packageId: pkg.id,
+        packageName: pkg.name,
+        revisions: pkg.revisions,
+        deliveryDays: pkg.deliveryDays,
+        priceMinor: pkg.priceMinor,
         feeMinor: gigFeeMinor(),
-        sellerMinor: sellerShareMinor(gig.priceMinor),
+        sellerMinor: sellerShareMinor(pkg.priceMinor),
         currency: "USD",
         brief: brief.data,
       },
@@ -207,10 +341,10 @@ export async function buyGigAction(
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: gig.priceMinor,
+            unit_amount: pkg.priceMinor,
             product_data: {
-              name: gig.title,
-              description: `By ${gig.seller.name} · delivered in ${gig.deliveryDays} day(s). Held by Godesi until you confirm.`,
+              name: `${gig.title} — ${pkg.name}`,
+              description: `By ${gig.seller.name} · delivered in ${pkg.deliveryDays} day(s). Held by Godesi until you confirm.`,
             },
           },
         },
@@ -422,6 +556,95 @@ export async function resolveGigDisputeAction(
     revalidatePath("/admin/gigs");
     revalidatePath(`/gigs/orders/${order.id}`);
     return { success: `Order ${outcome === "release" ? "released to the seller" : "refunded"} (${usd(order.priceMinor)}).` };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+const reviewSchema = z.object({
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z
+    .string()
+    .trim()
+    .min(10, "Say a line about how it went")
+    .max(1000),
+});
+
+/** Buyer rates a completed order once; the gig's average updates with it. */
+export async function reviewGigAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const orderId = String(formData.get("orderId") ?? "");
+    const order = await orderForParty(orderId, user.id);
+    if (!order || order.buyerId !== user.id) return { error: "Order not found." };
+    if (order.status !== "RELEASED") {
+      return { error: "You can review once the order is complete." };
+    }
+    const parsed = reviewSchema.safeParse({
+      rating: formData.get("rating"),
+      comment: formData.get("comment"),
+    });
+    if (!parsed.success) return { error: firstIssue(parsed.error) };
+    const existing = await db.gigReview.findUnique({ where: { orderId: order.id } });
+    if (existing) return { error: "You have already reviewed this order." };
+
+    await db.$transaction([
+      db.gigReview.create({
+        data: {
+          orderId: order.id,
+          gigId: order.gigId,
+          authorId: user.id,
+          rating: parsed.data.rating,
+          comment: parsed.data.comment,
+        },
+      }),
+      db.gig.update({
+        where: { id: order.gigId },
+        data: {
+          ratingSum: { increment: parsed.data.rating },
+          ratingCount: { increment: 1 },
+        },
+      }),
+    ]);
+    await notify({
+      userId: order.sellerId,
+      title: `${parsed.data.rating}★ review on ${order.gig.title}`,
+      body: parsed.data.comment.slice(0, 120),
+      href: `/gigs/${order.gig.slug}`,
+    });
+    revalidatePath(`/gigs/orders/${order.id}`);
+    revalidatePath(`/gigs/${order.gig.slug}`);
+    revalidatePath("/gigs");
+    return { success: "Thanks — your review is on the gig." };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+/** Seller answers a review publicly, once. */
+export async function replyGigReviewAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const reviewId = String(formData.get("reviewId") ?? "");
+    const reply = z.string().trim().min(2).max(600).safeParse(formData.get("reply"));
+    if (!reply.success) return { error: "Write a reply first." };
+    const review = await db.gigReview.findFirst({
+      where: { id: reviewId, gig: { sellerId: user.id }, reply: null },
+      include: { gig: { select: { slug: true } } },
+    });
+    if (!review) return { error: "Review not found." };
+    await db.gigReview.update({
+      where: { id: review.id },
+      data: { reply: reply.data, repliedAt: new Date() },
+    });
+    revalidatePath(`/gigs/${review.gig.slug}`);
+    return { success: "Reply posted." };
   } catch (error) {
     return fieldError(error);
   }

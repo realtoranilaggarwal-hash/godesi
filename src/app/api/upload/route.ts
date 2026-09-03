@@ -11,6 +11,7 @@ const FOLDERS = {
   logo: "listings",
   listing: "classifieds",
   banner: "banners",
+  gig: "gigs",
 } as const;
 
 type Purpose = keyof typeof FOLDERS;

@@ -345,6 +345,7 @@ model User {
   gigSales    GigOrder[]   @relation("GigSeller")
   gigOrders   GigOrder[]   @relation("GigBuyer")
   gigMessages GigMessage[]
+  gigReviews  GigReview[]
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
@@ -1670,6 +1671,12 @@ enum GigOrderStatus {
   CANCELLED
 }
 
+enum GigTier {
+  BASIC
+  STANDARD
+  PREMIUM
+}
+
 /// A small fixed-price service a member sells from their card, $5–$100.
 model Gig {
   id           String    @id @default(cuid())
@@ -1678,18 +1685,64 @@ model Gig {
   seller       User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   title        String
   description  String
-  /// What the buyer gets, one item per line.
+  /// What the buyer gets, one item per line (mirrors the Basic package).
   includes     String?
-  /// Whole US dollars; the buyer always pays in USD.
+  /// Starting price: the cheapest package, whole US dollars in cents.
   priceMinor   Int
+  /// Delivery of the cheapest package.
   deliveryDays Int       @default(3)
+  /// Seller's own pictures of the work; first one is the cover.
+  images       String[]  @default([])
+  tags         String[]  @default([])
+  /// [{ q, a }] written by the seller.
+  faq          Json      @default("[]")
+  ratingSum    Int       @default(0)
+  ratingCount  Int       @default(0)
   status       GigStatus @default(ACTIVE)
+  packages     GigPackage[]
   orders       GigOrder[]
+  reviews      GigReview[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   @@index([sellerId, status])
   @@index([status, createdAt])
+}
+
+/// Basic / Standard / Premium — what the buyer picks in the order box.
+model GigPackage {
+  id           String  @id @default(cuid())
+  gigId        String
+  gig          Gig     @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  tier         GigTier
+  name         String
+  description  String
+  /// One item per line.
+  includes     String?
+  priceMinor   Int
+  deliveryDays Int
+  revisions    Int     @default(0)
+  orders       GigOrder[]
+
+  @@unique([gigId, tier])
+}
+
+/// One review per completed order, by the buyer, shown on the gig.
+model GigReview {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     GigOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  gigId     String
+  gig       Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String
+  reply     String?
+  repliedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([gigId, createdAt])
 }
 
 model GigOrder {
@@ -1701,6 +1754,14 @@ model GigOrder {
   sellerId String
   seller   User           @relation("GigSeller", fields: [sellerId], references: [id], onDelete: Restrict)
   status   GigOrderStatus @default(PENDING)
+
+  packageId   String?
+  package     GigPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  /// Package name at the time of purchase, kept even if the seller edits it.
+  packageName  String?
+  revisions    Int         @default(0)
+  /// Delivery promised at purchase, in days.
+  deliveryDays Int         @default(3)
 
   /// What the buyer paid, Godesi's flat fee, and what the seller receives.
   priceMinor  Int
@@ -1729,6 +1790,7 @@ model GigOrder {
   resolution    String?
 
   messages  GigMessage[]
+  review    GigReview?
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 

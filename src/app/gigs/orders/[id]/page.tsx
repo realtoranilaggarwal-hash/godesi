@@ -16,6 +16,7 @@ import {
   deliverGigAction,
   disputeGigAction,
   postGigMessageAction,
+  reviewGigAction,
 } from "@/app/actions/gigs";
 import { ActionForm } from "@/components/gigs/GigForms";
 import { Alert, Badge, Button, Card, Field, inputClass } from "@/components/ui";
@@ -44,7 +45,8 @@ export default async function GigOrderPage({
   const order = await db.gigOrder.findUnique({
     where: { id: params.id },
     include: {
-      gig: { select: { title: true, slug: true, deliveryDays: true } },
+      gig: { select: { title: true, slug: true } },
+      review: { select: { id: true, rating: true, comment: true } },
       buyer: { select: { id: true, name: true, avatarUrl: true, username: true } },
       seller: { select: { id: true, name: true, avatarUrl: true, username: true } },
       messages: {
@@ -93,6 +95,35 @@ export default async function GigOrderPage({
           you.
         </Alert>
       ) : null}
+      {isBuyer && order.status === "RELEASED" && !order.review ? (
+        <Card className="space-y-2 border-amber-200">
+          <h2 className="font-bold">How did it go?</h2>
+          <p className="text-sm text-slate-600">
+            Your review shows on the gig, under your name. Only buyers who
+            completed an order can leave one.
+          </p>
+          <ActionForm action={reviewGigAction} submitLabel="Post review" pendingLabel="Posting…">
+            <input type="hidden" name="orderId" value={order.id} />
+            <Field label="Rating" required>
+              <select name="rating" defaultValue="5" className={inputClass}>
+                <option value="5">★★★★★ Excellent</option>
+                <option value="4">★★★★ Good</option>
+                <option value="3">★★★ Okay</option>
+                <option value="2">★★ Poor</option>
+                <option value="1">★ Bad</option>
+              </select>
+            </Field>
+            <Field label="Your review" required>
+              <textarea name="comment" required minLength={10} maxLength={1000} rows={3} className={inputClass} />
+            </Field>
+          </ActionForm>
+        </Card>
+      ) : null}
+      {order.review ? (
+        <Alert tone="success">
+          {isBuyer ? "You rated this" : "The buyer rated this"} {order.review.rating}★ — “{order.review.comment}”
+        </Alert>
+      ) : null}
       {isSeller &&
       order.status === "RELEASED" &&
       !order.stripeTransferId ? (
@@ -134,6 +165,13 @@ export default async function GigOrderPage({
           </div>
           <div className="text-right text-sm">
             <p className="text-2xl font-black">{usd(order.priceMinor)}</p>
+            {order.packageName ? (
+              <p className="font-semibold text-slate-700">
+                {order.packageName} · {order.deliveryDays} day
+                {order.deliveryDays === 1 ? "" : "s"} · {order.revisions} revision
+                {order.revisions === 1 ? "" : "s"}
+              </p>
+            ) : null}
             <p className="text-slate-500">
               seller receives {usd(order.sellerMinor)} · Godesi {usd(order.feeMinor)}
             </p>
@@ -319,7 +357,7 @@ export default async function GigOrderPage({
         <Card className="space-y-2 border-rose-200">
           <h2 className="font-bold">Delivery is overdue</h2>
           <p className="text-sm text-slate-600">
-            The seller promised {order.gig.deliveryDays} day(s). Message them
+            The seller promised {order.deliveryDays} day(s). Message them
             first; if there is no answer you can raise a problem and staff will
             refund you.
           </p>

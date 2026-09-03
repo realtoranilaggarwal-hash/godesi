@@ -8,10 +8,11 @@ import {
   GIG_FEE_USD,
   GIG_MAX_USD,
   GIG_MIN_USD,
-  MAX_DELIVERY_DAYS,
   MAX_GIGS_PER_SELLER,
   ORDER_LABEL,
   ORDER_TONE,
+  faqList,
+  sortPackages,
   usd,
 } from "@/lib/gigs";
 import {
@@ -20,84 +21,12 @@ import {
   updateGigAction,
 } from "@/app/actions/gigs";
 import { ActionForm } from "@/components/gigs/GigForms";
+import { GigEditor } from "@/components/gigs/GigEditor";
 import { FeeNote } from "@/components/gigs/GigCard";
-import { Alert, Badge, Button, Card, Field, inputClass } from "@/components/ui";
+import { Alert, Badge, Button, Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My gigs" };
-
-function GigFields({
-  gig,
-}: {
-  gig?: {
-    title: string;
-    description: string;
-    includes: string | null;
-    priceMinor: number;
-    deliveryDays: number;
-  };
-}) {
-  return (
-    <>
-      <Field label="Title" required hint="Say the outcome: “Kundli reading with 30-min call”, not “Astrology”.">
-        <input
-          name="title"
-          required
-          minLength={6}
-          maxLength={80}
-          defaultValue={gig?.title}
-          className={inputClass}
-        />
-      </Field>
-      <Field label="What you will do" required hint="Your own words. Who it is for, what you need from them, what they get back.">
-        <textarea
-          name="description"
-          required
-          minLength={40}
-          maxLength={2000}
-          rows={4}
-          defaultValue={gig?.description}
-          className={inputClass}
-        />
-      </Field>
-      <Field label="What's included" hint="One item per line, e.g. “PDF report”, “One revision”.">
-        <textarea
-          name="includes"
-          maxLength={1000}
-          rows={3}
-          defaultValue={gig?.includes ?? ""}
-          className={inputClass}
-        />
-      </Field>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label={`Price in US$ (${GIG_MIN_USD}–${GIG_MAX_USD})`} required>
-          <input
-            name="priceUsd"
-            type="number"
-            required
-            min={GIG_MIN_USD}
-            max={GIG_MAX_USD}
-            step={1}
-            defaultValue={gig ? gig.priceMinor / 100 : 25}
-            className={inputClass}
-          />
-        </Field>
-        <Field label={`Delivery in days (1–${MAX_DELIVERY_DAYS})`} required>
-          <input
-            name="deliveryDays"
-            type="number"
-            required
-            min={1}
-            max={MAX_DELIVERY_DAYS}
-            step={1}
-            defaultValue={gig?.deliveryDays ?? 3}
-            className={inputClass}
-          />
-        </Field>
-      </div>
-    </>
-  );
-}
 
 export default async function DashboardGigsPage() {
   const user = await getCurrentUser();
@@ -107,7 +36,10 @@ export default async function DashboardGigsPage() {
     db.gig.findMany({
       where: { sellerId: user.id, status: { not: "REMOVED" } },
       orderBy: { createdAt: "desc" },
-      include: { _count: { select: { orders: { where: { status: "RELEASED" } } } } },
+      include: {
+        packages: true,
+        _count: { select: { orders: { where: { status: "RELEASED" } } } },
+      },
     }),
     db.gigOrder.findMany({
       where: { sellerId: user.id, status: { not: "PENDING" } },
@@ -203,7 +135,11 @@ export default async function DashboardGigsPage() {
                     {gig.status === "ACTIVE" ? "Live" : "Paused"}
                   </Badge>
                   <span className="text-xs text-slate-500">
-                    {gig._count.orders} completed
+                    from {usd(gig.priceMinor)} · {gig.packages.length} package
+                    {gig.packages.length === 1 ? "" : "s"} · {gig._count.orders} completed
+                    {gig.ratingCount
+                      ? ` · ★ ${(gig.ratingSum / gig.ratingCount).toFixed(1)}`
+                      : ""}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -234,7 +170,16 @@ export default async function DashboardGigsPage() {
                 <div className="mt-3">
                   <ActionForm action={updateGigAction} submitLabel="Save changes">
                     <input type="hidden" name="gigId" value={gig.id} />
-                    <GigFields gig={gig} />
+                    <GigEditor
+                      gig={{
+                        title: gig.title,
+                        description: gig.description,
+                        tags: gig.tags,
+                        images: gig.images,
+                        faq: faqList(gig.faq),
+                        packages: sortPackages(gig.packages),
+                      }}
+                    />
                   </ActionForm>
                 </div>
               </details>
@@ -254,7 +199,7 @@ export default async function DashboardGigsPage() {
             pendingLabel="Publishing…"
             resetOnSuccess
           >
-            <GigFields />
+            <GigEditor />
           </ActionForm>
           <FeeNote priceMinor={2500} audience="seller" />
         </Card>

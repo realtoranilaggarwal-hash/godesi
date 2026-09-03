@@ -1,4 +1,4 @@
-import type { GigOrder, GigOrderStatus } from "@prisma/client";
+import type { GigOrder, GigOrderStatus, GigTier } from "@prisma/client";
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { notify } from "@/lib/notifications";
@@ -23,6 +23,36 @@ export const AUTO_RELEASE_DAYS = 7;
 
 export const MAX_DELIVERY_DAYS = 30;
 export const MAX_GIGS_PER_SELLER = 10;
+export const MAX_REVISIONS = 10;
+export const MAX_GIG_IMAGES = 5;
+export const MAX_GIG_TAGS = 5;
+export const MAX_GIG_FAQ = 5;
+
+export const TIERS: GigTier[] = ["BASIC", "STANDARD", "PREMIUM"];
+export const TIER_LABEL: Record<GigTier, string> = {
+  BASIC: "Basic",
+  STANDARD: "Standard",
+  PREMIUM: "Premium",
+};
+
+export type GigFaq = { q: string; a: string };
+
+/** The seller's FAQ is stored as JSON; anything malformed is dropped. */
+export function faqList(value: unknown): GigFaq[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const q = "q" in item ? item.q : null;
+    const a = "a" in item ? item.a : null;
+    return typeof q === "string" && typeof a === "string" && q && a
+      ? [{ q, a }]
+      : [];
+  });
+}
+
+export function averageRating(sum: number, count: number) {
+  return count ? Math.round((sum / count) * 10) / 10 : 0;
+}
 
 export function gigFeeMinor() {
   return GIG_FEE_USD * 100;
@@ -102,7 +132,7 @@ export async function confirmGigOrder({
 }) {
   const order = await db.gigOrder.findUnique({
     where: { id: orderId },
-    include: { gig: { select: { title: true, deliveryDays: true } } },
+    include: { gig: { select: { title: true } } },
   });
   if (!order) return null;
   if (order.status !== "PENDING") return order;
@@ -115,7 +145,7 @@ export async function confirmGigOrder({
       stripeSessionId: sessionId,
       stripePaymentIntentId: paymentIntentId,
       paidAt: now,
-      dueAt: addDays(now, order.gig.deliveryDays),
+      dueAt: addDays(now, order.deliveryDays),
     },
   });
   if (claimed.count === 0) {
@@ -129,7 +159,7 @@ export async function confirmGigOrder({
   await notify({
     userId: order.sellerId,
     title: `New order: ${order.gig.title}`,
-    body: `${usd(order.priceMinor)} paid. Deliver within ${order.gig.deliveryDays} day(s) and you receive ${usd(order.sellerMinor)}.${
+    body: `${usd(order.priceMinor)} paid${order.packageName ? ` (${order.packageName})` : ""}. Deliver within ${order.deliveryDays} day(s) and you receive ${usd(order.sellerMinor)}.${
       seller?.stripePayoutsEnabled
         ? ""
         : " Connect your Stripe account under Payouts so it is paid to you automatically."
@@ -282,7 +312,24 @@ export const GIG_SELECT = {
   includes: true,
   priceMinor: true,
   deliveryDays: true,
+  images: true,
+  tags: true,
+  faq: true,
+  ratingSum: true,
+  ratingCount: true,
   status: true,
+  packages: {
+    select: {
+      id: true,
+      tier: true,
+      name: true,
+      description: true,
+      includes: true,
+      priceMinor: true,
+      deliveryDays: true,
+      revisions: true,
+    },
+  },
   seller: {
     select: {
       id: true,
@@ -291,6 +338,36 @@ export const GIG_SELECT = {
       avatarUrl: true,
       headline: true,
       location: true,
+      createdAt: true,
     },
   },
 } as const;
+
+/** Packages in Basic → Premium order regardless of insertion. */
+export function sortPackages<T extends { tier: GigTier }>(packages: T[]) {
+  return [...packages].sort(
+    (a, b) => TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier),
+  );
+}
+
+/** Seller-level trust numbers shown in the gig header, from real orders. */
+export async function sellerStats(sellerId: string) {
+  const [completed, rating, active] = await Promise.all([
+    db.gigOrder.count({ where: { sellerId, status: "RELEASED" } }),
+    db.gig.aggregate({
+      where: { sellerId, status: { not: "REMOVED" } },
+      _sum: { ratingSum: true, ratingCount: true },
+    }),
+    db.gigOrder.count({
+      where: { sellerId, status: { in: ["PAID", "DELIVERED"] } },
+    }),
+  ]);
+  const sum = rating._sum.ratingSum ?? 0;
+  const count = rating._sum.ratingCount ?? 0;
+  return {
+    completed,
+    inProgress: active,
+    ratingCount: count,
+    rating: averageRating(sum, count),
+  };
+}
