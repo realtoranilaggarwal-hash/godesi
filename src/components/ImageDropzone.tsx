@@ -38,19 +38,23 @@ export type UploadPurpose =
   | "logo"
   | "listing"
   | "banner"
-  | "gig";
+  | "gig"
+  | "website";
 
 export function ImageDropzone({
   purpose,
   multiple = false,
   label = "Drag & drop an image here, or click to choose",
   hint,
+  fields,
   onUploaded,
 }: {
   purpose: UploadPurpose;
   multiple?: boolean;
   label?: string;
   hint?: string;
+  /** Extra form fields the upload route needs, e.g. a project id. */
+  fields?: Record<string, string>;
   onUploaded: (url: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,6 +76,7 @@ export function ImageDropzone({
         const body = new FormData();
         body.append("file", await compress(file));
         body.append("purpose", purpose);
+        for (const [key, value] of Object.entries(fields ?? {})) body.append(key, value);
         const res = await fetch("/api/upload", { method: "POST", body });
         const data = (await res.json()) as { url?: string; error?: string };
         if (!res.ok || !data.url) {

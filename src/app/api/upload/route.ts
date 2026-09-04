@@ -3,6 +3,9 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { mediaLimit } from "@/lib/plans";
 import { storeImage, uploadsEnabled, validateImage } from "@/lib/uploads";
+import { loadProject } from "@/lib/websiteProjects";
+
+const WEBSITE_UPLOAD_LIMIT = 12;
 
 const FOLDERS = {
   avatar: "avatars",
@@ -12,6 +15,7 @@ const FOLDERS = {
   listing: "classifieds",
   banner: "banners",
   gig: "gigs",
+  website: "websites",
 } as const;
 
 type Purpose = keyof typeof FOLDERS;
@@ -33,11 +37,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Please sign in first." }, { status: 401 });
-  }
-
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
   const purposeRaw = String(form?.get("purpose") ?? "");
@@ -48,6 +47,46 @@ export async function POST(request: Request) {
 
   const invalid = validateImage(file);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
+
+  // Website projects start before sign-in: the project cookie stands in for a
+  // session, and each picture is attached to the project straight away.
+  if (purposeRaw === "website") {
+    const project = await loadProject(String(form?.get("projectId") ?? ""));
+    if (!project) {
+      return NextResponse.json({ error: "Start your website first." }, { status: 403 });
+    }
+    if (project.uploads.length >= WEBSITE_UPLOAD_LIMIT) {
+      return NextResponse.json(
+        { error: `Up to ${WEBSITE_UPLOAD_LIMIT} pictures per website.` },
+        { status: 403 },
+      );
+    }
+    const url = await storeImage({ file, folder: "websites", ownerId: project.id });
+    const updated = await db.websiteProject.update({
+      where: { id: project.id },
+      data: { uploads: { push: url } },
+      select: { uploads: true },
+    });
+    // Parallel uploads can all pass the check above; keep the first N and drop the rest.
+    if (updated.uploads.length > WEBSITE_UPLOAD_LIMIT) {
+      await db.websiteProject.update({
+        where: { id: project.id },
+        data: { uploads: updated.uploads.slice(0, WEBSITE_UPLOAD_LIMIT) },
+      });
+      if (updated.uploads.indexOf(url) >= WEBSITE_UPLOAD_LIMIT) {
+        return NextResponse.json(
+          { error: `Up to ${WEBSITE_UPLOAD_LIMIT} pictures per website.` },
+          { status: 403 },
+        );
+      }
+    }
+    return NextResponse.json({ url });
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Please sign in first." }, { status: 401 });
+  }
 
   if (purposeRaw === "gallery") {
     const business = await db.business.findUnique({ where: { ownerId: user.id } });

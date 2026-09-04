@@ -62,6 +62,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   },
   { href: "/admin/rewards", label: "Rewards", icon: "🎁", need: "admin" },
   { href: "/admin/gigs", label: "Gigs", icon: "🛠️", need: "gigs" },
+  { href: "/admin/website", label: "Websites", icon: "🌐", need: "staff" },
   { href: "/admin/reviews", label: "Reviews", icon: "⭐", need: "reviews" },
   { href: "/admin/content", label: "Content desk", icon: "✍️", need: "staff" },
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆", need: "staff" },

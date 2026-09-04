@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
-import { WebsiteRequestForm } from "@/components/forms/WebsiteRequestForm";
 import { SidebarBanners } from "@/components/Banners";
-import {
-  WEBSITE_OFFER,
-  WEBSITE_OFFER_INCLUDES,
-  whatsappOfferLink,
-} from "@/lib/websiteOffer";
+import { WebsiteStartForm } from "@/components/website/WebsiteStartForm";
+import { WEBSITE_OFFER, whatsappOfferLink } from "@/lib/websiteOffer";
+import { BASE_INCLUDES, POWER_UPS, WEBSITE_STEPS, websitePath } from "@/lib/websiteBuilder";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: `Get a ${WEBSITE_OFFER.pages}-page website for $${WEBSITE_OFFER.priceUsd}`,
-  description: `No website yet? Godesi builds desi businesses a ${WEBSITE_OFFER.pages}-page mobile-friendly website for $${WEBSITE_OFFER.priceUsd} in collaboration with ${WEBSITE_OFFER.partner}.`,
+  title: "Your business already exists online. Let AI turn it into a website.",
+  description: `Paste your Google, Yelp or existing website link. AI builds your new website, you preview it free, and pay $${WEBSITE_OFFER.priceUsd} only if you love it.`,
   alternates: { canonical: "/website" },
 };
 
@@ -22,72 +21,119 @@ export default async function WebsiteOfferPage() {
   const business = user
     ? await db.business.findUnique({
         where: { ownerId: user.id },
-        select: { name: true, city: true, phone: true },
+        select: { name: true, city: true, phone: true, websiteUrl: true },
       })
     : null;
   const whatsapp = whatsappOfferLink();
 
+  const recentIds = (cookies().get("godesi_web_projects")?.value ?? "")
+    .split(",")
+    .filter(Boolean)
+    .slice(0, 3);
+  const recent = recentIds.length
+    ? await db.websiteProject.findMany({
+        where: { id: { in: recentIds }, status: { notIn: ["CANCELLED"] } },
+        select: { id: true, businessName: true, status: true },
+        orderBy: { updatedAt: "desc" },
+      })
+    : [];
+
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
-        <section className="rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-7 text-white sm:px-8">
-          <h1 className="text-3xl font-black">
-            No website? Get one for ${WEBSITE_OFFER.priceUsd} 🌐
+        <section className="rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
+          <h1 className="text-3xl font-black leading-tight sm:text-4xl">
+            Your Business Already Exists Online.
+            <br />
+            Let AI Turn It Into A Website.
           </h1>
-          <p className="mt-2 max-w-2xl text-white/90">
-            A clean {WEBSITE_OFFER.pages}-page website for your business, built with
-            our partner{" "}
-            <a
-              href={WEBSITE_OFFER.partnerUrl}
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              className="font-semibold underline"
-            >
-              {WEBSITE_OFFER.partner}
-            </a>
-            . ${WEBSITE_OFFER.priceUsd} to build it, then ${WEBSITE_OFFER.monthlyUsd} a
-            month — domain and hosting included. Fill the form below and we reply
-            within one business day.
+          <p className="mt-3 max-w-2xl text-lg text-white/90">
+            Give us your Google, Yelp or existing website. AI builds your new website.{" "}
+            <strong>Preview it FREE.</strong> Love it? Pay and launch. Don&apos;t like it?
+            You don&apos;t pay.
           </p>
-          {whatsapp ? (
+          <p className="mt-2 max-w-2xl text-sm text-white/80">
+            Then add the tools you need — booking, AI chat, payments, CRM, lead capture and
+            more. ${WEBSITE_OFFER.priceUsd} once, ${WEBSITE_OFFER.monthlyUsd}/month hosting, Power-Ups from $
+            {Math.min(...POWER_UPS.map((p) => p.monthlyUsd))}/month.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
             <a
-              href={whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-block rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white"
+              href="#start"
+              className="rounded-xl bg-white px-5 py-3 text-base font-bold text-indigo-700 shadow"
             >
-              💬 Ask on WhatsApp
+              🚀 Build My Website FREE
             </a>
-          ) : null}
+            {whatsapp ? (
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white"
+              >
+                💬 Ask on WhatsApp
+              </a>
+            ) : null}
+          </div>
         </section>
 
+        {recent.length ? (
+          <Card>
+            <h2 className="text-base font-bold">Pick up where you left off</h2>
+            <ul className="mt-2 space-y-1 text-sm">
+              {recent.map((project) => (
+                <li key={project.id}>
+                  <Link
+                    href={websitePath(
+                      project.id,
+                      project.status === "APPROVED"
+                        ? "/features"
+                        : project.status === "PAID" || project.status === "LIVE"
+                          ? "/done"
+                          : project.status === "PREVIEW"
+                            ? "/preview"
+                            : "/verify",
+                    )}
+                    className="font-semibold text-indigo-700 hover:underline"
+                  >
+                    {project.businessName}
+                  </Link>{" "}
+                  <span className="text-slate-500">— {project.status.toLowerCase()}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
         <Card>
-          <h2 className="text-lg font-bold">What ${WEBSITE_OFFER.priceUsd} covers</h2>
-          <ul className="mt-3 space-y-2 text-sm text-slate-600">
-            {WEBSITE_OFFER_INCLUDES.map((item) => (
-              <li key={item} className="flex gap-2">
-                <span aria-hidden>✅</span>
-                <span>{item}</span>
+          <ol className="grid gap-3 text-sm sm:grid-cols-5">
+            {WEBSITE_STEPS.map((step, index) => (
+              <li key={step} className="rounded-xl bg-slate-50 p-3">
+                <div className="text-xs font-bold text-indigo-600">STEP {index + 1}</div>
+                <div className="font-semibold text-slate-900">{step}</div>
               </li>
             ))}
-          </ul>
+          </ol>
           <p className="mt-3 text-xs text-slate-500">
-            ${WEBSITE_OFFER.priceUsd} one-time build, then ${WEBSITE_OFFER.monthlyUsd} a
-            month covering your domain, hosting and small text or photo updates. Extra
-            pages, online payments or a booking system are quoted separately.
+            Every website includes: {BASE_INCLUDES.join(", ").toLowerCase()}. Built and hosted
+            by GoDesi with our partner{" "}
+            <a href={WEBSITE_OFFER.partnerUrl} target="_blank" rel="noopener noreferrer nofollow" className="underline">
+              {WEBSITE_OFFER.partner}
+            </a>
+            .
           </p>
         </Card>
 
         <Card>
-          <h2 className="text-lg font-bold">Tell us about your website</h2>
-          <p className="mb-4 text-sm text-slate-600">
-            Everything here goes straight to our team — nothing is published on Godesi.
-          </p>
-          <WebsiteRequestForm
-            defaultBusinessName={business?.name}
-            defaultCity={business?.city ?? user?.location ?? undefined}
-            defaultEmail={user?.email}
-            defaultPhone={business?.phone ?? undefined}
+          <div id="start" className="scroll-mt-24" />
+          <WebsiteStartForm
+            defaults={{
+              businessName: business?.name,
+              city: business?.city ?? user?.location ?? undefined,
+              phone: business?.phone ?? undefined,
+              email: user?.email,
+              website: business?.websiteUrl ?? undefined,
+            }}
           />
         </Card>
       </div>
