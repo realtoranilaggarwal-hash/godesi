@@ -118,7 +118,7 @@ export function EventCard({
         <div
           className={`flex flex-1 flex-col gap-1 ${
             tile ? "p-2.5" : compact ? "p-3" : "p-4"
-          }`}
+          } ${featured && !event.imageUrl ? "pt-12" : ""}`}
         >
           <div className="flex items-center gap-2">
             {event.genres?.length && !tile ? (
