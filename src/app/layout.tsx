@@ -53,10 +53,12 @@ export default function RootLayout({
   const umamiSrc =
     process.env.NEXT_PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js";
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+  const quoraPixel =
+    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ?? "e1f78f6226a74980abda723156b819ed";
 
   return (
     <html lang="en" className="overflow-x-hidden">
-      {adsenseClient || umamiId || clarityId ? (
+      {adsenseClient || umamiId || clarityId || quoraPixel ? (
         <head>
           {adsenseClient ? (
             <Script
@@ -83,6 +85,28 @@ export default function RootLayout({
                 __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script",${JSON.stringify(clarityId)});`,
               }}
             />
+          ) : null}
+          {/* Quora Pixel: conversion tracking for Quora ads and the GoDesi Space. */}
+          {quoraPixel ? (
+            <>
+              <Script
+                id="quora-pixel"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `!function(q,e,v,n,t,s){if(q.qp) return; n=q.qp=function(){n.qp?n.qp.apply(n,arguments):n.queue.push(arguments);}; n.queue=[];t=document.createElement(e);t.async=!0;t.src=v; s=document.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t,s);}(window, 'script', 'https://a.quora.com/qevents.js');qp('init', ${JSON.stringify(quoraPixel)});qp('track', 'ViewContent');`,
+                }}
+              />
+              <noscript>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  height="1"
+                  width="1"
+                  style={{ display: "none" }}
+                  alt=""
+                  src={`https://q.quora.com/_/ad/${quoraPixel}/pixel?tag=ViewContent&noscript=1`}
+                />
+              </noscript>
+            </>
           ) : null}
         </head>
       ) : null}
