@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { venuePath } from "@/lib/venues";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -83,7 +84,7 @@ export default async function VenuesPage({
       {venues.length === 0 ? (
         <EmptyState
           title="No venues match that search yet"
-          body="Venues are added automatically when an organiser posts an event."
+          body="Organisers add venues when posting an event — pick one from the list or add a new one."
           action={<LinkButton href="/events/new">Post an event</LinkButton>}
         />
       ) : (
@@ -91,7 +92,22 @@ export default async function VenuesPage({
           {venues.map((venue) => (
             <Card key={venue.id} className="flex flex-col gap-2">
               <div>
-                <p className="font-bold text-slate-900">{venue.name}</p>
+                <Link
+                  href={venuePath(venue)}
+                  className="font-bold text-slate-900 hover:underline"
+                >
+                  {venue.name}
+                </Link>
+                {venue.website ? (
+                  <a
+                    href={venue.website}
+                    target="_blank"
+                    rel="noreferrer nofollow"
+                    className="ml-2 text-xs font-semibold text-violet-700 hover:underline"
+                  >
+                    website ↗
+                  </a>
+                ) : null}
                 <p className="text-xs text-slate-500">
                   {[venue.city, venue.state, venue.country]
                     .filter(Boolean)
@@ -130,7 +146,7 @@ export default async function VenuesPage({
 
               <div className="mt-auto flex flex-wrap items-center gap-3 text-xs font-semibold">
                 <Link
-                  href={`/events?venue=${encodeURIComponent(venue.name)}`}
+                  href={venuePath(venue)}
                   className="text-indigo-600 hover:underline"
                 >
                   All {venue._count.events} events →

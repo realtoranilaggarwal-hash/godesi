@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import { venuePath } from "@/lib/venues";
 import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { formatMoney, siteUrl } from "@/lib/format";
@@ -58,6 +59,7 @@ async function loadEvent(slug: string) {
         select: { slug: true, name: true, logoUrl: true, city: true },
       },
       source: { select: { name: true, websiteUrl: true } },
+      venueRef: { select: { id: true, slug: true } },
     },
   });
 }
@@ -330,7 +332,11 @@ export default async function EventPage({
               <p>
                 📍{" "}
                 <Link
-                  href={`/events?venue=${encodeURIComponent(event.venue)}`}
+                  href={
+                    event.venueRef
+                      ? venuePath(event.venueRef)
+                      : `/events?venue=${encodeURIComponent(event.venue)}`
+                  }
                   className="font-semibold text-indigo-600 hover:underline"
                 >
                   {event.venue}
