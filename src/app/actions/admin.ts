@@ -644,8 +644,8 @@ export async function adminUpdateEventAction(
       city: formData.get("city"),
       frequency: formData.get("frequency") || "ONE_TIME",
       recurrence: formData.get("recurrence") ?? undefined,
-      categorySlug: formData.get("categorySlug"),
-      subcategorySlug: formData.get("subcategorySlug"),
+      categorySlug: formData.get("categorySlug") ?? undefined,
+      subcategorySlug: formData.get("subcategorySlug") ?? undefined,
       eventType: formData.get("eventType") ?? undefined,
       mode: formData.get("mode") || "OFFLINE",
       onlineUrl: formData.get("onlineUrl") ?? undefined,
@@ -695,7 +695,15 @@ export async function adminUpdateEventAction(
 
     const existing = await db.event.findUnique({
       where: { id: parsed.data.id },
-      select: { seatsBooked: true },
+      select: {
+        seatsBooked: true,
+        venue: true,
+        city: true,
+        address: true,
+        mapsUrl: true,
+        state: true,
+        country: true,
+      },
     });
     if (!existing) return { error: "Event not found." };
     if (parsed.data.seatsTotal < existing.seatsBooked) {
@@ -704,17 +712,27 @@ export async function adminUpdateEventAction(
       };
     }
 
+    const online = parsed.data.mode === "ONLINE";
     const venueName = titleCase(parsed.data.venue);
     const venueCity = titleCase(parsed.data.city);
-    const venueRef =
-      parsed.data.mode === "ONLINE"
-        ? null
-        : await rememberVenue({
-            name: venueName,
-            city: venueCity,
-            website: parsed.data.venueUrl ?? null,
-            hall: parsed.data.hallName || null,
-          });
+    // Same venue as before: its address on the event still applies (and is
+    // taught to the venue record). A different venue takes its own details.
+    const sameVenue =
+      existing.venue.toLowerCase() === venueName.toLowerCase() &&
+      existing.city.toLowerCase() === venueCity.toLowerCase();
+    const kept = sameVenue ? existing : null;
+    const venueRef = online
+      ? null
+      : await rememberVenue({
+          name: venueName,
+          city: venueCity,
+          state: kept?.state,
+          country: kept?.country,
+          address: kept?.address,
+          mapsUrl: kept?.mapsUrl,
+          website: parsed.data.venueUrl ?? null,
+          hall: parsed.data.hallName || null,
+        });
 
     const event = await db.event.update({
       where: { id: parsed.data.id },
@@ -726,9 +744,15 @@ export async function adminUpdateEventAction(
         timeZone: zone,
         venue: venueName,
         venueRefId: venueRef?.id ?? null,
-        hallName: parsed.data.hallName || null,
-        hallCapacity: parsed.data.hallCapacity ?? null,
-        venueUrl: parsed.data.venueUrl ?? null,
+        hallName: online ? null : parsed.data.hallName || null,
+        hallCapacity: online ? null : parsed.data.hallCapacity ?? null,
+        venueUrl: online ? null : parsed.data.venueUrl ?? null,
+        // Location follows the venue on record, so a venue change never
+        // leaves the previous hall's address or map on the event.
+        address: venueRef?.address ?? kept?.address ?? null,
+        mapsUrl: venueRef?.mapsUrl ?? kept?.mapsUrl ?? null,
+        state: venueRef?.state ?? kept?.state ?? null,
+        country: venueRef?.country ?? kept?.country ?? null,
         city: venueCity,
         frequency: parsed.data.frequency,
         recurrence:

@@ -66,13 +66,24 @@ export function AdminEventForm({
   const [venue, setVenue] = useState(event.venue);
   const [venueUrl, setVenueUrl] = useState(event.venueUrl);
   const [city, setCity] = useState(event.city);
+  const [hallName, setHallName] = useState(event.hallName);
+  const [pickedId, setPickedId] = useState(
+    venues.find(
+      (item) =>
+        item.name.toLowerCase() === event.venue.trim().toLowerCase() &&
+        item.city.toLowerCase() === event.city.trim().toLowerCase(),
+    )?.id ?? "",
+  );
   const cities = Array.from(new Set(venues.map((item) => item.city))).sort();
   const pickVenue = (id: string) => {
+    setPickedId(id);
     const picked = venues.find((item) => item.id === id);
     if (!picked) return;
     setVenue(picked.name);
     setCity(picked.city);
     setVenueUrl(picked.website ?? "");
+    // The hall belonged to the previous venue.
+    if (id !== pickedId) setHallName("");
   };
 
   return (
@@ -149,7 +160,7 @@ export function AdminEventForm({
           hint="Fills the venue, city and website below; or type a new venue by hand"
         >
           <select
-            defaultValue=""
+            value={pickedId}
             onChange={(e) => pickVenue(e.target.value)}
             className={inputClass}
             aria-label="Venue on Godesi"
@@ -178,7 +189,12 @@ export function AdminEventForm({
           />
         </Field>
         <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
-          <input name="hallName" defaultValue={event.hallName} className={inputClass} />
+          <input
+            name="hallName"
+            value={hallName}
+            onChange={(e) => setHallName(e.target.value)}
+            className={inputClass}
+          />
         </Field>
         <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
           <input
