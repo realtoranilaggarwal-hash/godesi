@@ -47,11 +47,12 @@ export async function FeaturedEventStrip({ take = 12 }: { take?: number }) {
         </Link>
       </div>
 
+      {/* Three cards share the row on desktop; narrower screens scroll. */}
       <div className="no-scrollbar -mx-1 mt-3 flex snap-x gap-4 overflow-x-auto px-1 pb-3 pt-1">
         {events.map((event) => (
           <div
             key={event.id}
-            className="w-[300px] shrink-0 snap-start sm:w-[360px]"
+            className="w-[280px] shrink-0 snap-start sm:w-[320px] lg:w-[calc((100%-2rem)/3)]"
           >
             <EventCard event={event} featured />
           </div>
@@ -59,7 +60,9 @@ export async function FeaturedEventStrip({ take = 12 }: { take?: number }) {
 
         <Link
           href="/pricing"
-          className="flex w-[280px] shrink-0 snap-start flex-col justify-center rounded-2xl bg-gradient-to-br from-rose-500 via-fuchsia-600 to-indigo-600 p-5 text-white sm:w-[320px]"
+          className={`flex w-[260px] shrink-0 snap-start flex-col justify-center rounded-2xl bg-gradient-to-br from-rose-500 via-fuchsia-600 to-indigo-600 p-5 text-white sm:w-[300px] lg:w-[calc((100%-2rem)/3)] ${
+            events.length >= 3 ? "lg:hidden" : ""
+          }`}
         >
           <span className="text-2xl" aria-hidden>
             ⭐
