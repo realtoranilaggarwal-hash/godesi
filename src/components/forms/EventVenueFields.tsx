@@ -43,7 +43,7 @@ export function EventVenueFields({
   const [typed, setTyped] = useState(initialMatch ? "" : initialVenue);
 
   const picked = venues.find((item) => item.id === choice);
-  const adding = choice === NEW_VENUE || (online && !picked);
+  const adding = online || choice === NEW_VENUE;
 
   const cities = Array.from(new Set(venues.map((item) => item.city))).sort();
 
@@ -53,11 +53,10 @@ export function EventVenueFields({
     const set = (name: string, next: string | null) => {
       const field = form.elements.namedItem(name);
       if (
-        (field instanceof HTMLInputElement ||
-          field instanceof HTMLSelectElement) &&
-        next
+        field instanceof HTMLInputElement ||
+        field instanceof HTMLSelectElement
       ) {
-        field.value = next;
+        field.value = next ?? "";
       }
     };
     set("city", venue.city);

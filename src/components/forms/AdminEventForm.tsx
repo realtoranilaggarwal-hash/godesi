@@ -72,7 +72,7 @@ export function AdminEventForm({
     if (!picked) return;
     setVenue(picked.name);
     setCity(picked.city);
-    if (picked.website) setVenueUrl(picked.website);
+    setVenueUrl(picked.website ?? "");
   };
 
   return (

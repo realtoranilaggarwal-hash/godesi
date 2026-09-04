@@ -21,7 +21,8 @@ async function uniqueVenueSlug(name: string, city: string, skipId?: string) {
 /**
  * Saves the venue an organiser picked or typed so the next one can pick it
  * instead of retyping it, and remembers each hall used there. Existing details
- * are only filled in, never overwritten with blanks.
+ * are only filled in, never overwritten with blanks. Matching ignores case so a
+ * venue picked from the list is found again after the form title-cases it.
  */
 export async function rememberVenue({
   name,
@@ -42,8 +43,11 @@ export async function rememberVenue({
   website?: string | null;
   hall?: string | null;
 }) {
-  const existing = await db.venue.findUnique({
-    where: { name_city: { name, city } },
+  const existing = await db.venue.findFirst({
+    where: {
+      name: { equals: name, mode: "insensitive" },
+      city: { equals: city, mode: "insensitive" },
+    },
   });
 
   if (!existing) {
@@ -70,7 +74,9 @@ export async function rememberVenue({
   return db.venue.update({
     where: { id: existing.id },
     data: {
-      slug: existing.slug ?? (await uniqueVenueSlug(name, city, existing.id)),
+      slug:
+        existing.slug ??
+        (await uniqueVenueSlug(existing.name, existing.city, existing.id)),
       state: existing.state ?? state ?? null,
       country: existing.country ?? country ?? null,
       address: existing.address ?? address ?? null,
