@@ -14,6 +14,10 @@ export const TELEGRAM_GROUP =
 
 export const TELEGRAM_HANDLE = "@godesicommunity";
 
+/** The GoDesi Space on Quora. */
+export const QUORA_SPACE =
+  process.env.NEXT_PUBLIC_SOCIAL_QUORA ?? "https://qr.ae/pFaPVe";
+
 export type SocialLink = {
   key: string;
   label: string;
@@ -29,6 +33,7 @@ const SOCIAL_ENV: Omit<SocialLink, "url">[] = [
   { key: "linkedin", label: "LinkedIn", icon: "in" },
   { key: "telegram", label: "Telegram", icon: "✈️" },
   { key: "whatsapp", label: "WhatsApp", icon: "💬" },
+  { key: "quora", label: "Quora", icon: "Q" },
 ];
 
 const URLS: Record<string, string | undefined> = {
@@ -39,6 +44,7 @@ const URLS: Record<string, string | undefined> = {
   linkedin: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN,
   telegram: TELEGRAM_GROUP,
   whatsapp: process.env.NEXT_PUBLIC_SOCIAL_WHATSAPP,
+  quora: QUORA_SPACE,
 };
 
 export function socialLinks(): SocialLink[] {
