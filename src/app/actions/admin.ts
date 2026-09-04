@@ -720,7 +720,7 @@ export async function adminUpdateEventAction(
     const sameVenue =
       existing.venue.toLowerCase() === venueName.toLowerCase() &&
       existing.city.toLowerCase() === venueCity.toLowerCase();
-    const kept = sameVenue ? existing : null;
+    const kept = sameVenue && !online ? existing : null;
     const venueRef = online
       ? null
       : await rememberVenue({
