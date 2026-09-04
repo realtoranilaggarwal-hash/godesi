@@ -1,6 +1,6 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -104,6 +104,7 @@ export async function signupAction(
       user = await db.user.create({ data: { ...account, username: null } });
     }
     await createSession(user.id);
+    cookies().set("godesi_joined", "1", { path: "/", maxAge: 300, sameSite: "lax" });
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card } from "@/components/ui";
+import { QuoraEvent } from "@/components/QuoraEvent";
 import { StepHeader } from "@/components/website/StepHeader";
 import { loadProject } from "@/lib/websiteProjects";
 import { websitePath } from "@/lib/websiteBuilder";
@@ -24,6 +25,14 @@ export default async function DonePage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
+      {searchParams.session ? (
+        <QuoraEvent
+          event="Purchase"
+          valueUsd={
+            project.setupMinor ? project.setupMinor / 100 : WEBSITE_OFFER.priceUsd
+          }
+        />
+      ) : null}
       <StepHeader
         step={5}
         title={project.status === "LIVE" ? "🌐 Your website is live" : paid ? "🚀 Launching your website" : "Thanks — confirming your payment"}

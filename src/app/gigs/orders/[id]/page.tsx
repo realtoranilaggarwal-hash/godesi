@@ -20,6 +20,7 @@ import {
 } from "@/app/actions/gigs";
 import { ActionForm } from "@/components/gigs/GigForms";
 import { Alert, Badge, Button, Card, Field, inputClass } from "@/components/ui";
+import { QuoraEvent } from "@/components/QuoraEvent";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order", robots: { index: false } };
@@ -76,6 +77,9 @@ export default async function GigOrderPage({
         / Order
       </nav>
 
+      {searchParams.paid ? (
+        <QuoraEvent event="Purchase" valueUsd={order.priceMinor / 100} />
+      ) : null}
       {searchParams.paid ? (
         <Alert tone="success">
           Paid. Your money is held by Godesi until you confirm the work — the

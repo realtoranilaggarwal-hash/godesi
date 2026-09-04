@@ -8,6 +8,7 @@ import { BUNDLE_MONTHS, describeTerm } from "@/lib/bundles";
 import { PLANS } from "@/lib/plans";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { Alert, Card, LinkButton } from "@/components/ui";
+import { QuoraEvent, usdValue } from "@/components/QuoraEvent";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Payment complete" };
@@ -29,6 +30,7 @@ export default async function CheckoutSuccessPage({
   let granted: string | null = null;
   let term: string | null = null;
   let error: string | null = null;
+  let paidUsd: number | undefined;
 
   try {
     const session = await getStripe().checkout.sessions.retrieve(
@@ -73,6 +75,10 @@ export default async function CheckoutSuccessPage({
         });
         term = planMonths === 1 ? "30 days" : describeTerm(planMonths);
       }
+      paidUsd = await usdValue(
+        session.amount_total ?? 0,
+        session.currency ?? "inr",
+      );
       await recordCouponFromMetadata({
         metadata: session.metadata,
         userId: user.id,
@@ -92,6 +98,7 @@ export default async function CheckoutSuccessPage({
       <Card className="space-y-4">
         {granted ? (
           <>
+            <QuoraEvent event="Purchase" valueUsd={paidUsd} />
             <h1 className="text-2xl font-bold">Payment successful</h1>
             <p className="text-slate-600">
               Your <strong>{granted}</strong> is active for the next{" "}

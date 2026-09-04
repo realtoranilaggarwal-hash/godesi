@@ -6,11 +6,18 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatMinor } from "@/lib/format";
 import { formatEventDate } from "@/lib/events";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
+import { QuoraEvent, usdValue } from "@/components/QuoraEvent";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your ticket", robots: { index: false } };
 
-export default async function TicketPage({ params }: { params: { code: string } }) {
+export default async function TicketPage({
+  params,
+  searchParams,
+}: {
+  params: { code: string };
+  searchParams: { paid?: string };
+}) {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=/tickets/${params.code}`);
 
@@ -38,8 +45,16 @@ export default async function TicketPage({ params }: { params: { code: string } 
     user.id === ticket.event.organizerId;
   if (!allowed) notFound();
 
+  const paidUsd =
+    searchParams.paid && ticket.amountMinor
+      ? await usdValue(ticket.amountMinor, ticket.currency)
+      : undefined;
+
   return (
     <div className="mx-auto max-w-md space-y-4">
+      {searchParams.paid ? (
+        <QuoraEvent event="Purchase" valueUsd={paidUsd} />
+      ) : null}
       <Card className="space-y-4 text-center">
         <Badge tone={ticket.status === "CONFIRMED" ? "green" : "amber"}>{ticket.status}</Badge>
         <h1 className="text-xl font-black">{ticket.event.title}</h1>
