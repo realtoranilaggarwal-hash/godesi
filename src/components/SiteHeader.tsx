@@ -34,6 +34,7 @@ const NAV = [
   { href: "/people", label: "People", icon: "👥" },
   { href: "/professionals", label: "Professionals", icon: "👔" },
   { href: "/news", label: "News", icon: "📰" },
+  { href: "/trending", label: "Trending", icon: "🔥" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top contributors", icon: "🏅" },
 ];
@@ -42,6 +43,7 @@ const NAV = [
 const QUICK_LINKS = [
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
+  { href: "/trending", label: "Trending", icon: "🔥" },
   { href: "/desi-elite", label: "Elite", icon: "🏆" },
   { href: "/leaderboard", label: "Top 100", icon: "🏅" },
   { href: "/connect", label: "Connect", icon: "🤝" },
