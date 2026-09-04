@@ -51,9 +51,9 @@ export async function FeaturedEventStrip({ take = 12 }: { take?: number }) {
         {events.map((event) => (
           <div
             key={event.id}
-            className="w-[300px] shrink-0 snap-start sm:w-[360px]"
+            className="w-[300px] shrink-0 snap-start sm:w-[620px]"
           >
-            <EventCard event={event} featured />
+            <EventCard event={event} featured side />
           </div>
         ))}
 

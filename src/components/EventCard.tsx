@@ -3,10 +3,7 @@ import { formatEventDate, seatsLeft } from "@/lib/events";
 import { Money } from "@/components/Money";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
-import {
-  eventCategoryIcon,
-  eventCategoryLabel,
-} from "@/lib/eventCategories";
+import { eventCategoryIcon, eventCategoryLabel } from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { thumbImage } from "@/lib/proxyImage";
 import { eventTheme, placeLine } from "@/lib/eventTheme";
@@ -45,10 +42,13 @@ export function EventCard({
   event,
   variant = "default",
   featured = false,
+  side = false,
 }: {
   event: EventListItem;
   variant?: "default" | "compact" | "tile";
   featured?: boolean;
+  /** Featured only: poster on the left, details on the right, spanning the grid row. */
+  side?: boolean;
 }) {
   const left = seatsLeft(event);
   const imported = Boolean(event.sourceId);
@@ -59,11 +59,11 @@ export function EventCard({
     event.category?.icon,
     event.category?.color,
   );
-  const posterHeight = tile ? "h-28" : compact ? "h-24" : "h-32";
+  const posterHeight = tile ? "h-28" : compact ? "h-28" : "h-40";
 
   return (
     <div
-      className={`relative flex ${
+      className={`relative flex ${featured && side ? "sm:col-span-full" : ""} ${
         featured
           ? "rounded-[20px] bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 p-[3px] shadow-lg shadow-amber-200/60"
           : ""
@@ -83,12 +83,16 @@ export function EventCard({
         href={`/events/${event.slug}`}
         className={`group flex flex-1 flex-col overflow-hidden bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
           featured
-            ? "rounded-[17px]"
+            ? `rounded-[17px] ${side && event.imageUrl ? "sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]" : ""}`
             : "rounded-2xl border border-slate-200"
         }`}
       >
         {event.imageUrl && featured ? (
-          <div className="relative h-56 w-full overflow-hidden bg-slate-900">
+          <div
+            className={`relative h-56 w-full overflow-hidden bg-slate-900 ${
+              side ? "sm:h-full sm:min-h-[260px]" : ""
+            }`}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={thumbImage(event.imageUrl, 640)}
@@ -101,18 +105,32 @@ export function EventCard({
             <img
               src={thumbImage(event.imageUrl, 1080)}
               alt={event.title}
-              className="relative h-full w-full object-contain"
+              className={`relative h-full w-full object-contain ${
+                side ? "sm:absolute sm:inset-0" : ""
+              }`}
               loading="lazy"
             />
           </div>
         ) : event.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={thumbImage(event.imageUrl, 640)}
-            alt={event.title}
-            className={`${posterHeight} w-full object-cover`}
-            loading="lazy"
-          />
+          <div
+            className={`relative ${posterHeight} w-full overflow-hidden bg-slate-900`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumbImage(event.imageUrl, 384)}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
+              loading="lazy"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumbImage(event.imageUrl, 640)}
+              alt={event.title}
+              className="relative h-full w-full object-contain"
+              loading="lazy"
+            />
+          </div>
         ) : null}
 
         <div
@@ -134,7 +152,9 @@ export function EventCard({
             {event.partnerStatus === "APPROVED" ? (
               <Badge tone="amber">🔥 Partner event</Badge>
             ) : null}
-            {left === 0 && !imported ? <Badge tone="red">Sold out</Badge> : null}
+            {left === 0 && !imported ? (
+              <Badge tone="red">Sold out</Badge>
+            ) : null}
           </div>
           <div className="flex items-start gap-2">
             {event.imageUrl ? null : (

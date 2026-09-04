@@ -264,16 +264,31 @@ export default async function EventPage({
           </Link>
         </nav>
 
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div
+          className={`overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm ${
+            event.imageUrl
+              ? "md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+              : ""
+          }`}
+        >
           {event.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={event.imageUrl}
-              alt={event.title}
-              className="h-56 w-full object-cover"
-            />
+            <div className="relative flex max-h-[520px] min-h-[240px] items-center justify-center overflow-hidden bg-slate-900 md:max-h-none md:min-h-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={event.imageUrl}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full scale-110 object-cover opacity-50 blur-xl"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={event.imageUrl}
+                alt={event.title}
+                className="relative max-h-[520px] w-full object-contain md:absolute md:inset-0 md:h-full md:max-h-none"
+              />
+            </div>
           ) : null}
-          <div className="space-y-3 p-5">
+          <div className="min-w-0 space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
               {event.category ? (
                 <Link href={`/categories/${event.category.slug}`}>

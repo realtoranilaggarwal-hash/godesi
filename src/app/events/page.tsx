@@ -66,9 +66,10 @@ export default async function EventsPage({
     searchParams;
   // The event's own category (garba, comedy, satsang) and the language it runs
   // in — separate from `category`, which is the trade behind it.
-  const genre = searchParams.genre && isEventCategory(searchParams.genre)
-    ? searchParams.genre
-    : undefined;
+  const genre =
+    searchParams.genre && isEventCategory(searchParams.genre)
+      ? searchParams.genre
+      : undefined;
   const lang = EVENT_LANGUAGES.some(
     (option) => option.slug === searchParams.lang,
   )
@@ -91,7 +92,20 @@ export default async function EventsPage({
    * navigation, so React keeps the old `<select>` values and a later submit
    * would post the stale "All categories" over the chip the visitor picked.
    */
-  const formKey = [q, city, state, category, genre, lang, when, type, mode, venue, from, to]
+  const formKey = [
+    q,
+    city,
+    state,
+    category,
+    genre,
+    lang,
+    when,
+    type,
+    mode,
+    venue,
+    from,
+    to,
+  ]
     .map((value) => value ?? "")
     .concat(selectedFeatures)
     .join("|");
@@ -148,18 +162,18 @@ export default async function EventsPage({
   /** Whether an empty list means "nothing matches" rather than "nothing yet". */
   const filtered = Boolean(
     q ||
-      city ||
-      state ||
-      venue ||
-      genre ||
-      lang ||
-      category ||
-      type ||
-      mode ||
-      from ||
-      to ||
-      when ||
-      selectedFeatures.length,
+    city ||
+    state ||
+    venue ||
+    genre ||
+    lang ||
+    category ||
+    type ||
+    mode ||
+    from ||
+    to ||
+    when ||
+    selectedFeatures.length,
   );
   const categories = await getCategoryTree();
   const scope = category
@@ -402,7 +416,10 @@ export default async function EventsPage({
            * themselves start on the first screen.
            */}
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/90">
-            <Link href="/events/categories" className="underline hover:text-white">
+            <Link
+              href="/events/categories"
+              className="underline hover:text-white"
+            >
               Browse all categories →
             </Link>
             <Link href="/venues" className="underline hover:text-white">
@@ -426,7 +443,15 @@ export default async function EventsPage({
             >
               Get featured free 🤝
             </Link>
-            {q || city || state || venue || from || to || when || genre || lang ? (
+            {q ||
+            city ||
+            state ||
+            venue ||
+            from ||
+            to ||
+            when ||
+            genre ||
+            lang ? (
               <Link
                 href="/events"
                 className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
@@ -472,12 +497,14 @@ export default async function EventsPage({
               aria-label="Language"
             >
               <option value="">Any language</option>
-              {(languageRows.length ? languageRows : EVENT_LANGUAGES).map((item) => (
-                <option key={item.slug} value={item.slug}>
-                  {item.label}
-                  {"count" in item ? ` · ${item.count}` : ""}
-                </option>
-              ))}
+              {(languageRows.length ? languageRows : EVENT_LANGUAGES).map(
+                (item) => (
+                  <option key={item.slug} value={item.slug}>
+                    {item.label}
+                    {"count" in item ? ` · ${item.count}` : ""}
+                  </option>
+                ),
+              )}
             </select>
             <select
               name="type"
@@ -591,6 +618,7 @@ export default async function EventsPage({
                   featured={
                     event.featured || planRank(event.organizer.plan) > 0
                   }
+                  side
                 />
               ))}
             </div>
@@ -605,6 +633,7 @@ export default async function EventsPage({
                       featured={
                         event.featured || planRank(event.organizer.plan) > 0
                       }
+                      side
                     />
                   ))}
                 </div>
@@ -614,9 +643,7 @@ export default async function EventsPage({
         ) : (
           <EmptyState
             title={
-              filtered
-                ? "Nothing matches that search"
-                : "No events here yet"
+              filtered ? "Nothing matches that search" : "No events here yet"
             }
             body={
               filtered
