@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TelegramJoin } from "@/components/TelegramJoin";
-import { socialLinks } from "@/lib/site";
+import { QUORA_SPACE, socialLinks } from "@/lib/site";
 import { FooterBanner } from "@/components/Banners";
 import { TrafficCounter } from "@/components/TrafficCounter";
 import { LocalePicker } from "@/components/LocalePicker";
@@ -54,6 +54,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/professionals", label: "GoDesi Professionals" },
         { href: "/alumni", label: "Find your batchmates" },
         { href: "/buzz", label: "#godesi social wall" },
+        { href: QUORA_SPACE, label: "GoDesi on Quora" },
         { href: "/news/report", label: "Share news" },
         { href: "/journalists", label: "Become a local journalist" },
         { href: "/rewards", label: "Refer & earn rewards" },
@@ -152,9 +153,20 @@ export function SiteFooter() {
             <ul className="mt-2 space-y-1 text-sm text-slate-600">
               {section.links.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="hover:text-slate-900">
-                    {link.label}
-                  </Link>
+                  {link.href.startsWith("http") ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-slate-900"
+                    >
+                      {link.label} ↗
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="hover:text-slate-900">
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
               {section.title === "Live & media" && statsUrl ? (
