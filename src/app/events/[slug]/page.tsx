@@ -268,12 +268,30 @@ export default async function EventPage({
 
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           {event.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={event.imageUrl}
-              alt={event.title}
-              className="h-56 w-full object-cover"
-            />
+            <a
+              href={event.imageUrl}
+              target="_blank"
+              rel="noopener"
+              title="Open the full-size poster"
+              className="relative block max-h-[80vh] w-full overflow-hidden bg-slate-900"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={event.imageUrl}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-xl"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={event.imageUrl}
+                alt={event.title}
+                className="relative mx-auto max-h-[80vh] w-auto max-w-full object-contain"
+              />
+              <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">
+                🔍 View full size
+              </span>
+            </a>
           ) : null}
           <div className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
