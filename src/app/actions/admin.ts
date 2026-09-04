@@ -34,6 +34,7 @@ import {
 import { isOriginalReport, newsPath } from "@/lib/newsLinks";
 import { memberStory } from "@/lib/news";
 import { isAlbumLink } from "@/lib/photoAlbum";
+import { rememberVenue } from "@/lib/venues";
 
 export async function setListingStatusAction(formData: FormData) {
   await requirePermission("listings");
@@ -703,6 +704,18 @@ export async function adminUpdateEventAction(
       };
     }
 
+    const venueName = titleCase(parsed.data.venue);
+    const venueCity = titleCase(parsed.data.city);
+    const venueRef =
+      parsed.data.mode === "ONLINE"
+        ? null
+        : await rememberVenue({
+            name: venueName,
+            city: venueCity,
+            website: parsed.data.venueUrl ?? null,
+            hall: parsed.data.hallName || null,
+          });
+
     const event = await db.event.update({
       where: { id: parsed.data.id },
       data: {
@@ -711,11 +724,12 @@ export async function adminUpdateEventAction(
         startsAt,
         endsAt,
         timeZone: zone,
-        venue: titleCase(parsed.data.venue),
+        venue: venueName,
+        venueRefId: venueRef?.id ?? null,
         hallName: parsed.data.hallName || null,
         hallCapacity: parsed.data.hallCapacity ?? null,
         venueUrl: parsed.data.venueUrl ?? null,
-        city: titleCase(parsed.data.city),
+        city: venueCity,
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"

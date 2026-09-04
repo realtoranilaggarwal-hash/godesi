@@ -1099,12 +1099,15 @@ enum EventPartnerStatus {
 /// A place events happen at. Saved once so later organisers reuse it with its halls.
 model Venue {
   id        String   @id @default(cuid())
+  /// Public address, e.g. /venues/royal-alberts-palace-fords
+  slug      String?  @unique
   name      String
   city      String
   state     String?
   country   String?
   address   String?
   mapsUrl   String?
+  website   String?
   /// Every hall/room organisers have used at this venue.
   halls     String[] @default([])
   createdAt DateTime @default(now())

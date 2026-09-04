@@ -374,6 +374,7 @@ export async function createEventAction(
             country: parsed.data.country,
             address: parsed.data.address ?? null,
             mapsUrl: parsed.data.mapsUrl ?? null,
+            website: parsed.data.venueUrl ?? null,
             hall: parsed.data.hallName ?? null,
           });
 

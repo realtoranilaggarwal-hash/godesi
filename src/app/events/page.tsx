@@ -207,8 +207,8 @@ export default async function EventsPage({
     by: ["venue"],
     where: { status: "APPROVED", startsAt: { gte: new Date() } },
     _count: { venue: true },
-    orderBy: { _count: { venue: "desc" } },
-    take: 8,
+    orderBy: [{ _count: { venue: "desc" } }, { venue: "asc" }],
+    take: 200,
   });
 
   // Postgres cannot group by the members of an array, so the facets are counted

@@ -11,87 +11,135 @@ export type VenueOption = {
   country: string | null;
   address: string | null;
   mapsUrl: string | null;
+  website: string | null;
   halls: string[];
 };
 
+const NEW_VENUE = "__new__";
+
 /**
- * Venue, hall and map location. Venues other organisers have already used are
- * offered as suggestions and fill in the address, city and halls on pick, so the
- * same banquet hall is not retyped (and mis-spelled) for every event.
+ * Venue, hall and map location. Every venue already on Godesi is offered in a
+ * dropdown (grouped by city) and fills in the address, map, website and halls on
+ * pick; organisers whose venue is missing choose "Add a new venue" and type it
+ * once — it is saved for the next organiser and gets its own /venues page.
  */
 export function EventVenueFields({
   venues,
   online,
+  initialVenue = "",
 }: {
   venues: VenueOption[];
   /** Online-only events do not need an address or a map link. */
   online: boolean;
+  /** Venue name already on the event, when editing. */
+  initialVenue?: string;
 }) {
-  const [venue, setVenue] = useState("");
-  const match = venues.find(
-    (item) => item.name.toLowerCase() === venue.trim().toLowerCase(),
+  const initialMatch = venues.find(
+    (item) => item.name.toLowerCase() === initialVenue.trim().toLowerCase(),
   );
+  const [choice, setChoice] = useState(
+    initialMatch ? initialMatch.id : initialVenue ? NEW_VENUE : "",
+  );
+  const [typed, setTyped] = useState(initialMatch ? "" : initialVenue);
 
-  const apply = (value: string) => {
-    setVenue(value);
-    const picked = venues.find(
-      (item) => item.name.toLowerCase() === value.trim().toLowerCase(),
-    );
-    if (!picked) return;
+  const picked = venues.find((item) => item.id === choice);
+  const adding = choice === NEW_VENUE || (online && !picked);
+
+  const cities = Array.from(new Set(venues.map((item) => item.city))).sort();
+
+  const fill = (venue: VenueOption) => {
     const form = document.forms.namedItem("event-form");
     if (!form) return;
     const set = (name: string, next: string | null) => {
       const field = form.elements.namedItem(name);
-      if ((field instanceof HTMLInputElement || field instanceof HTMLSelectElement) && next) {
+      if (
+        (field instanceof HTMLInputElement ||
+          field instanceof HTMLSelectElement) &&
+        next
+      ) {
         field.value = next;
       }
     };
-    set("city", picked.city);
-    set("state", picked.state);
-    set("country", picked.country);
-    set("address", picked.address);
-    set("mapsUrl", picked.mapsUrl);
+    set("city", venue.city);
+    set("state", venue.state);
+    set("country", venue.country);
+    set("address", venue.address);
+    set("mapsUrl", venue.mapsUrl);
+    set("venueUrl", venue.website);
+  };
+
+  const onPick = (value: string) => {
+    setChoice(value);
+    const venue = venues.find((item) => item.id === value);
+    if (venue) fill(venue);
   };
 
   return (
     <>
-      <Field
-        label="Venue"
-        required
-        hint={
-          online
-            ? "e.g. Zoom, YouTube Live"
-            : "Start typing — venues already on Godesi fill in the address for you"
-        }
-      >
-        <input
-          name="venue"
+      {online ? null : (
+        <Field
+          label="Venue"
           required
-          list="godesi-venues"
-          value={venue}
-          onChange={(event) => apply(event.target.value)}
-          className={inputClass}
-        />
-        <datalist id="godesi-venues">
-          {venues.map((item) => (
-            <option key={item.id} value={item.name}>
-              {item.city}
-            </option>
-          ))}
-        </datalist>
-      </Field>
+          hint="Pick a venue already on Godesi — it fills the address for you — or add yours"
+        >
+          <select
+            value={choice}
+            onChange={(event) => onPick(event.target.value)}
+            className={inputClass}
+            aria-label="Venue"
+            required
+          >
+            <option value="">Choose a venue…</option>
+            <option value={NEW_VENUE}>➕ Add a new venue (not listed)</option>
+            {cities.map((city) => (
+              <optgroup key={city} label={city}>
+                {venues
+                  .filter((item) => item.city === city)
+                  .map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+              </optgroup>
+            ))}
+          </select>
+        </Field>
+      )}
+
+      {picked && !online ? (
+        <input type="hidden" name="venue" value={picked.name} />
+      ) : !adding ? null : (
+        <Field
+          label={online ? "Where it happens online" : "New venue name"}
+          required
+          hint={
+            online
+              ? "e.g. Zoom, YouTube Live"
+              : "Banquet hall, temple, gurdwara, community centre — saved for the next organiser"
+          }
+        >
+          <input
+            name="venue"
+            required
+            value={typed}
+            onChange={(event) => setTyped(event.target.value)}
+            placeholder={online ? "" : "e.g. Royal Albert's Palace"}
+            className={inputClass}
+          />
+        </Field>
+      )}
 
       <Field
         label="Hall / room"
         hint={
-          match?.halls.length
-            ? `Used here before: ${match.halls.join(", ")}`
+          picked?.halls.length
+            ? `Used here before: ${picked.halls.join(", ")}`
             : "Optional — for venues with several halls, e.g. Crystal Hall"
         }
       >
         <input name="hallName" list="godesi-halls" className={inputClass} />
         <datalist id="godesi-halls">
-          {(match?.halls ?? []).map((hall) => (
+          {(picked?.halls ?? []).map((hall) => (
             <option key={hall} value={hall} />
           ))}
         </datalist>
@@ -101,12 +149,25 @@ export function EventVenueFields({
         label="Hall capacity"
         hint="Optional — how many people it seats, so guests know the size"
       >
-        <input name="hallCapacity" type="number" min={0} className={inputClass} />
+        <input
+          name="hallCapacity"
+          type="number"
+          min={0}
+          className={inputClass}
+        />
       </Field>
 
-      <Field label="Venue website" hint="Optional — the hall's own page">
+      <Field
+        label="Venue website"
+        hint={
+          picked?.website
+            ? "From the venue's Godesi page"
+            : "Optional — the venue's own site, shown on its Godesi page"
+        }
+      >
         <input
           name="venueUrl"
+          defaultValue={initialMatch?.website ?? ""}
           placeholder="https://royalalbertspalace.com"
           className={inputClass}
         />
@@ -114,7 +175,10 @@ export function EventVenueFields({
 
       {online ? null : (
         <>
-          <Field label="Street address" hint="Shown on the event page so people find it">
+          <Field
+            label="Street address"
+            hint="Shown on the event page so people find it"
+          >
             <input name="address" className={inputClass} />
           </Field>
           <Field

@@ -6,6 +6,7 @@ import { can, getCurrentUser, isStaff } from "@/lib/auth";
 import { deskFallback } from "@/lib/adminSections";
 import { getCategoryTree } from "@/lib/directory";
 import { AdminEventForm } from "@/components/forms/AdminEventForm";
+import { venueSuggestions } from "@/lib/venues";
 import { TicketTypesForm } from "@/components/forms/TicketTypesForm";
 import { LEGACY_EVENT_ZONE, wallClockIn } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
@@ -26,7 +27,7 @@ export default async function AdminEditEventPage({
   // moderator without it was shown forms every submit refused.
   if (!can(user, "events")) redirect(deskFallback(user, "Edit event"));
 
-  const [event, categories] = await Promise.all([
+  const [event, categories, venues] = await Promise.all([
     db.event.findUnique({
       where: { id: params.id },
       include: {
@@ -46,6 +47,7 @@ export default async function AdminEditEventPage({
       },
     }),
     getCategoryTree(),
+    venueSuggestions(),
   ]);
   if (!event) notFound();
 
@@ -76,6 +78,7 @@ export default async function AdminEditEventPage({
       <Card>
         <AdminEventForm
           categories={categories}
+          venues={venues}
           event={{
             id: event.id,
             title: event.title,

@@ -15,6 +15,7 @@ import { EVENT_MODES, EVENT_TYPES } from "@/lib/eventOptions";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
+import type { VenueOption } from "@/components/forms/EventVenueFields";
 
 export type AdminEventValues = {
   id: string;
@@ -54,12 +55,25 @@ export type AdminEventValues = {
 export function AdminEventForm({
   event,
   categories,
+  venues,
 }: {
   event: AdminEventValues;
   categories: CategoryOption[];
+  venues: VenueOption[];
 }) {
   const [state, formAction] = useFormState(adminUpdateEventAction, emptyState);
   const [mode, setMode] = useState<string>(event.mode);
+  const [venue, setVenue] = useState(event.venue);
+  const [venueUrl, setVenueUrl] = useState(event.venueUrl);
+  const [city, setCity] = useState(event.city);
+  const cities = Array.from(new Set(venues.map((item) => item.city))).sort();
+  const pickVenue = (id: string) => {
+    const picked = venues.find((item) => item.id === id);
+    if (!picked) return;
+    setVenue(picked.name);
+    setCity(picked.city);
+    if (picked.website) setVenueUrl(picked.website);
+  };
 
   return (
     <form action={formAction} className="space-y-4">
@@ -130,8 +144,38 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Venue">
-          <input name="venue" defaultValue={event.venue} required className={inputClass} />
+        <Field
+          label="Pick a venue on Godesi"
+          hint="Fills the venue, city and website below; or type a new venue by hand"
+        >
+          <select
+            defaultValue=""
+            onChange={(e) => pickVenue(e.target.value)}
+            className={inputClass}
+            aria-label="Venue on Godesi"
+          >
+            <option value="">Choose a saved venue…</option>
+            {cities.map((c) => (
+              <optgroup key={c} label={c}>
+                {venues
+                  .filter((item) => item.city === c)
+                  .map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+              </optgroup>
+            ))}
+          </select>
+        </Field>
+        <Field label="Venue" hint="New venues are saved to /venues for other organisers">
+          <input
+            name="venue"
+            value={venue}
+            onChange={(e) => setVenue(e.target.value)}
+            required
+            className={inputClass}
+          />
         </Field>
         <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
           <input name="hallName" defaultValue={event.hallName} className={inputClass} />
@@ -148,13 +192,20 @@ export function AdminEventForm({
         <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
           <input
             name="venueUrl"
-            defaultValue={event.venueUrl}
+            value={venueUrl}
+            onChange={(e) => setVenueUrl(e.target.value)}
             placeholder="https://royalalbertspalace.com"
             className={inputClass}
           />
         </Field>
         <Field label="City">
-          <input name="city" defaultValue={event.city} required className={inputClass} />
+          <input
+            name="city"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            required
+            className={inputClass}
+          />
         </Field>
         <Field label="Repeats">
           <select
