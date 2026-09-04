@@ -585,7 +585,13 @@ export default async function EventsPage({
           <>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {events.slice(0, 6).map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  featured={
+                    event.featured || planRank(event.organizer.plan) > 0
+                  }
+                />
               ))}
             </div>
             {events.length > 6 ? (
@@ -593,7 +599,13 @@ export default async function EventsPage({
                 <InContentBanner />
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {events.slice(6).map((event) => (
-                    <EventCard key={event.id} event={event} />
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      featured={
+                        event.featured || planRank(event.organizer.plan) > 0
+                      }
+                    />
                   ))}
                 </div>
               </>

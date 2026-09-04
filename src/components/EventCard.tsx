@@ -38,13 +38,17 @@ export type EventListItem = {
 /**
  * `compact` shrinks the poster and hides feature chips so rows stay even;
  * `tile` trims it further for the six-across home page rows.
+ * `featured` wraps the card in a gold frame with a ribbon and shows the whole
+ * poster (letterboxed, never cropped) at a larger size.
  */
 export function EventCard({
   event,
   variant = "default",
+  featured = false,
 }: {
   event: EventListItem;
   variant?: "default" | "compact" | "tile";
+  featured?: boolean;
 }) {
   const left = seatsLeft(event);
   const imported = Boolean(event.sourceId);
@@ -58,7 +62,18 @@ export function EventCard({
   const posterHeight = tile ? "h-28" : compact ? "h-24" : "h-32";
 
   return (
-    <div className="relative flex">
+    <div
+      className={`relative flex ${
+        featured
+          ? "rounded-[20px] bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 p-[3px] shadow-lg shadow-amber-200/60"
+          : ""
+      }`}
+    >
+      {featured ? (
+        <span className="absolute -left-1.5 top-4 z-10 rounded-r-md bg-gradient-to-r from-amber-500 to-yellow-400 py-1 pl-3 pr-2.5 text-[11px] font-black uppercase tracking-wide text-slate-900 shadow after:absolute after:-bottom-1.5 after:left-0 after:border-r-[6px] after:border-t-[6px] after:border-r-transparent after:border-t-amber-700 after:content-['']">
+          ⭐ Featured
+        </span>
+      ) : null}
       <StaffEditLink
         href={`/admin/events/${event.id}`}
         className="absolute right-2 top-2 z-10 shadow"
@@ -66,9 +81,31 @@ export function EventCard({
       />
       <Link
         href={`/events/${event.slug}`}
-        className="group flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        className={`group flex flex-1 flex-col overflow-hidden bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+          featured
+            ? "rounded-[17px]"
+            : "rounded-2xl border border-slate-200"
+        }`}
       >
-        {event.imageUrl ? (
+        {event.imageUrl && featured ? (
+          <div className="relative h-56 w-full overflow-hidden bg-slate-900">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumbImage(event.imageUrl, 640)}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-xl"
+              loading="lazy"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumbImage(event.imageUrl, 1080)}
+              alt={event.title}
+              className="relative h-full w-full object-contain"
+              loading="lazy"
+            />
+          </div>
+        ) : event.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={thumbImage(event.imageUrl, 640)}
@@ -81,7 +118,7 @@ export function EventCard({
         <div
           className={`flex flex-1 flex-col gap-1 ${
             tile ? "p-2.5" : compact ? "p-3" : "p-4"
-          }`}
+          } ${featured && !event.imageUrl ? "pt-12" : ""}`}
         >
           <div className="flex items-center gap-2">
             {event.genres?.length && !tile ? (
