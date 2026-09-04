@@ -17,21 +17,70 @@ const TIMEOUT_MS = 8000;
 const MAX_BYTES = 1_500_000;
 const MAX_PHOTOS = 8;
 
-async function fetchPage(url: string) {
+const MAX_HOPS = 5;
+
+/**
+ * Only public web hosts may be fetched: pasted links come from anyone, and the
+ * server must never be talked into reading localhost, the cloud metadata
+ * service or anything on a private network — on the first request or after a
+ * redirect.
+ */
+function publicHttpUrl(raw: string): URL | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  if (url.username || url.password) return null;
+  const host = url.hostname.toLowerCase().replace(/\.$/, "");
+  if (!host || !host.includes(".")) return null;
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal")) {
+    return null;
+  }
+  if (host.startsWith("[") || host.includes(":")) return null; // no IPv6 literals
+  const v4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    if (
+      a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127)
+    ) {
+      return null;
+    }
+  }
+  if (/^\d+$/.test(host) || /^0x/i.test(host)) return null;
+  return url;
+}
+
+async function fetchPage(raw: string) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(url, {
-      headers: { "user-agent": UA, accept: "text/html,*/*" },
-      redirect: "follow",
-      signal: controller.signal,
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    const type = res.headers.get("content-type") ?? "";
-    if (!type.includes("html") && !type.includes("json")) return null;
-    const html = (await res.text()).slice(0, MAX_BYTES);
-    return { html, finalUrl: res.url || url };
+    let url = publicHttpUrl(raw);
+    for (let hop = 0; url && hop <= MAX_HOPS; hop += 1) {
+      const res = await fetch(url, {
+        headers: { "user-agent": UA, accept: "text/html,*/*" },
+        redirect: "manual",
+        signal: controller.signal,
+        cache: "no-store",
+      });
+      const location = res.headers.get("location");
+      if (res.status >= 300 && res.status < 400 && location) {
+        url = publicHttpUrl(new URL(location, url).toString());
+        continue;
+      }
+      if (!res.ok) return null;
+      const type = res.headers.get("content-type") ?? "";
+      if (!type.includes("html") && !type.includes("json")) return null;
+      const html = (await res.text()).slice(0, MAX_BYTES);
+      return { html, finalUrl: url.toString() };
+    }
+    return null;
   } catch {
     return null;
   } finally {
@@ -274,13 +323,20 @@ async function placeNameFromUrl(url: string) {
   let target = url;
   if (/goo\.gl|maps\.app/.test(url)) {
     try {
-      const res = await fetch(url, {
-        method: "HEAD",
-        redirect: "follow",
-        headers: { "user-agent": UA },
-        cache: "no-store",
-      });
-      target = res.url || url;
+      let hop = publicHttpUrl(url);
+      for (let i = 0; hop && i <= MAX_HOPS; i += 1) {
+        const res = await fetch(hop, {
+          method: "HEAD",
+          redirect: "manual",
+          headers: { "user-agent": UA },
+          cache: "no-store",
+        });
+        const location = res.headers.get("location");
+        if (!(res.status >= 300 && res.status < 400 && location)) break;
+        hop = publicHttpUrl(new URL(location, hop).toString());
+      }
+      if (!hop) return null;
+      target = hop.toString();
     } catch {
       return null;
     }
@@ -294,7 +350,9 @@ async function googleFacts(
   fallbackQuery: string,
 ): Promise<Partial<FoundFacts> | null> {
   const key = process.env.GOOGLE_PLACES_API_KEY;
-  if (!key) return null;
+  // Without a Places key, read whatever the public Maps page itself says
+  // (title, description, cover photo) so the link still helps.
+  if (!key) return url ? readUrl(url) : null;
   const fromUrl = url ? await placeNameFromUrl(url) : null;
   const query = fromUrl ?? fallbackQuery;
   if (!query.trim()) return null;

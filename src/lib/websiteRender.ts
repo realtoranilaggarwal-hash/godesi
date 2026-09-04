@@ -1,5 +1,6 @@
 import type { WebsiteProject } from "@prisma/client";
-import { designFor, type Design, type SiteContent } from "@/lib/websiteBuilder";
+import { designFor, type Design, type SiteContent, websitePath } from "@/lib/websiteBuilder";
+import { siteUrl } from "@/lib/format";
 import {
   projectContent,
   projectFound,
@@ -143,6 +144,7 @@ export function renderSite(project: WebsiteProject): string {
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
     : null;
   const reviews = (found?.reviews ?? []).slice(0, 3);
+  const leadUrl = `${siteUrl()}${websitePath(project.id, "/site/lead")}`;
 
   const actions = [
     phone ? `<a class="btn" href="tel:${esc(digits(phone))}">📞 Call ${esc(phone)}</a>` : "",
@@ -210,7 +212,7 @@ export function renderSite(project: WebsiteProject): string {
       found?.hours?.length
         ? `<div class="hours"><strong>Hours</strong><br>${found.hours.map(esc).join("<br>")}</div>`
         : ""
-    }</div><form onsubmit="return false"><input placeholder="Your name"><input placeholder="Phone or email"><textarea rows="4" placeholder="How can we help?"></textarea><button class="btn" type="submit">Send message</button></form></div></div></section>`,
+    }</div><form method="post" action="${esc(leadUrl)}"><input name="name" placeholder="Your name" required maxlength="120"><input name="contact" placeholder="Phone or email" required maxlength="160"><textarea name="message" rows="4" placeholder="How can we help?" required maxlength="2000"></textarea><input type="text" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px"><button class="btn" type="submit">Send message</button></form></div></div></section>`,
   };
 
   const body = design.order.map((key) => sections[key]).join("");

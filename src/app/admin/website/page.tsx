@@ -27,19 +27,30 @@ export default async function AdminWebsitePage() {
   if (!user) redirect("/login?next=/admin/website");
   if (!isStaff(user)) redirect(deskFallback(user, "Websites"));
 
-  const [projects, powerUps] = await Promise.all([
+  const include = { user: { select: { name: true, email: true } } };
+  const [toLaunch, funnel, live, powerUps] = await Promise.all([
     db.websiteProject.findMany({
-      orderBy: [{ paidAt: { sort: "desc", nulls: "last" } }, { updatedAt: "desc" }],
+      where: { status: "PAID" },
+      orderBy: { paidAt: "desc" },
       take: 100,
-      include: { user: { select: { name: true, email: true } } },
+      include,
+    }),
+    db.websiteProject.findMany({
+      where: { status: { in: ["DRAFT", "PREVIEW", "APPROVED"] } },
+      orderBy: { updatedAt: "desc" },
+      take: 100,
+      include,
+    }),
+    db.websiteProject.findMany({
+      where: { status: "LIVE" },
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+      include,
     }),
     loadPowerUps(),
   ]);
-  const toLaunch = projects.filter((p) => p.status === "PAID");
-  const funnel = projects.filter((p) => p.status !== "PAID" && p.status !== "LIVE" && p.status !== "CANCELLED");
-  const live = projects.filter((p) => p.status === "LIVE");
 
-  const row = (project: (typeof projects)[number]) => (
+  const row = (project: (typeof toLaunch)[number]) => (
     <li key={project.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
       <div className="min-w-0">
         <Link href={`/admin/website/${project.id}`} className="font-semibold text-indigo-700 hover:underline">

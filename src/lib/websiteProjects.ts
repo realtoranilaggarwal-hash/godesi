@@ -123,6 +123,7 @@ export async function confirmWebsitePayment({
 }) {
   const project = await db.websiteProject.findUnique({ where: { id: projectId } });
   if (!project || project.paidAt) return project;
+  const setup = project.setupMinor ?? setupMinor;
   const updated = await db.websiteProject.update({
     where: { id: projectId },
     data: {
@@ -130,7 +131,7 @@ export async function confirmWebsitePayment({
       paidAt: new Date(),
       stripeSessionId: sessionId,
       stripeSubscriptionId: subscriptionId,
-      setupMinor,
+      setupMinor: setup,
     },
   });
   await sendEmail({
@@ -140,8 +141,16 @@ export async function confirmWebsitePayment({
       "New website to launch",
       `<h2>New website to launch</h2>
        <p><strong>${updated.businessName}</strong> — ${updated.category}, ${updated.city}</p>
-       <p>Setup $${(setupMinor / 100).toFixed(0)}; monthly $${((updated.monthlyMinor ?? 0) / 100).toFixed(0)}.</p>
+       <p>Setup $${(setup / 100).toFixed(0)}; monthly $${((updated.monthlyMinor ?? 0) / 100).toFixed(0)}.</p>
        <p>Features: ${updated.powerUps.join(", ") || "none"}</p>
+       ${
+         projectQuoted(updated).filter((item) => !item.powerUp).length
+           ? `<p><strong>Custom extras to quote and confirm:</strong> ${projectQuoted(updated)
+               .filter((item) => !item.powerUp)
+               .map((item) => `${item.label} (est. $${item.monthlyUsd}/mo)`)
+               .join("; ")}</p>`
+           : ""
+       }
        <p><a href="${siteUrl()}/admin/website/${updated.id}">Open in the admin</a></p>`,
     ),
   });
@@ -174,10 +183,7 @@ export function quoteFor(
     const item = powerUps.find((entry) => entry.key === key);
     if (item?.active) lines.push({ label: item.label, monthlyUsd: item.monthlyUsd, kind: "powerUp" });
   }
-  for (const item of projectQuoted(project)) {
-    if (item.powerUp) continue;
-    if (item.monthlyUsd > 0) lines.push({ label: item.label, monthlyUsd: item.monthlyUsd, kind: "custom" });
-  }
+  // Custom wishes are estimates a person confirms first; they are never billed here.
   return {
     setupUsd: BASE_SETUP_USD,
     monthlyUsd: lines.reduce((sum, line) => sum + line.monthlyUsd, 0),

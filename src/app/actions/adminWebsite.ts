@@ -49,6 +49,7 @@ export async function savePowerUpPricesAction(
 ): Promise<ActionState> {
   try {
     await requireRole("ADMIN");
+    const rows: { key: string; monthlyUsd: number; active: boolean }[] = [];
     for (const powerUp of POWER_UPS) {
       const key = powerUp.key;
       if (!isPowerUpKey(key)) continue;
@@ -58,12 +59,17 @@ export async function savePowerUpPricesAction(
       if (!Number.isInteger(price) || price < 0 || price > 999) {
         return { error: `${powerUp.label}: whole dollars between 0 and 999.` };
       }
-      await db.websitePowerUp.upsert({
-        where: { key },
-        create: { key, monthlyUsd: price, active },
-        update: { monthlyUsd: price, active },
-      });
+      rows.push({ key, monthlyUsd: price, active });
     }
+    await db.$transaction(
+      rows.map(({ key, monthlyUsd, active }) =>
+        db.websitePowerUp.upsert({
+          where: { key },
+          create: { key, monthlyUsd, active },
+          update: { monthlyUsd, active },
+        }),
+      ),
+    );
     revalidatePath("/admin/website");
     return { success: "Prices saved" };
   } catch (error) {

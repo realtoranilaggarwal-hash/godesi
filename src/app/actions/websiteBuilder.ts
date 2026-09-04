@@ -133,7 +133,7 @@ const verifySchema = z.object({
   email: optional(160),
   whatsapp: optional(30),
   address: optional(240),
-  description: optional(700),
+  description: z.string().trim().max(700),
   keepPhotos: z.array(z.string().url()).max(12),
 });
 
@@ -158,7 +158,7 @@ export async function verifyFactsAction(
     const nextFound = found
       ? {
           ...found,
-          description: input.description ?? found.description,
+          description: input.description || undefined,
           photos: found.photos.filter((photo) => input.keepPhotos.includes(photo)),
         }
       : input.description

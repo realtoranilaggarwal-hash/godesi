@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { launchCheckoutAction, updateCartAction } from "@/app/actions/websiteBuilder";
 import { emptyState } from "@/lib/actions";
@@ -56,14 +56,21 @@ export function FeaturesCart({
   const [cartState, cartAction] = useFormState(updateCartAction.bind(null, id), emptyState);
   const [launchState, launchAction] = useFormState(launchCheckoutAction.bind(null, id), emptyState);
   const [picked, setPicked] = useState<string[]>(selected);
+  const selectedKey = selected.join(",");
+  // The "anything else" box can add a catalogue Power-Up on the server; pick it up here.
+  useEffect(() => {
+    setPicked((current) => {
+      const merged = Array.from(new Set([...current, ...selected]));
+      return merged.length === current.length ? current : merged;
+    });
+  }, [selectedKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const customLines = quoted.filter((item) => !item.powerUp);
   const monthly = useMemo(
     () =>
       BASE_MONTHLY_USD +
-      powerUps.filter((p) => picked.includes(p.key)).reduce((sum, p) => sum + p.monthlyUsd, 0) +
-      customLines.reduce((sum, item) => sum + item.monthlyUsd, 0),
-    [picked, powerUps, customLines],
+      powerUps.filter((p) => picked.includes(p.key)).reduce((sum, p) => sum + p.monthlyUsd, 0),
+    [picked, powerUps],
   );
 
   return (
@@ -161,8 +168,9 @@ export function FeaturesCart({
             className={`${inputClass} mt-2`}
           />
           <p className="mt-1 text-xs text-slate-500">
-            AI works out which tool does it and adds an estimate to your cart; anything unusual
-            is confirmed by a person before you are charged.
+            AI works out which tool does it: catalogue Power-Ups are ticked above; anything
+            unusual gets an estimate here and a person confirms the price with you after launch
+            — it is not charged today.
           </p>
           {customLines.length ? (
             <ul className="mt-3 space-y-1 text-sm">
@@ -173,7 +181,7 @@ export function FeaturesCart({
                     <span className="block text-xs text-slate-500">{item.note}</span>
                   </span>
                   <span className="shrink-0 font-semibold">
-                    {item.monthlyUsd ? `+$${item.monthlyUsd}/mo` : "quote"}
+                    {item.monthlyUsd ? `est. $${item.monthlyUsd}/mo` : "quote"}
                   </span>
                 </li>
               ))}
@@ -204,7 +212,7 @@ export function FeaturesCart({
             <div className="text-xs text-slate-500">
               Hosting ${BASE_MONTHLY_USD}
               {picked.length ? ` + ${picked.length} Power-Up${picked.length > 1 ? "s" : ""}` : ""}
-              {customLines.length ? " + extras" : ""} · cancel any time
+              {customLines.length ? " · custom extras quoted separately" : ""} · cancel any time
             </div>
           </div>
         </div>

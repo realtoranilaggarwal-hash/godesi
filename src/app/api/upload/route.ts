@@ -62,10 +62,24 @@ export async function POST(request: Request) {
       );
     }
     const url = await storeImage({ file, folder: "websites", ownerId: project.id });
-    await db.websiteProject.update({
+    const updated = await db.websiteProject.update({
       where: { id: project.id },
       data: { uploads: { push: url } },
+      select: { uploads: true },
     });
+    // Parallel uploads can all pass the check above; keep the first N and drop the rest.
+    if (updated.uploads.length > WEBSITE_UPLOAD_LIMIT) {
+      await db.websiteProject.update({
+        where: { id: project.id },
+        data: { uploads: updated.uploads.slice(0, WEBSITE_UPLOAD_LIMIT) },
+      });
+      if (updated.uploads.indexOf(url) >= WEBSITE_UPLOAD_LIMIT) {
+        return NextResponse.json(
+          { error: `Up to ${WEBSITE_UPLOAD_LIMIT} pictures per website.` },
+          { status: 403 },
+        );
+      }
+    }
     return NextResponse.json({ url });
   }
 
