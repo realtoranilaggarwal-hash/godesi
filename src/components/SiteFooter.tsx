@@ -22,6 +22,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Resources" },
         { href: "/news", label: "News" },
+        { href: "/trending", label: "🔥 Trending hashtags" },
         { href: "/blog", label: "Blog" },
         { href: "/find", label: "Search everything" },
       ],
