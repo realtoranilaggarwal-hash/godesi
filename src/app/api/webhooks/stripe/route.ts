@@ -10,6 +10,7 @@ import { confirmLiveChannelOrder } from "@/lib/liveChannelOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
 import { confirmGigOrder } from "@/lib/gigs";
+import { confirmWebsitePayment } from "@/lib/websiteProjects";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
       const eliteOrderId = session.metadata?.eliteOrderId;
       const liveChannelOrderId = session.metadata?.liveChannelOrderId;
       const gigOrderId = session.metadata?.gigOrderId;
+      const websiteProjectId = session.metadata?.websiteProjectId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
@@ -96,6 +98,16 @@ export async function POST(request: Request) {
               ? session.payment_intent
               : session.payment_intent?.id ?? null,
         });
+      } else if (session.metadata?.kind === "website" && websiteProjectId) {
+        await confirmWebsitePayment({
+          projectId: websiteProjectId,
+          sessionId: session.id,
+          subscriptionId:
+            typeof session.subscription === "string"
+              ? session.subscription
+              : session.subscription?.id ?? null,
+          setupMinor: session.amount_total ?? 0,
+        });
       } else if (session.metadata?.kind === "review-dispute" && reviewDisputeId) {
         await confirmReviewDispute({ disputeId: reviewDisputeId, reference: session.id });
       } else if (session.metadata?.kind === "bundle" && userId) {
@@ -127,7 +139,8 @@ export async function POST(request: Request) {
       if (
         userId &&
         session.metadata?.kind !== "ticket" &&
-        session.metadata?.kind !== "gig"
+        session.metadata?.kind !== "gig" &&
+        session.metadata?.kind !== "website"
       ) {
         await recordCouponFromMetadata({
           metadata: session.metadata,

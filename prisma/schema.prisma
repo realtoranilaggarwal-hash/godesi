@@ -341,11 +341,12 @@ model User {
   /// Paid for the Elite interview inside a package, before applying.
   elitePrepaid Boolean @default(false)
 
-  gigs        Gig[]
-  gigSales    GigOrder[]   @relation("GigSeller")
-  gigOrders   GigOrder[]   @relation("GigBuyer")
-  gigMessages GigMessage[]
-  gigReviews  GigReview[]
+  gigs            Gig[]
+  gigSales        GigOrder[]       @relation("GigSeller")
+  gigOrders       GigOrder[]       @relation("GigBuyer")
+  gigMessages     GigMessage[]
+  gigReviews      GigReview[]
+  websiteProjects WebsiteProject[]
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
@@ -1446,11 +1447,11 @@ model BusinessClaim {
 /// An organiser asks for an event we listed from a public calendar, so they can
 /// run their own ticketing on Godesi instead of the site we found it on.
 model EventClaim {
-  id      String @id @default(cuid())
+  id      String  @id @default(cuid())
   eventId String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// How the claimant runs the event.
   message String
   phone   String?
@@ -1682,10 +1683,10 @@ enum GigTier {
 
 /// A small fixed-price service a member sells from their card, $5–$100.
 model Gig {
-  id           String    @id @default(cuid())
-  slug         String    @unique
+  id           String       @id @default(cuid())
+  slug         String       @unique
   sellerId     String
-  seller       User      @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  seller       User         @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   title        String
   description  String
   /// What the buyer gets, one item per line (mirrors the Basic package).
@@ -1693,20 +1694,20 @@ model Gig {
   /// Starting price: the cheapest package, whole US dollars in cents.
   priceMinor   Int
   /// Delivery of the cheapest package.
-  deliveryDays Int       @default(3)
+  deliveryDays Int          @default(3)
   /// Seller's own pictures of the work; first one is the cover.
-  images       String[]  @default([])
-  tags         String[]  @default([])
+  images       String[]     @default([])
+  tags         String[]     @default([])
   /// [{ q, a }] written by the seller.
-  faq          Json      @default("[]")
-  ratingSum    Int       @default(0)
-  ratingCount  Int       @default(0)
-  status       GigStatus @default(ACTIVE)
+  faq          Json         @default("[]")
+  ratingSum    Int          @default(0)
+  ratingCount  Int          @default(0)
+  status       GigStatus    @default(ACTIVE)
   packages     GigPackage[]
   orders       GigOrder[]
   reviews      GigReview[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   @@index([sellerId, status])
   @@index([status, createdAt])
@@ -1714,9 +1715,9 @@ model Gig {
 
 /// Basic / Standard / Premium — what the buyer picks in the order box.
 model GigPackage {
-  id           String  @id @default(cuid())
+  id           String     @id @default(cuid())
   gigId        String
-  gig          Gig     @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  gig          Gig        @relation(fields: [gigId], references: [id], onDelete: Cascade)
   tier         GigTier
   name         String
   description  String
@@ -1724,7 +1725,7 @@ model GigPackage {
   includes     String?
   priceMinor   Int
   deliveryDays Int
-  revisions    Int     @default(0)
+  revisions    Int        @default(0)
   orders       GigOrder[]
 
   @@unique([gigId, tier])
@@ -1732,18 +1733,18 @@ model GigPackage {
 
 /// One review per completed order, by the buyer, shown on the gig.
 model GigReview {
-  id        String   @id @default(cuid())
-  orderId   String   @unique
-  order     GigOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  orderId   String    @unique
+  order     GigOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   gigId     String
-  gig       Gig      @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  gig       Gig       @relation(fields: [gigId], references: [id], onDelete: Cascade)
   authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   rating    Int
   comment   String
   reply     String?
   repliedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([gigId, createdAt])
 }
@@ -1758,8 +1759,8 @@ model GigOrder {
   seller   User           @relation("GigSeller", fields: [sellerId], references: [id], onDelete: Restrict)
   status   GigOrderStatus @default(PENDING)
 
-  packageId   String?
-  package     GigPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  packageId    String?
+  package      GigPackage? @relation(fields: [packageId], references: [id], onDelete: SetNull)
   /// Package name at the time of purchase, kept even if the seller edits it.
   packageName  String?
   revisions    Int         @default(0)
@@ -2066,14 +2067,14 @@ model EliteEntry {
   awardYear  Int?
 
   /// Paid the one-time interview + short video fee.
-  interviewPaid Boolean @default(false)
+  interviewPaid Boolean   @default(false)
   /// NONE, BASIC (30-60s edit) or PRO (3-minute professional film).
-  videoPackage  String  @default("NONE")
+  videoPackage  String    @default("NONE")
   /// Everything this member has paid towards their Elite profile, in cents.
-  paidCents     Int     @default(0)
+  paidCents     Int       @default(0)
   /// The part of that spend still inside its paid term; higher spend ranks the
   /// profile above others in its section, and expiry drops it back to zero.
-  rankCents     Int     @default(0)
+  rankCents     Int       @default(0)
   /// End of the paid Elite term; null for staff-compiled and unpaid profiles.
   eliteUntil    DateTime?
 
@@ -2288,10 +2289,10 @@ model PartnerKit {
 /// themselves. Facts are kept so a moderator can make the call, and the row is
 /// keyed by the page it was found on so a re-run updates instead of duplicating.
 model Prospect {
-  id    String @id @default(cuid())
-  name  String
+  id              String  @id @default(cuid())
+  name            String
   /// The trade in the source directory's words, e.g. "Disc Jockey".
-  trade String
+  trade           String
   /// Our own taxonomy, guessed from the trade so a beat can be filtered.
   categorySlug    String?
   subcategorySlug String?
@@ -2313,17 +2314,17 @@ model Prospect {
   /// same way. Never a photo lifted from a directory.
   draftLogoUrl    String?
 
-  status ProspectStatus @default(NEW)
+  status     ProspectStatus @default(NEW)
   /// Moderator working this row, so two people never ring the same business.
-  ownerId String?
-  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  ownerId    String?
+  owner      User?          @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   /// What the business said, in the moderator's words.
-  note         String?
-  calledAt     DateTime?
+  note       String?
+  calledAt   DateTime?
   /// Slug of the card they created, once they list.
-  listedSlug   String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  listedSlug String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
 
   @@index([status, categorySlug])
   @@index([ownerId, status])
@@ -2383,4 +2384,83 @@ model Invite {
 model InviteOptOut {
   emailCanonical String   @id
   createdAt      DateTime @default(now())
+}
+
+enum WebsiteProjectStatus {
+  /// Facts gathered, nothing generated yet.
+  DRAFT
+  /// A preview exists and the owner is looking at it.
+  PREVIEW
+  /// Owner pressed "make it live" and is choosing features.
+  APPROVED
+  /// Setup paid and the subscription started; the desk builds the real site.
+  PAID
+  /// The finished site is up on its domain.
+  LIVE
+  CANCELLED
+}
+
+/// One "build my website" journey: what we found about the business, what the
+/// owner wants the site to do, the AI-written content and chosen design, and the
+/// features bought at checkout. Owned by whoever holds the link until it is paid.
+model WebsiteProject {
+  id     String               @id @default(cuid())
+  userId String?
+  user   User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status WebsiteProjectStatus @default(DRAFT)
+
+  businessName String
+  category     String
+  city         String
+  phone        String?
+  email        String?
+  whatsapp     String?
+  address      String?
+  domain       String?
+
+  /// Links the owner pasted: google, yelp, website, facebook, instagram.
+  sources Json
+  /// What the public pages told us: description, hours, photos, reviews, services.
+  found   Json?
+  /// Pictures the owner uploaded for us to use.
+  uploads String[] @default([])
+  /// What customers should be able to do on the site (goal keys).
+  goals   String[] @default([])
+  /// Free-text "anything else you want the site to do".
+  wish    String?
+
+  /// AI-written copy for every section, as JSON.
+  content     Json?
+  /// Which palette, type and layout the current preview uses.
+  designSeed  Int     @default(0)
+  /// Owner's notes from "I want to make changes", folded into the next draft.
+  changeNotes String?
+
+  /// Feature keys picked in the cart.
+  powerUps String[] @default([])
+  /// Custom wishes the AI priced into the cart: [{ label, monthlyUsd, note }].
+  quoted   Json?
+
+  setupMinor           Int?
+  monthlyMinor         Int?
+  stripeSessionId      String?   @unique
+  stripeSubscriptionId String?
+  paidAt               DateTime?
+  approvedAt           DateTime?
+  liveUrl              String?
+  staffNotes           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+/// A price override for one website feature; the catalogue itself lives in code.
+model WebsitePowerUp {
+  key        String   @id
+  monthlyUsd Int
+  active     Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
 }
