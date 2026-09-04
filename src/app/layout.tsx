@@ -13,6 +13,7 @@ import { LiveActivity } from "@/components/LiveActivity";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
+import { QuoraSignupEvent } from "@/components/QuoraSignupEvent";
 import { aiEnabled } from "@/lib/ai";
 import { siteUrl } from "@/lib/format";
 import { TELEGRAM_GROUP } from "@/lib/site";
@@ -167,6 +168,7 @@ export default function RootLayout({
         <SiteTicker />
         <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
         <SiteFooter />
+        <QuoraSignupEvent />
         <LiveMediaPlayer />
         <CookieConsent />
         <RewardsNudge />

@@ -55,7 +55,7 @@ export default async function TicketSuccessPage({
     error = "We could not verify this payment. Please contact support.";
   }
 
-  if (code) redirect(`/tickets/${code}`);
+  if (code) redirect(`/tickets/${code}?paid=1`);
 
   return (
     <div className="mx-auto max-w-lg space-y-4 py-8 text-center">
