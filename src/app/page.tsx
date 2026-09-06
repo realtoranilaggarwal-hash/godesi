@@ -18,6 +18,7 @@ import { ActivityWall } from "@/components/ActivityWall";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { HandleClaim } from "@/components/HandleClaim";
+import { planRank } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -65,9 +66,10 @@ export default async function HomePage() {
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
-      take: 6,
+      take: 12,
       include: {
         category: { select: { name: true, icon: true, color: true } },
+        organizer: { select: { plan: true } },
       },
     }),
     db.newsItem.findMany({
@@ -95,6 +97,12 @@ export default async function HomePage() {
     }),
   ]);
   const pickerGroups = await categoryPickerGroups();
+  const isFeaturedEvent = (event: (typeof events)[number]) =>
+    event.featured || planRank(event.organizer.plan) > 0;
+  const featuredEvents = events.filter(isFeaturedEvent).slice(0, 3);
+  const otherEvents = events
+    .filter((event) => !isFeaturedEvent(event))
+    .slice(0, 6);
 
   return (
     <div className="space-y-8">
@@ -278,11 +286,20 @@ export default async function HomePage() {
               href="/events"
               linkLabel="All events"
             />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {events.map((event) => (
-                <EventCard key={event.id} event={event} variant="tile" />
-              ))}
-            </div>
+            {featuredEvents.length ? (
+              <div className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {featuredEvents.map((event) => (
+                  <EventCard key={event.id} event={event} featured />
+                ))}
+              </div>
+            ) : null}
+            {otherEvents.length ? (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                {otherEvents.map((event) => (
+                  <EventCard key={event.id} event={event} variant="tile" />
+                ))}
+              </div>
+            ) : null}
           </section>
         ) : null}
 

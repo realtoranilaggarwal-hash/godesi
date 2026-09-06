@@ -136,7 +136,7 @@ export async function CategoryFeatured() {
                   key={business.id}
                   business={business}
                   premium={spotlightable(business)}
-                  smallImage
+                  smallImage={!spotlightable(business)}
                 />
               ))}
 

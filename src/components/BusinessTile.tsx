@@ -68,8 +68,43 @@ export function BusinessTile({
           {business.name}
         </Link>
         <p className="line-clamp-1 text-xs text-slate-500">
-          {business.category} · {business.city}
+          {business.subcategoryName ?? business.category} · {business.city}
         </p>
+        {premium ? (
+          <>
+            <p className="flex flex-wrap items-center gap-x-2 text-[11px] font-semibold text-slate-700">
+              {business.reviewCount ? (
+                <span className="text-amber-600">
+                  ★ {business.rating.toFixed(1)}{" "}
+                  <span className="font-normal text-slate-500">
+                    ({business.reviewCount})
+                  </span>
+                </span>
+              ) : null}
+              {business.verifiedProvider ? (
+                <span className="text-emerald-700">✓ Verified</span>
+              ) : null}
+              {business.yearsExperience ? (
+                <span className="text-slate-600">
+                  {business.yearsExperience}+ yrs
+                </span>
+              ) : null}
+              {business.priceFrom ? (
+                <span className="text-slate-600">From {business.priceFrom}</span>
+              ) : null}
+            </p>
+            {business.description ? (
+              <p className="line-clamp-2 text-[11px] leading-snug text-slate-600">
+                {business.description}
+              </p>
+            ) : null}
+            {business.specialties.length ? (
+              <p className="line-clamp-1 text-[10px] text-indigo-700">
+                {business.specialties.slice(0, 4).join(" · ")}
+              </p>
+            ) : null}
+          </>
+        ) : null}
         <div className="mt-auto pt-1.5">
           {business.whatsappNumber ? (
             <WhatsAppButton
