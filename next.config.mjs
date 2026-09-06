@@ -82,6 +82,22 @@ const nextConfig = {
         destination: "/desi-elite/:path*",
         permanent: true,
       },
+      // Search engines still hold URLs from the old WordPress/Osclass godesi.com.
+      { source: "/index.php", destination: "/", permanent: true },
+      { source: "/index.php/:path*", destination: "/", permanent: true },
+      {
+        source: "/:lang(en|de|es|fr|it|nl|da|fi|pl|pt|ru|cs|zh|el|ro|th|hi)/:path*",
+        destination: "/",
+        permanent: true,
+      },
+      { source: "/:path(listing|vendor|vendors|product|products|shop|item)/:rest*", destination: "/categories", permanent: true },
+      { source: "/:path(listing-category|category)/:rest*", destination: "/categories", permanent: true },
+      { source: "/:path(vendors|products)", destination: "/categories", permanent: true },
+      { source: "/add-listing", destination: "/add-business", permanent: true },
+      { source: "/about-us", destination: "/about", permanent: true },
+      { source: "/privacy-policy", destination: "/privacy", permanent: true },
+      { source: "/:path(author|user)/:rest*", destination: "/people", permanent: true },
+      { source: "/wp-login.php", destination: "/login", permanent: true },
     ];
   },
 };
