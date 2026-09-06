@@ -93,15 +93,8 @@ function FaceLink({
  * floating scatter on a desktop and a wrapped row on a phone. It refreshes on
  * its own, so a member who signs up drifts in without a reload.
  */
-export function MemberBubbles({
-  members: initial,
-  total: initialTotal,
-}: {
-  members: BubbleMember[];
-  total: number;
-}) {
+export function MemberBubbles({ members: initial }: { members: BubbleMember[] }) {
   const [members, setMembers] = useState(initial);
-  const [total, setTotal] = useState(initialTotal);
   const [arrived, setArrived] = useState<string | null>(null);
 
   useEffect(() => {
@@ -111,10 +104,7 @@ export function MemberBubbles({
       try {
         const response = await fetch("/api/members");
         if (!response.ok) return;
-        const data = (await response.json()) as {
-          members?: BubbleMember[];
-          total?: number;
-        };
+        const data = (await response.json()) as { members?: BubbleMember[] };
         if (!Array.isArray(data.members)) return;
         const next = data.members;
         setMembers((current) => {
@@ -124,7 +114,6 @@ export function MemberBubbles({
           }
           return next;
         });
-        if (typeof data.total === "number") setTotal(data.total);
       } catch {
         // A hiccup just leaves the last set of faces on screen.
       }
@@ -187,7 +176,7 @@ export function MemberBubbles({
         })}
 
         <div className="absolute bottom-0 right-0 rounded-full bg-white/20 px-3 py-1 text-[11px] font-bold text-white backdrop-blur">
-          🎉 {total.toLocaleString()} members and counting
+          🎉 Joined already — and many more
         </div>
       </div>
 
@@ -202,7 +191,7 @@ export function MemberBubbles({
           ))}
         </div>
         <p className="mt-2 text-[11px] font-bold text-white/90">
-          🎉 {total.toLocaleString()} members and counting
+          🎉 Joined already — and many more
         </p>
       </div>
     </>

@@ -17,7 +17,6 @@ import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
-import { publicMemberCount } from "@/lib/membersQueries";
 import { HandleClaim } from "@/components/HandleClaim";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +58,6 @@ export default async function HomePage() {
     events,
     news,
     members,
-    memberCount,
     spaCount,
   ] = await Promise.all([
     getCategoryTree(),
@@ -89,7 +87,6 @@ export default async function HomePage() {
         location: true,
       },
     }),
-    publicMemberCount(),
     db.business.count({
       where: {
         status: "APPROVED",
@@ -148,7 +145,7 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <MemberBubbles members={members} total={memberCount} />
+          <MemberBubbles members={members} />
         </div>
       </section>
 
