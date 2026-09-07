@@ -15,50 +15,59 @@ const SITEMAP_TTL = 3600;
 
 /** Dates are stringified by the cache, so the rows carry ISO timestamps. */
 const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
-  const [businesses, categories, events, reports] = await Promise.all([
-    // A card or event with nothing on it but a name is left out: submitting
-    // thin pages is what the publisher policies count against the whole domain.
-    db.business.findMany({
-      where: { status: "APPROVED" },
-      select: {
-        slug: true,
-        updatedAt: true,
-        description: true,
-        logoUrl: true,
-        websiteUrl: true,
-        albumUrl: true,
-        videoUrl: true,
-        address: true,
-        specialties: true,
-        ownerId: true,
-        _count: { select: { media: true, reviews: true } },
-      },
-    }),
-    db.category.findMany({
-      where: { parentSlug: null },
-      select: { slug: true },
-    }),
-    db.event.findMany({
-      where: { status: "APPROVED" },
-      select: {
-        slug: true,
-        updatedAt: true,
-        description: true,
-        sourceId: true,
-        claimedAt: true,
-        imageUrl: true,
-        albumUrl: true,
-        videoUrl: true,
-        websiteUrl: true,
-      },
-    }),
-    // Feed items are somebody else's article; only our own reporting belongs
-    // in the sitemap.
-    db.newsItem.findMany({
-      where: { status: "PUBLISHED", submittedById: { not: null } },
-      select: { id: true, title: true, publishedAt: true },
-    }),
-  ]);
+  const [businesses, categories, events, reports, posts, worship] =
+    await Promise.all([
+      // A card or event with nothing on it but a name is left out: submitting
+      // thin pages is what the publisher policies count against the whole domain.
+      db.business.findMany({
+        where: { status: "APPROVED" },
+        select: {
+          slug: true,
+          updatedAt: true,
+          description: true,
+          logoUrl: true,
+          websiteUrl: true,
+          albumUrl: true,
+          videoUrl: true,
+          address: true,
+          specialties: true,
+          ownerId: true,
+          _count: { select: { media: true, reviews: true } },
+        },
+      }),
+      db.category.findMany({
+        where: { parentSlug: null },
+        select: { slug: true },
+      }),
+      db.event.findMany({
+        where: { status: "APPROVED" },
+        select: {
+          slug: true,
+          updatedAt: true,
+          description: true,
+          sourceId: true,
+          claimedAt: true,
+          imageUrl: true,
+          albumUrl: true,
+          videoUrl: true,
+          websiteUrl: true,
+        },
+      }),
+      // Feed items are somebody else's article; only our own reporting belongs
+      // in the sitemap.
+      db.newsItem.findMany({
+        where: { status: "PUBLISHED", submittedById: { not: null } },
+        select: { id: true, title: true, publishedAt: true },
+      }),
+      db.blogPost.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      db.worshipPlace.findMany({
+        where: { status: "APPROVED" },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
   return {
     businesses: businesses
       .filter(
@@ -84,13 +93,28 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       path: newsPath(row),
       publishedAt: row.publishedAt.toISOString(),
     })),
+    posts: posts.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+    })),
+    worship: worship.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+    })),
   };
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
-  const [{ businesses, categories, events, reports }, cities, professionals] =
-    await Promise.all([sitemapRows(), popularCities(200), professionalCount()]);
+  const [
+    { businesses, categories, events, reports, posts, worship },
+    cities,
+    professionals,
+  ] = await Promise.all([
+    sitemapRows(),
+    popularCities(200),
+    professionalCount(),
+  ]);
 
   return [
     ...(professionals >= PROFESSIONALS_INDEX_FROM
@@ -184,6 +208,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}${report.path}`,
       lastModified: new Date(report.publishedAt),
       changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+    ...posts.map((post) => ({
+      url: `${base}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+    ...worship.map((place) => ({
+      url: `${base}/religious/${place.slug}`,
+      lastModified: new Date(place.updatedAt),
+      changeFrequency: "weekly" as const,
       priority: 0.6,
     })),
   ];

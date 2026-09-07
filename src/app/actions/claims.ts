@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireRole, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
+import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { type ActionState, fieldError } from "@/lib/actions";
 
 const claimSchema = z.object({
@@ -97,4 +98,5 @@ export async function reviewClaimAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath(`/b/${claim.business.slug}`);
+  if (approve) pingIndexNowInBackground(`/b/${claim.business.slug}`);
 }
