@@ -24,6 +24,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/news", label: "News" },
         { href: "/trending", label: "🔥 Trending hashtags" },
         { href: "/blog", label: "Blog" },
+        { href: "/guide", label: "City guides" },
         { href: "/find", label: "Search everything" },
       ],
     },

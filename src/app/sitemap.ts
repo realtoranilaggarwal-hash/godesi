@@ -7,6 +7,7 @@ import { popularCities } from "@/lib/cities";
 import { businessIsThin, eventIsThin } from "@/lib/thinContent";
 import { professionalCount } from "@/lib/professionalsQueries";
 import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
+import { GUIDES } from "@/lib/guides";
 
 export const dynamic = "force-dynamic";
 
@@ -145,6 +146,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/city`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/trending`, changeFrequency: "daily", priority: 0.5 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/guide`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/desi-elite`, changeFrequency: "daily", priority: 0.8 },
     {
       url: `${base}/desi-elite/apply`,
@@ -209,6 +211,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(report.publishedAt),
       changeFrequency: "monthly" as const,
       priority: 0.6,
+    })),
+    ...GUIDES.map((guide) => ({
+      url: `${base}/guide/${guide.slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
     })),
     ...posts.map((post) => ({
       url: `${base}/blog/${post.slug}`,

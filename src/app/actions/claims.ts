@@ -76,6 +76,7 @@ export async function reviewClaimAction(formData: FormData) {
   });
   if (!claim) return;
 
+  let handedOver = false;
   if (!approve) {
     await db.businessClaim.update({ where: { id }, data: { status: "REJECTED" } });
   } else if (claim.business.ownerId) {
@@ -94,9 +95,10 @@ export async function reviewClaimAction(formData: FormData) {
         data: { status: "REJECTED" },
       }),
     ]);
+    handedOver = true;
   }
 
   revalidatePath("/admin");
   revalidatePath(`/b/${claim.business.slug}`);
-  if (approve) pingIndexNowInBackground(`/b/${claim.business.slug}`);
+  if (handedOver) pingIndexNowInBackground(`/b/${claim.business.slug}`);
 }
