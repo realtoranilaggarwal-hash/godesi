@@ -201,6 +201,8 @@ model User {
   digestOptOutAt  DateTime?
   /// Last weekly digest we sent them, so a retry never double-sends.
   digestSentAt    DateTime?
+  /// Last onboarding note sent: 0 none, 1 welcome, 2 day-2, 3 day-5, 4 day-14.
+  onboardingStep  Int       @default(0)
 
   /// 1..1000 for the first thousand members — powers the 🏅 Founding member
   /// badge and their double reward points. Null once the spots are gone.
@@ -350,6 +352,7 @@ model User {
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
+  @@index([onboardingStep, createdAt])
 }
 
 enum ReferralStatus {
