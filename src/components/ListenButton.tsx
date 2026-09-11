@@ -44,6 +44,10 @@ export function ListenButton({
   };
 
   const start = (speed: number) => {
+    if (utterance.current) {
+      utterance.current.onend = null;
+      utterance.current.onerror = null;
+    }
     window.speechSynthesis.cancel();
     const speech = new SpeechSynthesisUtterance(`${title}. ${text}`);
     speech.lang = lang;
@@ -82,7 +86,11 @@ export function ListenButton({
         onClick={toggle}
         className="rounded-xl bg-indigo-600 px-3 py-1.5 font-bold text-white hover:bg-indigo-700"
         aria-label={
-          state === "playing" ? "Pause reading" : "Listen to this story"
+          state === "playing"
+            ? "Pause reading"
+            : state === "paused"
+              ? "Resume reading"
+              : "Listen to this story"
         }
       >
         {state === "idle"
