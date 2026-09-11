@@ -12,7 +12,7 @@ import { formatEventDate } from "@/lib/events";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { properName } from "@/lib/names";
 import { ShareButtons } from "@/components/ShareButtons";
-import { Badge, Card, EmptyState, Stars } from "@/components/ui";
+import { Badge, Card, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
@@ -23,6 +23,7 @@ import { journalistStats } from "@/lib/journalistsQueries";
 import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
+import { PostIdeasBanner } from "@/components/PostIdeasBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -135,10 +136,27 @@ export default async function PublicProfilePage({
               </div>
             </div>
           </div>
-          <ShareButtons
-            url={shareUrl}
-            title={`${properName(user.name)} on Godesi`}
-          />
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end">
+            <ShareButtons
+              url={shareUrl}
+              title={`${properName(user.name)} on Godesi`}
+            />
+            <a
+              href={`/api/qr/u/${user.username}?download=1`}
+              title="Download this QR code"
+              className="flex shrink-0 flex-col items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 text-[11px] font-semibold text-slate-600 hover:border-indigo-300"
+            >
+              <Image
+                src={`/api/qr/u/${user.username}`}
+                alt={`QR code for ${user.name}`}
+                width={96}
+                height={96}
+                unoptimized
+                className="rounded-lg"
+              />
+              Personal QR · download
+            </a>
+          </div>
         </div>
         {user.bio ? (
           <p className="border-t border-slate-100 px-5 py-4 text-sm text-slate-700">
@@ -320,7 +338,10 @@ export default async function PublicProfilePage({
             <section className="space-y-2">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-lg font-bold">🛠️ Gigs</h2>
-                <Link href="/gigs/how-it-works" className="text-xs text-slate-500 underline">
+                <Link
+                  href="/gigs/how-it-works"
+                  className="text-xs text-slate-500 underline"
+                >
                   Pay safely through Godesi
                 </Link>
               </div>
@@ -448,10 +469,7 @@ export default async function PublicProfilePage({
           ) : null}
 
           {!activity && !user.business ? (
-            <EmptyState
-              title="Nothing posted yet"
-              body={`${user.name} has not published a business, event or requirement so far.`}
-            />
+            <PostIdeasBanner name={user.name} />
           ) : null}
         </div>
 
@@ -484,24 +502,6 @@ export default async function PublicProfilePage({
               ) : null}
             </Card>
           ) : null}
-          <Card className="space-y-3 text-center">
-            <p className="text-sm font-bold text-slate-900">Personal QR code</p>
-            <Image
-              src={`/api/qr/u/${user.username}`}
-              alt={`QR code for ${user.name}`}
-              width={200}
-              height={200}
-              unoptimized
-              className="mx-auto rounded-xl border border-slate-200"
-            />
-            <a
-              href={`/api/qr/u/${user.username}?download=1`}
-              className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              Download QR
-            </a>
-          </Card>
-
           {user.business && user.business.status === "APPROVED" ? (
             <Card className="space-y-3 text-center">
               <p className="text-sm font-bold text-slate-900">
