@@ -9,6 +9,7 @@ import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ShareRail } from "@/components/ShareRail";
 import { StoryBody } from "@/components/StoryBody";
+import { ListenButton } from "@/components/ListenButton";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
@@ -209,6 +210,8 @@ export default async function ReportPage({
               <JournalistBadge level={levelFor(approved)} />
             </div>
           ) : null}
+
+          <ListenButton title={report.title} text={report.summary} />
 
           <StoryBody text={report.summary} />
 
