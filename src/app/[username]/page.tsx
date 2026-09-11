@@ -68,7 +68,8 @@ export default async function PublicProfilePage({
     leads.length +
     reviews.length +
     listings.length +
-    gigs.length;
+    gigs.length +
+    (journalist?.approved ?? 0);
   const socialLinks = PERSONAL_SOCIALS.map((social) => ({
     ...social,
     url: user[social.key],
