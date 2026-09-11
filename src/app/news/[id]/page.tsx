@@ -170,6 +170,8 @@ export default async function ReportPage({
 
           <h1 className="text-2xl font-black leading-tight">{report.title}</h1>
 
+          <ListenButton title={report.title} text={report.summary} />
+
           <p className="text-sm text-slate-500">
             {report.source} · {when(report.publishedAt)}
           </p>
@@ -210,8 +212,6 @@ export default async function ReportPage({
               <JournalistBadge level={levelFor(approved)} />
             </div>
           ) : null}
-
-          <ListenButton title={report.title} text={report.summary} />
 
           <StoryBody text={report.summary} />
 
