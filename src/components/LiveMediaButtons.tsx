@@ -99,25 +99,25 @@ export function LiveMediaLinks({
       </button>
       <Link
         href="/live-radio"
-        className="text-xs font-semibold text-white/80 underline hover:text-white"
+        className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         all stations
       </Link>
       <Link
         href="/live/submit"
-        className="text-xs font-semibold text-white/80 underline hover:text-white"
+        className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         add yours
       </Link>
       <Link
         href="/news/report"
-        className="text-xs font-semibold text-white/80 underline hover:text-white"
+        className="hidden md:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         add your news
       </Link>
       <Link
         href="/leads"
-        className="text-xs font-semibold text-white/80 underline hover:text-white"
+        className="hidden md:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         help clients
       </Link>
