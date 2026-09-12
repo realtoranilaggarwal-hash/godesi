@@ -172,9 +172,19 @@ export default async function ReportPage({
 
           <ListenButton title={report.title} text={report.summary} />
 
-          <p className="text-sm text-slate-500">
-            {report.source} · {when(report.publishedAt)}
-          </p>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+            <span>
+              {report.source} · {when(report.publishedAt)}
+            </span>
+            {(isAuthor || isStaff) && report.submittedById ? (
+              <Link
+                href={`/news/${report.id}/edit`}
+                className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                ✏️ Edit {isAuthor ? "your story" : "story"}
+              </Link>
+            ) : null}
+          </div>
 
           {hero ? (
             // eslint-disable-next-line @next/next/no-img-element
