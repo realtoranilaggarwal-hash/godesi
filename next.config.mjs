@@ -94,6 +94,7 @@ const nextConfig = {
       { source: "/:path(listing-category|category)/:rest*", destination: "/categories", permanent: true },
       { source: "/:path(vendors|products)", destination: "/categories", permanent: true },
       { source: "/add-listing", destination: "/add-business", permanent: true },
+      { source: "/:path(your-name|yourname|your-business)", destination: "/add-business?utm_source=social", permanent: false },
       { source: "/about-us", destination: "/about", permanent: true },
       { source: "/privacy-policy", destination: "/privacy", permanent: true },
       { source: "/:path(author|user)/:rest*", destination: "/people", permanent: true },
