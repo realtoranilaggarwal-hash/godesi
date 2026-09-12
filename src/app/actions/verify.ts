@@ -9,6 +9,7 @@ import { emailEnabled } from "@/lib/email";
 import { consumeEmailOtp, issueEmailOtp } from "@/lib/otp";
 import { publishAfterVerification } from "@/lib/autoApprove";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { sendWelcomeEmail } from "@/lib/onboardingEmails";
 
 export async function sendEmailOtpAction(): Promise<ActionState> {
   const user = await getCurrentUser();
@@ -47,6 +48,7 @@ export async function verifyEmailOtpAction(
         data: { emailVerifiedAt: new Date() },
       });
       await publishAfterVerification(user.id);
+      await sendWelcomeEmail(user.id);
     } catch (error) {
       return fieldError(error);
     }

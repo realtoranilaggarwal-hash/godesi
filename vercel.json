@@ -13,6 +13,10 @@
       "schedule": "0 14 * * 4"
     },
     {
+      "path": "/api/cron/onboarding",
+      "schedule": "0 15 * * *"
+    },
+    {
       "path": "/api/cron/gigs-release",
       "schedule": "15 4 * * *"
     }
