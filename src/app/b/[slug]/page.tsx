@@ -729,13 +729,30 @@ export default async function BusinessProfilePage({
                       className="h-48 w-full rounded-xl bg-black object-cover"
                     />
                   ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <a
                       key={item.id}
-                      src={item.url}
-                      alt={item.caption ?? business.name}
-                      className="h-48 w-full rounded-xl border border-slate-200 object-cover"
-                    />
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener"
+                      title="View full size"
+                      className="relative block h-48 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.url}
+                        alt=""
+                        aria-hidden
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
+                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.url}
+                        alt={item.caption ?? business.name}
+                        loading="lazy"
+                        className="relative h-full w-full object-contain"
+                      />
+                    </a>
                   ),
                 )}
               </div>
