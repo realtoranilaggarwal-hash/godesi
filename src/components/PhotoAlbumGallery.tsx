@@ -36,7 +36,8 @@ export async function PhotoAlbumGallery({
       {title ? <p className="text-sm text-slate-500">{title}</p> : null}
       {held > 0 ? (
         <p className="text-xs text-slate-500">
-          Showing {tiles.length} of {images.length} — the rest open in the album.
+          Showing {tiles.length} of {images.length} — the rest open in the
+          album.
         </p>
       ) : null}
 
@@ -48,15 +49,23 @@ export async function PhotoAlbumGallery({
               href={url}
               target="_blank"
               rel="noreferrer nofollow"
-              className="group relative block aspect-square overflow-hidden rounded-xl border border-slate-200"
+              className="group relative block aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-900"
             >
               {/* Served straight from Google, so no Godesi storage or optimizer cost. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={albumThumb(image, 400, 400)}
                 alt=""
+                aria-hidden
                 loading="lazy"
-                className="h-full w-full object-cover transition group-hover:scale-105"
+                className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={albumThumb(image, 400, 400, false)}
+                alt=""
+                loading="lazy"
+                className="relative h-full w-full object-contain transition group-hover:scale-105"
               />
             </a>
           ))}
