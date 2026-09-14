@@ -65,7 +65,7 @@ export async function PhotoAlbumGallery({
                 src={albumThumb(image, 400, 400, false)}
                 alt=""
                 loading="lazy"
-                className="relative h-full w-full object-contain transition group-hover:scale-105"
+                className="relative h-full w-full object-contain"
               />
             </a>
           ))}
