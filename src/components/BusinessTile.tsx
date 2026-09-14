@@ -35,13 +35,27 @@ export function BusinessTile({
       />
       <Link href={`/b/${business.slug}`} className="block bg-slate-100">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={thumbImage(image, 384)}
-            alt={`${business.name} — ${business.category} in ${business.city}`}
-            loading="lazy"
-            className={`w-full ${smallImage ? "h-20" : "h-32"} object-cover`}
-          />
+          <div
+            className={`relative w-full overflow-hidden bg-slate-800 ${
+              smallImage ? "h-20" : "h-32"
+            }`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumbImage(image, 384)}
+              alt=""
+              aria-hidden
+              loading="lazy"
+              className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={thumbImage(image, 384)}
+              alt={`${business.name} — ${business.category} in ${business.city}`}
+              loading="lazy"
+              className="relative h-full w-full object-contain"
+            />
+          </div>
         ) : (
           <span
             role="img"
@@ -90,7 +104,9 @@ export function BusinessTile({
                 </span>
               ) : null}
               {business.priceFrom ? (
-                <span className="text-slate-600">From {business.priceFrom}</span>
+                <span className="text-slate-600">
+                  From {business.priceFrom}
+                </span>
               ) : null}
             </p>
             {business.description ? (
