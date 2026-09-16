@@ -8,6 +8,7 @@ export const DJ_CATEGORY_SLUGS = [
   "events-wedding-dj-and-sound",
   "events-wedding-dhol-and-baraat",
   "events-wedding-live-bands",
+  "events-wedding-singers",
   "events-wedding-anchors-and-artists",
   "events-wedding-stage-and-sound-rentals",
 ];
