@@ -23,6 +23,7 @@ import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
@@ -491,6 +492,12 @@ export default async function BusinessProfilePage({
                 {videos.map((video) => (
                   <VideoEmbed key={video} url={video} title={business.name} />
                 ))}
+              </div>
+            ) : null}
+
+            {business.playlistUrl ? (
+              <div className="mt-3">
+                <PlaylistGallery url={business.playlistUrl} owner={business.name} />
               </div>
             ) : null}
 

@@ -132,6 +132,7 @@ export async function publicProfile(username: string) {
       skills: true,
       languages: true,
       videoUrls: true,
+      playlistUrl: true,
       openToWork: true,
       whatsappNumber: true,
       websiteUrl: true,

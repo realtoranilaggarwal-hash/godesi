@@ -30,6 +30,7 @@ import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
+import { isPlaylistLink } from "@/lib/youtubePlaylist";
 import { titleCase } from "@/lib/titlecase";
 import {
   CONDITIONS,
@@ -162,6 +163,10 @@ const profileSchema = z.object({
     (value) => !value || isAlbumLink(value),
     "Paste a Google Photos album link (photos.app.goo.gl/…)",
   ),
+  playlistUrl: optionalUrl.refine(
+    (value) => !value || isPlaylistLink(value),
+    "Paste a YouTube playlist link (youtube.com/playlist?list=…)",
+  ),
   linkedinUrl: optionalUrl,
   xUrl: optionalUrl,
   tiktokUrl: optionalUrl,
@@ -229,6 +234,7 @@ function readProfileForm(formData: FormData) {
     videoUrl: value("videoUrl"),
     videoUrls: value("videoUrls"),
     albumUrl: value("albumUrl"),
+    playlistUrl: value("playlistUrl"),
     linkedinUrl: value("linkedinUrl"),
     xUrl: value("xUrl"),
     tiktokUrl: value("tiktokUrl"),
@@ -436,6 +442,7 @@ export async function saveBusinessProfileAction(
       videoUrl: videos[0] ?? null,
       videoUrls: videos,
       albumUrl: parsed.data.albumUrl ?? null,
+      playlistUrl: parsed.data.playlistUrl ?? null,
       linkedinUrl: parsed.data.linkedinUrl ?? null,
       xUrl: parsed.data.xUrl ?? null,
       tiktokUrl: parsed.data.tiktokUrl ?? null,

@@ -14,6 +14,7 @@ import { properName } from "@/lib/names";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
@@ -254,9 +255,13 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
 
+          {user.playlistUrl ? (
+            <PlaylistGallery url={user.playlistUrl} owner={user.name} />
+          ) : null}
+
           {user.videoUrls.length ? (
             <section className="space-y-3">
-              <h2 className="text-lg font-bold">Videos</h2>
+              <h2 className="text-lg font-bold">{user.playlistUrl ? "More videos" : "Videos"}</h2>
               {user.videoUrls.map((url) => (
                 <VideoEmbed key={url} url={url} title={`${user.name} video`} />
               ))}

@@ -13,6 +13,7 @@ import {
   type PersonalSocialKey,
 } from "@/lib/personalProfile";
 import { isSupportedVideoUrl } from "@/lib/video";
+import { isPlaylistLink } from "@/lib/youtubePlaylist";
 import { institutionSlug, MIN_YEAR } from "@/lib/alumni";
 
 const optionalUrl = z
@@ -75,6 +76,10 @@ export async function savePersonalProfileAction(
     const badVideo = videoUrls.find((url) => !isSupportedVideoUrl(url));
     if (badVideo) {
       return { error: "Videos must be YouTube or Vimeo links, one per line." };
+    }
+    const playlistUrl = value("playlistUrl").trim();
+    if (playlistUrl && !isPlaylistLink(playlistUrl)) {
+      return { error: "Paste a YouTube playlist link (youtube.com/playlist?list=…)." };
     }
 
     const username = normalizeUsername(parsed.data.username);
@@ -140,6 +145,7 @@ export async function savePersonalProfileAction(
         skills: splitTags(value("skills")),
         languages: splitTags(value("languages"), 10),
         videoUrls,
+        playlistUrl: playlistUrl || null,
         avatarUrl: parsed.data.avatarUrl ?? null,
         ...socials,
       },
