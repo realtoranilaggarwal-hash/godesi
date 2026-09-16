@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
@@ -38,7 +39,7 @@ import { businessIsThin, robotsFor } from "@/lib/thinContent";
 
 export const dynamic = "force-dynamic";
 
-async function getBusiness(slug: string) {
+const getBusiness = cache(async (slug: string) => {
   return db.business.findUnique({
     where: { slug },
     include: {
@@ -60,32 +61,17 @@ async function getBusiness(slug: string) {
       reviews: { where: { hidden: false }, orderBy: { createdAt: "desc" } },
       agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
       vehicle: true,
+      _count: { select: { media: true, reviews: true } },
     },
   });
-}
+});
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const business = await db.business.findUnique({
-    where: { slug: params.slug },
-    select: {
-      name: true,
-      category: true,
-      city: true,
-      description: true,
-      logoUrl: true,
-      websiteUrl: true,
-      albumUrl: true,
-      videoUrl: true,
-      address: true,
-      specialties: true,
-      ownerId: true,
-      _count: { select: { media: true, reviews: true } },
-    },
-  });
+  const business = await getBusiness(params.slug);
   if (!business) return { title: "Business not found" };
 
   const title = `${business.name} — ${business.category} in ${business.city}`;

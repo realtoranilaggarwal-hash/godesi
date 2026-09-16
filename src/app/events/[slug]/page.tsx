@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { venuePath } from "@/lib/venues";
 import { getCurrentUser } from "@/lib/auth";
@@ -41,10 +42,11 @@ import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
-async function loadEvent(slug: string) {
+const loadEvent = cache(async (slug: string) => {
   return db.event.findUnique({
     where: { slug },
     include: {
@@ -62,7 +64,32 @@ async function loadEvent(slug: string) {
       venueRef: { select: { id: true, slug: true } },
     },
   });
-}
+});
+
+const relatedEvents = cachedQuery(
+  "event-related",
+  CONTENT_TTL,
+  async (eventId: string, city: string, genres: string[], state: string | null) =>
+    db.event.findMany({
+      where: {
+        status: "APPROVED",
+        startsAt: { gte: new Date() },
+        id: { not: eventId },
+        OR: [
+          { city: { equals: city, mode: "insensitive" } },
+          ...(genres.length ? [{ genres: { hasSome: genres } }] : []),
+          ...(state
+            ? [{ state: { equals: state, mode: "insensitive" as const } }]
+            : []),
+        ],
+      },
+      orderBy: { startsAt: "asc" },
+      take: 8,
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
+    }),
+);
 
 export async function generateMetadata({
   params,
@@ -134,25 +161,16 @@ export default async function EventPage({
   // The page runs out of content well before the ad rail does, so it ends with
   // what the visitor most likely wants next: the same kind of event, or
   // anything else on in their city.
-  const related = await db.event.findMany({
-    where: {
-      status: "APPROVED",
-      startsAt: { gte: new Date() },
-      id: { not: event.id },
-      OR: [
-        { city: { equals: event.city, mode: "insensitive" } },
-        ...(event.genres.length ? [{ genres: { hasSome: event.genres } }] : []),
-        ...(event.state
-          ? [{ state: { equals: event.state, mode: "insensitive" as const } }]
-          : []),
-      ],
-    },
-    orderBy: { startsAt: "asc" },
-    take: 8,
-    include: {
-      category: { select: { name: true, icon: true, color: true } },
-    },
-  });
+  const relatedRows = await relatedEvents(
+    event.id,
+    event.city,
+    event.genres,
+    event.state,
+  );
+  const related = relatedRows.map((item) => ({
+    ...item,
+    startsAt: new Date(item.startsAt),
+  }));
 
   const jsonLd = {
     "@context": "https://schema.org",

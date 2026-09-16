@@ -19,8 +19,53 @@ import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { HandleClaim } from "@/components/HandleClaim";
 import { planRank } from "@/lib/plans";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
+
+const homeEvents = cachedQuery("home-events", CONTENT_TTL, async () =>
+  db.event.findMany({
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    orderBy: { startsAt: "asc" },
+    take: 12,
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      organizer: { select: { plan: true } },
+    },
+  }),
+);
+
+const homeNews = cachedQuery("home-news", CONTENT_TTL, async () =>
+  db.newsItem.findMany({
+    where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+    orderBy: { publishedAt: "desc" },
+    take: 4,
+  }),
+);
+
+const homeMembers = cachedQuery("home-members", CONTENT_TTL, async () =>
+  db.user.findMany({
+    where: { emailVerifiedAt: { not: null } },
+    orderBy: { createdAt: "desc" },
+    take: 44,
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      avatarUrl: true,
+      location: true,
+    },
+  }),
+);
+
+const homeSpaCount = cachedQuery("home-spa-count", CONTENT_TTL, async () =>
+  db.business.count({
+    where: {
+      status: "APPROVED",
+      subcategorySlug: "beauty-lifestyle-spa-and-massage",
+    },
+  }),
+);
 
 function SectionHeading({
   title,
@@ -56,46 +101,26 @@ export default async function HomePage() {
   const [
     categories,
     businesses,
-    events,
-    news,
+    eventRows,
+    newsRows,
     members,
     spaCount,
   ] = await Promise.all([
     getCategoryTree(),
     searchBusinesses({ take: 6, sort: "recent" }),
-    db.event.findMany({
-      where: { status: "APPROVED", startsAt: { gte: new Date() } },
-      orderBy: { startsAt: "asc" },
-      take: 12,
-      include: {
-        category: { select: { name: true, icon: true, color: true } },
-        organizer: { select: { plan: true } },
-      },
-    }),
-    db.newsItem.findMany({
-      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-      orderBy: { publishedAt: "desc" },
-      take: 4,
-    }),
-    db.user.findMany({
-      where: { emailVerifiedAt: { not: null } },
-      orderBy: { createdAt: "desc" },
-      take: 44,
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        avatarUrl: true,
-        location: true,
-      },
-    }),
-    db.business.count({
-      where: {
-        status: "APPROVED",
-        subcategorySlug: "beauty-lifestyle-spa-and-massage",
-      },
-    }),
+    homeEvents(),
+    homeNews(),
+    homeMembers(),
+    homeSpaCount(),
   ]);
+  const events = eventRows.map((event) => ({
+    ...event,
+    startsAt: new Date(event.startsAt),
+  }));
+  const news = newsRows.map((item) => ({
+    ...item,
+    publishedAt: new Date(item.publishedAt),
+  }));
   const pickerGroups = await categoryPickerGroups();
   const isFeaturedEvent = (event: (typeof events)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;

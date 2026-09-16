@@ -3,20 +3,29 @@ import { getCategoryTree } from "@/lib/directory";
 import { softFor } from "@/lib/categories";
 import { Card } from "@/components/ui";
 import { CategoryPicker, type PickerGroup } from "@/components/CategoryPicker";
+import { TAXONOMY_TTL, cachedQuery } from "@/lib/cache";
 
 /** Shared shape for the sidebar rail and the menu button. */
-export async function categoryPickerGroups(): Promise<PickerGroup[]> {
-  const categories = await getCategoryTree();
-  return categories.map((category) => ({
-    slug: category.slug,
-    name: category.name,
-    icon: category.icon,
-    className: softFor(category.color),
-    children: category.children.map((child) => ({
-      slug: child.slug,
-      name: child.name,
-    })),
-  }));
+const cachedCategoryPickerGroups = cachedQuery(
+  "category-picker-groups",
+  TAXONOMY_TTL,
+  async (): Promise<PickerGroup[]> => {
+    const categories = await getCategoryTree();
+    return categories.map((category) => ({
+      slug: category.slug,
+      name: category.name,
+      icon: category.icon,
+      className: softFor(category.color),
+      children: category.children.map((child) => ({
+        slug: child.slug,
+        name: child.name,
+      })),
+    }));
+  },
+);
+
+export function categoryPickerGroups() {
+  return cachedCategoryPickerGroups();
 }
 
 /** The side-rail picker: short links to the main categories plus the full tree. */
