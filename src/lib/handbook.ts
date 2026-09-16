@@ -249,6 +249,7 @@ Send me the poster, the ticket prices and the venue name and I will set it up wi
       { label: "DJ & Sound", href: "/categories/events-wedding-dj-and-sound" },
       { label: "Dhol & Baraat", href: "/categories/events-wedding-dhol-and-baraat" },
       { label: "Live Bands", href: "/categories/events-wedding-live-bands" },
+      { label: "Singers", href: "/categories/events-wedding-singers" },
       { label: "Anchors & Artists (singers, MCs)", href: "/categories/events-wedding-anchors-and-artists" },
       {
         label: "Stage & Sound Rentals",
