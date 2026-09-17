@@ -3,10 +3,7 @@ import { formatEventDate, seatsLeft } from "@/lib/events";
 import { Money } from "@/components/Money";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
-import {
-  eventCategoryIcon,
-  eventCategoryLabel,
-} from "@/lib/eventCategories";
+import { eventCategoryIcon, eventCategoryLabel } from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { thumbImage } from "@/lib/proxyImage";
 import { eventTheme, placeLine } from "@/lib/eventTheme";
@@ -82,9 +79,7 @@ export function EventCard({
       <Link
         href={`/events/${event.slug}`}
         className={`group flex flex-1 flex-col overflow-hidden bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-          featured
-            ? "rounded-[17px]"
-            : "rounded-2xl border border-slate-200"
+          featured ? "rounded-[17px]" : "rounded-2xl border border-slate-200"
         }`}
       >
         {event.imageUrl && featured ? (
@@ -113,6 +108,15 @@ export function EventCard({
             className={`${posterHeight} w-full object-cover`}
             loading="lazy"
           />
+        ) : compact ? (
+          <span
+            aria-hidden
+            className={`flex ${posterHeight} w-full items-center justify-center bg-gradient-to-br ${gradientFor(
+              theme.color,
+            )} text-5xl`}
+          >
+            {theme.icon}
+          </span>
         ) : null}
 
         <div
@@ -134,10 +138,12 @@ export function EventCard({
             {event.partnerStatus === "APPROVED" ? (
               <Badge tone="amber">🔥 Partner event</Badge>
             ) : null}
-            {left === 0 && !imported ? <Badge tone="red">Sold out</Badge> : null}
+            {left === 0 && !imported ? (
+              <Badge tone="red">Sold out</Badge>
+            ) : null}
           </div>
           <div className="flex items-start gap-2">
-            {event.imageUrl ? null : (
+            {event.imageUrl || compact ? null : (
               <span
                 aria-hidden
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradientFor(
