@@ -99,6 +99,7 @@ export default async function PersonalProfilePage() {
               languages: user.languages,
               videoUrls: user.videoUrls,
               playlistUrl: user.playlistUrl,
+              albumUrl: user.albumUrl,
               openToWork: user.openToWork,
               whatsappNumber: user.whatsappNumber,
               alumni,
