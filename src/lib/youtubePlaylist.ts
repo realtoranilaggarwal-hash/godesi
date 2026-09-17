@@ -1,9 +1,11 @@
 import { cachedQuery } from "@/lib/cache";
 
 /**
- * A member pastes a public YouTube playlist link and every video in it shows on
- * their card. YouTube publishes an Atom feed per playlist (no API key, latest
- * 15 videos), which we read once a day; the videos stay on YouTube.
+ * A member pastes a public YouTube playlist link and the playlist plays on
+ * their card through YouTube's own playlist embed, which carries every video.
+ * For the tile strip we read YouTube's Atom feed per playlist (no API key; it
+ * lists the newest 15) once a day. Only successful reads are cached, so a
+ * blocked or slow feed is retried on the next visit rather than kept for a day.
  */
 
 const HOSTS = ["youtube.com", "m.youtube.com", "youtu.be", "music.youtube.com"];
@@ -30,6 +32,14 @@ export function playlistPageUrl(id: string) {
   return `https://www.youtube.com/playlist?list=${id}`;
 }
 
+/** Embed that plays the whole playlist, with YouTube's own list drawer. */
+export function playlistEmbedUrl(id: string) {
+  return `https://www.youtube-nocookie.com/embed/videoseries?list=${id}`;
+}
+
+/** How many videos the feed lists; the embed player still has all of them. */
+export const FEED_LIMIT = 15;
+
 export type PlaylistVideo = { id: string; title: string; thumbnail: string };
 export type PlaylistPreview = { title: string | null; videos: PlaylistVideo[] };
 
@@ -40,7 +50,7 @@ async function readPlaylist(id: string): Promise<PlaylistPreview> {
     `https://www.youtube.com/feeds/videos.xml?playlist_id=${id}`,
     { signal: AbortSignal.timeout(8000) },
   );
-  if (!response.ok) return { title: null, videos: [] };
+  if (!response.ok) throw new Error(`playlist feed ${response.status}`);
 
   const xml = await response.text();
   const title = xml.match(/<title>([^<]*)<\/title>/)?.[1] ?? null;
@@ -71,16 +81,14 @@ function decodeEntities(value: string) {
 const cachedPlaylist = cachedQuery(
   "youtube-playlist",
   60 * 60 * 24,
-  async (id: string): Promise<PlaylistPreview> => {
-    try {
-      return await readPlaylist(id);
-    } catch {
-      return { title: null, videos: [] };
-    }
-  },
+  (id: string): Promise<PlaylistPreview> => readPlaylist(id),
 );
 
-/** Cached for a day; a playlist rarely changes minute to minute. */
-export function playlistPreview(id: string) {
-  return cachedPlaylist(id);
+/** Cached for a day on success; a failed read returns empty and is not cached. */
+export async function playlistPreview(id: string): Promise<PlaylistPreview> {
+  try {
+    return await cachedPlaylist(id);
+  } catch {
+    return { title: null, videos: [] };
+  }
 }

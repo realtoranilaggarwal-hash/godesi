@@ -1,13 +1,15 @@
 import { PlaylistPlayer } from "@/components/PlaylistPlayer";
 import {
+  FEED_LIMIT,
   playlistId,
   playlistPageUrl,
   playlistPreview,
 } from "@/lib/youtubePlaylist";
 
 /**
- * Every video in a member's public YouTube playlist, read from YouTube's own
- * feed. YouTube serves the videos and thumbnails; Godesi stores only the link.
+ * A member's public YouTube playlist: YouTube's playlist player (every video),
+ * plus the newest ones as tiles when the feed is readable. YouTube serves the
+ * videos and thumbnails; Godesi stores only the link.
  */
 export async function PlaylistGallery({
   url,
@@ -39,25 +41,21 @@ export async function PlaylistGallery({
       </div>
       {title ? <p className="text-sm text-slate-500">{title}</p> : null}
 
-      {videos.length ? (
-        <div className="mt-3">
-          <PlaylistPlayer videos={videos} owner={owner} />
-        </div>
-      ) : (
-        <p className="mt-3 text-sm text-slate-500">
-          No videos could be read from this playlist — make sure it is Public or
-          Unlisted, or{" "}
-          <a
-            href={page}
-            target="_blank"
-            rel="noreferrer nofollow"
-            className="underline"
-          >
-            open it on YouTube
-          </a>
-          .
+      <div className="mt-3">
+        <PlaylistPlayer playlistId={id} videos={videos} owner={owner} />
+      </div>
+      {videos.length >= FEED_LIMIT ? (
+        <p className="mt-2 text-xs text-slate-500">
+          Newest {FEED_LIMIT} shown as tiles — use the player&apos;s list (top
+          right) or open on YouTube for the rest.
         </p>
-      )}
+      ) : null}
+      {!videos.length ? (
+        <p className="mt-2 text-xs text-slate-500">
+          Use the player&apos;s list (top right) to pick a video. If nothing
+          plays, make sure the playlist is Public or Unlisted on YouTube.
+        </p>
+      ) : null}
     </section>
   );
 }
