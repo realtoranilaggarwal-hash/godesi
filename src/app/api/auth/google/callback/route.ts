@@ -6,6 +6,7 @@ import { createSession, hashPassword } from "@/lib/auth";
 import { fetchGoogleProfile, googleAuthEnabled } from "@/lib/googleAuth";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
+import { sendWelcomeEmail } from "@/lib/onboardingEmails";
 import { canonicalEmail } from "@/lib/signupGuard";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,8 @@ export async function GET(request: Request) {
   cookies().delete("google_oauth");
   const [state, next = ""] = stored.split("|");
   const code = url.searchParams.get("code");
-  if (!code || !state || url.searchParams.get("state") !== state) return failure;
+  if (!code || !state || url.searchParams.get("state") !== state)
+    return failure;
 
   const profile = await fetchGoogleProfile(code);
   if (!profile) return failure;
@@ -28,7 +30,9 @@ export async function GET(request: Request) {
     new URL("/login?error=suspended", url),
   );
 
-  const existing = await db.user.findUnique({ where: { email: profile.email } });
+  const existing = await db.user.findUnique({
+    where: { email: profile.email },
+  });
   const user =
     existing ??
     (await db.user.create({
@@ -48,6 +52,7 @@ export async function GET(request: Request) {
   if (!existing) {
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
+    await sendWelcomeEmail(user.id);
   }
   if (existing && profile.emailVerified && !existing.emailVerifiedAt) {
     await db.user.update({
