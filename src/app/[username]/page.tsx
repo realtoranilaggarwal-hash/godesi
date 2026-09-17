@@ -15,6 +15,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
@@ -257,6 +258,12 @@ export default async function PublicProfilePage({
 
           {user.playlistUrl ? (
             <PlaylistGallery url={user.playlistUrl} owner={user.name} />
+          ) : null}
+
+          {user.albumUrl ? (
+            <Card>
+              <PhotoAlbumGallery url={user.albumUrl} heading="Photos" />
+            </Card>
           ) : null}
 
           {user.videoUrls.length ? (

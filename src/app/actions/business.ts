@@ -31,6 +31,7 @@ import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { isPlaylistLink } from "@/lib/youtubePlaylist";
+import { harvestMediaLinks, mergeLinks } from "@/lib/mediaLinks";
 import { titleCase } from "@/lib/titlecase";
 import {
   CONDITIONS,
@@ -391,13 +392,24 @@ export async function saveBusinessProfileAction(
 
     const pasted = readVideoLinks(parsed.data.videoUrls);
     if ("error" in pasted) return { error: pasted.error };
-    const videos = (
+    const pastedVideos = (
       pasted.links.length
         ? pasted.links
         : parsed.data.videoUrl
           ? [parsed.data.videoUrl]
           : []
     ).slice(0, staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user));
+
+    // Media links pasted into the description move to the fields that play them.
+    const found = harvestMediaLinks(parsed.data.description ?? "");
+    const description = found.text;
+    const videos = mergeLinks(
+      pastedVideos,
+      found.videos,
+      staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user),
+    );
+    const albumUrl = parsed.data.albumUrl ?? found.albums[0] ?? null;
+    const playlistUrl = parsed.data.playlistUrl ?? found.playlists[0] ?? null;
 
     // showContact is the form's wording; the column stores the opposite.
     const { showContact, ...fields } = parsed.data;
@@ -429,7 +441,7 @@ export async function saveBusinessProfileAction(
       category: subcategory?.name ?? category.name,
       state: parsed.data.state || null,
       country: parsed.data.country || null,
-      description: parsed.data.description || null,
+      description: description || null,
       phone: parsed.data.phone || null,
       address: parsed.data.address || null,
       publicEmail: parsed.data.publicEmail ?? null,
@@ -441,8 +453,8 @@ export async function saveBusinessProfileAction(
       youtubeUrl: parsed.data.youtubeUrl ?? null,
       videoUrl: videos[0] ?? null,
       videoUrls: videos,
-      albumUrl: parsed.data.albumUrl ?? null,
-      playlistUrl: parsed.data.playlistUrl ?? null,
+      albumUrl,
+      playlistUrl,
       linkedinUrl: parsed.data.linkedinUrl ?? null,
       xUrl: parsed.data.xUrl ?? null,
       tiktokUrl: parsed.data.tiktokUrl ?? null,
