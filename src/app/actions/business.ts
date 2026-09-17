@@ -116,12 +116,44 @@ function readVehicleForm(formData: FormData) {
   } as const;
 }
 
-const optionalUrl = z
-  .string()
-  .trim()
-  .url("Enter a valid URL")
-  .optional()
-  .or(z.literal("").transform(() => undefined));
+/** Blank → undefined; a bare "www.example.com" gets its https://. */
+const optionalUrl = z.preprocess((raw) => {
+  if (typeof raw !== "string") return undefined;
+  const value = raw.trim();
+  if (!value) return undefined;
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+}, z.string().url("Enter a valid link (https://…)").optional());
+
+const FIELD_LABELS: Record<string, string> = {
+  logoUrl: "Logo",
+  websiteUrl: "Website",
+  instagramUrl: "Instagram",
+  facebookUrl: "Facebook",
+  youtubeUrl: "YouTube",
+  videoUrl: "Video link",
+  albumUrl: "Photo album link",
+  playlistUrl: "YouTube playlist link",
+  linkedinUrl: "LinkedIn",
+  xUrl: "X (Twitter)",
+  tiktokUrl: "TikTok",
+  threadsUrl: "Threads",
+  telegramUrl: "Telegram",
+  whatsappChannelUrl: "WhatsApp channel",
+  pinterestUrl: "Pinterest",
+  snapchatUrl: "Snapchat",
+  yelpUrl: "Yelp",
+  zillowUrl: "Zillow",
+  realtorUrl: "Realtor.com",
+  mapsUrl: "Google Maps",
+  publicEmail: "Public email",
+  whatsappNumber: "WhatsApp number",
+};
+
+/** "Website: Enter a valid link" rather than Zod's bare "Invalid input". */
+function issueMessage(issue: { path: PropertyKey[]; message: string }) {
+  const label = FIELD_LABELS[String(issue.path[0] ?? "")];
+  return label ? `${label}: ${issue.message}` : issue.message;
+}
 
 const profileSchema = z.object({
   name: z.string().trim().min(2, "Business name is required"),
@@ -141,12 +173,10 @@ const profileSchema = z.object({
       "Enter a valid WhatsApp number",
     ),
   phone: z.string().trim().optional(),
-  publicEmail: z
-    .string()
-    .trim()
-    .email("Enter a valid email")
-    .optional()
-    .or(z.literal("").transform(() => undefined)),
+  publicEmail: z.preprocess(
+    (raw) => (typeof raw === "string" && raw.trim() ? raw.trim() : undefined),
+    z.string().email("Enter a valid email").optional(),
+  ),
   /** Paid members choose whether the public sees their phone and email. */
   showContact: z.boolean(),
   address: z.string().trim().optional(),
@@ -165,7 +195,7 @@ const profileSchema = z.object({
     "Paste a Google Photos album link (photos.app.goo.gl/…)",
   ),
   playlistUrl: optionalUrl.refine(
-    (value) => !value || isPlaylistLink(value),
+    (value) => !value || isPlaylistLink(value) || isSupportedVideoUrl(value),
     "Paste a YouTube playlist link (youtube.com/playlist?list=…)",
   ),
   linkedinUrl: optionalUrl,
@@ -264,7 +294,7 @@ export async function saveBusinessProfileAction(
   try {
     const user = await requireUser();
     const parsed = readProfileForm(formData);
-    if (!parsed.success) return { error: parsed.error.issues[0].message };
+    if (!parsed.success) return { error: issueMessage(parsed.error.issues[0]) };
 
     // Staff may edit any card straight from its page by posting its id.
     const targetId = String(formData.get("businessId") ?? "").trim();
@@ -400,16 +430,27 @@ export async function saveBusinessProfileAction(
           : []
     ).slice(0, staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user));
 
-    // Media links pasted into the description move to the fields that play them.
+    // Media links pasted into the description (or a single video pasted into
+    // the playlist box) move to the fields that play them.
     const found = harvestMediaLinks(parsed.data.description ?? "");
     const description = found.text;
+    const typedPlaylist = parsed.data.playlistUrl;
+    const playlistIsVideo = Boolean(
+      typedPlaylist && !isPlaylistLink(typedPlaylist),
+    );
     const videos = mergeLinks(
       pastedVideos,
-      found.videos,
+      [
+        ...(playlistIsVideo && typedPlaylist ? [typedPlaylist] : []),
+        ...found.videos,
+      ],
       staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user),
     );
     const albumUrl = parsed.data.albumUrl ?? found.albums[0] ?? null;
-    const playlistUrl = parsed.data.playlistUrl ?? found.playlists[0] ?? null;
+    const playlistUrl =
+      (playlistIsVideo ? undefined : typedPlaylist) ??
+      found.playlists[0] ??
+      null;
 
     // showContact is the form's wording; the column stores the opposite.
     const { showContact, ...fields } = parsed.data;
