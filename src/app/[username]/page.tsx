@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import {
   normalizeUsername,
   publicProfile,
@@ -28,11 +29,11 @@ import { PostIdeasBanner } from "@/components/PostIdeasBanner";
 
 export const dynamic = "force-dynamic";
 
-async function load(usernameParam: string) {
+const load = cache(async (usernameParam: string) => {
   const username = normalizeUsername(decodeURIComponent(usernameParam));
   if (RESERVED_USERNAMES.has(username)) return null;
   return publicProfile(username);
-}
+});
 
 export async function generateMetadata({
   params,
