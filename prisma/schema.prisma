@@ -1278,6 +1278,8 @@ model NewsItem {
   albumUrl   String?
   /// Every truth declaration was ticked when the report was filed.
   declaredAt DateTime?
+  /// Byline hidden in public; the author is still on record for the desk.
+  anonymous  Boolean   @default(false)
 
   /// Editor's pick, shown at the top of /news.
   featured      Boolean            @default(false)
