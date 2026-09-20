@@ -28,6 +28,21 @@ export type ComplaintGuide = {
   /** Filled-in complaint the reader can copy and adapt. */
   template: string;
   faqs: { q: string; a: string }[];
+  /** Fields to write down while it is fresh; rendered as a fill-in sheet. */
+  writeDown?: string[];
+  /** Phone lines and online forms worth having at hand. */
+  hotlines?: Hotline[];
+  /** What to do when someone actually fell ill. */
+  ifSick?: string[];
+  /** Show the state-by-state directory (food only). */
+  stateDirectory?: boolean;
+};
+
+export type Hotline = {
+  name: string;
+  phone?: string;
+  url: string;
+  note: string;
 };
 
 export const EVERGREEN_EVIDENCE = [
@@ -57,18 +72,62 @@ export const COMPLAINT_GUIDES: ComplaintGuide[] = [
     example:
       "A tray of sweets in the display case has white or green fuzz; the counter staff say it is 'just sugar'. Packaged snacks are months past the best-before date. Meat or paneer smells off on the day of purchase.",
     firstSteps: [
-      "Do not eat it. If you already have and feel unwell, see a doctor first — a diagnosis is also evidence.",
-      "Photograph the item where it sits: display case, shelf, price tag, and the label with the lot number and dates.",
-      "Ask calmly for the manager and for a refund. Note the name and what was said. Most stores will refund on the spot; that does not stop you filing.",
+      "Do not eat it — and do not taste it 'to check'. If you already have and feel unwell, see a doctor first; a diagnosis is also evidence.",
+      "Before anything is thrown away, photograph the item where it sits: the mould, fungus, insects or foreign object; the display case or shelf; the price tag; the packaging with brand, best-before date and lot code; the storefront and address; the receipt.",
+      "Write down what happened while it is fresh — use the sheet below. Keep the original receipt and the photos.",
+      "Ask calmly for the manager and for a refund. Note the name and what was said. A refund settles your purchase; it does not settle a food-safety problem, and taking one does not stop you filing.",
       "Keep the item in a sealed bag in the fridge for a few days in case the inspector asks for it.",
-      "Check whether it is a packaged brand or made in-store. Packaged = the manufacturer and the federal agency; made in-store = your local health department.",
+      "Report to the right body. Food sold or prepared in a store, restaurant, bakery, deli or food truck is inspected by your city, county or state health department — start there, not with the FDA. Packaged brands: also the FDA (or USDA for meat, poultry and egg products). Use the state directory below.",
     ],
     evidence: [
-      "Product name, brand, lot/batch code, best-before or packed-on date.",
-      "Store name and full address; the aisle or counter.",
-      "Receipt showing the purchase date.",
+      "Photos: the affected food; the mould, fungus, foreign object, insects or discolouration; the packaging; brand name; expiry / use-by / best-before date; lot number or product code.",
+      "Store or restaurant name and full address; the aisle or counter.",
+      "Receipt, plus the date and approximate time of purchase.",
+      "Any refund or message exchanged with the business.",
       "If anyone got sick: symptoms, when they started, and the doctor's note.",
     ],
+    writeDown: [
+      "Business name",
+      "Business address",
+      "Date purchased",
+      "Approximate time",
+      "Product",
+      "Brand",
+      "Package size",
+      "Expiration / use-by date",
+      "Lot / code number",
+      "What was wrong",
+      "Did you eat the product?",
+      "Did anyone become sick?",
+      "Did you notify the business?",
+      "What did the business do?",
+    ],
+    hotlines: [
+      {
+        name: "FDA consumer food complaint",
+        phone: "1-888-SAFEFOOD (1-888-723-3366)",
+        url: "https://www.fda.gov/safety/report-problem-fda",
+        note: "Foods other than meat, poultry and processed egg products: sweets, snacks, spices, dairy, imported goods. Online form or phone; covers illness, foreign objects, quality and labelling.",
+      },
+      {
+        name: "USDA Meat & Poultry Hotline",
+        phone: "1-888-MPHotline (1-888-674-6854)",
+        url: "https://www.fsis.usda.gov/",
+        note: "Meat, poultry and processed egg products (halal or otherwise). Their online Electronic Consumer Complaint Form takes photos and documents: illness, allergic reaction, foreign object, injury, off taste or smell, mislabelling.",
+      },
+      {
+        name: "FoodSafety.gov — report a problem",
+        url: "https://www.foodsafety.gov/",
+        note: "The official US routing page: it sends restaurant and store complaints to your local health department and packaged-food complaints to FDA or USDA.",
+      },
+    ],
+    ifSick: [
+      "Contact your doctor or healthcare provider; in an emergency call 911.",
+      "Contact your city, county or state health department and tell them what you ate, where and when you bought it, and when symptoms started.",
+      "Tell them if others who ate the same food are also unwell — that is how outbreaks are spotted.",
+      "Keep receipts, packaging, leftovers (sealed, in the fridge) and photos.",
+    ],
+    stateDirectory: true,
     us: [
       {
         name: "Your county or city health department",
@@ -117,7 +176,11 @@ I am asking that the store be inspected. I can be reached at [phone / email].
     faqs: [
       {
         q: "The store gave me a refund. Should I still complain?",
-        a: "Yes if it was a safety issue (mould, spoilage, past date on the shelf). A refund fixes your purchase; an inspection fixes the shelf for the next customer.",
+        a: "Yes if it was a safety issue (mould, spoilage, past date on the shelf). You do not have to handle it yourself or simply accept the refund: a refund resolves the purchase, an inspection fixes the shelf for the next customer.",
+      },
+      {
+        q: "Should I send it to the FDA?",
+        a: "Not automatically. Stores, restaurants, bakeries and delis are regulated by your local or state health department — start there. The FDA is for packaged foods (and USDA for meat, poultry and eggs), especially if the same brand could be on shelves elsewhere.",
       },
       {
         q: "Will the store know it was me?",
