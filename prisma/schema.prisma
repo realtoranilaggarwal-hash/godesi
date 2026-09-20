@@ -2095,6 +2095,13 @@ model EliteEntry {
   /// Photographer and licence for a freely-licensed portrait, shown under it.
   photoCredit String?
 
+  /// Answers to the "prepare for your interview" story sheet, keyed by
+  /// question id; the interviewer's briefing is built from these.
+  storySheet     Json?
+  /// When and where the interview is booked (studio address or Zoom link).
+  interviewAt    DateTime?
+  interviewPlace String?
+
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?
   interviewUrl String?
