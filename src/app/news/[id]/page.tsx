@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { getCurrentUser, can } from "@/lib/auth";
 import { levelFor } from "@/lib/journalists";
@@ -23,7 +24,7 @@ import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
 
-async function loadReport(param: string) {
+const loadReport = cache(async (param: string) => {
   return db.newsItem.findUnique({
     where: { id: newsIdFromParam(param) },
     include: {
@@ -32,7 +33,7 @@ async function loadReport(param: string) {
       },
     },
   });
-}
+});
 
 export async function generateMetadata({
   params,
