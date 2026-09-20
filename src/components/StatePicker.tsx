@@ -36,6 +36,21 @@ export function StatePicker({ states }: { states: StateFoodContact[] }) {
           >
             Open {picked.name} food complaints ↗
           </a>
+          {picked.restaurant ? (
+            <div className="mt-3 border-t border-rose-200 pt-3">
+              <p className="font-bold text-rose-900">
+                {picked.restaurant.agency}
+              </p>
+              <a
+                href={picked.restaurant.url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="mt-1 inline-block rounded-xl border border-rose-600 px-3 py-1.5 font-bold text-rose-700 hover:bg-rose-100"
+              >
+                Restaurant complaints ↗
+              </a>
+            </div>
+          ) : null}
           <p className="mt-2 text-xs text-rose-900/70">
             Look for “file a complaint”, “report a food problem” or “contact
             your local health department” on that page. Big cities (New York,
@@ -60,6 +75,19 @@ export function StatePicker({ states }: { states: StateFoodContact[] }) {
                   {row.name}
                 </a>{" "}
                 — {row.agency}
+                {row.restaurant ? (
+                  <>
+                    {" · "}
+                    <a
+                      href={row.restaurant.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="text-rose-700 hover:underline"
+                    >
+                      restaurants
+                    </a>
+                  </>
+                ) : null}
               </li>
             ))}
           </ul>

@@ -9,6 +9,8 @@ export type StateFoodContact = {
   name: string;
   agency: string;
   url: string;
+  /** Set where restaurants are inspected by a different agency than stores. */
+  restaurant?: { agency: string; url: string };
 };
 
 export const FOOD_SAFETY_STATES: StateFoodContact[] = [
@@ -70,8 +72,12 @@ export const FOOD_SAFETY_STATES: StateFoodContact[] = [
     code: "FL",
     name: "Florida",
     agency:
-      "Florida Dept. of Business & Professional Regulation / Dept. of Agriculture",
+      "Florida Dept. of Agriculture (FDACS) — grocery & convenience stores",
     url: "https://www.fdacs.gov/Consumer-Resources/File-a-Complaint",
+    restaurant: {
+      agency: "Florida DBPR — Hotels & Restaurants complaint form",
+      url: "https://www.myfloridalicense.com/wl11.asp",
+    },
   },
   {
     code: "GA",
@@ -210,15 +216,22 @@ export const FOOD_SAFETY_STATES: StateFoodContact[] = [
   {
     code: "NY",
     name: "New York",
-    agency:
-      "NY Department of Agriculture & Markets (stores) / NYC DOHMH 311 (restaurants)",
+    agency: "NY Department of Agriculture & Markets — stores",
     url: "https://agriculture.ny.gov/food-safety/file-complaint",
+    restaurant: {
+      agency: "NYC 311 (in NYC) or your county health department — restaurants",
+      url: "https://portal.311.nyc.gov/",
+    },
   },
   {
     code: "NC",
     name: "North Carolina",
-    agency: "NC DHHS — Environmental Health / NCDA&CS Food & Drug",
+    agency: "NCDA&CS Food & Drug Protection — stores",
     url: "https://www.ncagr.gov/divisions/food-drug-protection",
+    restaurant: {
+      agency: "NC DHHS Environmental Health (county inspectors) — restaurants",
+      url: "https://ehs.dph.ncdhhs.gov/",
+    },
   },
   {
     code: "ND",
@@ -295,8 +308,12 @@ export const FOOD_SAFETY_STATES: StateFoodContact[] = [
   {
     code: "VA",
     name: "Virginia",
-    agency: "Virginia Department of Health — Food Safety / VDACS",
-    url: "https://www.vdh.virginia.gov/environmental-health/food-safety-in-virginia/",
+    agency: "VDACS Food Safety — grocery & convenience stores",
+    url: "https://www.vdacs.virginia.gov/",
+    restaurant: {
+      agency: "Virginia Department of Health — restaurants",
+      url: "https://www.vdh.virginia.gov/environmental-health/food-safety-in-virginia/",
+    },
   },
   {
     code: "WA",
