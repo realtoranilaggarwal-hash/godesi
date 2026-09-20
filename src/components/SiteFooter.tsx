@@ -61,7 +61,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/rewards", label: "Refer & earn rewards" },
         { href: "/leaderboard", label: "🏅 Top contributors" },
         { href: "/safety", label: "Trust & safety" },
-        { href: "/complaints", label: "How to file a complaint" },
+        { href: "/complaints", label: "⚠️ How to file a complaint" },
+        { href: "/news/report?topic=consumer", label: "Post a consumer alert" },
       ],
     },
     {
