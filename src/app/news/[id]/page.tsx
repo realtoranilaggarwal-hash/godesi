@@ -94,7 +94,11 @@ export default async function ReportPage({
       : null,
     report.submittedById
       ? db.newsItem.count({
-          where: { submittedById: report.submittedById, status: "PUBLISHED" },
+          where: {
+            submittedById: report.submittedById,
+            status: "PUBLISHED",
+            anonymous: false,
+          },
         })
       : 0,
     db.newsItem.findMany({

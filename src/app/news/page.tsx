@@ -114,7 +114,11 @@ export default async function NewsPage({
   const approvedCounts = submitterIds.length
     ? await db.newsItem.groupBy({
         by: ["submittedById"],
-        where: { status: "PUBLISHED", submittedById: { in: submitterIds } },
+        where: {
+          status: "PUBLISHED",
+          anonymous: false,
+          submittedById: { in: submitterIds },
+        },
         _count: { _all: true },
       })
     : [];
