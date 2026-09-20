@@ -8,7 +8,9 @@ import {
   POST_RULES,
   complaintGuide,
 } from "@/lib/complaints";
+import { FOOD_SAFETY_STATES } from "@/lib/foodSafetyStates";
 import { siteUrl } from "@/lib/format";
+import { StatePicker } from "@/components/StatePicker";
 import { SidebarBanners } from "@/components/Banners";
 import { CopyButton } from "@/components/CopyButton";
 import { Card } from "@/components/ui";
@@ -173,10 +175,97 @@ export default function ComplaintGuidePage({
           </details>
         </Card>
 
+        {guide.writeDown ? (
+          <Card>
+            <h2 className="text-lg font-bold">Write down what happened</h2>
+            <p className="mt-1 text-xs text-slate-500">
+              Fill this in the same day — it becomes your complaint. Copy it
+              into your notes app.
+            </p>
+            <div className="mt-3 flex justify-end">
+              <CopyButton
+                value={guide.writeDown.map((f) => `${f}: `).join("\n")}
+                label="Copy blank sheet"
+              />
+            </div>
+            <dl className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+              {guide.writeDown.map((field) => (
+                <div
+                  key={field}
+                  className="flex items-baseline gap-2 border-b border-dotted border-slate-200 py-1"
+                >
+                  <dt className="shrink-0 text-slate-700">{field}:</dt>
+                  <dd className="flex-1 text-slate-300"> </dd>
+                </div>
+              ))}
+            </dl>
+          </Card>
+        ) : null}
+
+        {guide.hotlines ? (
+          <Card>
+            <h2 className="text-lg font-bold">
+              ☎️ Hotlines and online forms (US)
+            </h2>
+            <ul className="mt-3 space-y-3">
+              {guide.hotlines.map((line) => (
+                <li key={line.url + line.name} className="text-sm">
+                  <a
+                    href={line.url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-bold text-rose-700 hover:underline"
+                  >
+                    {line.name} ↗
+                  </a>
+                  {line.phone ? (
+                    <span className="ml-2 rounded-lg bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-slate-800">
+                      {line.phone}
+                    </span>
+                  ) : null}
+                  <p className="text-slate-600">{line.note}</p>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
+        {guide.ifSick ? (
+          <Card className="border-rose-200 bg-rose-50">
+            <h2 className="text-lg font-bold text-rose-900">
+              🩺 If someone became sick
+            </h2>
+            <ul className="mt-2 space-y-1 text-sm text-rose-900/90">
+              {guide.ifSick.map((point) => (
+                <li key={point}>☐ {point}</li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-rose-800/80">
+              Reporting suspected food poisoning is how public-health officials
+              spot an outbreak early.
+            </p>
+          </Card>
+        ) : null}
+
         <div className="grid gap-4 md:grid-cols-2">
           <AuthorityList flag="🇺🇸" country="the US" rows={guide.us} />
           <AuthorityList flag="🇨🇦" country="Canada" rows={guide.canada} />
         </div>
+
+        {guide.stateDirectory ? (
+          <Card id="states">
+            <h2 className="text-lg font-bold">
+              🗺️ Your state&apos;s food-safety complaint office
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Food-safety contacts differ from state to state, sometimes city to
+              city. Pick your state for the agency that inspects stores and
+              restaurants there; it will route you to the county office if that
+              is who handles it.
+            </p>
+            <StatePicker states={FOOD_SAFETY_STATES} />
+          </Card>
+        ) : null}
 
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-2">
