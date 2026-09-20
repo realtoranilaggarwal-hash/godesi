@@ -8,6 +8,7 @@ import { businessIsThin, eventIsThin } from "@/lib/thinContent";
 import { professionalCount } from "@/lib/professionalsQueries";
 import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { GUIDES } from "@/lib/guides";
+import { COMPLAINT_GUIDES } from "@/lib/complaints";
 
 export const dynamic = "force-dynamic";
 
@@ -174,6 +175,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/badge`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/faq`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/safety`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/complaints`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/media`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/media/join`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/find`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/rewards`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/report`, changeFrequency: "yearly", priority: 0.3 },
@@ -216,6 +220,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/guide/${guide.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    ...COMPLAINT_GUIDES.map((guide) => ({
+      url: `${base}/complaints/${guide.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     })),
     ...posts.map((post) => ({
       url: `${base}/blog/${post.slug}`,

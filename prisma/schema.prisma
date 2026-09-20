@@ -233,22 +233,22 @@ model User {
   location  String?
 
   /// One-line "who I am" shown under the name on the public profile.
-  headline   String?
+  headline    String?
   /// What the member wants from the community — work, clients, partners, help.
-  lookingFor String?
+  lookingFor  String?
   /// School, college and courses, one per line.
-  education  String?
+  education   String?
   /// Work history, projects and achievements, one per line.
-  experience String?
-  skills     String[] @default([])
-  languages  String[] @default([])
+  experience  String?
+  skills      String[] @default([])
+  languages   String[] @default([])
   /// YouTube/Vimeo links embedded on the profile.
-  videoUrls  String[] @default([])
+  videoUrls   String[] @default([])
   /// Public YouTube playlist; every video in it is listed on the profile.
   playlistUrl String?
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
-  albumUrl   String?
-  openToWork Boolean  @default(false)
+  albumUrl    String?
+  openToWork  Boolean  @default(false)
 
   websiteUrl     String?
   instagramUrl   String?
@@ -1280,6 +1280,8 @@ model NewsItem {
   albumUrl   String?
   /// Every truth declaration was ticked when the report was filed.
   declaredAt DateTime?
+  /// Byline hidden in public; the author is still on record for the desk.
+  anonymous  Boolean   @default(false)
 
   /// Editor's pick, shown at the top of /news.
   featured      Boolean            @default(false)
@@ -2095,6 +2097,13 @@ model EliteEntry {
   /// Photographer and licence for a freely-licensed portrait, shown under it.
   photoCredit String?
 
+  /// Answers to the "prepare for your interview" story sheet, keyed by
+  /// question id; the interviewer's briefing is built from these.
+  storySheet     Json?
+  /// When and where the interview is booked (studio address or Zoom link).
+  interviewAt    DateTime?
+  interviewPlace String?
+
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?
   interviewUrl String?
@@ -2469,4 +2478,29 @@ model WebsitePowerUp {
   monthlyUsd Int
   active     Boolean  @default(true)
   updatedAt  DateTime @updatedAt
+}
+
+/// Someone offering to interview, host, film or edit for GoDesi Media;
+/// reviewed on /admin/media before we get in touch.
+model MediaApplication {
+  id           String   @id @default(cuid())
+  /// Applicant's account when signed in; guests can apply too.
+  userId       String?
+  name         String
+  email        String
+  phone        String?
+  city         String
+  /// interviewer, host, videographer, editor, writer, social, street.
+  roles        String[] @default([])
+  languages    String?
+  experience   String
+  links        String[] @default([])
+  /// Hours a week / weekends / evenings, in their words.
+  availability String?
+  status       String   @default("NEW")
+  adminNote    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
 }

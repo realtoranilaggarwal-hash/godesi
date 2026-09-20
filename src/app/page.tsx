@@ -53,49 +53,43 @@ const HERO_PROOF: string[] = [
 ];
 
 export default async function HomePage() {
-  const [
-    categories,
-    businesses,
-    events,
-    news,
-    members,
-    spaCount,
-  ] = await Promise.all([
-    getCategoryTree(),
-    searchBusinesses({ take: 6, sort: "recent" }),
-    db.event.findMany({
-      where: { status: "APPROVED", startsAt: { gte: new Date() } },
-      orderBy: { startsAt: "asc" },
-      take: 12,
-      include: {
-        category: { select: { name: true, icon: true, color: true } },
-        organizer: { select: { plan: true } },
-      },
-    }),
-    db.newsItem.findMany({
-      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-      orderBy: { publishedAt: "desc" },
-      take: 4,
-    }),
-    db.user.findMany({
-      where: { emailVerifiedAt: { not: null } },
-      orderBy: { createdAt: "desc" },
-      take: 44,
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        avatarUrl: true,
-        location: true,
-      },
-    }),
-    db.business.count({
-      where: {
-        status: "APPROVED",
-        subcategorySlug: "beauty-lifestyle-spa-and-massage",
-      },
-    }),
-  ]);
+  const [categories, businesses, events, news, members, spaCount] =
+    await Promise.all([
+      getCategoryTree(),
+      searchBusinesses({ take: 6, sort: "recent" }),
+      db.event.findMany({
+        where: { status: "APPROVED", startsAt: { gte: new Date() } },
+        orderBy: { startsAt: "asc" },
+        take: 12,
+        include: {
+          category: { select: { name: true, icon: true, color: true } },
+          organizer: { select: { plan: true } },
+        },
+      }),
+      db.newsItem.findMany({
+        where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+        orderBy: { publishedAt: "desc" },
+        take: 4,
+      }),
+      db.user.findMany({
+        where: { emailVerifiedAt: { not: null } },
+        orderBy: { createdAt: "desc" },
+        take: 44,
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          avatarUrl: true,
+          location: true,
+        },
+      }),
+      db.business.count({
+        where: {
+          status: "APPROVED",
+          subcategorySlug: "beauty-lifestyle-spa-and-massage",
+        },
+      }),
+    ]);
   const pickerGroups = await categoryPickerGroups();
   const isFeaturedEvent = (event: (typeof events)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
@@ -184,6 +178,28 @@ export default async function HomePage() {
       <DjsWikiCard />
 
       <div className="space-y-8">
+        <section className="flex flex-col gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            <span className="font-bold">
+              ⚠️ Mouldy sweets, kept deposit, unpaid wages?
+            </span>{" "}
+            Step-by-step: who to call and what to photograph — US &amp; Canada.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/complaints"
+              className="rounded-xl bg-rose-600 px-3 py-1.5 font-bold text-white hover:bg-rose-700"
+            >
+              How to file a complaint
+            </Link>
+            <Link
+              href="/news/report?topic=consumer"
+              className="rounded-xl border border-rose-300 bg-white px-3 py-1.5 font-bold text-rose-700 hover:bg-rose-100"
+            >
+              Post a consumer alert
+            </Link>
+          </div>
+        </section>
         <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
           {news.length ? (
             <section className="lg:col-span-2">

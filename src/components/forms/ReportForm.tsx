@@ -10,7 +10,7 @@ import {
   REPORT_SOURCES,
   REVERSE_IMAGE_SEARCH_URL,
 } from "@/lib/journalists";
-import { REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
+import { ANONYMOUS_BYLINE, REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -40,15 +40,18 @@ export type ReportDraft = {
   photoUrls: string[];
   albumUrl: string | null;
   videoUrl: string | null;
+  anonymous: boolean;
 };
 
 export function ReportForm({
   defaultCity = "",
   defaultCountry = "",
+  defaultTopic = "community",
   initial,
 }: {
   defaultCity?: string;
   defaultCountry?: string;
+  defaultTopic?: string;
   initial?: ReportDraft;
 }) {
   const [state, formAction] = useFormState(
@@ -132,7 +135,7 @@ export function ReportForm({
           <select
             name="topic"
             required
-            defaultValue={initial?.topic ?? "community"}
+            defaultValue={initial?.topic ?? defaultTopic}
             className={inputClass}
           >
             {REPORT_TOPIC_OPTIONS.map((option) => (
@@ -313,6 +316,22 @@ export function ReportForm({
           Run a reverse image search →
         </a>
       </div>
+
+      <label className="flex items-start gap-2 rounded-2xl border border-slate-200 p-3 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="anonymous"
+          defaultChecked={initial?.anonymous ?? false}
+          className="mt-0.5 h-4 w-4"
+        />
+        <span>
+          <span className="font-semibold">Post anonymously</span> — readers see
+          “{ANONYMOUS_BYLINE} · your city” instead of your name. Good for a
+          complaint about a store or landlord you still have to deal with. The
+          news desk still knows who filed it, and the story does not show on
+          your profile.
+        </span>
+      </label>
 
       <fieldset className="rounded-2xl border border-slate-200 p-3">
         <legend className="px-1 text-sm font-semibold text-slate-700">

@@ -3,8 +3,8 @@ import { searchBusinesses, type BusinessListItem } from "@/lib/businesses";
 import { BusinessTile } from "@/components/BusinessTile";
 import { PLANS, planRank } from "@/lib/plans";
 
-/** Three cards per trade, so no single category can take over the page. */
-const PER_CATEGORY = 3;
+/** One full row per trade, so no single category can take over the page. */
+const PER_CATEGORY = 4;
 /** How many trades get a row before the page turns into a wall of ads. */
 const MAX_CATEGORIES = 6;
 /** Everyone in a trade takes a turn; the set changes on this clock. */
@@ -67,9 +67,7 @@ export async function CategoryFeatured() {
 
   // Trades that someone is paying for lead, then the busiest ones.
   const shown = Array.from(groups.values())
-    .sort(
-      (a, b) => b.paid - a.paid || b.members.length - a.members.length,
-    )
+    .sort((a, b) => b.paid - a.paid || b.members.length - a.members.length)
     .slice(0, MAX_CATEGORIES);
 
   if (!shown.length) return null;
@@ -106,6 +104,14 @@ export async function CategoryFeatured() {
           step,
         );
         const waiting = Math.max(group.paid - PER_CATEGORY, 0);
+        // The promo only takes a slot nobody else fills; a full row stays a row.
+        const openSlots = PER_CATEGORY - picks.length;
+        const promoSpan =
+          openSlots >= 3
+            ? "sm:col-span-3"
+            : openSlots === 2
+              ? "sm:col-span-2"
+              : "";
 
         return (
           <div key={group.slug ?? group.name}>
@@ -123,11 +129,19 @@ export async function CategoryFeatured() {
                   group.name
                 )}
               </h3>
-              <p className="text-[11px] font-semibold text-slate-400">
-                {waiting
-                  ? `${waiting} more featured here — showing in turn`
-                  : `Your spot here from ₹${pro.priceInr} / $${pro.priceUsd.toFixed(2)} a month`}
-              </p>
+              {waiting ? (
+                <p className="text-[11px] font-semibold text-slate-400">
+                  {waiting} more featured here — showing in turn
+                </p>
+              ) : (
+                <Link
+                  href={`/pricing?category=${encodeURIComponent(group.slug ?? "")}`}
+                  className="text-[11px] font-semibold text-rose-600 hover:underline"
+                >
+                  Your spot here from ₹{pro.priceInr} / $
+                  {pro.priceUsd.toFixed(2)} a month →
+                </Link>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -140,9 +154,10 @@ export async function CategoryFeatured() {
                 />
               ))}
 
-              <Link
+              {openSlots > 0 ? (
+                <Link
                   href={`/pricing?category=${encodeURIComponent(group.slug ?? "")}`}
-                  className="flex flex-col justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-3 text-white transition hover:brightness-110"
+                  className={`flex flex-col justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-3 text-white transition hover:brightness-110 ${promoSpan}`}
                 >
                   <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
                     {group.name} · open
@@ -151,13 +166,14 @@ export async function CategoryFeatured() {
                     Be featured in {group.name}
                   </span>
                   <span className="mt-1 text-[11px] text-white/90">
-                    ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month — on the
-                    home page in your own category.
+                    ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month — on
+                    the home page in your own category.
                   </span>
-                <span className="mt-2 text-[11px] font-bold underline">
-                  Take this spot →
-                </span>
-              </Link>
+                  <span className="mt-2 text-[11px] font-bold underline">
+                    Take this spot →
+                  </span>
+                </Link>
+              ) : null}
             </div>
           </div>
         );
