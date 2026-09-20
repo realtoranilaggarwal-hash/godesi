@@ -90,7 +90,9 @@ export default async function NewsPage({
     }),
   ]);
 
-  const items = [...memberStories, ...wireStories].slice(0, 40);
+  const items = [...memberStories, ...wireStories]
+    .slice(0, 40)
+    .map((item) => (item.anonymous ? { ...item, submittedBy: null } : item));
 
   const myVotes = user
     ? await db.newsVote.findMany({
@@ -157,6 +159,18 @@ export default async function NewsPage({
               className="rounded-xl bg-white/95 px-3 py-1.5 text-sky-700 hover:bg-white"
             >
               📰 Report local news
+            </Link>
+            <Link
+              href={
+                topic === "consumer"
+                  ? "/complaints"
+                  : "/news/report?topic=consumer"
+              }
+              className="rounded-xl bg-white/95 px-3 py-1.5 text-rose-700 hover:bg-white"
+            >
+              {topic === "consumer"
+                ? "⚠️ How to file an official complaint"
+                : "⚠️ Post a consumer alert"}
             </Link>
             <Link
               href="/trending"
