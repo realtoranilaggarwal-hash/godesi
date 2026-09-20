@@ -51,7 +51,10 @@ export default async function ElitePreparePage() {
         ← Your Elite application
       </Link>
       <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
-        GoDesi Media · Desi Who&apos;s Who
+        <Link href="/media" className="hover:underline">
+          GoDesi Media
+        </Link>{" "}
+        · Desi Who&apos;s Who
       </p>
       <h1 className="text-2xl font-black sm:text-3xl">
         Prepare for your interview, {entry.fullName.split(" ")[0]}
