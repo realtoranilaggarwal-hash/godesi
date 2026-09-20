@@ -60,7 +60,7 @@ export default async function PublicProfilePage({
   if (!profile) notFound();
 
   const { user, events, leads, reviews, listings, gigs } = profile;
-  const journalist = await journalistStats(user.id);
+  const journalist = await journalistStats(user.id, { publicOnly: true });
   const points = await wallet(user.id);
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
@@ -261,7 +261,9 @@ export default async function PublicProfilePage({
 
           {user.videoUrls.length ? (
             <section className="space-y-3">
-              <h2 className="text-lg font-bold">{user.playlistUrl ? "More videos" : "Videos"}</h2>
+              <h2 className="text-lg font-bold">
+                {user.playlistUrl ? "More videos" : "Videos"}
+              </h2>
               {user.videoUrls.map((url) => (
                 <VideoEmbed key={url} url={url} title={`${user.name} video`} />
               ))}
