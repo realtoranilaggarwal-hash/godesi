@@ -96,7 +96,7 @@ export default async function HomePage() {
   const featuredEvents = events.filter(isFeaturedEvent).slice(0, 3);
   const otherEvents = events
     .filter((event) => !isFeaturedEvent(event))
-    .slice(0, 6);
+    .slice(0, Math.max(6, 12 - featuredEvents.length * 4));
 
   return (
     <div className="space-y-8">
