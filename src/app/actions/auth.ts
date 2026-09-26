@@ -104,7 +104,11 @@ export async function signupAction(
       user = await db.user.create({ data: { ...account, username: null } });
     }
     await createSession(user.id);
-    cookies().set("godesi_joined", "1", { path: "/", maxAge: 300, sameSite: "lax" });
+    cookies().set("godesi_joined", "1", {
+      path: "/",
+      maxAge: 300,
+      sameSite: "lax",
+    });
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
 
@@ -137,7 +141,10 @@ export async function loginAction(
     const password = String(formData.get("password") ?? "");
     const user = await db.user.findUnique({ where: { email } });
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
-      return { error: "Invalid email or password." };
+      return {
+        error:
+          "Invalid email or password. Forgot it? Use the link below the password box — or if you joined with Google or Facebook, use that button above.",
+      };
     }
     if (user.bannedAt) {
       return {

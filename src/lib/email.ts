@@ -56,7 +56,11 @@ export async function sendEmail({
       body: JSON.stringify({ from, to: [to], subject, html }),
     });
     if (!response.ok) {
-      console.error("Resend send failed", response.status, await response.text());
+      console.error(
+        "Resend send failed",
+        response.status,
+        await response.text(),
+      );
       return false;
     }
     return true;
@@ -66,14 +70,27 @@ export async function sendEmail({
   }
 }
 
+/** Sent when a password reset is asked for an address with no account. */
+export function noAccountEmail() {
+  return {
+    subject: "No Godesi account under this email",
+    html: shell(
+      "We could not find your account",
+      `<p style="margin:0 0 12px;color:#334155">Someone asked to reset a Godesi password for this address, but no account uses it.</p>
+       <p style="margin:0 0 12px;color:#334155">You may have joined with a different email, or with Google or Facebook — try those buttons at <a href="${siteUrl()}/login" style="color:#4f46e5">${siteUrl().replace(/^https?:\/\//, "")}/login</a>.</p>
+       <p style="margin:0;font-size:13px;color:#64748b">Still stuck? Reply to this email and we will find your account. If this was not you, ignore it.</p>`,
+    ),
+  };
+}
+
 export function otpEmail(code: string) {
   return {
     subject: `${code} is your Godesi verification code`,
     html: shell(
       "Verify your email",
-      `<p style="margin:0 0 16px;color:#334155">Enter this code to finish setting up your Godesi account. It expires in 10 minutes.</p>
+      `<p style="margin:0 0 16px;color:#334155">Enter this code on Godesi to verify your email or reset your password. It expires in 10 minutes.</p>
        <p style="margin:0 0 16px;font-size:34px;font-weight:800;letter-spacing:8px">${code}</p>
-       <p style="margin:0;font-size:13px;color:#64748b">If you did not create a Godesi account, you can ignore this email.</p>`,
+       <p style="margin:0;font-size:13px;color:#64748b">If you did not ask for this, you can ignore this email — nothing changes without the code.</p>`,
     ),
   };
 }

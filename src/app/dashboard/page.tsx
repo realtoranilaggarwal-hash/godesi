@@ -64,6 +64,7 @@ export default async function DashboardPage({
     posted?: string;
     upgraded?: string;
     verified?: string;
+    password?: string;
   };
 }) {
   const user = await getCurrentUser();
@@ -162,6 +163,9 @@ export default async function DashboardPage({
 
         {searchParams.verified ? (
           <Alert tone="success">Email verified — thanks!</Alert>
+        ) : null}
+        {searchParams.password === "reset" ? (
+          <Alert tone="success">New password saved — you are signed in.</Alert>
         ) : null}
         {!user.emailVerifiedAt && emailEnabled() ? (
           <Alert tone="info">
