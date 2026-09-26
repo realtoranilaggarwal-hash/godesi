@@ -82,7 +82,7 @@ export function EventCard({
           featured ? "rounded-[17px]" : "rounded-2xl border border-slate-200"
         }`}
       >
-        {event.imageUrl && featured ? (
+        {event.imageUrl && featured && !tile ? (
           <div className="relative min-h-56 w-full flex-1 overflow-hidden bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -120,9 +120,9 @@ export function EventCard({
         ) : null}
 
         <div
-          className={`flex ${featured && event.imageUrl ? "" : "flex-1"} flex-col gap-1 ${
+          className={`flex ${featured && !tile && event.imageUrl ? "" : "flex-1"} flex-col gap-1 ${
             tile ? "p-2.5" : compact ? "p-3" : "p-4"
-          } ${featured && !event.imageUrl ? "pt-12" : ""}`}
+          } ${featured && !tile && !event.imageUrl ? "pt-12" : ""}`}
         >
           <div className="flex items-center gap-2">
             {event.genres?.length && !tile ? (

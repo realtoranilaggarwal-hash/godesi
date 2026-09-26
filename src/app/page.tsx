@@ -19,6 +19,8 @@ import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { HandleClaim } from "@/components/HandleClaim";
 import { planRank } from "@/lib/plans";
+import { newestMembers } from "@/lib/membersQueries";
+import { MemberTile } from "@/components/MemberTile";
 
 export const dynamic = "force-dynamic";
 
@@ -53,50 +55,57 @@ const HERO_PROOF: string[] = [
 ];
 
 export default async function HomePage() {
-  const [categories, businesses, events, news, members, spaCount] =
-    await Promise.all([
-      getCategoryTree(),
-      searchBusinesses({ take: 6, sort: "recent" }),
-      db.event.findMany({
-        where: { status: "APPROVED", startsAt: { gte: new Date() } },
-        orderBy: { startsAt: "asc" },
-        take: 12,
-        include: {
-          category: { select: { name: true, icon: true, color: true } },
-          organizer: { select: { plan: true } },
-        },
-      }),
-      db.newsItem.findMany({
-        where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-        orderBy: { publishedAt: "desc" },
-        take: 4,
-      }),
-      db.user.findMany({
-        where: { emailVerifiedAt: { not: null } },
-        orderBy: { createdAt: "desc" },
-        take: 44,
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          avatarUrl: true,
-          location: true,
-        },
-      }),
-      db.business.count({
-        where: {
-          status: "APPROVED",
-          subcategorySlug: "beauty-lifestyle-spa-and-massage",
-        },
-      }),
-    ]);
+  const [
+    categories,
+    businesses,
+    upcoming,
+    news,
+    members,
+    spaCount,
+    newMembers,
+  ] = await Promise.all([
+    getCategoryTree(),
+    searchBusinesses({ take: 6, sort: "recent" }),
+    db.event.findMany({
+      where: { status: "APPROVED", startsAt: { gte: new Date() } },
+      orderBy: { startsAt: "asc" },
+      take: 24,
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+        organizer: { select: { plan: true } },
+      },
+    }),
+    db.newsItem.findMany({
+      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+      orderBy: { publishedAt: "desc" },
+      take: 4,
+    }),
+    db.user.findMany({
+      where: { emailVerifiedAt: { not: null } },
+      orderBy: { createdAt: "desc" },
+      take: 44,
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        avatarUrl: true,
+        location: true,
+      },
+    }),
+    db.business.count({
+      where: {
+        status: "APPROVED",
+        subcategorySlug: "beauty-lifestyle-spa-and-massage",
+      },
+    }),
+    newestMembers(6),
+  ]);
   const pickerGroups = await categoryPickerGroups();
-  const isFeaturedEvent = (event: (typeof events)[number]) =>
+  const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
-  const featuredEvents = events.filter(isFeaturedEvent).slice(0, 3);
-  const otherEvents = events
-    .filter((event) => !isFeaturedEvent(event))
-    .slice(0, Math.max(6, 12 - featuredEvents.length * 4));
+  const events = [...upcoming]
+    .sort((a, b) => Number(isFeaturedEvent(b)) - Number(isFeaturedEvent(a)))
+    .slice(0, 6);
 
   return (
     <div className="space-y-8">
@@ -261,6 +270,21 @@ export default async function HomePage() {
           )}
         </section>
 
+        {newMembers.length ? (
+          <section>
+            <SectionHeading
+              title="Newest members 👋"
+              href="/people"
+              linkLabel="All members"
+            />
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {newMembers.map((member) => (
+                <MemberTile key={member.id} member={member} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         <div className="grid gap-3 sm:grid-cols-3">
           <SpaSpotlight listings={spaCount} />
           <ReferEarnTile />
@@ -302,17 +326,14 @@ export default async function HomePage() {
               href="/events"
               linkLabel="All events"
             />
-            <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {featuredEvents.map((event) => (
-                <div
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {events.map((event) => (
+                <EventCard
                   key={event.id}
-                  className="col-span-2 row-span-2 [&>div]:h-full"
-                >
-                  <EventCard event={event} featured />
-                </div>
-              ))}
-              {otherEvents.map((event) => (
-                <EventCard key={event.id} event={event} variant="tile" />
+                  event={event}
+                  variant="tile"
+                  featured={isFeaturedEvent(event)}
+                />
               ))}
             </div>
           </section>

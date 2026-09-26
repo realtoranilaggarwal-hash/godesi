@@ -65,10 +65,24 @@ export async function CategoryFeatured() {
     groups.set(key, group);
   }
 
-  // Trades that someone is paying for lead, then the busiest ones.
-  const shown = Array.from(groups.values())
-    .sort((a, b) => b.paid - a.paid || b.members.length - a.members.length)
+  // Trades that someone is paying for always get a row; the remaining rows
+  // rotate through every other trade so each category takes a turn.
+  const sorted = Array.from(groups.values()).sort(
+    (a, b) => b.paid - a.paid || b.members.length - a.members.length,
+  );
+  const paidGroups = sorted
+    .filter((group) => group.paid > 0)
     .slice(0, MAX_CATEGORIES);
+  const rest = sorted.filter((group) => group.paid === 0);
+  const openRows = MAX_CATEGORIES - paidGroups.length;
+  const restStart = rest.length ? (step * openRows) % rest.length : 0;
+  const shown = [
+    ...paidGroups,
+    ...Array.from(
+      { length: Math.min(openRows, rest.length) },
+      (_, index) => rest[(restStart + index) % rest.length],
+    ),
+  ];
 
   if (!shown.length) return null;
 
