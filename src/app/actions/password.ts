@@ -8,11 +8,12 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { emailEnabled, noAccountEmail, sendEmail } from "@/lib/email";
 import { consumeEmailOtp, issueEmailOtp } from "@/lib/otp";
 import { canonicalEmail } from "@/lib/signupGuard";
+import { publishAfterVerification } from "@/lib/autoApprove";
 
 async function findAccount(email: string) {
   return db.user.findFirst({
     where: { OR: [{ email }, { emailCanonical: canonicalEmail(email) }] },
-    select: { id: true, email: true, bannedAt: true },
+    select: { id: true, email: true, bannedAt: true, emailVerifiedAt: true },
   });
 }
 
@@ -37,8 +38,15 @@ export async function requestPasswordResetAction(
   try {
     const account = await findAccount(email);
     if (account && !account.bannedAt) {
+      // A cooldown refusal falls through: the code sent a moment ago is
+      // still valid, and the page must read the same for every address.
       const result = await issueEmailOtp(account.email);
-      if (!result.ok) return { error: result.error };
+      if (result.ok && !result.delivered) {
+        return {
+          error:
+            "We could not send the email just now — please try again shortly.",
+        };
+      }
     } else {
       const { subject, html } = noAccountEmail();
       await sendEmail({ to: email, subject, html });
@@ -74,16 +82,15 @@ export async function resetPasswordAction(
         error: "That code is not right — check the email and try again.",
       };
     }
+    const passwordHash = await hashPassword(password);
     const result = await consumeEmailOtp(account.email, code);
     if (!result.ok) return { error: result.error };
 
     await db.user.update({
       where: { id: account.id },
-      data: {
-        passwordHash: await hashPassword(password),
-        emailVerifiedAt: new Date(),
-      },
+      data: { passwordHash, emailVerifiedAt: new Date() },
     });
+    if (!account.emailVerifiedAt) await publishAfterVerification(account.id);
     await createSession(account.id);
   } catch (error) {
     return fieldError(error);
