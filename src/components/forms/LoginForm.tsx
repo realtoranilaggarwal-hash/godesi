@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useFormState } from "react-dom";
 import { loginAction } from "@/app/actions/auth";
 import { emptyState } from "@/lib/actions";
@@ -18,8 +19,21 @@ export function LoginForm({ next }: { next?: string }) {
         <input name="email" type="email" required className={inputClass} />
       </Field>
       <Field label="Password">
-        <input name="password" type="password" required className={inputClass} />
+        <input
+          name="password"
+          type="password"
+          required
+          className={inputClass}
+        />
       </Field>
+      <p className="-mt-1 text-right text-xs">
+        <Link
+          href="/forgot-password"
+          className="font-semibold text-indigo-600 hover:underline"
+        >
+          Forgot your password?
+        </Link>
+      </p>
       <SubmitButton pendingLabel="Signing in..." className="w-full">
         Sign in
       </SubmitButton>
