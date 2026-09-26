@@ -246,6 +246,8 @@ model User {
   videoUrls   String[] @default([])
   /// Public YouTube playlist; every video in it is listed on the profile.
   playlistUrl String?
+  /// Public Google Photos album shown as a gallery; Google hosts the photos.
+  albumUrl    String?
   openToWork  Boolean  @default(false)
 
   websiteUrl     String?

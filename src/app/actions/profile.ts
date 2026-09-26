@@ -14,6 +14,8 @@ import {
 } from "@/lib/personalProfile";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isPlaylistLink } from "@/lib/youtubePlaylist";
+import { isAlbumLink } from "@/lib/photoAlbum";
+import { harvestMediaLinks, mergeLinks } from "@/lib/mediaLinks";
 import { institutionSlug, MIN_YEAR } from "@/lib/alumni";
 
 const optionalUrl = z
@@ -72,14 +74,33 @@ export async function savePersonalProfileAction(
       socials[social.key] = link.data ?? null;
     }
 
-    const videoUrls = splitLines(value("videoUrls"), 3);
+    let videoUrls = splitLines(value("videoUrls"), 3);
     const badVideo = videoUrls.find((url) => !isSupportedVideoUrl(url));
     if (badVideo) {
       return { error: "Videos must be YouTube or Vimeo links, one per line." };
     }
-    const playlistUrl = value("playlistUrl").trim();
+    let playlistUrl = value("playlistUrl").trim();
     if (playlistUrl && !isPlaylistLink(playlistUrl)) {
       return { error: "Paste a YouTube playlist link (youtube.com/playlist?list=…)." };
+    }
+    let albumUrl = value("albumUrl").trim();
+    if (albumUrl && !isAlbumLink(albumUrl)) {
+      return { error: "Paste a Google Photos album link (photos.app.goo.gl/…)." };
+    }
+
+    // Media links pasted into text boxes move to the fields that play them.
+    const text: Record<"bio" | "lookingFor" | "education" | "experience", string> = {
+      bio: parsed.data.bio ?? "",
+      lookingFor: parsed.data.lookingFor ?? "",
+      education: parsed.data.education ?? "",
+      experience: parsed.data.experience ?? "",
+    };
+    for (const key of Object.keys(text) as (keyof typeof text)[]) {
+      const found = harvestMediaLinks(text[key]);
+      text[key] = found.text;
+      videoUrls = mergeLinks(videoUrls, found.videos, 3);
+      playlistUrl ||= found.playlists[0] ?? "";
+      albumUrl ||= found.albums[0] ?? "";
     }
 
     const username = normalizeUsername(parsed.data.username);
@@ -134,18 +155,19 @@ export async function savePersonalProfileAction(
       data: {
         name: parsed.data.name,
         username,
-        bio: parsed.data.bio || null,
+        bio: text.bio || null,
         location: parsed.data.location || null,
         headline: parsed.data.headline || null,
-        lookingFor: parsed.data.lookingFor || null,
-        education: parsed.data.education || null,
-        experience: parsed.data.experience || null,
+        lookingFor: text.lookingFor || null,
+        education: text.education || null,
+        experience: text.experience || null,
         whatsappNumber: parsed.data.whatsappNumber || null,
         openToWork: formData.get("openToWork") === "on",
         skills: splitTags(value("skills")),
         languages: splitTags(value("languages"), 10),
         videoUrls,
         playlistUrl: playlistUrl || null,
+        albumUrl: albumUrl || null,
         avatarUrl: parsed.data.avatarUrl ?? null,
         ...socials,
       },
