@@ -302,20 +302,19 @@ export default async function HomePage() {
               href="/events"
               linkLabel="All events"
             />
-            {featuredEvents.length ? (
-              <div className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {featuredEvents.map((event) => (
-                  <EventCard key={event.id} event={event} featured />
-                ))}
-              </div>
-            ) : null}
-            {otherEvents.length ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                {otherEvents.map((event) => (
-                  <EventCard key={event.id} event={event} variant="tile" />
-                ))}
-              </div>
-            ) : null}
+            <div className="grid grid-flow-dense grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {featuredEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="col-span-2 row-span-2 [&>div]:h-full"
+                >
+                  <EventCard event={event} featured />
+                </div>
+              ))}
+              {otherEvents.map((event) => (
+                <EventCard key={event.id} event={event} variant="tile" />
+              ))}
+            </div>
           </section>
         ) : null}
 
