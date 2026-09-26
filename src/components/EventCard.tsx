@@ -82,8 +82,8 @@ export function EventCard({
           featured ? "rounded-[17px]" : "rounded-2xl border border-slate-200"
         }`}
       >
-        {event.imageUrl && featured ? (
-          <div className="relative h-56 w-full overflow-hidden bg-slate-900">
+        {event.imageUrl && featured && !tile ? (
+          <div className="relative min-h-56 w-full flex-1 overflow-hidden bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={thumbImage(event.imageUrl, 640)}
@@ -96,7 +96,7 @@ export function EventCard({
             <img
               src={thumbImage(event.imageUrl, 1080)}
               alt={event.title}
-              className="relative h-full w-full object-contain"
+              className="absolute inset-0 h-full w-full object-contain"
               loading="lazy"
             />
           </div>
@@ -120,9 +120,9 @@ export function EventCard({
         ) : null}
 
         <div
-          className={`flex flex-1 flex-col gap-1 ${
+          className={`flex ${featured && !tile && event.imageUrl ? "" : "flex-1"} flex-col gap-1 ${
             tile ? "p-2.5" : compact ? "p-3" : "p-4"
-          } ${featured && !event.imageUrl ? "pt-12" : ""}`}
+          } ${featured && !tile && !event.imageUrl ? "pt-12" : ""}`}
         >
           <div className="flex items-center gap-2">
             {event.genres?.length && !tile ? (

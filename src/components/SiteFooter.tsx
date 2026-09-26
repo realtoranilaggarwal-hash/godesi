@@ -7,6 +7,7 @@ import { TrafficCounter } from "@/components/TrafficCounter";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { trafficReportUrl } from "@/lib/traffic";
 
 /** Five roughly equal columns, so no single list runs far past the others. */
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
@@ -97,8 +98,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
 
 export function SiteFooter() {
   const socials = socialLinks();
-  /** Public Umami dashboard, shown only when a share URL is configured. */
-  const statsUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL;
+  const statsUrl = trafficReportUrl();
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">

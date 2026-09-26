@@ -9,6 +9,10 @@ const PER_CATEGORY = 4;
 const MAX_CATEGORIES = 6;
 /** Everyone in a trade takes a turn; the set changes on this clock. */
 const ROTATE_MINUTES = 10;
+/** A trade nobody pays for needs this many claimed cards before it gets a row. */
+const MIN_FREE_MEMBERS = 3;
+/** Trades kept off the home page until they have enough real cards to show. */
+const HIDDEN_ON_HOME = new Set(["home-services"]);
 
 type Group = {
   slug: string | null;
@@ -52,6 +56,7 @@ export async function CategoryFeatured() {
   for (const row of rows) {
     const name = row.categoryName ?? row.category;
     if (!name) continue;
+    if (row.categorySlug && HIDDEN_ON_HOME.has(row.categorySlug)) continue;
     const key = row.categorySlug ?? name;
     const group = groups.get(key) ?? {
       slug: row.categorySlug,
@@ -65,10 +70,26 @@ export async function CategoryFeatured() {
     groups.set(key, group);
   }
 
-  // Trades that someone is paying for lead, then the busiest ones.
-  const shown = Array.from(groups.values())
-    .sort((a, b) => b.paid - a.paid || b.members.length - a.members.length)
+  // Trades that someone is paying for always get a row; the remaining rows
+  // rotate through every other trade so each category takes a turn.
+  const sorted = Array.from(groups.values()).sort(
+    (a, b) => b.paid - a.paid || b.members.length - a.members.length,
+  );
+  const paidGroups = sorted
+    .filter((group) => group.paid > 0)
     .slice(0, MAX_CATEGORIES);
+  const rest = sorted.filter(
+    (group) => group.paid === 0 && group.members.length >= MIN_FREE_MEMBERS,
+  );
+  const openRows = MAX_CATEGORIES - paidGroups.length;
+  const restStart = rest.length ? (step * openRows) % rest.length : 0;
+  const shown = [
+    ...paidGroups,
+    ...Array.from(
+      { length: Math.min(openRows, rest.length) },
+      (_, index) => rest[(restStart + index) % rest.length],
+    ),
+  ];
 
   if (!shown.length) return null;
 
