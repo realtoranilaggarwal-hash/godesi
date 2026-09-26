@@ -1,12 +1,22 @@
 import { visitTotals } from "@/lib/visits";
+import { gaTotals } from "@/lib/ga";
 
 export type Traffic = {
   views: number;
   visitors: number;
   since: Date | null;
-  /** True when the numbers come from Umami rather than our own counter. */
+  /** True when the numbers come from Umami/GA rather than our own counter. */
   measured: boolean;
 };
+
+/** Where "live traffic" points: a public Looker Studio report, else Umami. */
+export function trafficReportUrl(): string | undefined {
+  return (
+    process.env.NEXT_PUBLIC_TRAFFIC_REPORT_URL ||
+    process.env.NEXT_PUBLIC_UMAMI_SHARE_URL ||
+    undefined
+  );
+}
 
 /** Umami's read API lives on a regional gateway, not on the dashboard host. */
 const GATEWAY = process.env.UMAMI_GATEWAY ?? "https://gateway-us.umami.is";
@@ -18,12 +28,32 @@ function shareId() {
 }
 
 /**
- * Everything since tracking started, read from the public share link the site
- * already publishes — the same numbers a visitor sees on the traffic dashboard,
- * so nothing here is guessed. Falls back to our own ping counter if Umami is
- * unreachable, and never throws: a footer line is not worth an error page.
+ * Everything since tracking started. Umami counted the first months (and its
+ * lifetime total stays readable after the plan cap froze it); Google Analytics
+ * counts from the day it was added, so the two are summed. Falls back to our
+ * own ping counter if neither answers, and never throws: a footer line is not
+ * worth an error page.
  */
 export async function siteTraffic(): Promise<Traffic> {
+  const [umami, ga] = await Promise.all([umamiTraffic(), gaTotals()]);
+  if (umami || ga) {
+    return {
+      views: (umami?.views ?? 0) + (ga?.views ?? 0),
+      visitors: (umami?.visitors ?? 0) + (ga?.visitors ?? 0),
+      since: umami?.since ?? null,
+      measured: true,
+    };
+  }
+
+  try {
+    const own = await visitTotals();
+    return { ...own, since: null, measured: false };
+  } catch {
+    return { views: 0, visitors: 0, since: null, measured: false };
+  }
+}
+
+async function umamiTraffic(): Promise<Omit<Traffic, "measured"> | null> {
   const id = shareId();
   if (id) {
     try {
@@ -67,21 +97,14 @@ export async function siteTraffic(): Promise<Traffic> {
                 views: totals.pageviews,
                 visitors: totals.visitors,
                 since: since && !Number.isNaN(since.getTime()) ? since : null,
-                measured: true,
               };
             }
           }
         }
       }
     } catch {
-      /* fall through to our own counter */
+      /* unreachable: caller falls back */
     }
   }
-
-  try {
-    const own = await visitTotals();
-    return { ...own, since: null, measured: false };
-  } catch {
-    return { views: 0, visitors: 0, since: null, measured: false };
-  }
+  return null;
 }

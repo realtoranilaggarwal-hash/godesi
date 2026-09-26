@@ -1,4 +1,4 @@
-import { siteTraffic } from "@/lib/traffic";
+import { siteTraffic, trafficReportUrl } from "@/lib/traffic";
 import { VisitPing } from "@/components/VisitPing";
 
 const MONTH = new Intl.DateTimeFormat("en-GB", {
@@ -14,7 +14,7 @@ const MONTH = new Intl.DateTimeFormat("en-GB", {
  */
 export async function TrafficCounter() {
   const traffic = await siteTraffic();
-  const statsUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL;
+  const statsUrl = trafficReportUrl();
 
   if (!traffic.views && !traffic.visitors) return <VisitPing />;
 
