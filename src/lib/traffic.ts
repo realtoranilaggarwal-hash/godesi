@@ -1,5 +1,5 @@
 import { visitTotals } from "@/lib/visits";
-import { gaTotals } from "@/lib/ga";
+import { gaConfigured, gaTotals } from "@/lib/ga";
 
 export type Traffic = {
   views: number;
@@ -9,8 +9,12 @@ export type Traffic = {
   measured: boolean;
 };
 
-/** Where "live traffic" points: a public Looker Studio report, else Umami. */
+/**
+ * Where "live traffic" points: our own /traffic page once Google Analytics
+ * can be read, else an external report (Looker Studio / Umami share) if set.
+ */
 export function trafficReportUrl(): string | undefined {
+  if (gaConfigured()) return "/traffic";
   return (
     process.env.NEXT_PUBLIC_TRAFFIC_REPORT_URL ||
     process.env.NEXT_PUBLIC_UMAMI_SHARE_URL ||
