@@ -178,8 +178,9 @@ export function SiteFooter() {
                 <li>
                   <a
                     href={statsUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                    {...(statsUrl.startsWith("/")
+                      ? {}
+                      : { target: "_blank", rel: "noreferrer" })}
                     className="hover:text-slate-900"
                   >
                     Live traffic stats

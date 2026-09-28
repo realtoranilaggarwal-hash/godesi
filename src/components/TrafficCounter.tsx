@@ -36,8 +36,9 @@ export async function TrafficCounter() {
           {" · "}
           <a
             href={statsUrl}
-            target="_blank"
-            rel="noreferrer"
+            {...(statsUrl.startsWith("/")
+              ? {}
+              : { target: "_blank", rel: "noreferrer" })}
             className="font-semibold text-slate-600 underline hover:text-slate-900"
           >
             live traffic
