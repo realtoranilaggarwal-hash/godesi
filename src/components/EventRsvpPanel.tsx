@@ -2,7 +2,7 @@ import Link from "next/link";
 import { rsvpAction } from "@/app/actions/clubs";
 import { Button, Card, inputClass } from "@/components/ui";
 import { RSVP_ANSWERS } from "@/lib/clubs";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, fromMinor } from "@/lib/format";
 import type { ContributionMode, RsvpAnswer } from "@prisma/client";
 
 export type RsvpRow = {
@@ -82,7 +82,7 @@ export function EventRsvpPanel({
       {asks ? (
         <p className="mt-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
           {event.contributionMode === "SUGGESTED" && event.contributionMinor
-            ? `Suggested contribution: ${formatMoney(event.contributionMinor, event.currency)} per person.`
+            ? `Suggested contribution: ${formatMoney(fromMinor(event.contributionMinor), event.currency)} per person.`
             : "Chip in what you like — say how much when you RSVP."}
           {event.contributionNote ? ` ${event.contributionNote}` : ""}
         </p>
@@ -108,7 +108,7 @@ export function EventRsvpPanel({
           ))}
           {asks && pledged ? (
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-800">
-              {formatMoney(pledged, event.currency)} pledged
+              {formatMoney(fromMinor(pledged), event.currency)} pledged
             </span>
           ) : null}
         </div>
@@ -284,7 +284,7 @@ export function EventRsvpPanel({
                     ...r.participating,
                     r.bringingNote ?? "",
                     isOrganizer && r.amountMinor
-                      ? formatMoney(r.amountMinor, event.currency)
+                      ? formatMoney(fromMinor(r.amountMinor), event.currency)
                       : "",
                   ]
                     .filter(Boolean)
