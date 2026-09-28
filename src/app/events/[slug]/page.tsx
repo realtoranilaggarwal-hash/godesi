@@ -42,6 +42,8 @@ import { metaDescription } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
 import { matchProfilesByExactName } from "@/lib/peopleLookup";
+import { EventRsvpPanel } from "@/components/EventRsvpPanel";
+import { MapEmbed } from "@/components/MapEmbed";
 
 type SpeakerRow =
   Awaited<ReturnType<typeof loadEvent>> extends infer E
@@ -119,6 +121,27 @@ async function loadEvent(slug: string) {
       },
       source: { select: { name: true, websiteUrl: true } },
       venueRef: { select: { id: true, slug: true } },
+      club: { select: { id: true, slug: true, name: true, visibility: true } },
+      rsvps: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          answer: true,
+          bringing: true,
+          bringingNote: true,
+          participating: true,
+          amountMinor: true,
+          guests: true,
+          userId: true,
+          user: {
+            select: {
+              name: true,
+              username: true,
+              emailVerifiedAt: true,
+              bannedAt: true,
+            },
+          },
+        },
+      },
     },
   });
 }
@@ -164,6 +187,32 @@ export default async function EventPage({
   const isOwnerOrDesk = Boolean(
     user && (user.id === event.organizerId || can(user, "events")),
   );
+  const clubMembership =
+    user && event.club
+      ? await db.clubMember.findUnique({
+          where: { clubId_userId: { clubId: event.club.id, userId: user.id } },
+          select: { role: true, status: true },
+        })
+      : null;
+  const rsvpOpen =
+    Boolean(event.club) ||
+    event.bringOptions.length > 0 ||
+    event.participateOptions.length > 0 ||
+    event.contributionMode !== "NONE";
+  const canRsvp = event.club ? clubMembership?.status === "ACTIVE" : true;
+  const rsvpRows = event.rsvps.map((r) => ({
+    ...r,
+    user: {
+      name: r.user.name,
+      username:
+        r.user.username && r.user.emailVerifiedAt && !r.user.bannedAt
+          ? r.user.username
+          : null,
+    },
+  }));
+  const myRsvp = user
+    ? (rsvpRows.find((r) => r.userId === user.id) ?? null)
+    : null;
   // An event waiting on moderation is only visible to its organiser and the desk.
   if (event.status !== "APPROVED" && !isOwnerOrDesk) notFound();
   // The join link is what an online seat buys, so only a ticket holder, the
@@ -538,6 +587,15 @@ export default async function EventPage({
                 </p>
               )}
             </div>
+            {event.mode !== "ONLINE" ? (
+              <MapEmbed
+                query={[event.venue, event.address, event.city, event.state]
+                  .filter(Boolean)
+                  .join(", ")}
+                title={event.venue}
+                className="mt-3"
+              />
+            ) : null}
 
             {past ? null : (
               <AddToCalendar
@@ -758,6 +816,21 @@ export default async function EventPage({
           </Card>
         ) : null}
 
+        {rsvpOpen && !imported ? (
+          <EventRsvpPanel
+            event={event}
+            rsvps={rsvpRows}
+            mine={myRsvp}
+            viewer={Boolean(user)}
+            canRsvp={canRsvp}
+            isOrganizer={
+              isOwnerOrDesk ||
+              (clubMembership?.role === "ORGANIZER" &&
+                clubMembership.status === "ACTIVE")
+            }
+          />
+        ) : null}
+
         {event.tiers.length ? (
           <Card>
             <h2 className="font-bold">Ticket types</h2>
@@ -807,6 +880,18 @@ export default async function EventPage({
           ) : (
             <PostedBy user={event.organizer} className="mt-1" />
           )}
+          {event.club ? (
+            <p className="mt-2 text-sm text-slate-600">
+              Hosted by{" "}
+              <Link
+                href={`/clubs/${event.club.slug}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                {event.club.name}
+              </Link>{" "}
+              · a GoDesi club
+            </p>
+          ) : null}
           {event.claimedAt && event.importedFrom ? (
             <p className="mt-2 text-xs text-slate-500">
               Claimed by the organiser. First listed from {event.importedFrom}.

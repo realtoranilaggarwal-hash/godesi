@@ -17,7 +17,7 @@ const SITEMAP_TTL = 3600;
 
 /** Dates are stringified by the cache, so the rows carry ISO timestamps. */
 const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
-  const [businesses, categories, events, reports, posts, worship] =
+  const [businesses, categories, events, reports, posts, worship, clubs] =
     await Promise.all([
       // A card or event with nothing on it but a name is left out: submitting
       // thin pages is what the publisher policies count against the whole domain.
@@ -69,6 +69,10 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
         where: { status: "APPROVED" },
         select: { slug: true, updatedAt: true },
       }),
+      db.club.findMany({
+        where: { visibility: "PUBLIC" },
+        select: { slug: true, updatedAt: true },
+      }),
     ]);
   return {
     businesses: businesses
@@ -103,13 +107,17 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       slug: row.slug,
       updatedAt: row.updatedAt.toISOString(),
     })),
+    clubs: clubs.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+    })),
   };
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const [
-    { businesses, categories, events, reports, posts, worship },
+    { businesses, categories, events, reports, posts, worship, clubs },
     cities,
     professionals,
   ] = await Promise.all([
@@ -165,6 +173,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/live-tv`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/categories`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/connect`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${base}/clubs`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/alumni`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "weekly", priority: 0.5 },
     { url: `${base}/pricing`, changeFrequency: "monthly", priority: 0.5 },
@@ -203,6 +212,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...events.map((event) => ({
       url: `${base}/events/${event.slug}`,
       lastModified: new Date(event.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+    ...clubs.map((club) => ({
+      url: `${base}/clubs/${club.slug}`,
+      lastModified: new Date(club.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),

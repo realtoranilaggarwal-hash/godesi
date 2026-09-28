@@ -30,6 +30,8 @@ import {
 import { rememberVenue } from "@/lib/venues";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
+import { BRING_OPTIONS, PARTICIPATE_OPTIONS } from "@/lib/clubs";
+import { isClubOrganizer } from "@/lib/clubAccess";
 
 /** Seat types per event, e.g. Early bird / Couple / Online / VIP. */
 const MAX_TIERS = 8;
@@ -371,6 +373,41 @@ export async function createEventAction(
     });
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
 
+    const clubId = String(formData.get("clubId") ?? "").trim() || null;
+    if (clubId && !(await isClubOrganizer(clubId, user.id))) {
+      return { error: "Only a club's organisers can post events under it." };
+    }
+    const contributionRaw = String(formData.get("contributionMode") ?? "NONE");
+    const contributionMode =
+      contributionRaw === "SUGGESTED" || contributionRaw === "CUSTOM"
+        ? contributionRaw
+        : "NONE";
+    const contributionAmount = Number(formData.get("contributionAmount") ?? 0);
+    const contributionMinor =
+      contributionMode === "SUGGESTED" &&
+      Number.isFinite(contributionAmount) &&
+      contributionAmount > 0
+        ? toMinor(contributionAmount)
+        : null;
+    const contributionNote =
+      contributionMode === "NONE"
+        ? null
+        : String(formData.get("contributionNote") ?? "")
+            .trim()
+            .slice(0, 200) || null;
+    const bringOptions = formData
+      .getAll("bringOptions")
+      .map(String)
+      .filter((v): v is (typeof BRING_OPTIONS)[number] =>
+        (BRING_OPTIONS as readonly string[]).includes(v),
+      );
+    const participateOptions = formData
+      .getAll("participateOptions")
+      .map(String)
+      .filter((v): v is (typeof PARTICIPATE_OPTIONS)[number] =>
+        (PARTICIPATE_OPTIONS as readonly string[]).includes(v),
+      );
+
     const venueRef =
       parsed.data.mode === "ONLINE"
         ? null
@@ -439,6 +476,12 @@ export async function createEventAction(
         seatsTotal,
         organizerId: user.id,
         businessId: business?.id ?? null,
+        clubId,
+        contributionMode,
+        contributionMinor,
+        contributionNote,
+        bringOptions,
+        participateOptions,
         categorySlug: primaryCategory,
         categorySlugs,
         speakers: speakers.length

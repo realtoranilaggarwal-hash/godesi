@@ -31,6 +31,37 @@ enum EventMode {
   HYBRID
 }
 
+enum ClubVisibility {
+  /// Anyone can find it and join straight away.
+  PUBLIC
+  /// Listed by name only; joining needs an organiser's approval.
+  PRIVATE
+}
+
+enum ClubRole {
+  ORGANIZER
+  MEMBER
+}
+
+enum ClubMemberStatus {
+  PENDING
+  ACTIVE
+}
+
+enum ContributionMode {
+  NONE
+  /// Pay-what-you-like with a suggested amount per person.
+  SUGGESTED
+  /// Each member enters what they will chip in.
+  CUSTOM
+}
+
+enum RsvpAnswer {
+  YES
+  MAYBE
+  NO
+}
+
 enum EventFrequency {
   ONE_TIME
   RECURRING
@@ -226,7 +257,10 @@ model User {
   pressCardIssuedAt  DateTime?
   pressCardExpiresAt DateTime?
 
-  speakerAt EventSpeaker[] @relation("SpeakerProfile")
+  speakerAt       EventSpeaker[] @relation("SpeakerProfile")
+  clubsCreated    Club[]
+  clubMemberships ClubMember[]
+  eventRsvps      EventRsvp[]
 
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
@@ -1046,6 +1080,22 @@ model Event {
   /// The calendar's own id for this entry, so a re-import updates one row.
   sourceUid String?
 
+  /// The club this event belongs to; clubs are permanent, events come and go.
+  clubId String?
+  club   Club?   @relation(fields: [clubId], references: [id], onDelete: SetNull)
+
+  /// How members chip in beyond tickets: nothing, a suggested amount, or their own.
+  contributionMode   ContributionMode @default(NONE)
+  /// Suggested amount per person in minor units of `currency`.
+  contributionMinor  Int?
+  /// Free text like "Bring a dish + $10 towards the hall".
+  contributionNote   String?
+  /// What members can offer to bring, e.g. food, drinks, equipment.
+  bringOptions       String[]         @default([])
+  /// What members can take part in, e.g. singing, dancing, open mic.
+  participateOptions String[]         @default([])
+  rsvps              EventRsvp[]
+
   speakers EventSpeaker[]
   sessions EventSession[]
   claims   EventClaim[]
@@ -1059,6 +1109,7 @@ model Event {
   @@index([categorySlug])
   @@index([city])
   @@index([venueRefId])
+  @@index([clubId])
   @@index([genres], type: Gin)
   @@index([languages], type: Gin)
   @@map("EventListing")
@@ -1141,6 +1192,80 @@ model EventSpeaker {
   user   User?   @relation("SpeakerProfile", fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([eventId])
+  @@index([userId])
+}
+
+/// A permanent group — a karaoke circle, cricket team, book club — that puts
+/// on events. Members belong to the club; events belong to the club.
+model Club {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  description String
+  imageUrl    String?
+  /// From `lib/clubs` CLUB_CATEGORIES: singing, music, food, travel…
+  category    String
+  city        String?
+  state       String?
+  country     String?
+  /// Meets online (Zoom, WhatsApp) rather than in one town.
+  online      Boolean        @default(false)
+  rules       String?
+  /// Public YouTube playlist — songs the club sings, past performances.
+  playlistUrl String?
+  websiteUrl  String?
+  whatsappUrl String?
+  visibility  ClubVisibility @default(PUBLIC)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  members ClubMember[]
+  events  Event[]
+
+  @@index([category])
+  @@index([city])
+}
+
+model ClubMember {
+  id        String           @id @default(cuid())
+  clubId    String
+  club      Club             @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      ClubRole         @default(MEMBER)
+  status    ClubMemberStatus @default(ACTIVE)
+  /// What they do in the club — "sings ghazals", "brings the speaker".
+  note      String?
+  createdAt DateTime         @default(now())
+
+  @@unique([clubId, userId])
+  @@index([userId])
+}
+
+/// A member's commitment to an event: coming, what they bring, what they do.
+model EventRsvp {
+  id            String     @id @default(cuid())
+  eventId       String
+  event         Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answer        RsvpAnswer @default(YES)
+  /// Which of the event's bring options they picked.
+  bringing      String[]   @default([])
+  /// What exactly — "Samosa + chai", "JBL speaker".
+  bringingNote  String?
+  /// Which of the event's participate options they picked.
+  participating String[]   @default([])
+  /// What they will chip in, minor units of the event's currency.
+  amountMinor   Int?
+  guests        Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([eventId, userId])
   @@index([userId])
 }
 
