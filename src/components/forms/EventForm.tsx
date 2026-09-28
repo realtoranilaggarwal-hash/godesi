@@ -29,6 +29,10 @@ import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { SpeakerRow } from "@/components/forms/SpeakerRow";
+import {
+  ClubEventFields,
+  type ClubOption,
+} from "@/components/forms/ClubEventFields";
 import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 
 /** Suggested seat types; organisers can rename them to anything. */
@@ -53,6 +57,8 @@ export function EventForm({
   venues,
   feePercent,
   feeWaived,
+  clubs = [],
+  defaultClub,
 }: {
   categories: CategoryOption[];
   defaultCurrency: string;
@@ -65,6 +71,9 @@ export function EventForm({
   feePercent: number;
   /** True when this organiser's plan means Godesi takes nothing. */
   feeWaived: boolean;
+  /** Clubs this organiser runs, offered as the event's home. */
+  clubs?: ClubOption[];
+  defaultClub?: string;
 }) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
   const [mode, setMode] = useState<string>("OFFLINE");
@@ -485,6 +494,12 @@ export function EventForm({
           </button>
         ) : null}
       </fieldset>
+
+      <ClubEventFields
+        clubs={clubs}
+        defaultClub={defaultClub}
+        currency={defaultCurrency}
+      />
 
       <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
         <legend className="px-1 text-sm font-bold text-slate-900">

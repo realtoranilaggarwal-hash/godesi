@@ -19,6 +19,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/search", label: "Businesses" },
         { href: "/leads", label: "Leads" },
         { href: "/events", label: "Events" },
+        { href: "/clubs", label: "Clubs — karaoke, cricket, foodies" },
         { href: "/gigs", label: "Gigs — services $5–$100" },
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Resources" },
