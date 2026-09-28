@@ -5,6 +5,7 @@ import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { publicProfileIds } from "@/lib/peopleLookup";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
@@ -83,6 +84,7 @@ type SpeakerInput = {
   name: string;
   bio: string | null;
   photoUrl: string | null;
+  userId: string | null;
 };
 type SessionInput = {
   title: string;
@@ -96,7 +98,7 @@ const MAX_SPEAKERS = 12;
 const MAX_SESSIONS = 20;
 
 /** Repeated speaker rows; rows without a name are skipped. */
-function readSpeakers(formData: FormData): SpeakerInput[] {
+async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
   const names = formData
     .getAll("speakerName")
     .map((value) => String(value).trim());
@@ -106,6 +108,10 @@ function readSpeakers(formData: FormData): SpeakerInput[] {
   const photos = formData
     .getAll("speakerPhoto")
     .map((value) => String(value).trim());
+  const users = formData
+    .getAll("speakerUser")
+    .map((value) => String(value).trim());
+  const linkable = await publicProfileIds(users);
 
   const speakers: SpeakerInput[] = [];
   for (
@@ -118,6 +124,7 @@ function readSpeakers(formData: FormData): SpeakerInput[] {
       name: names[index].slice(0, 120),
       bio: bios[index]?.slice(0, 600) || null,
       photoUrl: photos[index] || null,
+      userId: linkable.has(users[index]) ? users[index] : null,
     });
   }
   return speakers;
@@ -310,7 +317,7 @@ export async function createEventAction(
       return { error: "Add the join link for an online or hybrid event." };
     }
 
-    const speakers = readSpeakers(formData);
+    const speakers = await readSpeakers(formData);
     const sessions = readSessions(formData);
     const features = formData
       .getAll("features")
@@ -396,10 +403,10 @@ export async function createEventAction(
         timeZone: zone,
         venue: titleCase(parsed.data.venue),
         hallName: venueRef ? parsed.data.hallName || null : null,
-        hallCapacity: venueRef ? parsed.data.hallCapacity ?? null : null,
-        venueUrl: venueRef ? parsed.data.venueUrl ?? null : null,
+        hallCapacity: venueRef ? (parsed.data.hallCapacity ?? null) : null,
+        venueUrl: venueRef ? (parsed.data.venueUrl ?? null) : null,
         address: venueRef ? parsed.data.address || null : null,
-        mapsUrl: venueRef ? parsed.data.mapsUrl ?? null : null,
+        mapsUrl: venueRef ? (parsed.data.mapsUrl ?? null) : null,
         venueRefId: venueRef?.id ?? null,
         features,
         partnerStatus: wantsPartnership ? "REQUESTED" : "NONE",

@@ -226,6 +226,8 @@ model User {
   pressCardIssuedAt  DateTime?
   pressCardExpiresAt DateTime?
 
+  speakerAt EventSpeaker[] @relation("SpeakerProfile")
+
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
   avatarUrl String?
@@ -1133,7 +1135,13 @@ model EventSpeaker {
   bio       String?
   sortOrder Int     @default(0)
 
+  /// The speaker's own Godesi profile when the organiser picked one, so the
+  /// event links to the person instead of minting a duplicate.
+  userId String?
+  user   User?   @relation("SpeakerProfile", fields: [userId], references: [id], onDelete: SetNull)
+
   @@index([eventId])
+  @@index([userId])
 }
 
 /// One agenda row — a talk, workshop slot or stage on the event schedule.
