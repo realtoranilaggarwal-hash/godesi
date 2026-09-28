@@ -657,7 +657,7 @@ export default async function EventPage({
         ) : null}
 
         {event.sessions.length ? (
-          <Card className="border-2 border-indigo-200">
+          <Card className="!border-2 !border-indigo-200">
             <h2 className="font-bold">Agenda</h2>
             <ol className="mt-3 space-y-2">
               {event.sessions.map((session, index) => {
