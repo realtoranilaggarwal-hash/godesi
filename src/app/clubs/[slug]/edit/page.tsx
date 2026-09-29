@@ -22,8 +22,7 @@ export default async function EditClubPage({
   if (!user) redirect(`/login?next=/clubs/${params.slug}/edit`);
   const club = await db.club.findUnique({ where: { slug: params.slug } });
   if (!club) notFound();
-  if (!(await isClubOrganizer(club.id, user.id)))
-    redirect(`/clubs/${club.slug}`);
+  if (!(await isClubOrganizer(club.id, user))) redirect(`/clubs/${club.slug}`);
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">

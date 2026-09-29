@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useFormState } from "react-dom";
 import { createClubAction, updateClubAction } from "@/app/actions/clubs";
 import { emptyState } from "@/lib/actions";
-import { Field, inputClass } from "@/components/ui";
-import { SubmitButton } from "@/components/SubmitButton";
+import { Button, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { ImageField } from "@/components/forms/ImageField";
 import { PlaylistField } from "@/components/forms/PlaylistField";
@@ -44,9 +43,17 @@ export function ClubForm({
   const [visibility, setVisibility] = useState<"PUBLIC" | "PRIVATE">(
     club?.visibility ?? "PUBLIC",
   );
+  const [pending, startTransition] = useTransition();
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => formAction(data));
+      }}
+      className="space-y-5"
+    >
       {club ? <input type="hidden" name="clubId" value={club.id} /> : null}
       <FormError>{state.error}</FormError>
 
@@ -237,7 +244,9 @@ export function ClubForm({
         </Field>
       </div>
 
-      <SubmitButton>{club ? "Save changes" : "Create the club"}</SubmitButton>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Saving..." : club ? "Save changes" : "Create the club"}
+      </Button>
     </form>
   );
 }
