@@ -375,7 +375,7 @@ export async function createEventAction(
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
 
     const clubId = String(formData.get("clubId") ?? "").trim() || null;
-    if (clubId && !(await isClubOrganizer(clubId, user.id))) {
+    if (clubId && !(await isClubOrganizer(clubId, user))) {
       return { error: "Only a club's organisers can post events under it." };
     }
     const contributionRaw = String(formData.get("contributionMode") ?? "NONE");

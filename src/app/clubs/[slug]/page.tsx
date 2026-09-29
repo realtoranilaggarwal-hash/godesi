@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { clubPlace } from "@/components/ClubCard";
 import { EventCard } from "@/components/EventCard";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
@@ -121,7 +121,9 @@ export default async function ClubPage({
   const me = viewer
     ? (club.members.find((m) => m.userId === viewer.id) ?? null)
     : null;
-  const isOrganizer = me?.role === "ORGANIZER" && me.status === "ACTIVE";
+  const staff = viewer ? isStaff(viewer) : false;
+  const isOrganizer =
+    staff || (me?.role === "ORGANIZER" && me.status === "ACTIVE");
   const isMember = me?.status === "ACTIVE";
   const active = club.members.filter((m) => m.status === "ACTIVE");
   const pending = club.members.filter((m) => m.status === "PENDING");
@@ -181,7 +183,11 @@ export default async function ClubPage({
               </Badge>
               {premium ? <Badge tone="amber">⭐ Premium club</Badge> : null}
               {isOrganizer ? (
-                <Badge tone="indigo">You organise this</Badge>
+                <Badge tone="indigo">
+                  {me?.role === "ORGANIZER"
+                    ? "You organise this"
+                    : "GoDesi staff — you can edit this club"}
+                </Badge>
               ) : null}
             </div>
             <p className="mt-1 text-sm text-slate-600">
@@ -238,9 +244,11 @@ export default async function ClubPage({
                 <Badge tone="amber">
                   Request sent — waiting for an organiser
                 </Badge>
-              ) : isMember ? (
+              ) : isMember || staff ? (
                 <>
-                  <Badge tone="green">✓ You&rsquo;re a member</Badge>
+                  {isMember ? (
+                    <Badge tone="green">✓ You&rsquo;re a member</Badge>
+                  ) : null}
                   {club.whatsappUrl ? (
                     <LinkButton href={club.whatsappUrl} variant="whatsapp">
                       WhatsApp group
@@ -259,7 +267,16 @@ export default async function ClubPage({
                       </LinkButton>
                     </>
                   ) : null}
-                  {!(isOrganizer && organizers.length <= 1) ? (
+                  {!isOrganizer ? (
+                    <span className="basis-full text-xs text-slate-500">
+                      Only organisers can edit the club or post its events — ask{" "}
+                      {organizers
+                        .map((m) => properName(m.user.name))
+                        .join(", ") || "an organiser"}{" "}
+                      to promote you.
+                    </span>
+                  ) : null}
+                  {isMember && !(isOrganizer && organizers.length <= 1) ? (
                     <form action={leaveClubAction}>
                       <input type="hidden" name="clubId" value={club.id} />
                       <button className="text-xs text-slate-500 underline">

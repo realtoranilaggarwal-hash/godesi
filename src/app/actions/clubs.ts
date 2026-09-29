@@ -145,7 +145,7 @@ export async function updateClubAction(
       where: { id: clubId },
       select: { slug: true },
     });
-    if (!club || !(await isClubOrganizer(clubId, user.id))) {
+    if (!club || !(await isClubOrganizer(clubId, user))) {
       return { error: "Only the club's organisers can edit it." };
     }
     const read = readClub(formData);
@@ -213,7 +213,7 @@ export async function moderateMemberAction(formData: FormData) {
     where: { id: memberId },
     include: { club: { select: { id: true, slug: true } } },
   });
-  if (!member || !(await isClubOrganizer(member.clubId, user.id))) return;
+  if (!member || !(await isClubOrganizer(member.clubId, user))) return;
 
   if (action === "approve") {
     await db.clubMember.update({
@@ -318,7 +318,7 @@ export async function startClubPremiumCheckoutAction(formData: FormData) {
     where: { id: clubId },
     select: { id: true, slug: true, name: true },
   });
-  if (!club || !(await isClubOrganizer(club.id, user.id))) {
+  if (!club || !(await isClubOrganizer(club.id, user))) {
     redirect("/clubs?error=not_organizer");
   }
   if (!stripeEnabled())
