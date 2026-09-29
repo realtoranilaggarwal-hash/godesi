@@ -165,13 +165,12 @@ export async function CategoryFeatured() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {picks.map((business) => (
                 <BusinessTile
                   key={business.id}
                   business={business}
                   premium={spotlightable(business)}
-                  smallImage={!spotlightable(business)}
                 />
               ))}
 

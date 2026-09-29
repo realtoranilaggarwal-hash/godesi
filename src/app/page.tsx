@@ -66,7 +66,7 @@ export default async function HomePage() {
     newMembers,
   ] = await Promise.all([
     getCategoryTree(),
-    searchBusinesses({ take: 6, sort: "recent" }),
+    searchBusinesses({ take: 8, sort: "recent" }),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
@@ -252,13 +252,9 @@ export default async function HomePage() {
             linkLabel="See all"
           />
           {businesses.length ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {businesses.map((business) => (
-                <BusinessTile
-                  key={business.id}
-                  business={business}
-                  smallImage
-                />
+                <BusinessTile key={business.id} business={business} />
               ))}
             </div>
           ) : (

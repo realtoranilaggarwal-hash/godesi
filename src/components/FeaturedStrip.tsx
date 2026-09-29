@@ -4,7 +4,7 @@ import { BusinessTile } from "@/components/BusinessTile";
 import { PLANS } from "@/lib/plans";
 
 /** Six to a row, up to three rows, so a full strip still fits above the fold. */
-const ROW = 6;
+const ROW = 4;
 const MAX_SLOTS = ROW * 3;
 
 /** An unsold slot sells itself rather than leaving a hole in the row. */
@@ -64,7 +64,10 @@ export async function FeaturedStrip({
    * Short of members it shrinks, rather than showing a wall of empty ads.
    */
   const total = Math.min(
-    Math.max(Math.ceil((businesses.length + claimed.length + 1) / ROW) * ROW, ROW),
+    Math.max(
+      Math.ceil((businesses.length + claimed.length + 1) / ROW) * ROW,
+      ROW,
+    ),
     MAX_SLOTS,
   );
 
@@ -90,7 +93,7 @@ export async function FeaturedStrip({
         </Link>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {businesses.map((business) => (
           <BusinessTile key={business.id} business={business} premium />
         ))}
@@ -105,7 +108,8 @@ export async function FeaturedStrip({
               className="mt-1 block text-center text-[10px] font-semibold text-slate-400 hover:text-rose-600"
             >
               Free spotlight · slot {businesses.length + index + 1} of {total} —
-              take it from ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month →
+              take it from ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month
+              →
             </Link>
           </div>
         ))}
