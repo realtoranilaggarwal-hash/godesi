@@ -112,7 +112,7 @@ export default async function VenuePage({
           <LinkButton href="/events/new">➕ Post an event here</LinkButton>
         </div>
         <MapEmbed
-          query={[venue.name, venue.address, place].filter(Boolean).join(", ")}
+          parts={[venue.name, venue.address, place]}
           title={venue.name}
           className="mt-4"
         />

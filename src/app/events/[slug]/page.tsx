@@ -589,9 +589,7 @@ export default async function EventPage({
             </div>
             {event.mode !== "ONLINE" ? (
               <MapEmbed
-                query={[event.venue, event.address, event.city, event.state]
-                  .filter(Boolean)
-                  .join(", ")}
+                parts={[event.venue, event.address, event.city, event.state]}
                 title={event.venue}
                 className="mt-3"
               />

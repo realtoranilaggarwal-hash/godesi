@@ -62,6 +62,7 @@ const QUICK_LINKS = [
 const BAR_NAV = [
   { href: "/search", label: "Businesses" },
   { href: "/events", label: "Events" },
+  { href: "/clubs", label: "Clubs" },
   { href: "/gigs", label: "Gigs" },
   { href: "/blog", label: "Blog" },
   { href: "/leads", label: "Leads" },
@@ -111,6 +112,13 @@ export async function SiteHeader() {
       icon: "🎟️",
       className:
         "bg-gradient-to-r from-rose-600 to-pink-500 text-white hover:opacity-90",
+    },
+    {
+      href: "/clubs",
+      label: "Clubs",
+      icon: "🎤",
+      className:
+        "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-90",
     },
     {
       href: "/gigs",

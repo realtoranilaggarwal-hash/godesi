@@ -4,6 +4,21 @@ import { ClubCard } from "@/components/ClubCard";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 import { CLUB_CATEGORIES } from "@/lib/clubs";
 import { listClubs } from "@/lib/clubQueries";
+import { weddingServiceSlug } from "@/lib/wedding";
+
+/** Trades clubs book for their meets; each links to its listings on GoDesi. */
+const CLUB_VENDORS = [
+  { icon: "🎧", service: "DJ & Sound" },
+  { icon: "🎤", service: "Singers" },
+  { icon: "🎸", service: "Live Bands" },
+  { icon: "🍛", service: "Caterers" },
+  { icon: "🏛️", service: "Banquet Halls & Venues" },
+  { icon: "📸", service: "Photographers" },
+  { icon: "🎉", service: "Decorators & Florists" },
+  { icon: "🎙️", service: "Anchors & Artists" },
+  { icon: "🥁", service: "Dhol & Baraat" },
+  { icon: "💃", service: "Dance Choreographers" },
+];
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -110,6 +125,35 @@ export default async function ClubsPage({
             past meets in one place.
           </li>
         </ol>
+      </Card>
+
+      <Card className="!border-2 !border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-white">
+        <h2 className="font-bold text-slate-900">
+          DJs, singers, caterers, halls &mdash; clubs are your customers
+        </h2>
+        <p className="mt-1 text-sm text-slate-700">
+          Every club here runs karaoke nights, cricket socials, potlucks and
+          parties, and each one needs a DJ, sound, singers, food, a hall or a
+          photographer. List your business free and organisers find you from the
+          club and event pages when they plan the next meet.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {CLUB_VENDORS.map((v) => (
+            <Link
+              key={v.service}
+              href={`/wedding?service=${weddingServiceSlug(v.service)}`}
+              className="rounded-full border border-fuchsia-200 bg-white px-3 py-1 text-xs font-semibold text-fuchsia-900 hover:bg-fuchsia-100"
+            >
+              {v.icon} {v.service}
+            </Link>
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <LinkButton href="/signup">List my business free</LinkButton>
+          <LinkButton href="/advertise" variant="secondary">
+            Advertise to club organisers
+          </LinkButton>
+        </div>
       </Card>
     </div>
   );
