@@ -1,12 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 /**
- * Card shell whose picture placement follows the photo: a landscape shot runs
- * across the top, a portrait or square one stands full-height on the left with
- * the text beside it, so neither gets shrunk to fit the other's box.
+ * Card shell with the picture across the top: the whole photo is shown
+ * (never cropped) over a blurred copy of itself, so a portrait or logo still
+ * fills the band edge to edge and the text below keeps its full width.
  */
 export function OrientedTile({
   href,
@@ -20,34 +18,19 @@ export function OrientedTile({
   href: string;
   src: string;
   alt: string;
-  /** Height of the picture band in the landscape layout. */
+  /** Height of the picture band. */
   imageHeightClass: string;
   className: string;
   /** Absolutely-positioned extras (badges, staff edit). */
   overlay?: ReactNode;
   children: ReactNode;
 }) {
-  const ref = useRef<HTMLImageElement>(null);
-  const [portrait, setPortrait] = useState(false);
-
-  const measure = () => {
-    const img = ref.current;
-    if (img && img.naturalWidth && img.naturalHeight) {
-      setPortrait(img.naturalHeight / img.naturalWidth > 0.9);
-    }
-  };
-  useEffect(() => {
-    if (ref.current?.complete) measure();
-  }, []);
-
   return (
-    <div className={`${className} ${portrait ? "flex-row" : "flex-col"}`}>
+    <div className={`${className} flex-col`}>
       {overlay}
       <Link
         href={href}
-        className={`relative block shrink-0 overflow-hidden bg-slate-800 ${
-          portrait ? "w-[42%] self-stretch" : `w-full ${imageHeightClass}`
-        }`}
+        className={`relative block w-full shrink-0 overflow-hidden bg-slate-800 ${imageHeightClass}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -59,14 +42,10 @@ export function OrientedTile({
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          ref={ref}
           src={src}
           alt={alt}
           loading="lazy"
-          onLoad={measure}
-          className={`h-full w-full object-contain ${
-            portrait ? "absolute inset-0" : "relative"
-          }`}
+          className="relative h-full w-full object-contain"
         />
       </Link>
       {children}
