@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { isClubOrganizer } from "@/lib/clubAccess";
 import { ClubForm } from "@/components/forms/ClubForm";
+import { DeleteClubForm } from "@/components/forms/DeleteClubForm";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,10 @@ export default async function EditClubPage({
       </div>
       <Card>
         <ClubForm club={club} />
+      </Card>
+      <Card className="border-rose-200">
+        <h2 className="mb-2 text-lg font-bold text-rose-700">Delete club</h2>
+        <DeleteClubForm clubId={club.id} clubName={club.name} />
       </Card>
     </div>
   );
