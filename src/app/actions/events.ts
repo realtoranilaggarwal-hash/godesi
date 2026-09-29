@@ -30,6 +30,7 @@ import {
 import { rememberVenue } from "@/lib/venues";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
+import { clubIsPremium } from "@/lib/clubs";
 import { BRING_OPTIONS, PARTICIPATE_OPTIONS } from "@/lib/clubs";
 import { isClubOrganizer } from "@/lib/clubAccess";
 
@@ -572,6 +573,7 @@ export async function bookTicketAction(
             planExpiresAt: true,
           },
         },
+        club: { select: { premiumUntil: true } },
       },
     });
     if (!event) return { error: "This event no longer exists." };
@@ -614,8 +616,10 @@ export async function bookTicketAction(
     }
 
     const amountMinor = Math.max(0, subtotalMinor - discountMinor);
-    /** Free organisers pay Godesi's service fee; paid plans keep the whole ticket. */
-    const feeMinor = platformFeeMinor(amountMinor, event.organizer);
+    /** Free organisers pay Godesi's service fee; paid plans and Premium clubs keep the whole ticket. */
+    const feeMinor = clubIsPremium(event.club)
+      ? 0
+      : platformFeeMinor(amountMinor, event.organizer);
 
     const ticket = await db.ticket.create({
       data: {

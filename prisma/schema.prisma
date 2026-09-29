@@ -350,6 +350,7 @@ model User {
 
   liveChannels       LiveChannel[]
   liveChannelOrders  LiveChannelOrder[]
+  clubOrders         ClubOrder[]
   liveChannelReports LiveChannelReport[]
   liveChannelVotes   LiveChannelVote[]
   liveFavorites      LiveChannelFavorite[]
@@ -1198,35 +1199,57 @@ model EventSpeaker {
 /// A permanent group — a karaoke circle, cricket team, book club — that puts
 /// on events. Members belong to the club; events belong to the club.
 model Club {
-  id          String         @id @default(cuid())
-  slug        String         @unique
-  name        String
-  description String
-  imageUrl    String?
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  name         String
+  description  String
+  imageUrl     String?
   /// From `lib/clubs` CLUB_CATEGORIES: singing, music, food, travel…
-  category    String
-  city        String?
-  state       String?
-  country     String?
+  category     String
+  city         String?
+  state        String?
+  country      String?
   /// Meets online (Zoom, WhatsApp) rather than in one town.
-  online      Boolean        @default(false)
-  rules       String?
+  online       Boolean        @default(false)
+  rules        String?
   /// Public YouTube playlist — songs the club sings, past performances.
-  playlistUrl String?
-  websiteUrl  String?
-  whatsappUrl String?
-  visibility  ClubVisibility @default(PUBLIC)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  playlistUrl  String?
+  websiteUrl   String?
+  whatsappUrl  String?
+  visibility   ClubVisibility @default(PUBLIC)
+  /// Premium club until this date: no Godesi fee on its events' tickets, badge, listed first.
+  premiumUntil DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   members ClubMember[]
   events  Event[]
+  orders  ClubOrder[]
 
   @@index([category])
   @@index([city])
+}
+
+/// A yearly Premium payment for a club; extends `Club.premiumUntil` when paid.
+model ClubOrder {
+  id          String        @id @default(cuid())
+  clubId      String
+  club        Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  years       Int           @default(1)
+  amountMinor Int
+  currency    String
+  status      AdOrderStatus @default(PENDING)
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  createdAt   DateTime      @default(now())
+
+  @@index([clubId])
+  @@index([userId])
 }
 
 model ClubMember {

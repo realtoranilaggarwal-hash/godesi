@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ClubCard } from "@/components/ClubCard";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
-import { CLUB_CATEGORIES } from "@/lib/clubs";
+import { CLUB_CATEGORIES, CLUB_PREMIUM_YEAR_USD } from "@/lib/clubs";
 import { listClubs } from "@/lib/clubQueries";
 import { weddingServiceSlug } from "@/lib/wedding";
+import { platformFeePercent } from "@/lib/connect";
 
 /** Trades clubs book for their meets; each links to its listings on GoDesi. */
 const CLUB_VENDORS = [
@@ -123,6 +124,12 @@ export default async function ClubsPage({
           <li>
             A YouTube playlist on the club page keeps the songs and clips from
             past meets in one place.
+          </li>
+          <li>
+            Starting a club is free. Free clubs pay GoDesi{" "}
+            {platformFeePercent()}% on paid event tickets and contributions; a{" "}
+            <strong>⭐ Premium club</strong> (${CLUB_PREMIUM_YEAR_USD}/year)
+            pays nothing per event and is listed first here with a badge.
           </li>
         </ol>
       </Card>
