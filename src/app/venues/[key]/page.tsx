@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { findVenue, venuePath } from "@/lib/venues";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
+import { MapEmbed } from "@/components/MapEmbed";
 import { EventCard } from "@/components/EventCard";
 
 export const dynamic = "force-dynamic";
@@ -30,40 +31,61 @@ export default async function VenuePage({
 }) {
   const venue = await findVenue(params.key);
   if (!venue) notFound();
-  if (venue.slug && venue.slug !== params.key) permanentRedirect(venuePath(venue));
+  if (venue.slug && venue.slug !== params.key)
+    permanentRedirect(venuePath(venue));
 
   const now = new Date();
   const [upcoming, past] = await Promise.all([
     db.event.findMany({
-      where: { venueRefId: venue.id, status: "APPROVED", startsAt: { gte: now } },
+      where: {
+        venueRefId: venue.id,
+        status: "APPROVED",
+        startsAt: { gte: now },
+      },
       orderBy: { startsAt: "asc" },
       take: 48,
-      include: { category: { select: { name: true, icon: true, color: true } } },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
     }),
     db.event.findMany({
-      where: { venueRefId: venue.id, status: "APPROVED", startsAt: { lt: now } },
+      where: {
+        venueRefId: venue.id,
+        status: "APPROVED",
+        startsAt: { lt: now },
+      },
       orderBy: { startsAt: "desc" },
       take: 12,
-      include: { category: { select: { name: true, icon: true, color: true } } },
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+      },
     }),
   ]);
 
-  const place = [venue.city, venue.state, venue.country].filter(Boolean).join(", ");
+  const place = [venue.city, venue.state, venue.country]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <div className="space-y-6">
       <Card className="border-violet-200 bg-gradient-to-br from-violet-50 via-white to-sky-50">
-        <Link href="/venues" className="text-xs font-semibold text-violet-700 hover:underline">
+        <Link
+          href="/venues"
+          className="text-xs font-semibold text-violet-700 hover:underline"
+        >
           ← All venues
         </Link>
-        <h1 className="mt-1 text-2xl font-black sm:text-3xl">📍 {venue.name}</h1>
+        <h1 className="mt-1 text-2xl font-black sm:text-3xl">
+          📍 {venue.name}
+        </h1>
         <p className="text-sm text-slate-600">{place}</p>
         {venue.address ? (
           <p className="mt-1 text-sm text-slate-700">{venue.address}</p>
         ) : null}
         {venue.halls.length ? (
           <p className="mt-2 text-sm text-slate-700">
-            <span className="font-semibold">Halls:</span> {venue.halls.join(" · ")}
+            <span className="font-semibold">Halls:</span>{" "}
+            {venue.halls.join(" · ")}
           </p>
         ) : null}
         <div className="mt-3 flex flex-wrap gap-2">
@@ -89,6 +111,11 @@ export default async function VenuePage({
           ) : null}
           <LinkButton href="/events/new">➕ Post an event here</LinkButton>
         </div>
+        <MapEmbed
+          query={[venue.name, venue.address, place].filter(Boolean).join(", ")}
+          title={venue.name}
+          className="mt-4"
+        />
       </Card>
 
       <section>

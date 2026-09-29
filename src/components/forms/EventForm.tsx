@@ -28,6 +28,11 @@ import {
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { SpeakerRow } from "@/components/forms/SpeakerRow";
+import {
+  ClubEventFields,
+  type ClubOption,
+} from "@/components/forms/ClubEventFields";
 import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 
 /** Suggested seat types; organisers can rename them to anything. */
@@ -52,6 +57,8 @@ export function EventForm({
   venues,
   feePercent,
   feeWaived,
+  clubs = [],
+  defaultClub,
 }: {
   categories: CategoryOption[];
   defaultCurrency: string;
@@ -64,6 +71,9 @@ export function EventForm({
   feePercent: number;
   /** True when this organiser's plan means Godesi takes nothing. */
   feeWaived: boolean;
+  /** Clubs this organiser runs, offered as the event's home. */
+  clubs?: ClubOption[];
+  defaultClub?: string;
 }) {
   const [state, formAction] = useFormState(createEventAction, emptyState);
   const [mode, setMode] = useState<string>("OFFLINE");
@@ -353,32 +363,26 @@ export function EventForm({
         <legend className="px-1 text-sm font-bold text-slate-900">
           Speakers & guests (optional)
         </legend>
+        <p className="text-xs text-slate-500">
+          Type a name and we check whether they already have a godesi.com
+          profile, so the event links to the real person.
+        </p>
         {speakers.map((row) => (
-          <div key={row} className="grid gap-2 rounded-xl bg-slate-50 p-3">
-            <input
-              name="speakerName"
-              placeholder="Name — e.g. Dr. Meera Iyer"
-              className={inputClass}
-              aria-label="Speaker name"
-            />
-            <textarea
-              name="speakerBio"
-              rows={2}
-              placeholder="Short bio — role, company, what they will talk about"
-              className={inputClass}
-              aria-label="Speaker bio"
-            />
-            <ImageField
-              name="speakerPhoto"
-              label="Photo"
-              purpose="avatar"
-              previewClassName="h-16 w-16 rounded-full object-cover"
-            />
-          </div>
+          <SpeakerRow
+            key={row}
+            onRemove={
+              speakers.length > 1
+                ? () =>
+                    setSpeakers((rows) => rows.filter((item) => item !== row))
+                : undefined
+            }
+          />
         ))}
         <button
           type="button"
-          onClick={() => setSpeakers((rows) => [...rows, rows.length])}
+          onClick={() =>
+            setSpeakers((rows) => [...rows, (rows.at(-1) ?? 0) + 1])
+          }
           className="text-sm font-semibold text-indigo-600 hover:underline"
         >
           + Add another speaker
@@ -490,6 +494,12 @@ export function EventForm({
           </button>
         ) : null}
       </fieldset>
+
+      <ClubEventFields
+        clubs={clubs}
+        defaultClub={defaultClub}
+        currency={defaultCurrency}
+      />
 
       <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
         <legend className="px-1 text-sm font-bold text-slate-900">
