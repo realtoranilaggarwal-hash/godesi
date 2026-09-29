@@ -8,8 +8,10 @@ import { EventCard } from "@/components/EventCard";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { ShareButtons } from "@/components/ShareButtons";
 import { siteUrl } from "@/lib/format";
-import { Badge, Card, LinkButton, inputClass } from "@/components/ui";
-import { clubCategory } from "@/lib/clubs";
+import { Alert, Badge, Card, LinkButton, inputClass } from "@/components/ui";
+import { clubCategory, clubIsPremium, splitRules } from "@/lib/clubs";
+import { ClubPromote } from "@/components/ClubPromote";
+import { settleClubPremiumSession } from "@/lib/clubOrders";
 import {
   joinClubAction,
   leaveClubAction,
@@ -101,14 +103,19 @@ function Avatar({
 
 export default async function ClubPage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { paid?: string; error?: string };
 }) {
-  const [club, viewer] = await Promise.all([
-    loadClub(params.slug),
-    getCurrentUser(),
-  ]);
+  const viewer = await getCurrentUser();
+  const justPaid =
+    searchParams.paid && viewer
+      ? await settleClubPremiumSession(searchParams.paid, viewer.id)
+      : false;
+  const club = await loadClub(params.slug);
   if (!club) notFound();
+  const premium = clubIsPremium(club);
 
   const cat = clubCategory(club.category);
   const me = viewer
@@ -136,6 +143,18 @@ export default async function ClubPage({
 
   return (
     <div className="space-y-6">
+      {justPaid ? (
+        <Alert tone="success">
+          Thank you — {club.name} is now a Premium club: no Godesi fee on event
+          tickets, ⭐ badge and top placement.
+        </Alert>
+      ) : searchParams.error === "cancelled" ? (
+        <Alert tone="info">Payment cancelled — nothing was charged.</Alert>
+      ) : searchParams.error === "stripe_unavailable" ? (
+        <Alert tone="info">
+          Card payments are not available right now. Please try again later.
+        </Alert>
+      ) : null}
       <Card className="overflow-hidden">
         <div className="flex flex-wrap items-start gap-4">
           <span className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-4xl">
@@ -160,6 +179,7 @@ export default async function ClubPage({
                   ? "Public club"
                   : "🔒 Private club"}
               </Badge>
+              {premium ? <Badge tone="amber">⭐ Premium club</Badge> : null}
               {isOrganizer ? (
                 <Badge tone="indigo">You organise this</Badge>
               ) : null}
@@ -360,14 +380,17 @@ export default async function ClubPage({
           {club.rules ? (
             <Card>
               <h2 className="font-bold text-slate-900">Club rules</h2>
-              <p className="mt-2 whitespace-pre-line text-sm text-slate-700">
-                {club.rules}
-              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+                {splitRules(club.rules).lines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
             </Card>
           ) : null}
         </div>
 
         <div className="space-y-6">
+          {isOrganizer ? <ClubPromote club={club} /> : null}
           {isOrganizer && pending.length ? (
             <Card className="!border-amber-200 bg-amber-50/40">
               <h2 className="font-bold text-slate-900">

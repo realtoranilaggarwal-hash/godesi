@@ -45,6 +45,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
         { href: "/advertise", label: "Advertise on Godesi" },
         { href: "/events/new", label: "Post an event" },
+        { href: "/clubs/new", label: "Start a club" },
         { href: "/dashboard/gigs", label: "Sell a gig" },
         { href: "/dashboard", label: "Dashboard" },
       ],
@@ -53,6 +54,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Community",
       links: [
         { href: "/connect", label: "Connect" },
+        { href: "/clubs", label: "🎤 Clubs — karaoke, cricket, foodies" },
         { href: "/people", label: "People on GoDesi" },
         { href: "/professionals", label: "GoDesi Professionals" },
         { href: "/alumni", label: "Find your batchmates" },
