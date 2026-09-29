@@ -202,6 +202,39 @@ export async function leaveClubAction(formData: FormData) {
 }
 
 /**
+ * Deletes the club with its members and orders; its events stay, just no
+ * longer under a club. The typed name must match, so a stray click does
+ * nothing.
+ */
+export async function deleteClubAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const clubId = String(formData.get("clubId") ?? "");
+    const club = await db.club.findUnique({
+      where: { id: clubId },
+      select: { name: true },
+    });
+    if (!club || !(await isClubOrganizer(clubId, user))) {
+      return { error: "Only the club's organisers can delete it." };
+    }
+    const typed = String(formData.get("confirmName") ?? "").trim();
+    if (typed.toLowerCase() !== club.name.trim().toLowerCase()) {
+      return {
+        error: `Type the club's name exactly — “${club.name}” — to confirm.`,
+      };
+    }
+    await db.club.delete({ where: { id: clubId } });
+  } catch (error) {
+    return fieldError(error);
+  }
+  revalidatePath("/clubs");
+  redirect("/clubs");
+}
+
+/**
  * Organiser moderation: approve or decline a request, remove a member, or make
  * a member an organiser.
  */
