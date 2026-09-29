@@ -13,6 +13,7 @@ export type ClubListItem = {
   state: string | null;
   online: boolean;
   visibility: "PUBLIC" | "PRIVATE";
+  premium: boolean;
   memberCount: number;
   nextEvent: { slug: string; title: string; startsAt: Date } | null;
 };
@@ -32,7 +33,7 @@ export function ClubCard({ club }: { club: ClubListItem }) {
   return (
     <Link
       href={`/clubs/${club.slug}`}
-      className="flex h-full gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"
+      className={`flex h-full gap-3 rounded-2xl border bg-white p-4 ${club.premium ? "border-amber-300 ring-1 ring-amber-200" : "border-slate-200"} shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md`}
     >
       <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-2xl">
         {club.imageUrl ? (
@@ -50,6 +51,7 @@ export function ClubCard({ club }: { club: ClubListItem }) {
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="truncate font-bold text-slate-900">{club.name}</span>
+          {club.premium ? <Badge tone="amber">⭐ Premium</Badge> : null}
           {club.visibility === "PRIVATE" ? (
             <Badge tone="slate">🔒 Private</Badge>
           ) : null}

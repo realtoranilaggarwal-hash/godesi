@@ -9,7 +9,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
 import { ImageField } from "@/components/forms/ImageField";
 import { PlaylistField } from "@/components/forms/PlaylistField";
-import { CLUB_CATEGORIES } from "@/lib/clubs";
+import { CLUB_CATEGORIES, CLUB_RULE_PRESETS, splitRules } from "@/lib/clubs";
 
 export type ClubFormValues = {
   id: string;
@@ -35,6 +35,7 @@ export function ClubForm({
   club?: ClubFormValues;
   defaultCountry?: string;
 }) {
+  const rules = splitRules(club?.rules);
   const [state, formAction] = useFormState(
     club ? updateClubAction : createClubAction,
     emptyState,
@@ -185,14 +186,30 @@ export function ClubForm({
 
       <Field
         label="Club rules"
-        hint="Optional — house rules members agree to: turn-taking, timings, costs, respect."
+        hint="Optional — tick the house rules members agree to, add your own below."
       >
+        <ul className="grid gap-1.5 sm:grid-cols-2">
+          {CLUB_RULE_PRESETS.map((rule) => (
+            <li key={rule}>
+              <label className="flex items-start gap-2 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50">
+                <input
+                  type="checkbox"
+                  name="rulePreset"
+                  value={rule}
+                  defaultChecked={rules.presets.includes(rule)}
+                  className="mt-0.5"
+                />
+                <span>{rule}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
         <textarea
-          name="rules"
-          rows={3}
-          defaultValue={club?.rules ?? ""}
-          placeholder="1. One song per turn until everyone has sung. 2. RSVP by Thursday…"
-          className={inputClass}
+          name="rulesExtra"
+          rows={2}
+          defaultValue={rules.extra}
+          placeholder="Your own rules, one per line — e.g. RSVP by Thursday; songs in Hindi, Punjabi or English…"
+          className={`${inputClass} mt-2`}
         />
       </Field>
 

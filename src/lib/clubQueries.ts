@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import type { ClubListItem } from "@/components/ClubCard";
+import { clubIsPremium } from "@/lib/clubs";
 
 /** Clubs for the directory: every club is listed, private ones by name only. */
 export async function listClubs(filter: {
@@ -24,9 +25,13 @@ export async function listClubs(filter: {
           }
         : {}),
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [
+      { premiumUntil: { sort: "desc", nulls: "last" } },
+      { createdAt: "desc" },
+    ],
     take: 60,
     select: {
+      premiumUntil: true,
       slug: true,
       name: true,
       description: true,
@@ -45,11 +50,15 @@ export async function listClubs(filter: {
       },
     },
   });
-  return rows.map(({ _count, events, ...club }) => ({
-    ...club,
-    memberCount: _count.members,
-    nextEvent: events[0] ?? null,
-  }));
+  const now = new Date();
+  return rows
+    .map(({ _count, events, premiumUntil, ...club }) => ({
+      ...club,
+      premium: clubIsPremium({ premiumUntil }, now),
+      memberCount: _count.members,
+      nextEvent: events[0] ?? null,
+    }))
+    .sort((a, b) => Number(b.premium) - Number(a.premium));
 }
 
 /** Clubs where this member is an active organiser — the ones they can post events for. */

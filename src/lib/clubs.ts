@@ -81,3 +81,62 @@ export const RSVP_ANSWERS = [
   { value: "MAYBE", label: "Maybe" },
   { value: "NO", label: "Can't make it" },
 ] as const;
+
+/** House rules an organiser ticks instead of typing; stored as lines in `Club.rules`. */
+export const CLUB_RULE_PRESETS = [
+  "Respect everyone — no politics, religion debates or personal remarks.",
+  "RSVP honestly and update it if your plans change; no-shows hurt the host.",
+  "Bring what you signed up to bring; tell the organiser early if you can't.",
+  "Arrive on time — we start at the posted hour.",
+  "One song / one turn each until everyone has had a go.",
+  "Cheer every performer; no heckling or filming without asking.",
+  "Ask before posting photos or videos of members online.",
+  "Share costs fairly — venue, food and equipment are split as the organiser posts.",
+  "Guests are welcome only if the organiser agrees beforehand.",
+  "No selling, promotions or recruiting at meets unless the organiser allows it.",
+  "Drink responsibly; never drive after drinking.",
+  "Help set up and clean up — leave the venue as we found it.",
+  "Keep the WhatsApp group for club matters only.",
+  "Members under 18 come with a parent or guardian.",
+  "Organisers may remove anyone who breaks these rules.",
+] as const;
+
+const RULE_BULLET = "• ";
+
+/** Ticked presets first, then the organiser's own lines. */
+export function composeRules(presets: string[], extra: string) {
+  const picked = CLUB_RULE_PRESETS.filter((r) => presets.includes(r)).map(
+    (r) => RULE_BULLET + r,
+  );
+  const own = extra
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => (l.startsWith(RULE_BULLET) ? l : RULE_BULLET + l));
+  return [...picked, ...own].join("\n") || null;
+}
+
+/** Splits stored rules back into ticked presets and the organiser's own lines. */
+export function splitRules(rules: string | null | undefined) {
+  const lines = (rules ?? "")
+    .split(/\r?\n/)
+    .map((l) => l.trim().replace(/^•\s*/, ""))
+    .filter(Boolean);
+  const presets = lines.filter((l) =>
+    (CLUB_RULE_PRESETS as readonly string[]).includes(l),
+  );
+  const extra = lines.filter((l) => !presets.includes(l));
+  return { presets, extra: extra.join("\n"), lines };
+}
+
+/** Premium club: yearly price in USD; waives Godesi's ticket fee on club events. */
+export const CLUB_PREMIUM_YEAR_USD = 49;
+
+export function clubIsPremium(
+  club: { premiumUntil: Date | null } | null | undefined,
+  now: Date = new Date(),
+) {
+  return Boolean(
+    club?.premiumUntil && club.premiumUntil.getTime() > now.getTime(),
+  );
+}

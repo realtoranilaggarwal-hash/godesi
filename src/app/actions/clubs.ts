@@ -7,7 +7,13 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { slugify } from "@/lib/slug";
-import { isClubCategory } from "@/lib/clubs";
+import {
+  CLUB_PREMIUM_YEAR_USD,
+  composeRules,
+  isClubCategory,
+} from "@/lib/clubs";
+import { siteUrl } from "@/lib/format";
+import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { isPlaylistLink } from "@/lib/youtubePlaylist";
 import { isClubOrganizer } from "@/lib/clubAccess";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
@@ -54,7 +60,11 @@ function readClub(formData: FormData) {
     city: value("city") || undefined,
     state: value("state") || undefined,
     country: value("country") || undefined,
-    rules: value("rules") || undefined,
+    rules:
+      composeRules(
+        formData.getAll("rulePreset").map(String),
+        value("rulesExtra"),
+      ) ?? undefined,
     imageUrl: value("imageUrl"),
     playlistUrl: value("playlistUrl"),
     websiteUrl: value("websiteUrl"),
@@ -291,4 +301,66 @@ export async function rsvpAction(formData: FormData) {
     update: data,
   });
   revalidatePath(`/events/${event.slug}`);
+}
+
+const PREMIUM_YEARS = [1, 2] as const;
+
+/** Yearly Premium payment for a club; extends `premiumUntil` when Stripe confirms. */
+export async function startClubPremiumCheckoutAction(formData: FormData) {
+  const user = await requireUser();
+  const clubId = String(formData.get("clubId") ?? "");
+  const yearsRaw = Number(String(formData.get("years") ?? "1"));
+  const years = (PREMIUM_YEARS as readonly number[]).includes(yearsRaw)
+    ? yearsRaw
+    : 1;
+
+  const club = await db.club.findUnique({
+    where: { id: clubId },
+    select: { id: true, slug: true, name: true },
+  });
+  if (!club || !(await isClubOrganizer(club.id, user.id))) {
+    redirect("/clubs?error=not_organizer");
+  }
+  if (!stripeEnabled())
+    redirect(`/clubs/${club.slug}?error=stripe_unavailable`);
+
+  const amountMinor = CLUB_PREMIUM_YEAR_USD * 100 * years;
+  const order = await db.clubOrder.create({
+    data: {
+      clubId: club.id,
+      userId: user.id,
+      years,
+      amountMinor,
+      currency: "USD",
+    },
+  });
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    client_reference_id: user.id,
+    metadata: {
+      kind: "club-premium",
+      clubOrderId: order.id,
+      clubId: club.id,
+      userId: user.id,
+    },
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: "usd",
+          unit_amount: amountMinor,
+          product_data: {
+            name: `GoDesi Premium club — ${years} year${years > 1 ? "s" : ""}`,
+            description: `${club.name}: no Godesi fee on event tickets, Premium badge, listed first.`,
+          },
+        },
+      },
+    ],
+    success_url: `${siteUrl()}/clubs/${club.slug}?paid={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl()}/clubs/${club.slug}?error=cancelled`,
+  });
+  if (!session.url) redirect(`/clubs/${club.slug}?error=stripe_unavailable`);
+  redirect(session.url);
 }
