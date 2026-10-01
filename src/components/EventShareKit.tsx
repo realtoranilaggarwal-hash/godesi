@@ -140,7 +140,9 @@ export function EventShareKit({
                   {field.value}
                 </span>
               </span>
-              <CopyButton value={field.value} />
+              <span className="shrink-0 whitespace-nowrap">
+                <CopyButton value={field.value} />
+              </span>
             </li>
           ))}
         </ul>

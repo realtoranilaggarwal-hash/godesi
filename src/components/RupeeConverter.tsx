@@ -13,7 +13,7 @@ export function RupeeConverter({
   code: string;
 }) {
   const [usd, setUsd] = useState("1000");
-  const dollars = Number(usd) || 0;
+  const dollars = Math.max(0, Number(usd) || 0);
   const format = (value: number, currency: string) =>
     new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
