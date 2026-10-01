@@ -9,6 +9,7 @@ import { professionalCount } from "@/lib/professionalsQueries";
 import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { GUIDES } from "@/lib/guides";
 import { COMPLAINT_GUIDES } from "@/lib/complaints";
+import { FESTIVALS, festivalSlug } from "@/lib/festivals";
 
 export const dynamic = "force-dynamic";
 
@@ -154,6 +155,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/news`, changeFrequency: "hourly", priority: 0.7 },
     { url: `${base}/city`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/trending`, changeFrequency: "daily", priority: 0.5 },
+    { url: `${base}/festivals`, changeFrequency: "weekly", priority: 0.7 },
+    ...FESTIVALS.map((festival) => ({
+      url: `${base}/festivals/${festivalSlug(festival)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+    { url: `${base}/visa-bulletin`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/usd-to-inr`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/guide`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/desi-elite`, changeFrequency: "daily", priority: 0.8 },
