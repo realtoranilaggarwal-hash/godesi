@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CopyButton } from "@/components/CopyButton";
 import { LogoTile } from "@/components/LogoTile";
-import { expiryLabel } from "@/lib/deals";
+import { expiryLabel } from "@/lib/dealFormat";
 
 export type DealCardProps = {
   title: string;
