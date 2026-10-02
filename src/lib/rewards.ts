@@ -1,6 +1,10 @@
 import type { Plan, PointsReason } from "@prisma/client";
 
-export type EarnReason = Exclude<PointsReason, "REDEMPTION" | "ADJUSTMENT">;
+/** Wheel prizes are set by the wheel's own odds, not the admin points table. */
+export type EarnReason = Exclude<
+  PointsReason,
+  "REDEMPTION" | "ADJUSTMENT" | "DAILY_SPIN"
+>;
 
 /** Published reward table — admins can override any value in `RewardSetting`. */
 export const POINTS: Record<EarnReason, number> = {
@@ -27,6 +31,7 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   REFERRAL_SIGNUP: "A friend signed up with your link",
   PROFILE_CREATED: "You completed your business profile",
   PAID_UPGRADE: "You upgraded to a paid plan",
+  DAILY_SPIN: "Daily spin of the GoDesi wheel",
   LISTING_POSTED: "You posted a listing or event",
   REFERRAL_PROFILE: "Your referral completed their profile",
   REFERRAL_UPGRADE: "Your referral upgraded to a paid plan",

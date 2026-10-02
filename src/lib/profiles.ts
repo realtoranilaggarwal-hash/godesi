@@ -55,6 +55,7 @@ export const RESERVED_USERNAMES = new Set([
   "claim",
   "connect",
   "deals",
+  "shop",
   "desi-elite",
   "faq",
   "feed.xml",

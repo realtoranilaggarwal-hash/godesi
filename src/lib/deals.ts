@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { effectivePlan } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 
-export const MAX_ACTIVE_DEALS = 5;
+export { endOfDay, expiryLabel, MAX_ACTIVE_DEALS } from "@/lib/dealFormat";
 
 /** Switched on and not past its last day. */
 export function liveDealWhere(now = new Date()): Prisma.DealWhereInput {
@@ -13,22 +13,7 @@ export function liveDealWhere(now = new Date()): Prisma.DealWhereInput {
   };
 }
 
-/** Expiry is the last valid day, so the offer runs to the end of it. */
-export function endOfDay(date: string) {
-  return new Date(`${date}T23:59:59.999Z`);
-}
-
-export function expiryLabel(expiresAt: Date | null) {
-  if (!expiresAt) return null;
-  return `Ends ${expiresAt.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })}`;
-}
-
-const dealSelect = {
+export const dealSelect = {
   id: true,
   title: true,
   details: true,

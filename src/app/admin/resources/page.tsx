@@ -8,6 +8,11 @@ import {
   reviewResourceLinkAction,
   toggleResourceLinkAction,
 } from "@/app/actions/resources";
+import {
+  syncStoreOffersAction,
+  toggleStoreOfferAction,
+} from "@/app/actions/storeOffers";
+import { cjConfig } from "@/lib/cj";
 import { duplicateLinkIds } from "@/lib/resources";
 import { ResourceLinkForm } from "@/components/forms/ResourceLinkForm";
 import { getCategoryTree } from "@/lib/directory";
@@ -23,7 +28,7 @@ export default async function Page() {
   if (!isStaff(user)) redirect("/dashboard");
   if (!can(user, "resources")) redirect(deskFallback(user, "Resources"));
 
-  const [resourceLinks, categories] = await Promise.all([
+  const [resourceLinks, categories, storeOffers] = await Promise.all([
     db.resourceLink.findMany({
       orderBy: [{ status: "asc" }, { createdAt: "desc" }],
       include: {
@@ -33,7 +38,13 @@ export default async function Page() {
       },
     }),
     getCategoryTree(),
+    db.storeOffer.findMany({
+      where: { active: true },
+      orderBy: [{ hidden: "desc" }, { advertiserName: "asc" }],
+      take: 300,
+    }),
   ]);
+  const cjReady = Boolean(cjConfig());
 
   const duplicates = new Set(
     duplicateLinkIds(
@@ -173,6 +184,66 @@ export default async function Page() {
           })}
           {resourceLinks.length === 0 ? (
             <li className="py-2 text-slate-500">No links yet.</li>
+          ) : null}
+        </ul>
+      </Card>
+      <Card id="store-offers">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-bold">
+            Store offers from CJ ({storeOffers.length})
+          </h2>
+          {cjReady ? (
+            <form action={syncStoreOffersAction}>
+              <button
+                type="submit"
+                className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+              >
+                Sync now
+              </button>
+            </form>
+          ) : null}
+        </div>
+        <p className="mb-3 text-xs text-slate-500">
+          {cjReady
+            ? "Coupons and sales from the CJ stores GoDesi has joined, refreshed daily and shown on /deals and /shop as paid links. Hide any that don't suit the site; they stay hidden after each sync."
+            : "Set CJ_API_TOKEN and CJ_WEBSITE_ID to pull coupons from the CJ stores GoDesi has joined."}
+        </p>
+        <ul className="divide-y divide-slate-100 text-sm">
+          {storeOffers.map((offer) => (
+            <li
+              key={offer.id}
+              className="flex flex-wrap items-start justify-between gap-2 py-2"
+            >
+              <div className="min-w-0">
+                <p className="font-medium">
+                  {offer.title}{" "}
+                  <span className="text-xs font-normal text-slate-400">
+                    {offer.advertiserName}
+                    {offer.code ? ` · code ${offer.code}` : ""}
+                    {offer.hidden ? " · hidden" : ""}
+                  </span>
+                </p>
+                <p className="text-xs text-slate-500">
+                  {offer.promotionType ?? "offer"}
+                  {offer.endsAt
+                    ? ` · ends ${offer.endsAt.toISOString().slice(0, 10)}`
+                    : ""}{" "}
+                  · {offer.clicks.toLocaleString()} clicks
+                </p>
+              </div>
+              <form action={toggleStoreOfferAction}>
+                <input type="hidden" name="id" value={offer.id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                >
+                  {offer.hidden ? "show" : "hide"}
+                </button>
+              </form>
+            </li>
+          ))}
+          {storeOffers.length === 0 ? (
+            <li className="py-2 text-slate-500">No store offers yet.</li>
           ) : null}
         </ul>
       </Card>
