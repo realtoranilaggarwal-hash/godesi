@@ -62,7 +62,7 @@ function field(block: string, name: string) {
   const match = block.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`));
   if (!match) return null;
   const value = decode(match[1]);
-  return value && value.toUpperCase() !== "N/A" ? value : null;
+  return value && !["N/A", "NULL"].includes(value.toUpperCase()) ? value : null;
 }
 
 function parseDate(value: string | null) {
