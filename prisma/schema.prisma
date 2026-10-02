@@ -811,11 +811,33 @@ model Business {
   reviews       Review[]
   trackedEvents AnalyticsEvent[]
   eventListings Event[]
+  deals         Deal[]
 
   @@index([category])
   @@index([city])
   @@index([categorySlug])
   @@index([subcategorySlug])
+}
+
+/// An offer a business runs for GoDesi visitors, shown on its card and /deals.
+model Deal {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  title      String
+  details    String?
+  /// Promo code to quote or type at checkout; null when the offer needs none.
+  code       String?
+  /// Where to claim it, e.g. the business's booking page.
+  linkUrl    String?
+  /// Last day the offer is valid; null runs until the owner switches it off.
+  expiresAt  DateTime?
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([active, expiresAt])
+  @@index([businessId])
 }
 
 model Media {

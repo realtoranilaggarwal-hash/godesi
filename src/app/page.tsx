@@ -22,6 +22,7 @@ import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
+import { DealsStrip } from "@/components/DealsStrip";
 
 export const dynamic = "force-dynamic";
 
@@ -184,6 +185,8 @@ export default async function HomePage() {
       </section>
 
       <RecentStrip />
+
+      <DealsStrip />
 
       <CategoryFeatured />
 
