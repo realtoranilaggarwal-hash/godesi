@@ -821,6 +821,36 @@ model Business {
   @@index([subcategorySlug])
 }
 
+/// An online store's promotion pulled from an affiliate network feed (CJ Link Search), shown on /deals and /shop as a paid link.
+model StoreOffer {
+  id             String    @id @default(cuid())
+  /// Feed the offer came from, e.g. "CJ".
+  source         String
+  /// The network's own link id, so a re-sync updates instead of duplicating.
+  externalId     String
+  advertiserId   String
+  advertiserName String
+  title          String
+  description    String?
+  code           String?
+  promotionType  String?
+  category       String?
+  /// Tracking URL carrying GoDesi's publisher id.
+  clickUrl       String
+  startsAt       DateTime?
+  endsAt         DateTime?
+  /// False once the feed stops returning it, or when staff hide it.
+  active         Boolean   @default(true)
+  hidden         Boolean   @default(false)
+  clicks         Int       @default(0)
+  syncedAt       DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([source, externalId])
+  @@index([active, hidden, endsAt])
+}
+
 /// An offer a business runs for GoDesi visitors, shown on its card and /deals.
 model Deal {
   id         String      @id @default(cuid())
