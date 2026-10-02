@@ -357,6 +357,9 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/packages" variant="secondary">
                   Packages & pricing
                 </LinkButton>
+                <LinkButton href="/dashboard/deals" variant="secondary">
+                  🏷️ Deals &amp; offers
+                </LinkButton>
                 <LinkButton href="/dashboard/leads" variant="secondary">
                   Unlocked leads
                 </LinkButton>

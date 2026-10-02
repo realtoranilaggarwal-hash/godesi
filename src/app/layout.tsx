@@ -12,6 +12,7 @@ import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
+import { SpinWheel } from "@/components/SpinWheel";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { QuoraSignupEvent } from "@/components/QuoraSignupEvent";
 import { aiEnabled } from "@/lib/ai";
@@ -192,6 +193,7 @@ export default function RootLayout({
         <LiveActivity />
         <GoogleTranslate />
         <BackToTop />
+        <SpinWheel />
         {aiEnabled() && <AiChat />}
       </body>
     </html>
