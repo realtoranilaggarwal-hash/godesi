@@ -21,6 +21,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/events", label: "Events" },
         { href: "/clubs", label: "Clubs — karaoke, cricket, foodies" },
         { href: "/deals", label: "🏷️ Deals & offers" },
+        { href: "/shop", label: "🛍️ Desi shop" },
         { href: "/gigs", label: "Gigs — services $5–$100" },
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Resources" },

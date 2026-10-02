@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteUrl } from "@/lib/format";
 import { dealDetails, liveDeals } from "@/lib/deals";
+import { liveStoreOffers } from "@/lib/storeOffers";
 import { DealCard } from "@/components/DealCard";
+import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +20,10 @@ export default async function DealsPage({
 }: {
   searchParams: { category?: string };
 }) {
-  const all = await liveDeals({ take: 200 });
+  const [all, storeOffers] = await Promise.all([
+    liveDeals({ take: 200 }),
+    liveStoreOffers(12),
+  ]);
   // Only categories that have an offer running get a chip.
   const categories = Array.from(
     new Map(
@@ -107,6 +112,31 @@ export default async function DealsPage({
           action={<LinkButton href="/dashboard/deals">Post a deal</LinkButton>}
         />
       )}
+
+      {storeOffers.length ? (
+        <section className="space-y-3 border-t border-slate-200 pt-5">
+          <div>
+            <h2 className="text-lg font-bold">🛒 Online store deals</h2>
+            <p className="text-xs text-slate-600">
+              Coupons and sales from online stores, not GoDesi businesses. These
+              are paid links: GoDesi may earn a commission when you buy, at no
+              extra cost to you. Terms, prices and stock are set by each store.{" "}
+              <Link
+                href="/shop"
+                className="font-semibold text-indigo-700 underline"
+              >
+                More in the shop
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {storeOffers.map((offer) => (
+              <StoreOfferCard key={offer.id} offer={offer} />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
