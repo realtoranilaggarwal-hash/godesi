@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteUrl } from "@/lib/format";
 import { recommendedLinks } from "@/lib/resourcesQueries";
+import { liveStoreOffers } from "@/lib/storeOffers";
 import { LinkImpressions } from "@/components/LinkImpressions";
+import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { Card } from "@/components/ui";
 import {
   SHOP_SHELVES,
@@ -39,6 +41,7 @@ export default async function ShopPage() {
   const pinned = await recommendedLinks(null, 24, "shop");
   const stores = pinned.length ? pinned : await recommendedLinks(null, 12);
   const hasShelfStores = Boolean(amazonTag || ebayCampaignId);
+  const storeOffers = await liveStoreOffers(9);
 
   return (
     <div className="space-y-6">
@@ -120,6 +123,19 @@ export default async function ShopPage() {
         </section>
       ) : null}
 
+      {storeOffers.length ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold">
+            Today&apos;s coupons &amp; sales
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {storeOffers.map((offer) => (
+              <StoreOfferCard key={offer.id} offer={offer} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {stores.length ? (
         <section className="space-y-3">
           <h2 className="text-lg font-bold">More stores &amp; offers</h2>
@@ -152,7 +168,10 @@ export default async function ShopPage() {
         </section>
       ) : null}
 
-      {!quicklyUrl && !hasShelfStores && !stores.length ? (
+      {!quicklyUrl &&
+      !hasShelfStores &&
+      !stores.length &&
+      !storeOffers.length ? (
         <p className="text-sm text-slate-600">
           The shop is being stocked — check back soon.
         </p>
