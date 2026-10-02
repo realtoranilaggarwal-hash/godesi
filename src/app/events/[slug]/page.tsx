@@ -19,6 +19,7 @@ import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ShareRail } from "@/components/ShareRail";
+import { EventShareKit } from "@/components/EventShareKit";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
 import { EventClaimPitch } from "@/components/EventClaimPitch";
@@ -648,6 +649,38 @@ export default async function EventPage({
                 title={event.title}
               />
             </div>
+            {past ? null : (
+              <details className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-3">
+                <summary className="cursor-pointer text-sm font-bold text-indigo-900">
+                  📣 Share kit — WhatsApp & Facebook groups, Nextdoor, Patch
+                </summary>
+                <div className="mt-3">
+                  <EventShareKit
+                    url={`${siteUrl()}/events/${event.slug}`}
+                    title={event.title}
+                    when={formatEventDate(event.startsAt, event.timeZone)}
+                    where={
+                      event.mode === "ONLINE"
+                        ? "Online"
+                        : [event.venue, event.address, event.city, event.state]
+                            .filter(Boolean)
+                            .join(", ")
+                    }
+                    price={
+                      event.price
+                        ? `From ${formatMoney(event.price, event.currency)}`
+                        : event.tiers.length
+                          ? "Tickets from free"
+                          : imported
+                            ? "Entry terms: see the organiser"
+                            : "Free entry"
+                    }
+                    description={event.description}
+                    imageUrl={event.imageUrl}
+                  />
+                </div>
+              </details>
+            )}
           </div>
         </div>
 
