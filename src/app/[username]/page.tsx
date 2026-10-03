@@ -25,6 +25,7 @@ import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
+import { cachedCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,11 @@ export default async function PublicProfilePage({
 
   const { user, events, leads, reviews, listings, gigs } = profile;
   const journalist = await journalistStats(user.id, { publicOnly: true });
-  const points = await wallet(user.id);
+  const [points, viewer] = await Promise.all([
+    wallet(user.id),
+    cachedCurrentUser(),
+  ]);
+  const isOwner = viewer?.id === user.id;
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
@@ -88,6 +93,27 @@ export default async function PublicProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {isOwner ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+          <span className="font-semibold">
+            This is your page — this is how everyone sees it.
+          </span>
+          <span className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/me"
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 font-bold text-white hover:bg-indigo-700"
+            >
+              ✏️ Edit my profile
+            </Link>
+            <Link
+              href="/dashboard"
+              className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 font-bold text-indigo-700 hover:bg-indigo-100"
+            >
+              My dashboard
+            </Link>
+          </span>
+        </div>
+      ) : null}
       <Card className="overflow-hidden !p-0">
         <div className="h-2 bg-gradient-to-r from-orange-400 via-rose-500 to-fuchsia-600" />
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">

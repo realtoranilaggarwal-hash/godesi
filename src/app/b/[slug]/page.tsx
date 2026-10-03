@@ -262,6 +262,14 @@ export default async function BusinessProfilePage({
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
               <StaffEditLink href={`/admin/business/${business.slug}`} />
+              {isOwner ? (
+                <Link
+                  href="/dashboard/profile"
+                  className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-bold text-white hover:bg-indigo-700"
+                >
+                  ✏️ Edit my card
+                </Link>
+              ) : null}
               {ownerPlan !== "FREE" ? (
                 <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
               ) : null}

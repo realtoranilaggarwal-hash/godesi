@@ -34,9 +34,14 @@ export type MemberCard = {
 };
 
 /** Newest members, for the home page shelf. */
-export function newestMembers(take: number): Promise<MemberCard[]> {
+export function newestMembers(
+  take: number,
+  { withPage = false }: { withPage?: boolean } = {},
+): Promise<MemberCard[]> {
   return db.user.findMany({
-    where: PUBLIC_MEMBER,
+    where: withPage
+      ? { ...PUBLIC_MEMBER, username: { not: null } }
+      : PUBLIC_MEMBER,
     orderBy: { createdAt: "desc" },
     take,
     select: CARD_FIELDS,

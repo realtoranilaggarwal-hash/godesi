@@ -10,7 +10,6 @@ import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
-import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
 import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
@@ -57,51 +56,32 @@ const HERO_PROOF: string[] = [
 ];
 
 export default async function HomePage() {
-  const [
-    categories,
-    businesses,
-    upcoming,
-    news,
-    members,
-    spaCount,
-    newMembers,
-  ] = await Promise.all([
-    getCategoryTree(),
-    searchBusinesses({ take: 8, sort: "recent" }),
-    db.event.findMany({
-      where: { status: "APPROVED", startsAt: { gte: new Date() } },
-      orderBy: { startsAt: "asc" },
-      take: 24,
-      include: {
-        category: { select: { name: true, icon: true, color: true } },
-        organizer: { select: { plan: true } },
-      },
-    }),
-    db.newsItem.findMany({
-      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-      orderBy: { publishedAt: "desc" },
-      take: 4,
-    }),
-    db.user.findMany({
-      where: { emailVerifiedAt: { not: null } },
-      orderBy: { createdAt: "desc" },
-      take: 44,
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        avatarUrl: true,
-        location: true,
-      },
-    }),
-    db.business.count({
-      where: {
-        status: "APPROVED",
-        subcategorySlug: "beauty-lifestyle-spa-and-massage",
-      },
-    }),
-    newestMembers(6),
-  ]);
+  const [categories, businesses, upcoming, news, spaCount, newMembers] =
+    await Promise.all([
+      getCategoryTree(),
+      searchBusinesses({ take: 8, sort: "recent" }),
+      db.event.findMany({
+        where: { status: "APPROVED", startsAt: { gte: new Date() } },
+        orderBy: { startsAt: "asc" },
+        take: 24,
+        include: {
+          category: { select: { name: true, icon: true, color: true } },
+          organizer: { select: { plan: true } },
+        },
+      }),
+      db.newsItem.findMany({
+        where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+        orderBy: { publishedAt: "desc" },
+        take: 4,
+      }),
+      db.business.count({
+        where: {
+          status: "APPROVED",
+          subcategorySlug: "beauty-lifestyle-spa-and-massage",
+        },
+      }),
+      newestMembers(12, { withPage: true }),
+    ]);
   const pickerGroups = await categoryPickerGroups();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
@@ -111,8 +91,10 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      <RecentStrip />
+
       <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-6 text-white sm:px-8 sm:py-8">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
               Free desi page · first come, first served
@@ -158,33 +140,46 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <MemberBubbles members={members} />
+          <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-black">
+                Looking for someone? Pick a service 👇
+              </h2>
+              <Link
+                href="/categories"
+                className="text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                All {categories.length} →
+              </Link>
+            </div>
+            <CategoryPicker
+              groups={pickerGroups}
+              quickCount={10}
+              label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
+            />
+          </div>
         </div>
       </section>
 
-      {/* One bold box instead of a wall of category tiles: the whole taxonomy
-          is one click down, and nothing else competes with it. */}
-      <section className="rounded-3xl border-2 border-slate-900 bg-white p-4 shadow-sm sm:p-5">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-xl font-black">
-            Looking for someone? Pick a service 👇
-          </h2>
-          <Link
-            href="/categories"
-            className="text-sm font-semibold text-indigo-600 hover:underline"
-          >
-            All {categories.length} categories →
-          </Link>
-        </div>
-        <CategoryPicker
-          groups={pickerGroups}
-          quickCount={10}
-          label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-          big
-        />
-      </section>
-
-      <RecentStrip />
+      {newMembers.length ? (
+        <section>
+          <SectionHeading
+            title="Newest members 👋"
+            href="/people"
+            linkLabel="All members"
+          />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {newMembers.map((member, index) => (
+              <div
+                key={member.id}
+                className={index >= 6 ? "hidden sm:block" : ""}
+              >
+                <MemberTile member={member} compact />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <DealsStrip />
 
@@ -271,21 +266,6 @@ export default async function HomePage() {
             </Card>
           )}
         </section>
-
-        {newMembers.length ? (
-          <section>
-            <SectionHeading
-              title="Newest members 👋"
-              href="/people"
-              linkLabel="All members"
-            />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {newMembers.map((member) => (
-                <MemberTile key={member.id} member={member} />
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         <div className="grid gap-3 sm:grid-cols-3">
           <SpaSpotlight listings={spaCount} />

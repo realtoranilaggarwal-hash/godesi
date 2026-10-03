@@ -111,10 +111,10 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
-      <div className="mx-auto w-full max-w-7xl px-4 pt-6">
+      <div className="mx-auto w-full max-w-screen-2xl px-4 pt-6">
         <FooterBanner />
       </div>
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mx-auto grid max-w-screen-2xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
         <div>
           <Link href="/" aria-label="Godesi home">
             <Image
@@ -202,7 +202,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-slate-100">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
+        <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
           <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
           <TrafficCounter />
           <LocalePicker currency={displayCurrency()} open />

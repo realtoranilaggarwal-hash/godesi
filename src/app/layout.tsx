@@ -57,7 +57,8 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
   const quoraPixel =
-    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ?? "e1f78f6226a74980abda723156b819ed";
+    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ??
+    "e1f78f6226a74980abda723156b819ed";
 
   return (
     <html lang="en" className="overflow-x-hidden">
@@ -184,7 +185,9 @@ export default function RootLayout({
         <UnregisterServiceWorkers />
         <SiteHeader />
         <SiteTicker />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-screen-2xl px-4 py-6">
+          {children}
+        </main>
         <SiteFooter />
         <QuoraSignupEvent />
         <LiveMediaPlayer />
