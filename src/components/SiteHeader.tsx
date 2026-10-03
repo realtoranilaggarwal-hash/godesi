@@ -223,9 +223,9 @@ export async function SiteHeader() {
 
             <LiveMediaChips className="hidden lg:flex" />
 
-            {/* Fills the gap beside the search box, but only once there is room:
-              below this the row used to overflow and clip the account buttons. */}
-            <div className="hidden shrink-0 items-center gap-1 text-xs font-semibold 2xl:flex">
+            {/* Fills the gap beside the search box; chips that don't fit wrap out of
+              the fixed-height row instead of pushing the account buttons off-screen. */}
+            <div className="hidden h-8 min-w-0 flex-1 flex-wrap content-start items-center gap-x-1 gap-y-4 overflow-hidden text-xs font-semibold 2xl:flex">
               {QUICK_LINKS.map((item) => (
                 <Link
                   key={item.href}
@@ -330,7 +330,8 @@ export async function SiteHeader() {
                   <Link
                     href="/dashboard/me"
                     aria-label="My profile"
-                    className="shrink-0"
+                    title="View and edit my profile"
+                    className="flex shrink-0 items-center gap-1.5 rounded-full hover:bg-slate-100 lg:border lg:border-slate-200 lg:py-0.5 lg:pl-0.5 lg:pr-2.5"
                   >
                     {user.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -344,6 +345,9 @@ export async function SiteHeader() {
                         {(user.name || user.email).slice(0, 1).toUpperCase()}
                       </span>
                     )}
+                    <span className="hidden whitespace-nowrap text-xs font-semibold text-slate-700 lg:inline">
+                      ✏️ My profile
+                    </span>
                   </Link>
                   <div className="hidden items-center gap-2 sm:flex">
                     <span className="hidden 2xl:inline-flex">
