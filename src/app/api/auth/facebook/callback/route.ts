@@ -3,12 +3,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { createSession, hashPassword } from "@/lib/auth";
-import {
-  facebookAuthEnabled,
-  fetchFacebookProfile,
-} from "@/lib/facebookAuth";
+import { facebookAuthEnabled, fetchFacebookProfile } from "@/lib/facebookAuth";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
+import { sendWelcomeEmail } from "@/lib/onboardingEmails";
 import { canonicalEmail } from "@/lib/signupGuard";
 
 export const dynamic = "force-dynamic";
@@ -24,14 +22,17 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
   // Facebook sends the member back with an error when they cancel the dialog.
   if (url.searchParams.get("error")) return failure;
-  if (!code || !state || url.searchParams.get("state") !== state) return failure;
+  if (!code || !state || url.searchParams.get("state") !== state)
+    return failure;
 
   const profile = await fetchFacebookProfile(code);
   if (!profile) {
     return NextResponse.redirect(new URL("/login?error=facebook-email", url));
   }
 
-  const existing = await db.user.findUnique({ where: { email: profile.email } });
+  const existing = await db.user.findUnique({
+    where: { email: profile.email },
+  });
   const user =
     existing ??
     (await db.user.create({
@@ -54,6 +55,7 @@ export async function GET(request: Request) {
   if (!existing) {
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
+    await sendWelcomeEmail(user.id);
   }
   if (existing && !existing.emailVerifiedAt) {
     await db.user.update({
