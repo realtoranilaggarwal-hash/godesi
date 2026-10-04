@@ -17,6 +17,7 @@ import { PostFab } from "@/components/PostFab";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
+import { emailEnabled } from "@/lib/email";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -389,6 +390,22 @@ export async function SiteHeader() {
           </div>
         }
       />
+      {user && !user.emailVerifiedAt && emailEnabled() ? (
+        <div className="border-b border-amber-200 bg-amber-50">
+          <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-sm text-amber-900">
+            <span>
+              📧 One step left: enter the 6-digit code we emailed to{" "}
+              <span className="font-semibold">{user.email}</span>.
+            </span>
+            <Link
+              href="/verify-email"
+              className="rounded-lg bg-amber-500 px-3 py-1 font-bold text-white hover:bg-amber-600"
+            >
+              Enter my code
+            </Link>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
