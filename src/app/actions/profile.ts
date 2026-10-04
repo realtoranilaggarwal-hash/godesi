@@ -23,16 +23,30 @@ const optionalUrl = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
+/** Optional free text with a limit; the error names the field and how much to cut. */
+function limitedText(label: string, max: number) {
+  return z
+    .string()
+    .trim()
+    .max(max, {
+      error: (issue) => {
+        const length = String(issue.input ?? "").length;
+        return `“${label}” is ${length} characters — the limit is ${max}. Please shorten it by ${length - max}.`;
+      },
+    })
+    .optional();
+}
+
 const schema = z.object({
   name: z.string().trim().min(2, "Your name is required"),
   username: z.string().trim().min(3, "Pick a username"),
-  bio: z.string().trim().max(500, "Keep your bio under 500 characters").optional(),
-  location: z.string().trim().max(120).optional(),
-  headline: z.string().trim().max(120).optional(),
-  lookingFor: z.string().trim().max(500).optional(),
-  education: z.string().trim().max(800).optional(),
-  experience: z.string().trim().max(1200).optional(),
-  whatsappNumber: z.string().trim().max(30).optional(),
+  bio: limitedText("About me", 500),
+  location: limitedText("Location", 120),
+  headline: limitedText("Headline", 120),
+  lookingFor: limitedText("What I am looking for", 500),
+  education: limitedText("Other education", 800),
+  experience: limitedText("Work & achievements", 1200),
+  whatsappNumber: limitedText("WhatsApp number", 30),
   avatarUrl: z
     .string()
     .trim()
@@ -47,7 +61,10 @@ export async function savePersonalProfileAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
-    const value = (key: string) => String(formData.get(key) ?? "");
+    // Browsers count a line break as one character against maxLength but
+    // submit it as \r\n, so normalise before checking lengths.
+    const value = (key: string) =>
+      String(formData.get(key) ?? "").replace(/\r\n/g, "\n");
 
     const parsed = schema.safeParse({
       name: value("name"),
