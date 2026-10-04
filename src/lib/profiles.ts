@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 import { GIG_SELECT } from "@/lib/gigs";
+import { uniqueViolation } from "@/lib/actions";
 
 /**
  * Paths that already exist at the root of the site. Usernames resolve at
@@ -54,10 +55,13 @@ export const RESERVED_USERNAMES = new Set([
   "city",
   "claim",
   "connect",
+  "deals",
+  "shop",
   "desi-elite",
   "faq",
   "feed.xml",
   "feeds",
+  "festivals",
   "find",
   "fonts",
   "journalists",
@@ -75,12 +79,20 @@ export const RESERVED_USERNAMES = new Set([
   "safety",
   "sitemap",
   "trending",
+  "usd-to-inr",
   "unsubscribe",
   "upgrade",
   "venues",
+  "visa-bulletin",
   "website",
   "why-godesi",
   "why-list",
+  "clubs",
+  "complaints",
+  "forgot-password",
+  "guide",
+  "media",
+  "traffic",
 ]);
 
 export const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._-]{1,28})[a-z0-9]$/;
@@ -114,6 +126,32 @@ export async function suggestUsername(name: string, email: string) {
   return candidate;
 }
 
+/**
+ * Gives a confirmed member a page at godesi.com/<handle> if they never picked
+ * one, so every byline and member tile can link somewhere.
+ */
+export async function ensureUsername(userId: string) {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { username: true, name: true, email: true },
+  });
+  if (!user || user.username) return;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const username = await suggestUsername(user.name, user.email);
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await db.user.updateMany({
+        where: { id: userId, username: null },
+        data: { username },
+      });
+      return;
+    } catch (error) {
+      if (!uniqueViolation(error)) throw error;
+    }
+  }
+}
+
 /** Everything the public personal profile renders, in one query round. */
 export async function publicProfile(username: string) {
   const user = await db.user.findUnique({
@@ -132,6 +170,7 @@ export async function publicProfile(username: string) {
       skills: true,
       languages: true,
       videoUrls: true,
+      playlistUrl: true,
       openToWork: true,
       whatsappNumber: true,
       websiteUrl: true,

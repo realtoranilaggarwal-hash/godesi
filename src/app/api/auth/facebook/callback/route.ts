@@ -8,6 +8,7 @@ import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
 import { sendWelcomeEmail } from "@/lib/onboardingEmails";
 import { canonicalEmail } from "@/lib/signupGuard";
+import { ensureUsername } from "@/lib/profiles";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,7 @@ export async function GET(request: Request) {
     });
   }
 
+  await ensureUsername(user.id);
   await createSession(user.id);
 
   const target = next || (user.role === "ADMIN" ? "/admin" : "/dashboard");

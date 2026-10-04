@@ -12,6 +12,7 @@ export const NEWS_TOPICS: NewsTopic[] = [
   { slug: "business", label: "Business & money", emoji: "💼" },
   { slug: "immigration", label: "Immigration & visas", emoji: "🛂" },
   { slug: "crime", label: "Crime & safety", emoji: "🚨" },
+  { slug: "consumer", label: "Consumer alerts", emoji: "⚠️" },
   { slug: "events", label: "Events & festivals", emoji: "🎉" },
   { slug: "faith", label: "Religion & faith", emoji: "🕉️" },
   { slug: "jobs", label: "Jobs & careers", emoji: "🧑‍💻" },
@@ -51,11 +52,17 @@ export function topicSlug(value?: string | null) {
   return LEGACY[key] ?? "general";
 }
 
-export function topicOf(item: { topic?: string | null; category?: string | null }) {
+export function topicOf(item: {
+  topic?: string | null;
+  category?: string | null;
+}) {
   const fromTopic = topicSlug(item.topic);
   if (fromTopic !== "general") return fromTopic;
   return topicSlug(item.category);
 }
+
+/** Shown in place of the author on an anonymous report. */
+export const ANONYMOUS_BYLINE = "A GoDesi member";
 
 export function topicLabel(slug: string) {
   const topic = BY_SLUG.get(topicSlug(slug));

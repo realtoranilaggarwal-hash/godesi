@@ -24,9 +24,14 @@ export function normaliseAlbumLink(url: string) {
   return isAlbumLink(clean) ? clean : null;
 }
 
-/** Google serves any size from the same base URL by appending =w<width>-h<height>. */
-export function albumThumb(url: string, width = 400, height = 400) {
-  return `${url}=w${width}-h${height}-c`;
+/** Google serves any size from the same base URL by appending =w<width>-h<height>; `-c` crops to fill, otherwise the photo fits inside. */
+export function albumThumb(
+  url: string,
+  width = 400,
+  height = 400,
+  crop = true,
+) {
+  return `${url}=w${width}-h${height}${crop ? "-c" : ""}`;
 }
 
 const PHOTO = /https:\/\/lh3\.googleusercontent\.com\/pw\/[A-Za-z0-9_-]{40,}/g;
@@ -46,9 +51,7 @@ async function readAlbum(url: string): Promise<AlbumPreview> {
   if (!response.ok) return { images: [], title: null };
 
   const html = await response.text();
-  const title = html.match(
-    /<meta property="og:title" content="([^"]*)"/,
-  )?.[1];
+  const title = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1];
 
   const images: string[] = [];
   for (const match of html.match(PHOTO) ?? []) {

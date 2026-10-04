@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { emailEnabled } from "@/lib/email";
 import { consumeEmailOtp, issueEmailOtp } from "@/lib/otp";
 import { publishAfterVerification } from "@/lib/autoApprove";
+import { ensureUsername } from "@/lib/profiles";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { sendWelcomeEmail } from "@/lib/onboardingEmails";
 
@@ -48,6 +49,7 @@ export async function verifyEmailOtpAction(
         data: { emailVerifiedAt: new Date() },
       });
       await publishAfterVerification(user.id);
+      await ensureUsername(user.id);
       await sendWelcomeEmail(user.id);
     } catch (error) {
       return fieldError(error);

@@ -98,6 +98,7 @@ export default async function PersonalProfilePage() {
               skills: user.skills,
               languages: user.languages,
               videoUrls: user.videoUrls,
+              playlistUrl: user.playlistUrl,
               openToWork: user.openToWork,
               whatsappNumber: user.whatsappNumber,
               alumni,

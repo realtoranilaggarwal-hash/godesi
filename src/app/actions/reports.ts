@@ -2,15 +2,20 @@
 
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { memberStory, newsQuotaLeft } from "@/lib/news";
 import { newsPath } from "@/lib/newsLinks";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { REPORT_DECLARATIONS, REPORT_SOURCES } from "@/lib/journalists";
-import { REPORT_TOPIC_OPTIONS, topicSlug } from "@/lib/newsTopics";
+import {
+  ANONYMOUS_BYLINE,
+  REPORT_TOPIC_OPTIONS,
+  topicSlug,
+} from "@/lib/newsTopics";
 
 const MAX_PHOTOS = 8;
 
@@ -46,6 +51,41 @@ const reportSchema = z.object({
     ),
 });
 
+function parseReport(formData: FormData) {
+  const missing = REPORT_DECLARATIONS.find(
+    (item) => formData.get(item.name) !== "on",
+  );
+  if (missing) {
+    return { error: `Please confirm: ${missing.label.toLowerCase()}` };
+  }
+
+  const parsed = reportSchema.safeParse({
+    title: formData.get("title"),
+    topic: formData.get("topic"),
+    city: formData.get("city"),
+    state: formData.get("state") || undefined,
+    country: formData.get("country") || undefined,
+    happenedAt: formData.get("happenedAt"),
+    summary: formData.get("summary"),
+    sourceType: formData.get("sourceType"),
+    sourceUrl: formData.get("sourceUrl"),
+    videoUrl: formData.get("videoUrl"),
+    albumUrl: formData.get("albumUrl") || undefined,
+    photoUrls: formData
+      .getAll("photoUrls")
+      .map(String)
+      .filter(Boolean)
+      .slice(0, MAX_PHOTOS),
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (parsed.data.happenedAt.getTime() > Date.now() + 60 * 60 * 1000) {
+    return { error: "The date and time cannot be in the future." };
+  }
+  return {
+    data: { ...parsed.data, anonymous: formData.get("anonymous") === "on" },
+  };
+}
+
 /**
  * A member's own report from the ground, as opposed to a link to someone
  * else's article. Everything goes through the news desk queue first.
@@ -57,32 +97,8 @@ export async function submitReportAction(
   try {
     const user = await requireUser();
 
-    const missing = REPORT_DECLARATIONS.find(
-      (item) => formData.get(item.name) !== "on",
-    );
-    if (missing) {
-      return { error: `Please confirm: ${missing.label.toLowerCase()}` };
-    }
-
-    const parsed = reportSchema.safeParse({
-      title: formData.get("title"),
-      topic: formData.get("topic"),
-      city: formData.get("city"),
-      state: formData.get("state") || undefined,
-      country: formData.get("country") || undefined,
-      happenedAt: formData.get("happenedAt"),
-      summary: formData.get("summary"),
-      sourceType: formData.get("sourceType"),
-      sourceUrl: formData.get("sourceUrl"),
-      videoUrl: formData.get("videoUrl"),
-      albumUrl: formData.get("albumUrl") || undefined,
-      photoUrls: formData
-        .getAll("photoUrls")
-        .map(String)
-        .filter(Boolean)
-        .slice(0, MAX_PHOTOS),
-    });
-    if (!parsed.success) return { error: parsed.error.issues[0].message };
+    const parsed = parseReport(formData);
+    if ("error" in parsed) return { error: parsed.error };
 
     const quota = await newsQuotaLeft(user);
     if (quota.left === 0) {
@@ -94,9 +110,6 @@ export async function submitReportAction(
     }
 
     const data = parsed.data;
-    if (data.happenedAt.getTime() > Date.now() + 60 * 60 * 1000) {
-      return { error: "The date and time cannot be in the future." };
-    }
 
     const report = await db.newsItem.create({
       data: {
@@ -104,7 +117,8 @@ export async function submitReportAction(
         title: data.title,
         summary: memberStory(data.summary),
         link: "",
-        source: user.name,
+        source: data.anonymous ? ANONYMOUS_BYLINE : user.name,
+        anonymous: data.anonymous,
         submittedById: user.id,
         status: "PENDING",
         topic: topicSlug(data.topic),
@@ -149,6 +163,68 @@ export async function submitReportAction(
   } catch (error) {
     return fieldError(error);
   }
+}
+
+/**
+ * The author (or the news desk) corrects a report in place. The story keeps
+ * its status and URL id; only the words, media and place change.
+ */
+export async function updateReportAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  let path: string;
+  try {
+    const user = await requireUser();
+    const id = String(formData.get("id") ?? "");
+    const item = await db.newsItem.findUnique({
+      where: { id },
+      include: { submittedBy: { select: { name: true } } },
+    });
+    if (!item || !item.submittedById) return { error: "Report not found." };
+    if (item.submittedById !== user.id && !can(user, "news")) {
+      return { error: "Only the author can edit this report." };
+    }
+
+    const parsed = parseReport(formData);
+    if ("error" in parsed) return { error: parsed.error };
+    const data = parsed.data;
+
+    const slug = topicSlug(data.topic);
+    path = newsPath({ id, title: data.title });
+    await db.newsItem.update({
+      where: { id },
+      data: {
+        title: data.title,
+        link: path,
+        source: data.anonymous
+          ? ANONYMOUS_BYLINE
+          : (item.submittedBy?.name ?? item.source),
+        anonymous: data.anonymous,
+        summary: memberStory(data.summary),
+        topic: slug,
+        category:
+          REPORT_TOPIC_OPTIONS.find((option) => option.slug === slug)?.label ??
+          "General",
+        city: data.city,
+        state: data.state ?? null,
+        country: data.country ?? null,
+        happenedAt: data.happenedAt,
+        sourceType: data.sourceType,
+        sourceUrl: data.sourceUrl ?? null,
+        photoUrls: data.photoUrls,
+        imageUrl: data.photoUrls[0] ?? null,
+        videoUrl: data.videoUrl ?? null,
+        albumUrl: data.albumUrl || null,
+      },
+    });
+
+    revalidatePath("/news");
+    revalidatePath(path);
+  } catch (error) {
+    return fieldError(error);
+  }
+  redirect(path);
 }
 
 const VERDICTS = ["CONFIRMED", "DOUBTED", "FAKE"] as const;

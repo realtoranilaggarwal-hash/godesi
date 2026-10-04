@@ -5,6 +5,7 @@ import { getCategoryTree } from "@/lib/directory";
 import { gradientFor } from "@/lib/categories";
 import { Card } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
+import { DealsAndShopStrip } from "@/components/DealsAndShopStrip";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -339,6 +340,8 @@ export default async function PostPage({
             ) : null}
           </Card>
         )}
+
+        <DealsAndShopStrip />
       </div>
 
       <PostingSidebar />

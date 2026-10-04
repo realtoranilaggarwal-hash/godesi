@@ -46,7 +46,10 @@ export default async function EliteApplyPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <Link href="/desi-elite" className="text-sm font-semibold text-indigo-600">
+      <Link
+        href="/desi-elite"
+        className="text-sm font-semibold text-indigo-600"
+      >
         ← GoDesi Elite
       </Link>
       <h1 className="text-2xl font-black sm:text-3xl">
@@ -54,9 +57,9 @@ export default async function EliteApplyPage({
       </h1>
       <p className="text-sm text-slate-600">
         Recognition for desi entrepreneurs, professionals and community leaders.
-        Apply yourself or nominate someone who deserves it — our team reviews every
-        entry, interviews you (phone, WhatsApp, Zoom or Facebook Live) and publishes
-        a profile with your video.
+        Apply yourself or nominate someone who deserves it — our team reviews
+        every entry, interviews you (phone, WhatsApp, Zoom or Facebook Live) and
+        publishes a profile with your video.
       </p>
 
       {searchParams.error && ERRORS[searchParams.error] ? (
@@ -79,6 +82,26 @@ export default async function EliteApplyPage({
             >
               View your published profile →
             </Link>
+          ) : null}
+          {existing.status !== "REJECTED" ? (
+            <div className="mt-3 rounded-xl border border-indigo-200 bg-white p-3">
+              <p className="text-sm font-bold text-slate-900">
+                Next step: prepare for your interview
+              </p>
+              <p className="mt-1 text-xs text-slate-600">
+                Tell us your story before we meet — how you came here, your
+                first job, the challenge that shaped you. Takes 15 minutes, save
+                as you go.
+              </p>
+              <Link
+                href="/desi-elite/prepare"
+                className="mt-2 inline-block rounded-xl bg-indigo-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-indigo-700"
+              >
+                {existing.storySheet
+                  ? "Edit your story sheet →"
+                  : "Fill in your story sheet →"}
+              </Link>
+            </div>
           ) : null}
           <p className="mt-2 text-xs text-indigo-900">
             You can still nominate somebody else below.

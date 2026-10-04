@@ -58,6 +58,7 @@ export const WEDDING_GROUPS: WeddingGroup[] = [
     items: [
       "DJ & Sound",
       "Live Bands",
+      "Singers",
       "Dhol & Baraat",
       "Dance Choreographers",
       "Anchors & Artists",

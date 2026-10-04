@@ -216,6 +216,8 @@ async function creditFoundingBonus({
 }) {
   if (reason === "FOUNDING_BONUS" || reason === "FOUNDING_MEMBER") return;
   if (reason === "REDEMPTION" || reason === "ADJUSTMENT") return;
+  // The wheel publishes its odds; doubling them for some members would not match.
+  if (reason === "DAILY_SPIN") return;
 
   const member = await db.user.findUnique({
     where: { id: userId },

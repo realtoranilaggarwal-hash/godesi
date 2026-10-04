@@ -40,7 +40,9 @@ export function LiveMediaChips({ className = "" }: { className?: string }) {
     <div className={`flex shrink-0 items-center gap-1 ${className}`}>
       <button
         type="button"
-        onClick={() => openLiveMedia({ kind: "radio", id: RADIO_STATIONS[0].id })}
+        onClick={() =>
+          openLiveMedia({ kind: "radio", id: RADIO_STATIONS[0].id })
+        }
         title="Play live desi radio"
         className={`${chip} bg-gradient-to-r from-emerald-500 to-teal-600`}
       >
@@ -54,6 +56,13 @@ export function LiveMediaChips({ className = "" }: { className?: string }) {
       >
         📺 TV
       </button>
+      <Link
+        href="/news"
+        title="Desi news and local reports"
+        className={`${chip} bg-gradient-to-r from-sky-500 to-indigo-600`}
+      >
+        📰 News
+      </Link>
     </div>
   );
 }
@@ -74,7 +83,9 @@ export function LiveMediaLinks({
     <div className={`flex items-center gap-2 ${className}`}>
       <button
         type="button"
-        onClick={() => openLiveMedia({ kind: "radio", id: RADIO_STATIONS[0].id })}
+        onClick={() =>
+          openLiveMedia({ kind: "radio", id: RADIO_STATIONS[0].id })
+        }
         className={base}
       >
         🎧 Live Radio
@@ -88,15 +99,27 @@ export function LiveMediaLinks({
       </button>
       <Link
         href="/live-radio"
-        className="text-xs font-semibold text-white/80 underline hover:text-white"
+        className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         all stations
       </Link>
       <Link
         href="/live/submit"
-        className="text-xs font-semibold text-white/80 underline hover:text-white"
+        className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         add yours
+      </Link>
+      <Link
+        href="/news/report"
+        className="hidden md:block text-xs font-semibold text-white/80 underline hover:text-white"
+      >
+        add your news
+      </Link>
+      <Link
+        href="/leads"
+        className="hidden md:block text-xs font-semibold text-white/80 underline hover:text-white"
+      >
+        help clients
       </Link>
     </div>
   );

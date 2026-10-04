@@ -9,6 +9,7 @@ import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ShareRail } from "@/components/ShareRail";
 import { StoryBody } from "@/components/StoryBody";
+import { ListenButton } from "@/components/ListenButton";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
@@ -18,6 +19,7 @@ import { SocialEmbed, isEmbeddable } from "@/components/SocialEmbed";
 import { proxyImage } from "@/lib/proxyImage";
 import { siteUrl } from "@/lib/format";
 import { isOriginalReport, newsIdFromParam, newsPath } from "@/lib/newsLinks";
+import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +94,11 @@ export default async function ReportPage({
       : null,
     report.submittedById
       ? db.newsItem.count({
-          where: { submittedById: report.submittedById, status: "PUBLISHED" },
+          where: {
+            submittedById: report.submittedById,
+            status: "PUBLISHED",
+            anonymous: false,
+          },
         })
       : 0,
     db.newsItem.findMany({
@@ -169,9 +175,21 @@ export default async function ReportPage({
 
           <h1 className="text-2xl font-black leading-tight">{report.title}</h1>
 
-          <p className="text-sm text-slate-500">
-            {report.source} · {when(report.publishedAt)}
-          </p>
+          <ListenButton title={report.title} text={report.summary} />
+
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+            <span>
+              {report.source} · {when(report.publishedAt)}
+            </span>
+            {(isAuthor || isStaff) && report.submittedById ? (
+              <Link
+                href={`/news/${report.id}/edit`}
+                className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              >
+                ✏️ Edit {isAuthor ? "your story" : "story"}
+              </Link>
+            ) : null}
+          </div>
 
           {hero ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -182,7 +200,17 @@ export default async function ReportPage({
             />
           ) : null}
 
-          {report.submittedBy ? (
+          {report.anonymous ? (
+            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-xs">
+                👤
+              </span>
+              <span className="font-semibold">{ANONYMOUS_BYLINE}</span>
+              <span className="text-xs text-slate-500">
+                · name on record with the news desk
+              </span>
+            </div>
+          ) : report.submittedBy ? (
             <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
               {report.submittedBy.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -211,6 +239,24 @@ export default async function ReportPage({
           ) : null}
 
           <StoryBody text={report.summary} />
+
+          {report.topic === "consumer" ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              Had the same experience? File it where it counts —{" "}
+              <Link href="/complaints" className="font-bold underline">
+                step-by-step complaint guides
+              </Link>{" "}
+              — then{" "}
+              <Link
+                href="/news/report?topic=consumer"
+                className="font-bold underline"
+              >
+                post your own alert
+              </Link>
+              . This is one member&apos;s account, read by the news desk; it is
+              not a finding by any authority.
+            </div>
+          ) : null}
 
           <InArticleAd />
 

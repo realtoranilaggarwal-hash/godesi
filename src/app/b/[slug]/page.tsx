@@ -23,6 +23,7 @@ import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
@@ -35,6 +36,8 @@ import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { businessIsThin, robotsFor } from "@/lib/thinContent";
+import { liveDealWhere } from "@/lib/deals";
+import { DealCard } from "@/components/DealCard";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +60,7 @@ async function getBusiness(slug: string) {
       subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
       packages: { orderBy: { sortOrder: "asc" } },
+      deals: { where: liveDealWhere(), orderBy: { createdAt: "desc" } },
       reviews: { where: { hidden: false }, orderBy: { createdAt: "desc" } },
       agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
       vehicle: true,
@@ -258,6 +262,14 @@ export default async function BusinessProfilePage({
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
               <StaffEditLink href={`/admin/business/${business.slug}`} />
+              {isOwner ? (
+                <Link
+                  href="/dashboard/profile"
+                  className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-bold text-white hover:bg-indigo-700"
+                >
+                  ✏️ Edit my card
+                </Link>
+              ) : null}
               {ownerPlan !== "FREE" ? (
                 <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
               ) : null}
@@ -494,6 +506,12 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
+            {business.playlistUrl ? (
+              <div className="mt-3">
+                <PlaylistGallery url={business.playlistUrl} owner={business.name} />
+              </div>
+            ) : null}
+
             {business.albumUrl ? (
               <div className="mt-3">
                 <PhotoAlbumGallery
@@ -577,6 +595,47 @@ export default async function BusinessProfilePage({
           </div>
         </div>
       </Card>
+
+      {business.deals.length || isOwner ? (
+        <Card id="deals">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold">🏷️ Deals &amp; offers</h2>
+            {isOwner ? (
+              <Link
+                href="/dashboard/deals"
+                className="text-sm font-semibold text-indigo-700 hover:underline"
+              >
+                {business.deals.length ? "Manage deals" : "Post a deal →"}
+              </Link>
+            ) : null}
+          </div>
+          {business.deals.length ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {business.deals.map((deal) => (
+                <DealCard
+                  key={deal.id}
+                  title={deal.title}
+                  details={
+                    deal.details
+                      ? contactVisible
+                        ? deal.details
+                        : maskContactDetails(deal.details)
+                      : null
+                  }
+                  code={deal.code}
+                  linkUrl={deal.linkUrl}
+                  expiresAt={deal.expiresAt}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-600">
+              Only you can see this: post an offer for GoDesi visitors and it shows here
+              and on godesi.com/deals.
+            </p>
+          )}
+        </Card>
+      ) : null}
 
       {!business.owner ? (
         <Card className="space-y-3 border-amber-200 bg-amber-50">
@@ -729,13 +788,30 @@ export default async function BusinessProfilePage({
                       className="h-48 w-full rounded-xl bg-black object-cover"
                     />
                   ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <a
                       key={item.id}
-                      src={item.url}
-                      alt={item.caption ?? business.name}
-                      className="h-48 w-full rounded-xl border border-slate-200 object-cover"
-                    />
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener"
+                      title="View full size"
+                      className="relative block h-48 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.url}
+                        alt=""
+                        aria-hidden
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
+                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.url}
+                        alt={item.caption ?? business.name}
+                        loading="lazy"
+                        className="relative h-full w-full object-contain"
+                      />
+                    </a>
                   ),
                 )}
               </div>

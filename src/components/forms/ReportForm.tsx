@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
-import { submitReportAction } from "@/app/actions/reports";
+import { submitReportAction, updateReportAction } from "@/app/actions/reports";
 import { emptyState } from "@/lib/actions";
 import {
   FAKE_MEDIA_CHECKS,
@@ -10,7 +10,7 @@ import {
   REPORT_SOURCES,
   REVERSE_IMAGE_SEARCH_URL,
 } from "@/lib/journalists";
-import { REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
+import { ANONYMOUS_BYLINE, REPORT_TOPIC_OPTIONS } from "@/lib/newsTopics";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { ImageDropzone } from "@/components/ImageDropzone";
@@ -19,22 +19,47 @@ import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
 /** `datetime-local` wants the local clock, not the UTC ISO string. */
-function localNow() {
-  const now = new Date();
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  return now.toISOString().slice(0, 16);
+function localDateTime(at = new Date()) {
+  const local = new Date(at);
+  local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+  return local.toISOString().slice(0, 16);
 }
+
+/** An existing report being corrected by its author. */
+export type ReportDraft = {
+  id: string;
+  title: string;
+  topic: string;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  happenedAt: Date | null;
+  summary: string;
+  sourceType: string | null;
+  sourceUrl: string | null;
+  photoUrls: string[];
+  albumUrl: string | null;
+  videoUrl: string | null;
+  anonymous: boolean;
+};
 
 export function ReportForm({
   defaultCity = "",
   defaultCountry = "",
+  defaultTopic = "community",
+  initial,
 }: {
   defaultCity?: string;
   defaultCountry?: string;
+  defaultTopic?: string;
+  initial?: ReportDraft;
 }) {
-  const [state, formAction] = useFormState(submitReportAction, emptyState);
+  const [state, formAction] = useFormState(
+    initial ? updateReportAction : submitReportAction,
+    emptyState,
+  );
   const form = useRef<HTMLFormElement>(null);
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<string[]>(initial?.photoUrls ?? []);
   const [locating, setLocating] = useState(false);
   const [locationNote, setLocationNote] = useState("");
 
@@ -92,12 +117,14 @@ export function ReportForm({
   return (
     <form ref={form} action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
+      {initial ? <input type="hidden" name="id" value={initial.id} /> : null}
 
       <Field label="Title" hint="What happened, in one line">
         <input
           name="title"
           required
           maxLength={140}
+          defaultValue={initial?.title ?? ""}
           placeholder="Free health camp at the Gurdwara this Sunday"
           className={inputClass}
         />
@@ -108,7 +135,7 @@ export function ReportForm({
           <select
             name="topic"
             required
-            defaultValue="community"
+            defaultValue={initial?.topic ?? defaultTopic}
             className={inputClass}
           >
             {REPORT_TOPIC_OPTIONS.map((option) => (
@@ -123,7 +150,7 @@ export function ReportForm({
             name="happenedAt"
             type="datetime-local"
             required
-            defaultValue={localNow()}
+            defaultValue={localDateTime(initial?.happenedAt ?? undefined)}
             className={inputClass}
           />
         </Field>
@@ -146,17 +173,21 @@ export function ReportForm({
             <input
               name="city"
               required
-              defaultValue={defaultCity}
+              defaultValue={initial?.city ?? defaultCity}
               className={inputClass}
             />
           </Field>
           <Field label="State / region">
-            <input name="state" className={inputClass} />
+            <input
+              name="state"
+              defaultValue={initial?.state ?? ""}
+              className={inputClass}
+            />
           </Field>
           <Field label="Country">
             <input
               name="country"
-              defaultValue={defaultCountry}
+              defaultValue={initial?.country ?? defaultCountry}
               className={inputClass}
             />
           </Field>
@@ -167,12 +198,23 @@ export function ReportForm({
       </div>
 
       <Field label="What happened" hint="Who, what, where, when — plain facts">
-        <textarea name="summary" rows={5} required className={inputClass} />
+        <textarea
+          name="summary"
+          rows={initial ? 12 : 5}
+          required
+          defaultValue={initial?.summary ?? ""}
+          className={inputClass}
+        />
       </Field>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Where did you see this?">
-          <select name="sourceType" required className={inputClass}>
+          <select
+            name="sourceType"
+            required
+            defaultValue={initial?.sourceType ?? undefined}
+            className={inputClass}
+          >
             {REPORT_SOURCES.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -181,7 +223,12 @@ export function ReportForm({
           </select>
         </Field>
         <Field label="Source link" hint="Optional — where you first saw it">
-          <input name="sourceUrl" type="url" className={inputClass} />
+          <input
+            name="sourceUrl"
+            type="url"
+            defaultValue={initial?.sourceUrl ?? ""}
+            className={inputClass}
+          />
         </Field>
       </div>
 
@@ -231,13 +278,21 @@ export function ReportForm({
         ) : null}
       </div>
 
-      <PhotoAlbumField hint="Shot more than eight photos? Paste a public Google Photos album link and the whole album shows under your story — nothing to upload." />
+      <PhotoAlbumField
+        defaultValue={initial?.albumUrl ?? ""}
+        hint="Shot more than eight photos? Paste a public Google Photos album link and the whole album shows under your story — nothing to upload."
+      />
 
       <Field
         label="Video or social post link"
         hint="YouTube, Instagram, Facebook or X — it plays inside the story"
       >
-        <input name="videoUrl" type="url" className={inputClass} />
+        <input
+          name="videoUrl"
+          type="url"
+          defaultValue={initial?.videoUrl ?? ""}
+          className={inputClass}
+        />
       </Field>
 
       <div className="rounded-2xl bg-amber-50 p-3">
@@ -262,6 +317,22 @@ export function ReportForm({
         </a>
       </div>
 
+      <label className="flex items-start gap-2 rounded-2xl border border-slate-200 p-3 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="anonymous"
+          defaultChecked={initial?.anonymous ?? false}
+          className="mt-0.5 h-4 w-4"
+        />
+        <span>
+          <span className="font-semibold">Post anonymously</span> — readers see
+          “{ANONYMOUS_BYLINE} · your city” instead of your name. Good for a
+          complaint about a store or landlord you still have to deal with. The
+          news desk still knows who filed it, and the story does not show on
+          your profile.
+        </span>
+      </label>
+
       <fieldset className="rounded-2xl border border-slate-200 p-3">
         <legend className="px-1 text-sm font-semibold text-slate-700">
           Your declaration
@@ -285,14 +356,20 @@ export function ReportForm({
       </fieldset>
 
       <FormSuccess>{state.success}</FormSuccess>
-      <SubmitButton pendingLabel="Sending to the news desk…">
-        Submit report
-      </SubmitButton>
-      <p className="text-xs text-slate-500">
-        Every report is read by the Godesi news desk before it appears. Readers
-        can then confirm it, doubt it or flag it as fake — that record follows
-        your journalist profile.
-      </p>
+      {initial ? (
+        <SubmitButton pendingLabel="Saving…">Save changes</SubmitButton>
+      ) : (
+        <>
+          <SubmitButton pendingLabel="Sending to the news desk…">
+            Submit report
+          </SubmitButton>
+          <p className="text-xs text-slate-500">
+            Every report is read by the Godesi news desk before it appears.
+            Readers can then confirm it, doubt it or flag it as fake — that
+            record follows your journalist profile.
+          </p>
+        </>
+      )}
     </form>
   );
 }

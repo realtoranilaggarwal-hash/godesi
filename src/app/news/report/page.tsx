@@ -16,8 +16,13 @@ export const metadata: Metadata = {
     "Saw something in your desi neighbourhood? File a report for the Godesi news desk.",
 };
 
-export default async function ReportNewsPage() {
+export default async function ReportNewsPage({
+  searchParams,
+}: {
+  searchParams: { topic?: string };
+}) {
   const user = await getCurrentUser();
+  const consumer = searchParams.topic === "consumer";
   const stats = user ? await journalistStats(user.id) : null;
   const quota = user ? await newsQuotaLeft(user) : null;
 
@@ -25,12 +30,22 @@ export default async function ReportNewsPage() {
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 py-7 text-white sm:px-8">
-          <h1 className="text-3xl font-black">Report local news 📰</h1>
+          <h1 className="text-3xl font-black">
+            {consumer ? "Post a consumer alert ⚠️" : "Report local news 📰"}
+          </h1>
           <p className="mt-2 max-w-2xl text-white/90">
-            A festival, a store opening, a scam warning, a road closure — if it
-            matters to desis around you, file it here. The news desk checks
-            every report, then readers confirm or challenge it.
+            {consumer
+              ? "Spoiled food on the shelf, a deposit never returned, an agent who vanished — tell the community what happened to you, with dates and photos. Tick “Post anonymously” if you would rather your name stayed with the news desk only."
+              : "A festival, a store opening, a scam warning, a road closure — if it matters to desis around you, file it here. The news desk checks every report, then readers confirm or challenge it."}
           </p>
+          {consumer ? (
+            <Link
+              href="/complaints"
+              className="mt-3 inline-block rounded-xl bg-white/20 px-3 py-1.5 text-sm font-bold hover:bg-white/30"
+            >
+              First: how to file an official complaint →
+            </Link>
+          ) : null}
           {stats?.level ? (
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
               <JournalistBadge level={stats.level} beat={stats.beat} />
@@ -63,7 +78,10 @@ export default async function ReportNewsPage() {
                   ) : null}
                 </p>
               ) : null}
-              <ReportForm defaultCity={user.location ?? ""} />
+              <ReportForm
+                defaultCity={user.location ?? ""}
+                defaultTopic={consumer ? "consumer" : undefined}
+              />
             </>
           ) : (
             <div className="space-y-3">
@@ -71,7 +89,11 @@ export default async function ReportNewsPage() {
                 Sign in to file a report — it is free, and your name runs with
                 the story.
               </p>
-              <LinkButton href="/login?next=/news/report">
+              <LinkButton
+                href={`/login?next=${encodeURIComponent(
+                  consumer ? "/news/report?topic=consumer" : "/news/report",
+                )}`}
+              >
                 Sign in to report
               </LinkButton>
             </div>

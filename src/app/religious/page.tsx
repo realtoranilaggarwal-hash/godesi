@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { gradientFor } from "@/lib/categories";
-import { formatFestivalDate, upcomingFestivals } from "@/lib/festivals";
+import {
+  festivalSlug,
+  formatFestivalDate,
+  upcomingFestivals,
+} from "@/lib/festivals";
 import { formatEventDate } from "@/lib/events";
 import {
   FAITHS,
@@ -98,12 +102,21 @@ export default async function ReligiousPage({
         </section>
 
         <Card>
-          <h2 className="mb-3 font-bold">Upcoming festivals</h2>
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-bold">Upcoming festivals</h2>
+            <Link
+              href="/festivals"
+              className="text-sm font-bold text-amber-700 hover:underline"
+            >
+              Full festival calendar →
+            </Link>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {festivals.map((festival) => (
-              <div
+              <Link
                 key={festival.name}
-                className="rounded-2xl border border-amber-200 bg-gradient-to-br from-white to-amber-50 p-3"
+                href={`/festivals/${festivalSlug(festival)}`}
+                className="rounded-2xl border border-amber-200 bg-gradient-to-br from-white to-amber-50 p-3 transition hover:border-amber-400"
               >
                 <p className="font-bold">
                   {festival.emoji} {festival.name}
@@ -115,7 +128,7 @@ export default async function ReligiousPage({
                     : ` · in ${festival.daysAway} day${festival.daysAway === 1 ? "" : "s"}`}
                 </p>
                 <p className="mt-1 text-sm text-slate-600">{festival.blurb}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </Card>

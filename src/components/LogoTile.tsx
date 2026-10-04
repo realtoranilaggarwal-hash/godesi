@@ -20,13 +20,25 @@ export function LogoTile({
 }) {
   if (imageUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={thumbImage(imageUrl, 384)}
-        alt=""
-        loading="lazy"
-        className={`${className} shrink-0 rounded-xl border border-slate-200 object-cover`}
-      />
+      <span
+        className={`${className} relative block shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-900`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={thumbImage(imageUrl, 384)}
+          alt=""
+          aria-hidden
+          loading="lazy"
+          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-md"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={thumbImage(imageUrl, 384)}
+          alt=""
+          loading="lazy"
+          className="relative h-full w-full object-contain"
+        />
+      </span>
     );
   }
 

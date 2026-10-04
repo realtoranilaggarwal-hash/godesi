@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { PlaylistField } from "@/components/forms/PlaylistField";
 import { WriteHelper } from "@/components/WriteHelper";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
@@ -273,6 +274,7 @@ export function BusinessProfileForm({
           defaultValue={business?.albumUrl ?? ""}
           hint={`Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`}
         />
+        <PlaylistField defaultValue={business?.playlistUrl ?? ""} />
         <Field
           label={
             videoLimit > 1

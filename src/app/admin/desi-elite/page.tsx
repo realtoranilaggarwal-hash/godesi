@@ -7,6 +7,8 @@ import { Card, inputClass } from "@/components/ui";
 import { deleteEliteAction, updateEliteAction } from "@/app/actions/elite";
 import { reviewEliteClaimAction } from "@/app/actions/eliteClaims";
 import { ELITE_BADGES, ELITE_STATUS_LABELS } from "@/lib/elite";
+import { readStoryAnswers, storyProgress } from "@/lib/storySheet";
+import { DEFAULT_EVENT_ZONE, wallClockIn } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -18,6 +20,11 @@ const STATUSES = Object.keys(
   ELITE_STATUS_LABELS,
 ) as (keyof typeof ELITE_STATUS_LABELS)[];
 const BADGES = Object.keys(ELITE_BADGES) as (keyof typeof ELITE_BADGES)[];
+
+function sheetLabel(storySheet: unknown) {
+  const progress = storyProgress(readStoryAnswers(storySheet));
+  return `${progress.done}/${progress.total}`;
+}
 
 export default async function EliteAdminPage({
   searchParams,
@@ -115,7 +122,10 @@ export default async function EliteAdminPage({
                 <p className="whitespace-pre-line text-sm text-slate-700">
                   {claim.message}
                 </p>
-                <form action={reviewEliteClaimAction} className="flex gap-2 pt-1">
+                <form
+                  action={reviewEliteClaimAction}
+                  className="flex gap-2 pt-1"
+                >
                   <input type="hidden" name="id" value={claim.id} />
                   <button
                     name="decision"
@@ -175,6 +185,24 @@ export default async function EliteAdminPage({
                   Nominee contact: {entry.nomineeContact}
                 </p>
               ) : null}
+              <p className="mt-1 text-xs">
+                <Link
+                  href={`/admin/desi-elite/${entry.id}/briefing`}
+                  className="font-semibold text-indigo-600 hover:underline"
+                >
+                  Interviewer briefing →
+                </Link>{" "}
+                <span className="text-slate-500">
+                  · story sheet {sheetLabel(entry.storySheet)}
+                  {entry.interviewAt
+                    ? ` · booked ${entry.interviewAt.toLocaleString("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                        timeZone: DEFAULT_EVENT_ZONE,
+                      })} ET`
+                    : " · not booked"}
+                </span>
+              </p>
             </div>
             <div className="text-right text-xs">
               <p className="font-bold text-slate-700">
@@ -266,6 +294,34 @@ export default async function EliteAdminPage({
               defaultValue={entry.videoUrl ?? ""}
               placeholder="Video (YouTube/Vimeo)"
               className={inputClass}
+            />
+            <input
+              name="interviewDate"
+              type="date"
+              title="Interview date (US Eastern)"
+              defaultValue={
+                entry.interviewAt
+                  ? wallClockIn(entry.interviewAt, DEFAULT_EVENT_ZONE).date
+                  : ""
+              }
+              className={inputClass}
+            />
+            <input
+              name="interviewTime"
+              type="time"
+              title="Interview time (US Eastern)"
+              defaultValue={
+                entry.interviewAt
+                  ? wallClockIn(entry.interviewAt, DEFAULT_EVENT_ZONE).time
+                  : ""
+              }
+              className={inputClass}
+            />
+            <input
+              name="interviewPlace"
+              defaultValue={entry.interviewPlace ?? ""}
+              placeholder="Where: Iselin studio / Zoom link"
+              className={`${inputClass} sm:col-span-3`}
             />
             <button
               type="submit"

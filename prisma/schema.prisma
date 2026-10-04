@@ -31,6 +31,37 @@ enum EventMode {
   HYBRID
 }
 
+enum ClubVisibility {
+  /// Anyone can find it and join straight away.
+  PUBLIC
+  /// Listed by name only; joining needs an organiser's approval.
+  PRIVATE
+}
+
+enum ClubRole {
+  ORGANIZER
+  MEMBER
+}
+
+enum ClubMemberStatus {
+  PENDING
+  ACTIVE
+}
+
+enum ContributionMode {
+  NONE
+  /// Pay-what-you-like with a suggested amount per person.
+  SUGGESTED
+  /// Each member enters what they will chip in.
+  CUSTOM
+}
+
+enum RsvpAnswer {
+  YES
+  MAYBE
+  NO
+}
+
 enum EventFrequency {
   ONE_TIME
   RECURRING
@@ -163,6 +194,7 @@ enum PointsReason {
   REVIEW_POSTED
   /// One point per US dollar spent with Godesi.
   PAYMENT_SPEND
+  DAILY_SPIN
   REDEMPTION
   ADJUSTMENT
 }
@@ -228,6 +260,11 @@ model User {
   pressCardIssuedAt  DateTime?
   pressCardExpiresAt DateTime?
 
+  speakerAt       EventSpeaker[] @relation("SpeakerProfile")
+  clubsCreated    Club[]
+  clubMemberships ClubMember[]
+  eventRsvps      EventRsvp[]
+
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
   avatarUrl String?
@@ -235,18 +272,20 @@ model User {
   location  String?
 
   /// One-line "who I am" shown under the name on the public profile.
-  headline   String?
+  headline    String?
   /// What the member wants from the community — work, clients, partners, help.
-  lookingFor String?
+  lookingFor  String?
   /// School, college and courses, one per line.
-  education  String?
+  education   String?
   /// Work history, projects and achievements, one per line.
-  experience String?
-  skills     String[] @default([])
-  languages  String[] @default([])
+  experience  String?
+  skills      String[] @default([])
+  languages   String[] @default([])
   /// YouTube/Vimeo links embedded on the profile.
-  videoUrls  String[] @default([])
-  openToWork Boolean  @default(false)
+  videoUrls   String[] @default([])
+  /// Public YouTube playlist; every video in it is listed on the profile.
+  playlistUrl String?
+  openToWork  Boolean  @default(false)
 
   websiteUrl     String?
   instagramUrl   String?
@@ -314,6 +353,7 @@ model User {
 
   liveChannels       LiveChannel[]
   liveChannelOrders  LiveChannelOrder[]
+  clubOrders         ClubOrder[]
   liveChannelReports LiveChannelReport[]
   liveChannelVotes   LiveChannelVote[]
   liveFavorites      LiveChannelFavorite[]
@@ -349,6 +389,7 @@ model User {
   gigMessages     GigMessage[]
   gigReviews      GigReview[]
   websiteProjects WebsiteProject[]
+  dailySpins      DailySpin[]
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
@@ -699,6 +740,8 @@ model Business {
   videoUrls          String[]      @default([])
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl           String?
+  /// Public YouTube playlist; every video in it is listed on the card.
+  playlistUrl        String?
   mapsUrl            String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
@@ -773,11 +816,82 @@ model Business {
   reviews       Review[]
   trackedEvents AnalyticsEvent[]
   eventListings Event[]
+  deals         Deal[]
 
   @@index([category])
   @@index([city])
   @@index([categorySlug])
   @@index([subcategorySlug])
+}
+
+/// An online store's promotion pulled from an affiliate network feed (CJ Link Search), shown on /deals and /shop as a paid link.
+model StoreOffer {
+  id             String    @id @default(cuid())
+  /// Feed the offer came from, e.g. "CJ".
+  source         String
+  /// The network's own link id, so a re-sync updates instead of duplicating.
+  externalId     String
+  advertiserId   String
+  advertiserName String
+  title          String
+  description    String?
+  code           String?
+  promotionType  String?
+  category       String?
+  /// Tracking URL carrying GoDesi's publisher id.
+  clickUrl       String
+  startsAt       DateTime?
+  endsAt         DateTime?
+  /// False once the feed stops returning it, or when staff hide it.
+  active         Boolean   @default(true)
+  hidden         Boolean   @default(false)
+  clicks         Int       @default(0)
+  syncedAt       DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([source, externalId])
+  @@index([active, hidden, endsAt])
+}
+
+/// An offer a business runs for GoDesi visitors, shown on its card and /deals.
+model Deal {
+  id         String      @id @default(cuid())
+  businessId String
+  business   Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  title      String
+  details    String?
+  /// Promo code to quote or type at checkout; null when the offer needs none.
+  code       String?
+  /// Where to claim it, e.g. the business's booking page.
+  linkUrl    String?
+  /// Last day the offer is valid; null runs until the owner switches it off.
+  expiresAt  DateTime?
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  spins      DailySpin[]
+
+  @@index([active, expiresAt])
+  @@index([businessId])
+}
+
+/// One free wheel spin per member per GoDesi day (midnight New York time).
+model DailySpin {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// YYYY-MM-DD in America/New_York; unique per member so a replayed request cannot spin twice.
+  day       String
+  /// Key of the wheel slice that came up, from SPIN_SLICES.
+  prize     String
+  points    Int      @default(0)
+  dealId    String?
+  deal      Deal?    @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, day])
+  @@index([dealId])
 }
 
 model Media {
@@ -1043,6 +1157,22 @@ model Event {
   /// The calendar's own id for this entry, so a re-import updates one row.
   sourceUid String?
 
+  /// The club this event belongs to; clubs are permanent, events come and go.
+  clubId String?
+  club   Club?   @relation(fields: [clubId], references: [id], onDelete: SetNull)
+
+  /// How members chip in beyond tickets: nothing, a suggested amount, or their own.
+  contributionMode   ContributionMode @default(NONE)
+  /// Suggested amount per person in minor units of `currency`.
+  contributionMinor  Int?
+  /// Free text like "Bring a dish + $10 towards the hall".
+  contributionNote   String?
+  /// What members can offer to bring, e.g. food, drinks, equipment.
+  bringOptions       String[]         @default([])
+  /// What members can take part in, e.g. singing, dancing, open mic.
+  participateOptions String[]         @default([])
+  rsvps              EventRsvp[]
+
   speakers EventSpeaker[]
   sessions EventSession[]
   claims   EventClaim[]
@@ -1056,6 +1186,7 @@ model Event {
   @@index([categorySlug])
   @@index([city])
   @@index([venueRefId])
+  @@index([clubId])
   @@index([genres], type: Gin)
   @@index([languages], type: Gin)
   @@map("EventListing")
@@ -1132,7 +1263,109 @@ model EventSpeaker {
   bio       String?
   sortOrder Int     @default(0)
 
+  /// The speaker's own Godesi profile when the organiser picked one, so the
+  /// event links to the person instead of minting a duplicate.
+  userId String?
+  user   User?   @relation("SpeakerProfile", fields: [userId], references: [id], onDelete: SetNull)
+
   @@index([eventId])
+  @@index([userId])
+}
+
+/// A permanent group — a karaoke circle, cricket team, book club — that puts
+/// on events. Members belong to the club; events belong to the club.
+model Club {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  name         String
+  description  String
+  imageUrl     String?
+  /// From `lib/clubs` CLUB_CATEGORIES: singing, music, food, travel…
+  category     String
+  city         String?
+  state        String?
+  country      String?
+  /// Meets online (Zoom, WhatsApp) rather than in one town.
+  online       Boolean        @default(false)
+  rules        String?
+  /// Public YouTube playlist — songs the club sings, past performances.
+  playlistUrl  String?
+  websiteUrl   String?
+  whatsappUrl  String?
+  visibility   ClubVisibility @default(PUBLIC)
+  /// Premium club until this date: no Godesi fee on its events' tickets, badge, listed first.
+  premiumUntil DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  members ClubMember[]
+  events  Event[]
+  orders  ClubOrder[]
+
+  @@index([category])
+  @@index([city])
+}
+
+/// A yearly Premium payment for a club; extends `Club.premiumUntil` when paid.
+model ClubOrder {
+  id          String        @id @default(cuid())
+  clubId      String
+  club        Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  years       Int           @default(1)
+  amountMinor Int
+  currency    String
+  status      AdOrderStatus @default(PENDING)
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  createdAt   DateTime      @default(now())
+
+  @@index([clubId])
+  @@index([userId])
+}
+
+model ClubMember {
+  id        String           @id @default(cuid())
+  clubId    String
+  club      Club             @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      ClubRole         @default(MEMBER)
+  status    ClubMemberStatus @default(ACTIVE)
+  /// What they do in the club — "sings ghazals", "brings the speaker".
+  note      String?
+  createdAt DateTime         @default(now())
+
+  @@unique([clubId, userId])
+  @@index([userId])
+}
+
+/// A member's commitment to an event: coming, what they bring, what they do.
+model EventRsvp {
+  id            String     @id @default(cuid())
+  eventId       String
+  event         Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answer        RsvpAnswer @default(YES)
+  /// Which of the event's bring options they picked.
+  bringing      String[]   @default([])
+  /// What exactly — "Samosa + chai", "JBL speaker".
+  bringingNote  String?
+  /// Which of the event's participate options they picked.
+  participating String[]   @default([])
+  /// What they will chip in, minor units of the event's currency.
+  amountMinor   Int?
+  guests        Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([userId])
 }
 
 /// One agenda row — a talk, workshop slot or stage on the event schedule.
@@ -1277,6 +1510,8 @@ model NewsItem {
   albumUrl   String?
   /// Every truth declaration was ticked when the report was filed.
   declaredAt DateTime?
+  /// Byline hidden in public; the author is still on record for the desk.
+  anonymous  Boolean   @default(false)
 
   /// Editor's pick, shown at the top of /news.
   featured      Boolean            @default(false)
@@ -2092,6 +2327,13 @@ model EliteEntry {
   /// Photographer and licence for a freely-licensed portrait, shown under it.
   photoCredit String?
 
+  /// Answers to the "prepare for your interview" story sheet, keyed by
+  /// question id; the interviewer's briefing is built from these.
+  storySheet     Json?
+  /// When and where the interview is booked (studio address or Zoom link).
+  interviewAt    DateTime?
+  interviewPlace String?
+
   /// Staff notes, interview recording/stream link and the reviewer trail.
   adminNote    String?
   interviewUrl String?
@@ -2466,4 +2708,29 @@ model WebsitePowerUp {
   monthlyUsd Int
   active     Boolean  @default(true)
   updatedAt  DateTime @updatedAt
+}
+
+/// Someone offering to interview, host, film or edit for GoDesi Media;
+/// reviewed on /admin/media before we get in touch.
+model MediaApplication {
+  id           String   @id @default(cuid())
+  /// Applicant's account when signed in; guests can apply too.
+  userId       String?
+  name         String
+  email        String
+  phone        String?
+  city         String
+  /// interviewer, host, videographer, editor, writer, social, street.
+  roles        String[] @default([])
+  languages    String?
+  experience   String
+  links        String[] @default([])
+  /// Hours a week / weekends / evenings, in their words.
+  availability String?
+  status       String   @default("NEW")
+  adminNote    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
 }

@@ -12,8 +12,9 @@ import { formatEventDate } from "@/lib/events";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { properName } from "@/lib/names";
 import { ShareButtons } from "@/components/ShareButtons";
-import { Badge, Card, EmptyState, Stars } from "@/components/ui";
+import { Badge, Card, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
@@ -23,6 +24,8 @@ import { journalistStats } from "@/lib/journalistsQueries";
 import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
+import { PostIdeasBanner } from "@/components/PostIdeasBanner";
+import { cachedCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -58,8 +61,12 @@ export default async function PublicProfilePage({
   if (!profile) notFound();
 
   const { user, events, leads, reviews, listings, gigs } = profile;
-  const journalist = await journalistStats(user.id);
-  const points = await wallet(user.id);
+  const journalist = await journalistStats(user.id, { publicOnly: true });
+  const [points, viewer] = await Promise.all([
+    wallet(user.id),
+    cachedCurrentUser(),
+  ]);
+  const isOwner = viewer?.id === user.id;
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
@@ -67,7 +74,8 @@ export default async function PublicProfilePage({
     leads.length +
     reviews.length +
     listings.length +
-    gigs.length;
+    gigs.length +
+    (journalist?.approved ?? 0);
   const socialLinks = PERSONAL_SOCIALS.map((social) => ({
     ...social,
     url: user[social.key],
@@ -85,6 +93,27 @@ export default async function PublicProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {isOwner ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+          <span className="font-semibold">
+            This is your page — this is how everyone sees it.
+          </span>
+          <span className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/me"
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 font-bold text-white hover:bg-indigo-700"
+            >
+              ✏️ Edit my profile
+            </Link>
+            <Link
+              href="/dashboard"
+              className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 font-bold text-indigo-700 hover:bg-indigo-100"
+            >
+              My dashboard
+            </Link>
+          </span>
+        </div>
+      ) : null}
       <Card className="overflow-hidden !p-0">
         <div className="h-2 bg-gradient-to-r from-orange-400 via-rose-500 to-fuchsia-600" />
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
@@ -135,10 +164,27 @@ export default async function PublicProfilePage({
               </div>
             </div>
           </div>
-          <ShareButtons
-            url={shareUrl}
-            title={`${properName(user.name)} on Godesi`}
-          />
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end">
+            <ShareButtons
+              url={shareUrl}
+              title={`${properName(user.name)} on Godesi`}
+            />
+            <a
+              href={`/api/qr/u/${user.username}?download=1`}
+              title="Download this QR code"
+              className="flex shrink-0 flex-col items-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 text-[11px] font-semibold text-slate-600 hover:border-indigo-300"
+            >
+              <Image
+                src={`/api/qr/u/${user.username}`}
+                alt={`QR code for ${user.name}`}
+                width={96}
+                height={96}
+                unoptimized
+                className="rounded-lg"
+              />
+              Personal QR · download
+            </a>
+          </div>
         </div>
         {user.bio ? (
           <p className="border-t border-slate-100 px-5 py-4 text-sm text-slate-700">
@@ -235,9 +281,15 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
 
+          {user.playlistUrl ? (
+            <PlaylistGallery url={user.playlistUrl} owner={user.name} />
+          ) : null}
+
           {user.videoUrls.length ? (
             <section className="space-y-3">
-              <h2 className="text-lg font-bold">Videos</h2>
+              <h2 className="text-lg font-bold">
+                {user.playlistUrl ? "More videos" : "Videos"}
+              </h2>
               {user.videoUrls.map((url) => (
                 <VideoEmbed key={url} url={url} title={`${user.name} video`} />
               ))}
@@ -320,7 +372,10 @@ export default async function PublicProfilePage({
             <section className="space-y-2">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-lg font-bold">🛠️ Gigs</h2>
-                <Link href="/gigs/how-it-works" className="text-xs text-slate-500 underline">
+                <Link
+                  href="/gigs/how-it-works"
+                  className="text-xs text-slate-500 underline"
+                >
                   Pay safely through Godesi
                 </Link>
               </div>
@@ -448,10 +503,7 @@ export default async function PublicProfilePage({
           ) : null}
 
           {!activity && !user.business ? (
-            <EmptyState
-              title="Nothing posted yet"
-              body={`${user.name} has not published a business, event or requirement so far.`}
-            />
+            <PostIdeasBanner name={user.name} />
           ) : null}
         </div>
 
@@ -484,24 +536,6 @@ export default async function PublicProfilePage({
               ) : null}
             </Card>
           ) : null}
-          <Card className="space-y-3 text-center">
-            <p className="text-sm font-bold text-slate-900">Personal QR code</p>
-            <Image
-              src={`/api/qr/u/${user.username}`}
-              alt={`QR code for ${user.name}`}
-              width={200}
-              height={200}
-              unoptimized
-              className="mx-auto rounded-xl border border-slate-200"
-            />
-            <a
-              href={`/api/qr/u/${user.username}?download=1`}
-              className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              Download QR
-            </a>
-          </Card>
-
           {user.business && user.business.status === "APPROVED" ? (
             <Card className="space-y-3 text-center">
               <p className="text-sm font-bold text-slate-900">

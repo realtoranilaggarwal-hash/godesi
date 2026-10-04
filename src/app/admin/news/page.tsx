@@ -62,8 +62,7 @@ function StoryEditor({
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/news");
-  if (user.role !== "ADMIN")
-    redirect(deskFallback(user, "News"));
+  if (user.role !== "ADMIN") redirect(deskFallback(user, "News"));
 
   // Member reports must never be buried under the crawler's newest 40 items,
   // so pending stories are queried on their own and shown first.
@@ -101,6 +100,11 @@ export default async function Page() {
                       {item.category ? ` · ${item.category}` : ""}
                       {" · "}
                       {item.publishedAt.toLocaleString("en-IN")}
+                      {item.anonymous ? (
+                        <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-800">
+                          anonymous to readers
+                        </span>
+                      ) : null}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

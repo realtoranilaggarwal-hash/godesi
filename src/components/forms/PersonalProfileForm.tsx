@@ -13,6 +13,7 @@ import { AlumniFields } from "@/components/forms/AlumniFields";
 import type { AlumniEntry } from "@/lib/alumni";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
+import { PlaylistField } from "@/components/forms/PlaylistField";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
@@ -29,6 +30,7 @@ export type PersonalProfileValues = {
   skills: string[];
   languages: string[];
   videoUrls: string[];
+  playlistUrl: string | null;
   openToWork: boolean;
   whatsappNumber: string | null;
   socials: Record<string, string | null>;
@@ -204,6 +206,8 @@ export function PersonalProfileForm({
           />
         </Field>
       </div>
+
+      <PlaylistField defaultValue={profile.playlistUrl ?? ""} />
 
       <Field
         label="Videos"
