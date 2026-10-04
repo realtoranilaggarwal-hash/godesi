@@ -53,7 +53,7 @@ export const REWARDS = [
     key: "banner",
     label: "300 × 250 sidebar banner for a month",
     points: 500,
-    auto: false,
+    auto: true,
   },
   {
     key: "featured-listing",
