@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { publishPointsBanner } from "@/lib/pointsBanner";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { rewardFor } from "@/lib/rewards";
@@ -46,6 +47,8 @@ async function applyReward(key: string, userId: string) {
     return true;
   }
 
+  if (key === "banner") return publishPointsBanner(userId);
+
   return false;
 }
 
@@ -63,6 +66,19 @@ export async function redeemPointsAction(
       return {
         error: `You need ${reward.points - balance} more points for this reward.`,
       };
+    }
+
+    if (reward.key === "banner") {
+      const page = await db.user.findUnique({
+        where: { id: user.id },
+        select: { username: true, business: { select: { id: true } } },
+      });
+      if (!page?.username && !page?.business) {
+        return {
+          error:
+            "Pick a username or create your business card first — the banner links to it.",
+        };
+      }
     }
 
     if (reward.key === "featured-listing") {
@@ -109,7 +125,9 @@ export async function redeemPointsAction(
     revalidatePath("/dashboard");
     return {
       success: applied
-        ? `Done — "${reward.label}" is active on your account.`
+        ? reward.key === "banner"
+          ? "Done — your banner is live in the GoDesi sidebar for a month. We've emailed you a copy."
+          : `Done — "${reward.label}" is active on your account.`
         : `Redeemed ${reward.points} points — our team will set up "${reward.label}" within 24 hours.`,
     };
   } catch (error) {
