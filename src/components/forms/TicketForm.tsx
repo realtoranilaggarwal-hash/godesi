@@ -25,6 +25,7 @@ export function TicketForm({
   tiers,
   defaultName,
   defaultEmail,
+  defaultCoupon,
 }: {
   eventId: string;
   price: number;
@@ -34,6 +35,7 @@ export function TicketForm({
   tiers: TicketTierOption[];
   defaultName?: string;
   defaultEmail?: string;
+  defaultCoupon?: string;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
@@ -102,9 +104,13 @@ export function TicketForm({
           />
         </Field>
         {unitPrice ? (
-          <Field label="Coupon code" hint="Optional — from the organiser">
+          <Field
+            label="Coupon code (optional)"
+            hint="Got a code from the organiser or a ✂️ coupon on this page? Type it here — the discount comes off before you pay."
+          >
             <input
               name="couponCode"
+              defaultValue={defaultCoupon}
               placeholder="e.g. EARLYBIRD"
               className={`${inputClass} uppercase`}
             />

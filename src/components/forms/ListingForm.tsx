@@ -21,6 +21,7 @@ import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
+import { CouponTips } from "@/components/CouponTips";
 
 /** Grouped so nobody picks "for sale" expecting to sell a necklace. */
 const KIND_GROUPS: { label: string; kinds: ListingKind[] }[] = [
@@ -285,6 +286,36 @@ export function ListingForm({
             : undefined
         }
       />
+
+      <fieldset className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+        <legend className="px-1 text-sm font-bold text-amber-900">
+          Coupon or offer (optional)
+        </legend>
+        <CouponTips kind="listing" />
+        <Field
+          label="Offer headline"
+          hint={
+            isItem
+              ? "e.g. Free delivery in Edison, or 10% off for GoDesi members"
+              : "e.g. $200 off the first month's rent"
+          }
+        >
+          <input name="offerTitle" maxLength={90} className={inputClass} />
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Code buyers quote" hint="Optional, e.g. GODESI10">
+            <input
+              name="offerCode"
+              maxLength={24}
+              pattern="[A-Za-z0-9\-]{3,24}"
+              className={`${inputClass} uppercase`}
+            />
+          </Field>
+          <Field label="Last day" hint="Optional — blank runs until you remove the listing">
+            <input name="offerExpiresAt" type="date" className={inputClass} />
+          </Field>
+        </div>
+      </fieldset>
 
       {isProperty || isRoom ? <FairHousingNotice /> : null}
       {isRoom ? <RoomSharingNotice /> : null}

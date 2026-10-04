@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireRole, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { normalizeCouponCode } from "@/lib/coupons";
+import { endOfDay } from "@/lib/dealFormat";
 
 const couponSchema = z.object({
   code: z
@@ -124,14 +125,16 @@ export async function createEventCouponAction(
         currency: parsed.data.discountKind === "FIXED" ? event.currency : null,
         eventId: event.id,
         createdById: user.id,
+        publicOffer: parsed.data.publicOffer,
         maxRedemptions: parsed.data.maxRedemptions ?? null,
         expiresAt: parsed.data.expiresAt
-          ? new Date(parsed.data.expiresAt)
+          ? endOfDay(parsed.data.expiresAt)
           : null,
       },
     });
 
     revalidatePath("/dashboard/coupons");
+    revalidatePath(`/events/${event.slug}`);
     return { success: `Coupon ${code} is live for ${event.title}.` };
   } catch (error) {
     return fieldError(error);
@@ -150,4 +153,24 @@ export async function toggleCouponAction(formData: FormData) {
   await db.coupon.update({ where: { id }, data: { active: !coupon.active } });
   revalidatePath("/admin/coupons");
   revalidatePath("/dashboard/coupons");
+}
+
+/** Shows or hides an organiser's event code as a clip-out coupon on the event page. */
+export async function toggleCouponShownAction(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  const coupon = await db.coupon.findUnique({
+    where: { id },
+    include: { event: { select: { slug: true } } },
+  });
+  if (!coupon || !coupon.eventId) throw new Error("NOT_FOUND");
+  if (user.role !== "ADMIN" && coupon.createdById !== user.id)
+    throw new Error("FORBIDDEN");
+
+  await db.coupon.update({
+    where: { id },
+    data: { publicOffer: !coupon.publicOffer },
+  });
+  revalidatePath("/dashboard/coupons");
+  if (coupon.event) revalidatePath(`/events/${coupon.event.slug}`);
 }

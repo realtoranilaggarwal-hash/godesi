@@ -534,6 +534,10 @@ model Listing {
   videoUrl          String?
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl          String?
+  /// Optional clip-out coupon for buyers: headline, code to quote, last day.
+  offerTitle        String?
+  offerCode         String?
+  offerExpiresAt    DateTime?
   status            ListingStatus  @default(APPROVED)
   featured          Boolean        @default(false)
   createdAt         DateTime       @default(now())

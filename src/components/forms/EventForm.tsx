@@ -29,6 +29,7 @@ import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { SpeakerRow } from "@/components/forms/SpeakerRow";
+import { CouponTips } from "@/components/CouponTips";
 import {
   ClubEventFields,
   type ClubOption,
@@ -552,6 +553,7 @@ export function EventForm({
           “call me to register” loses you the sale and hides your seats from
           search.
         </p>
+        <CouponTips kind="event" />
         <Field
           label="Bonus included"
           hint="e.g. Parents get 2 free yoga classes"
@@ -563,31 +565,58 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <input
-            name="couponCode"
-            placeholder="Coupon code — EARLYBIRD"
-            className={inputClass}
-            aria-label="Coupon code"
-          />
-          <input
-            name="couponPercent"
-            type="number"
-            min={1}
-            max={100}
-            placeholder="% off"
-            className={inputClass}
-            aria-label="Coupon percent off"
-          />
-          <input
-            name="couponMaxRedemptions"
-            type="number"
-            min={1}
-            placeholder="Max uses (optional)"
-            className={inputClass}
-            aria-label="Coupon maximum redemptions"
-          />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field
+            label="Coupon code"
+            hint="Letters, numbers, dashes — e.g. EARLYBIRD"
+          >
+            <input
+              name="couponCode"
+              maxLength={24}
+              pattern="[A-Za-z0-9\-]{3,24}"
+              placeholder="EARLYBIRD"
+              className={`${inputClass} uppercase`}
+            />
+          </Field>
+          <Field label="% off" hint="1 to 100 — needed for the code to work">
+            <input
+              name="couponPercent"
+              type="number"
+              min={1}
+              max={100}
+              placeholder="20"
+              className={inputClass}
+            />
+          </Field>
+          <Field
+            label="How many can use it"
+            hint="Optional, e.g. 25 — blank for no limit"
+          >
+            <input
+              name="couponMaxRedemptions"
+              type="number"
+              min={1}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Last day" hint="Optional — blank runs until the event">
+            <input name="couponExpiresAt" type="date" className={inputClass} />
+          </Field>
         </div>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="couponPublic"
+            defaultChecked
+            className="mt-1 h-4 w-4 accent-rose-600"
+          />
+          <span>
+            Show as a ✂️ clip-out coupon on the event page
+            <span className="block text-xs text-slate-500">
+              Untick for a private code you only send to your own list.
+            </span>
+          </span>
+        </label>
       </fieldset>
 
       <SubmitButton pendingLabel="Publishing...">Publish event</SubmitButton>
