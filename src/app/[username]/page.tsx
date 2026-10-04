@@ -26,6 +26,8 @@ import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
 import { cachedCurrentUser } from "@/lib/auth";
+import { clubCategory } from "@/lib/clubs";
+import { thumbImage } from "@/lib/proxyImage";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +62,7 @@ export default async function PublicProfilePage({
   const profile = await load(params.username);
   if (!profile) notFound();
 
-  const { user, events, leads, reviews, listings, gigs } = profile;
+  const { user, events, leads, reviews, listings, gigs, clubs } = profile;
   const journalist = await journalistStats(user.id, { publicOnly: true });
   const [points, viewer] = await Promise.all([
     wallet(user.id),
@@ -75,6 +77,7 @@ export default async function PublicProfilePage({
     reviews.length +
     listings.length +
     gigs.length +
+    clubs.length +
     (journalist?.approved ?? 0);
   const socialLinks = PERSONAL_SOCIALS.map((social) => ({
     ...social,
@@ -434,6 +437,47 @@ export default async function PublicProfilePage({
                   </span>
                 </span>
               </Link>
+            </section>
+          ) : null}
+
+          {clubs.length ? (
+            <section className="space-y-2">
+              <h2 className="text-lg font-bold">Clubs</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {clubs.map(({ role, club }) => (
+                  <Link
+                    key={club.slug}
+                    href={`/clubs/${club.slug}`}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-xl">
+                      {club.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={thumbImage(club.imageUrl, 384)}
+                          alt={club.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        clubCategory(club.category).emoji
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold text-slate-900">
+                        {club.name}
+                      </span>
+                      <span className="block text-sm text-slate-600">
+                        {club.createdById === user.id
+                          ? "Started this club"
+                          : role === "ORGANIZER"
+                            ? "Organiser"
+                            : "Member"}
+                        {club.city ? ` · ${club.city}` : ""}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </section>
           ) : null}
 
