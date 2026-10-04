@@ -42,7 +42,7 @@ import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
-import { matchProfilesByExactName } from "@/lib/peopleLookup";
+import { matchProfilesByExactName, nameKey } from "@/lib/peopleLookup";
 import { EventRsvpPanel } from "@/components/EventRsvpPanel";
 import { MapEmbed } from "@/components/MapEmbed";
 
@@ -59,15 +59,38 @@ type SpeakerProfile = {
   headline: string | null;
 };
 
+type Organizer = {
+  name: string;
+  username: string | null;
+  avatarUrl: string | null;
+  headline: string | null;
+  emailVerifiedAt: Date | null;
+  bannedAt: Date | null;
+} | null;
+
 /**
- * A speaker links to the profile the organiser picked; older speakers saved
- * before that existed still link when a public member has exactly that name.
+ * A speaker links to the profile the organiser picked. A typed-in name links
+ * to the organiser when it is their own name or handle, otherwise to a public
+ * member with that name (case, spaces and punctuation ignored).
  */
-async function withProfiles(speakers: SpeakerRow[]) {
+async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
   const unlinked = speakers
     .filter((speaker) => !speaker.user)
     .map((speaker) => speaker.name);
   const byName = await matchProfilesByExactName(unlinked);
+  const host =
+    organizer?.username && organizer.emailVerifiedAt && !organizer.bannedAt
+      ? {
+          username: organizer.username,
+          avatarUrl: organizer.avatarUrl,
+          headline: organizer.headline,
+        }
+      : null;
+  const hostKeys = new Set(
+    [nameKey(organizer?.name ?? ""), nameKey(organizer?.username ?? "")].filter(
+      Boolean,
+    ),
+  );
   return speakers.map((speaker) => {
     let profile: SpeakerProfile | null = null;
     const linked = speaker.user;
@@ -77,8 +100,10 @@ async function withProfiles(speakers: SpeakerRow[]) {
         avatarUrl: linked.avatarUrl,
         headline: linked.headline,
       };
+    } else if (host && hostKeys.has(nameKey(speaker.name))) {
+      profile = host;
     } else {
-      const match = byName.get(speaker.name.trim().toLowerCase());
+      const match = byName.get(nameKey(speaker.name));
       if (match?.username) {
         profile = {
           username: match.username,
@@ -115,7 +140,14 @@ async function loadEvent(slug: string) {
       sessions: { orderBy: { sortOrder: "asc" } },
       category: { select: { slug: true, name: true, icon: true, color: true } },
       organizer: {
-        select: { name: true, username: true, avatarUrl: true },
+        select: {
+          name: true,
+          username: true,
+          avatarUrl: true,
+          headline: true,
+          emailVerifiedAt: true,
+          bannedAt: true,
+        },
       },
       business: {
         select: { slug: true, name: true, logoUrl: true, city: true },
@@ -178,12 +210,11 @@ export default async function EventPage({
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
-  const speakers = await withProfiles(event.speakers);
+  const speakers = await withProfiles(event.speakers, event.organizer);
   const profileFor = (name: string | null) =>
     name
-      ? (speakers.find(
-          (speaker) => speaker.name.toLowerCase() === name.trim().toLowerCase(),
-        )?.profile ?? null)
+      ? (speakers.find((speaker) => nameKey(speaker.name) === nameKey(name))
+          ?.profile ?? null)
       : null;
   const isOwnerOrDesk = Boolean(
     user && (user.id === event.organizerId || can(user, "events")),
