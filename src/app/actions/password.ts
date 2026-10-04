@@ -9,6 +9,7 @@ import { emailEnabled, noAccountEmail, sendEmail } from "@/lib/email";
 import { consumeEmailOtp, issueEmailOtp } from "@/lib/otp";
 import { canonicalEmail } from "@/lib/signupGuard";
 import { publishAfterVerification } from "@/lib/autoApprove";
+import { ensureUsername } from "@/lib/profiles";
 
 async function findAccount(email: string) {
   return db.user.findFirst({
@@ -40,7 +41,7 @@ export async function requestPasswordResetAction(
     if (account && !account.bannedAt) {
       // A cooldown refusal falls through: the code sent a moment ago is
       // still valid, and the page must read the same for every address.
-      const result = await issueEmailOtp(account.email);
+      const result = await issueEmailOtp(account.email, "reset");
       if (result.ok && !result.delivered) {
         return {
           error:
@@ -91,6 +92,7 @@ export async function resetPasswordAction(
       data: { passwordHash, emailVerifiedAt: new Date() },
     });
     if (!account.emailVerifiedAt) await publishAfterVerification(account.id);
+    await ensureUsername(account.id);
     await createSession(account.id);
   } catch (error) {
     return fieldError(error);
