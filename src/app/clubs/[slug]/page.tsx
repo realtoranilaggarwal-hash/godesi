@@ -26,6 +26,14 @@ async function loadClub(slug: string) {
   return db.club.findUnique({
     where: { slug },
     include: {
+      createdBy: {
+        select: {
+          name: true,
+          username: true,
+          emailVerifiedAt: true,
+          bannedAt: true,
+        },
+      },
       members: {
         orderBy: [{ role: "asc" }, { createdAt: "asc" }],
         include: {
@@ -143,6 +151,9 @@ export default async function ClubPage({
   }) =>
     u.username && u.emailVerifiedAt && !u.bannedAt ? `/${u.username}` : null;
 
+  const founderHref = profileHref(club.createdBy);
+  const founderName = properName(club.createdBy.name);
+
   return (
     <div className="space-y-6">
       {justPaid ? (
@@ -220,6 +231,19 @@ export default async function ClubPage({
                   })}
                 </>
               ) : null}
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Started by{" "}
+              {founderHref ? (
+                <Link
+                  href={founderHref}
+                  className="font-semibold text-indigo-700"
+                >
+                  {founderName}
+                </Link>
+              ) : (
+                <span className="font-semibold">{founderName}</span>
+              )}
             </p>
             {upcoming[0] ? (
               <p className="mt-1 text-sm font-semibold text-indigo-700">
