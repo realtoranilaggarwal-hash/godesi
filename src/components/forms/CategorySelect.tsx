@@ -24,6 +24,7 @@ export function CategorySelect({
   extraLimit = 0,
   defaultExtras = [],
   foundingMember = false,
+  businessHelpers = true,
 }: {
   categories: CategoryOption[];
   defaultCategory?: string | null;
@@ -38,6 +39,8 @@ export function CategorySelect({
   extraLimit?: number;
   defaultExtras?: string[];
   foundingMember?: boolean;
+  /** The "describe what you do" finder and paid extra categories; forms with their own extras turn these off. */
+  businessHelpers?: boolean;
 }) {
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [subcategory, setSubcategory] = useState(defaultSubcategory ?? "");
@@ -61,43 +64,45 @@ export function CategorySelect({
 
   return (
     <>
-      <Field
-        label="Not sure which category? Describe what you do"
-        hint="e.g. financial planning, mortgage loans, tiffin service, mehndi"
-        className="sm:col-span-2"
-      >
-        <input
-          value={trade}
-          onChange={(event) => setTrade(event.target.value)}
-          placeholder="Type what your business does"
-          className={inputClass}
-        />
-        {suggestions.length ? (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {suggestions.map((suggestion) => (
-              <button
-                key={suggestion.subcategorySlug}
-                type="button"
-                onClick={() => {
-                  selectCategory(suggestion.categorySlug);
-                  selectSubcategory(suggestion.subcategorySlug);
-                  setTrade("");
-                }}
-                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
-              >
-                {suggestion.categoryIcon} {suggestion.subcategoryName}
-                <span className="ml-1 font-normal text-indigo-500">
-                  in {suggestion.categoryName}
-                </span>
-              </button>
-            ))}
-          </div>
-        ) : trade.trim().length > 2 ? (
-          <p className="mt-2 text-xs text-slate-500">
-            No match yet — try another word, or pick the category below.
-          </p>
-        ) : null}
-      </Field>
+      {businessHelpers ? (
+        <Field
+          label="Not sure which category? Describe what you do"
+          hint="e.g. financial planning, mortgage loans, tiffin service, mehndi"
+          className="sm:col-span-2"
+        >
+          <input
+            value={trade}
+            onChange={(event) => setTrade(event.target.value)}
+            placeholder="Type what your business does"
+            className={inputClass}
+          />
+          {suggestions.length ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion.subcategorySlug}
+                  type="button"
+                  onClick={() => {
+                    selectCategory(suggestion.categorySlug);
+                    selectSubcategory(suggestion.subcategorySlug);
+                    setTrade("");
+                  }}
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                >
+                  {suggestion.categoryIcon} {suggestion.subcategoryName}
+                  <span className="ml-1 font-normal text-indigo-500">
+                    in {suggestion.categoryName}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : trade.trim().length > 2 ? (
+            <p className="mt-2 text-xs text-slate-500">
+              No match yet — try another word, or pick the category below.
+            </p>
+          ) : null}
+        </Field>
+      ) : null}
 
       <Field label={label} required={required}>
         <select
@@ -143,66 +148,68 @@ export function CategorySelect({
         </select>
       </Field>
 
-      <Field
-        label="Also list under (extra categories)"
-        hint={
-          extraLimit
-            ? foundingMember
-              ? `Founding member perk — included free. Up to ${extraLimit}.`
-              : `Your plan includes up to ${extraLimit}.`
-            : "Paid feature — upgrade to appear under more than one category. Free for founding members."
-        }
-        className="sm:col-span-2"
-      >
-        {extras.map((slug) => (
-          <input key={slug} type="hidden" name="extraCategorySlugs" value={slug} />
-        ))}
-        {extras.length ? (
-          <div className="mb-2 flex flex-wrap gap-2">
-            {extras.map((slug) => (
-              <button
-                key={slug}
-                type="button"
-                onClick={() => setExtras(extras.filter((item) => item !== slug))}
-                className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
-              >
-                {subcategoryName(categories, slug)} ×
-              </button>
-            ))}
-          </div>
-        ) : null}
-        <select
-          value=""
-          disabled={!extraLimit || extras.length >= extraLimit}
-          onChange={(event) => {
-            const slug = event.target.value;
-            if (slug && !extras.includes(slug)) setExtras([...extras, slug]);
-          }}
-          className={inputClass}
-          aria-label="Add an extra category"
+      {businessHelpers ? (
+        <Field
+          label="Also list under (extra categories)"
+          hint={
+            extraLimit
+              ? foundingMember
+                ? `Founding member perk — included free. Up to ${extraLimit}.`
+                : `Your plan includes up to ${extraLimit}.`
+              : "Paid feature — upgrade to appear under more than one category. Free for founding members."
+          }
+          className="sm:col-span-2"
         >
-          <option value="">
-            {!extraLimit
-              ? "Upgrade to add extra categories"
-              : extras.length >= extraLimit
-                ? `Limit reached (${extraLimit})`
-                : "Add another category…"}
-          </option>
-          {categories.map((item) => (
-            <optgroup key={item.slug} label={`${item.icon} ${item.name}`}>
-              {item.children
-                .filter(
-                  (child) => child.slug !== subcategory && !extras.includes(child.slug),
-                )
-                .map((child) => (
-                  <option key={child.slug} value={child.slug}>
-                    {child.name}
-                  </option>
-                ))}
-            </optgroup>
+          {extras.map((slug) => (
+            <input key={slug} type="hidden" name="extraCategorySlugs" value={slug} />
           ))}
-        </select>
-      </Field>
+          {extras.length ? (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {extras.map((slug) => (
+                <button
+                  key={slug}
+                  type="button"
+                  onClick={() => setExtras(extras.filter((item) => item !== slug))}
+                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                >
+                  {subcategoryName(categories, slug)} ×
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <select
+            value=""
+            disabled={!extraLimit || extras.length >= extraLimit}
+            onChange={(event) => {
+              const slug = event.target.value;
+              if (slug && !extras.includes(slug)) setExtras([...extras, slug]);
+            }}
+            className={inputClass}
+            aria-label="Add an extra category"
+          >
+            <option value="">
+              {!extraLimit
+                ? "Upgrade to add extra categories"
+                : extras.length >= extraLimit
+                  ? `Limit reached (${extraLimit})`
+                  : "Add another category…"}
+            </option>
+            {categories.map((item) => (
+              <optgroup key={item.slug} label={`${item.icon} ${item.name}`}>
+                {item.children
+                  .filter(
+                    (child) => child.slug !== subcategory && !extras.includes(child.slug),
+                  )
+                  .map((child) => (
+                    <option key={child.slug} value={child.slug}>
+                      {child.name}
+                    </option>
+                  ))}
+              </optgroup>
+            ))}
+          </select>
+        </Field>
+      ) : null}
     </>
   );
 }
