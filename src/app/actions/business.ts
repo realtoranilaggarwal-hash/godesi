@@ -30,7 +30,7 @@ import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
-import { isPlaylistLink } from "@/lib/youtubePlaylist";
+import { isPlaylistLink, resolvePlaylistField } from "@/lib/youtubePlaylist";
 import { titleCase } from "@/lib/titlecase";
 import {
   CONDITIONS,
@@ -165,7 +165,7 @@ const profileSchema = z.object({
   ),
   playlistUrl: optionalUrl.refine(
     (value) => !value || isPlaylistLink(value),
-    "Paste a YouTube playlist link (youtube.com/playlist?list=…)",
+    "Paste a YouTube playlist or channel link (youtube.com/playlist?list=… or youtube.com/@yourchannel)",
   ),
   linkedinUrl: optionalUrl,
   xUrl: optionalUrl,
@@ -262,6 +262,7 @@ export async function saveBusinessProfileAction(
   let isNew = false;
   try {
     const user = await requireUser();
+    await resolvePlaylistField(formData);
     const parsed = readProfileForm(formData);
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 

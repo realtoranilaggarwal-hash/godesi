@@ -28,6 +28,56 @@ export function isPlaylistLink(url: string) {
   return playlistId(url) !== null;
 }
 
+const CHANNEL_PATH =
+  /^\/(?:channel\/(UC[\w-]{22})|@[\w.-]+|c\/[\w.-]+|user\/[\w.-]+)(?:\/|$)/;
+
+/**
+ * A channel link becomes its "Uploads" playlist (channel id UC… → UU…), so
+ * every video the channel posts shows without the member building a playlist.
+ * @handle, /c/ and /user/ links are looked up on YouTube once, at save time.
+ * Anything else comes back unchanged for the usual playlist check.
+ */
+export async function channelToPlaylistLink(raw: string): Promise<string> {
+  const value = raw.trim();
+  if (!value || playlistId(value)) return value;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    return value;
+  }
+  if (!HOSTS.includes(url.hostname.replace(/^www\./, "").toLowerCase()))
+    return value;
+  const match = url.pathname.match(CHANNEL_PATH);
+  if (!match) return value;
+
+  let channelId: string | null = match[1] ?? null;
+  if (!channelId) {
+    try {
+      const page = await fetch(`https://www.youtube.com${url.pathname}`, {
+        headers: { "accept-language": "en" },
+        signal: AbortSignal.timeout(8000),
+      });
+      const html = page.ok ? await page.text() : "";
+      channelId =
+        html.match(/"externalId":"(UC[\w-]{22})"/)?.[1] ??
+        html.match(/youtube\.com\/channel\/(UC[\w-]{22})/)?.[1] ??
+        null;
+    } catch {
+      return value;
+    }
+  }
+  return channelId ? playlistPageUrl(`UU${channelId.slice(2)}`) : value;
+}
+
+/** Rewrites a pasted channel link in the form to its uploads playlist. */
+export async function resolvePlaylistField(formData: FormData) {
+  const raw = formData.get("playlistUrl");
+  if (typeof raw === "string" && raw.trim()) {
+    formData.set("playlistUrl", await channelToPlaylistLink(raw));
+  }
+}
+
 export function playlistPageUrl(id: string) {
   return `https://www.youtube.com/playlist?list=${id}`;
 }
