@@ -10,6 +10,7 @@ import { unreadCount } from "@/lib/notifications";
 import { gradientFor, softFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { HeaderShell } from "@/components/HeaderShell";
+import type { StripGroup } from "@/components/CategoryStrip";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
@@ -43,6 +44,41 @@ const NAV = [
 ];
 
 /** Chips beside the search box, for pages the main nav has no room for. */
+/** Header strip sections; directory categories not listed here land in "More". */
+const STRIP_GROUPS: StripGroup[] = [
+  { id: "explore", label: "Explore", icon: "✨" },
+  { id: "home", label: "Home & family", icon: "🏠" },
+  { id: "business", label: "Business & money", icon: "💼" },
+  { id: "lifestyle", label: "Events, food & travel", icon: "🎉" },
+  { id: "community", label: "Shopping & community", icon: "🛍️" },
+  { id: "more", label: "More", icon: "➕" },
+];
+
+const STRIP_SECTION_OF: Record<string, string> = {
+  "home-services": "home",
+  "care-services": "home",
+  "real-estate": "home",
+  "rooms-roommates": "home",
+  "health-medical": "home",
+  "auto-services": "home",
+  construction: "home",
+  "business-services": "business",
+  professionals: "business",
+  "financial-services": "business",
+  jobs: "business",
+  "trade-sourcing": "business",
+  "it-training": "business",
+  education: "business",
+  "events-wedding": "lifestyle",
+  "food-catering": "lifestyle",
+  "beauty-lifestyle": "lifestyle",
+  travel: "lifestyle",
+  "shops-retail": "community",
+  "buy-sell": "community",
+  "religious-services": "community",
+  "community-orgs": "community",
+};
+
 const QUICK_LINKS = [
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
@@ -109,6 +145,7 @@ export async function SiteHeader() {
     },
     {
       href: "/events",
+    group: "explore",
       label: "Events",
       icon: "🎟️",
       className:
@@ -116,6 +153,7 @@ export async function SiteHeader() {
     },
     {
       href: "/clubs",
+    group: "explore",
       label: "Clubs",
       icon: "🎤",
       className:
@@ -123,6 +161,7 @@ export async function SiteHeader() {
     },
     {
       href: "/gigs",
+    group: "explore",
       label: "Gigs",
       icon: "🛠️",
       className:
@@ -130,6 +169,7 @@ export async function SiteHeader() {
     },
     {
       href: "/blog",
+    group: "explore",
       label: "Blog",
       icon: "✍️",
       className:
@@ -137,12 +177,14 @@ export async function SiteHeader() {
     },
     {
       href: "/desi-elite",
+    group: "explore",
       label: "Desi Elite",
       icon: "🏆",
       className:
         "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 hover:opacity-90",
     },
     ...categories.map((category) => ({
+      group: STRIP_SECTION_OF[category.slug] ?? "more",
       href: `/categories/${category.slug}`,
       label: category.name,
       icon: category.icon,
@@ -176,6 +218,7 @@ export async function SiteHeader() {
       <PostFab signedIn={Boolean(user)} />
       <HeaderShell
         items={categoryItems}
+        groups={STRIP_GROUPS}
         topRight={
           <>
             {firstName ? (

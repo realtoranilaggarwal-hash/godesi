@@ -2,20 +2,26 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { CategoryStrip, type StripItem } from "@/components/CategoryStrip";
+import {
+  CategoryStrip,
+  type StripGroup,
+  type StripItem,
+} from "@/components/CategoryStrip";
 import { LiveMediaLinks } from "@/components/LiveMediaButtons";
 
 /**
- * Wide screens get the full category strip; once you scroll it folds into a
- * dropdown, and on narrow screens it lives in the menu button instead.
+ * The one-line category strip sits under the bar; once you scroll it folds into
+ * a dropdown on wide screens and hides on narrow ones.
  */
 export function HeaderShell({
   bar,
   items,
+  groups,
   topRight,
 }: {
   bar: ReactNode;
   items: StripItem[];
+  groups?: StripGroup[];
   /** Greeting and weather, rendered on the server and passed in. */
   topRight?: ReactNode;
 }) {
@@ -73,13 +79,13 @@ export function HeaderShell({
           </div>
           {open ? (
             <div className="absolute inset-x-0 top-full border-b border-slate-200 bg-white shadow-lg">
-              <CategoryStrip items={items} />
+              <CategoryStrip items={items} groups={groups} />
             </div>
           ) : null}
         </div>
       ) : (
-        <div className="hidden border-t border-slate-100 bg-white lg:block">
-          <CategoryStrip items={items} />
+        <div className="border-t border-slate-100 bg-white">
+          <CategoryStrip items={items} groups={groups} />
         </div>
       )}
     </header>
