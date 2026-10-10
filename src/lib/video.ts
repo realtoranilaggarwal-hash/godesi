@@ -20,6 +20,14 @@ export function videoEmbedUrl(raw: string | null | undefined): string | null {
   }
 
   if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+    const list = url.searchParams.get("list");
+    if (!url.searchParams.get("v") && list && /^[\w-]{10,}$/.test(list)) {
+      return `https://www.youtube-nocookie.com/embed/videoseries?list=${list}`;
+    }
+    const channel = url.pathname.match(/^\/channel\/(UC[\w-]{22})\/live\/?$/)?.[1];
+    if (channel) {
+      return `https://www.youtube-nocookie.com/embed/live_stream?channel=${channel}`;
+    }
     const id =
       url.searchParams.get("v") ??
       url.pathname.match(/^\/(?:embed|shorts|live|v)\/([\w-]+)/)?.[1] ??

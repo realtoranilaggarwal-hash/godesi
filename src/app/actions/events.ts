@@ -206,6 +206,10 @@ const eventSchema = z.object({
     (value) => !value || isSupportedVideoUrl(value),
     "Paste a YouTube or Vimeo video link",
   ),
+  liveUrl: optionalUrl.refine(
+    (value) => !value || isSupportedVideoUrl(value),
+    "Paste the YouTube Live link (youtube.com/live/… or youtu.be/…)",
+  ),
   albumUrl: optionalUrl.refine(
     (value) => !value || isAlbumLink(value),
     "Paste a Google Photos album link (photos.app.goo.gl/…)",
@@ -280,6 +284,7 @@ export async function createEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl") ?? undefined,
       videoUrl: formData.get("videoUrl") ?? undefined,
+      liveUrl: formData.get("liveUrl") ?? undefined,
       albumUrl: formData.get("albumUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -471,6 +476,10 @@ export async function createEventAction(
         tags,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        liveUrl: parsed.data.liveUrl ?? null,
+        liveTicketOnly:
+          Boolean(parsed.data.liveUrl) &&
+          formData.get("liveTicketOnly") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         price,
         currency: parsed.data.currency ?? requestCurrency(),
