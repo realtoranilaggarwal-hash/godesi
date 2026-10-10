@@ -169,6 +169,20 @@ export function EventForm({
           </select>
         </Field>
         <EventVenueFields venues={venues} online={mode === "ONLINE"} />
+        <Field label="City">
+          <input name="city" required className={inputClass} />
+        </Field>
+        <Field label="State / province">
+          <input name="state" required className={inputClass} />
+        </Field>
+        <Field label="Country">
+          <input
+            name="country"
+            required
+            defaultValue={defaultCountry}
+            className={inputClass}
+          />
+        </Field>
         {mode === "OFFLINE" ? null : (
           <Field label="Join link" hint="Zoom, Meet or stream URL">
             <input
@@ -200,20 +214,6 @@ export function EventForm({
             .
           </p>
         </Field>
-        <Field label="City">
-          <input name="city" required className={inputClass} />
-        </Field>
-        <Field label="State / province">
-          <input name="state" required className={inputClass} />
-        </Field>
-        <Field label="Country">
-          <input
-            name="country"
-            required
-            defaultValue={defaultCountry}
-            className={inputClass}
-          />
-        </Field>
         <Field label="How often?">
           <select
             name="frequency"
@@ -238,6 +238,7 @@ export function EventForm({
           required={false}
           defaultCategory={defaultCategory}
           defaultSubcategory={defaultSubcategory}
+          businessHelpers={false}
         />
         <Field
           label="Tags"
