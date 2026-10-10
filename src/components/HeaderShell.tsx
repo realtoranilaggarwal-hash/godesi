@@ -6,6 +6,7 @@ import {
   CategoryStrip,
   type StripGroup,
   type StripItem,
+  type StripLink,
 } from "@/components/CategoryStrip";
 import { LiveMediaLinks } from "@/components/LiveMediaButtons";
 
@@ -17,11 +18,13 @@ export function HeaderShell({
   bar,
   items,
   groups,
+  links,
   topRight,
 }: {
   bar: ReactNode;
   items: StripItem[];
   groups?: StripGroup[];
+  links?: StripLink[];
   /** Greeting and weather, rendered on the server and passed in. */
   topRight?: ReactNode;
 }) {
@@ -59,11 +62,7 @@ export function HeaderShell({
         </div>
       </div>
 
-      <div
-        className={scrolled ? "[&_img]:!h-7" : undefined}
-      >
-        {bar}
-      </div>
+      <div className={scrolled ? "[&_img]:!h-7" : undefined}>{bar}</div>
 
       {scrolled ? (
         <div className="relative hidden border-t border-slate-100 lg:block">
@@ -79,13 +78,13 @@ export function HeaderShell({
           </div>
           {open ? (
             <div className="absolute inset-x-0 top-full border-b border-slate-200 bg-white shadow-lg">
-              <CategoryStrip items={items} groups={groups} />
+              <CategoryStrip items={items} groups={groups} links={links} />
             </div>
           ) : null}
         </div>
       ) : (
         <div className="border-t border-slate-100 bg-white">
-          <CategoryStrip items={items} groups={groups} />
+          <CategoryStrip items={items} groups={groups} links={links} />
         </div>
       )}
     </header>
