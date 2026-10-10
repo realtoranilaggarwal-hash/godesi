@@ -63,6 +63,7 @@ export default async function NewListingPage({
       <PostAnything title="Everything you can post on GoDesi" />
       <Card>
         <ListingForm
+          key={`${kind}-${group ?? ""}`}
           defaultKind={kind}
           imageLimit={listingImageLimit(user)}
           paidImageLimit={PLANS.PRO.mediaLimit}
