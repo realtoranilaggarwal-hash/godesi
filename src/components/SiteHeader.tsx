@@ -15,6 +15,7 @@ import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
 import { PostFab } from "@/components/PostFab";
+import { PromoLinks } from "@/components/PromoLinks";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
@@ -270,44 +271,7 @@ export async function SiteHeader() {
 
             <LiveMediaChips className="hidden lg:flex" />
 
-            {/* Chips that don't fit wrap out of the fixed-height row instead of
-              pushing the account buttons off-screen; "More" lists them all. */}
-            <nav
-              aria-label="Popular on GoDesi"
-              className="hidden h-8 min-w-0 flex-1 flex-wrap content-start items-center gap-x-1 gap-y-4 overflow-hidden text-xs font-semibold lg:flex"
-            >
-              {PROMO_LINKS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1.5 text-slate-700 hover:bg-slate-200"
-                >
-                  <span aria-hidden className="mr-1">
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <details className="relative hidden shrink-0 lg:block">
-              <summary className="cursor-pointer list-none whitespace-nowrap rounded-full bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 [&::-webkit-details-marker]:hidden">
-                More ▾
-              </summary>
-              <div className="absolute right-0 z-50 mt-2 grid w-96 grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-white p-2 text-xs font-semibold shadow-lg">
-                {[...PROMO_LINKS, ...STRIP_LINKS].map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="truncate rounded-lg px-2 py-1.5 text-slate-700 hover:bg-slate-100"
-                  >
-                    <span aria-hidden className="mr-1">
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </details>
+            <PromoLinks links={PROMO_LINKS} more={STRIP_LINKS} />
 
             <div className="ml-auto flex shrink-0 items-center gap-1 text-sm font-medium sm:gap-2">
               <Link
