@@ -114,7 +114,7 @@ function Chart({
 export default async function VisaBulletinPage() {
   const [headlines, helpers] = await Promise.all([
     visaHeadlines(),
-    immigrationHelpers(),
+    immigrationHelpers().catch(() => []),
   ]);
 
   const filingNote =
@@ -212,7 +212,7 @@ export default async function VisaBulletinPage() {
         ) : null}
 
         <Card>
-          <h2 className="font-bold">🤝 Immigration help near you</h2>
+          <h2 className="font-bold">🤝 Immigration help on GoDesi</h2>
           <p className="mb-3 text-sm text-slate-600">
             Immigration attorneys, visa consultants and H-1B support listed on
             GoDesi. Ask for their licence (US: bar number or DOJ-accredited
