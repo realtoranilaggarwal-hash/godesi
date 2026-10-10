@@ -28,6 +28,7 @@ import {
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { LiveStreamFields } from "@/components/forms/LiveStreamFields";
 import { SpeakerRow } from "@/components/forms/SpeakerRow";
 import {
   ClubEventFields,
@@ -283,6 +284,7 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
+        <LiveStreamFields />
         <PhotoAlbumField hint="Photos from your last event? Paste a public Google Photos album link and Godesi shows a 3×3 gallery that opens the album." />
       </div>
 

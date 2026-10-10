@@ -247,20 +247,22 @@ export default async function EventPage({
     : null;
   // An event waiting on moderation is only visible to its organiser and the desk.
   if (event.status !== "APPROVED" && !isOwnerOrDesk) notFound();
-  // The join link is what an online seat buys, so only a ticket holder, the
-  // organiser and the events desk may see it.
-  const joinUrl =
+  // The join link (and a ticket-only stream) is what an online seat buys, so
+  // only a ticket holder, the organiser and the events desk may see it.
+  const hasSeat =
     isOwnerOrDesk ||
-    (user &&
+    (Boolean(user) &&
+      Boolean(event.onlineUrl || (event.liveUrl && event.liveTicketOnly)) &&
       (await db.ticket.count({
         where: {
           eventId: event.id,
-          userId: user.id,
+          userId: user!.id,
           status: "CONFIRMED",
         },
-      })) > 0)
-      ? event.onlineUrl
-      : null;
+      })) > 0);
+  const joinUrl = hasSeat ? event.onlineUrl : null;
+  const liveUrl =
+    event.liveUrl && (!event.liveTicketOnly || hasSeat) ? event.liveUrl : null;
   // Imported from someone else's public calendar: we list it and send people to
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
@@ -656,6 +658,20 @@ export default async function EventPage({
                     {eventFeatureIcon(feature)} {feature}
                   </span>
                 ))}
+              </div>
+            ) : null}
+            {liveUrl ? (
+              <div className="space-y-2">
+                <h2 className="font-bold text-rose-600">🔴 Watch live</h2>
+                <VideoEmbed url={liveUrl} title={`${event.title} — live`} />
+              </div>
+            ) : event.liveUrl ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                <p className="font-bold">🔴 This event streams live on GoDesi</p>
+                <p>
+                  Book a ticket below and the live video plays right here on
+                  this page.
+                </p>
               </div>
             ) : null}
             <p className="whitespace-pre-line text-slate-700">
