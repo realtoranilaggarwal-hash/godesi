@@ -1832,6 +1832,12 @@ model MeetupProfile {
   state            String?
   /// Comma separated intents: business, coffee, chit-chat, community.
   intents          String
+  /// Club-category slugs (lib/clubs CLUB_CATEGORIES) the member enjoys; they drive suggestions.
+  interests        String[]      @default([])
+  /// Preferred age band for suggestions (lib/meetups AGE_RANGES); null = any age.
+  ageRange         String?
+  /// How far to look for people, in miles; null = anywhere / online.
+  meetRadiusMiles  Int?
   bio              String
   whatsappNumber   String?
   status           ListingStatus @default(PENDING)
