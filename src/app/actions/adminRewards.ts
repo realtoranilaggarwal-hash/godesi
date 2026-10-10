@@ -6,7 +6,8 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { notify } from "@/lib/notifications";
-import { POINTS, type EarnReason } from "@/lib/rewards";
+import { POINTS, rewardFor, type EarnReason } from "@/lib/rewards";
+import { publishPointsBanner } from "@/lib/pointsBanner";
 import {
   awardPoints,
   payPendingReferralMilestones,
@@ -181,16 +182,24 @@ export async function reviewRedemptionAction(formData: FormData) {
     throw new Error("Nothing to review");
 
   if (decision === "FULFILLED") {
+    const isBanner = redemption.reward === rewardFor("banner")?.label;
+    if (isBanner && !(await publishPointsBanner(redemption.userId))) {
+      throw new Error(
+        "This member has no card or profile page for the banner to link to.",
+      );
+    }
     await db.redemption.update({
       where: { id },
       data: { status: "FULFILLED" },
     });
-    await notify({
-      userId: redemption.userId,
-      title: "Your reward is live",
-      body: redemption.reward,
-      href: "/dashboard/rewards",
-    });
+    if (!isBanner) {
+      await notify({
+        userId: redemption.userId,
+        title: "Your reward is live",
+        body: redemption.reward,
+        href: "/dashboard/rewards",
+      });
+    }
   } else {
     await db.$transaction([
       db.redemption.update({ where: { id }, data: { status: "REJECTED" } }),
