@@ -625,6 +625,8 @@ export default async function BusinessProfilePage({
                   code={deal.code}
                   linkUrl={deal.linkUrl}
                   expiresAt={deal.expiresAt}
+                  issuer={business.name}
+                  pageUrl={`godesi.com/b/${business.slug}`}
                 />
               ))}
             </div>

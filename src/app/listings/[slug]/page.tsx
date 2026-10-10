@@ -32,6 +32,8 @@ import { ListingCard } from "@/components/ListingCard";
 import { getCurrentUser } from "@/lib/auth";
 import { PROPERTY_GROUP_LABELS } from "@/lib/property";
 import Link from "next/link";
+import { ClipCoupon } from "@/components/ClipCoupon";
+import { expiryLabel } from "@/lib/dealFormat";
 
 export const dynamic = "force-dynamic";
 
@@ -170,6 +172,22 @@ export default async function ListingPage({
             />
           ) : null}
         </Card>
+
+        {listing.offerTitle &&
+        (!listing.offerExpiresAt || listing.offerExpiresAt > new Date()) ? (
+          <ClipCoupon
+            title={listing.offerTitle}
+            details={
+              listing.offerCode
+                ? "Quote the code when you message the seller."
+                : "Mention GoDesi when you message the seller."
+            }
+            code={listing.offerCode}
+            ends={expiryLabel(listing.offerExpiresAt)}
+            issuer={listing.owner?.name ?? listing.title}
+            pageUrl={`godesi.com/listings/${listing.slug}`}
+          />
+        ) : null}
 
         {listing.images.length ? (
           <div className="grid gap-3 sm:grid-cols-2">

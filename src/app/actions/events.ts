@@ -21,6 +21,7 @@ import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
+import { endOfDay } from "@/lib/dealFormat";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
 import {
   cleanEventCategories,
@@ -234,6 +235,7 @@ async function createLaunchCoupon(
   if (clash) return;
 
   const maxRedemptions = Number(formData.get("couponMaxRedemptions") ?? 0);
+  const lastDay = String(formData.get("couponExpiresAt") ?? "");
   await db.coupon.create({
     data: {
       code,
@@ -243,6 +245,8 @@ async function createLaunchCoupon(
       eventId,
       createdById: userId,
       maxRedemptions: maxRedemptions > 0 ? maxRedemptions : null,
+      publicOffer: formData.get("couponPublic") === "on",
+      expiresAt: /^\d{4}-\d{2}-\d{2}$/.test(lastDay) ? endOfDay(lastDay) : null,
     },
   });
 }

@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { describeCoupon } from "@/lib/coupons";
-import { toggleCouponAction } from "@/app/actions/coupons";
+import {
+  toggleCouponAction,
+  toggleCouponShownAction,
+} from "@/app/actions/coupons";
+import { CouponTips } from "@/components/CouponTips";
 import { EventCouponForm } from "@/components/forms/CouponForms";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
@@ -23,7 +27,7 @@ export default async function MyCouponsPage() {
     db.coupon.findMany({
       where: { createdById: user.id },
       orderBy: { createdAt: "desc" },
-      include: { event: { select: { title: true } } },
+      include: { event: { select: { title: true, slug: true } } },
     }),
   ]);
 
@@ -42,6 +46,9 @@ export default async function MyCouponsPage() {
           Give your customers a code they can enter when booking tickets for your event.
           Each customer can use a code once.
         </p>
+        <div className="mb-3">
+          <CouponTips kind="event" />
+        </div>
         {events.length ? (
           <EventCouponForm events={events} />
         ) : (
@@ -73,8 +80,25 @@ export default async function MyCouponsPage() {
                     {coupon.expiresAt
                       ? ` · expires ${coupon.expiresAt.toLocaleDateString()}`
                       : ""}
+                    {coupon.eventId
+                      ? coupon.publicOffer
+                        ? " · ✂️ shown on the event page"
+                        : " · private (not shown)"
+                      : ""}
                   </p>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+                {coupon.event ? (
+                  <form action={toggleCouponShownAction}>
+                    <input type="hidden" name="id" value={coupon.id} />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                    >
+                      {coupon.publicOffer ? "hide coupon" : "show on event page"}
+                    </button>
+                  </form>
+                ) : null}
                 <form action={toggleCouponAction}>
                   <input type="hidden" name="id" value={coupon.id} />
                   <button
@@ -84,6 +108,7 @@ export default async function MyCouponsPage() {
                     {coupon.active ? "switch off" : "switch on"}
                   </button>
                 </form>
+                </div>
               </li>
             ))}
           </ul>

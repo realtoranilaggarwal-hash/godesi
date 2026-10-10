@@ -45,6 +45,8 @@ export type ListingCardItem = {
   openHouseAt?: Date | null;
   nriFriendly?: boolean;
   investmentDeal?: boolean;
+  offerTitle?: string | null;
+  offerExpiresAt?: Date | null;
   images: { url: string }[];
   owner: { name: string; username: string | null; avatarUrl: string | null };
 };
@@ -99,6 +101,10 @@ export function ListingCard({
           <Badge tone="indigo">{KIND_LABELS[listing.kind]}</Badge>
           {categoryName ? <Badge tone="green">{categoryName}</Badge> : null}
           {listing.featured ? <Badge tone="amber">Featured</Badge> : null}
+          {listing.offerTitle &&
+          (!listing.offerExpiresAt || listing.offerExpiresAt > new Date()) ? (
+            <Badge tone="red">✂️ Coupon</Badge>
+          ) : null}
           {listing.propertyType ? (
             <Badge tone="green">{propertyTypeLabel(listing.propertyType)}</Badge>
           ) : null}

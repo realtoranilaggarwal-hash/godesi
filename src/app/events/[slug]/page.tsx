@@ -14,6 +14,9 @@ import {
   seatsLeft,
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
+import { ClipCoupon } from "@/components/ClipCoupon";
+import { describeCoupon } from "@/lib/coupons";
+import { expiryLabel } from "@/lib/dealFormat";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
@@ -204,10 +207,28 @@ export default async function EventPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { error?: string };
+  searchParams: { error?: string; coupon?: string };
 }) {
   const event = await loadEvent(params.slug);
   if (!event || event.status === "REJECTED") notFound();
+  const now = new Date();
+  const coupons = (
+    await db.coupon.findMany({
+      where: {
+        eventId: event.id,
+        scope: "TICKETS",
+        active: true,
+        publicOffer: true,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      },
+      orderBy: { createdAt: "asc" },
+      take: 3,
+    })
+  ).filter(
+    (coupon) =>
+      coupon.maxRedemptions === null ||
+      coupon.timesRedeemed < coupon.maxRedemptions,
+  );
 
   const user = await getCurrentUser();
   const speakers = await withProfiles(event.speakers, event.organizer);
@@ -1007,8 +1028,33 @@ export default async function EventPage({
             </p>
           </Card>
         ) : (
-          <Card>
+          <Card id="book">
             <h2 className="font-bold">Book your seats</h2>
+            {coupons.length && !past && left !== 0 ? (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {coupons.map((coupon) => (
+                  <ClipCoupon
+                    key={coupon.id}
+                    title={`${describeCoupon(coupon)} your tickets`}
+                    details={
+                      coupon.maxRedemptions
+                        ? `First ${coupon.maxRedemptions} bookings only · ${
+                            coupon.maxRedemptions - coupon.timesRedeemed
+                          } left. Type the code when you book.`
+                        : "Type the code in the Coupon code box when you book."
+                    }
+                    code={coupon.code}
+                    ends={expiryLabel(coupon.expiresAt)}
+                    issuer={event.title}
+                    pageUrl={`godesi.com/events/${event.slug}`}
+                    action={{
+                      href: `/events/${event.slug}?coupon=${encodeURIComponent(coupon.code)}#book`,
+                      label: "Use it now ↓",
+                    }}
+                  />
+                ))}
+              </div>
+            ) : null}
             {past ? (
               <p className="mt-2 text-sm text-slate-600">
                 This event has already taken place.
@@ -1042,6 +1088,7 @@ export default async function EventPage({
                   }))}
                   defaultName={user.name}
                   defaultEmail={user.email}
+                  defaultCoupon={searchParams.coupon?.slice(0, 24)}
                 />
               </div>
             )}
