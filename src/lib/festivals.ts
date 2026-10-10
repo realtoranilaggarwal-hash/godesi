@@ -7,6 +7,10 @@ export type Festival = {
   dates: string[];
   blurb: string;
   emoji: string;
+  /** Event category slug (see eventCategories) whose events belong on this festival's page. */
+  genre?: string;
+  /** Lower-case words that put an event under this festival when it has no genre. */
+  keywords: string[];
 };
 
 /**
@@ -16,6 +20,8 @@ export type Festival = {
 export const FESTIVALS: Festival[] = [
   {
     name: "Makar Sankranti",
+    genre: "onam-pongal-bihu",
+    keywords: ["sankranti", "pongal", "lohri", "uttarayan"],
     faith: "HINDU_TEMPLE",
     emoji: "🪁",
     blurb: "Harvest festival marked with kite flying, til-gud and holy dips.",
@@ -23,6 +29,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Maha Shivaratri",
+    keywords: ["shivaratri", "shivratri"],
     faith: "HINDU_TEMPLE",
     emoji: "🔱",
     blurb: "Night-long vigil and abhishekam at Shiva temples.",
@@ -30,6 +37,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Holi",
+    genre: "holi",
+    keywords: ["holi"],
     faith: "HINDU_TEMPLE",
     emoji: "🎨",
     blurb: "Festival of colours; Holika Dahan the previous evening.",
@@ -37,6 +46,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Ram Navami",
+    keywords: ["ram navami", "rama navami"],
     faith: "HINDU_TEMPLE",
     emoji: "🏹",
     blurb: "Birth of Lord Rama — bhajans, processions and temple prasad.",
@@ -44,6 +54,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Eid al-Fitr",
+    genre: "eid-christmas",
+    keywords: ["eid"],
     faith: "MOSQUE",
     emoji: "🌙",
     blurb: "End of Ramadan — Eid namaz, sewaiyan and zakat al-fitr.",
@@ -51,6 +63,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Baisakhi",
+    genre: "onam-pongal-bihu",
+    keywords: ["baisakhi", "vaisakhi"],
     faith: "GURUDWARA",
     emoji: "🌾",
     blurb: "Khalsa foundation day — nagar kirtan and langar at gurudwaras.",
@@ -58,6 +72,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Good Friday",
+    keywords: ["good friday"],
     faith: "CHURCH",
     emoji: "✝️",
     blurb: "Passion services and the Way of the Cross.",
@@ -65,6 +80,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Easter Sunday",
+    keywords: ["easter"],
     faith: "CHURCH",
     emoji: "🕊️",
     blurb: "Resurrection Sunday — sunrise services and family lunches.",
@@ -72,6 +88,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Mahavir Jayanti",
+    keywords: ["mahavir"],
     faith: "JAIN_TEMPLE",
     emoji: "🪷",
     blurb: "Birth of Bhagwan Mahavir — rath yatra and temple abhishek.",
@@ -79,6 +96,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Buddha Purnima",
+    keywords: ["buddha purnima", "vesak"],
     faith: "BUDDHIST_TEMPLE",
     emoji: "☸️",
     blurb: "Birth, enlightenment and nirvana of the Buddha.",
@@ -86,6 +104,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Eid al-Adha",
+    genre: "eid-christmas",
+    keywords: ["eid al-adha", "bakrid", "eid"],
     faith: "MOSQUE",
     emoji: "🕌",
     blurb: "Festival of sacrifice, marked with Eid namaz and qurbani.",
@@ -93,6 +113,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Rath Yatra",
+    keywords: ["rath yatra", "ratha yatra"],
     faith: "HINDU_TEMPLE",
     emoji: "🛕",
     blurb: "Jagannath chariot procession, celebrated worldwide.",
@@ -100,6 +121,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Raksha Bandhan",
+    keywords: ["raksha bandhan", "rakhi"],
     faith: "HINDU_TEMPLE",
     emoji: "🧵",
     blurb: "Sisters tie rakhi; temples hold community celebrations.",
@@ -107,6 +129,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Janmashtami",
+    keywords: ["janmashtami", "krishna"],
     faith: "HINDU_TEMPLE",
     emoji: "🪈",
     blurb: "Krishna's birth — midnight aarti, jhanki and dahi handi.",
@@ -114,6 +137,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Ganesh Chaturthi",
+    genre: "ganesh-utsav",
+    keywords: ["ganesh", "ganapati"],
     faith: "HINDU_TEMPLE",
     emoji: "🐘",
     blurb: "Ten days of Ganpati pandals, modaks and visarjan.",
@@ -121,6 +146,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Navratri",
+    genre: "garba-dandiya",
+    keywords: ["navratri", "garba", "dandiya"],
     faith: "HINDU_TEMPLE",
     emoji: "💃",
     blurb: "Nine nights of Durga puja, garba and dandiya.",
@@ -128,6 +155,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Dussehra",
+    genre: "durga-puja",
+    keywords: ["dussehra", "durga puja", "ramlila"],
     faith: "HINDU_TEMPLE",
     emoji: "🏹",
     blurb: "Ravan dahan and Ramlila finales.",
@@ -135,6 +164,8 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Diwali",
+    genre: "diwali",
+    keywords: ["diwali", "deepavali"],
     faith: "HINDU_TEMPLE",
     emoji: "🪔",
     blurb: "Festival of lights — Lakshmi puja, diyas and sweets.",
@@ -142,6 +173,7 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Guru Nanak Jayanti (Gurpurab)",
+    keywords: ["gurpurab", "guru nanak"],
     faith: "GURUDWARA",
     emoji: "🪯",
     blurb: "Birth of Guru Nanak Dev Ji — akhand path, nagar kirtan, langar.",
@@ -149,12 +181,30 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Christmas",
+    genre: "eid-christmas",
+    keywords: ["christmas"],
     faith: "CHURCH",
     emoji: "🎄",
     blurb: "Midnight mass, carols and community feasts.",
     dates: ["2026-12-25", "2027-12-25", "2028-12-25"],
   },
 ];
+
+export function festivalSlug(festival: Pick<Festival, "name">) {
+  return festival.name
+    .toLowerCase()
+    .replace(/\(.*?\)/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function festivalBySlug(slug: string) {
+  return FESTIVALS.find((festival) => festivalSlug(festival) === slug) ?? null;
+}
+
+export function festivalDates(festival: Festival) {
+  return festival.dates.map((value) => new Date(`${value}T00:00:00Z`));
+}
 
 export type UpcomingFestival = Festival & { date: Date; daysAway: number };
 

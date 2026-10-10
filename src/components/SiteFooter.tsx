@@ -7,6 +7,7 @@ import { TrafficCounter } from "@/components/TrafficCounter";
 import { LocalePicker } from "@/components/LocalePicker";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { trafficReportUrl } from "@/lib/traffic";
 
 /** Five roughly equal columns, so no single list runs far past the others. */
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
@@ -18,11 +19,17 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/search", label: "Businesses" },
         { href: "/leads", label: "Leads" },
         { href: "/events", label: "Events" },
+        { href: "/clubs", label: "Clubs — karaoke, cricket, foodies" },
+        { href: "/deals", label: "🏷️ Deals & offers" },
+        { href: "/shop", label: "🛍️ Desi shop" },
         { href: "/gigs", label: "Gigs — services $5–$100" },
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Resources" },
         { href: "/news", label: "News" },
         { href: "/trending", label: "🔥 Trending hashtags" },
+        { href: "/festivals", label: "🪔 Festival calendar" },
+        { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
+        { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
         { href: "/blog", label: "Blog" },
         { href: "/guide", label: "City guides" },
         { href: "/find", label: "Search everything" },
@@ -43,6 +50,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
         { href: "/advertise", label: "Advertise on Godesi" },
         { href: "/events/new", label: "Post an event" },
+        { href: "/clubs/new", label: "Start a club" },
+        { href: "/dashboard/deals", label: "Post a deal" },
         { href: "/dashboard/gigs", label: "Sell a gig" },
         { href: "/dashboard", label: "Dashboard" },
       ],
@@ -51,6 +60,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Community",
       links: [
         { href: "/connect", label: "Connect" },
+        { href: "/clubs", label: "🎤 Clubs — karaoke, cricket, foodies" },
         { href: "/people", label: "People on GoDesi" },
         { href: "/professionals", label: "GoDesi Professionals" },
         { href: "/alumni", label: "Find your batchmates" },
@@ -97,15 +107,14 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
 
 export function SiteFooter() {
   const socials = socialLinks();
-  /** Public Umami dashboard, shown only when a share URL is configured. */
-  const statsUrl = process.env.NEXT_PUBLIC_UMAMI_SHARE_URL;
+  const statsUrl = trafficReportUrl();
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
-      <div className="mx-auto w-full max-w-7xl px-4 pt-6">
+      <div className="mx-auto w-full max-w-screen-2xl px-4 pt-6">
         <FooterBanner />
       </div>
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mx-auto grid max-w-screen-2xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
         <div>
           <Link href="/" aria-label="Godesi home">
             <Image
@@ -178,8 +187,9 @@ export function SiteFooter() {
                 <li>
                   <a
                     href={statsUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                    {...(statsUrl.startsWith("/")
+                      ? {}
+                      : { target: "_blank", rel: "noreferrer" })}
                     className="hover:text-slate-900"
                   >
                     Live traffic stats
@@ -192,7 +202,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-slate-100">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
+        <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
           <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
           <TrafficCounter />
           <LocalePicker currency={displayCurrency()} open />

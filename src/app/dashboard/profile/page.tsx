@@ -16,6 +16,7 @@ import {
 } from "@/lib/plans";
 import { requestCountry } from "@/lib/currency";
 import { SignOutButton } from "@/components/SignOutButton";
+import { DealsAndShopStrip } from "@/components/DealsAndShopStrip";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -126,6 +127,8 @@ export default async function ProfileEditorPage({
             foundingMember={user.foundingNumber !== null}
           />
         </Card>
+
+        <DealsAndShopStrip />
       </div>
 
       <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">

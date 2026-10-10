@@ -13,7 +13,7 @@ import {
   type PersonalSocialKey,
 } from "@/lib/personalProfile";
 import { isSupportedVideoUrl } from "@/lib/video";
-import { isPlaylistLink } from "@/lib/youtubePlaylist";
+import { channelToPlaylistLink, isPlaylistLink } from "@/lib/youtubePlaylist";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { harvestMediaLinks, mergeLinks } from "@/lib/mediaLinks";
 import { institutionSlug, MIN_YEAR } from "@/lib/alumni";
@@ -28,7 +28,11 @@ const optionalUrl = z
 const schema = z.object({
   name: z.string().trim().min(2, "Your name is required"),
   username: z.string().trim().min(3, "Pick a username"),
-  bio: z.string().trim().max(500, "Keep your bio under 500 characters").optional(),
+  bio: z
+    .string()
+    .trim()
+    .max(500, "Keep your bio under 500 characters")
+    .optional(),
   location: z.string().trim().max(120).optional(),
   headline: z.string().trim().max(120).optional(),
   lookingFor: z.string().trim().max(500).optional(),
@@ -79,9 +83,12 @@ export async function savePersonalProfileAction(
     if (badVideo) {
       return { error: "Videos must be YouTube or Vimeo links, one per line." };
     }
-    let playlistUrl = value("playlistUrl").trim();
+    let playlistUrl = await channelToPlaylistLink(value("playlistUrl"));
     if (playlistUrl && !isPlaylistLink(playlistUrl)) {
-      return { error: "Paste a YouTube playlist link (youtube.com/playlist?list=…)." };
+      return {
+        error:
+          "Paste a YouTube playlist or channel link (youtube.com/playlist?list=… or youtube.com/@yourchannel).",
+      };
     }
     let albumUrl = value("albumUrl").trim();
     if (albumUrl && !isAlbumLink(albumUrl)) {
@@ -134,7 +141,10 @@ export async function savePersonalProfileAction(
       const institution = schools[index].trim().slice(0, 120);
       if (!institution) continue;
       const year = Number.parseInt(years[index] ?? "", 10);
-      if (years[index] && (Number.isNaN(year) || year < MIN_YEAR || year > thisYear + 8)) {
+      if (
+        years[index] &&
+        (Number.isNaN(year) || year < MIN_YEAR || year > thisYear + 8)
+      ) {
         return { error: `Check the year for ${institution}.` };
       }
       alumni.push({
@@ -151,26 +161,26 @@ export async function savePersonalProfileAction(
     const previous = user.username;
     try {
       await db.user.update({
-      where: { id: user.id },
-      data: {
-        name: parsed.data.name,
-        username,
-        bio: text.bio || null,
-        location: parsed.data.location || null,
-        headline: parsed.data.headline || null,
-        lookingFor: text.lookingFor || null,
-        education: text.education || null,
-        experience: text.experience || null,
-        whatsappNumber: parsed.data.whatsappNumber || null,
-        openToWork: formData.get("openToWork") === "on",
-        skills: splitTags(value("skills")),
-        languages: splitTags(value("languages"), 10),
-        videoUrls,
-        playlistUrl: playlistUrl || null,
-        albumUrl: albumUrl || null,
-        avatarUrl: parsed.data.avatarUrl ?? null,
-        ...socials,
-      },
+        where: { id: user.id },
+        data: {
+          name: parsed.data.name,
+          username,
+          bio: text.bio || null,
+          location: parsed.data.location || null,
+          headline: parsed.data.headline || null,
+          lookingFor: text.lookingFor || null,
+          education: text.education || null,
+          experience: text.experience || null,
+          whatsappNumber: parsed.data.whatsappNumber || null,
+          openToWork: formData.get("openToWork") === "on",
+          skills: splitTags(value("skills")),
+          languages: splitTags(value("languages"), 10),
+          videoUrls,
+          playlistUrl: playlistUrl || null,
+          albumUrl: albumUrl || null,
+          avatarUrl: parsed.data.avatarUrl ?? null,
+          ...socials,
+        },
       });
     } catch (error) {
       // Somebody may have taken the name between the check above and here.

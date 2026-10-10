@@ -149,6 +149,20 @@ html.consent-open {
   }
 }
 
+/* Same loop, running left to right. */
+.ticker-track--right {
+  animation-name: ticker-drift-right;
+}
+
+@keyframes ticker-drift-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 /*
  * Even with reduced motion the strip still drifts, only slower: a stopped
  * ticker looked broken and left people dragging it by hand.

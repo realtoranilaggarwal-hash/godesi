@@ -27,10 +27,10 @@ export function PlaylistField({
 
   return (
     <Field
-      label="YouTube playlist link"
+      label="YouTube playlist or channel link"
       hint={
         hint ??
-        "Paste a public YouTube playlist link and every video in it shows on your page — add a video to the playlist and it appears here automatically."
+        "Paste a public YouTube playlist or channel link and its videos show on your page — new uploads appear here automatically."
       }
     >
       <input
@@ -38,7 +38,7 @@ export function PlaylistField({
         type="url"
         inputMode="url"
         defaultValue={defaultValue}
-        placeholder="https://www.youtube.com/playlist?list=..."
+        placeholder="https://www.youtube.com/@yourchannel or …/playlist?list=..."
         className={inputClass}
       />
       <button

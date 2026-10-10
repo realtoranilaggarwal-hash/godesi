@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export type StripItem = {
@@ -8,42 +8,103 @@ export type StripItem = {
   label: string;
   icon: string;
   className: string;
+  /** Id of the `StripGroup` dropdown this chip sits in; ungrouped chips show on the bar. */
+  group?: string;
 };
 
+export type StripGroup = { id: string; label: string; icon: string };
+
 /**
- * Category chips wrap onto as many rows as they need, so nothing is hidden
- * behind a horizontal scroll. On narrow screens the rows are clamped to two
- * until the visitor expands them, keeping the header from eating the viewport.
+ * One line of section buttons that swipes sideways on phones. Each section opens
+ * a panel of its category chips under the line, so the header stays one row tall.
  */
-export function CategoryStrip({ items }: { items: StripItem[] }) {
-  const [expanded, setExpanded] = useState(false);
+export function CategoryStrip({
+  items,
+  groups = [],
+}: {
+  items: StripItem[];
+  groups?: StripGroup[];
+}) {
+  const [open, setOpen] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(null);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(null);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const loose = items.filter((item) => !item.group);
+  const sections = groups
+    .map((group) => ({
+      ...group,
+      items: items.filter((item) => item.group === group.id),
+    }))
+    .filter((section) => section.items.length);
+  const current = sections.find((section) => section.id === open);
 
   return (
-    <div className="mx-auto max-w-screen-2xl px-4 py-2">
-      <div
-        className={`flex flex-wrap gap-1.5 text-[11px] font-semibold sm:text-xs ${
-          expanded ? "" : "max-h-[3.6rem] overflow-hidden sm:max-h-none"
-        }`}
-      >
-        {items.map((item) => (
+    <div ref={ref} className="mx-auto max-w-screen-2xl px-4 py-2">
+      <div className="flex gap-1.5 overflow-x-auto whitespace-nowrap text-[11px] font-semibold [scrollbar-width:none] sm:text-xs [&::-webkit-scrollbar]:hidden">
+        {loose.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`whitespace-nowrap rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5 ${item.className}`}
+            className={`shrink-0 rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5 ${item.className}`}
           >
             {item.icon} {item.label}
           </Link>
         ))}
+        {sections.map((section) => {
+          const active = section.id === open;
+          return (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => setOpen(active ? null : section.id)}
+              aria-expanded={active}
+              aria-controls="category-strip-panel"
+              className={`shrink-0 rounded-full border px-2.5 py-1 sm:px-3 sm:py-1.5 ${
+                active
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+              }`}
+            >
+              {section.icon} {section.label} {active ? "▴" : "▾"}
+            </button>
+          );
+        })}
       </div>
 
-      <button
-        type="button"
-        onClick={() => setExpanded((value) => !value)}
-        aria-expanded={expanded}
-        className="mt-1 text-[11px] font-bold text-indigo-600 sm:hidden"
-      >
-        {expanded ? "Show less ▴" : "All categories ▾"}
-      </button>
+      {current ? (
+        <div
+          id="category-strip-panel"
+          className="mt-2 flex flex-wrap gap-1.5 rounded-2xl border border-slate-200 bg-white p-2 text-[11px] font-semibold shadow-sm sm:text-xs"
+        >
+          {current.items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(null)}
+              className={`whitespace-nowrap rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5 ${item.className}`}
+            >
+              {item.icon} {item.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

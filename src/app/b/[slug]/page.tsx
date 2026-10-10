@@ -36,6 +36,8 @@ import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { businessIsThin, robotsFor } from "@/lib/thinContent";
+import { liveDealWhere } from "@/lib/deals";
+import { DealCard } from "@/components/DealCard";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +60,7 @@ async function getBusiness(slug: string) {
       subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
       packages: { orderBy: { sortOrder: "asc" } },
+      deals: { where: liveDealWhere(), orderBy: { createdAt: "desc" } },
       reviews: { where: { hidden: false }, orderBy: { createdAt: "desc" } },
       agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
       vehicle: true,
@@ -259,6 +262,14 @@ export default async function BusinessProfilePage({
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
               <StaffEditLink href={`/admin/business/${business.slug}`} />
+              {isOwner ? (
+                <Link
+                  href="/dashboard/profile"
+                  className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-bold text-white hover:bg-indigo-700"
+                >
+                  ✏️ Edit my card
+                </Link>
+              ) : null}
               {ownerPlan !== "FREE" ? (
                 <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
               ) : null}
@@ -584,6 +595,47 @@ export default async function BusinessProfilePage({
           </div>
         </div>
       </Card>
+
+      {business.deals.length || isOwner ? (
+        <Card id="deals">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold">🏷️ Deals &amp; offers</h2>
+            {isOwner ? (
+              <Link
+                href="/dashboard/deals"
+                className="text-sm font-semibold text-indigo-700 hover:underline"
+              >
+                {business.deals.length ? "Manage deals" : "Post a deal →"}
+              </Link>
+            ) : null}
+          </div>
+          {business.deals.length ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {business.deals.map((deal) => (
+                <DealCard
+                  key={deal.id}
+                  title={deal.title}
+                  details={
+                    deal.details
+                      ? contactVisible
+                        ? deal.details
+                        : maskContactDetails(deal.details)
+                      : null
+                  }
+                  code={deal.code}
+                  linkUrl={deal.linkUrl}
+                  expiresAt={deal.expiresAt}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-600">
+              Only you can see this: post an offer for GoDesi visitors and it shows here
+              and on godesi.com/deals.
+            </p>
+          )}
+        </Card>
+      ) : null}
 
       {!business.owner ? (
         <Card className="space-y-3 border-amber-200 bg-amber-50">
