@@ -11,6 +11,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { siteUrl } from "@/lib/format";
 import { Card } from "@/components/ui";
+import { optionalRead } from "@/lib/resilient";
 import {
   VISA_NEWS_REVALIDATE,
   immigrationHelpers,
@@ -114,7 +115,7 @@ function Chart({
 export default async function VisaBulletinPage() {
   const [headlines, helpers] = await Promise.all([
     visaHeadlines(),
-    immigrationHelpers().catch(() => []),
+    optionalRead(() => immigrationHelpers(), []),
   ]);
 
   const filingNote =
