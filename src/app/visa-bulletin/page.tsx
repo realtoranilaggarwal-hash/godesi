@@ -11,8 +11,23 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { siteUrl } from "@/lib/format";
 import { Card } from "@/components/ui";
+import {
+  VISA_NEWS_REVALIDATE,
+  immigrationHelpers,
+  visaHeadlines,
+} from "@/lib/visaNews";
 
 const bulletin = CURRENT_BULLETIN;
+
+export const revalidate = VISA_NEWS_REVALIDATE;
+
+function shortDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "America/New_York",
+  });
+}
 
 export const metadata: Metadata = {
   title: `Visa Bulletin ${bulletin.month} for India — EB-2, EB-3, green card dates`,
@@ -96,7 +111,12 @@ function Chart({
   );
 }
 
-export default function VisaBulletinPage() {
+export default async function VisaBulletinPage() {
+  const [headlines, helpers] = await Promise.all([
+    visaHeadlines(),
+    immigrationHelpers(),
+  ]);
+
   const filingNote =
     bulletin.uscisEmploymentChart === "DATES_FOR_FILING"
       ? `USCIS is accepting employment-based I-485s on this chart in ${bulletin.month}.`
@@ -162,6 +182,86 @@ export default function VisaBulletinPage() {
           title="Family — dates for filing"
           rows={bulletin.family.filing}
         />
+
+        {headlines.length ? (
+          <Card>
+            <h2 className="font-bold">📰 Latest visa & immigration news</h2>
+            <p className="mb-3 text-xs text-slate-500">
+              Headlines from news sites across the web, refreshed every few
+              hours. Each one opens on the publisher&apos;s own site.
+            </p>
+            <ul className="divide-y divide-slate-100">
+              {headlines.map((item) => (
+                <li key={item.link} className="py-2">
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-semibold text-slate-900 hover:text-indigo-700 hover:underline"
+                  >
+                    {item.title}
+                  </a>
+                  <span className="block text-xs text-slate-500">
+                    {item.source ? `${item.source} · ` : ""}
+                    {shortDate(item.publishedAt)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
+        <Card>
+          <h2 className="font-bold">🤝 Immigration help near you</h2>
+          <p className="mb-3 text-sm text-slate-600">
+            Immigration attorneys, visa consultants and H-1B support listed on
+            GoDesi. Ask for their licence (US: bar number or DOJ-accredited
+            representative; Canada: RCIC) before you pay.
+          </p>
+          {helpers.length ? (
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {helpers.map((business) => (
+                <li key={business.slug}>
+                  <Link
+                    href={`/b/${business.slug}`}
+                    className={`flex items-center gap-3 rounded-xl border p-3 hover:border-indigo-300 hover:bg-indigo-50/40 ${business.featured ? "border-amber-300 bg-amber-50/40" : "border-slate-200"}`}
+                  >
+                    {business.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={business.logoUrl}
+                        alt=""
+                        className="h-10 w-10 shrink-0 rounded-lg object-contain"
+                      />
+                    ) : (
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-lg">
+                        🛂
+                      </span>
+                    )}
+                    <span className="min-w-0">
+                      <span className="block truncate font-semibold text-slate-900">
+                        {business.name}
+                      </span>
+                      <span className="block truncate text-xs text-slate-500">
+                        {business.subcategoryRef?.name ?? business.category} ·{" "}
+                        {business.city}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="mt-3 text-sm">
+            Do you help people with visas or green cards?{" "}
+            <Link
+              href="/add-business"
+              className="font-bold text-indigo-600 hover:underline"
+            >
+              List your practice free →
+            </Link>
+          </p>
+        </Card>
 
         <Card>
           <h2 className="mb-2 font-bold">H-1B & USCIS — official links</h2>
