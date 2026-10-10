@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormState } from "react-dom";
 import { createListingAction } from "@/app/actions/listings";
 import { emptyState } from "@/lib/actions";
@@ -51,6 +52,18 @@ export function ListingForm({
 }) {
   const [state, formAction] = useFormState(createListingAction, emptyState);
   const [kind, setKind] = useState<ListingKind>(defaultKind);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  useEffect(() => setKind(defaultKind), [defaultKind]);
+
+  function chooseKind(next: ListingKind) {
+    setKind(next);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("kind", next);
+    router.replace(`${pathname}?${params}`, { scroll: false });
+  }
   const [images, setImages] = useState<string[]>([]);
 
   const isRoom = kind === "ROOM_OFFERED" || kind === "ROOM_WANTED";
@@ -66,7 +79,7 @@ export function ListingForm({
         <select
           name="kind"
           value={kind}
-          onChange={(event) => setKind(event.target.value as ListingKind)}
+          onChange={(event) => chooseKind(event.target.value as ListingKind)}
           className={inputClass}
         >
           {KIND_GROUPS.map((group) => (
