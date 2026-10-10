@@ -45,36 +45,54 @@ function Banner({ banner }: { banner: RecentBanner }) {
  */
 export async function RecentStrip() {
   const banners = await recentActivity(30);
-  if (banners.length < 4) return null;
+  const showTicker = banners.length >= 4;
 
   return (
     <section aria-label="Recently joined and posted">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-700">
-          🟢 Just now on GoDesi
-        </h2>
+      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+        {showTicker ? (
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-700">
+            🟢 Just now on GoDesi
+          </h2>
+        ) : null}
         <Link
-          href="/people"
-          className="text-xs font-semibold text-indigo-600 hover:underline"
+          href="/signup"
+          className="order-last flex min-w-full flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-center text-base font-black uppercase tracking-wide text-white shadow-lg shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:order-none sm:min-w-0 sm:text-lg"
         >
-          All members →
+          📝 Register now — it&apos;s free →
         </Link>
+        {showTicker ? (
+          <Link
+            href="/people"
+            className="text-xs font-semibold text-indigo-600 hover:underline"
+          >
+            All members →
+          </Link>
+        ) : null}
       </div>
-      <div className="ticker-window -mx-4 px-4 py-1 sm:mx-0 sm:px-0">
-        <div
-          className="ticker-track ticker-track--right flex gap-3"
-          style={{ animationDuration: `${Math.max(40, banners.length * 3)}s` }}
-        >
-          {banners.map((banner) => (
-            <Banner key={banner.key} banner={banner} />
-          ))}
-          {banners.map((banner) => (
-            <span key={`repeat-${banner.key}`} aria-hidden className="contents">
-              <Banner banner={banner} />
-            </span>
-          ))}
+      {showTicker ? (
+        <div className="ticker-window -mx-4 px-4 py-1 sm:mx-0 sm:px-0">
+          <div
+            className="ticker-track ticker-track--right flex gap-3"
+            style={{
+              animationDuration: `${Math.max(40, banners.length * 3)}s`,
+            }}
+          >
+            {banners.map((banner) => (
+              <Banner key={banner.key} banner={banner} />
+            ))}
+            {banners.map((banner) => (
+              <span
+                key={`repeat-${banner.key}`}
+                aria-hidden
+                className="contents"
+              >
+                <Banner banner={banner} />
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }
