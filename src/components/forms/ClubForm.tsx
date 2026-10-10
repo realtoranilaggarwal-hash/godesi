@@ -188,7 +188,7 @@ export function ClubForm({
 
       <PlaylistField
         defaultValue={club?.playlistUrl ?? ""}
-        hint="Optional — a public YouTube playlist of the songs you sing or clips from past meets. Every video in it shows on the club page."
+        hint="Optional — a public YouTube playlist or channel with the songs you sing or clips from past meets. Its videos show on the club page."
       />
 
       <Field
