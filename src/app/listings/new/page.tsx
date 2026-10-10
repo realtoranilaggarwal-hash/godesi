@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { PLANS, listingImageLimit } from "@/lib/plans";
 import { ListingForm } from "@/components/forms/ListingForm";
 import { Card } from "@/components/ui";
+import { PostAnything } from "@/components/PostAnything";
 import { requestCurrency } from "@/lib/currency";
 import { marketplaceCategories } from "@/lib/listingsQueries";
 import { isPropertyGroup } from "@/lib/property";
@@ -59,8 +60,10 @@ export default async function NewListingPage({
           — jewellery, clothes, furniture, electronics. A minute, and free.
         </p>
       </div>
+      <PostAnything title="Everything you can post on GoDesi" />
       <Card>
         <ListingForm
+          key={`${kind}-${group ?? ""}`}
           defaultKind={kind}
           imageLimit={listingImageLimit(user)}
           paidImageLimit={PLANS.PRO.mediaLimit}
