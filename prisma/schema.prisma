@@ -246,6 +246,13 @@ model User {
   journalistSince DateTime?
   journalistBeat  String?
 
+  /// Offer topics the member asked to hear about (lib/offerInterests ids); each pick is a sales lead.
+  offerInterests   String[]  @default([])
+  /// Optional number the member gave for those offers; never shown publicly.
+  offerPhone       String?
+  /// Last time the member saved their offer picks (their consent timestamp).
+  offerInterestsAt DateTime?
+
   /// Phone kept for journalist verification; never shown publicly.
   phone           String?
   phoneVerifiedAt DateTime?
