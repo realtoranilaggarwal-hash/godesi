@@ -25,7 +25,8 @@ import {
   missingChoiceGroups,
   specialtySet,
 } from "@/lib/specialties";
-import { uniqueSlug } from "@/lib/uniqueSlug";
+import { slugTaken, uniqueSlug } from "@/lib/uniqueSlug";
+import { slugify } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
@@ -258,6 +259,7 @@ export async function saveBusinessProfileAction(
   formData: FormData,
 ): Promise<ActionState> {
   let slug: string;
+  let movedFrom: string | null = null;
   let staffEdit = false;
   let isNew = false;
   try {
@@ -481,10 +483,29 @@ export async function saveBusinessProfileAction(
     isNew = !existing;
     let businessId: string;
     if (existing) {
+      const wantedSlug = slugify(String(formData.get("slug") ?? ""));
+      const newSlug =
+        wantedSlug && wantedSlug !== existing.slug ? wantedSlug : null;
+      if (newSlug && newSlug.length < 3)
+        return { error: "The page address needs at least 3 letters or numbers." };
+      if (newSlug && (await slugTaken(newSlug, existing.id)))
+        return {
+          error: `godesi.com/b/${newSlug} is already taken — try adding your city, e.g. ${newSlug}-${slugify(data.city) || "usa"}.`,
+        };
       const updated = await db.business.update({
         where: { id: existing.id },
-        data,
+        data: newSlug
+          ? {
+              ...data,
+              slug: newSlug,
+              previousSlugs: [
+                ...existing.previousSlugs.filter((old) => old !== newSlug),
+                existing.slug,
+              ],
+            }
+          : data,
       });
+      if (newSlug) movedFrom = existing.slug;
       slug = updated.slug;
       businessId = updated.id;
     } else {
@@ -522,6 +543,7 @@ export async function saveBusinessProfileAction(
   }
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
+  if (movedFrom) revalidatePath(`/b/${movedFrom}`);
   pingIndexNowInBackground(`/b/${slug}`);
   invalidateDirectory();
   if (staffEdit) redirect(`/b/${slug}?saved=1`);
