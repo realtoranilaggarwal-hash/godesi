@@ -25,5 +25,7 @@ export const offerLeadSelect = {
   phone: true,
   offerInterests: true,
   offerInterestsAt: true,
+  offerContactOk: true,
+  offerContactAt: true,
   createdAt: true,
 } satisfies Prisma.UserSelect;

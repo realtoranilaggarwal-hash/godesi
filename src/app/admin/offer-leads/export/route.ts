@@ -33,6 +33,7 @@ export async function GET(request: Request) {
       "Email",
       "Email confirmed",
       "Phone",
+      "OK to contact",
       "Location",
       "Role",
       "Wants offers on",
@@ -43,6 +44,7 @@ export async function GET(request: Request) {
       row.email,
       row.emailVerifiedAt ? "yes" : "no",
       row.offerPhone ?? row.phone,
+      row.offerContactOk ? "yes" : "no",
       row.location,
       row.role,
       row.offerInterests
