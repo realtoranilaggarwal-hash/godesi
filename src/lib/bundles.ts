@@ -69,7 +69,6 @@ export const CART_ITEMS: CartItem[] = [
   },
   bannerItem("banner-sidebar", "SIDEBAR", false),
   bannerItem("banner-header", "HEADER", false),
-  bannerItem("banner-hero", "HERO", false),
   bannerItem("banner-skyscraper", "SKYSCRAPER", false),
   bannerItem("banner-billboard", "BILLBOARD", false),
   bannerItem("banner-leaderboard", "LEADERBOARD", false),
@@ -99,6 +98,14 @@ export const BUNDLE_EXTRAS = [
 
 export function cartItem(key: string): CartItem | undefined {
   return CART_ITEMS.find((item) => item.key === key);
+}
+
+/** Lines no longer sold but still honoured for checkouts started before. */
+const RETIRED_ITEMS: CartItem[] = [bannerItem("banner-hero", "HERO", false)];
+
+/** Resolves a paid line, including retired ones, when granting an order. */
+export function orderedItem(key: string): CartItem | undefined {
+  return cartItem(key) ?? RETIRED_ITEMS.find((item) => item.key === key);
 }
 
 export function itemPrice(item: CartItem, currency: Currency) {

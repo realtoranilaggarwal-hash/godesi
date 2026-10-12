@@ -1,10 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { BannerSlot } from "@prisma/client";
 import {
   activeBanners,
   HEADER_SIZE,
-  HERO_SIZE,
   SIDEBAR_SIZE,
   SIDEBAR_SLOTS,
   SKYSCRAPER_SIZE,
@@ -25,7 +23,6 @@ import { AD_PLACEMENTS } from "@/lib/ads";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
-  HERO: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HERO,
   HEADER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER,
   SIDEBAR: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
   SKYSCRAPER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SKYSCRAPER,
@@ -252,72 +249,6 @@ export async function SidebarBanners({
   );
 }
 
-/**
- * The homepage hero: a paid full-width creative when one is booked, otherwise our
- * own artwork with an "advertise here" ribbon so the space still sells itself.
- */
-export async function HeroBanner() {
-  const [banner] = await activeBanners("HERO", 1);
-
-  if (banner) {
-    return (
-      <div className="space-y-1">
-        <BannerLink
-          banner={banner}
-          width={HERO_SIZE.width}
-          height={HERO_SIZE.height}
-          className="rounded-3xl"
-        />
-        <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
-      </div>
-    );
-  }
-
-  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const adsenseSlot = ADSENSE_SLOTS.HERO;
-
-  if (client && adsenseSlot) {
-    return (
-      <div>
-        <AdSenseUnit
-          client={client}
-          slotId={adsenseSlot}
-          height={HERO_SIZE.height}
-          className="rounded-3xl"
-          fallback={
-            <HousePromo
-              width={HERO_SIZE.width}
-              height={HERO_SIZE.height}
-              seed="hero"
-            />
-          }
-        />
-        <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href="/advertise?slot=HERO#book"
-      className="group relative block overflow-hidden rounded-3xl"
-    >
-      <Image
-        src="/hero-banner.jpg"
-        alt="Godesi — your desi community directory: businesses, leads, events, news, connections"
-        width={1983}
-        height={793}
-        priority
-        sizes="100vw"
-        className="h-auto w-full"
-      />
-      <span className="absolute bottom-3 right-3 rounded-xl bg-slate-900/80 px-3 py-2 text-xs font-bold text-white group-hover:bg-indigo-600 sm:text-sm">
-        Book this spot — monthly or pay per views →
-      </span>
-    </Link>
-  );
-}
-
 /** Full-width leaderboard above the footer, so long pages end on inventory. */
 export async function FooterBanner() {
   const [banner] = await activeBanners("HEADER");
@@ -363,23 +294,20 @@ export async function InContentBanner({
     full: "FULLBANNER",
   };
   const desktopSlot = bySize[size];
-  // A 468x60 booking fills the leaderboard spot too, since affiliate creatives
-  // mostly come in that size and the wider unit would otherwise sit empty.
-  const fallbackSlot: BannerSlot | null =
-    desktopSlot === "LEADERBOARD" ? "FULLBANNER" : null;
+  // 468x60 bookings take turns in the leaderboard spot, since affiliate
+  // creatives mostly come in that size.
+  const sharedSlots: BannerSlot[] =
+    desktopSlot === "LEADERBOARD"
+      ? ["LEADERBOARD", "FULLBANNER"]
+      : [desktopSlot];
   const mobile = AD_PLACEMENTS.MOBILE.size;
 
-  const [primary, fallback, phone] = await Promise.all([
-    activeBanners(desktopSlot, 1),
-    fallbackSlot ? activeBanners(fallbackSlot, 1) : Promise.resolve([]),
+  const [wide, phone] = await Promise.all([
+    activeBanners(sharedSlots, 1),
     activeBanners("MOBILE", 1),
   ]);
 
-  const wide = primary.length ? primary : fallback;
-  const wideSlot =
-    !primary.length && fallback.length && fallbackSlot
-      ? fallbackSlot
-      : desktopSlot;
+  const wideSlot = wide[0]?.slot ?? desktopSlot;
   const desktop = AD_PLACEMENTS[wideSlot].size;
 
   return (

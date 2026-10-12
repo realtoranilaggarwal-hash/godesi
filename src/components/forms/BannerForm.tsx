@@ -11,6 +11,11 @@ import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
 export function BannerForm({ slot }: { slot?: string }) {
+  const retired = AD_SLOT_ORDER.find((option) => option === slot)
+    ? null
+    : (Object.keys(AD_PLACEMENTS) as (keyof typeof AD_PLACEMENTS)[]).find(
+        (option) => option === slot,
+      );
   const [state, formAction] = useFormState(saveBannerAction, emptyState);
   const form = useRef<HTMLFormElement>(null);
 
@@ -31,15 +36,20 @@ export function BannerForm({ slot }: { slot?: string }) {
             defaultValue={slot ?? "SIDEBAR"}
             className={inputClass}
           >
-            {AD_SLOT_ORDER.map((option) => {
-              const placement = AD_PLACEMENTS[option];
-              return (
-                <option key={option} value={option}>
-                  {placement.name} — {placement.size.width}×
-                  {placement.size.height} ({placement.slots} shown at a time)
-                </option>
-              );
-            })}
+            {(retired ? [retired, ...AD_SLOT_ORDER] : AD_SLOT_ORDER).map(
+              (option) => {
+                const placement = AD_PLACEMENTS[option];
+                return (
+                  <option key={option} value={option}>
+                    {placement.name} — {placement.size.width}×
+                    {placement.size.height}{" "}
+                    {option === retired
+                      ? "(not shown on the site)"
+                      : `(${placement.slots} shown at a time)`}
+                  </option>
+                );
+              },
+            )}
           </select>
         </Field>
         <Field
