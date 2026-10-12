@@ -18,10 +18,6 @@ import type { PublicDeal } from "@/lib/deals";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My member benefits" };
 
-function sameTown(a: string, b: string | null) {
-  return !!b && b.toLowerCase().includes(a.trim().toLowerCase());
-}
-
 function DealTile({ deal }: { deal: PublicDeal }) {
   return (
     <DealCard
@@ -75,11 +71,12 @@ export default async function DashboardOffersPage() {
   if (!user) redirect("/login?next=/dashboard/offers");
 
   const town = user.location?.split(",")[0]?.trim() ?? "";
-  const [wonSpins, tickets, deals, storeOffers, localEvents] =
+  const [wonSpins, tickets, deals, localDeals, storeOffers, localEvents] =
     await Promise.all([
       db.dailySpin.findMany({
         where: { userId: user.id, deal: liveDealWhere() },
         orderBy: { createdAt: "desc" },
+        distinct: ["dealId"],
         take: 12,
         select: { deal: { select: dealSelect } },
       }),
@@ -100,7 +97,21 @@ export default async function DashboardOffersPage() {
           },
         },
       }),
-      liveDeals({ take: 60 }),
+      liveDeals({ take: 12 }),
+      town
+        ? db.deal.findMany({
+            where: {
+              ...liveDealWhere(),
+              business: {
+                status: "APPROVED",
+                city: { contains: town, mode: "insensitive" },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+            take: 6,
+            select: dealSelect,
+          })
+        : Promise.resolve([]),
       liveStoreOffers(6),
       town ? circleEvents(town, 3) : Promise.resolve([]),
     ]);
@@ -123,14 +134,13 @@ export default async function DashboardOffersPage() {
     ).values(),
   );
   const wonIds = new Set(won.map((deal) => deal.id));
-  const forYou = deals
-    .filter((deal) => !wonIds.has(deal.id))
-    .sort(
-      (a, b) =>
-        Number(town ? sameTown(town, b.business.city) : false) -
-        Number(town ? sameTown(town, a.business.city) : false),
-    )
-    .slice(0, 6);
+  const forYou = Array.from(
+    new Map(
+      [...localDeals, ...deals]
+        .filter((deal) => !wonIds.has(deal.id))
+        .map((deal) => [deal.id, deal]),
+    ).values(),
+  ).slice(0, 6);
   const picks = user.offerInterests.flatMap((id) => {
     const item = offerInterest(id);
     return item ? [item] : [];
@@ -150,7 +160,7 @@ export default async function DashboardOffersPage() {
         {picks.length ? (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold text-slate-500">
-              Personalised for:
+              Your interests:
             </span>
             {picks.map((item) => (
               <Badge key={item.id} tone="indigo">
