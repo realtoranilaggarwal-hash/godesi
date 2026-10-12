@@ -13,7 +13,7 @@ import type {
 import { db } from "@/lib/db";
 import { requireRole, requirePermission } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { AD_SLOT_ORDER } from "@/lib/ads";
+import { AD_PLACEMENTS } from "@/lib/ads";
 import { nextPosition } from "@/lib/banners";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewardsQueries";
@@ -176,7 +176,7 @@ export async function setUserPlanAction(formData: FormData) {
 }
 
 const bannerSchema = z.object({
-  slot: z.enum(AD_SLOT_ORDER as [BannerSlot, ...BannerSlot[]]),
+  slot: z.enum(Object.keys(AD_PLACEMENTS) as [BannerSlot, ...BannerSlot[]]),
   /** Blank means "the next free slot", so several creatives can share a rotation. */
   position: z.coerce.number().int().min(1).optional(),
   advertiserEmail: z.string().trim().email("Enter a valid email").optional(),

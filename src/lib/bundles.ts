@@ -69,7 +69,6 @@ export const CART_ITEMS: CartItem[] = [
   },
   bannerItem("banner-sidebar", "SIDEBAR", false),
   bannerItem("banner-header", "HEADER", false),
-  bannerItem("banner-hero", "HERO", false),
   bannerItem("banner-skyscraper", "SKYSCRAPER", false),
   bannerItem("banner-billboard", "BILLBOARD", false),
   bannerItem("banner-leaderboard", "LEADERBOARD", false),
