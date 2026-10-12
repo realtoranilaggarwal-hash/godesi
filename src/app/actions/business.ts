@@ -483,7 +483,10 @@ export async function saveBusinessProfileAction(
     isNew = !existing;
     let businessId: string;
     if (existing) {
-      const wantedSlug = slugify(String(formData.get("slug") ?? ""));
+      const typedSlug = String(formData.get("slug") ?? "").trim();
+      const wantedSlug = slugify(typedSlug);
+      if (typedSlug && !wantedSlug)
+        return { error: "The page address needs at least 3 letters or numbers." };
       const newSlug =
         wantedSlug && wantedSlug !== existing.slug ? wantedSlug : null;
       if (newSlug && newSlug.length < 3)

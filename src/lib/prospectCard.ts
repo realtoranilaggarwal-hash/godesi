@@ -2,6 +2,7 @@ import type { Prospect } from "@prisma/client";
 import { db } from "@/lib/db";
 import { CATEGORY_TREE, subcategorySlug } from "@/lib/categories";
 import { slugify } from "@/lib/slug";
+import { slugTaken } from "@/lib/uniqueSlug";
 
 /**
  * Turns a call-list row into an unclaimed starter card.
@@ -57,8 +58,7 @@ async function freeSlug(name: string, city: string | null) {
   for (let attempt = 0; attempt < 25; attempt += 1) {
     const slug = attempt ? `${base}-${attempt + 1}` : base;
     // eslint-disable-next-line no-await-in-loop
-    const taken = await db.business.findUnique({ where: { slug }, select: { id: true } });
-    if (!taken) return slug;
+    if (!(await slugTaken(slug))) return slug;
   }
   return `${base}-${Date.now().toString(36)}`;
 }
