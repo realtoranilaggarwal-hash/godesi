@@ -18,6 +18,13 @@ const STORES = [
       "Learn coding, AI, Excel, business, design and more from affordable video courses you keep for life.",
     tags: ["courses", "learning"],
   },
+  {
+    title: "Rakuten — cash back at 3,500+ stores",
+    url: "https://www.rakuten.com/r/LUCKY7226",
+    description:
+      "Start your shopping at Rakuten and get cash back from over 3,500 stores. Join free through this invite link.",
+    tags: ["cash back", "coupons"],
+  },
 ];
 
 async function main() {
