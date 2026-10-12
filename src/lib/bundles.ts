@@ -100,6 +100,14 @@ export function cartItem(key: string): CartItem | undefined {
   return CART_ITEMS.find((item) => item.key === key);
 }
 
+/** Lines no longer sold but still honoured for checkouts started before. */
+const RETIRED_ITEMS: CartItem[] = [bannerItem("banner-hero", "HERO", false)];
+
+/** Resolves a paid line, including retired ones, when granting an order. */
+export function orderedItem(key: string): CartItem | undefined {
+  return cartItem(key) ?? RETIRED_ITEMS.find((item) => item.key === key);
+}
+
 export function itemPrice(item: CartItem, currency: Currency) {
   return currency === "INR" ? item.inr : item.usd;
 }
