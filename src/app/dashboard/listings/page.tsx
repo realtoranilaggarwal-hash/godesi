@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { KIND_LABELS, priceLabel } from "@/lib/listings";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 import { deleteListingAction } from "@/app/actions/listings";
+import { PostAnything } from "@/components/PostAnything";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My listings" };
@@ -31,6 +32,7 @@ export default async function MyListingsPage() {
         </div>
         <LinkButton href="/listings/new">Post a listing</LinkButton>
       </div>
+      <PostAnything title="What would you like to list?" />
 
       {listings.length ? (
         <Card className="space-y-2">

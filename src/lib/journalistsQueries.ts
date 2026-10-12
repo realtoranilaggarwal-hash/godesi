@@ -29,9 +29,15 @@ async function verdictCounts(userId: string) {
   };
 }
 
+/**
+ * `publicOnly` leaves anonymous stories out of the counts, for anything a
+ * reader can see; the member's own dashboard sees everything.
+ */
 export async function journalistStats(
   userId: string,
+  { publicOnly = false } = {},
 ): Promise<JournalistStats> {
+  const credited = publicOnly ? { anonymous: false } : {};
   const [user, approved, pending, featured, rejected, scores, verdicts] =
     await Promise.all([
       db.user.findUnique({
@@ -51,12 +57,14 @@ export async function journalistStats(
         },
       }),
       db.newsItem.count({
-        where: { submittedById: userId, status: "PUBLISHED" },
+        where: { submittedById: userId, status: "PUBLISHED", ...credited },
       }),
       db.newsItem.count({
         where: { submittedById: userId, status: "PENDING" },
       }),
-      db.newsItem.count({ where: { submittedById: userId, featured: true } }),
+      db.newsItem.count({
+        where: { submittedById: userId, featured: true, ...credited },
+      }),
       db.newsItem.count({
         where: { submittedById: userId, status: "REJECTED" },
       }),
@@ -122,7 +130,11 @@ export async function nextPressCardId() {
 export async function topJournalists(limit = 8): Promise<LeaderRow[]> {
   const grouped = await db.newsItem.groupBy({
     by: ["submittedById"],
-    where: { status: "PUBLISHED", submittedById: { not: null } },
+    where: {
+      status: "PUBLISHED",
+      anonymous: false,
+      submittedById: { not: null },
+    },
     _count: { _all: true },
     orderBy: { _count: { id: "desc" } },
     take: limit,

@@ -24,6 +24,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { SignOutButton } from "@/components/SignOutButton";
 import { EarnStrip } from "@/components/EarnStrip";
 import { pointValues, wallet } from "@/lib/rewardsQueries";
+import { offerInterest } from "@/lib/offerInterests";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -64,6 +65,7 @@ export default async function DashboardPage({
     posted?: string;
     upgraded?: string;
     verified?: string;
+    password?: string;
   };
 }) {
   const user = await getCurrentUser();
@@ -162,6 +164,9 @@ export default async function DashboardPage({
 
         {searchParams.verified ? (
           <Alert tone="success">Email verified — thanks!</Alert>
+        ) : null}
+        {searchParams.password === "reset" ? (
+          <Alert tone="success">New password saved — you are signed in.</Alert>
         ) : null}
         {!user.emailVerifiedAt && emailEnabled() ? (
           <Alert tone="info">
@@ -262,6 +267,37 @@ export default async function DashboardPage({
           />
         ) : null}
 
+        {user.offerInterests.length ? (
+          <p className="rounded-xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+            🎁 You get offers on{" "}
+            <strong>
+              {user.offerInterests
+                .map((id) => offerInterest(id)?.label)
+                .filter(Boolean)
+                .join(" · ")}
+            </strong>
+            .{" "}
+            <Link href="/dashboard/offers" className="font-semibold underline">
+              Change
+            </Link>
+          </p>
+        ) : (
+          <Card className="border-indigo-200 bg-indigo-50">
+            <h2 className="text-lg font-bold text-indigo-900">
+              🎁 What would you like offers on?
+            </h2>
+            <p className="mt-1 text-sm text-indigo-900/80">
+              Buying a home, life insurance, saving tax, missed tax refunds,
+              cheap flights to India, a franchise, investing in India and more
+              — tick what you want and we&apos;ll connect you with trusted desi
+              professionals.
+            </p>
+            <div className="mt-3">
+              <LinkButton href="/dashboard/offers">Pick my offers</LinkButton>
+            </div>
+          </Card>
+        )}
+
         <ElitePrompt userId={user.id} answered={user.elitePrompt} />
 
         {adStats._count._all ? (
@@ -352,6 +388,9 @@ export default async function DashboardPage({
                 </LinkButton>
                 <LinkButton href="/dashboard/packages" variant="secondary">
                   Packages & pricing
+                </LinkButton>
+                <LinkButton href="/dashboard/deals" variant="secondary">
+                  🏷️ Deals &amp; offers
                 </LinkButton>
                 <LinkButton href="/dashboard/leads" variant="secondary">
                   Unlocked leads

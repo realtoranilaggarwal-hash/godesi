@@ -9,6 +9,7 @@ import {
   professionalCount,
 } from "@/lib/professionalsQueries";
 import { ELITE_CATEGORIES, ELITE_ORDER, eliteWhere } from "@/lib/elite";
+import { WHOS_WHO_YOUTUBE } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -20,7 +21,13 @@ export const metadata: Metadata = {
 export default async function EliteDirectoryPage({
   searchParams,
 }: {
-  searchParams: { category?: string; city?: string; country?: string; badge?: string; q?: string };
+  searchParams: {
+    category?: string;
+    city?: string;
+    country?: string;
+    badge?: string;
+    q?: string;
+  };
 }) {
   const where = eliteWhere(searchParams);
   const [entries, professionals, professionalTotal] = await Promise.all([
@@ -40,14 +47,29 @@ export default async function EliteDirectoryPage({
   return (
     <div className="space-y-6">
       <Card className="border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50">
+        <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
+          <Link href="/media" className="hover:underline">
+            GoDesi Media
+          </Link>{" "}
+          · Desi Who&apos;s Who
+        </p>
         <h1 className="text-2xl font-black sm:text-3xl">🏆 GoDesi Elite</h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-700">
-          Recognition for desi entrepreneurs, professionals and community leaders
-          worldwide. Apply or nominate someone — our team reviews the entry,
-          interviews them and publishes a profile with video. Some profiles are
-          written by us from public record and marked <b>unclaimed</b> until the
-          person takes theirs over. Not ready for that? Completing your profile
-          lists you free in{" "}
+          Recognition for desi entrepreneurs, professionals and community
+          leaders worldwide. Apply or nominate someone — our team reviews the
+          entry, interviews them for{" "}
+          <a
+            href={WHOS_WHO_YOUTUBE}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold underline"
+          >
+            Desi Who&apos;s Who
+          </a>{" "}
+          and publishes a profile with video. Some profiles are written by us
+          from public record and marked <b>unclaimed</b> until the person takes
+          theirs over. Not ready for that? Completing your profile lists you
+          free in{" "}
           <Link href="/professionals" className="font-bold underline">
             GoDesi Professionals
           </Link>{" "}
@@ -67,6 +89,12 @@ export default async function EliteDirectoryPage({
           >
             🏆 Elite Awards
           </LinkButton>
+          <LinkButton
+            href="/media"
+            className="bg-white text-slate-900 ring-1 ring-slate-300"
+          >
+            🎙️ GoDesi Media
+          </LinkButton>
           <Link
             href="/desi-elite/rss"
             className="self-center text-sm font-semibold text-slate-500 hover:underline"
@@ -83,7 +111,11 @@ export default async function EliteDirectoryPage({
           placeholder="Search name or work"
           className={inputClass}
         />
-        <select name="category" defaultValue={searchParams.category ?? ""} className={inputClass}>
+        <select
+          name="category"
+          defaultValue={searchParams.category ?? ""}
+          className={inputClass}
+        >
           <option value="">All categories</option>
           {ELITE_CATEGORIES.map((category) => (
             <option key={category} value={category}>
@@ -97,7 +129,11 @@ export default async function EliteDirectoryPage({
           placeholder="City"
           className={inputClass}
         />
-        <select name="badge" defaultValue={searchParams.badge ?? ""} className={inputClass}>
+        <select
+          name="badge"
+          defaultValue={searchParams.badge ?? ""}
+          className={inputClass}
+        >
           <option value="">All members</option>
           <option value="FEATURED">Featured only</option>
           <option value="PREMIUM">Premium only</option>
@@ -114,7 +150,10 @@ export default async function EliteDirectoryPage({
         <Card>
           <p className="text-sm text-slate-600">
             No published profiles match yet — be the first.{" "}
-            <Link href="/desi-elite/apply" className="font-bold text-indigo-600 underline">
+            <Link
+              href="/desi-elite/apply"
+              className="font-bold text-indigo-600 underline"
+            >
               Apply for GoDesi Elite
             </Link>
             .
@@ -124,7 +163,9 @@ export default async function EliteDirectoryPage({
 
       {featured.length ? (
         <section>
-          <h2 className="mb-3 text-lg font-black text-slate-900">⭐ Featured Elite Members</h2>
+          <h2 className="mb-3 text-lg font-black text-slate-900">
+            ⭐ Featured Elite Members
+          </h2>
           <div className="grid gap-4 lg:grid-cols-2">
             {featured.map((entry) => (
               <EliteCard key={entry.id} entry={entry} size="large" />
@@ -135,7 +176,9 @@ export default async function EliteDirectoryPage({
 
       {premium.length ? (
         <section>
-          <h2 className="mb-3 text-lg font-black text-slate-900">💎 Premium Members</h2>
+          <h2 className="mb-3 text-lg font-black text-slate-900">
+            💎 Premium Members
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {premium.map((entry) => (
               <EliteCard key={entry.id} entry={entry} />
@@ -146,7 +189,9 @@ export default async function EliteDirectoryPage({
 
       {basic.length ? (
         <section>
-          <h2 className="mb-3 text-lg font-black text-slate-900">📂 Elite Directory</h2>
+          <h2 className="mb-3 text-lg font-black text-slate-900">
+            📂 Elite Directory
+          </h2>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {basic.map((entry) => (
               <EliteCard key={entry.id} entry={entry} size="small" />
@@ -184,8 +229,8 @@ export default async function EliteDirectoryPage({
 
       <Card className="border-indigo-200 bg-indigo-50">
         <p className="text-sm font-semibold text-indigo-900">
-          Want the top spot? Featured and Premium recognition includes video, contact
-          buttons and placement above the directory.
+          Want the top spot? Featured and Premium recognition includes video,
+          contact buttons and placement above the directory.
         </p>
         <LinkButton href="/pricing" className="mt-3">
           See membership plans

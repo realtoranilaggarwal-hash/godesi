@@ -9,6 +9,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { PlaylistField } from "@/components/forms/PlaylistField";
 import { WriteHelper } from "@/components/WriteHelper";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
@@ -144,6 +145,23 @@ export function BusinessProfileForm({
         <Field label="Business or professional name" required>
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
+        {business ? (
+          <Field
+            label="Page address"
+            hint="Letters, numbers and dashes. Old links and printed QR codes keep working."
+          >
+            <div className="flex items-center gap-1">
+              <span className="shrink-0 text-sm text-slate-500">godesi.com/b/</span>
+              <input
+                name="slug"
+                defaultValue={business.slug}
+                pattern="[A-Za-z0-9 \-]{3,60}"
+                title="3–60 letters, numbers or dashes"
+                className={inputClass}
+              />
+            </div>
+          </Field>
+        ) : null}
         <CategorySelect
           required={!starterCard}
           categories={categories}
@@ -273,6 +291,7 @@ export function BusinessProfileForm({
           defaultValue={business?.albumUrl ?? ""}
           hint={`Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`}
         />
+        <PlaylistField defaultValue={business?.playlistUrl ?? ""} />
         <Field
           label={
             videoLimit > 1

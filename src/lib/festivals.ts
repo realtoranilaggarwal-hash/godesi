@@ -7,6 +7,12 @@ export type Festival = {
   dates: string[];
   blurb: string;
   emoji: string;
+  /** Event category slug (see eventCategories) whose events belong on this festival's page. */
+  genre?: string;
+  /** Lower-case words that put an event under this festival when it has no genre. */
+  keywords: string[];
+  /** Store searches shown as "Shop for …" links (see FestivalShop). */
+  shop: { label: string; query: string }[];
 };
 
 /**
@@ -16,6 +22,13 @@ export type Festival = {
 export const FESTIVALS: Festival[] = [
   {
     name: "Makar Sankranti",
+    shop: [
+      { label: "Kites & manja", query: "indian kites manja patang" },
+      { label: "Til-gud & sweets", query: "til gud chikki" },
+      { label: "Pongal pot & kolam", query: "pongal pot kolam rangoli" },
+    ],
+    genre: "onam-pongal-bihu",
+    keywords: ["sankranti", "pongal", "lohri", "uttarayan"],
     faith: "HINDU_TEMPLE",
     emoji: "🪁",
     blurb: "Harvest festival marked with kite flying, til-gud and holy dips.",
@@ -23,6 +36,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Maha Shivaratri",
+    shop: [
+      { label: "Shiva puja items", query: "shivling puja abhishek kit" },
+      { label: "Rudraksha malas", query: "rudraksha mala" },
+      { label: "Shiva idols & murtis", query: "lord shiva idol" },
+    ],
+    keywords: ["shivaratri", "shivratri"],
     faith: "HINDU_TEMPLE",
     emoji: "🔱",
     blurb: "Night-long vigil and abhishekam at Shiva temples.",
@@ -30,6 +49,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Holi",
+    shop: [
+      { label: "Organic gulal colours", query: "organic holi colors gulal" },
+      { label: "Pichkaris & water guns", query: "holi pichkari" },
+      { label: "White kurtas for Holi", query: "white kurta holi" },
+    ],
+    genre: "holi",
+    keywords: ["holi"],
     faith: "HINDU_TEMPLE",
     emoji: "🎨",
     blurb: "Festival of colours; Holika Dahan the previous evening.",
@@ -37,6 +63,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Ram Navami",
+    shop: [
+      { label: "Ram Darbar idols", query: "ram darbar idol" },
+      { label: "Puja thali sets", query: "puja thali set" },
+      { label: "Ramayan books", query: "ramayan book" },
+    ],
+    keywords: ["ram navami", "rama navami"],
     faith: "HINDU_TEMPLE",
     emoji: "🏹",
     blurb: "Birth of Lord Rama — bhajans, processions and temple prasad.",
@@ -44,6 +76,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Eid al-Fitr",
+    shop: [
+      { label: "Eid decorations", query: "eid mubarak decorations" },
+      { label: "Eid gift boxes", query: "eid gift box" },
+      { label: "Kurtas & abayas", query: "eid kurta abaya" },
+    ],
+    genre: "eid-christmas",
+    keywords: ["eid"],
     faith: "MOSQUE",
     emoji: "🌙",
     blurb: "End of Ramadan — Eid namaz, sewaiyan and zakat al-fitr.",
@@ -51,6 +90,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Baisakhi",
+    shop: [
+      { label: "Phulkari dupattas", query: "phulkari dupatta" },
+      { label: "Dhol & bhangra wear", query: "dhol bhangra costume" },
+      { label: "Sikh gifts", query: "khanda kara sikh gift" },
+    ],
+    genre: "onam-pongal-bihu",
+    keywords: ["baisakhi", "vaisakhi"],
     faith: "GURUDWARA",
     emoji: "🌾",
     blurb: "Khalsa foundation day — nagar kirtan and langar at gurudwaras.",
@@ -58,6 +104,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Good Friday",
+    shop: [
+      { label: "Bibles & devotionals", query: "holy bible devotional" },
+      { label: "Crosses & rosaries", query: "rosary cross" },
+      { label: "Lenten books", query: "lent devotional book" },
+    ],
+    keywords: ["good friday"],
     faith: "CHURCH",
     emoji: "✝️",
     blurb: "Passion services and the Way of the Cross.",
@@ -65,6 +117,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Easter Sunday",
+    shop: [
+      { label: "Easter baskets", query: "easter basket" },
+      { label: "Easter eggs & decor", query: "easter eggs decorations" },
+      { label: "Easter outfits", query: "easter dress outfit" },
+    ],
+    keywords: ["easter"],
     faith: "CHURCH",
     emoji: "🕊️",
     blurb: "Resurrection Sunday — sunrise services and family lunches.",
@@ -72,6 +130,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Mahavir Jayanti",
+    shop: [
+      { label: "Jain puja items", query: "jain puja samagri" },
+      { label: "Mahavir idols", query: "mahavir swami idol" },
+      { label: "Jain books", query: "jainism book" },
+    ],
+    keywords: ["mahavir"],
     faith: "JAIN_TEMPLE",
     emoji: "🪷",
     blurb: "Birth of Bhagwan Mahavir — rath yatra and temple abhishek.",
@@ -79,6 +143,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Buddha Purnima",
+    shop: [
+      { label: "Buddha statues", query: "buddha statue" },
+      { label: "Meditation cushions", query: "meditation cushion" },
+      { label: "Incense & candles", query: "incense sticks candles" },
+    ],
+    keywords: ["buddha purnima", "vesak"],
     faith: "BUDDHIST_TEMPLE",
     emoji: "☸️",
     blurb: "Birth, enlightenment and nirvana of the Buddha.",
@@ -86,6 +156,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Eid al-Adha",
+    shop: [
+      { label: "Eid decorations", query: "eid mubarak decorations" },
+      { label: "Prayer mats", query: "prayer mat" },
+      { label: "Eid gift boxes", query: "eid gift box" },
+    ],
+    genre: "eid-christmas",
+    keywords: ["eid al-adha", "bakrid", "eid"],
     faith: "MOSQUE",
     emoji: "🕌",
     blurb: "Festival of sacrifice, marked with Eid namaz and qurbani.",
@@ -93,6 +170,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Rath Yatra",
+    shop: [
+      { label: "Jagannath idols", query: "jagannath idol" },
+      { label: "Puja thali sets", query: "puja thali set" },
+      { label: "Rath Yatra decor", query: "rath yatra decoration" },
+    ],
+    keywords: ["rath yatra", "ratha yatra"],
     faith: "HINDU_TEMPLE",
     emoji: "🛕",
     blurb: "Jagannath chariot procession, celebrated worldwide.",
@@ -100,6 +183,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Raksha Bandhan",
+    shop: [
+      { label: "Rakhis", query: "rakhi for brother" },
+      { label: "Rakhi gift hampers", query: "rakhi gift hamper" },
+      { label: "Gifts for sisters", query: "gift for sister" },
+    ],
+    keywords: ["raksha bandhan", "rakhi"],
     faith: "HINDU_TEMPLE",
     emoji: "🧵",
     blurb: "Sisters tie rakhi; temples hold community celebrations.",
@@ -107,6 +196,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Janmashtami",
+    shop: [
+      { label: "Laddu Gopal dress", query: "laddu gopal dress" },
+      { label: "Jhula & krishna decor", query: "krishna jhula janmashtami decoration" },
+      { label: "Matki & flute", query: "matki krishna flute" },
+    ],
+    keywords: ["janmashtami", "krishna"],
     faith: "HINDU_TEMPLE",
     emoji: "🪈",
     blurb: "Krishna's birth — midnight aarti, jhanki and dahi handi.",
@@ -114,6 +209,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Ganesh Chaturthi",
+    shop: [
+      { label: "Eco Ganesh idols", query: "eco friendly ganesh idol" },
+      { label: "Makhar & mandap decor", query: "ganpati makhar decoration" },
+      { label: "Modak moulds", query: "modak mould" },
+    ],
+    genre: "ganesh-utsav",
+    keywords: ["ganesh", "ganapati"],
     faith: "HINDU_TEMPLE",
     emoji: "🐘",
     blurb: "Ten days of Ganpati pandals, modaks and visarjan.",
@@ -121,6 +223,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Navratri",
+    shop: [
+      { label: "Dandiya sticks", query: "dandiya sticks" },
+      { label: "Chaniya choli", query: "navratri chaniya choli" },
+      { label: "Garba kurtas & kediyu", query: "garba kediyu kurta men" },
+    ],
+    genre: "garba-dandiya",
+    keywords: ["navratri", "garba", "dandiya"],
     faith: "HINDU_TEMPLE",
     emoji: "💃",
     blurb: "Nine nights of Durga puja, garba and dandiya.",
@@ -128,6 +237,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Dussehra",
+    shop: [
+      { label: "Ravan effigies & decor", query: "ravan dussehra decoration" },
+      { label: "Puja thali sets", query: "puja thali set" },
+      { label: "Ethnic wear", query: "indian ethnic wear kurta" },
+    ],
+    genre: "durga-puja",
+    keywords: ["dussehra", "durga puja", "ramlila"],
     faith: "HINDU_TEMPLE",
     emoji: "🏹",
     blurb: "Ravan dahan and Ramlila finales.",
@@ -135,6 +251,13 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Diwali",
+    shop: [
+      { label: "Diyas & string lights", query: "diwali diya lights" },
+      { label: "Rangoli & torans", query: "rangoli toran diwali" },
+      { label: "Diwali gift boxes", query: "diwali gift box sweets" },
+    ],
+    genre: "diwali",
+    keywords: ["diwali", "deepavali"],
     faith: "HINDU_TEMPLE",
     emoji: "🪔",
     blurb: "Festival of lights — Lakshmi puja, diyas and sweets.",
@@ -142,6 +265,12 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Guru Nanak Jayanti (Gurpurab)",
+    shop: [
+      { label: "Sikh prayer books", query: "gutka sahib nitnem" },
+      { label: "Rumala & chaur sahib", query: "rumala sahib" },
+      { label: "Sikh gifts", query: "khanda kara sikh gift" },
+    ],
+    keywords: ["gurpurab", "guru nanak"],
     faith: "GURUDWARA",
     emoji: "🪯",
     blurb: "Birth of Guru Nanak Dev Ji — akhand path, nagar kirtan, langar.",
@@ -149,12 +278,35 @@ export const FESTIVALS: Festival[] = [
   },
   {
     name: "Christmas",
+    shop: [
+      { label: "Christmas decor", query: "christmas decorations" },
+      { label: "Christmas lights", query: "christmas lights outdoor" },
+      { label: "Christmas gifts", query: "christmas gifts for family" },
+    ],
+    genre: "eid-christmas",
+    keywords: ["christmas"],
     faith: "CHURCH",
     emoji: "🎄",
     blurb: "Midnight mass, carols and community feasts.",
     dates: ["2026-12-25", "2027-12-25", "2028-12-25"],
   },
 ];
+
+export function festivalSlug(festival: Pick<Festival, "name">) {
+  return festival.name
+    .toLowerCase()
+    .replace(/\(.*?\)/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function festivalBySlug(slug: string) {
+  return FESTIVALS.find((festival) => festivalSlug(festival) === slug) ?? null;
+}
+
+export function festivalDates(festival: Festival) {
+  return festival.dates.map((value) => new Date(`${value}T00:00:00Z`));
+}
 
 export type UpcomingFestival = Festival & { date: Date; daysAway: number };
 

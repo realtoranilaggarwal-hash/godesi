@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { cache } from "react";
+import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
@@ -24,6 +23,7 @@ import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
@@ -36,10 +36,12 @@ import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { businessIsThin, robotsFor } from "@/lib/thinContent";
+import { liveDealWhere } from "@/lib/deals";
+import { DealCard } from "@/components/DealCard";
 
 export const dynamic = "force-dynamic";
 
-const getBusiness = cache(async (slug: string) => {
+async function getBusiness(slug: string) {
   return db.business.findUnique({
     where: { slug },
     include: {
@@ -58,20 +60,36 @@ const getBusiness = cache(async (slug: string) => {
       subcategoryRef: { select: { slug: true, name: true } },
       media: { orderBy: { sortOrder: "asc" } },
       packages: { orderBy: { sortOrder: "asc" } },
+      deals: { where: liveDealWhere(), orderBy: { createdAt: "desc" } },
       reviews: { where: { hidden: false }, orderBy: { createdAt: "desc" } },
       agentProfile: { include: { sales: { orderBy: { soldOn: "desc" }, take: 12 } } },
       vehicle: true,
-      _count: { select: { media: true, reviews: true } },
     },
   });
-});
+}
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const business = await getBusiness(params.slug);
+  const business = await db.business.findUnique({
+    where: { slug: params.slug },
+    select: {
+      name: true,
+      category: true,
+      city: true,
+      description: true,
+      logoUrl: true,
+      websiteUrl: true,
+      albumUrl: true,
+      videoUrl: true,
+      address: true,
+      specialties: true,
+      ownerId: true,
+      _count: { select: { media: true, reviews: true } },
+    },
+  });
   if (!business) return { title: "Business not found" };
 
   const title = `${business.name} — ${business.category} in ${business.city}`;
@@ -114,7 +132,19 @@ export default async function BusinessProfilePage({
     getBusiness(params.slug),
     getCurrentUser(),
   ]);
-  if (!business) notFound();
+  if (!business) {
+    const moved = await db.business.findFirst({
+      where: { previousSlugs: { has: params.slug } },
+      select: { slug: true },
+    });
+    if (!moved) notFound();
+    const query = new URLSearchParams(
+      Object.entries(searchParams).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    ).toString();
+    permanentRedirect(`/b/${moved.slug}${query ? `?${query}` : ""}`);
+  }
 
   const extraCategories = business.extraCategorySlugs.length
     ? await db.category.findMany({
@@ -244,6 +274,14 @@ export default async function BusinessProfilePage({
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold">{business.name}</h1>
               <StaffEditLink href={`/admin/business/${business.slug}`} />
+              {isOwner ? (
+                <Link
+                  href="/dashboard/profile"
+                  className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-bold text-white hover:bg-indigo-700"
+                >
+                  ✏️ Edit my card
+                </Link>
+              ) : null}
               {ownerPlan !== "FREE" ? (
                 <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
               ) : null}
@@ -480,6 +518,12 @@ export default async function BusinessProfilePage({
               </div>
             ) : null}
 
+            {business.playlistUrl ? (
+              <div className="mt-3">
+                <PlaylistGallery url={business.playlistUrl} owner={business.name} />
+              </div>
+            ) : null}
+
             {business.albumUrl ? (
               <div className="mt-3">
                 <PhotoAlbumGallery
@@ -563,6 +607,47 @@ export default async function BusinessProfilePage({
           </div>
         </div>
       </Card>
+
+      {business.deals.length || isOwner ? (
+        <Card id="deals">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold">🏷️ Deals &amp; offers</h2>
+            {isOwner ? (
+              <Link
+                href="/dashboard/deals"
+                className="text-sm font-semibold text-indigo-700 hover:underline"
+              >
+                {business.deals.length ? "Manage deals" : "Post a deal →"}
+              </Link>
+            ) : null}
+          </div>
+          {business.deals.length ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {business.deals.map((deal) => (
+                <DealCard
+                  key={deal.id}
+                  title={deal.title}
+                  details={
+                    deal.details
+                      ? contactVisible
+                        ? deal.details
+                        : maskContactDetails(deal.details)
+                      : null
+                  }
+                  code={deal.code}
+                  linkUrl={deal.linkUrl}
+                  expiresAt={deal.expiresAt}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-600">
+              Only you can see this: post an offer for GoDesi visitors and it shows here
+              and on godesi.com/deals.
+            </p>
+          )}
+        </Card>
+      ) : null}
 
       {!business.owner ? (
         <Card className="space-y-3 border-amber-200 bg-amber-50">

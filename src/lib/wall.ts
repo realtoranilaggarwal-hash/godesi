@@ -4,6 +4,7 @@ import { optionalRead } from "@/lib/resilient";
 import { SOCIAL_TAG } from "@/lib/social";
 import { socialWallPosts } from "@/lib/socialQueries";
 import { newsPath } from "@/lib/newsLinks";
+import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
 
 export type WallItem = {
   id: string;
@@ -125,6 +126,7 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
           category: true,
           imageUrl: true,
           publishedAt: true,
+          anonymous: true,
           submittedBy: { select: { name: true, avatarUrl: true } },
         },
       }),
@@ -206,12 +208,16 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
       icon: "📰",
       title: report.title,
       text: `${[report.category, report.city].filter(Boolean).join(" · ") || "Local report"} — by ${
-        report.submittedBy?.name ?? "a member"
+        report.anonymous
+          ? ANONYMOUS_BYLINE
+          : (report.submittedBy?.name ?? "a member")
       }`,
       href: newsPath(report),
       external: false,
       imageUrl: report.imageUrl,
-      avatarUrl: report.submittedBy?.avatarUrl ?? null,
+      avatarUrl: report.anonymous
+        ? null
+        : (report.submittedBy?.avatarUrl ?? null),
       at: report.publishedAt,
     })),
     ...updates.map((update) => ({

@@ -57,6 +57,7 @@ export default async function EditReportPage({
             photoUrls: report.photoUrls,
             albumUrl: report.albumUrl,
             videoUrl: report.videoUrl,
+            anonymous: report.anonymous,
           }}
         />
       </Card>

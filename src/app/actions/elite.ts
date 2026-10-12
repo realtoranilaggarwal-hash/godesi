@@ -18,6 +18,8 @@ import {
   elitePackageOrNull,
 } from "@/lib/elite";
 import { uniqueEliteSlug } from "@/lib/eliteSlug";
+import { STORY_QUESTIONS, readStoryAnswers } from "@/lib/storySheet";
+import { DEFAULT_EVENT_ZONE, instantFrom } from "@/lib/time";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { termEnd } from "@/lib/billing";
 import { BUNDLE_MONTHS } from "@/lib/bundles";
@@ -220,7 +222,46 @@ export async function submitEliteAction(
   }
 }
 
-/** Dismisses (or records) the "want to be featured?" prompt. */
+/**
+ * The nominee's own answers to the interview story sheet. Saved as they go,
+ * so a half-filled sheet is kept; the interviewer reads it from the briefing.
+ */
+export async function saveStorySheetAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const id = String(formData.get("id") ?? "");
+    const entry = await db.eliteEntry.findFirst({
+      where: { id, userId: user.id },
+      select: { id: true, storySheet: true, fullName: true },
+    });
+    if (!entry) return { error: "We could not find your Elite entry." };
+
+    const answers = readStoryAnswers(entry.storySheet);
+    for (const question of STORY_QUESTIONS) {
+      const value = String(formData.get(question.id) ?? "")
+        .trim()
+        .slice(0, 3000);
+      if (value) answers[question.id] = value;
+      else delete answers[question.id];
+    }
+
+    await db.eliteEntry.update({
+      where: { id: entry.id },
+      data: { storySheet: answers },
+    });
+    revalidatePath("/desi-elite/prepare");
+    revalidatePath("/admin/desi-elite");
+    return {
+      success: `Saved — ${Object.keys(answers).length} of ${STORY_QUESTIONS.length} answered. You can come back and add more any time.`,
+    };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
 /**
  * Elite fees are one-time purchases in USD: the interview, the professional
  * film and placement boosts. Stripe confirms them through the webhook.
@@ -308,9 +349,22 @@ export async function updateEliteAction(formData: FormData) {
   const awardTitle = String(formData.get("awardTitle") ?? "").trim();
   const awardYearRaw = String(formData.get("awardYear") ?? "").trim();
   const videoPackage = String(formData.get("videoPackage") ?? "").trim();
+  const interviewDate = String(formData.get("interviewDate") ?? "").trim();
+  const interviewTime = String(formData.get("interviewTime") ?? "").trim();
+  const interviewAt = interviewDate
+    ? instantFrom(interviewDate, interviewTime || "10:00", DEFAULT_EVENT_ZONE)
+    : null;
+  const interviewPlace = String(formData.get("interviewPlace") ?? "").trim();
 
-  const entry = await db.eliteEntry.findUnique({ where: { id } });
+  const entry = await db.eliteEntry.findUnique({
+    where: { id },
+    include: { user: { select: { email: true } } },
+  });
   if (!entry) throw new Error("Entry not found");
+  const scheduleChanged =
+    (interviewAt?.getTime() ?? null) !==
+      (entry.interviewAt?.getTime() ?? null) ||
+    (interviewPlace || null) !== (entry.interviewPlace ?? null);
 
   const updated = await db.eliteEntry.update({
     where: { id },
@@ -325,6 +379,8 @@ export async function updateEliteAction(formData: FormData) {
       awardTitle: awardTitle || null,
       awardYear: awardYearRaw ? Number(awardYearRaw) : null,
       videoPackage: videoPackage || entry.videoPackage,
+      interviewAt,
+      interviewPlace: interviewPlace || null,
       reviewedAt: new Date(),
       publishedAt:
         status === "PUBLISHED"
@@ -339,11 +395,11 @@ export async function updateEliteAction(formData: FormData) {
     > = {
       APPROVED: {
         title: "Your GoDesi Elite application is approved",
-        body: "Our team will contact you to arrange your interview.",
+        body: "Next step: fill in your story sheet so our interviewer knows your journey, then we book your Desi Who's Who interview.",
       },
       INTERVIEW_PENDING: {
         title: "GoDesi Elite interview being scheduled",
-        body: "Watch for a call or WhatsApp message from our team.",
+        body: "Watch for a call or WhatsApp message from our team, and finish your story sheet before we meet.",
       },
       PUBLISHED: {
         title: "You are published in GoDesi Elite 🎉",
@@ -356,12 +412,21 @@ export async function updateEliteAction(formData: FormData) {
     };
     const message = messages[status];
     if (message) {
+      const href =
+        status === "PUBLISHED"
+          ? `/desi-elite/${updated.slug}`
+          : status === "REJECTED"
+            ? "/desi-elite"
+            : "/desi-elite/prepare";
+      const linkLabel =
+        status === "REJECTED" || status === "PUBLISHED"
+          ? "GoDesi Elite"
+          : "Prepare for your interview";
       await notify({
         userId: entry.userId,
         title: message.title,
         body: message.body,
-        href:
-          status === "PUBLISHED" ? `/desi-elite/${updated.slug}` : "/dashboard",
+        href,
       });
       const owner = await db.user.findUnique({
         where: { id: entry.userId },
@@ -373,10 +438,50 @@ export async function updateEliteAction(formData: FormData) {
           subject: message.title,
           html: shell(
             message.title,
-            `<p>${message.body}</p><p><a href="${siteUrl()}/desi-elite">GoDesi Elite</a></p>`,
+            `<p>${message.body}</p><p><a href="${siteUrl()}${href}">${linkLabel}</a></p>`,
           ),
         }).catch(() => undefined);
       }
+    }
+  }
+
+  if (scheduleChanged && updated.interviewAt) {
+    const when = updated.interviewAt.toLocaleString("en-US", {
+      dateStyle: "full",
+      timeStyle: "short",
+      timeZone: DEFAULT_EVENT_ZONE,
+    });
+    const where = updated.interviewPlace ?? "to be confirmed";
+    const body = `Your Desi Who's Who interview is booked for ${when} (US Eastern) — ${where}. Please finish your story sheet before then.`;
+    const prepareUrl = `${siteUrl()}/desi-elite/prepare`;
+    if (entry.userId) {
+      await notify({
+        userId: entry.userId,
+        title: "Your GoDesi Elite interview is scheduled",
+        body,
+        href: "/desi-elite/prepare",
+      });
+    }
+    const to = entry.contactEmail ?? entry.user?.email ?? null;
+    if (to) {
+      await sendEmail({
+        to,
+        subject: "Your GoDesi Elite interview is scheduled",
+        html: shell(
+          "Interview scheduled",
+          `<p>${body}</p><p><a href="${prepareUrl}">Prepare for your interview</a></p>`,
+        ),
+      }).catch(() => undefined);
+    }
+    if (updated.assignedTo?.includes("@")) {
+      await sendEmail({
+        to: updated.assignedTo,
+        subject: `Interview booked: ${updated.fullName} — ${when}`,
+        html: shell(
+          "Interview booked",
+          `<p>${updated.fullName} (${updated.category}, ${updated.city}) — ${when} (US Eastern), ${where}.</p><p><a href="${siteUrl()}/admin/desi-elite/${updated.id}/briefing">Open the briefing sheet</a></p>`,
+        ),
+      }).catch(() => undefined);
     }
   }
 

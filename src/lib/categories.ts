@@ -265,6 +265,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
       "Regional Cuisine Catering",
       "Dessert & Cake Vendors",
       "Live Bands",
+      "Singers",
       "Dhol & Baraat",
       "Dance Choreographers",
       "Mandap Setup",

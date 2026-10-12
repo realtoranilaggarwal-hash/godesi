@@ -9,6 +9,7 @@ import { FeaturedEventRail } from "@/components/FeaturedEvents";
 import { requestCountry, requestCurrency } from "@/lib/currency";
 import { venueSuggestions } from "@/lib/venues";
 import { organiserPaysFee, platformFeePercent } from "@/lib/connect";
+import { organizerClubs } from "@/lib/clubQueries";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -21,13 +22,14 @@ export const metadata: Metadata = {
 export default async function NewEventPage({
   searchParams,
 }: {
-  searchParams: { category?: string; subcategory?: string };
+  searchParams: { category?: string; subcategory?: string; club?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/events/new");
-  const [categories, venues] = await Promise.all([
+  const [categories, venues, clubs] = await Promise.all([
     getCategoryTree(),
     venueSuggestions(),
+    organizerClubs(user.id),
   ]);
 
   return (
@@ -56,6 +58,8 @@ export default async function NewEventPage({
             venues={venues}
             feePercent={platformFeePercent()}
             feeWaived={!organiserPaysFee(user)}
+            clubs={clubs}
+            defaultClub={searchParams.club}
           />
         </Card>
       </div>

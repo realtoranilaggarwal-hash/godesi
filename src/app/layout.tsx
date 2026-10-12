@@ -12,6 +12,7 @@ import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
+import { SpinWheel } from "@/components/SpinWheel";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { QuoraSignupEvent } from "@/components/QuoraSignupEvent";
 import { aiEnabled } from "@/lib/ai";
@@ -53,13 +54,15 @@ export default function RootLayout({
   const umamiId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   const umamiSrc =
     process.env.NEXT_PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js";
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
   const quoraPixel =
-    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ?? "e1f78f6226a74980abda723156b819ed";
+    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ??
+    "e1f78f6226a74980abda723156b819ed";
 
   return (
     <html lang="en" className="overflow-x-hidden">
-      {adsenseClient || umamiId || clarityId || quoraPixel ? (
+      {adsenseClient || umamiId || gaId || clarityId || quoraPixel ? (
         <head>
           {adsenseClient ? (
             <Script
@@ -76,6 +79,22 @@ export default function RootLayout({
               data-website-id={umamiId}
               strategy="afterInteractive"
             />
+          ) : null}
+          {gaId ? (
+            <>
+              <Script
+                async
+                src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+                strategy="afterInteractive"
+              />
+              <Script
+                id="ga4"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',${JSON.stringify(gaId)});`,
+                }}
+              />
+            </>
           ) : null}
           {/* Microsoft Clarity: heatmaps and session replay of the layout. */}
           {clarityId ? (
@@ -166,7 +185,9 @@ export default function RootLayout({
         <UnregisterServiceWorkers />
         <SiteHeader />
         <SiteTicker />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-screen-2xl px-4 py-6">
+          {children}
+        </main>
         <SiteFooter />
         <QuoraSignupEvent />
         <LiveMediaPlayer />
@@ -175,6 +196,7 @@ export default function RootLayout({
         <LiveActivity />
         <GoogleTranslate />
         <BackToTop />
+        <SpinWheel />
         {aiEnabled() && <AiChat />}
       </body>
     </html>

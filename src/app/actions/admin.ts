@@ -611,6 +611,16 @@ const adminEventSchema = z.object({
       (value) => !value || isSupportedVideoUrl(value),
       "Paste a YouTube or Vimeo video link",
     ),
+  liveUrl: z
+    .string()
+    .trim()
+    .url("Enter the full live stream link starting with https://")
+    .optional()
+    .or(z.literal("").transform(() => undefined))
+    .refine(
+      (value) => !value || isSupportedVideoUrl(value),
+      "Paste the YouTube Live link (youtube.com/live/… or youtu.be/…)",
+    ),
   albumUrl: z
     .string()
     .trim()
@@ -655,6 +665,7 @@ export async function adminUpdateEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl"),
       videoUrl: formData.get("videoUrl"),
+      liveUrl: formData.get("liveUrl"),
       albumUrl: formData.get("albumUrl"),
       featured: formData.get("featured") === "on",
       status: formData.get("status"),
@@ -769,6 +780,10 @@ export async function adminUpdateEventAction(
         websiteUrl: parsed.data.websiteUrl ?? null,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        liveUrl: parsed.data.liveUrl ?? null,
+        liveTicketOnly:
+          Boolean(parsed.data.liveUrl) &&
+          formData.get("liveTicketOnly") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         featured: parsed.data.featured,
         price: parsed.data.price,

@@ -27,8 +27,9 @@ export default async function ReportPage({
         <div>
           <h1 className="text-2xl font-bold">Report an issue</h1>
           <p className="text-sm text-slate-600">
-            Tell us what happened and we will look into it. Reports are confidential —
-            we never share your details with the person you are reporting.
+            Tell us what happened and we will look into it. Reports are
+            confidential — we never share your details with the person you are
+            reporting.
           </p>
         </div>
 
@@ -48,7 +49,11 @@ export default async function ReportPage({
             <Link href="/safety" className="font-semibold text-indigo-600">
               how to hire safely
             </Link>{" "}
-            first.
+            first. Bad food, a kept deposit or unpaid wages? See{" "}
+            <Link href="/complaints" className="font-semibold text-indigo-600">
+              how to file an official complaint
+            </Link>
+            .
           </p>
         </Card>
       </div>

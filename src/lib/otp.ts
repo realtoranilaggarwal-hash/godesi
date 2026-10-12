@@ -1,6 +1,6 @@
 import { createHash, randomInt } from "crypto";
 import { db } from "@/lib/db";
-import { otpEmail, sendEmail } from "@/lib/email";
+import { otpEmail, sendEmail, type OtpPurpose } from "@/lib/email";
 
 const TTL_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 6;
@@ -16,7 +16,10 @@ export type OtpIssueResult =
   | { ok: false; error: string };
 
 /** Creates a one-time code for `email` and mails it out. */
-export async function issueEmailOtp(email: string): Promise<OtpIssueResult> {
+export async function issueEmailOtp(
+  email: string,
+  purpose: OtpPurpose = "verify",
+): Promise<OtpIssueResult> {
   const recent = await db.emailOtp.findFirst({
     where: { email, createdAt: { gt: new Date(Date.now() - RESEND_COOLDOWN_MS) } },
     orderBy: { createdAt: "desc" },
@@ -31,7 +34,7 @@ export async function issueEmailOtp(email: string): Promise<OtpIssueResult> {
     data: { email, codeHash: hash(code), expiresAt: new Date(Date.now() + TTL_MS) },
   });
 
-  const { subject, html } = otpEmail(code);
+  const { subject, html } = otpEmail(code, email, purpose);
   const delivered = await sendEmail({ to: email, subject, html });
   return { ok: true, delivered };
 }

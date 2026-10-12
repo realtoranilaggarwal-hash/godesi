@@ -7,6 +7,7 @@ import { confirmAdOrder } from "@/lib/adOrders";
 import { confirmResourceOrder } from "@/lib/resourceOrders";
 import { confirmEliteOrder } from "@/lib/eliteOrders";
 import { confirmLiveChannelOrder } from "@/lib/liveChannelOrders";
+import { confirmClubOrder } from "@/lib/clubOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
 import { confirmGigOrder } from "@/lib/gigs";
@@ -18,7 +19,10 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!stripeEnabled() || !secret) {
-    return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "Stripe is not configured" },
+      { status: 503 },
+    );
   }
 
   const signature = request.headers.get("stripe-signature");
@@ -44,6 +48,7 @@ export async function POST(request: Request) {
       const reviewDisputeId = session.metadata?.reviewDisputeId;
       const eliteOrderId = session.metadata?.eliteOrderId;
       const liveChannelOrderId = session.metadata?.liveChannelOrderId;
+      const clubOrderId = session.metadata?.clubOrderId;
       const gigOrderId = session.metadata?.gigOrderId;
       const websiteProjectId = session.metadata?.websiteProjectId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
@@ -81,9 +86,20 @@ export async function POST(request: Request) {
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "usd").toUpperCase(),
         });
-      } else if (session.metadata?.kind === "live-channel" && liveChannelOrderId) {
+      } else if (
+        session.metadata?.kind === "live-channel" &&
+        liveChannelOrderId
+      ) {
         await confirmLiveChannelOrder({
           liveChannelOrderId,
+          provider: "stripe",
+          reference: session.id,
+          amountMinor: session.amount_total ?? 0,
+          currency: (session.currency ?? "usd").toUpperCase(),
+        });
+      } else if (session.metadata?.kind === "club-premium" && clubOrderId) {
+        await confirmClubOrder({
+          clubOrderId,
           provider: "stripe",
           reference: session.id,
           amountMinor: session.amount_total ?? 0,
@@ -96,7 +112,7 @@ export async function POST(request: Request) {
           paymentIntentId:
             typeof session.payment_intent === "string"
               ? session.payment_intent
-              : session.payment_intent?.id ?? null,
+              : (session.payment_intent?.id ?? null),
         });
       } else if (session.metadata?.kind === "website" && websiteProjectId) {
         await confirmWebsitePayment({
@@ -105,11 +121,17 @@ export async function POST(request: Request) {
           subscriptionId:
             typeof session.subscription === "string"
               ? session.subscription
-              : session.subscription?.id ?? null,
+              : (session.subscription?.id ?? null),
           setupMinor: session.amount_total ?? 0,
         });
-      } else if (session.metadata?.kind === "review-dispute" && reviewDisputeId) {
-        await confirmReviewDispute({ disputeId: reviewDisputeId, reference: session.id });
+      } else if (
+        session.metadata?.kind === "review-dispute" &&
+        reviewDisputeId
+      ) {
+        await confirmReviewDispute({
+          disputeId: reviewDisputeId,
+          reference: session.id,
+        });
       } else if (session.metadata?.kind === "bundle" && userId) {
         const months = Number(session.metadata?.months ?? 12);
         await grantBundle({

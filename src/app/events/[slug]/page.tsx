@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 import { db } from "@/lib/db";
 import { venuePath } from "@/lib/venues";
 import { getCurrentUser } from "@/lib/auth";
@@ -20,6 +19,7 @@ import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { ShareRail } from "@/components/ShareRail";
+import { EventShareKit } from "@/components/EventShareKit";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
 import { EventClaimPitch } from "@/components/EventClaimPitch";
@@ -43,33 +43,147 @@ import { metaDescription } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
+import { matchProfilesByExactName, nameKey } from "@/lib/peopleLookup";
+import { EventRsvpPanel } from "@/components/EventRsvpPanel";
+import { MapEmbed } from "@/components/MapEmbed";
+
+type SpeakerRow =
+  Awaited<ReturnType<typeof loadEvent>> extends infer E
+    ? E extends { speakers: (infer S)[] }
+      ? S
+      : never
+    : never;
+
+type SpeakerProfile = {
+  username: string;
+  avatarUrl: string | null;
+  headline: string | null;
+};
+
+type Organizer = {
+  name: string;
+  username: string | null;
+  avatarUrl: string | null;
+  headline: string | null;
+  emailVerifiedAt: Date | null;
+  bannedAt: Date | null;
+} | null;
+
+/**
+ * A speaker links to the profile the organiser picked. A typed-in name links
+ * to the organiser when it is their own name or handle, otherwise to a public
+ * member with that name (case, spaces and punctuation ignored).
+ */
+async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
+  const unlinked = speakers
+    .filter((speaker) => !speaker.user)
+    .map((speaker) => speaker.name);
+  const byName = await matchProfilesByExactName(unlinked);
+  const host =
+    organizer?.username && organizer.emailVerifiedAt && !organizer.bannedAt
+      ? {
+          username: organizer.username,
+          avatarUrl: organizer.avatarUrl,
+          headline: organizer.headline,
+        }
+      : null;
+  const hostKeys = new Set(
+    [nameKey(organizer?.name ?? ""), nameKey(organizer?.username ?? "")].filter(
+      Boolean,
+    ),
+  );
+  return speakers.map((speaker) => {
+    let profile: SpeakerProfile | null = null;
+    const linked = speaker.user;
+    if (linked?.username && linked.emailVerifiedAt && !linked.bannedAt) {
+      profile = {
+        username: linked.username,
+        avatarUrl: linked.avatarUrl,
+        headline: linked.headline,
+      };
+    } else if (host && hostKeys.has(nameKey(speaker.name))) {
+      profile = host;
+    } else {
+      const match = byName.get(nameKey(speaker.name));
+      if (match?.username) {
+        profile = {
+          username: match.username,
+          avatarUrl: match.avatarUrl,
+          headline: match.headline,
+        };
+      }
+    }
+    return { ...speaker, profile };
+  });
+}
 
 export const dynamic = "force-dynamic";
 
-const loadEvent = cache(async (slug: string) => {
+async function loadEvent(slug: string) {
   return db.event.findUnique({
     where: { slug },
     include: {
       tiers: { orderBy: { sortOrder: "asc" } },
-      speakers: { orderBy: { sortOrder: "asc" } },
+      speakers: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          user: {
+            select: {
+              username: true,
+              avatarUrl: true,
+              headline: true,
+              emailVerifiedAt: true,
+              bannedAt: true,
+            },
+          },
+        },
+      },
       sessions: { orderBy: { sortOrder: "asc" } },
       category: { select: { slug: true, name: true, icon: true, color: true } },
       organizer: {
-        select: { name: true, username: true, avatarUrl: true },
+        select: {
+          name: true,
+          username: true,
+          avatarUrl: true,
+          headline: true,
+          emailVerifiedAt: true,
+          bannedAt: true,
+        },
       },
       business: {
         select: { slug: true, name: true, logoUrl: true, city: true },
       },
       source: { select: { name: true, websiteUrl: true } },
       venueRef: { select: { id: true, slug: true } },
+      club: { select: { id: true, slug: true, name: true, visibility: true } },
+      rsvps: {
+        orderBy: { createdAt: "asc" },
+        select: {
+          answer: true,
+          bringing: true,
+          bringingNote: true,
+          participating: true,
+          amountMinor: true,
+          guests: true,
+          userId: true,
+          user: {
+            select: {
+              name: true,
+              username: true,
+              emailVerifiedAt: true,
+              bannedAt: true,
+            },
+          },
+        },
+      },
     },
   });
-});
+}
 
 const relatedEvents = cachedQuery(
   "event-related",
   CONTENT_TTL,
-  async (eventId: string, city: string, genres: string[], state: string | null) =>
+  (eventId: string, city: string, genres: string[], state: string | null) =>
     db.event.findMany({
       where: {
         status: "APPROVED",
@@ -122,25 +236,59 @@ export default async function EventPage({
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
+  const speakers = await withProfiles(event.speakers, event.organizer);
+  const profileFor = (name: string | null) =>
+    name
+      ? (speakers.find((speaker) => nameKey(speaker.name) === nameKey(name))
+          ?.profile ?? null)
+      : null;
   const isOwnerOrDesk = Boolean(
     user && (user.id === event.organizerId || can(user, "events")),
   );
+  const clubMembership =
+    user && event.club
+      ? await db.clubMember.findUnique({
+          where: { clubId_userId: { clubId: event.club.id, userId: user.id } },
+          select: { role: true, status: true },
+        })
+      : null;
+  const rsvpOpen =
+    Boolean(event.club) ||
+    event.bringOptions.length > 0 ||
+    event.participateOptions.length > 0 ||
+    event.contributionMode !== "NONE";
+  const canRsvp = event.club ? clubMembership?.status === "ACTIVE" : true;
+  const rsvpRows = event.rsvps.map((r) => ({
+    ...r,
+    user: {
+      name: r.user.name,
+      username:
+        r.user.username && r.user.emailVerifiedAt && !r.user.bannedAt
+          ? r.user.username
+          : null,
+    },
+  }));
+  const myRsvp = user
+    ? (rsvpRows.find((r) => r.userId === user.id) ?? null)
+    : null;
   // An event waiting on moderation is only visible to its organiser and the desk.
   if (event.status !== "APPROVED" && !isOwnerOrDesk) notFound();
-  // The join link is what an online seat buys, so only a ticket holder, the
-  // organiser and the events desk may see it.
-  const joinUrl =
+  // The join link (and a ticket-only stream) is what an online seat buys, so
+  // only a ticket holder, the organiser and the events desk may see it.
+  const hasSeat =
     isOwnerOrDesk ||
-    (user &&
+    (Boolean(user) &&
+      Boolean(event.onlineUrl || (event.liveUrl && event.liveTicketOnly)) &&
       (await db.ticket.count({
         where: {
           eventId: event.id,
-          userId: user.id,
+          userId: user!.id,
           status: "CONFIRMED",
         },
-      })) > 0)
-      ? event.onlineUrl
-      : null;
+      })) > 0);
+  const joinUrl = hasSeat ? event.onlineUrl : null;
+  const liveUrl =
+    event.liveUrl && (!event.liveTicketOnly || hasSeat) ? event.liveUrl : null;
   // Imported from someone else's public calendar: we list it and send people to
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
@@ -161,16 +309,9 @@ export default async function EventPage({
   // The page runs out of content well before the ad rail does, so it ends with
   // what the visitor most likely wants next: the same kind of event, or
   // anything else on in their city.
-  const relatedRows = await relatedEvents(
-    event.id,
-    event.city,
-    event.genres,
-    event.state,
-  );
-  const related = relatedRows.map((item) => ({
-    ...item,
-    startsAt: new Date(item.startsAt),
-  }));
+  const related = (
+    await relatedEvents(event.id, event.city, event.genres, event.state)
+  ).map((item) => ({ ...item, startsAt: new Date(item.startsAt) }));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -490,6 +631,13 @@ export default async function EventPage({
                 </p>
               )}
             </div>
+            {event.mode !== "ONLINE" ? (
+              <MapEmbed
+                parts={[event.venue, event.address, event.city, event.state]}
+                title={event.venue}
+                className="mt-3"
+              />
+            ) : null}
 
             {past ? null : (
               <AddToCalendar
@@ -522,6 +670,20 @@ export default async function EventPage({
                 ))}
               </div>
             ) : null}
+            {liveUrl ? (
+              <div className="space-y-2">
+                <h2 className="font-bold text-rose-600">🔴 Watch live</h2>
+                <VideoEmbed url={liveUrl} title={`${event.title} — live`} />
+              </div>
+            ) : event.liveUrl ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                <p className="font-bold">🔴 This event streams live on GoDesi</p>
+                <p>
+                  Book a ticket below and the live video plays right here on
+                  this page.
+                </p>
+              </div>
+            ) : null}
             <p className="whitespace-pre-line text-slate-700">
               {event.description}
             </p>
@@ -544,6 +706,38 @@ export default async function EventPage({
                 title={event.title}
               />
             </div>
+            {past ? null : (
+              <details className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-3">
+                <summary className="cursor-pointer text-sm font-bold text-indigo-900">
+                  📣 Share kit — WhatsApp & Facebook groups, Nextdoor, Patch
+                </summary>
+                <div className="mt-3">
+                  <EventShareKit
+                    url={`${siteUrl()}/events/${event.slug}`}
+                    title={event.title}
+                    when={formatEventDate(event.startsAt, event.timeZone)}
+                    where={
+                      event.mode === "ONLINE"
+                        ? "Online"
+                        : [event.venue, event.address, event.city, event.state]
+                            .filter(Boolean)
+                            .join(", ")
+                    }
+                    price={
+                      event.price
+                        ? `From ${formatMoney(event.price, event.currency)}`
+                        : event.tiers.length
+                          ? "Tickets from free"
+                          : imported
+                            ? "Entry terms: see the organiser"
+                            : "Free entry"
+                    }
+                    description={event.description}
+                    imageUrl={event.imageUrl}
+                  />
+                </div>
+              </details>
+            )}
           </div>
         </div>
 
@@ -609,65 +803,120 @@ export default async function EventPage({
         ) : null}
 
         {event.sessions.length ? (
-          <Card>
+          <Card className="!border-2 !border-indigo-200">
             <h2 className="font-bold">Agenda</h2>
-            <ul className="mt-3 divide-y divide-slate-100">
-              {event.sessions.map((session) => (
-                <li
-                  key={session.id}
-                  className="flex flex-wrap gap-x-3 gap-y-1 py-2"
-                >
-                  <p className="w-28 shrink-0 text-sm font-semibold text-indigo-700">
-                    {session.startTime
-                      ? `${session.startTime}${session.endTime ? `–${session.endTime}` : ""}`
-                      : "—"}
-                  </p>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">
-                      {session.title}
+            <ol className="mt-3 space-y-2">
+              {event.sessions.map((session, index) => {
+                const profile = profileFor(session.speaker);
+                return (
+                  <li
+                    key={session.id}
+                    className="flex flex-wrap gap-x-3 gap-y-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                  >
+                    <p className="w-28 shrink-0 text-sm font-semibold text-indigo-700">
+                      {session.startTime
+                        ? `${session.startTime}${session.endTime ? `–${session.endTime}` : ""}`
+                        : `#${index + 1}`}
                     </p>
-                    <p className="text-sm text-slate-500">
-                      {[session.stage, session.speaker]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900">
+                        {session.title}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {session.stage}
+                        {session.stage && session.speaker ? " · " : null}
+                        {session.speaker ? (
+                          profile ? (
+                            <Link
+                              href={`/${profile.username}`}
+                              className="font-semibold text-indigo-700 hover:underline"
+                            >
+                              {session.speaker}
+                            </Link>
+                          ) : (
+                            session.speaker
+                          )
+                        ) : null}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
           </Card>
         ) : null}
 
-        {event.speakers.length ? (
+        {speakers.length ? (
           <Card>
             <h2 className="font-bold">Speakers & guests</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {event.speakers.map((speaker) => (
-                <div key={speaker.id} className="flex gap-3">
-                  {speaker.photoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={speaker.photoUrl}
-                      alt={speaker.name}
-                      className="h-14 w-14 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg font-black text-white">
-                      {speaker.name.slice(0, 1).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="font-semibold text-slate-900">
-                      {speaker.name}
-                    </p>
-                    {speaker.bio ? (
-                      <p className="text-sm text-slate-600">{speaker.bio}</p>
-                    ) : null}
+              {speakers.map((speaker) => {
+                const photo = speaker.photoUrl || speaker.profile?.avatarUrl;
+                const href = speaker.profile
+                  ? `/${speaker.profile.username}`
+                  : null;
+                const avatar = photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={photo}
+                    alt={speaker.name}
+                    className="h-14 w-14 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg font-black text-white">
+                    {speaker.name.slice(0, 1).toUpperCase()}
                   </div>
-                </div>
-              ))}
+                );
+                return (
+                  <div key={speaker.id} className="flex gap-3">
+                    {href ? <Link href={href}>{avatar}</Link> : avatar}
+                    <div className="min-w-0">
+                      {href ? (
+                        <Link
+                          href={href}
+                          className="font-semibold text-indigo-700 hover:underline"
+                        >
+                          {speaker.name}
+                        </Link>
+                      ) : (
+                        <p className="font-semibold text-slate-900">
+                          {speaker.name}
+                        </p>
+                      )}
+                      {speaker.bio || speaker.profile?.headline ? (
+                        <p className="text-sm text-slate-600">
+                          {speaker.bio || speaker.profile?.headline}
+                        </p>
+                      ) : null}
+                      {href ? (
+                        <Link
+                          href={href}
+                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700"
+                        >
+                          ✓ GoDesi profile →
+                        </Link>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
+        ) : null}
+
+        {rsvpOpen && !imported ? (
+          <EventRsvpPanel
+            event={event}
+            rsvps={rsvpRows}
+            mine={myRsvp}
+            viewer={Boolean(user)}
+            canRsvp={canRsvp}
+            isOrganizer={
+              isOwnerOrDesk ||
+              (clubMembership?.role === "ORGANIZER" &&
+                clubMembership.status === "ACTIVE")
+            }
+          />
         ) : null}
 
         {event.tiers.length ? (
@@ -719,6 +968,18 @@ export default async function EventPage({
           ) : (
             <PostedBy user={event.organizer} className="mt-1" />
           )}
+          {event.club ? (
+            <p className="mt-2 text-sm text-slate-600">
+              Hosted by{" "}
+              <Link
+                href={`/clubs/${event.club.slug}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                {event.club.name}
+              </Link>{" "}
+              · a GoDesi club
+            </p>
+          ) : null}
           {event.claimedAt && event.importedFrom ? (
             <p className="mt-2 text-xs text-slate-500">
               Claimed by the organiser. First listed from {event.importedFrom}.

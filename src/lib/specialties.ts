@@ -2394,6 +2394,7 @@ const WEDDING_ALIASES: Record<string, string> = {
   "Stage & Sound Rentals": "DJ & Sound",
   "Dhol & Baraat": "DJ & Sound",
   "Live Bands": "Anchors & Artists",
+  Singers: "Anchors & Artists",
   "Dance Choreographers": "Anchors & Artists",
   "Fireworks & Sparklers": "Anchors & Artists",
   "Cold Sparklers & Special Effects": "Anchors & Artists",

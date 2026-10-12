@@ -3,10 +3,7 @@ import { formatEventDate, seatsLeft } from "@/lib/events";
 import { Money } from "@/components/Money";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
-import {
-  eventCategoryIcon,
-  eventCategoryLabel,
-} from "@/lib/eventCategories";
+import { eventCategoryIcon, eventCategoryLabel } from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { thumbImage } from "@/lib/proxyImage";
 import { eventTheme, placeLine } from "@/lib/eventTheme";
@@ -82,13 +79,11 @@ export function EventCard({
       <Link
         href={`/events/${event.slug}`}
         className={`group flex flex-1 flex-col overflow-hidden bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-          featured
-            ? "rounded-[17px]"
-            : "rounded-2xl border border-slate-200"
+          featured ? "rounded-[17px]" : "rounded-2xl border border-slate-200"
         }`}
       >
-        {event.imageUrl && featured ? (
-          <div className="relative h-56 w-full overflow-hidden bg-slate-900">
+        {event.imageUrl && featured && !tile ? (
+          <div className="relative min-h-56 w-full flex-1 overflow-hidden bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={thumbImage(event.imageUrl, 640)}
@@ -101,7 +96,7 @@ export function EventCard({
             <img
               src={thumbImage(event.imageUrl, 1080)}
               alt={event.title}
-              className="relative h-full w-full object-contain"
+              className="absolute inset-0 h-full w-full object-contain"
               loading="lazy"
             />
           </div>
@@ -113,12 +108,21 @@ export function EventCard({
             className={`${posterHeight} w-full object-cover`}
             loading="lazy"
           />
+        ) : compact ? (
+          <span
+            aria-hidden
+            className={`flex ${posterHeight} w-full items-center justify-center bg-gradient-to-br ${gradientFor(
+              theme.color,
+            )} text-5xl`}
+          >
+            {theme.icon}
+          </span>
         ) : null}
 
         <div
-          className={`flex flex-1 flex-col gap-1 ${
+          className={`flex ${featured && !tile && event.imageUrl ? "" : "flex-1"} flex-col gap-1 ${
             tile ? "p-2.5" : compact ? "p-3" : "p-4"
-          } ${featured && !event.imageUrl ? "pt-12" : ""}`}
+          } ${featured && !tile && !event.imageUrl ? "pt-12" : ""}`}
         >
           <div className="flex items-center gap-2">
             {event.genres?.length && !tile ? (
@@ -134,10 +138,12 @@ export function EventCard({
             {event.partnerStatus === "APPROVED" ? (
               <Badge tone="amber">🔥 Partner event</Badge>
             ) : null}
-            {left === 0 && !imported ? <Badge tone="red">Sold out</Badge> : null}
+            {left === 0 && !imported ? (
+              <Badge tone="red">Sold out</Badge>
+            ) : null}
           </div>
           <div className="flex items-start gap-2">
-            {event.imageUrl ? null : (
+            {event.imageUrl || compact ? null : (
               <span
                 aria-hidden
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradientFor(

@@ -5,6 +5,7 @@ import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { publicProfileIds } from "@/lib/peopleLookup";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
@@ -29,6 +30,9 @@ import {
 import { rememberVenue } from "@/lib/venues";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
+import { clubIsPremium } from "@/lib/clubs";
+import { BRING_OPTIONS, PARTICIPATE_OPTIONS } from "@/lib/clubs";
+import { isClubOrganizer } from "@/lib/clubAccess";
 
 /** Seat types per event, e.g. Early bird / Couple / Online / VIP. */
 const MAX_TIERS = 8;
@@ -83,6 +87,7 @@ type SpeakerInput = {
   name: string;
   bio: string | null;
   photoUrl: string | null;
+  userId: string | null;
 };
 type SessionInput = {
   title: string;
@@ -96,7 +101,7 @@ const MAX_SPEAKERS = 12;
 const MAX_SESSIONS = 20;
 
 /** Repeated speaker rows; rows without a name are skipped. */
-function readSpeakers(formData: FormData): SpeakerInput[] {
+async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
   const names = formData
     .getAll("speakerName")
     .map((value) => String(value).trim());
@@ -106,6 +111,10 @@ function readSpeakers(formData: FormData): SpeakerInput[] {
   const photos = formData
     .getAll("speakerPhoto")
     .map((value) => String(value).trim());
+  const users = formData
+    .getAll("speakerUser")
+    .map((value) => String(value).trim());
+  const linkable = await publicProfileIds(users);
 
   const speakers: SpeakerInput[] = [];
   for (
@@ -118,6 +127,7 @@ function readSpeakers(formData: FormData): SpeakerInput[] {
       name: names[index].slice(0, 120),
       bio: bios[index]?.slice(0, 600) || null,
       photoUrl: photos[index] || null,
+      userId: linkable.has(users[index]) ? users[index] : null,
     });
   }
   return speakers;
@@ -196,6 +206,10 @@ const eventSchema = z.object({
     (value) => !value || isSupportedVideoUrl(value),
     "Paste a YouTube or Vimeo video link",
   ),
+  liveUrl: optionalUrl.refine(
+    (value) => !value || isSupportedVideoUrl(value),
+    "Paste the YouTube Live link (youtube.com/live/… or youtu.be/…)",
+  ),
   albumUrl: optionalUrl.refine(
     (value) => !value || isAlbumLink(value),
     "Paste a Google Photos album link (photos.app.goo.gl/…)",
@@ -270,6 +284,7 @@ export async function createEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl") ?? undefined,
       videoUrl: formData.get("videoUrl") ?? undefined,
+      liveUrl: formData.get("liveUrl") ?? undefined,
       albumUrl: formData.get("albumUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -310,7 +325,7 @@ export async function createEventAction(
       return { error: "Add the join link for an online or hybrid event." };
     }
 
-    const speakers = readSpeakers(formData);
+    const speakers = await readSpeakers(formData);
     const sessions = readSessions(formData);
     const features = formData
       .getAll("features")
@@ -364,6 +379,41 @@ export async function createEventAction(
     });
     slug = await uniqueEventSlug(parsed.data.title, parsed.data.city);
 
+    const clubId = String(formData.get("clubId") ?? "").trim() || null;
+    if (clubId && !(await isClubOrganizer(clubId, user))) {
+      return { error: "Only a club's organisers can post events under it." };
+    }
+    const contributionRaw = String(formData.get("contributionMode") ?? "NONE");
+    const contributionMode =
+      contributionRaw === "SUGGESTED" || contributionRaw === "CUSTOM"
+        ? contributionRaw
+        : "NONE";
+    const contributionAmount = Number(formData.get("contributionAmount") ?? 0);
+    const contributionMinor =
+      contributionMode === "SUGGESTED" &&
+      Number.isFinite(contributionAmount) &&
+      contributionAmount > 0
+        ? toMinor(contributionAmount)
+        : null;
+    const contributionNote =
+      contributionMode === "NONE"
+        ? null
+        : String(formData.get("contributionNote") ?? "")
+            .trim()
+            .slice(0, 200) || null;
+    const bringOptions = formData
+      .getAll("bringOptions")
+      .map(String)
+      .filter((v): v is (typeof BRING_OPTIONS)[number] =>
+        (BRING_OPTIONS as readonly string[]).includes(v),
+      );
+    const participateOptions = formData
+      .getAll("participateOptions")
+      .map(String)
+      .filter((v): v is (typeof PARTICIPATE_OPTIONS)[number] =>
+        (PARTICIPATE_OPTIONS as readonly string[]).includes(v),
+      );
+
     const venueRef =
       parsed.data.mode === "ONLINE"
         ? null
@@ -396,10 +446,10 @@ export async function createEventAction(
         timeZone: zone,
         venue: titleCase(parsed.data.venue),
         hallName: venueRef ? parsed.data.hallName || null : null,
-        hallCapacity: venueRef ? parsed.data.hallCapacity ?? null : null,
-        venueUrl: venueRef ? parsed.data.venueUrl ?? null : null,
+        hallCapacity: venueRef ? (parsed.data.hallCapacity ?? null) : null,
+        venueUrl: venueRef ? (parsed.data.venueUrl ?? null) : null,
         address: venueRef ? parsed.data.address || null : null,
-        mapsUrl: venueRef ? parsed.data.mapsUrl ?? null : null,
+        mapsUrl: venueRef ? (parsed.data.mapsUrl ?? null) : null,
         venueRefId: venueRef?.id ?? null,
         features,
         partnerStatus: wantsPartnership ? "REQUESTED" : "NONE",
@@ -426,12 +476,22 @@ export async function createEventAction(
         tags,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        liveUrl: parsed.data.liveUrl ?? null,
+        liveTicketOnly:
+          Boolean(parsed.data.liveUrl) &&
+          formData.get("liveTicketOnly") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         price,
         currency: parsed.data.currency ?? requestCurrency(),
         seatsTotal,
         organizerId: user.id,
         businessId: business?.id ?? null,
+        clubId,
+        contributionMode,
+        contributionMinor,
+        contributionNote,
+        bringOptions,
+        participateOptions,
         categorySlug: primaryCategory,
         categorySlugs,
         speakers: speakers.length
@@ -522,6 +582,7 @@ export async function bookTicketAction(
             planExpiresAt: true,
           },
         },
+        club: { select: { premiumUntil: true } },
       },
     });
     if (!event) return { error: "This event no longer exists." };
@@ -564,8 +625,10 @@ export async function bookTicketAction(
     }
 
     const amountMinor = Math.max(0, subtotalMinor - discountMinor);
-    /** Free organisers pay Godesi's service fee; paid plans keep the whole ticket. */
-    const feeMinor = platformFeeMinor(amountMinor, event.organizer);
+    /** Free organisers pay Godesi's service fee; paid plans and Premium clubs keep the whole ticket. */
+    const feeMinor = clubIsPremium(event.club)
+      ? 0
+      : platformFeeMinor(amountMinor, event.organizer);
 
     const ticket = await db.ticket.create({
       data: {

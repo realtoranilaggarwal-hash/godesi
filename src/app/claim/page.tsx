@@ -8,6 +8,7 @@ import { SignupForm } from "@/components/forms/SignupForm";
 import { SocialSignIn } from "@/components/SocialSignIn";
 import { HandleClaim } from "@/components/HandleClaim";
 import { Alert, Card } from "@/components/ui";
+import { DealsAndShopStrip } from "@/components/DealsAndShopStrip";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -135,6 +136,8 @@ export default async function ClaimPage({
           )}
         </>
       )}
+
+      <DealsAndShopStrip />
     </div>
   );
 }

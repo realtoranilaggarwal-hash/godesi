@@ -6,6 +6,7 @@ import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { OfferChips } from "@/components/OfferChips";
 
 export function SignupForm({
   defaultRole = "BUSINESS",
@@ -57,6 +58,14 @@ export function SignupForm({
       <Field label="Password" hint="At least 8 characters">
         <input name="password" type="password" required minLength={8} className={inputClass} />
       </Field>
+      <details open className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+        <summary className="cursor-pointer text-sm font-bold text-indigo-900">
+          🎁 What would you like offers on? (optional)
+        </summary>
+        <div className="mt-3">
+          <OfferChips />
+        </div>
+      </details>
       <SubmitButton pendingLabel="Creating account..." className="w-full">
         Create account
       </SubmitButton>

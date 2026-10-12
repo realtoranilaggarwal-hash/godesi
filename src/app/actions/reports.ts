@@ -11,7 +11,11 @@ import { memberStory, newsQuotaLeft } from "@/lib/news";
 import { newsPath } from "@/lib/newsLinks";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { REPORT_DECLARATIONS, REPORT_SOURCES } from "@/lib/journalists";
-import { REPORT_TOPIC_OPTIONS, topicSlug } from "@/lib/newsTopics";
+import {
+  ANONYMOUS_BYLINE,
+  REPORT_TOPIC_OPTIONS,
+  topicSlug,
+} from "@/lib/newsTopics";
 
 const MAX_PHOTOS = 8;
 
@@ -77,7 +81,9 @@ function parseReport(formData: FormData) {
   if (parsed.data.happenedAt.getTime() > Date.now() + 60 * 60 * 1000) {
     return { error: "The date and time cannot be in the future." };
   }
-  return { data: parsed.data };
+  return {
+    data: { ...parsed.data, anonymous: formData.get("anonymous") === "on" },
+  };
 }
 
 /**
@@ -111,7 +117,8 @@ export async function submitReportAction(
         title: data.title,
         summary: memberStory(data.summary),
         link: "",
-        source: user.name,
+        source: data.anonymous ? ANONYMOUS_BYLINE : user.name,
+        anonymous: data.anonymous,
         submittedById: user.id,
         status: "PENDING",
         topic: topicSlug(data.topic),
@@ -170,7 +177,10 @@ export async function updateReportAction(
   try {
     const user = await requireUser();
     const id = String(formData.get("id") ?? "");
-    const item = await db.newsItem.findUnique({ where: { id } });
+    const item = await db.newsItem.findUnique({
+      where: { id },
+      include: { submittedBy: { select: { name: true } } },
+    });
     if (!item || !item.submittedById) return { error: "Report not found." };
     if (item.submittedById !== user.id && !can(user, "news")) {
       return { error: "Only the author can edit this report." };
@@ -187,6 +197,10 @@ export async function updateReportAction(
       data: {
         title: data.title,
         link: path,
+        source: data.anonymous
+          ? ANONYMOUS_BYLINE
+          : (item.submittedBy?.name ?? item.source),
+        anonymous: data.anonymous,
         summary: memberStory(data.summary),
         topic: slug,
         category:
