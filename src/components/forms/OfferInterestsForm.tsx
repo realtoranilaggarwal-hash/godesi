@@ -11,9 +11,11 @@ import { FormSuccess } from "@/components/forms/FormSuccess";
 export function OfferInterestsForm({
   selected,
   phone,
+  contactOk,
 }: {
   selected: string[];
   phone: string;
+  contactOk: boolean;
 }) {
   const [state, formAction] = useFormState(
     saveOfferInterestsAction,
@@ -24,8 +26,8 @@ export function OfferInterestsForm({
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
       <FormSuccess>{state.success}</FormSuccess>
-      <OfferChips selected={selected} phone={phone} />
-      <SubmitButton>Save my picks</SubmitButton>
+      <OfferChips selected={selected} phone={phone} contactOk={contactOk} />
+      <SubmitButton>Save my benefits</SubmitButton>
     </form>
   );
 }

@@ -52,8 +52,9 @@ export default async function OfferLeadsPage({
         <div>
           <h1 className="text-2xl font-bold">🎁 Offer leads</h1>
           <p className="text-sm text-slate-600">
-            Members who asked for offers at signup or on their dashboard. They
-            agreed to be contacted about the topics they ticked only.
+            Members who picked benefit topics at signup or on their dashboard.
+            Only contact those marked &ldquo;OK to contact&rdquo;, and only
+            about the topics they ticked; the rest asked to browse offers only.
           </p>
         </div>
         <a
@@ -144,6 +145,13 @@ export default async function OfferLeadsPage({
                           <Badge tone="amber">unconfirmed</Badge>
                         </span>
                       )}
+                      <div className="mt-1">
+                        {lead.offerContactOk ? (
+                          <Badge tone="green">✅ OK to contact</Badge>
+                        ) : (
+                          <Badge tone="red">🚫 Don&apos;t contact</Badge>
+                        )}
+                      </div>
                       {phone ? (
                         <div>
                           <a href={`tel:${phone}`} className="hover:underline">

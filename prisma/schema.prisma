@@ -252,6 +252,10 @@ model User {
   offerPhone       String?
   /// Last time the member saved their offer picks (their consent timestamp).
   offerInterestsAt DateTime?
+  /// Separate, opt-in permission to be contacted about the picked topics; picks alone only personalise offers.
+  offerContactOk   Boolean   @default(false)
+  /// When the member last gave that contact permission.
+  offerContactAt   DateTime?
 
   /// Phone kept for journalist verification; never shown publicly.
   phone           String?

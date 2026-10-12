@@ -60,7 +60,7 @@ export function SignupForm({
       </Field>
       <details open className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
         <summary className="cursor-pointer text-sm font-bold text-indigo-900">
-          🎁 What would you like offers on? (optional)
+          🎁 Unlock Your GoDesi Member Benefits (optional)
         </summary>
         <div className="mt-3">
           <OfferChips />

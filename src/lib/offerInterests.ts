@@ -1,7 +1,7 @@
 /**
- * Offers a member can ask for at signup or later from the dashboard. Every
- * pick is a lead the team can pass to a matching professional, so the copy
- * says so next to the picker.
+ * Member-benefit topics picked at signup or later from the dashboard. Picks
+ * personalise the member's offers; contact about them needs the separate
+ * `offerContactOk` opt-in.
  */
 export type OfferInterest = { id: string; icon: string; label: string };
 
@@ -159,5 +159,23 @@ export function cleanOfferPhone(value: unknown) {
   return digits;
 }
 
-export const OFFER_CONSENT =
-  "By ticking a topic you agree GoDesi, and a trusted GoDesi professional for that topic, may contact you about it by email, phone or WhatsApp. Untick it any time on your dashboard.";
+export const BENEFITS_TITLE = "Unlock Your GoDesi Member Benefits";
+export const BENEFITS_QUESTION =
+  "What would you like to save money on or learn more about?";
+export const BENEFITS_INTRO =
+  "Choose any interests below to personalize your offers. Get access to participating business discounts, coupons, events, shopping deals, and relevant service information.";
+export const BENEFITS_POINTS = [
+  "Choose only the topics you care about.",
+  "Browse available offers at any time.",
+  "Decide separately whether you want a provider to contact you.",
+  "No purchase required to join.",
+];
+export const BENEFITS_FINE_PRINT =
+  "Your choices help personalize your GoDesi experience. Offers vary by provider and availability. Review each offer's terms before redeeming.";
+export const CONTACT_CONSENT =
+  "Yes, GoDesi and a trusted GoDesi professional may contact me by email, phone or WhatsApp about the topics I ticked. I can switch this off any time.";
+
+/** The contact opt-in is its own unticked box; anything but "on" means no. */
+export function parseOfferContact(value: unknown) {
+  return value === "on";
+}
