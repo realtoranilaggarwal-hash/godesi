@@ -514,3 +514,42 @@ export async function HeaderBanner() {
     </div>
   );
 }
+
+/**
+ * Two 300x250 rectangles for a page's own right-hand column, so a short side
+ * column still carries rotating sponsors (or Godesi promos when unsold).
+ */
+export async function RailRectangles() {
+  const banners = await activeBanners("SIDEBAR", 2);
+
+  return (
+    <div className="space-y-4" aria-label="Sponsored">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        Sponsored
+      </p>
+      {banners.map((banner) => (
+        <BannerLink
+          key={banner.id}
+          banner={banner}
+          width={SIDEBAR_SIZE.width}
+          height={SIDEBAR_SIZE.height}
+          className="mx-auto max-w-[300px]"
+          sellSlot="SIDEBAR"
+          sellLabel="post your banner here — 300 × 250"
+        />
+      ))}
+      {Array.from({ length: Math.max(2 - banners.length, 0) }).map(
+        (_, index) => (
+          <AdvertiseHere
+            key={`rail-open-${index}`}
+            label={`300 × 250 sidebar banner · profile ${index + 1}`}
+            height={SIDEBAR_SIZE.height}
+            width={SIDEBAR_SIZE.width}
+            slot="SIDEBAR"
+            className="mx-auto max-w-[300px]"
+          />
+        ),
+      )}
+    </div>
+  );
+}
