@@ -4,7 +4,7 @@
  */
 
 const TWEET_URL =
-  /^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/([A-Za-z0-9_]{1,15})\/status\/(\d+)/i;
+  /^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/([A-Za-z0-9_]{1,15})\/status\/(\d+)(?:[/?#]|$)/i;
 
 export type TweetDetails = {
   url: string;
