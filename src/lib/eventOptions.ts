@@ -36,6 +36,9 @@ export const EVENT_TYPES = [
   "Other",
 ] as const;
 
+/** Seats given to an online-only event, which has no room to fill. */
+export const ONLINE_OPEN_SEATS = 10_000;
+
 export const EVENT_MODES = [
   { value: "OFFLINE", label: "Offline — in person", icon: "📍" },
   { value: "ONLINE", label: "Online — join from anywhere", icon: "💻" },

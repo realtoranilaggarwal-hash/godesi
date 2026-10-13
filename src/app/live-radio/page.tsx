@@ -9,7 +9,6 @@ import { SponsoredCard } from "@/components/SponsoredCard";
 import { liveVoteCounts } from "@/lib/liveVotes";
 import { liveFavoriteKeys } from "@/lib/liveFavorites";
 import { getCurrentUser } from "@/lib/auth";
-import { LiveSignupNudge } from "@/components/LiveSignupNudge";
 
 export const metadata: Metadata = {
   title: "Live desi radio — Hindi, Punjabi and Bollywood stations | Godesi",
@@ -31,8 +30,7 @@ export default async function LiveRadioPage() {
   // A member's own stations open first; everyone else sees the usual order.
   const ordered = favorites.size
     ? [...stations].sort(
-        (a, b) =>
-          Number(favorites.has(b.key)) - Number(favorites.has(a.key)),
+        (a, b) => Number(favorites.has(b.key)) - Number(favorites.has(a.key)),
       )
     : stations;
 
@@ -43,9 +41,9 @@ export default async function LiveRadioPage() {
         <p className="mt-2 max-w-3xl text-sm text-slate-700">
           Bollywood, Hindi, Punjabi and news stations from India and the USA.
           Press play on any station — or tap &ldquo;keep playing while I
-          browse&rdquo; and it follows you around Godesi in a mini player.
-          Free to listen, no account needed — sign up only if you want to save
-          favourites.
+          browse&rdquo; and it follows you around Godesi in a mini player. Your
+          first station is free; register free or log in to listen to every
+          station and save favourites.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <LinkButton href="/live/submit">➕ Submit your station</LinkButton>
@@ -110,8 +108,6 @@ export default async function LiveRadioPage() {
           </Link>
         </div>
       </Card>
-
-      {user ? null : <LiveSignupNudge kind="radio" />}
 
       <p className="text-xs text-slate-500">
         Audio comes straight from each broadcaster&apos;s own public stream.
