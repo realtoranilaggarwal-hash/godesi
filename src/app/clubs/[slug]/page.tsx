@@ -55,6 +55,7 @@ async function loadClub(slug: string) {
         orderBy: { startsAt: "asc" },
         include: {
           category: { select: { name: true, icon: true, color: true } },
+          tiers: { select: { price: true } },
         },
       },
     },

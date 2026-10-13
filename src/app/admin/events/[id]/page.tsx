@@ -129,6 +129,7 @@ export default async function AdminEditEventPage({
         <TicketTypesForm
           eventId={event.id}
           currency={event.currency}
+          needsPayoutTerms={!event.payoutTermsAt}
           tiers={event.tiers}
         />
       </Card>

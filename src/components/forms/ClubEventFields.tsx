@@ -19,13 +19,38 @@ export function ClubEventFields({
   clubs,
   defaultClub,
   currency,
+  clubOnly = false,
 }: {
   clubs: ClubOption[];
   defaultClub?: string;
   currency: string;
+  /** Just the club picker, without the RSVP, bring and contribution options. */
+  clubOnly?: boolean;
 }) {
   const [contribution, setContribution] = useState<string>("NONE");
   const preset = clubs.find((c) => c.slug === defaultClub);
+
+  const picker = (
+    <Field
+      label="This event belongs to"
+      hint="Members of the club see it on the club page and get asked to RSVP."
+    >
+      <select
+        name="clubId"
+        defaultValue={preset?.id ?? ""}
+        className={inputClass}
+      >
+        <option value="">No club — a one-off public event</option>
+        {clubs.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </Field>
+  );
+
+  if (clubOnly) return clubs.length ? picker : null;
 
   return (
     <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
@@ -34,23 +59,7 @@ export function ClubEventFields({
       </legend>
 
       {clubs.length ? (
-        <Field
-          label="This event belongs to"
-          hint="Members of the club see it on the club page and get asked to RSVP."
-        >
-          <select
-            name="clubId"
-            defaultValue={preset?.id ?? ""}
-            className={inputClass}
-          >
-            <option value="">No club — a one-off public event</option>
-            {clubs.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Field>
+        picker
       ) : (
         <p className="text-xs text-slate-500">
           Run a karaoke circle, cricket team or foodie group?{" "}

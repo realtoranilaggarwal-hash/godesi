@@ -118,6 +118,9 @@ export function circleEvents(city: string, take = 3) {
     },
     orderBy: { startsAt: "asc" },
     take,
-    include: { category: { select: { name: true, icon: true, color: true } } },
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
+    },
   });
 }

@@ -88,7 +88,6 @@ export function EventForm({
   const [price, setPrice] = useState(0);
   // Online-only events skip everything about a physical room and seats.
   const online = mode === "ONLINE";
-  const presetClub = clubs.find((club) => club.slug === defaultClub);
 
   const toggleCategory = (slug: string) =>
     setExtraCategories((current) =>
@@ -521,17 +520,12 @@ export function EventForm({
         </fieldset>
       )}
 
-      {online ? (
-        presetClub ? (
-          <input type="hidden" name="clubId" value={presetClub.id} />
-        ) : null
-      ) : (
-        <ClubEventFields
-          clubs={clubs}
-          defaultClub={defaultClub}
-          currency={defaultCurrency}
-        />
-      )}
+      <ClubEventFields
+        clubs={clubs}
+        defaultClub={defaultClub}
+        currency={defaultCurrency}
+        clubOnly={online}
+      />
 
       {online && price === 0 ? null : (
         <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">

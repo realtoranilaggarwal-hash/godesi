@@ -143,6 +143,7 @@ export default async function MyTicketsPage() {
                 <TicketTypesForm
                   eventId={event.id}
                   currency={event.currency}
+                  needsPayoutTerms={!event.payoutTermsAt}
                   tiers={event.tiers.map((tier) => ({
                     id: tier.id,
                     name: tier.name,

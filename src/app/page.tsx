@@ -66,6 +66,7 @@ export default async function HomePage() {
         take: 24,
         include: {
           category: { select: { name: true, icon: true, color: true } },
+          tiers: { select: { price: true } },
           organizer: { select: { plan: true } },
         },
       }),
