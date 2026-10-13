@@ -1138,6 +1138,8 @@ model Event {
   liveUrl           String?
   /// Only ticket holders, the organiser and the desk see the stream.
   liveTicketOnly    Boolean            @default(false)
+  /// Booking form asks "Referred by" (networking events track who brought whom).
+  askReferredBy     Boolean            @default(false)
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl          String?
   price             Int                @default(0)
@@ -1413,6 +1415,8 @@ model Ticket {
   buyerName   String
   buyerEmail  String
   buyerPhone  String?
+  /// Who referred the buyer, typed at booking when the event asks for it.
+  referredBy  String?
   quantity    Int          @default(1)
   amountMinor Int          @default(0)
   currency    String       @default("INR")

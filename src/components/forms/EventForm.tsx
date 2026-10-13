@@ -29,6 +29,7 @@ import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { LiveStreamFields } from "@/components/forms/LiveStreamFields";
+import { AskReferredByField } from "@/components/forms/AskReferredByField";
 import { SpeakerRow } from "@/components/forms/SpeakerRow";
 import {
   ClubEventFields,
@@ -267,6 +268,7 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
+        <AskReferredByField />
         <ImageField
           name="imageUrl"
           label="Event banner"

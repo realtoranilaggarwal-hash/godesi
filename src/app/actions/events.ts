@@ -490,6 +490,7 @@ export async function createEventAction(
         liveTicketOnly:
           Boolean(parsed.data.liveUrl) &&
           formData.get("liveTicketOnly") === "on",
+        askReferredBy: formData.get("askReferredBy") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         price,
         currency: parsed.data.currency ?? requestCurrency(),
@@ -555,6 +556,11 @@ const bookingSchema = z.object({
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
   buyerPhone: z.string().trim().optional(),
+  referredBy: z
+    .string()
+    .trim()
+    .max(120, "Keep \"Referred by\" under 120 characters")
+    .optional(),
 });
 
 /**
@@ -571,12 +577,13 @@ export async function bookTicketAction(
     const user = await requireUser();
     const parsed = bookingSchema.safeParse({
       eventId: formData.get("eventId"),
-      tierId: formData.get("tierId"),
+      tierId: formData.get("tierId") ?? undefined,
       couponCode: formData.get("couponCode") ?? undefined,
       quantity: formData.get("quantity") || 1,
       buyerName: formData.get("buyerName") || user.name,
       buyerEmail: formData.get("buyerEmail") || user.email,
       buyerPhone: formData.get("buyerPhone") ?? undefined,
+      referredBy: formData.get("referredBy") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -651,6 +658,9 @@ export async function bookTicketAction(
         buyerName: parsed.data.buyerName,
         buyerEmail: parsed.data.buyerEmail,
         buyerPhone: parsed.data.buyerPhone || null,
+        referredBy: event.askReferredBy
+          ? parsed.data.referredBy || null
+          : null,
         quantity: parsed.data.quantity,
         amountMinor,
         currency: event.currency,
