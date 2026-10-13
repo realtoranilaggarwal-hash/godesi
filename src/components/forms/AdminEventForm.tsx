@@ -169,74 +169,83 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
-        <Field
-          label="Pick a venue on Godesi"
-          hint="Fills the venue, city and website below; or type a new venue by hand"
-        >
-          <select
-            value={pickedId}
-            onChange={(e) => pickVenue(e.target.value)}
-            className={inputClass}
-            aria-label="Venue on Godesi"
-          >
-            <option value="">Choose a saved venue…</option>
-            {cities.map((c) => (
-              <optgroup key={c} label={c}>
-                {venues
-                  .filter((item) => item.city === c)
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-              </optgroup>
-            ))}
-          </select>
-        </Field>
-        <Field label="Venue" hint="New venues are saved to /venues for other organisers">
-          <input
-            name="venue"
-            value={venue}
-            onChange={(e) => setVenue(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
-          <input
-            name="hallName"
-            value={hallName}
-            onChange={(e) => setHallName(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
-          <input
-            name="hallCapacity"
-            type="number"
-            min={0}
-            defaultValue={event.hallCapacity ?? ""}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
-          <input
-            name="venueUrl"
-            value={venueUrl}
-            onChange={(e) => setVenueUrl(e.target.value)}
-            placeholder="https://royalalbertspalace.com"
-            className={inputClass}
-          />
-        </Field>
-        <Field label="City">
-          <input
-            name="city"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </Field>
+        {mode === "ONLINE" ? (
+          <>
+            <input type="hidden" name="venue" value="Online" />
+            <input type="hidden" name="city" value="Online" />
+          </>
+        ) : (
+          <>
+            <Field
+              label="Pick a venue on Godesi"
+              hint="Fills the venue, city and website below; or type a new venue by hand"
+            >
+              <select
+                value={pickedId}
+                onChange={(e) => pickVenue(e.target.value)}
+                className={inputClass}
+                aria-label="Venue on Godesi"
+              >
+                <option value="">Choose a saved venue…</option>
+                {cities.map((c) => (
+                  <optgroup key={c} label={c}>
+                    {venues
+                      .filter((item) => item.city === c)
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            </Field>
+            <Field label="Venue" hint="New venues are saved to /venues for other organisers">
+              <input
+                name="venue"
+                value={venue}
+                onChange={(e) => setVenue(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
+              <input
+                name="hallName"
+                value={hallName}
+                onChange={(e) => setHallName(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
+              <input
+                name="hallCapacity"
+                type="number"
+                min={0}
+                defaultValue={event.hallCapacity ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
+              <input
+                name="venueUrl"
+                value={venueUrl}
+                onChange={(e) => setVenueUrl(e.target.value)}
+                placeholder="https://royalalbertspalace.com"
+                className={inputClass}
+              />
+            </Field>
+            <Field label="City">
+              <input
+                name="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </Field>
+          </>
+        )}
         <Field label="Repeats">
           <select
             name="frequency"

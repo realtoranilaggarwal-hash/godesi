@@ -109,6 +109,17 @@ export default async function EditOwnEventPage({
           }}
         />
       </Card>
+
+      <p className="text-sm text-slate-600">
+        🎟️ Ticket types (early bird, couple pass, online seat) are changed on{" "}
+        <Link
+          href="/dashboard/tickets"
+          className="font-semibold text-indigo-600"
+        >
+          My tickets
+        </Link>
+        .
+      </p>
     </div>
   );
 }
