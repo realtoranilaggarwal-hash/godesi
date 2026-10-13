@@ -13,6 +13,7 @@ import { DealCard } from "@/components/DealCard";
 import { EventCard } from "@/components/EventCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { OfferInterestsForm } from "@/components/forms/OfferInterestsForm";
+import { OpenSpinButton } from "@/components/OpenSpinButton";
 import type { PublicDeal } from "@/lib/deals";
 
 export const dynamic = "force-dynamic";
@@ -268,6 +269,13 @@ export default async function DashboardOffersPage() {
         <h2 className="text-lg font-bold">
           ⚙️ Your interests and contact choice
         </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+          <p>
+            🎁 <strong>Each interest you pick = one bonus spin</strong> of the
+            GoDesi wheel for points, on top of your free daily spin.
+          </p>
+          <OpenSpinButton>🎡 Spin now</OpenSpinButton>
+        </div>
         <OfferInterestsForm
           selected={user.offerInterests}
           phone={user.offerPhone ?? ""}
