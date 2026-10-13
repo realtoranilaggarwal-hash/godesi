@@ -6,6 +6,7 @@ import { siteUrl } from "@/lib/format";
 import { BadgeEmbed } from "@/components/BadgeEmbed";
 import { SidebarBanners } from "@/components/Banners";
 import { Card, LinkButton } from "@/components/ui";
+import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -46,7 +47,9 @@ export default async function BadgePage() {
           {!business ? (
             <p className="mt-1 text-sm text-slate-600">
               The snippet below points at{" "}
-              <code className="rounded bg-slate-100 px-1">/b/your-business</code>{" "}
+              <code className="rounded bg-slate-100 px-1">
+                /b/your-business
+              </code>{" "}
               — claim or create your free listing and it fills in automatically.
             </p>
           ) : null}
@@ -64,9 +67,15 @@ export default async function BadgePage() {
           <h2 className="font-bold">Where to put it</h2>
           <ul className="mt-2 space-y-2 text-sm text-slate-600">
             <li>• Footer or “Contact us” page of your website.</li>
-            <li>• Your Google Business Profile description (as a plain link).</li>
-            <li>• Instagram bio, WhatsApp Business catalogue, email signature.</li>
-            <li>• Flyers and shop window — print the QR from your listing page.</li>
+            <li>
+              • Your Google Business Profile description (as a plain link).
+            </li>
+            <li>
+              • Instagram bio, WhatsApp Business catalogue, email signature.
+            </li>
+            <li>
+              • Flyers and shop window — print the QR from your listing page.
+            </li>
           </ul>
           <p className="mt-3 text-sm text-slate-600">
             Questions?{" "}
@@ -76,6 +85,8 @@ export default async function BadgePage() {
             .
           </p>
         </Card>
+
+        <MoreOnGodesi />
       </div>
 
       <SidebarBanners />
