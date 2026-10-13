@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
-import { adminUpdateEventAction } from "@/app/actions/admin";
+import {
+  adminUpdateEventAction,
+  organiserUpdateEventAction,
+} from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
@@ -61,12 +64,18 @@ export function AdminEventForm({
   event,
   categories,
   venues,
+  staff = true,
 }: {
   event: AdminEventValues;
   categories: CategoryOption[];
   venues: VenueOption[];
+  /** Off for the organiser's own edit page: no featured or status controls. */
+  staff?: boolean;
 }) {
-  const [state, formAction] = useFormState(adminUpdateEventAction, emptyState);
+  const [state, formAction] = useFormState(
+    staff ? adminUpdateEventAction : organiserUpdateEventAction,
+    emptyState,
+  );
   const [mode, setMode] = useState<string>(event.mode);
   const [venue, setVenue] = useState(event.venue);
   const [venueUrl, setVenueUrl] = useState(event.venueUrl);
@@ -360,27 +369,31 @@ export function AdminEventForm({
             hint="Paste a public Google Photos album link and the event page shows a 3×3 gallery that opens the album."
           />
         </div>
-        <Field
-          label="Feature this event"
-          hint="Pins it to the featured strip at the top of /events, ahead of paid plans."
-        >
-          <label className="flex items-center gap-2 text-sm font-semibold">
-            <input
-              type="checkbox"
-              name="featured"
-              defaultChecked={event.featured}
-              className="h-4 w-4"
-            />
-            Show in featured events
-          </label>
-        </Field>
-        <Field label="Status">
-          <select name="status" defaultValue={event.status} className={inputClass}>
-            <option value="APPROVED">Approved (public)</option>
-            <option value="PENDING">Pending review</option>
-            <option value="REJECTED">Rejected (hidden)</option>
-          </select>
-        </Field>
+        {staff ? (
+          <>
+            <Field
+              label="Feature this event"
+              hint="Pins it to the featured strip at the top of /events, ahead of paid plans."
+            >
+              <label className="flex items-center gap-2 text-sm font-semibold">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  defaultChecked={event.featured}
+                  className="h-4 w-4"
+                />
+                Show in featured events
+              </label>
+            </Field>
+            <Field label="Status">
+              <select name="status" defaultValue={event.status} className={inputClass}>
+                <option value="APPROVED">Approved (public)</option>
+                <option value="PENDING">Pending review</option>
+                <option value="REJECTED">Rejected (hidden)</option>
+              </select>
+            </Field>
+          </>
+        ) : null}
       </div>
 
       <FormSuccess>{state.success}</FormSuccess>

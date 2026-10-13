@@ -518,6 +518,14 @@ export default async function EventPage({
                 {event.title}
               </h1>
               <StaffEditLink href={`/admin/events/${event.id}`} />
+              {user?.id === event.organizerId && !imported ? (
+                <Link
+                  href={`/events/${event.slug}/edit`}
+                  className="rounded-lg border border-indigo-300 bg-white px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+                >
+                  ✏️ Edit event
+                </Link>
+              ) : null}
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>
