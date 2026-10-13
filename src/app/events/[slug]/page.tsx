@@ -44,6 +44,7 @@ import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
 import { matchProfilesByExactName, nameKey } from "@/lib/peopleLookup";
 import { EventRsvpPanel } from "@/components/EventRsvpPanel";
+import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 
 type SpeakerRow =
@@ -1042,11 +1043,20 @@ export default async function EventPage({
                   }))}
                   defaultName={user.name}
                   defaultEmail={user.email}
+                  askReferredBy={event.askReferredBy}
                 />
               </div>
             )}
           </Card>
         )}
+
+        {isOwnerOrDesk && !imported ? (
+          <EventAttendees
+            eventId={event.id}
+            slug={event.slug}
+            askReferredBy={event.askReferredBy}
+          />
+        ) : null}
 
         {thin ? null : <InContentBanner size="leaderboard" />}
 

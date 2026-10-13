@@ -111,6 +111,7 @@ export default async function AdminEditEventPage({
             videoUrl: event.videoUrl ?? "",
             liveUrl: event.liveUrl ?? "",
             liveTicketOnly: event.liveTicketOnly,
+            askReferredBy: event.askReferredBy,
             albumUrl: event.albumUrl ?? "",
             featured: event.featured,
             status: event.status,

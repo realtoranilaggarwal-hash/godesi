@@ -784,6 +784,7 @@ export async function adminUpdateEventAction(
         liveTicketOnly:
           Boolean(parsed.data.liveUrl) &&
           formData.get("liveTicketOnly") === "on",
+        askReferredBy: formData.get("askReferredBy") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         featured: parsed.data.featured,
         price: parsed.data.price,
