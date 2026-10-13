@@ -4,7 +4,6 @@ export function eventAttendees(eventId: string) {
   return db.ticket.findMany({
     where: { eventId, status: "CONFIRMED" },
     orderBy: { createdAt: "asc" },
-    take: 5_000,
     select: {
       code: true,
       buyerName: true,
