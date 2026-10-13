@@ -31,6 +31,7 @@ import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
+import { badgeStatus } from "@/lib/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -100,9 +101,10 @@ export default async function BusinessProfilePage({
   params: { slug: string };
   searchParams: { src?: string; claim?: string };
 }) {
-  const [business, viewer] = await Promise.all([
+  const [business, viewer, badge] = await Promise.all([
     getBusiness(params.slug),
     getCurrentUser(),
+    badgeStatus(params.slug),
   ]);
   if (!business) notFound();
 
@@ -228,6 +230,11 @@ export default async function BusinessProfilePage({
                 <Badge tone="green">Professional</Badge>
               ) : null}
               {business.featured ? <Badge tone="amber">Featured</Badge> : null}
+              {badge.level === "VERIFIED" ? (
+                <Link href={`/verify/${business.slug}`} title="What this means">
+                  <Badge tone="green">✅ Verified on Godesi</Badge>
+                </Link>
+              ) : null}
             </div>
             <p className="text-slate-600">
               {business.category} ·{" "}
@@ -742,11 +749,16 @@ export default async function BusinessProfilePage({
             <Card>
               <h2 className="font-bold">Show it off on your website 🏅</h2>
               <p className="mt-1 text-sm text-slate-600">
-                Paste this badge on your own site — customers can jump straight
-                to your Godesi page.
+                Paste this badge on your own site — customers can click it to
+                check your Godesi listing is real.
               </p>
               <div className="mt-3">
-                <BadgeEmbed listingUrl={`${siteUrl()}/b/${business.slug}`} />
+                <BadgeEmbed
+                  slug={business.slug}
+                  name={business.name}
+                  level={badge.level}
+                  origin={siteUrl()}
+                />
               </div>
             </Card>
           ) : null}
