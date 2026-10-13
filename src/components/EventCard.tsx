@@ -29,6 +29,8 @@ export type EventListItem = {
   /** Set when the event came from a public calendar; Godesi sells no seats. */
   sourceId?: string | null;
   category: { name: string; icon: string; color: string } | null;
+  /** Ticket types; `price` alone is the cheapest one, so a free tier can sit beside paid ones. */
+  tiers?: { price: number }[];
   /** The event's own categories, e.g. garba-dandiya — the first one is shown. */
   genres?: string[];
 };
@@ -83,7 +85,11 @@ export function EventCard({
           featured ? "rounded-[17px]" : "rounded-2xl border border-slate-200"
         }`}
       >
-        {event.price || imported ? null : <FreeRibbon />}
+        {event.price ||
+        imported ||
+        event.tiers?.some((tier) => tier.price > 0) ? null : (
+          <FreeRibbon />
+        )}
         {event.imageUrl && featured && !tile ? (
           <div className="relative min-h-56 w-full flex-1 overflow-hidden bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}

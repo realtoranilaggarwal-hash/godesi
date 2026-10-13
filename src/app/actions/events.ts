@@ -489,7 +489,7 @@ export async function createEventAction(
           String(formData.get("bonusNote") ?? "")
             .trim()
             .slice(0, 200) || null,
-        payoutTermsAt: new Date(),
+        payoutTermsAt: takesMoney ? new Date() : null,
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"

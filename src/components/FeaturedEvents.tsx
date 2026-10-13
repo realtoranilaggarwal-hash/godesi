@@ -18,6 +18,7 @@ async function paidEvents(take: number) {
     take: 40,
     include: {
       category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
       organizer: { select: { plan: true } },
     },
   });

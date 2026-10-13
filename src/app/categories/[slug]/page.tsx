@@ -213,6 +213,7 @@ export default async function CategoryPage({
       take: 3,
       include: {
         category: { select: { name: true, icon: true, color: true } },
+        tiers: { select: { price: true } },
       },
     }),
     memberListings
