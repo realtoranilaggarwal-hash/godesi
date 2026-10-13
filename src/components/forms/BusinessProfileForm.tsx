@@ -54,6 +54,8 @@ export function BusinessProfileForm({
   extraCategoryLimit = 0,
   foundingMember = false,
   staffEdit = false,
+  videoLimit = 1,
+  albumPhotoLimit = 6,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -72,6 +74,10 @@ export function BusinessProfileForm({
   foundingMember?: boolean;
   /** Staff editing somebody else's card: posts the id and skips plan limits. */
   staffEdit?: boolean;
+  /** Showcase videos the plan allows; extras beyond it are kept but not shown. */
+  videoLimit?: number;
+  /** Album thumbnails the plan shows before the "see all photos" link. */
+  albumPhotoLimit?: number;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -241,15 +247,29 @@ export function BusinessProfileForm({
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
-          hint="Your card holds one picture. Paste a public Google Photos album link and Godesi shows a 3×3 gallery of your work that opens the full album — no upload limit, no storage cost."
+          hint={`Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`}
         />
         <Field
-          label="Video link (YouTube or Vimeo)"
-          hint="Paste a link like https://youtu.be/abc123 or https://vimeo.com/123456 — it plays on your page."
+          label={
+            videoLimit > 1
+              ? `Video links (up to ${videoLimit}, one per line)`
+              : "Video link (YouTube or Vimeo)"
+          }
+          hint={
+            videoLimit > 1
+              ? `Paste up to ${videoLimit} YouTube or Vimeo links, one per line — they play on your page as a showreel.`
+              : "Paste a link like https://youtu.be/abc123 — it plays on your page. Upgrade to show several videos."
+          }
         >
-          <input
-            name="videoUrl"
-            defaultValue={business?.videoUrl ?? ""}
+          <textarea
+            name="videoUrls"
+            rows={videoLimit > 1 ? 4 : 2}
+            defaultValue={(business?.videoUrls?.length
+              ? business.videoUrls
+              : business?.videoUrl
+                ? [business.videoUrl]
+                : []
+            ).join("\n")}
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />

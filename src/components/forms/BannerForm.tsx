@@ -32,8 +32,7 @@ export function BannerForm() {
               return (
                 <option key={slot} value={slot}>
                   {placement.name} — {placement.size.width}×
-                  {placement.size.height} ({placement.slots} slot
-                  {placement.slots > 1 ? "s" : ""})
+                  {placement.size.height} ({placement.slots} shown at a time)
                 </option>
               );
             })}
@@ -41,13 +40,13 @@ export function BannerForm() {
         </Field>
         <Field
           label="Position"
-          hint="Leave blank for the next free slot in that size"
+          hint="Leave blank for the next free number — a placement never fills up"
         >
           <input
             name="position"
             type="number"
             min={1}
-            placeholder="next free slot"
+            placeholder="next free number"
             className={inputClass}
           />
         </Field>

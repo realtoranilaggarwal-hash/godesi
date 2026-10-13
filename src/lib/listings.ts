@@ -88,7 +88,10 @@ export type ListingFilters = {
 function intOrNull(value?: string) {
   if (!value) return null;
   const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  // Clamped to int4 so a long number pasted into a filter box cannot reach
+  // Prisma, which rejects anything wider than the column.
+  return Math.min(parsed, 2_147_483_647);
 }
 
 /** Builds the Prisma filter for a section page from URL search params. */

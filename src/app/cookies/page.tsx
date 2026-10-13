@@ -34,9 +34,20 @@ export default function CookiesPage() {
         When you accept optional cookies we may measure aggregate performance — which
         pages, listings and banners are viewed and clicked. Today this measurement is
         stored as counters against a listing or banner, not against you as an
-        individual, and we do not run third-party advertising trackers. If that ever
-        changes we will name the providers here first.
+        individual.
       </p>
+      <ul>
+        <li>
+          <strong>_clck, _clsk</strong> — Microsoft Clarity, which records clicks,
+          scrolling and a replay of the page layout so we can find confusing screens.
+          Clarity masks the text you type and we do not use it to identify you. _clck
+          lasts a year, _clsk a day.
+        </li>
+        <li>
+          <strong>Google AdSense</strong> — where we have not sold advertising space
+          directly, Google and its partners may set cookies to show and measure ads.
+        </li>
+      </ul>
 
       <h2>Your choice</h2>
       <p>

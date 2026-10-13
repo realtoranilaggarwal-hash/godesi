@@ -10,12 +10,13 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { PropertyFields } from "@/components/forms/PropertyFields";
 import {
   FairHousingNotice,
   RoomSharingNotice,
 } from "@/components/FairHousingNotice";
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
-import type { ListingKind } from "@prisma/client";
+import type { ListingKind, PropertyGroup } from "@prisma/client";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
@@ -33,12 +34,20 @@ export function ListingForm({
   defaultWhatsapp,
   defaultCurrency,
   categories,
+  defaultGroup,
+  defaultCountry,
+  paidImageLimit,
 }: {
   defaultKind: ListingKind;
   imageLimit: number;
+  /** Uploads a paid plan would give, used only in the upgrade nudge. */
+  paidImageLimit: number;
   defaultWhatsapp: string;
   defaultCurrency: string;
   categories: { slug: string; name: string }[];
+  /** Preselected property branch when arriving from the real-estate flow. */
+  defaultGroup?: PropertyGroup;
+  defaultCountry?: string;
 }) {
   const [state, formAction] = useFormState(createListingAction, emptyState);
   const [kind, setKind] = useState<ListingKind>(defaultKind);
@@ -130,6 +139,21 @@ export function ListingForm({
         <Field label={isItem ? "Area (optional)" : "Area / locality"}>
           <input name="area" className={inputClass} />
         </Field>
+        {isProperty ? (
+          <>
+            <Field label="State / province">
+              <input name="state" maxLength={80} className={inputClass} />
+            </Field>
+            <Field label="Country">
+              <input
+                name="country"
+                maxLength={80}
+                defaultValue={defaultCountry}
+                className={inputClass}
+              />
+            </Field>
+          </>
+        ) : null}
         <Field
           label={monthly ? "Rent per month" : "Price"}
           hint="Leave 0 for price on request"
@@ -194,8 +218,12 @@ export function ListingForm({
       </div>
 
       <Field
-        label="Photos"
-        hint={`Drag & drop up to ${imageLimit} photos — they are resized automatically.`}
+        label={imageLimit === 1 ? "Photo" : "Photos"}
+        hint={
+          imageLimit === 1
+            ? "One photo free — make it the best one. For a full gallery, paste a Google Photos album below."
+            : `Drag & drop up to ${imageLimit} photos — they are resized automatically.`
+        }
       >
         <div className="space-y-3">
           {images.length ? (
@@ -223,16 +251,21 @@ export function ListingForm({
           {images.length < imageLimit ? (
             <ImageDropzone
               purpose="listing"
-              multiple
+              multiple={imageLimit > 1}
               onUploaded={(url) => setImages((current) => [...current, url].slice(0, imageLimit))}
             />
           ) : (
             <p className="rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
-              That is all {imageLimit} uploads on your plan.{" "}
+              {imageLimit === 1
+                ? "That is your free photo. "
+                : `That is all ${imageLimit} uploads on your plan. `}
+              <strong>Want to show more?</strong> Put them in a free Google
+              Photos album and paste the link below — as many photos as you like,
+              shown right on your listing.{" "}
               <a href="/upgrade" target="_blank" className="font-bold underline">
-                Upgrade for 20 uploads
-              </a>{" "}
-              — or add a free Google Photos album below and show as many photos as you like.
+                Or upgrade for {paidImageLimit} uploads
+              </a>
+              .
             </p>
           )}
           {images.map((url) => (
@@ -241,7 +274,17 @@ export function ListingForm({
         </div>
       </Field>
 
-      <PhotoAlbumField />
+      {isProperty ? (
+        <PropertyFields forRent={kind === "PROPERTY_RENT"} defaultGroup={defaultGroup} />
+      ) : null}
+
+      <PhotoAlbumField
+        hint={
+          isProperty
+            ? "Every room, for free — put the photos in a Google Photos album, paste the link, and Godesi shows a gallery that opens the whole album. Nothing to upload and no limit."
+            : undefined
+        }
+      />
 
       {isProperty || isRoom ? <FairHousingNotice /> : null}
       {isRoom ? <RoomSharingNotice /> : null}

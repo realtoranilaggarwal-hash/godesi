@@ -112,6 +112,17 @@ export default function PrivacyPage() {
         <Link href="/about" className="text-indigo-600 underline">
           about page
         </Link>
+        . We also use Microsoft Clarity, which records how pages are used — clicks,
+        scrolling and a replay of the layout — so we can fix confusing screens. Clarity
+        masks the text you type, and we never use it to identify you. See{" "}
+        <a
+          href="https://privacy.microsoft.com/privacystatement"
+          target="_blank"
+          rel="noreferrer"
+          className="text-indigo-600 underline"
+        >
+          Microsoft&rsquo;s privacy statement
+        </a>
         . Banner and link impressions and clicks are counted in aggregate for advertisers.
       </p>
 

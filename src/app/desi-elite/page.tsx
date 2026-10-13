@@ -35,7 +35,9 @@ export default async function EliteDirectoryPage({
         <p className="mt-2 max-w-3xl text-sm text-slate-700">
           Recognition for desi entrepreneurs, professionals and community leaders
           worldwide. Apply or nominate someone — our team reviews the entry,
-          interviews them and publishes a profile with video.
+          interviews them and publishes a profile with video. Some profiles are
+          written by us from public record and marked <b>unclaimed</b> until the
+          person takes theirs over.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <LinkButton href="/desi-elite/apply">Apply now</LinkButton>
@@ -148,6 +150,19 @@ export default async function EliteDirectoryPage({
           See membership plans
         </LinkButton>
       </Card>
+
+      <p className="text-center text-xs text-slate-500">
+        These profiles also appear on{" "}
+        <a
+          href="https://desiwhoswho.com"
+          target="_blank"
+          rel="noopener"
+          className="font-semibold underline"
+        >
+          desiwhoswho.com
+        </a>
+        , Godesi&apos;s who&apos;s who of desi America.
+      </p>
     </div>
   );
 }

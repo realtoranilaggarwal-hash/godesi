@@ -34,17 +34,25 @@ export function BusinessTile({
         label="✏️"
       />
       <Link href={`/b/${business.slug}`} className="block bg-slate-100">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={image ? thumbImage(image, 384) : "/placeholder-logo.svg"}
-          alt={`${business.name} — ${business.category} in ${business.city}`}
-          loading="lazy"
-          className={`w-full ${smallImage ? "h-20" : "h-32"} ${
-            image
-              ? "object-cover"
-              : `object-contain ${smallImage ? "p-3" : "p-6"}`
-          }`}
-        />
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumbImage(image, 384)}
+            alt={`${business.name} — ${business.category} in ${business.city}`}
+            loading="lazy"
+            className={`w-full ${smallImage ? "h-20" : "h-32"} object-cover`}
+          />
+        ) : (
+          <span
+            role="img"
+            aria-label={business.name}
+            className={`flex w-full ${
+              smallImage ? "h-20 text-3xl" : "h-32 text-5xl"
+            } items-center justify-center bg-indigo-50 leading-none`}
+          >
+            {business.categoryIcon || "🏷️"}
+          </span>
+        )}
       </Link>
       {premium ? (
         <span className="absolute left-2 top-2 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white shadow">

@@ -238,7 +238,23 @@ export default async function Page({
                         <td className="whitespace-nowrap text-xs text-slate-500">
                           {row.createdAt.toLocaleDateString("en-IN")}
                         </td>
-                        <td className="text-xs">{row.role}</td>
+                        <td className="text-xs">
+                          {row.role}
+                          {row.role === "CLIENT" || row.role === "BUSINESS" ? (
+                            <div className="mt-1">
+                              <button
+                                type="submit"
+                                formMethod="post"
+                                formAction="/admin/team/apply"
+                                name="id"
+                                value={row.id}
+                                className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                              >
+                                make moderator
+                              </button>
+                            </div>
+                          ) : null}
+                        </td>
                         <td>
                           <Badge tone={row.plan === "FREE" ? "slate" : "indigo"}>
                             {row.plan}

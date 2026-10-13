@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
 import { FeaturedEventStrip } from "@/components/FeaturedEvents";
+import { EventSuppliersStrip } from "@/components/EventSuppliersStrip";
 import { planRank } from "@/lib/plans";
 import {
   InContentBanner,
@@ -19,6 +20,18 @@ import {
   EVENT_TYPES,
   eventFeatureIcon,
 } from "@/lib/eventOptions";
+import {
+  EVENT_WHEN,
+  eventDateRange,
+  eventTextWhere,
+  stateLabel,
+  statesMatching,
+} from "@/lib/eventSearch";
+import {
+  EVENT_CATEGORIES,
+  EVENT_LANGUAGES,
+  isEventCategory,
+} from "@/lib/eventCategories";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -36,15 +49,32 @@ export default async function EventsPage({
 }: {
   searchParams: {
     city?: string;
+    state?: string;
     category?: string;
+    genre?: string;
+    lang?: string;
     when?: string;
     type?: string;
     mode?: string;
     venue?: string;
+    q?: string;
+    from?: string;
+    to?: string;
     feature?: string | string[];
   };
 }) {
-  const { city, category, when, type, mode, venue } = searchParams;
+  const { city, state, category, when, type, mode, venue, q, from, to } =
+    searchParams;
+  // The event's own category (garba, comedy, satsang) and the language it runs
+  // in — separate from `category`, which is the trade behind it.
+  const genre = searchParams.genre && isEventCategory(searchParams.genre)
+    ? searchParams.genre
+    : undefined;
+  const lang = EVENT_LANGUAGES.some(
+    (option) => option.slug === searchParams.lang,
+  )
+    ? searchParams.lang
+    : undefined;
   const selectedFeatures = (
     Array.isArray(searchParams.feature)
       ? searchParams.feature
@@ -57,15 +87,57 @@ export default async function EventsPage({
     ),
   );
 
+  /**
+   * Remounts the two search forms whenever the query changes. A chip is a soft
+   * navigation, so React keeps the old `<select>` values and a later submit
+   * would post the stale "All categories" over the chip the visitor picked.
+   */
+  const formKey = [q, city, state, category, genre, lang, when, type, mode, venue, from, to]
+    .map((value) => value ?? "")
+    .concat(selectedFeatures)
+    .join("|");
+
+  /** Chips change one thing and keep the rest of the search intact. */
+  const searchHref = (changes: Record<string, string>) => {
+    const params = new URLSearchParams();
+    const current: Record<string, string | undefined> = {
+      q,
+      city,
+      state,
+      category,
+      genre,
+      lang,
+      when,
+      type,
+      mode,
+      venue,
+      from,
+      to,
+      ...changes,
+    };
+    for (const [key, value] of Object.entries(current)) {
+      if (value) params.set(key, value);
+    }
+    for (const value of selectedFeatures) params.append("feature", value);
+    const query = params.toString();
+    return query ? `/events?${query}` : "/events";
+  };
+
   /** Toggling a chip keeps every other filter in the query string. */
   const featureHref = (feature: string) => {
     const params = new URLSearchParams();
     if (city) params.set("city", city);
+    if (state) params.set("state", state);
     if (category) params.set("category", category);
+    if (genre) params.set("genre", genre);
+    if (lang) params.set("lang", lang);
     if (when) params.set("when", when);
     if (type) params.set("type", type);
     if (mode) params.set("mode", mode);
     if (venue) params.set("venue", venue);
+    if (q) params.set("q", q);
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
     for (const value of selectedFeatures) {
       if (value !== feature) params.append("feature", value);
     }
@@ -74,6 +146,22 @@ export default async function EventsPage({
     return query ? `/events?${query}` : "/events";
   };
   const modeFilter = EVENT_MODES.find((option) => option.value === mode)?.value;
+  /** Whether an empty list means "nothing matches" rather than "nothing yet". */
+  const filtered = Boolean(
+    q ||
+      city ||
+      state ||
+      venue ||
+      genre ||
+      lang ||
+      category ||
+      type ||
+      mode ||
+      from ||
+      to ||
+      when ||
+      selectedFeatures.length,
+  );
   const categories = await getCategoryTree();
   const scope = category
     ? [
@@ -84,18 +172,120 @@ export default async function EventsPage({
       ]
     : undefined;
 
+  // "Events in Florida" is how people ask, so states get their own chip row.
+  // "NJ" and "New Jersey" are the same state, so rows are merged on the label
+  // they display under rather than on the raw stored text.
+  const rawStateRows = await db.event.groupBy({
+    by: ["state"],
+    where: {
+      status: "APPROVED",
+      startsAt: { gte: new Date() },
+      state: { not: null },
+    },
+    _count: { state: true },
+    orderBy: { _count: { state: "desc" } },
+    take: 40,
+  });
+  const byStateLabel = new Map<string, { code: string; count: number }>();
+  for (const row of rawStateRows) {
+    const code = row.state ?? "";
+    if (!code) continue;
+    const label = stateLabel(code);
+    const seen = byStateLabel.get(label);
+    byStateLabel.set(label, {
+      // Keep the spelt-out value so the chip's own link matches both rows.
+      code: seen && seen.code.length >= code.length ? seen.code : code,
+      count: (seen?.count ?? 0) + row._count.state,
+    });
+  }
+  const stateRows = Array.from(byStateLabel.entries())
+    .map(([label, row]) => ({ label, ...row }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+
+  // The halls people ask for by name, so "parties at Royal Albert Palace" is one tap.
+  const venueRows = await db.event.groupBy({
+    by: ["venue"],
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    _count: { venue: true },
+    orderBy: { _count: { venue: "desc" } },
+    take: 8,
+  });
+
+  // Postgres cannot group by the members of an array, so the facets are counted
+  // here from the upcoming events and only the ones with events are offered.
+  const facetRows = await db.event.findMany({
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    select: { genres: true, languages: true },
+    take: 1000,
+  });
+  const genreCounts = new Map<string, number>();
+  const languageCounts = new Map<string, number>();
+  for (const row of facetRows) {
+    for (const slug of row.genres) {
+      genreCounts.set(slug, (genreCounts.get(slug) ?? 0) + 1);
+    }
+    for (const slug of row.languages) {
+      languageCounts.set(slug, (languageCounts.get(slug) ?? 0) + 1);
+    }
+  }
+  // Only the categories something is actually on under, so the dropdown is a
+  // list of what is on rather than of everything we support.
+  const genreRows = EVENT_CATEGORIES.filter((option) =>
+    genreCounts.has(option.slug),
+  )
+    .map((option) => ({ ...option, count: genreCounts.get(option.slug) ?? 0 }))
+    .sort((a, b) => b.count - a.count);
+  const languageRows = EVENT_LANGUAGES.filter((option) =>
+    languageCounts.has(option.slug),
+  ).map((option) => ({
+    ...option,
+    count: languageCounts.get(option.slug) ?? 0,
+  }));
+
   const events = await db.event.findMany({
     where: {
       status: "APPROVED",
-      ...(when === "past"
-        ? { startsAt: { lt: new Date() } }
-        : { startsAt: { gte: new Date() } }),
-      ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
-      ...(scope
+      startsAt: eventDateRange(when, from, to),
+      // Both the search box and the category scope are OR groups, so they are
+      // combined rather than overwriting one another.
+      AND: [
+        ...(eventTextWhere(q) ? [eventTextWhere(q)!] : []),
+        ...(scope
+          ? [
+              {
+                OR: [
+                  { categorySlug: { in: scope } },
+                  { categorySlugs: { hasSome: scope } },
+                ],
+              },
+            ]
+          : []),
+        // A state chip must find both spellings: some events store "NJ" and
+        // others "New Jersey".
+        ...(state
+          ? [
+              {
+                OR: [
+                  { state: { equals: state, mode: "insensitive" as const } },
+                  ...statesMatching(state).map((match) => ({
+                    state: { equals: match, mode: "insensitive" as const },
+                  })),
+                ],
+              },
+            ]
+          : []),
+      ],
+      ...(genre ? { genres: { has: genre } } : {}),
+      ...(lang ? { languages: { has: lang } } : {}),
+      // The city box doubles as a state box, so "NJ" or "New Jersey" works in it.
+      ...(city
         ? {
             OR: [
-              { categorySlug: { in: scope } },
-              { categorySlugs: { hasSome: scope } },
+              { city: { contains: city, mode: "insensitive" as const } },
+              ...statesMatching(city).map((match) => ({
+                state: { equals: match, mode: "insensitive" as const },
+              })),
             ],
           }
         : {}),
@@ -118,6 +308,7 @@ export default async function EventsPage({
   const partnerRank = (status: string) => (status === "APPROVED" ? 1 : 0);
   events.sort(
     (a, b) =>
+      Number(b.featured) - Number(a.featured) ||
       partnerRank(b.partnerStatus) - partnerRank(a.partnerStatus) ||
       planRank(b.organizer.plan) - planRank(a.organizer.plan),
   );
@@ -133,23 +324,127 @@ export default async function EventsPage({
             Melas, workshops, expos, satsangs and weddings — book a seat in
             seconds and get a QR ticket on your phone.
           </p>
+          <form
+            key={formKey}
+            className="mt-4 grid gap-2 rounded-2xl bg-white/15 p-2 backdrop-blur sm:grid-cols-[1.4fr_1fr_1fr_auto]"
+            role="search"
+          >
+            <input
+              name="q"
+              defaultValue={q ?? ""}
+              placeholder="Garba, satsang, temple name…"
+              aria-label="Search events"
+              className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+            />
+            <input
+              name="city"
+              defaultValue={city ?? ""}
+              placeholder="City or state, e.g. Edison or NJ"
+              aria-label="City or state"
+              className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400"
+            />
+            <input
+              type="date"
+              name="from"
+              defaultValue={from ?? ""}
+              aria-label="On or after this date"
+              className="rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-slate-900"
+            />
+            {/* Chip filters live in the URL, not in this form — without these a
+                search would silently throw away the category the visitor picked. */}
+            {genre ? <input type="hidden" name="genre" value={genre} /> : null}
+            {lang ? <input type="hidden" name="lang" value={lang} /> : null}
+            {state ? <input type="hidden" name="state" value={state} /> : null}
+            {venue ? <input type="hidden" name="venue" value={venue} /> : null}
+            {type ? <input type="hidden" name="type" value={type} /> : null}
+            {mode ? <input type="hidden" name="mode" value={mode} /> : null}
+            {when ? <input type="hidden" name="when" value={when} /> : null}
+            {category ? (
+              <input type="hidden" name="category" value={category} />
+            ) : null}
+            {selectedFeatures.map((feature) => (
+              <input
+                key={feature}
+                type="hidden"
+                name="feature"
+                value={feature}
+              />
+            ))}
+            <button
+              type="submit"
+              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
+            >
+              Search
+            </button>
+          </form>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {EVENT_WHEN.map((option) => {
+              const active = (when ?? "") === option.value && !from && !to;
+              return (
+                <Link
+                  key={option.value || "any"}
+                  href={searchHref({ when: option.value, from: "", to: "" })}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                    active
+                      ? "bg-white text-rose-700"
+                      : "bg-white/20 text-white hover:bg-white/30"
+                  }`}
+                >
+                  {option.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/*
+           * No chip rows: the category, language, state, city and venue
+           * dropdowns below do the same job in one line, and the events
+           * themselves start on the first screen.
+           */}
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-white/90">
+            <Link href="/events/categories" className="underline hover:text-white">
+              Browse all categories →
+            </Link>
+            <Link href="/venues" className="underline hover:text-white">
+              Browse venues →
+            </Link>
+            <Link
+              href="/events/how-it-works"
+              className="underline hover:text-white"
+            >
+              Fees &amp; how posting works →
+            </Link>
+          </div>
+
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href="/events/new" variant="secondary">
               Post your event
             </LinkButton>
             <Link
-              href={when === "past" ? "/events" : "/events?when=past"}
+              href="/events/partner"
               className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
             >
-              {when === "past" ? "Upcoming events" : "Past events"}
+              Get featured free 🤝
             </Link>
+            {q || city || state || venue || from || to || when || genre || lang ? (
+              <Link
+                href="/events"
+                className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+              >
+                Clear search
+              </Link>
+            ) : null}
           </div>
         </section>
 
         <FeaturedEventStrip />
 
         <Card>
-          <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
+          <form
+            key={formKey}
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_auto]"
+          >
             <input
               name="city"
               defaultValue={city ?? ""}
@@ -158,15 +453,30 @@ export default async function EventsPage({
               aria-label="City"
             />
             <select
-              name="category"
-              defaultValue={category ?? ""}
+              name="genre"
+              defaultValue={genre ?? ""}
               className={inputClass}
-              aria-label="Category"
+              aria-label="Event category"
             >
               <option value="">All categories</option>
-              {categories.map((item) => (
+              {(genreRows.length ? genreRows : EVENT_CATEGORIES).map((item) => (
                 <option key={item.slug} value={item.slug}>
-                  {item.icon} {item.name}
+                  {item.icon} {item.label}
+                  {"count" in item ? ` · ${item.count}` : ""}
+                </option>
+              ))}
+            </select>
+            <select
+              name="lang"
+              defaultValue={lang ?? ""}
+              className={inputClass}
+              aria-label="Language"
+            >
+              <option value="">Any language</option>
+              {(languageRows.length ? languageRows : EVENT_LANGUAGES).map((item) => (
+                <option key={item.slug} value={item.slug}>
+                  {item.label}
+                  {"count" in item ? ` · ${item.count}` : ""}
                 </option>
               ))}
             </select>
@@ -196,7 +506,41 @@ export default async function EventsPage({
                 </option>
               ))}
             </select>
+            {/* State and venue are dropdowns too, so the chip rows they used
+                to need are gone and the events start near the top. */}
+            <select
+              name="state"
+              defaultValue={state ?? ""}
+              className={inputClass}
+              aria-label="State"
+            >
+              <option value="">Any state</option>
+              {stateRows.map((row) => (
+                <option key={row.label} value={row.code}>
+                  {row.label} · {row.count}
+                </option>
+              ))}
+            </select>
+            <select
+              name="venue"
+              defaultValue={venue ?? ""}
+              className={inputClass}
+              aria-label="Venue"
+            >
+              <option value="">Any venue</option>
+              {venueRows.map((row) => (
+                <option key={row.venue} value={row.venue}>
+                  {row.venue} · {row._count.venue}
+                </option>
+              ))}
+            </select>
             {when ? <input type="hidden" name="when" value={when} /> : null}
+            {category ? (
+              <input type="hidden" name="category" value={category} />
+            ) : null}
+            {q ? <input type="hidden" name="q" value={q} /> : null}
+            {from ? <input type="hidden" name="from" value={from} /> : null}
+            {to ? <input type="hidden" name="to" value={to} /> : null}
             {selectedFeatures.map((feature) => (
               <input
                 key={feature}
@@ -258,10 +602,20 @@ export default async function EventsPage({
           </>
         ) : (
           <EmptyState
-            title="No events here yet"
-            body="Be the first to list one — posting an event is free."
+            title={
+              filtered
+                ? "Nothing matches that search"
+                : "No events here yet"
+            }
+            body={
+              filtered
+                ? "Try a wider date range, or clear the search to see everything coming up."
+                : "Be the first to list one — posting an event is free."
+            }
           />
         )}
+
+        <EventSuppliersStrip />
 
         <p className="text-sm text-slate-500">
           Organising something?{" "}

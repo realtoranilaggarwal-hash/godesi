@@ -41,17 +41,20 @@ export default async function AdminOutreachPage({
 
   const where: Prisma.BusinessWhereInput = {
     ownerId: null,
-    source: "osm",
+    // Starter rows we added: openly-licensed map data or a pasted public page.
+    source: { not: null },
     ...(searchParams.city ? { city: searchParams.city } : {}),
     ...(searchParams.state ? { state: searchParams.state } : {}),
     ...(status === "contacted"
       ? { NOT: { invitedAt: null } }
       : { invitedAt: null }),
-    // Only rows where the business itself publishes a way to reach it.
+    // Only rows with a way to reach the owner: something they publish about
+    // themselves, or the page a desk read their card from.
     OR: [
       { phone: { not: null } },
       { publicEmail: { not: null } },
       { websiteUrl: { not: null } },
+      { sourceUrl: { not: null } },
     ],
   };
 
@@ -72,6 +75,7 @@ export default async function AdminOutreachPage({
         websiteUrl: true,
         categorySlug: true,
         subcategorySlug: true,
+        sourceUrl: true,
         invitedAt: true,
         inviteChannel: true,
         inviteNote: true,
@@ -79,11 +83,15 @@ export default async function AdminOutreachPage({
     }),
     db.business.count({ where }),
     db.business.count({
-      where: { ownerId: null, source: "osm", NOT: { invitedAt: null } },
+      where: {
+        ownerId: null,
+        source: { not: null },
+        NOT: { invitedAt: null },
+      },
     }),
     db.business.groupBy({
       by: ["city", "state"],
-      where: { ownerId: null, source: "osm" },
+      where: { ownerId: null, source: { not: null } },
       _count: { _all: true },
       orderBy: { city: "asc" },
     }),
@@ -156,6 +164,19 @@ export default async function AdminOutreachPage({
                     view page →
                   </Link>
                 </p>
+                {row.sourceUrl ? (
+                  <p className="text-xs text-slate-500">
+                    read from{" "}
+                    <a
+                      href={row.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer nofollow"
+                      className="text-indigo-600"
+                    >
+                      their listing →
+                    </a>
+                  </p>
+                ) : null}
                 <p className="text-xs text-slate-600">
                   {row.phone ?? "no phone"} · {row.publicEmail ?? "no email"}
                   {row.websiteUrl ? (

@@ -142,8 +142,7 @@ export default async function AdvertisePage({
       <section id="placements" className="grid gap-4 lg:grid-cols-3">
         {order.map((slot) => {
           const placement = AD_PLACEMENTS[slot];
-          const used = usedBySlot.get(slot) ?? 0;
-          const available = Math.max(placement.slots - used, 0);
+          const running = usedBySlot.get(slot) ?? 0;
 
           return (
             <Card
@@ -157,8 +156,11 @@ export default async function AdvertisePage({
                 <div>
                   <h2 className="text-lg font-bold">{placement.name}</h2>
                   <p className="text-xs font-medium text-slate-500">
-                    {placement.size.width} × {placement.size.height} px ·{" "}
-                    {available} of {placement.slots} rotating slots free
+                    {placement.size.width} × {placement.size.height} px · shows{" "}
+                    {placement.slots} at a time ·{" "}
+                    {running
+                      ? `${running} advertiser${running > 1 ? "s" : ""} in rotation — always open`
+                      : "open, no advertiser yet"}
                   </p>
                 </div>
               </div>

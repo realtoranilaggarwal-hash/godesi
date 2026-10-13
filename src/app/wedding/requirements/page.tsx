@@ -3,7 +3,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { canUnlockLeads } from "@/lib/plans";
-import { formatInr, whatsappLink } from "@/lib/format";
+import { whatsappLink } from "@/lib/format";
+import { budgetRange } from "@/lib/budget";
 import { unlockLeadAction } from "@/app/actions/leads";
 import { PostedBy } from "@/components/PostedBy";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
@@ -24,12 +25,6 @@ export const metadata: Metadata = {
   description:
     "Live wedding requirements posted by brides, grooms and families — budget, city and date. Premium vendors unlock the contact and reply on WhatsApp.",
 };
-
-function budgetLabel(min: number | null, max: number | null) {
-  if (min === null && max === null) return "Budget open";
-  if (min !== null && max !== null) return `${formatInr(min)} – ${formatInr(max)}`;
-  return formatInr((min ?? max) as number);
-}
 
 export default async function WeddingRequirementsPage({
   searchParams,
@@ -138,7 +133,13 @@ export default async function WeddingRequirementsPage({
                     <Badge tone="slate">{lead.category}</Badge>
                   </div>
                   <p className="text-sm text-slate-500">
-                    📍 {lead.city} · {budgetLabel(lead.budgetMin, lead.budgetMax)}
+                    📍 {lead.city} ·{" "}
+                    {budgetRange(
+                      lead.budgetMin,
+                      lead.budgetMax,
+                      lead.budgetCurrency,
+                      "Budget open",
+                    )}
                     {lead.eventDate
                       ? ` · 📅 ${lead.eventDate.toLocaleDateString()}`
                       : ""}

@@ -48,28 +48,3 @@ export async function grantModeratorAction(
     return fieldError(error);
   }
 }
-
-/** Updates an existing moderator's tick boxes. */
-export async function updateModeratorPermissionsAction(formData: FormData) {
-  await requireRole("ADMIN");
-  const id = String(formData.get("id") ?? "");
-  const member = await db.user.findUnique({ where: { id } });
-  if (!member || member.role !== "MODERATOR") return;
-  await db.user.update({
-    where: { id },
-    data: { staffPermissions: pickPermissions(formData) },
-  });
-  revalidatePath("/admin");
-}
-
-export async function revokeModeratorAction(formData: FormData) {
-  await requireRole("ADMIN");
-  const id = String(formData.get("id") ?? "");
-  const member = await db.user.findUnique({ where: { id } });
-  if (!member || member.role !== "MODERATOR") return;
-  await db.user.update({
-    where: { id },
-    data: { role: "BUSINESS", staffPermissions: [] },
-  });
-  revalidatePath("/admin");
-}

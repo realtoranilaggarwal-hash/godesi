@@ -130,7 +130,14 @@ export async function publicProfile(username: string) {
       where: { organizerId: user.id, status: "APPROVED" },
       orderBy: { startsAt: "desc" },
       take: 6,
-      select: { slug: true, title: true, startsAt: true, city: true, imageUrl: true },
+      select: {
+        slug: true,
+        title: true,
+        startsAt: true,
+        timeZone: true,
+        city: true,
+        imageUrl: true,
+      },
     }),
     db.lead.findMany({
       where: { clientId: user.id, status: "OPEN" },

@@ -6,6 +6,7 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessProfileForm } from "@/components/forms/BusinessProfileForm";
 import { Card } from "@/components/ui";
+import { MAX_VIDEO_LIMIT, albumPhotoLimit } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -32,7 +33,14 @@ export default async function StaffBusinessEditPage({
       where: { slug: params.slug },
       include: {
         vehicle: true,
-        owner: { select: { email: true, plan: true } },
+        owner: {
+          select: {
+            email: true,
+            plan: true,
+            planExpiresAt: true,
+            foundingNumber: true,
+          },
+        },
       },
     }),
     getCategoryTree(),
@@ -91,6 +99,8 @@ export default async function StaffBusinessEditPage({
           extraCategoryLimit={20}
           foundingMember
           staffEdit
+          videoLimit={MAX_VIDEO_LIMIT}
+          albumPhotoLimit={albumPhotoLimit(business.owner)}
         />
       </Card>
     </div>

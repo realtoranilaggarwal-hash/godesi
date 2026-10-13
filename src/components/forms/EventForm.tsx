@@ -16,6 +16,7 @@ import {
   EVENT_MODES,
   EVENT_TYPES,
 } from "@/lib/eventOptions";
+import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { FormError } from "@/components/forms/FormError";
 import {
   EventVenueFields,
@@ -24,6 +25,7 @@ import {
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { DEFAULT_EVENT_ZONE, EVENT_TIME_ZONES } from "@/lib/time";
 
 /** Suggested seat types; organisers can rename them to anything. */
 const TIER_PRESETS = ["Basic", "Webinar", "Premium"];
@@ -89,9 +91,29 @@ export function EventForm({
         <Field label="Date">
           <input name="date" type="date" required className={inputClass} />
         </Field>
-        <Field label="Start time" hint="India Standard Time">
+        <Field label="Start time" hint="The time where your event happens">
           <input name="time" type="time" required className={inputClass} />
         </Field>
+        <Field label="Times are in" hint="Your venue's own zone">
+          <select
+            name="timeZone"
+            defaultValue={DEFAULT_EVENT_ZONE}
+            className={inputClass}
+          >
+            {EVENT_TIME_ZONES.map((zone) => (
+              <option key={zone.value} value={zone.value}>
+                {zone.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="End time" hint="Optional — when it finishes">
+          <input name="endTime" type="time" className={inputClass} />
+        </Field>
+        <Field label="End date" hint="Only for events that run over more than one day">
+          <input name="endDate" type="date" className={inputClass} />
+        </Field>
+        <EventCategoryPicker />
         <Field label="Event type">
           <select name="eventType" required className={inputClass}>
             <option value="">Select a type</option>

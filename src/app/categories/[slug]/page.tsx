@@ -10,6 +10,7 @@ import { guideFor } from "@/lib/categoryGuides";
 import { BusinessCard } from "@/components/BusinessCard";
 import { EventCard } from "@/components/EventCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { DJ_CATEGORY_SLUGS, DjsWikiBanner } from "@/components/DjsWikiPromo";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { CategoryNewsRail } from "@/components/CategoryNewsRail";
 import { Card, EmptyState, inputClass } from "@/components/ui";
@@ -266,6 +267,8 @@ export default async function CategoryPage({
           </div>
         </section>
 
+        {DJ_CATEGORY_SLUGS.includes(category.slug) ? <DjsWikiBanner /> : null}
+
         <FeaturedStrip
           categorySlugs={scope}
           title={`Featured in ${category.name}`}
@@ -489,6 +492,42 @@ export default async function CategoryPage({
           </Card>
         ) : null}
 
+        {category.slug === "real-estate" ? (
+          <Card className="bg-gradient-to-r from-orange-50 to-fuchsia-50">
+            <h2 className="font-bold">Godesi property marketplace 🏢</h2>
+            <p className="mt-1 text-sm text-slate-700">
+              Buy, sell or rent — flats, villas, plots, shops, offices and new
+              projects from owners, agents and builders in India and the USA.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+              <Link
+                href="/real-estate/start"
+                className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+              >
+                What do you want to do?
+              </Link>
+              <Link
+                href="/real-estate?kind=PROPERTY_SALE"
+                className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-white"
+              >
+                🔍 Buy
+              </Link>
+              <Link
+                href="/real-estate?kind=PROPERTY_RENT"
+                className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-white"
+              >
+                🔑 Rent
+              </Link>
+              <Link
+                href="/listings/new?kind=PROPERTY_SALE"
+                className="rounded-xl border border-slate-300 px-3 py-2 hover:bg-white"
+              >
+                🏷️ Post a property free
+              </Link>
+            </div>
+          </Card>
+        ) : null}
+
         {memberListings && listings.length ? (
           <section>
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -543,7 +582,10 @@ export default async function CategoryPage({
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <SidebarBanners
+        categorySlug={category.slug}
+        parentSlug={category.parent?.slug ?? null}
+      />
     </div>
   );
 }

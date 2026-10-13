@@ -15,6 +15,7 @@ import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 import { LocationScopeField } from "@/components/forms/LocationScopeField";
+import { BudgetFields } from "@/components/forms/BudgetFields";
 
 export function LeadForm({
   defaultName,
@@ -23,6 +24,7 @@ export function LeadForm({
   groups,
   optionSets,
   defaultOptionSlug,
+  currency,
 }: {
   defaultName?: string;
   defaultEmail?: string;
@@ -32,6 +34,8 @@ export function LeadForm({
   /** Per-subcategory option groups, mirroring the posting form. */
   optionSets?: RequirementOptionSet[];
   defaultOptionSlug?: string;
+  /** Guessed from where the visitor is; they can change it. */
+  currency: string;
 }) {
   const [state, formAction] = useFormState(createLeadAction, emptyState);
 
@@ -80,12 +84,7 @@ export function LeadForm({
           </Field>
         )}
         <LocationScopeField />
-        <Field label="Budget from (₹)">
-          <input name="budgetMin" type="number" min={0} className={inputClass} />
-        </Field>
-        <Field label="Budget to (₹)">
-          <input name="budgetMax" type="number" min={0} className={inputClass} />
-        </Field>
+        <BudgetFields currency={currency} />
         <Field label="Event date" hint="Optional — helps vendors check availability">
           <input name="eventDate" type="date" className={inputClass} />
         </Field>

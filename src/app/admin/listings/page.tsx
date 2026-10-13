@@ -35,7 +35,15 @@ export default async function Page() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Listings</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">Listings</h1>
+        <Link
+          href="/admin/listings/wire"
+          className="text-sm font-semibold text-indigo-700"
+        >
+          Add one from a link →
+        </Link>
+      </div>
       <Card id="listings">
         <h2 className="text-lg font-bold">Listings</h2>
         <p className="mb-3 text-xs text-slate-500">

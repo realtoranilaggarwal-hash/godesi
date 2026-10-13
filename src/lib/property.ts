@@ -1,0 +1,434 @@
+import type { PostedByRole, PropertyGroup, Prisma } from "@prisma/client";
+import { listingWhere, type ListingFilters } from "@/lib/listings";
+
+/**
+ * Real-estate taxonomy shared by the post form, the filters and the spec sheet
+ * on a listing. Everything is slug + label so a new type can be added here
+ * without a migration, and unknown values coming from a form are dropped.
+ */
+
+export type Option = { slug: string; label: string };
+
+export const PROPERTY_GROUP_LABELS: Record<PropertyGroup, string> = {
+  RESIDENTIAL: "Residential",
+  COMMERCIAL: "Commercial",
+  LAND: "Land / plot",
+  NEW_PROJECT: "New project",
+};
+
+export const PROPERTY_GROUP_EMOJI: Record<PropertyGroup, string> = {
+  RESIDENTIAL: "🏠",
+  COMMERCIAL: "🏢",
+  LAND: "🌍",
+  NEW_PROJECT: "🏗️",
+};
+
+export const PROPERTY_GROUPS: PropertyGroup[] = [
+  "RESIDENTIAL",
+  "COMMERCIAL",
+  "LAND",
+  "NEW_PROJECT",
+];
+
+/** Property types offered per group, in the order buyers expect them. */
+export const PROPERTY_TYPES: Record<PropertyGroup, Option[]> = {
+  RESIDENTIAL: [
+    { slug: "single-family", label: "Single family home" },
+    { slug: "multi-family", label: "Multi-family home" },
+    { slug: "townhouse", label: "Townhouse" },
+    { slug: "condo", label: "Condo" },
+    { slug: "apartment", label: "Apartment / flat" },
+    { slug: "mobile-manufactured", label: "Mobile / manufactured home" },
+    { slug: "cabin-cottage", label: "Cabin / cottage" },
+    { slug: "independent-house", label: "Independent house" },
+    { slug: "villa", label: "Villa" },
+    { slug: "builder-floor", label: "Builder floor" },
+    { slug: "studio", label: "Studio / 1 RK" },
+    { slug: "pg-hostel", label: "PG / hostel" },
+    { slug: "farmhouse", label: "Farmhouse" },
+  ],
+  COMMERCIAL: [
+    { slug: "office-space", label: "Office space" },
+    { slug: "shop-retail", label: "Shop / retail" },
+    { slug: "showroom", label: "Showroom" },
+    { slug: "warehouse", label: "Warehouse / industrial" },
+    { slug: "coworking", label: "Co-working seat" },
+    { slug: "restaurant-space", label: "Restaurant / kitchen space" },
+  ],
+  LAND: [
+    { slug: "lot", label: "Land / lot" },
+    { slug: "farm-ranch", label: "Farm or ranch" },
+    { slug: "residential-plot", label: "Residential plot" },
+    { slug: "commercial-plot", label: "Commercial plot" },
+    { slug: "agricultural-land", label: "Agricultural land" },
+    { slug: "industrial-land", label: "Industrial land" },
+  ],
+  NEW_PROJECT: [
+    { slug: "builder-project", label: "Builder project" },
+    { slug: "under-construction", label: "Under construction" },
+    { slug: "ready-to-move", label: "Ready to move" },
+  ],
+};
+
+const TYPE_LABELS = new Map(
+  PROPERTY_GROUPS.flatMap((group) =>
+    PROPERTY_TYPES[group].map((type) => [type.slug, type.label] as const),
+  ),
+);
+
+export function propertyTypeLabel(slug: string) {
+  return TYPE_LABELS.get(slug) ?? slug;
+}
+
+export function groupForType(slug: string): PropertyGroup | null {
+  return (
+    PROPERTY_GROUPS.find((group) =>
+      PROPERTY_TYPES[group].some((type) => type.slug === slug),
+    ) ?? null
+  );
+}
+
+export const POSTED_BY_LABELS: Record<PostedByRole, string> = {
+  OWNER: "Owner",
+  AGENT: "Agent",
+  BUILDER: "Builder",
+};
+
+export const AREA_UNITS: Option[] = [
+  { slug: "sqft", label: "sq ft" },
+  { slug: "sqm", label: "sq m" },
+  { slug: "sqyd", label: "sq yd" },
+  { slug: "acre", label: "acres" },
+  { slug: "guntha", label: "guntha" },
+];
+
+/** Lot size is quoted either in square feet or in acres, nothing else. */
+export const LOT_UNITS: Option[] = [
+  { slug: "sqft", label: "sq ft" },
+  { slug: "acre", label: "acres" },
+];
+
+/** How the sale is framed — the first thing a US buyer reads on a listing. */
+export const SALE_TYPES: Option[] = [
+  { slug: "resale", label: "Resale" },
+  { slug: "new-construction", label: "New construction" },
+  { slug: "investment", label: "Investment property" },
+  { slug: "luxury", label: "Luxury property" },
+  { slug: "rental-property", label: "Rental property" },
+  { slug: "foreclosure", label: "Foreclosure" },
+  { slug: "short-sale", label: "Short sale" },
+];
+
+export const CONSTRUCTION_TYPES: Option[] = [
+  { slug: "brick", label: "Brick" },
+  { slug: "wood", label: "Wood frame" },
+  { slug: "vinyl-siding", label: "Vinyl siding" },
+  { slug: "stucco", label: "Stucco" },
+  { slug: "concrete-block", label: "Concrete block" },
+  { slug: "stone", label: "Stone" },
+  { slug: "metal", label: "Metal" },
+  { slug: "log", label: "Log" },
+  { slug: "adobe", label: "Adobe" },
+];
+
+export const FLOORING_TYPES: Option[] = [
+  { slug: "hardwood", label: "Hardwood" },
+  { slug: "engineered-wood", label: "Engineered wood" },
+  { slug: "laminate", label: "Laminate" },
+  { slug: "vinyl", label: "Vinyl / linoleum" },
+  { slug: "tile", label: "Tile" },
+  { slug: "marble", label: "Marble" },
+  { slug: "ceramic", label: "Ceramic" },
+  { slug: "carpet", label: "Carpet" },
+  { slug: "concrete", label: "Concrete" },
+  { slug: "bamboo", label: "Bamboo" },
+  { slug: "cork", label: "Cork" },
+];
+
+export const PARKING_TYPES: Option[] = [
+  { slug: "garage-attached", label: "Attached garage" },
+  { slug: "garage-detached", label: "Detached garage" },
+  { slug: "driveway", label: "Driveway" },
+  { slug: "carport", label: "Carport" },
+  { slug: "street", label: "Street parking" },
+  { slug: "off-street", label: "Off-street" },
+  { slug: "assigned", label: "Assigned space" },
+  { slug: "none", label: "No parking" },
+];
+
+/** Short selling points buyers filter on, kept factual and checkable. */
+export const PROPERTY_HIGHLIGHTS: Option[] = [
+  { slug: "ready-to-move", label: "Ready to move" },
+  { slug: "good-schools", label: "Near schools & colleges" },
+  { slug: "near-transit", label: "Near train / transit" },
+  { slug: "near-temple", label: "Near temple / gurdwara / mosque" },
+  { slug: "desi-groceries", label: "Desi groceries nearby" },
+  { slug: "family-friendly", label: "Family-friendly street" },
+  { slug: "low-maintenance", label: "Low maintenance" },
+  { slug: "high-rental-yield", label: "Strong rental yield" },
+  { slug: "finished-basement", label: "Finished basement" },
+  { slug: "backyard", label: "Backyard / deck" },
+  { slug: "solar", label: "Solar panels" },
+  { slug: "new-roof-hvac", label: "New roof or HVAC" },
+  { slug: "corner-lot", label: "Corner lot" },
+  { slug: "waterfront", label: "Waterfront / lake view" },
+];
+
+export const PROPERTY_AGES: Option[] = [
+  { slug: "under-construction", label: "Under construction" },
+  { slug: "new", label: "Newly built" },
+  { slug: "0-5", label: "0–5 years old" },
+  { slug: "5-10", label: "5–10 years old" },
+  { slug: "10-20", label: "10–20 years old" },
+  { slug: "20-plus", label: "20+ years old" },
+];
+
+export const FACINGS: Option[] = [
+  { slug: "north", label: "North" },
+  { slug: "east", label: "East" },
+  { slug: "south", label: "South" },
+  { slug: "west", label: "West" },
+  { slug: "north-east", label: "North-east" },
+  { slug: "north-west", label: "North-west" },
+  { slug: "south-east", label: "South-east" },
+  { slug: "south-west", label: "South-west" },
+];
+
+export const OWNERSHIPS: Option[] = [
+  { slug: "freehold", label: "Freehold" },
+  { slug: "leasehold", label: "Leasehold" },
+  { slug: "co-op-society", label: "Co-operative society" },
+  { slug: "power-of-attorney", label: "Power of attorney" },
+  { slug: "builder-allotment", label: "Builder allotment" },
+];
+
+export const TENANT_PREFS: Option[] = [
+  { slug: "anyone", label: "Anyone" },
+  { slug: "family", label: "Family" },
+  { slug: "bachelors", label: "Bachelors" },
+  { slug: "company", label: "Company lease" },
+  { slug: "students", label: "Students" },
+];
+
+export const UTILITIES: Option[] = [
+  { slug: "water-24x7", label: "24×7 water supply" },
+  { slug: "power-backup", label: "Power backup" },
+  { slug: "gated-security", label: "Gated security" },
+  { slug: "gas-pipeline", label: "Piped gas" },
+  { slug: "internet", label: "Internet ready" },
+  { slug: "rain-water", label: "Rainwater harvesting" },
+];
+
+export const AMENITIES: Option[] = [
+  { slug: "lift", label: "Lift" },
+  { slug: "swimming-pool", label: "Swimming pool" },
+  { slug: "gym", label: "Gym" },
+  { slug: "clubhouse", label: "Clubhouse" },
+  { slug: "park", label: "Park / garden" },
+  { slug: "play-area", label: "Children's play area" },
+  { slug: "visitor-parking", label: "Visitor parking" },
+  { slug: "fire-safety", label: "Fire safety" },
+  { slug: "shopping-centre", label: "Shopping centre nearby" },
+  { slug: "temple", label: "Temple nearby" },
+  { slug: "vegetarian-only", label: "Vegetarian-only building" },
+  { slug: "pet-friendly", label: "Pet friendly" },
+  { slug: "modular-kitchen", label: "Modular kitchen" },
+];
+
+const ALL_LABELS = new Map(
+  [
+    ...AMENITIES,
+    ...UTILITIES,
+    ...PROPERTY_AGES,
+    ...FACINGS,
+    ...OWNERSHIPS,
+    ...TENANT_PREFS,
+    ...AREA_UNITS,
+    ...LOT_UNITS,
+    ...SALE_TYPES,
+    ...CONSTRUCTION_TYPES,
+    ...FLOORING_TYPES,
+    ...PARKING_TYPES,
+    ...PROPERTY_HIGHLIGHTS,
+  ].map((option) => [option.slug, option.label] as const),
+);
+
+/** Human label for any taxonomy slug; falls back to the slug itself. */
+export function optionLabel(slug: string) {
+  return ALL_LABELS.get(slug) ?? slug;
+}
+
+/** Keeps only slugs we know about, so a hand-crafted POST cannot inject text. */
+export function keepOptions(values: string[], allowed: Option[]) {
+  const known = new Set(allowed.map((option) => option.slug));
+  return Array.from(new Set(values.filter((value) => known.has(value))));
+}
+
+export function isPropertyGroup(value: string): value is PropertyGroup {
+  return (PROPERTY_GROUPS as string[]).includes(value);
+}
+
+export function isPostedByRole(value: string): value is PostedByRole {
+  return value === "OWNER" || value === "AGENT" || value === "BUILDER";
+}
+
+/** Only these types ever want BHK, bathrooms and furnishing. */
+export function wantsRooms(type: string | null | undefined) {
+  if (!type) return true;
+  const group = groupForType(type);
+  return group === "RESIDENTIAL" || group === "NEW_PROJECT";
+}
+
+export function areaLabel(
+  listing: { builtUpArea: number | null; carpetArea: number | null; areaUnit: string | null },
+) {
+  const unit = optionLabel(listing.areaUnit ?? "sqft");
+  const built = listing.builtUpArea ? `${listing.builtUpArea} ${unit} built-up` : null;
+  const carpet = listing.carpetArea ? `${listing.carpetArea} ${unit} carpet` : null;
+  return [built, carpet].filter(Boolean).join(" · ") || null;
+}
+
+/** "1,850 sq ft · 0.34 acre lot" — the line every US listing leads with. */
+export function sizeLabel(listing: {
+  builtUpArea: number | null;
+  lotSize: number | null;
+  lotUnit: string | null;
+  areaUnit: string | null;
+}) {
+  const finished = listing.builtUpArea
+    ? `${listing.builtUpArea.toLocaleString()} ${optionLabel(listing.areaUnit ?? "sqft")}`
+    : null;
+  const lot = listing.lotSize
+    ? `${listing.lotSize.toLocaleString()} ${optionLabel(listing.lotUnit ?? "sqft")} lot`
+    : null;
+  return [finished, lot].filter(Boolean).join(" · ") || null;
+}
+
+/** "3 full · 1 half" — half and three-quarter baths sell a US home. */
+export function bathsLabel(listing: {
+  bathrooms: number | null;
+  threeQuarterBaths: number | null;
+  halfBaths: number | null;
+}) {
+  const parts = [
+    listing.bathrooms ? `${listing.bathrooms} full` : null,
+    listing.threeQuarterBaths ? `${listing.threeQuarterBaths} three-quarter` : null,
+    listing.halfBaths ? `${listing.halfBaths} half` : null,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" · ") : null;
+}
+
+/** Price per finished square foot, rounded — never stored, always derived. */
+export function pricePerSqft(listing: {
+  price: number;
+  builtUpArea: number | null;
+  areaUnit: string | null;
+}) {
+  if (!listing.price || !listing.builtUpArea) return null;
+  if ((listing.areaUnit ?? "sqft") !== "sqft") return null;
+  return Math.round(listing.price / listing.builtUpArea);
+}
+
+export type PropertyFilterParams = {
+  group?: string;
+  ptype?: string;
+  sale?: string;
+  highlight?: string | string[];
+  minSqft?: string;
+  builtAfter?: string;
+  openHouse?: string;
+  min?: string;
+  max?: string;
+  bhk?: string;
+  baths?: string;
+  furnishing?: string;
+  parking?: string;
+  amenity?: string | string[];
+  by?: string;
+  tenant?: string;
+  nri?: string;
+  deal?: string;
+};
+
+function intOrNull(value?: string) {
+  if (!value) return null;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  // Postgres int4 — a longer number typed into the price box would otherwise
+  // reach Prisma and blow up the page.
+  return Math.min(parsed, 2_147_483_647);
+}
+
+function asArray(value?: string | string[]) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+/**
+ * Property-only half of the /real-estate filter bar, merged into the generic
+ * listing filter so both sets of URL params keep working.
+ */
+export function propertyWhere(filters: PropertyFilterParams): Prisma.ListingWhereInput {
+  const min = intOrNull(filters.min);
+  const baths = intOrNull(filters.baths);
+  const amenities = keepOptions(asArray(filters.amenity), AMENITIES);
+  const group = filters.group && isPropertyGroup(filters.group) ? filters.group : null;
+  const type = filters.ptype && TYPE_LABELS.has(filters.ptype) ? filters.ptype : null;
+  const by = filters.by && isPostedByRole(filters.by) ? filters.by : null;
+  const highlights = keepOptions(asArray(filters.highlight), PROPERTY_HIGHLIGHTS);
+  const sale = SALE_TYPES.some((option) => option.slug === filters.sale)
+    ? filters.sale
+    : null;
+  const minSqft = intOrNull(filters.minSqft);
+  const builtAfter = intOrNull(filters.builtAfter);
+  const tenant = TENANT_PREFS.some((option) => option.slug === filters.tenant)
+    ? filters.tenant
+    : null;
+
+  return {
+    ...(group ? { propertyGroup: group } : {}),
+    ...(type ? { propertyType: type } : {}),
+    ...(min ? { price: { gte: min } } : {}),
+    ...(baths ? { bathrooms: { gte: baths } } : {}),
+    ...(amenities.length ? { amenities: { hasEvery: amenities } } : {}),
+    ...(by ? { postedByRole: by } : {}),
+    ...(tenant ? { tenantPref: tenant } : {}),
+    ...(filters.parking ? { parkingCar: { gte: 1 } } : {}),
+    ...(filters.nri ? { nriFriendly: true } : {}),
+    ...(filters.deal ? { investmentDeal: true } : {}),
+    ...(sale ? { saleType: sale } : {}),
+    ...(highlights.length ? { highlights: { hasEvery: highlights } } : {}),
+    ...(minSqft ? { builtUpArea: { gte: minSqft } } : {}),
+    ...(builtAfter ? { yearBuilt: { gte: builtAfter } } : {}),
+    ...(filters.openHouse ? { openHouseAt: { gte: new Date() } } : {}),
+  };
+}
+
+/**
+ * The whole /real-estate query: the shared section filter plus the property
+ * one. Both halves write `price`, so they are merged rather than spread — a
+ * plain spread silently dropped whichever bound came first.
+ */
+export function propertySearchWhere(
+  filters: PropertyFilterParams & ListingFilters,
+): Prisma.ListingWhereInput {
+  const base = listingWhere("real-estate", filters);
+  const extra = propertyWhere(filters);
+  const price = {
+    ...(base.price && typeof base.price === "object" ? base.price : {}),
+    ...(extra.price && typeof extra.price === "object" ? extra.price : {}),
+  };
+
+  return {
+    ...base,
+    ...extra,
+    ...(Object.keys(price).length ? { price } : {}),
+  };
+}
+
+/** True when the visitor has narrowed the list beyond the defaults. */
+export function hasPropertyFilters(filters: PropertyFilterParams) {
+  return Object.entries(filters).some(([, value]) =>
+    Array.isArray(value) ? value.length > 0 : Boolean(value),
+  );
+}

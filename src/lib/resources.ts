@@ -24,6 +24,10 @@ export const RESOURCE_BOX_SIZE = 4;
  */
 export const RESOURCE_PLACEMENTS = [
   { value: "connect-safety", label: "Safety tools & tips (Connect)" },
+  {
+    value: "event-suppliers",
+    label: "Party supplies & printers (Events)",
+  },
 ] as const;
 
 export type ResourcePlacement = (typeof RESOURCE_PLACEMENTS)[number]["value"];

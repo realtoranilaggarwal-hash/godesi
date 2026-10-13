@@ -9,12 +9,18 @@ import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
 import { confirmTicket, seatsLeft, ticketCode, uniqueEventSlug } from "@/lib/events";
+import { instantFrom, isEventZone, zoneForPlace } from "@/lib/time";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
 import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
+import {
+  cleanEventCategories,
+  cleanEventLanguages,
+  guessEventCategories,
+} from "@/lib/eventCategories";
 import { rememberVenue } from "@/lib/venues";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 import { payoutAccount, platformFeeMinor } from "@/lib/connect";
@@ -115,8 +121,16 @@ const eventSchema = z.object({
   description: z.string().trim().min(20, "Describe the event (20+ characters)"),
   date: z.string().trim().min(1, "Event date is required"),
   time: z.string().trim().min(1, "Event time is required"),
+  endDate: z.string().trim().optional(),
+  endTime: z.string().trim().optional(),
   venue: z.string().trim().min(3, "Venue is required"),
   hallName: z.string().trim().max(120).optional(),
+  hallCapacity: z.coerce
+    .number()
+    .int()
+    .min(0, "Capacity cannot be negative")
+    .optional(),
+  venueUrl: optionalUrl,
   address: z.string().trim().max(300).optional(),
   mapsUrl: optionalUrl,
   city: z.string().trim().min(2, "City is required"),
@@ -184,8 +198,12 @@ export async function createEventAction(
       description: formData.get("description"),
       date: formData.get("date"),
       time: formData.get("time"),
+      endDate: formData.get("endDate") ?? undefined,
+      endTime: formData.get("endTime") ?? undefined,
       venue: formData.get("venue"),
       hallName: formData.get("hallName") ?? undefined,
+      hallCapacity: formData.get("hallCapacity") || undefined,
+      venueUrl: formData.get("venueUrl") ?? undefined,
       address: formData.get("address") ?? undefined,
       mapsUrl: formData.get("mapsUrl") ?? undefined,
       city: formData.get("city"),
@@ -212,8 +230,29 @@ export async function createEventAction(
       return { error: "Please confirm you understand how ticket money and fees work." };
     }
 
-    const startsAt = new Date(`${parsed.data.date}T${parsed.data.time}:00+05:30`);
-    if (Number.isNaN(startsAt.getTime())) return { error: "Enter a valid date and time." };
+    // An organiser types the time of the town the event is in; the zone box
+    // says which, and defaults to the one their state suggests.
+    const chosen = String(formData.get("timeZone") ?? "");
+    const zone = isEventZone(chosen)
+      ? chosen
+      : zoneForPlace(parsed.data.state, parsed.data.country);
+
+    const startsAt = instantFrom(parsed.data.date, parsed.data.time, zone);
+    if (!startsAt) return { error: "Enter a valid date and time." };
+
+    // An end time alone finishes the same day; an end date alone keeps the start time.
+    const endsAt =
+      parsed.data.endTime || parsed.data.endDate
+        ? instantFrom(
+            parsed.data.endDate || parsed.data.date,
+            parsed.data.endTime || parsed.data.time,
+            zone,
+          )
+        : null;
+    if ((parsed.data.endTime || parsed.data.endDate) && !endsAt)
+      return { error: "Enter a valid end date and time." };
+    if (endsAt && endsAt <= startsAt)
+      return { error: "The event has to end after it starts." };
 
     const tiers = readTiers(formData);
     if ("error" in tiers) return { error: tiers.error };
@@ -248,6 +287,20 @@ export async function createEventAction(
       .filter(Boolean);
     const categorySlugs = Array.from(
       new Set([primaryCategory, ...extraCategories].filter(Boolean) as string[]),
+    );
+    // Untouched by the organiser, the title still puts the event in a list.
+    const picked = cleanEventCategories(
+      formData.getAll("genres").map((value) => String(value)),
+    );
+    const genres = picked.length
+      ? picked
+      : guessEventCategories(
+          parsed.data.title,
+          parsed.data.eventType,
+          parsed.data.description,
+        );
+    const languages = cleanEventLanguages(
+      formData.getAll("languages").map((value) => String(value)),
     );
     const tags = (parsed.data.tags ?? "")
       .split(",")
@@ -285,8 +338,12 @@ export async function createEventAction(
         title: titleCase(parsed.data.title),
         description: sentenceCase(parsed.data.description),
         startsAt,
+        endsAt,
+        timeZone: zone,
         venue: titleCase(parsed.data.venue),
         hallName: parsed.data.hallName || null,
+        hallCapacity: parsed.data.hallCapacity ?? null,
+        venueUrl: parsed.data.venueUrl ?? null,
         address: parsed.data.address || null,
         mapsUrl: parsed.data.mapsUrl ?? null,
         venueRefId: venueRef?.id ?? null,
@@ -297,6 +354,8 @@ export async function createEventAction(
         state: parsed.data.state,
         country: parsed.data.country,
         eventType: parsed.data.eventType,
+        genres,
+        languages,
         mode: parsed.data.mode,
         onlineUrl: parsed.data.onlineUrl ?? null,
         websiteUrl: parsed.data.websiteUrl ?? null,

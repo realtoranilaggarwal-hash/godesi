@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
-import { formatInr } from "@/lib/format";
+import { budgetRange } from "@/lib/budget";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Unlocked leads" };
@@ -38,7 +38,7 @@ export default async function UnlockedLeadsPage() {
               <p className="text-sm text-slate-600">
                 {lead.category} · {lead.city}
                 {lead.budgetMin !== null || lead.budgetMax !== null
-                  ? ` · ${formatInr(lead.budgetMin ?? 0)} – ${formatInr(lead.budgetMax ?? lead.budgetMin ?? 0)}`
+                  ? ` · ${budgetRange(lead.budgetMin, lead.budgetMax, lead.budgetCurrency)}`
                   : ""}
               </p>
               <div className="rounded-xl bg-slate-50 p-3 text-sm">

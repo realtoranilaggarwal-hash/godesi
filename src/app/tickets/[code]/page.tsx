@@ -22,6 +22,7 @@ export default async function TicketPage({ params }: { params: { code: string } 
           slug: true,
           title: true,
           startsAt: true,
+          timeZone: true,
           venue: true,
           city: true,
           organizerId: true,
@@ -43,7 +44,7 @@ export default async function TicketPage({ params }: { params: { code: string } 
         <Badge tone={ticket.status === "CONFIRMED" ? "green" : "amber"}>{ticket.status}</Badge>
         <h1 className="text-xl font-black">{ticket.event.title}</h1>
         <div className="space-y-1 text-sm text-slate-600">
-          <p>📅 {formatEventDate(ticket.event.startsAt)}</p>
+          <p>📅 {formatEventDate(ticket.event.startsAt, ticket.event.timeZone)}</p>
           <p>
             📍 {ticket.event.venue}, {ticket.event.city}
           </p>

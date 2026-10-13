@@ -8,7 +8,13 @@ import {
   KIND_LABELS,
   priceLabel,
 } from "@/lib/listings";
-import type { Furnishing, GenderPreference, ListingKind } from "@prisma/client";
+import type {
+  Furnishing,
+  GenderPreference,
+  ListingKind,
+  PostedByRole,
+} from "@prisma/client";
+import { POSTED_BY_LABELS, propertyTypeLabel, sizeLabel } from "@/lib/property";
 import { thumbImage } from "@/lib/proxyImage";
 
 export type ListingCardItem = {
@@ -25,6 +31,20 @@ export type ListingCardItem = {
   genderPref: GenderPreference | null;
   categorySlug: string | null;
   featured: boolean;
+  /** Property extras; absent on rooms and buy & sell cards. */
+  propertyType?: string | null;
+  postedByRole?: PostedByRole | null;
+  bathrooms?: number | null;
+  halfBaths?: number | null;
+  builtUpArea?: number | null;
+  carpetArea?: number | null;
+  areaUnit?: string | null;
+  lotSize?: number | null;
+  lotUnit?: string | null;
+  yearBuilt?: number | null;
+  openHouseAt?: Date | null;
+  nriFriendly?: boolean;
+  investmentDeal?: boolean;
   images: { url: string }[];
   owner: { name: string; username: string | null; avatarUrl: string | null };
 };
@@ -40,6 +60,22 @@ export function ListingCard({
   /** Buy & sell category label, when the section knows the taxonomy. */
   categoryName?: string;
 }) {
+  const size = sizeLabel({
+    builtUpArea: listing.builtUpArea ?? null,
+    lotSize: listing.lotSize ?? null,
+    lotUnit: listing.lotUnit ?? null,
+    areaUnit: listing.areaUnit ?? null,
+  });
+  const openHouse =
+    listing.openHouseAt && listing.openHouseAt > new Date()
+      ? listing.openHouseAt.toLocaleString(undefined, {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          hour: "numeric",
+        })
+      : null;
+
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link href={`/listings/${listing.slug}`} className="block">
@@ -63,6 +99,11 @@ export function ListingCard({
           <Badge tone="indigo">{KIND_LABELS[listing.kind]}</Badge>
           {categoryName ? <Badge tone="green">{categoryName}</Badge> : null}
           {listing.featured ? <Badge tone="amber">Featured</Badge> : null}
+          {listing.propertyType ? (
+            <Badge tone="green">{propertyTypeLabel(listing.propertyType)}</Badge>
+          ) : null}
+          {listing.nriFriendly ? <Badge tone="indigo">🌏 NRI</Badge> : null}
+          {listing.investmentDeal ? <Badge tone="amber">📈 Investment</Badge> : null}
           {listing.furnishing ? (
             <Badge tone="slate">{FURNISHING_LABELS[listing.furnishing]}</Badge>
           ) : null}
@@ -80,11 +121,29 @@ export function ListingCard({
         <p className="text-sm text-slate-600">
           📍 {listing.area ? `${listing.area}, ` : ""}
           <PlaceLink city={listing.city} base={cityBase} />
-          {listing.bedrooms ? ` · ${listing.bedrooms} BHK` : ""}
+          {listing.bedrooms ? ` · ${listing.bedrooms} bed` : ""}
+          {listing.bathrooms ? ` · ${listing.bathrooms} bath` : ""}
+          {listing.halfBaths ? ` + ${listing.halfBaths} half` : ""}
         </p>
+        {size ? (
+          <p className="text-xs text-slate-500">
+            📏 {size}
+            {listing.yearBuilt ? ` · built ${listing.yearBuilt}` : ""}
+          </p>
+        ) : null}
+        {openHouse ? (
+          <p className="text-xs font-semibold text-emerald-700">
+            🚪 Open house {openHouse}
+          </p>
+        ) : null}
         <p className="text-lg font-black text-emerald-700">{priceLabel(listing)}</p>
-        <div className="mt-auto pt-1">
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
           <PostedBy user={listing.owner} />
+          {listing.postedByRole ? (
+            <span className="text-xs font-semibold text-slate-500">
+              {POSTED_BY_LABELS[listing.postedByRole]}
+            </span>
+          ) : null}
         </div>
       </div>
     </div>
