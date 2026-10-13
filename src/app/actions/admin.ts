@@ -652,6 +652,46 @@ export async function adminUpdateEventAction(
   }
 }
 
+/**
+ * Approve, reject or hold a member-posted listing (property, room or item).
+ * `setListingStatusAction` above moderates directory businesses — a different
+ * table entirely, despite the shared word "listing".
+ */
+export async function setClassifiedStatusAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "") as ListingStatus;
+  if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
+    throw new Error("Invalid status");
+  }
+  const listing = await db.listing.update({ where: { id }, data: { status } });
+
+  revalidatePath("/admin/properties");
+  revalidatePath("/admin/content");
+  revalidatePath("/real-estate");
+  revalidatePath("/rooms");
+  revalidatePath("/marketplace");
+  revalidatePath(`/listings/${listing.slug}`);
+}
+
+/** Puts a member listing in (or out of) the paid featured slots. */
+export async function toggleClassifiedFeaturedAction(formData: FormData) {
+  await requirePermission("listings");
+  const id = String(formData.get("id") ?? "");
+  const listing = await db.listing.findUnique({ where: { id } });
+  if (!listing) throw new Error("Listing not found");
+  await db.listing.update({
+    where: { id },
+    data: { featured: !listing.featured },
+  });
+
+  revalidatePath("/admin/properties");
+  revalidatePath("/real-estate");
+  revalidatePath("/rooms");
+  revalidatePath("/marketplace");
+  revalidatePath(`/listings/${listing.slug}`);
+}
+
 export async function toggleFeaturedAction(formData: FormData) {
   await requireRole("ADMIN");
   const id = String(formData.get("id") ?? "");

@@ -10,12 +10,13 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { WriteHelper } from "@/components/WriteHelper";
 import { ImageDropzone } from "@/components/ImageDropzone";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { PropertyFields } from "@/components/forms/PropertyFields";
 import {
   FairHousingNotice,
   RoomSharingNotice,
 } from "@/components/FairHousingNotice";
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
-import type { ListingKind } from "@prisma/client";
+import type { ListingKind, PropertyGroup } from "@prisma/client";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
@@ -33,12 +34,17 @@ export function ListingForm({
   defaultWhatsapp,
   defaultCurrency,
   categories,
+  defaultGroup,
+  defaultCountry,
 }: {
   defaultKind: ListingKind;
   imageLimit: number;
   defaultWhatsapp: string;
   defaultCurrency: string;
   categories: { slug: string; name: string }[];
+  /** Preselected property branch when arriving from the real-estate flow. */
+  defaultGroup?: PropertyGroup;
+  defaultCountry?: string;
 }) {
   const [state, formAction] = useFormState(createListingAction, emptyState);
   const [kind, setKind] = useState<ListingKind>(defaultKind);
@@ -240,6 +246,14 @@ export function ListingForm({
           ))}
         </div>
       </Field>
+
+      {isProperty ? (
+        <PropertyFields
+          forRent={kind === "PROPERTY_RENT"}
+          defaultGroup={defaultGroup}
+          defaultCountry={defaultCountry}
+        />
+      ) : null}
 
       <PhotoAlbumField />
 
