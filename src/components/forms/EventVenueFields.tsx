@@ -128,49 +128,53 @@ export function EventVenueFields({
         </Field>
       )}
 
-      <Field
-        label="Hall / room"
-        hint={
-          picked?.halls.length
-            ? `Used here before: ${picked.halls.join(", ")}`
-            : "Optional — for venues with several halls, e.g. Crystal Hall"
-        }
-      >
-        <input name="hallName" list="godesi-halls" className={inputClass} />
-        <datalist id="godesi-halls">
-          {(picked?.halls ?? []).map((hall) => (
-            <option key={hall} value={hall} />
-          ))}
-        </datalist>
-      </Field>
+      {online ? null : (
+        <>
+          <Field
+            label="Hall / room"
+            hint={
+              picked?.halls.length
+                ? `Used here before: ${picked.halls.join(", ")}`
+                : "Optional — for venues with several halls, e.g. Crystal Hall"
+            }
+          >
+            <input name="hallName" list="godesi-halls" className={inputClass} />
+            <datalist id="godesi-halls">
+              {(picked?.halls ?? []).map((hall) => (
+                <option key={hall} value={hall} />
+              ))}
+            </datalist>
+          </Field>
 
-      <Field
-        label="Hall capacity"
-        hint="Optional — how many people it seats, so guests know the size"
-      >
-        <input
-          name="hallCapacity"
-          type="number"
-          min={0}
-          className={inputClass}
-        />
-      </Field>
+          <Field
+            label="Hall capacity"
+            hint="Optional — how many people it seats, so guests know the size"
+          >
+            <input
+              name="hallCapacity"
+              type="number"
+              min={0}
+              className={inputClass}
+            />
+          </Field>
 
-      <Field
-        label="Venue website"
-        hint={
-          picked?.website
-            ? "From the venue's Godesi page"
-            : "Optional — the venue's own site, shown on its Godesi page"
-        }
-      >
-        <input
-          name="venueUrl"
-          defaultValue={initialMatch?.website ?? ""}
-          placeholder="https://royalalbertspalace.com"
-          className={inputClass}
-        />
-      </Field>
+          <Field
+            label="Venue website"
+            hint={
+              picked?.website
+                ? "From the venue's Godesi page"
+                : "Optional — the venue's own site, shown on its Godesi page"
+            }
+          >
+            <input
+              name="venueUrl"
+              defaultValue={initialMatch?.website ?? ""}
+              placeholder="https://royalalbertspalace.com"
+              className={inputClass}
+            />
+          </Field>
+        </>
+      )}
 
       {online ? null : (
         <>

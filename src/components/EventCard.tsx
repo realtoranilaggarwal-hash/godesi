@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
 import { eventCategoryIcon, eventCategoryLabel } from "@/lib/eventCategories";
 import { StaffEditLink } from "@/components/StaffEditLink";
+import { FreeRibbon } from "@/components/FreeRibbon";
 import { thumbImage } from "@/lib/proxyImage";
 import { eventTheme, placeLine } from "@/lib/eventTheme";
 import { gradientFor } from "@/lib/categories";
@@ -78,10 +79,11 @@ export function EventCard({
       />
       <Link
         href={`/events/${event.slug}`}
-        className={`group flex flex-1 flex-col overflow-hidden bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+        className={`group relative flex flex-1 flex-col overflow-hidden bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
           featured ? "rounded-[17px]" : "rounded-2xl border border-slate-200"
         }`}
       >
+        {event.price || imported ? null : <FreeRibbon />}
         {event.imageUrl && featured && !tile ? (
           <div className="relative min-h-56 w-full flex-1 overflow-hidden bg-slate-900">
             {/* eslint-disable-next-line @next/next/no-img-element */}

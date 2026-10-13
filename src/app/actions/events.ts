@@ -22,7 +22,11 @@ import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
-import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
+import {
+  EVENT_FEATURES,
+  ONLINE_OPEN_SEATS,
+  PARTNER_COMMITMENTS,
+} from "@/lib/eventOptions";
 import {
   cleanEventCategories,
   cleanEventLanguages,
@@ -197,8 +201,8 @@ const eventSchema = z.object({
   address: z.string().trim().max(300).optional(),
   mapsUrl: optionalUrl,
   city: z.string().trim().min(2, "City is required"),
-  state: z.string().trim().min(2, "State is required"),
-  country: z.string().trim().min(2, "Country is required"),
+  state: z.string().trim().min(2, "State is required").optional(),
+  country: z.string().trim().min(2, "Country is required").optional(),
   eventType: z.string().trim().min(2, "Pick an event type"),
   mode: z.enum(["OFFLINE", "ONLINE", "HYBRID"]).default("OFFLINE"),
   frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
@@ -264,6 +268,7 @@ export async function createEventAction(
   let slug: string;
   try {
     const user = await requireUser();
+    const onlineOnly = formData.get("mode") === "ONLINE";
     const parsed = eventSchema.safeParse({
       title: formData.get("title"),
       description: formData.get("description"),
@@ -277,9 +282,9 @@ export async function createEventAction(
       venueUrl: formData.get("venueUrl") ?? undefined,
       address: formData.get("address") ?? undefined,
       mapsUrl: formData.get("mapsUrl") ?? undefined,
-      city: formData.get("city"),
-      state: formData.get("state"),
-      country: formData.get("country"),
+      city: formData.get("city") || (onlineOnly ? "Online" : ""),
+      state: formData.get("state") || (onlineOnly ? undefined : ""),
+      country: formData.get("country") || (onlineOnly ? undefined : ""),
       eventType: formData.get("eventType"),
       mode: formData.get("mode") || "OFFLINE",
       frequency: formData.get("frequency") || "ONE_TIME",
@@ -291,18 +296,14 @@ export async function createEventAction(
       subcategorySlug: formData.get("subcategorySlug") ?? undefined,
       price: formData.get("price") || 0,
       currency: formData.get("currency") || undefined,
-      seatsTotal: formData.get("seatsTotal") || 1,
+      seatsTotal:
+        formData.get("seatsTotal") || (onlineOnly ? ONLINE_OPEN_SEATS : 1),
       imageUrl: formData.get("imageUrl") ?? undefined,
       videoUrl: formData.get("videoUrl") ?? undefined,
       liveUrl: formData.get("liveUrl") ?? undefined,
       albumUrl: formData.get("albumUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
-    if (formData.get("acceptPayoutTerms") !== "on") {
-      return {
-        error: "Please confirm you understand how ticket money and fees work.",
-      };
-    }
 
     // An organiser types the time of the town the event is in; the zone box
     // says which, and defaults to the one their state suggests.
@@ -330,6 +331,17 @@ export async function createEventAction(
 
     const tiers = readTiers(formData);
     if ("error" in tiers) return { error: tiers.error };
+
+    // Free online-only events take no money, so there are no payout terms.
+    const takesMoney =
+      !onlineOnly ||
+      parsed.data.price > 0 ||
+      tiers.some((tier) => tier.price > 0);
+    if (takesMoney && formData.get("acceptPayoutTerms") !== "on") {
+      return {
+        error: "Please confirm you understand how ticket money and fees work.",
+      };
+    }
 
     if (parsed.data.mode !== "OFFLINE" && !parsed.data.onlineUrl) {
       return { error: "Add the join link for an online or hybrid event." };
@@ -465,8 +477,8 @@ export async function createEventAction(
         partnerStatus: wantsPartnership ? "REQUESTED" : "NONE",
         partnerAgreedAt: wantsPartnership ? new Date() : null,
         city: titleCase(parsed.data.city),
-        state: parsed.data.state,
-        country: parsed.data.country,
+        state: parsed.data.state ?? null,
+        country: parsed.data.country ?? null,
         eventType: parsed.data.eventType,
         genres,
         languages,

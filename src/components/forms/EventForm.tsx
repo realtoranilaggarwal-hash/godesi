@@ -18,6 +18,7 @@ import {
   EVENT_FREQUENCIES,
   EVENT_MODES,
   EVENT_TYPES,
+  ONLINE_OPEN_SEATS,
 } from "@/lib/eventOptions";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { FormError } from "@/components/forms/FormError";
@@ -84,6 +85,10 @@ export function EventForm({
   const [sessions, setSessions] = useState([0]);
   const [tiers, setTiers] = useState([0, 1, 2]);
   const [extraCategories, setExtraCategories] = useState<string[]>([]);
+  const [price, setPrice] = useState(0);
+  // Online-only events skip everything about a physical room and seats.
+  const online = mode === "ONLINE";
+  const presetClub = clubs.find((club) => club.slug === defaultClub);
 
   const toggleCategory = (slug: string) =>
     setExtraCategories((current) =>
@@ -170,27 +175,32 @@ export function EventForm({
             ))}
           </select>
         </Field>
-        <EventVenueFields venues={venues} online={mode === "ONLINE"} />
-        <Field label="City">
-          <input name="city" required className={inputClass} />
-        </Field>
-        <Field label="State / province">
-          <input name="state" required className={inputClass} />
-        </Field>
-        <Field label="Country">
-          <input
-            name="country"
-            required
-            defaultValue={defaultCountry}
-            className={inputClass}
-          />
-        </Field>
+        <EventVenueFields venues={venues} online={online} />
+        {online ? null : (
+          <>
+            <Field label="City">
+              <input name="city" required className={inputClass} />
+            </Field>
+            <Field label="State / province">
+              <input name="state" required className={inputClass} />
+            </Field>
+            <Field label="Country">
+              <input
+                name="country"
+                required
+                defaultValue={defaultCountry}
+                className={inputClass}
+              />
+            </Field>
+          </>
+        )}
         {mode === "OFFLINE" ? null : (
-          <Field label="Join link" hint="Zoom, Meet or stream URL">
+          <Field label="🔗 Join link" hint="Zoom, Meet or stream URL">
             <input
               name="onlineUrl"
+              required={online}
               placeholder="https://zoom.us/j/…"
-              className={inputClass}
+              className={`${inputClass} font-bold`}
             />
           </Field>
         )}
@@ -253,21 +263,26 @@ export function EventForm({
             name="price"
             type="number"
             min={0}
-            defaultValue={0}
+            value={price}
+            onChange={(event) => setPrice(Number(event.target.value) || 0)}
             className={inputClass}
           />
         </Field>
         <CurrencySelect defaultValue={defaultCurrency} />
-        <Field label="Capacity" hint="Total seats or spots available">
-          <input
-            name="seatsTotal"
-            type="number"
-            min={1}
-            defaultValue={50}
-            required
-            className={inputClass}
-          />
-        </Field>
+        {online ? (
+          <input type="hidden" name="seatsTotal" value={ONLINE_OPEN_SEATS} />
+        ) : (
+          <Field label="Capacity" hint="Total seats or spots available">
+            <input
+              name="seatsTotal"
+              type="number"
+              min={1}
+              defaultValue={50}
+              required
+              className={inputClass}
+            />
+          </Field>
+        )}
         <AskReferredByField />
         <ImageField
           name="imageUrl"
@@ -286,44 +301,46 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
-        <LiveStreamFields />
+        {online ? null : <LiveStreamFields />}
         <PhotoAlbumField hint="Photos from your last event? Paste a public Google Photos album link and Godesi shows a 3×3 gallery that opens the album." />
       </div>
 
-      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-bold text-slate-900">
-          What does your event offer?
-        </legend>
-        <p className="text-xs text-slate-500">
-          Tick everything that applies — these become the filters people search
-          with, like parking, food and family friendly.
-        </p>
-        {EVENT_FEATURE_GROUPS.map((group) => (
-          <div key={group.key}>
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-              {group.label}
-            </p>
-            <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
-              {group.options.map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-center gap-2 text-sm text-slate-700"
-                >
-                  <input
-                    type="checkbox"
-                    name="features"
-                    value={option.value}
-                    className="h-4 w-4"
-                  />
-                  <span>
-                    {option.icon} {option.value}
-                  </span>
-                </label>
-              ))}
+      {online ? null : (
+        <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-bold text-slate-900">
+            What does your event offer?
+          </legend>
+          <p className="text-xs text-slate-500">
+            Tick everything that applies — these become the filters people
+            search with, like parking, food and family friendly.
+          </p>
+          {EVENT_FEATURE_GROUPS.map((group) => (
+            <div key={group.key}>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                {group.label}
+              </p>
+              <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
+                {group.options.map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex items-center gap-2 text-sm text-slate-700"
+                  >
+                    <input
+                      type="checkbox"
+                      name="features"
+                      value={option.value}
+                      className="h-4 w-4"
+                    />
+                    <span>
+                      {option.icon} {option.value}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </fieldset>
+          ))}
+        </fieldset>
+      )}
 
       <EventPartnerPanel />
 
@@ -445,108 +462,120 @@ export function EventForm({
         </button>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-bold text-slate-900">
-          Ticket types (optional)
-        </legend>
-        <p className="text-xs text-slate-500">
-          Add as many seat types as you sell — early bird, couple pass, VIP, an
-          online seat for a hybrid event — each with its own price and quantity.
-          Price 0 makes it a free RSVP seat, so you can take registrations and
-          paid seats on the same event. Leave the block blank to sell every seat
-          at the single price above. Connect your own Stripe account under{" "}
-          <a
-            href="/dashboard/payouts"
-            className="font-semibold text-indigo-600"
-          >
-            Ticket payouts
-          </a>{" "}
-          and buyers pay you directly.
-        </p>
-        {tiers.map((row) => (
-          <div key={row} className="grid gap-2 sm:grid-cols-3">
-            <input
-              name="tierName"
-              defaultValue=""
-              placeholder={`Name — e.g. ${TIER_PRESETS[row % MAX_TIERS]}`}
-              className={inputClass}
-              aria-label={`Ticket type ${row + 1} name`}
-            />
-            <input
-              name="tierPrice"
-              type="number"
-              min={0}
-              placeholder="Price"
-              className={inputClass}
-              aria-label={`Ticket type ${row + 1} price`}
-            />
-            <input
-              name="tierSeats"
-              type="number"
-              min={1}
-              placeholder="Seats"
-              className={inputClass}
-              aria-label={`Ticket type ${row + 1} seats`}
-            />
-          </div>
-        ))}
-        {tiers.length < MAX_TIERS ? (
-          <button
-            type="button"
-            onClick={() => setTiers((rows) => [...rows, rows.length])}
-            className="text-sm font-semibold text-indigo-600 hover:underline"
-          >
-            + Add another ticket type
-          </button>
-        ) : null}
-      </fieldset>
+      {online ? null : (
+        <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+          <legend className="px-1 text-sm font-bold text-slate-900">
+            Ticket types (optional)
+          </legend>
+          <p className="text-xs text-slate-500">
+            Add as many seat types as you sell — early bird, couple pass, VIP,
+            an online seat for a hybrid event — each with its own price and
+            quantity. Price 0 makes it a free RSVP seat, so you can take
+            registrations and paid seats on the same event. Leave the block
+            blank to sell every seat at the single price above. Connect your own
+            Stripe account under{" "}
+            <a
+              href="/dashboard/payouts"
+              className="font-semibold text-indigo-600"
+            >
+              Ticket payouts
+            </a>{" "}
+            and buyers pay you directly.
+          </p>
+          {tiers.map((row) => (
+            <div key={row} className="grid gap-2 sm:grid-cols-3">
+              <input
+                name="tierName"
+                defaultValue=""
+                placeholder={`Name — e.g. ${TIER_PRESETS[row % MAX_TIERS]}`}
+                className={inputClass}
+                aria-label={`Ticket type ${row + 1} name`}
+              />
+              <input
+                name="tierPrice"
+                type="number"
+                min={0}
+                placeholder="Price"
+                className={inputClass}
+                aria-label={`Ticket type ${row + 1} price`}
+              />
+              <input
+                name="tierSeats"
+                type="number"
+                min={1}
+                placeholder="Seats"
+                className={inputClass}
+                aria-label={`Ticket type ${row + 1} seats`}
+              />
+            </div>
+          ))}
+          {tiers.length < MAX_TIERS ? (
+            <button
+              type="button"
+              onClick={() => setTiers((rows) => [...rows, rows.length])}
+              className="text-sm font-semibold text-indigo-600 hover:underline"
+            >
+              + Add another ticket type
+            </button>
+          ) : null}
+        </fieldset>
+      )}
 
-      <ClubEventFields
-        clubs={clubs}
-        defaultClub={defaultClub}
-        currency={defaultCurrency}
-      />
+      {online ? (
+        presetClub ? (
+          <input type="hidden" name="clubId" value={presetClub.id} />
+        ) : null
+      ) : (
+        <ClubEventFields
+          clubs={clubs}
+          defaultClub={defaultClub}
+          currency={defaultCurrency}
+        />
+      )}
 
-      <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
-        <legend className="px-1 text-sm font-bold text-slate-900">
-          How ticket money reaches you
-        </legend>
-        <ul className="list-disc space-y-1 pl-5 text-slate-700">
-          <li>Buyers pay by card on Godesi and get a QR ticket instantly.</li>
-          <li>
-            Godesi collects the money and sends it to you after the event, minus
-            the card processor&apos;s charge (Stripe/PayPal, roughly 3%).
-          </li>
-          <li>
-            {feeWaived ? (
-              <span className="font-semibold text-emerald-700">
-                Your paid plan means Godesi takes no service fee — you keep the
-                rest.
-              </span>
-            ) : (
-              <>
-                Godesi keeps a {feePercent}% service fee on the free plan.{" "}
-                <a href="/pricing" className="font-semibold text-indigo-600">
-                  Paid members pay no Godesi fee.
-                </a>
-              </>
-            )}
-          </li>
-          <li>
-            Refunds and attendee disputes are yours to decide — Godesi is not a
-            party to the sale and does not hold your money in escrow.
-          </li>
-        </ul>
-        <label className="flex items-start gap-2 font-semibold text-slate-800">
-          <input
-            type="checkbox"
-            name="acceptPayoutTerms"
-            required
-            className="mt-0.5"
-          />
-          <span>I understand how ticket money and fees are handled.</span>
-        </label>
-      </fieldset>
+      {online && price === 0 ? null : (
+        <fieldset className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
+          <legend className="px-1 text-sm font-bold text-slate-900">
+            How ticket money reaches you
+          </legend>
+          <ul className="list-disc space-y-1 pl-5 text-slate-700">
+            <li>Buyers pay by card on Godesi and get a QR ticket instantly.</li>
+            <li>
+              Godesi collects the money and sends it to you after the event,
+              minus the card processor&apos;s charge (Stripe/PayPal, roughly
+              3%).
+            </li>
+            <li>
+              {feeWaived ? (
+                <span className="font-semibold text-emerald-700">
+                  Your paid plan means Godesi takes no service fee — you keep
+                  the rest.
+                </span>
+              ) : (
+                <>
+                  Godesi keeps a {feePercent}% service fee on the free plan.{" "}
+                  <a href="/pricing" className="font-semibold text-indigo-600">
+                    Paid members pay no Godesi fee.
+                  </a>
+                </>
+              )}
+            </li>
+            <li>
+              Refunds and attendee disputes are yours to decide — Godesi is not
+              a party to the sale and does not hold your money in escrow.
+            </li>
+          </ul>
+          <label className="flex items-start gap-2 font-semibold text-slate-800">
+            <input
+              type="checkbox"
+              name="acceptPayoutTerms"
+              required
+              className="mt-0.5"
+            />
+            <span>I understand how ticket money and fees are handled.</span>
+          </label>
+        </fieldset>
+      )}
 
       <fieldset className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
         <legend className="px-1 text-sm font-bold text-amber-900">
