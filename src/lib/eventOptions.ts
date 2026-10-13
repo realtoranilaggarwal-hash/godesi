@@ -36,8 +36,8 @@ export const EVENT_TYPES = [
   "Other",
 ] as const;
 
-/** Seats given to an online-only event, which has no room to fill. */
-export const ONLINE_OPEN_SEATS = 10_000;
+/** Spots on an online-only event, about the size of a typical Zoom meeting. */
+export const ONLINE_OPEN_SEATS = 100;
 
 export const EVENT_MODES = [
   { value: "OFFLINE", label: "Offline — in person", icon: "📍" },

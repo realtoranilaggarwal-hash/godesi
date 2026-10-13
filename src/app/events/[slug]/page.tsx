@@ -32,7 +32,6 @@ import {
   eventFeatureIcon,
   eventModeIcon,
   eventModeLabel,
-  ONLINE_OPEN_SEATS,
 } from "@/lib/eventOptions";
 import {
   eventCategoryIcon,
@@ -646,9 +645,10 @@ export default async function EventPage({
                   "Free entry"
                 )}
               </p>
-              {imported ? null : event.mode === "ONLINE" &&
-                event.seatsTotal >= ONLINE_OPEN_SEATS ? (
-                <p>💻 Online — open to everyone</p>
+              {imported ? null : event.mode === "ONLINE" ? (
+                <p>
+                  💻 Online — {left} of {event.seatsTotal} spots available
+                </p>
               ) : (
                 <p>
                   🪑 {left} of {event.seatsTotal} seats available

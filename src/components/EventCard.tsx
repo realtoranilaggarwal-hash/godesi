@@ -206,6 +206,8 @@ export function EventCard({
               ) : imported ? (
                 // The organiser sets their own entry terms; we do not know them.
                 "See organiser"
+              ) : event.tiers?.some((tier) => tier.price > 0) ? (
+                "Free & paid tickets"
               ) : (
                 "Free entry"
               )}
