@@ -14,7 +14,6 @@ import type { StripGroup } from "@/components/CategoryStrip";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
-import { PostFab } from "@/components/PostFab";
 import { PromoLinks } from "@/components/PromoLinks";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
@@ -218,7 +217,6 @@ export async function SiteHeader() {
 
   return (
     <>
-      <PostFab signedIn={Boolean(user)} />
       <HeaderShell
         items={categoryItems}
         groups={STRIP_GROUPS}
