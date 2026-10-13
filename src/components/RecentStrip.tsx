@@ -64,7 +64,7 @@ export async function RecentStrip() {
           <div className="order-last flex min-w-full flex-1 gap-2 sm:order-none sm:min-w-0">
             <Link
               href="/signup"
-              className="flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-red-600 px-3 py-3 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-white shadow-lg shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:px-5 sm:text-lg"
+              className="flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-red-600 px-3 py-2 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-white shadow-md shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:px-5 sm:text-base"
             >
               <span className="sm:hidden">📝 Register free →</span>
               <span className="hidden sm:inline">
@@ -73,7 +73,7 @@ export async function RecentStrip() {
             </Link>
             <Link
               href="/login"
-              className="flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl border-2 border-red-600 bg-white px-3 py-3 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-red-600 shadow-lg shadow-red-600/20 transition hover:bg-red-50 sm:px-4 sm:text-lg"
+              className="flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl border-2 border-red-600 bg-white px-3 py-2 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-red-600 shadow-md shadow-red-600/20 transition hover:bg-red-50 sm:px-4 sm:text-base"
             >
               🔑 Log in
             </Link>
