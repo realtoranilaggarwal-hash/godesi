@@ -1282,8 +1282,14 @@ model EventSpeaker {
   userId String?
   user   User?   @relation("SpeakerProfile", fields: [userId], references: [id], onDelete: SetNull)
 
+  /// GoDesi Elite profile of a well-known speaker the organiser picked from
+  /// the famous-people suggestions.
+  eliteEntryId String?
+  eliteEntry   EliteEntry? @relation(fields: [eliteEntryId], references: [id], onDelete: SetNull)
+
   @@index([eventId])
   @@index([userId])
+  @@index([eliteEntryId])
 }
 
 /// A permanent group — a karaoke circle, cricket team, book club — that puts
@@ -2336,8 +2342,10 @@ model EliteEntry {
   /// End of the paid Elite term; null for staff-compiled and unpaid profiles.
   eliteUntil    DateTime?
 
-  orders EliteOrder[]
-  claims EliteClaim[]
+  orders    EliteOrder[]
+  claims    EliteClaim[]
+  /// Events this person was booked to speak at.
+  speakerAt EventSpeaker[]
 
   /// Where a staff-compiled profile's facts came from, e.g. the person's own
   /// site or their Wikipedia page. Unique, so a source is only compiled once.
