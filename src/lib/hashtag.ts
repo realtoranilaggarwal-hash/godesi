@@ -28,6 +28,14 @@ export function cleanTag(input: string) {
     .slice(0, 60);
 }
 
+/** Short "how old is this" label for a hit. */
+export function hitAgo(iso: string) {
+  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (minutes < 60) return `${Math.max(minutes, 1)}m ago`;
+  if (minutes < 1440) return `${Math.round(minutes / 60)}h ago`;
+  return `${Math.round(minutes / 1440)}d ago`;
+}
+
 /** Mastodon tags are single words, so "india day" becomes "indiaday". */
 function tagWord(input: string) {
   return cleanTag(input)

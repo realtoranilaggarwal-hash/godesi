@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cleanTag, hashtagWall } from "@/lib/hashtag";
+import { cleanTag, hashtagWall, hitAgo } from "@/lib/hashtag";
 import { siteUrl } from "@/lib/format";
 import { SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, inputClass } from "@/components/ui";
@@ -35,13 +35,6 @@ export function generateMetadata({
   };
 }
 
-function ago(iso: string) {
-  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-  if (minutes < 60) return `${Math.max(minutes, 1)}m ago`;
-  if (minutes < 1440) return `${Math.round(minutes / 60)}h ago`;
-  return `${Math.round(minutes / 1440)}d ago`;
-}
-
 export default async function TrendingPage({
   searchParams,
 }: {
@@ -73,6 +66,13 @@ export default async function TrendingPage({
               Show me
             </button>
           </form>
+          <p className="mt-3 text-xs font-semibold text-white/90">
+            Or see every topic at once on the{" "}
+            <Link href="/wall" className="underline">
+              news wall
+            </Link>
+            .
+          </p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
             {SUGGESTIONS.map((suggestion) => (
               <Link
@@ -106,7 +106,7 @@ export default async function TrendingPage({
                 <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
                   {hit.source === "news" ? "📰 News" : "💬 Post"}
                   <span className="font-semibold normal-case text-slate-400">
-                    {ago(hit.publishedAt)}
+                    {hitAgo(hit.publishedAt)}
                   </span>
                 </span>
                 <span className="line-clamp-4 text-sm font-semibold text-slate-900">

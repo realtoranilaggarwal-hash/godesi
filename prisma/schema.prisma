@@ -1809,3 +1809,19 @@ model ChatMessage {
   @@index([userId, createdAt])
 }
 
+
+/// One box on the topic wall: a keyword polled against Google News and
+/// Mastodon. Editable in the admin desk because the topics that matter shift
+/// with the news, not with releases.
+model WallTopic {
+  id        String   @id @default(cuid())
+  label     String
+  /// What is sent to the search sources — usually the label without the emoji.
+  query     String
+  emoji     String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([active, sortOrder])
+}
