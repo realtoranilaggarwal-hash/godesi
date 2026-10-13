@@ -246,6 +246,17 @@ model User {
   journalistSince DateTime?
   journalistBeat  String?
 
+  /// Offer topics the member asked to hear about (lib/offerInterests ids); each pick is a sales lead.
+  offerInterests   String[]  @default([])
+  /// Optional number the member gave for those offers; never shown publicly.
+  offerPhone       String?
+  /// Last time the member saved their offer picks (their consent timestamp).
+  offerInterestsAt DateTime?
+  /// Separate, opt-in permission to be contacted about the picked topics; picks alone only personalise offers.
+  offerContactOk   Boolean   @default(false)
+  /// When the member last gave that contact permission.
+  offerContactAt   DateTime?
+
   /// Phone kept for journalist verification; never shown publicly.
   phone           String?
   phoneVerifiedAt DateTime?
@@ -707,6 +718,8 @@ model Category {
 model Business {
   id                 String        @id @default(cuid())
   slug               String        @unique
+  /// Earlier page addresses; /b/<old> redirects to the current one so printed QR codes keep working.
+  previousSlugs      String[]      @default([])
   name               String
   /// A shop/company card versus an individual professional (realtor, attorney…).
   profileType        ProfileType   @default(BUSINESS)
@@ -1125,6 +1138,12 @@ model Event {
   imageUrl          String?
   /// Promo video pasted from YouTube or Vimeo.
   videoUrl          String?
+  /// YouTube Live (or Vimeo) stream played at the top of the event page.
+  liveUrl           String?
+  /// Only ticket holders, the organiser and the desk see the stream.
+  liveTicketOnly    Boolean            @default(false)
+  /// Booking form asks "Referred by" (networking events track who brought whom).
+  askReferredBy     Boolean            @default(false)
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl          String?
   price             Int                @default(0)
@@ -1269,8 +1288,14 @@ model EventSpeaker {
   userId String?
   user   User?   @relation("SpeakerProfile", fields: [userId], references: [id], onDelete: SetNull)
 
+  /// GoDesi Elite profile of a well-known speaker the organiser picked from
+  /// the famous-people suggestions.
+  eliteEntryId String?
+  eliteEntry   EliteEntry? @relation(fields: [eliteEntryId], references: [id], onDelete: SetNull)
+
   @@index([eventId])
   @@index([userId])
+  @@index([eliteEntryId])
 }
 
 /// A permanent group — a karaoke circle, cricket team, book club — that puts
@@ -1394,6 +1419,8 @@ model Ticket {
   buyerName   String
   buyerEmail  String
   buyerPhone  String?
+  /// Who referred the buyer, typed at booking when the event asks for it.
+  referredBy  String?
   quantity    Int          @default(1)
   amountMinor Int          @default(0)
   currency    String       @default("INR")
@@ -1825,6 +1852,12 @@ model MeetupProfile {
   state            String?
   /// Comma separated intents: business, coffee, chit-chat, community.
   intents          String
+  /// Club-category slugs (lib/clubs CLUB_CATEGORIES) the member enjoys; they drive suggestions.
+  interests        String[]      @default([])
+  /// Preferred age band for suggestions (lib/meetups AGE_RANGES); null = any age.
+  ageRange         String?
+  /// How far to look for people, in miles; null = anywhere / online.
+  meetRadiusMiles  Int?
   bio              String
   whatsappNumber   String?
   status           ListingStatus @default(PENDING)
@@ -2317,8 +2350,10 @@ model EliteEntry {
   /// End of the paid Elite term; null for staff-compiled and unpaid profiles.
   eliteUntil    DateTime?
 
-  orders EliteOrder[]
-  claims EliteClaim[]
+  orders    EliteOrder[]
+  claims    EliteClaim[]
+  /// Events this person was booked to speak at.
+  speakerAt EventSpeaker[]
 
   /// Where a staff-compiled profile's facts came from, e.g. the person's own
   /// site or their Wikipedia page. Unique, so a source is only compiled once.

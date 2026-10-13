@@ -47,6 +47,7 @@ import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
 import { matchProfilesByExactName, nameKey } from "@/lib/peopleLookup";
 import { EventRsvpPanel } from "@/components/EventRsvpPanel";
+import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 
 type SpeakerRow =
@@ -57,9 +58,11 @@ type SpeakerRow =
     : never;
 
 type SpeakerProfile = {
-  username: string;
+  href: string;
   avatarUrl: string | null;
   headline: string | null;
+  /** A GoDesi Elite profile rather than a member page. */
+  elite: boolean;
 };
 
 type Organizer = {
@@ -74,19 +77,21 @@ type Organizer = {
 /**
  * A speaker links to the profile the organiser picked. A typed-in name links
  * to the organiser when it is their own name or handle, otherwise to a public
- * member with that name (case, spaces and punctuation ignored).
+ * member with that name (case, spaces and punctuation ignored). A well-known
+ * speaker the organiser picked links to their GoDesi Elite profile.
  */
 async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
   const unlinked = speakers
-    .filter((speaker) => !speaker.user)
+    .filter((speaker) => !speaker.user && !speaker.eliteEntry)
     .map((speaker) => speaker.name);
   const byName = await matchProfilesByExactName(unlinked);
   const host =
     organizer?.username && organizer.emailVerifiedAt && !organizer.bannedAt
       ? {
-          username: organizer.username,
+          href: `/${organizer.username}`,
           avatarUrl: organizer.avatarUrl,
           headline: organizer.headline,
+          elite: false,
         }
       : null;
   const hostKeys = new Set(
@@ -97,11 +102,20 @@ async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
   return speakers.map((speaker) => {
     let profile: SpeakerProfile | null = null;
     const linked = speaker.user;
+    const elite = speaker.eliteEntry;
     if (linked?.username && linked.emailVerifiedAt && !linked.bannedAt) {
       profile = {
-        username: linked.username,
+        href: `/${linked.username}`,
         avatarUrl: linked.avatarUrl,
         headline: linked.headline,
+        elite: false,
+      };
+    } else if (elite?.status === "PUBLISHED") {
+      profile = {
+        href: `/desi-elite/${elite.slug}`,
+        avatarUrl: elite.photoUrl,
+        headline: elite.shortBio,
+        elite: true,
       };
     } else if (host && hostKeys.has(nameKey(speaker.name))) {
       profile = host;
@@ -109,9 +123,10 @@ async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
       const match = byName.get(nameKey(speaker.name));
       if (match?.username) {
         profile = {
-          username: match.username,
+          href: `/${match.username}`,
           avatarUrl: match.avatarUrl,
           headline: match.headline,
+          elite: false,
         };
       }
     }
@@ -136,6 +151,14 @@ async function loadEvent(slug: string) {
               headline: true,
               emailVerifiedAt: true,
               bannedAt: true,
+            },
+          },
+          eliteEntry: {
+            select: {
+              slug: true,
+              status: true,
+              photoUrl: true,
+              shortBio: true,
             },
           },
         },
@@ -268,20 +291,22 @@ export default async function EventPage({
     : null;
   // An event waiting on moderation is only visible to its organiser and the desk.
   if (event.status !== "APPROVED" && !isOwnerOrDesk) notFound();
-  // The join link is what an online seat buys, so only a ticket holder, the
-  // organiser and the events desk may see it.
-  const joinUrl =
+  // The join link (and a ticket-only stream) is what an online seat buys, so
+  // only a ticket holder, the organiser and the events desk may see it.
+  const hasSeat =
     isOwnerOrDesk ||
-    (user &&
+    (Boolean(user) &&
+      Boolean(event.onlineUrl || (event.liveUrl && event.liveTicketOnly)) &&
       (await db.ticket.count({
         where: {
           eventId: event.id,
-          userId: user.id,
+          userId: user!.id,
           status: "CONFIRMED",
         },
-      })) > 0)
-      ? event.onlineUrl
-      : null;
+      })) > 0);
+  const joinUrl = hasSeat ? event.onlineUrl : null;
+  const liveUrl =
+    event.liveUrl && (!event.liveTicketOnly || hasSeat) ? event.liveUrl : null;
   // Imported from someone else's public calendar: we list it and send people to
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
@@ -679,6 +704,22 @@ export default async function EventPage({
                 ))}
               </div>
             ) : null}
+            {liveUrl ? (
+              <div className="space-y-2">
+                <h2 className="font-bold text-rose-600">🔴 Watch live</h2>
+                <VideoEmbed url={liveUrl} title={`${event.title} — live`} />
+              </div>
+            ) : event.liveUrl ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                <p className="font-bold">
+                  🔴 This event streams live on GoDesi
+                </p>
+                <p>
+                  Book a ticket below and the live video plays right here on
+                  this page.
+                </p>
+              </div>
+            ) : null}
             <p className="whitespace-pre-line text-slate-700">
               {event.description}
             </p>
@@ -823,7 +864,7 @@ export default async function EventPage({
                         {session.speaker ? (
                           profile ? (
                             <Link
-                              href={`/${profile.username}`}
+                              href={profile.href}
                               className="font-semibold text-indigo-700 hover:underline"
                             >
                               {session.speaker}
@@ -847,9 +888,7 @@ export default async function EventPage({
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {speakers.map((speaker) => {
                 const photo = speaker.photoUrl || speaker.profile?.avatarUrl;
-                const href = speaker.profile
-                  ? `/${speaker.profile.username}`
-                  : null;
+                const href = speaker.profile?.href ?? null;
                 const avatar = photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -886,9 +925,15 @@ export default async function EventPage({
                       {href ? (
                         <Link
                           href={href}
-                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700"
+                          className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            speaker.profile?.elite
+                              ? "bg-amber-100 text-amber-900"
+                              : "bg-indigo-50 text-indigo-700"
+                          }`}
                         >
-                          ✓ GoDesi profile →
+                          {speaker.profile?.elite
+                            ? "⭐ GoDesi Elite →"
+                            : "✓ GoDesi profile →"}
                         </Link>
                       ) : null}
                     </div>
@@ -1073,11 +1118,20 @@ export default async function EventPage({
                   defaultName={user.name}
                   defaultEmail={user.email}
                   defaultCoupon={searchParams.coupon?.slice(0, 24)}
+                  askReferredBy={event.askReferredBy}
                 />
               </div>
             )}
           </Card>
         )}
+
+        {isOwnerOrDesk && !imported ? (
+          <EventAttendees
+            eventId={event.id}
+            slug={event.slug}
+            askReferredBy={event.askReferredBy}
+          />
+        ) : null}
 
         {thin ? null : <InContentBanner size="leaderboard" />}
 

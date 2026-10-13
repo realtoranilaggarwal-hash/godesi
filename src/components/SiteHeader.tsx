@@ -10,10 +10,12 @@ import { unreadCount } from "@/lib/notifications";
 import { gradientFor, softFor } from "@/lib/categories";
 import { Badge } from "@/components/ui";
 import { HeaderShell } from "@/components/HeaderShell";
+import type { StripGroup } from "@/components/CategoryStrip";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
 import { PostFab } from "@/components/PostFab";
+import { PromoLinks } from "@/components/PromoLinks";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
@@ -43,34 +45,65 @@ const NAV = [
 ];
 
 /** Chips beside the search box, for pages the main nav has no room for. */
-const QUICK_LINKS = [
-  { href: "/events", label: "Events", icon: "🎟️" },
-  { href: "/gigs", label: "Gigs", icon: "🛠️" },
-  { href: "/trending", label: "Trending", icon: "🔥" },
-  { href: "/desi-elite", label: "Elite", icon: "🏆" },
-  { href: "/leaderboard", label: "Top 100", icon: "🏅" },
-  { href: "/connect", label: "Connect", icon: "🤝" },
-  { href: "/clubs", label: "Clubs", icon: "🎤" },
-  { href: "/blog", label: "Blog", icon: "✍️" },
-  { href: "/complaints", label: "Complaints", icon: "⚠️" },
-  { href: "/faq", label: "FAQ", icon: "❓" },
+/** Header strip sections; directory categories not listed here land in "More". */
+const STRIP_GROUPS: StripGroup[] = [
+  { id: "explore", label: "Explore", icon: "✨" },
+  { id: "home", label: "Home & family", icon: "🏠" },
+  { id: "business", label: "Business & money", icon: "💼" },
+  { id: "lifestyle", label: "Events, food & travel", icon: "🎉" },
+  { id: "community", label: "Shopping & community", icon: "🛍️" },
+  { id: "more", label: "More", icon: "➕" },
 ];
 
-/**
- * Short labels for the one-line bar. Anything longer overflowed into the
- * search box on 1536–1800px screens, which made the row jump around.
- */
-const BAR_NAV = [
-  { href: "/search", label: "Businesses" },
-  { href: "/events", label: "Events" },
-  { href: "/clubs", label: "Clubs" },
-  { href: "/gigs", label: "Gigs" },
-  { href: "/blog", label: "Blog" },
-  { href: "/leads", label: "Leads" },
-  { href: "/real-estate", label: "Property" },
-  { href: "/rooms", label: "Rooms" },
-  { href: "/marketplace", label: "Buy & Sell" },
-  { href: "/news", label: "News" },
+const STRIP_SECTION_OF: Record<string, string> = {
+  "home-services": "home",
+  "care-services": "home",
+  "real-estate": "home",
+  "rooms-roommates": "home",
+  "health-medical": "home",
+  "auto-services": "home",
+  construction: "home",
+  "business-services": "business",
+  professionals: "business",
+  "financial-services": "business",
+  jobs: "business",
+  "trade-sourcing": "business",
+  "it-training": "business",
+  education: "business",
+  "events-wedding": "lifestyle",
+  "food-catering": "lifestyle",
+  "beauty-lifestyle": "lifestyle",
+  travel: "lifestyle",
+  "shops-retail": "community",
+  "buy-sell": "community",
+  "religious-services": "community",
+  "community-orgs": "community",
+};
+
+/** Promoted pages beside the search box; any that don't fit stay under "More". */
+const PROMO_LINKS = [
+  { href: "/search", label: "Directory", icon: "🏪" },
+  { href: "/leads", label: "Leads", icon: "📋" },
+  { href: "/events", label: "Events", icon: "🎟️" },
+  { href: "/clubs", label: "Clubs", icon: "🎤" },
+  { href: "/deals", label: "Deals", icon: "🏷️" },
+  { href: "/shop", label: "Shop", icon: "🛍️" },
+  { href: "/gigs", label: "Gigs", icon: "🛠️" },
+  { href: "/resources", label: "Resources", icon: "🔗" },
+  { href: "/advertise", label: "Advertise", icon: "📢" },
+];
+
+/** Everyday pages at the end of the category line. */
+const STRIP_LINKS = [
+  { href: "/trending", label: "Trending hashtags", icon: "🔥" },
+  { href: "/festivals", label: "Festival calendar", icon: "🪔" },
+  { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
+  { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
+  { href: "/blog", label: "Blog", icon: "✍️" },
+  { href: "/guide", label: "City guides", icon: "🗺️" },
+  { href: "/people", label: "Community", icon: "👥" },
+  { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/buzz", label: "#godesi social wall", icon: "🌍" },
 ];
 
 /** Admins land on the full panel, moderators on the content desk. */
@@ -109,6 +142,7 @@ export async function SiteHeader() {
     },
     {
       href: "/events",
+      group: "explore",
       label: "Events",
       icon: "🎟️",
       className:
@@ -116,6 +150,7 @@ export async function SiteHeader() {
     },
     {
       href: "/clubs",
+      group: "explore",
       label: "Clubs",
       icon: "🎤",
       className:
@@ -123,6 +158,7 @@ export async function SiteHeader() {
     },
     {
       href: "/gigs",
+      group: "explore",
       label: "Gigs",
       icon: "🛠️",
       className:
@@ -130,6 +166,7 @@ export async function SiteHeader() {
     },
     {
       href: "/blog",
+      group: "explore",
       label: "Blog",
       icon: "✍️",
       className:
@@ -137,12 +174,14 @@ export async function SiteHeader() {
     },
     {
       href: "/desi-elite",
+      group: "explore",
       label: "Desi Elite",
       icon: "🏆",
       className:
         "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 hover:opacity-90",
     },
     ...categories.map((category) => ({
+      group: STRIP_SECTION_OF[category.slug] ?? "more",
       href: `/categories/${category.slug}`,
       label: category.name,
       icon: category.icon,
@@ -165,6 +204,12 @@ export async function SiteHeader() {
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
     { href: "/resources", label: "Resources", icon: "🔗" },
+    { href: "/deals", label: "Deals", icon: "🏷️" },
+    { href: "/shop", label: "Shop", icon: "🛍️" },
+    { href: "/festivals", label: "Festival calendar", icon: "🪔" },
+    { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
+    { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
+    { href: "/guide", label: "City guides", icon: "🗺️" },
     { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
@@ -176,6 +221,8 @@ export async function SiteHeader() {
       <PostFab signedIn={Boolean(user)} />
       <HeaderShell
         items={categoryItems}
+        groups={STRIP_GROUPS}
+        links={STRIP_LINKS}
         topRight={
           <>
             {firstName ? (
@@ -224,39 +271,7 @@ export async function SiteHeader() {
 
             <LiveMediaChips className="hidden lg:flex" />
 
-            {/* Fills the gap beside the search box; chips that don't fit wrap out of
-              the fixed-height row instead of pushing the account buttons off-screen. */}
-            <div className="hidden h-8 min-w-0 flex-1 flex-wrap content-start items-center gap-x-1 gap-y-4 overflow-hidden text-xs font-semibold 2xl:flex">
-              {QUICK_LINKS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-full bg-slate-100 px-2.5 py-1.5 text-slate-700 hover:bg-slate-200"
-                >
-                  <span aria-hidden className="mr-1">
-                    {item.icon}
-                  </span>
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Signed-in members get dashboard chips here instead of the nav row. */}
-            <nav
-              className={`hidden min-w-0 flex-1 items-center justify-end gap-0.5 overflow-hidden text-[13px] font-semibold text-slate-700 ${
-                user ? "" : "2xl:flex"
-              }`}
-            >
-              {BAR_NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="whitespace-nowrap rounded-lg px-2 py-1.5 hover:bg-slate-100 hover:text-slate-900"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <PromoLinks links={PROMO_LINKS} more={STRIP_LINKS} />
 
             <div className="ml-auto flex shrink-0 items-center gap-1 text-sm font-medium sm:gap-2">
               <Link

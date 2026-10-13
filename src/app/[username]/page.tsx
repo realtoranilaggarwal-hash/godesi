@@ -25,6 +25,7 @@ import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
+import { RailRectangles } from "@/components/Banners";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
 import { thumbImage } from "@/lib/proxyImage";
@@ -601,6 +602,7 @@ export default async function PublicProfilePage({
               </a>
             </Card>
           ) : null}
+          <RailRectangles />
         </aside>
       </div>
     </div>

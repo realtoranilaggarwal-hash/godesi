@@ -16,6 +16,8 @@ import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 import type { VenueOption } from "@/components/forms/EventVenueFields";
+import { LiveStreamFields } from "@/components/forms/LiveStreamFields";
+import { AskReferredByField } from "@/components/forms/AskReferredByField";
 
 export type AdminEventValues = {
   id: string;
@@ -47,6 +49,9 @@ export type AdminEventValues = {
   seatsBooked: number;
   imageUrl: string;
   videoUrl: string;
+  liveUrl: string;
+  liveTicketOnly: boolean;
+  askReferredBy: boolean;
   albumUrl: string;
   featured: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
@@ -344,6 +349,11 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
+        <LiveStreamFields
+          liveUrl={event.liveUrl}
+          ticketOnly={event.liveTicketOnly}
+        />
+        <AskReferredByField defaultChecked={event.askReferredBy} />
         <div className="sm:col-span-2">
           <PhotoAlbumField
             defaultValue={event.albumUrl}

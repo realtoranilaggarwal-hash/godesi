@@ -28,6 +28,8 @@ import {
 import { EventPartnerPanel } from "@/components/forms/EventPartnerPanel";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
+import { LiveStreamFields } from "@/components/forms/LiveStreamFields";
+import { AskReferredByField } from "@/components/forms/AskReferredByField";
 import { SpeakerRow } from "@/components/forms/SpeakerRow";
 import { CouponTips } from "@/components/CouponTips";
 import {
@@ -170,6 +172,20 @@ export function EventForm({
           </select>
         </Field>
         <EventVenueFields venues={venues} online={mode === "ONLINE"} />
+        <Field label="City">
+          <input name="city" required className={inputClass} />
+        </Field>
+        <Field label="State / province">
+          <input name="state" required className={inputClass} />
+        </Field>
+        <Field label="Country">
+          <input
+            name="country"
+            required
+            defaultValue={defaultCountry}
+            className={inputClass}
+          />
+        </Field>
         {mode === "OFFLINE" ? null : (
           <Field label="Join link" hint="Zoom, Meet or stream URL">
             <input
@@ -201,20 +217,6 @@ export function EventForm({
             .
           </p>
         </Field>
-        <Field label="City">
-          <input name="city" required className={inputClass} />
-        </Field>
-        <Field label="State / province">
-          <input name="state" required className={inputClass} />
-        </Field>
-        <Field label="Country">
-          <input
-            name="country"
-            required
-            defaultValue={defaultCountry}
-            className={inputClass}
-          />
-        </Field>
         <Field label="How often?">
           <select
             name="frequency"
@@ -239,6 +241,7 @@ export function EventForm({
           required={false}
           defaultCategory={defaultCategory}
           defaultSubcategory={defaultSubcategory}
+          businessHelpers={false}
         />
         <Field
           label="Tags"
@@ -266,6 +269,7 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
+        <AskReferredByField />
         <ImageField
           name="imageUrl"
           label="Event banner"
@@ -283,6 +287,7 @@ export function EventForm({
             className={inputClass}
           />
         </Field>
+        <LiveStreamFields />
         <PhotoAlbumField hint="Photos from your last event? Paste a public Google Photos album link and Godesi shows a 3×3 gallery that opens the album." />
       </div>
 
@@ -366,7 +371,8 @@ export function EventForm({
         </legend>
         <p className="text-xs text-slate-500">
           Type a name and we check whether they already have a godesi.com
-          profile, so the event links to the real person.
+          profile, so the event links to the real person. Well-known people are
+          suggested too — pick one and they get a GoDesi Elite profile.
         </p>
         {speakers.map((row) => (
           <SpeakerRow

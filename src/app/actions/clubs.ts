@@ -14,7 +14,7 @@ import {
 } from "@/lib/clubs";
 import { siteUrl } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
-import { isPlaylistLink } from "@/lib/youtubePlaylist";
+import { isPlaylistLink, resolvePlaylistField } from "@/lib/youtubePlaylist";
 import { isClubOrganizer } from "@/lib/clubAccess";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
 
@@ -42,7 +42,7 @@ const clubSchema = z.object({
   imageUrl: optionalUrl,
   playlistUrl: optionalUrl.refine(
     (value) => !value || isPlaylistLink(value),
-    "Paste a YouTube playlist link (it contains list=…)",
+    "Paste a YouTube playlist or channel link (youtube.com/playlist?list=… or youtube.com/@yourchannel)",
   ),
   websiteUrl: optionalUrl,
   whatsappUrl: optionalUrl,
@@ -113,6 +113,7 @@ export async function createClubAction(
   let slug: string;
   try {
     const user = await requireUser();
+    await resolvePlaylistField(formData);
     const read = readClub(formData);
     if ("error" in read) return { error: read.error };
     slug = await uniqueClubSlug(read.data.name, read.data.city);
@@ -148,6 +149,7 @@ export async function updateClubAction(
     if (!club || !(await isClubOrganizer(clubId, user))) {
       return { error: "Only the club's organisers can edit it." };
     }
+    await resolvePlaylistField(formData);
     const read = readClub(formData);
     if ("error" in read) return { error: read.error };
     await db.club.update({ where: { id: clubId }, data: read.data });

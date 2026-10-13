@@ -30,6 +30,9 @@ export default async function AdminBannersPage({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Banner desk</h1>
         <div className="flex flex-wrap gap-3 text-sm font-semibold text-indigo-600">
+          <Link href="/advertise/design" className="hover:underline">
+            Sizes &amp; design prompts →
+          </Link>
           <Link href="/advertise#placements" className="hover:underline">
             See every spot →
           </Link>

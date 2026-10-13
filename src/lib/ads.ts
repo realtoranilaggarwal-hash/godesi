@@ -266,8 +266,8 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   },
 };
 
+/** Placements on sale. HERO has no spot on any page, so it isn't offered. */
 export const AD_SLOT_ORDER: BannerSlot[] = [
-  "HERO",
   "BILLBOARD",
   "HEADER",
   "LEADERBOARD",
@@ -341,8 +341,9 @@ export function formatCpm(placement: AdPlacement, currency: Currency) {
 }
 
 export function placementOrThrow(value: string): AdPlacement {
-  const placement = AD_PLACEMENTS[value as BannerSlot];
-  if (!placement) throw new Error("Unknown ad placement");
+  const slot = AD_SLOT_ORDER.find((option) => option === value);
+  if (!slot) throw new Error("Unknown ad placement");
+  const placement = AD_PLACEMENTS[slot];
   return placement;
 }
 

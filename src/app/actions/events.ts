@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { publicProfileIds } from "@/lib/peopleLookup";
+import { eliteForFamousSpeaker } from "@/lib/famousPeople";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
@@ -89,6 +90,7 @@ type SpeakerInput = {
   bio: string | null;
   photoUrl: string | null;
   userId: string | null;
+  eliteEntryId: string | null;
 };
 type SessionInput = {
   title: string;
@@ -115,6 +117,9 @@ async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
   const users = formData
     .getAll("speakerUser")
     .map((value) => String(value).trim());
+  const famous = formData
+    .getAll("speakerWiki")
+    .map((value) => String(value).trim());
   const linkable = await publicProfileIds(users);
 
   const speakers: SpeakerInput[] = [];
@@ -124,11 +129,16 @@ async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
     index += 1
   ) {
     if (!names[index]) continue;
+    const userId = linkable.has(users[index]) ? users[index] : null;
     speakers.push({
       name: names[index].slice(0, 120),
       bio: bios[index]?.slice(0, 600) || null,
       photoUrl: photos[index] || null,
-      userId: linkable.has(users[index]) ? users[index] : null,
+      userId,
+      eliteEntryId:
+        !userId && famous[index]
+          ? await eliteForFamousSpeaker(famous[index]).catch(() => null)
+          : null,
     });
   }
   return speakers;
@@ -207,6 +217,10 @@ const eventSchema = z.object({
     (value) => !value || isSupportedVideoUrl(value),
     "Paste a YouTube or Vimeo video link",
   ),
+  liveUrl: optionalUrl.refine(
+    (value) => !value || isSupportedVideoUrl(value),
+    "Paste the YouTube Live link (youtube.com/live/… or youtu.be/…)",
+  ),
   albumUrl: optionalUrl.refine(
     (value) => !value || isAlbumLink(value),
     "Paste a Google Photos album link (photos.app.goo.gl/…)",
@@ -284,6 +298,7 @@ export async function createEventAction(
       seatsTotal: formData.get("seatsTotal") || 1,
       imageUrl: formData.get("imageUrl") ?? undefined,
       videoUrl: formData.get("videoUrl") ?? undefined,
+      liveUrl: formData.get("liveUrl") ?? undefined,
       albumUrl: formData.get("albumUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -475,6 +490,11 @@ export async function createEventAction(
         tags,
         imageUrl: parsed.data.imageUrl ?? null,
         videoUrl: parsed.data.videoUrl ?? null,
+        liveUrl: parsed.data.liveUrl ?? null,
+        liveTicketOnly:
+          Boolean(parsed.data.liveUrl) &&
+          formData.get("liveTicketOnly") === "on",
+        askReferredBy: formData.get("askReferredBy") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         price,
         currency: parsed.data.currency ?? requestCurrency(),
@@ -540,6 +560,11 @@ const bookingSchema = z.object({
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
   buyerPhone: z.string().trim().optional(),
+  referredBy: z
+    .string()
+    .trim()
+    .max(120, "Keep \"Referred by\" under 120 characters")
+    .optional(),
 });
 
 /**
@@ -556,12 +581,13 @@ export async function bookTicketAction(
     const user = await requireUser();
     const parsed = bookingSchema.safeParse({
       eventId: formData.get("eventId"),
-      tierId: formData.get("tierId"),
+      tierId: formData.get("tierId") ?? undefined,
       couponCode: formData.get("couponCode") ?? undefined,
       quantity: formData.get("quantity") || 1,
       buyerName: formData.get("buyerName") || user.name,
       buyerEmail: formData.get("buyerEmail") || user.email,
       buyerPhone: formData.get("buyerPhone") ?? undefined,
+      referredBy: formData.get("referredBy") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -636,6 +662,9 @@ export async function bookTicketAction(
         buyerName: parsed.data.buyerName,
         buyerEmail: parsed.data.buyerEmail,
         buyerPhone: parsed.data.buyerPhone || null,
+        referredBy: event.askReferredBy
+          ? parsed.data.referredBy || null
+          : null,
         quantity: parsed.data.quantity,
         amountMinor,
         currency: event.currency,

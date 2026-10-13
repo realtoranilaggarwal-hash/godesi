@@ -11,7 +11,11 @@ import {
   festivalSlug,
   formatFestivalDate,
 } from "@/lib/festivals";
+import { optionalRead } from "@/lib/resilient";
+import { liveStoreOffers } from "@/lib/storeOffers";
 import { EventCard } from "@/components/EventCard";
+import { FestivalShop } from "@/components/FestivalShop";
+import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { Card, LinkButton } from "@/components/ui";
@@ -74,6 +78,8 @@ export default async function FestivalPage({
       category: { select: { name: true, icon: true, color: true } },
     },
   });
+
+  const storeOffers = await optionalRead(() => liveStoreOffers(3), []);
 
   const faq = [
     ...(next
@@ -166,6 +172,22 @@ export default async function FestivalPage({
             </Link>
           ) : null}
         </Card>
+
+        <FestivalShop
+          festivals={[festival]}
+          title={`Shop for ${festival.name}`}
+        />
+
+        {storeOffers.length ? (
+          <Card>
+            <h2 className="mb-3 font-bold">Online store coupons &amp; sales</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {storeOffers.map((offer) => (
+                <StoreOfferCard key={offer.id} offer={offer} />
+              ))}
+            </div>
+          </Card>
+        ) : null}
 
         <Card>
           <h2 className="mb-2 font-bold">{festival.name} dates</h2>

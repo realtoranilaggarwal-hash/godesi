@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
@@ -132,7 +132,19 @@ export default async function BusinessProfilePage({
     getBusiness(params.slug),
     getCurrentUser(),
   ]);
-  if (!business) notFound();
+  if (!business) {
+    const moved = await db.business.findFirst({
+      where: { previousSlugs: { has: params.slug } },
+      select: { slug: true },
+    });
+    if (!moved) notFound();
+    const query = new URLSearchParams(
+      Object.entries(searchParams).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    ).toString();
+    permanentRedirect(`/b/${moved.slug}${query ? `?${query}` : ""}`);
+  }
 
   const extraCategories = business.extraCategorySlugs.length
     ? await db.category.findMany({
