@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { handleFromUrl, platformFromUrl } from "@/lib/social";
+import { fetchTweet, tweetUrl } from "@/lib/tweetEmbed";
 
 async function requireSocialStaff() {
   const user = await requireUser();
@@ -19,14 +20,37 @@ export async function addSocialPostAction(
 ): Promise<ActionState> {
   try {
     await requireSocialStaff();
-    const url = String(formData.get("url") ?? "").trim();
-    const author = String(formData.get("author") ?? "").trim().slice(0, 80);
-    const text = String(formData.get("text") ?? "").trim().slice(0, 400);
-    const handle = String(formData.get("handle") ?? "").trim().slice(0, 40);
+    const pasted = String(formData.get("url") ?? "").trim();
+    let author = String(formData.get("author") ?? "")
+      .trim()
+      .slice(0, 80);
+    let text = String(formData.get("text") ?? "")
+      .trim()
+      .slice(0, 400);
+    let handle = String(formData.get("handle") ?? "")
+      .trim()
+      .slice(0, 40);
     const imageUrl = String(formData.get("imageUrl") ?? "").trim();
-    const postedAt = String(formData.get("postedAt") ?? "").trim();
+    let postedAt = String(formData.get("postedAt") ?? "").trim();
 
-    if (!/^https?:\/\//i.test(url)) return { error: "Paste the link to the post." };
+    if (!/^https?:\/\//i.test(pasted))
+      return { error: "Paste the link to the post." };
+
+    // A tweet link is enough on its own: X fills in who posted it and what.
+    const url = tweetUrl(pasted) ?? pasted;
+    if (tweetUrl(pasted) && (!author || !text)) {
+      const tweet = await fetchTweet(url);
+      if (!tweet) {
+        return {
+          error:
+            "X didn't return that tweet — it may be deleted or private. Check the link, or type who posted it and a line from it.",
+        };
+      }
+      author ||= tweet.author.slice(0, 80);
+      text ||= tweet.text.slice(0, 400);
+      handle ||= tweet.handle;
+      if (!postedAt && tweet.postedAt) postedAt = tweet.postedAt.toISOString();
+    }
     if (author.length < 2) return { error: "Who posted it?" };
     if (text.length < 10) return { error: "Add a line or two from the post." };
 
