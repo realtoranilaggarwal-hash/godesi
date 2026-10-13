@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { publicProfileIds } from "@/lib/peopleLookup";
+import { eliteForFamousSpeaker } from "@/lib/famousPeople";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
@@ -88,6 +89,7 @@ type SpeakerInput = {
   bio: string | null;
   photoUrl: string | null;
   userId: string | null;
+  eliteEntryId: string | null;
 };
 type SessionInput = {
   title: string;
@@ -114,6 +116,9 @@ async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
   const users = formData
     .getAll("speakerUser")
     .map((value) => String(value).trim());
+  const famous = formData
+    .getAll("speakerWiki")
+    .map((value) => String(value).trim());
   const linkable = await publicProfileIds(users);
 
   const speakers: SpeakerInput[] = [];
@@ -123,11 +128,16 @@ async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
     index += 1
   ) {
     if (!names[index]) continue;
+    const userId = linkable.has(users[index]) ? users[index] : null;
     speakers.push({
       name: names[index].slice(0, 120),
       bio: bios[index]?.slice(0, 600) || null,
       photoUrl: photos[index] || null,
-      userId: linkable.has(users[index]) ? users[index] : null,
+      userId,
+      eliteEntryId:
+        !userId && famous[index]
+          ? await eliteForFamousSpeaker(famous[index]).catch(() => null)
+          : null,
     });
   }
   return speakers;
