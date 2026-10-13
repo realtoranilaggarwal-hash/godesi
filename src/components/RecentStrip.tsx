@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { recentActivity, type RecentBanner } from "@/lib/recentActivity";
 import { thumbImage } from "@/lib/proxyImage";
+import { getCurrentUser } from "@/lib/auth";
+import { optionalRead } from "@/lib/resilient";
 
 function Banner({ banner }: { banner: RecentBanner }) {
   return (
@@ -44,7 +46,10 @@ function Banner({ banner }: { banner: RecentBanner }) {
  * themselves here; hovering pauses it.
  */
 export async function RecentStrip() {
-  const banners = await recentActivity(30);
+  const [banners, user] = await Promise.all([
+    recentActivity(30),
+    optionalRead(() => getCurrentUser(), null),
+  ]);
   const showTicker = banners.length >= 4;
 
   return (
@@ -55,20 +60,25 @@ export async function RecentStrip() {
             🟢 Just now on GoDesi
           </h2>
         ) : null}
-        <div className="order-last flex min-w-full flex-1 gap-2 sm:order-none sm:min-w-0">
-          <Link
-            href="/signup"
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-center text-base font-black uppercase tracking-wide text-white shadow-lg shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:text-lg"
-          >
-            📝 Register now — it&apos;s free →
-          </Link>
-          <Link
-            href="/login"
-            className="flex shrink-0 items-center justify-center gap-1 rounded-xl border-2 border-red-600 bg-white px-4 py-3 text-center text-base font-black uppercase tracking-wide text-red-600 shadow-lg shadow-red-600/20 transition hover:bg-red-50 sm:text-lg"
-          >
-            🔑 Log in
-          </Link>
-        </div>
+        {user ? null : (
+          <div className="order-last flex min-w-full flex-1 gap-2 sm:order-none sm:min-w-0">
+            <Link
+              href="/signup"
+              className="flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-red-600 px-3 py-3 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-white shadow-lg shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:px-5 sm:text-lg"
+            >
+              <span className="sm:hidden">📝 Register free →</span>
+              <span className="hidden sm:inline">
+                📝 Register now — it&apos;s free →
+              </span>
+            </Link>
+            <Link
+              href="/login"
+              className="flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl border-2 border-red-600 bg-white px-3 py-3 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-red-600 shadow-lg shadow-red-600/20 transition hover:bg-red-50 sm:px-4 sm:text-lg"
+            >
+              🔑 Log in
+            </Link>
+          </div>
+        )}
         {showTicker ? (
           <Link
             href="/people"
