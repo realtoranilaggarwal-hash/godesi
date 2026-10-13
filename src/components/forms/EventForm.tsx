@@ -370,7 +370,8 @@ export function EventForm({
         </legend>
         <p className="text-xs text-slate-500">
           Type a name and we check whether they already have a godesi.com
-          profile, so the event links to the real person.
+          profile, so the event links to the real person. Well-known people are
+          suggested too — pick one and they get a GoDesi Elite profile.
         </p>
         {speakers.map((row) => (
           <SpeakerRow
