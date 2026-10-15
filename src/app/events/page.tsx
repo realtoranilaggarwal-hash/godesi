@@ -299,6 +299,7 @@ export default async function EventsPage({
     take: 48,
     include: {
       category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
       organizer: { select: { plan: true } },
     },
   });

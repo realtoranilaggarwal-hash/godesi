@@ -22,6 +22,9 @@ import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
+import { DealOfTheDay } from "@/components/DealOfTheDay";
+import { PanchangCard } from "@/components/PanchangCard";
+import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +69,7 @@ export default async function HomePage() {
         take: 24,
         include: {
           category: { select: { name: true, icon: true, color: true } },
+          tiers: { select: { price: true } },
           organizer: { select: { plan: true } },
         },
       }),
@@ -83,6 +87,7 @@ export default async function HomePage() {
       newestMembers(12, { withPage: true }),
     ]);
   const pickerGroups = await categoryPickerGroups();
+  const today = visitorPanchang();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
   const events = [...upcoming]
@@ -113,26 +118,6 @@ export default async function HomePage() {
               <div className="mt-4">
                 <HandleClaim />
               </div>
-            </div>
-            <div>
-              <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-lg font-black">
-                    Looking for someone? Pick a service 👇
-                  </h2>
-                  <Link
-                    href="/categories"
-                    className="text-sm font-semibold text-indigo-600 hover:underline"
-                  >
-                    All {categories.length} →
-                  </Link>
-                </div>
-                <CategoryPicker
-                  groups={pickerGroups}
-                  quickCount={10}
-                  label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-                />
-              </div>
               <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
                 {HERO_PROOF.map((line) => (
                   <li key={line}>✓ {line}</li>
@@ -160,6 +145,26 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
+            <div>
+              <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-lg font-black">
+                    Looking for someone? Pick a service 👇
+                  </h2>
+                  <Link
+                    href="/categories"
+                    className="text-sm font-semibold text-indigo-600 hover:underline"
+                  >
+                    All {categories.length} →
+                  </Link>
+                </div>
+                <CategoryPicker
+                  groups={pickerGroups}
+                  quickCount={10}
+                  label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
+                />
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -183,6 +188,12 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      {today.panchang ? (
+        <PanchangCard panchang={today.panchang} place={today.label} compact />
+      ) : null}
+
+      <DealOfTheDay />
 
       <DealsStrip />
 

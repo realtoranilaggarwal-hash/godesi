@@ -76,6 +76,7 @@ export default async function FestivalPage({
     take: 24,
     include: {
       category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
     },
   });
 

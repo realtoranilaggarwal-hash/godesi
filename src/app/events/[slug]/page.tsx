@@ -21,7 +21,6 @@ import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
-import { ShareRail } from "@/components/ShareRail";
 import { EventShareKit } from "@/components/EventShareKit";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
@@ -35,7 +34,6 @@ import {
   eventFeatureIcon,
   eventModeIcon,
   eventModeLabel,
-  ONLINE_OPEN_SEATS,
 } from "@/lib/eventOptions";
 import {
   eventCategoryIcon,
@@ -346,6 +344,7 @@ export default async function EventPage({
     take: 8,
     include: {
       category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
     },
   });
 
@@ -539,6 +538,14 @@ export default async function EventPage({
                 {event.title}
               </h1>
               <StaffEditLink href={`/admin/events/${event.id}`} />
+              {user?.id === event.organizerId && !imported ? (
+                <Link
+                  href={`/events/${event.slug}/edit`}
+                  className="rounded-lg border border-indigo-300 bg-white px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+                >
+                  ✏️ Edit event
+                </Link>
+              ) : null}
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>
@@ -666,9 +673,10 @@ export default async function EventPage({
                   "Free entry"
                 )}
               </p>
-              {imported ? null : event.mode === "ONLINE" &&
-                event.seatsTotal >= ONLINE_OPEN_SEATS ? (
-                <p>💻 Online — open to everyone</p>
+              {imported ? null : event.mode === "ONLINE" ? (
+                <p>
+                  💻 Online — {left} of {event.seatsTotal} spots available
+                </p>
               ) : (
                 <p>
                   🪑 {left} of {event.seatsTotal} seats available
@@ -746,7 +754,6 @@ export default async function EventPage({
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
-              <ShareRail title={event.title} />
               <ShareButtons
                 url={`${siteUrl()}/events/${event.slug}`}
                 title={event.title}

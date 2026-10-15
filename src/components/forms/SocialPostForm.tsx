@@ -20,7 +20,7 @@ export function SocialPostForm() {
 
       <Field
         label="Link to the post"
-        hint={`Any public #${SOCIAL_TAG} post on X, Instagram, Facebook, LinkedIn, YouTube or Threads`}
+        hint={`Any public #${SOCIAL_TAG} post on X, Instagram, Facebook, LinkedIn, YouTube or Threads. For a tweet, the link is all you need — leave the rest blank.`}
       >
         <input
           name="url"
@@ -30,15 +30,21 @@ export function SocialPostForm() {
         />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Who posted it">
-          <input name="author" required className={inputClass} />
+        <Field label="Who posted it" hint="Blank for a tweet — X fills it in">
+          <input name="author" className={inputClass} />
         </Field>
-        <Field label="Handle" hint="Optional — we read it from the link if blank">
+        <Field
+          label="Handle"
+          hint="Optional — we read it from the link if blank"
+        >
           <input name="handle" placeholder="@handle" className={inputClass} />
         </Field>
       </div>
-      <Field label="Quote from the post" hint="A line or two — keep it short">
-        <textarea name="text" required rows={3} maxLength={400} className={inputClass} />
+      <Field
+        label="Quote from the post"
+        hint="A line or two — blank for a tweet, X fills it in"
+      >
+        <textarea name="text" rows={3} maxLength={400} className={inputClass} />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Image URL" hint="Optional">

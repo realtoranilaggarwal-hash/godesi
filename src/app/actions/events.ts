@@ -493,7 +493,7 @@ export async function createEventAction(
           String(formData.get("bonusNote") ?? "")
             .trim()
             .slice(0, 200) || null,
-        payoutTermsAt: new Date(),
+        payoutTermsAt: takesMoney ? new Date() : null,
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"
@@ -866,7 +866,13 @@ async function ownedEvent(id: string) {
   const user = await requireUser();
   const event = await db.event.findUnique({
     where: { id },
-    select: { id: true, slug: true, organizerId: true, currency: true },
+    select: {
+      id: true,
+      slug: true,
+      organizerId: true,
+      currency: true,
+      payoutTermsAt: true,
+    },
   });
   if (!event || (event.organizerId !== user.id && !can(user, "events"))) {
     throw new Error("FORBIDDEN");
@@ -908,6 +914,15 @@ export async function saveTicketTypeAction(
     seatsTotal: formData.get("seatsTotal"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  // Free online events skip the payout terms at posting, so the first paid
+  // ticket type collects them.
+  const firstPaid = parsed.data.price > 0 && !event.payoutTermsAt;
+  if (firstPaid && formData.get("acceptPayoutTerms") !== "on") {
+    return {
+      error:
+        "To sell paid tickets, tick that you understand how ticket money and fees are handled.",
+    };
+  }
 
   const tierId = String(formData.get("tierId") ?? "");
   const clash = await db.ticketTier.findFirst({
@@ -943,6 +958,12 @@ export async function saveTicketTypeAction(
     });
   }
 
+  if (firstPaid) {
+    await db.event.update({
+      where: { id: event.id },
+      data: { payoutTermsAt: new Date() },
+    });
+  }
   await syncEventFromTiers(event.id);
   revalidatePath(`/events/${event.slug}`);
   revalidatePath("/dashboard/tickets");

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { siteUrl } from "@/lib/format";
 import { dealDetails, liveDeals } from "@/lib/deals";
 import { liveStoreOffers } from "@/lib/storeOffers";
+import { DealOfTheDay } from "@/components/DealOfTheDay";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { EmptyState, LinkButton } from "@/components/ui";
@@ -61,6 +62,8 @@ export default async function DealsPage({
           Post a deal for your business
         </LinkButton>
       </div>
+
+      {active ? null : <DealOfTheDay />}
 
       {categories.length > 1 ? (
         <div className="flex flex-wrap gap-1.5 text-xs">

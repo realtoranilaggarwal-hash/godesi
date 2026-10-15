@@ -32,6 +32,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
         { href: "/blog", label: "Blog" },
         { href: "/guide", label: "City guides" },
+        { href: "/astrology", label: "🔮 Astrology guides" },
         { href: "/find", label: "Search everything" },
       ],
     },

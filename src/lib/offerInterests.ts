@@ -169,6 +169,7 @@ export const BENEFITS_POINTS = [
   "Browse available offers at any time.",
   "Decide separately whether you want a provider to contact you.",
   "No purchase required to join.",
+  "Each topic you pick gives you one bonus spin of the GoDesi wheel.",
 ];
 export const BENEFITS_FINE_PRINT =
   "Your choices help personalize your GoDesi experience. Offers vary by provider and availability. Review each offer's terms before redeeming.";
