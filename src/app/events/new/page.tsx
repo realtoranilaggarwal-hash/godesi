@@ -6,6 +6,7 @@ import { getCategoryTree } from "@/lib/directory";
 import { EventForm } from "@/components/forms/EventForm";
 import { Card } from "@/components/ui";
 import { FeaturedEventRail } from "@/components/FeaturedEvents";
+import { EventPostGuide } from "@/components/EventPostGuide";
 import { requestCountry, requestCurrency } from "@/lib/currency";
 import { venueSuggestions } from "@/lib/venues";
 import { organiserPaysFee, platformFeePercent } from "@/lib/connect";
@@ -48,6 +49,9 @@ export default async function NewEventPage({
             </Link>
           </p>
         </div>
+        <div className="lg:hidden">
+          <EventPostGuide collapsible />
+        </div>
         <Card>
           <EventForm
             categories={categories}
@@ -64,7 +68,10 @@ export default async function NewEventPage({
         </Card>
       </div>
 
-      <FeaturedEventRail />
+      <div className="hidden w-[300px] shrink-0 space-y-6 lg:block">
+        <EventPostGuide />
+        <FeaturedEventRail />
+      </div>
     </div>
   );
 }
