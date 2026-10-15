@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BannerImpression } from "@/components/BannerImpression";
+import { HOUSE_BANNERS } from "@/components/houseBanners";
 
 export type SmallBanner = { id: string; title: string; imageUrl: string };
 
@@ -136,11 +137,15 @@ export function SmallBannerRail({
     { length: Math.min(show, banners.length) },
     (_, index) => banners[(offset + index) % banners.length],
   );
+  const house = Array.from(
+    { length: show - visible.length },
+    (_, index) => HOUSE_BANNERS[(offset + index) % HOUSE_BANNERS.length],
+  );
 
   const stack = (
     <div className="space-y-3" aria-label="Sponsored">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Sponsored
+        {visible.length ? "Sponsored" : "Explore GoDesi"}
       </p>
       {visible.map((banner) => (
         <a
@@ -162,6 +167,37 @@ export function SmallBannerRail({
             className="h-auto w-full object-cover"
           />
         </a>
+      ))}
+      {house.map((banner) => (
+        <Link
+          key={banner.slug}
+          href={banner.href}
+          data-house-banner={banner.slug}
+          className={`relative flex aspect-[3/1] w-full items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-br px-4 text-white shadow-sm transition hover:shadow-md ${banner.colors}`}
+        >
+          <span
+            aria-hidden
+            className="absolute -right-5 -top-6 h-20 w-20 rounded-full bg-white/15"
+          />
+          <span
+            aria-hidden
+            className="absolute -bottom-8 right-10 h-16 w-16 rounded-full bg-white/10"
+          />
+          <span aria-hidden className="text-4xl drop-shadow">
+            {banner.emoji}
+          </span>
+          <span className="relative min-w-0">
+            <span className="block text-lg font-black leading-tight">
+              {banner.title}
+            </span>
+            <span className="block text-xs leading-snug text-white/90">
+              {banner.line}
+            </span>
+            <span className="mt-1 inline-block rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-bold">
+              GoDesi.com →
+            </span>
+          </span>
+        </Link>
       ))}
       <Link
         href="/advertise?slot=MOBILE#book"
