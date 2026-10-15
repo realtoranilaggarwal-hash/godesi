@@ -57,13 +57,7 @@ function usedWidth(element: Element, depth = 0): number {
 }
 
 /** Sections where the page needs the full width and ads would be in the way. */
-const HIDDEN_ON = [
-  "/admin",
-  "/dashboard",
-  "/login",
-  "/signup",
-  "/forgot-password",
-];
+const HIDDEN_ON = ["/admin", "/login", "/signup", "/forgot-password"];
 
 /**
  * A stack of 320x100 banners. The root layout stays mounted between pages, so
@@ -73,14 +67,20 @@ export function SmallBannerRail({
   banners,
   show,
   embedded = false,
+  start = 0,
+  side = "right",
 }: {
   banners: SmallBanner[];
   show: number;
   /** Inside a page's own right column rather than the site-wide rail. */
   embedded?: boolean;
+  /** Index of the first banner, so two stacks on one page differ. */
+  start?: number;
+  /** Which side of the page the site-wide rail sits on. */
+  side?: "left" | "right";
 }) {
   const pathname = usePathname();
-  const [offset, setOffset] = useState(0);
+  const [offset, setOffset] = useState(start);
   const firstPath = useRef(pathname);
   const railRef = useRef<HTMLElement>(null);
   const [roomFor, setRoomFor] = useState<string | null>(null);
@@ -89,7 +89,8 @@ export function SmallBannerRail({
   useEffect(() => {
     if (embedded) return;
     const rail = railRef.current;
-    const page = rail?.previousElementSibling;
+    const page =
+      side === "left" ? rail?.nextElementSibling : rail?.previousElementSibling;
     const main = rail?.parentElement;
     if (!page || !main) return;
 
@@ -103,7 +104,7 @@ export function SmallBannerRail({
         pathname !== "/" &&
           window.innerWidth >= 1280 &&
           !page.querySelector("[data-right-rail]") &&
-          usedWidth(page) + RAIL_SPACE < inner - 2
+          usedWidth(page) + RAIL_SPACE * (side === "left" ? 2 : 1) < inner - 2
           ? pathname
           : null,
       );
@@ -119,7 +120,7 @@ export function SmallBannerRail({
       observer.disconnect();
       window.removeEventListener("resize", check);
     };
-  }, [pathname, embedded]);
+  }, [pathname, embedded, side]);
 
   useEffect(() => {
     if (pathname === firstPath.current) return;
@@ -176,7 +177,7 @@ export function SmallBannerRail({
   return (
     <aside
       ref={railRef}
-      data-site-rail
+      data-site-rail={side}
       className={hasRoom ? "w-[320px] shrink-0" : "hidden"}
     >
       {hasRoom && stack}

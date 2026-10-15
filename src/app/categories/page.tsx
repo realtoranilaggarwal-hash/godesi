@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getCategoryCounts, getCategoryTree } from "@/lib/directory";
 import { CategoryTiles } from "@/components/CategoryTiles";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners, SmallBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -27,6 +27,9 @@ export default async function CategoriesPage() {
       <InlineBanner />
       </div>
       <SidebarBanners />
+      <aside data-right-rail className="hidden w-[320px] shrink-0 xl:block">
+        <SmallBanners show={10} embedded />
+      </aside>
     </div>
   );
 }

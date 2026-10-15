@@ -189,6 +189,7 @@ export default async function RootLayout({
         <SiteHeader />
         <SiteTicker />
         <main className="mx-auto flex w-full max-w-screen-2xl gap-6 px-4 py-6">
+          <SmallBanners side="left" start={10} />
           <div className="min-w-0 flex-1">{children}</div>
           <SmallBanners />
         </main>
