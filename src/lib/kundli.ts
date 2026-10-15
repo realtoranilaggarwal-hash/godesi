@@ -62,6 +62,12 @@ function tropicalLongitude(body: Body, time: AstroTime) {
   return SphereFromVector(vector).lon;
 }
 
+/** Sidereal (Lahiri) longitude of the Sun at a moment, in degrees. */
+export function siderealSun(utc: Date) {
+  const time = MakeTime(utc);
+  return norm(tropicalLongitude(Body.Sun, time) - lahiriAyanamsa(time));
+}
+
 /** Sidereal (Lahiri) longitude of the Moon at a moment, in degrees. */
 export function siderealMoon(utc: Date) {
   const time = MakeTime(utc);
