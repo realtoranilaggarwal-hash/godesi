@@ -267,11 +267,13 @@ export async function SmallBanners({
   embedded = false,
   start = 0,
   side,
+  strip = false,
 }: {
   show?: number;
   embedded?: boolean;
   start?: number;
   side?: "left" | "right";
+  strip?: boolean;
 } = {}) {
   if (isPhoneRequest()) return null;
   const banners = await activeBanners("MOBILE", 20);
@@ -281,6 +283,7 @@ export async function SmallBanners({
       embedded={embedded}
       start={start}
       side={side}
+      strip={strip}
       banners={banners.map((banner) => ({
         id: banner.id,
         title: banner.title,
