@@ -208,3 +208,19 @@ export function localToUtc(date: string, time: string, timeZone: string): Date {
   utc = wall - zoneOffsetMs(utc, timeZone);
   return new Date(utc);
 }
+
+/** The wall-clock date and time ("YYYY-MM-DD HH:mm") an instant shows in a zone. */
+export function wallClock(utc: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(utc);
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
+}

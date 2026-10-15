@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import tzlookup from "tz-lookup";
 import { z } from "zod";
-import { computeKundli, localToUtc } from "@/lib/kundli";
+import {
+  computeKundli,
+  localToUtc,
+  siderealMoon,
+  wallClock,
+} from "@/lib/kundli";
 
 const schema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -15,10 +20,16 @@ const schema = z.object({
 /** Cheap per-IP throttle so one visitor cannot flood OpenStreetMap's free geocoder. */
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_PER_WINDOW = 40;
+const MAX_TRACKED_IPS = 5000;
 const hits = new Map<string, number[]>();
 
 function rateLimited(ip: string) {
   const now = Date.now();
+  if (hits.size > MAX_TRACKED_IPS) {
+    hits.forEach((times, key) => {
+      if (now - times[times.length - 1] >= WINDOW_MS) hits.delete(key);
+    });
+  }
   const recent = (hits.get(ip) ?? []).filter((at) => now - at < WINDOW_MS);
   recent.push(now);
   hits.set(ip, recent);
@@ -52,7 +63,9 @@ async function geocode(place: string) {
 /** Birth details are used for this one calculation and never stored. */
 export async function POST(request: Request) {
   const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    request.headers.get("x-real-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown";
   if (rateLimited(ip)) {
     return NextResponse.json(
       { error: "Too many charts in an hour. Please try again later." },
@@ -96,13 +109,26 @@ export async function POST(request: Request) {
   }
 
   const timeZone = tzlookup(location.latitude, location.longitude);
-  const utc = localToUtc(date, time ?? "12:00", timeZone);
-  if (Number.isNaN(utc.getTime())) {
+  const wall = time ?? "12:00";
+  const utc = localToUtc(date, wall, timeZone);
+  if (
+    Number.isNaN(utc.getTime()) ||
+    wallClock(utc, timeZone) !== `${date} ${wall}`
+  ) {
     return NextResponse.json(
-      { error: "That date or time isn't valid." },
+      {
+        error: time
+          ? "That date or time didn't exist there (for example 30 February, or an hour skipped when clocks moved forward)."
+          : "That date isn't valid.",
+      },
       { status: 400 },
     );
   }
+  const moonSignAt = (clock: string) =>
+    Math.floor(siderealMoon(localToUtc(date, clock, timeZone)) / 30);
+  const moonSignRange = time
+    ? null
+    : { from: moonSignAt("00:00"), to: moonSignAt("23:59") };
 
   return NextResponse.json({
     place: location.label,
@@ -114,6 +140,10 @@ export async function POST(request: Request) {
       location.longitude,
       Boolean(time),
     ),
+    moonSignChanged:
+      moonSignRange && moonSignRange.from !== moonSignRange.to
+        ? moonSignRange
+        : null,
     attribution: "Place lookup © OpenStreetMap contributors",
   });
 }

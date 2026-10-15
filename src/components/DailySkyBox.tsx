@@ -15,7 +15,7 @@ export function DailySkyBox({ sky }: { sky: DailySky }) {
           <li>
             ➡️ Moves into {RASHIS[sky.nextSign.sign].name} (
             {RASHIS[sky.nextSign.sign].english}) at {sky.nextSign.at} ET; the
-            readings change then
+            readings change soon after
           </li>
         ) : null}
         <li>

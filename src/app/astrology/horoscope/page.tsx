@@ -12,7 +12,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { DailySkyBox } from "@/components/DailySkyBox";
 import { HoroscopeCard } from "@/components/HoroscopeCard";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: "Today's Vedic horoscope for all 12 rashis — free daily rashifal",

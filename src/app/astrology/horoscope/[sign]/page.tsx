@@ -18,7 +18,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { DailySkyBox } from "@/components/DailySkyBox";
 import { HoroscopeCard } from "@/components/HoroscopeCard";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 export function generateStaticParams() {
   return SIGN_SLUGS.map((sign) => ({ sign }));

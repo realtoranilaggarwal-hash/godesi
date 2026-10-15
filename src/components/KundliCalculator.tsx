@@ -11,6 +11,7 @@ type Result = {
   timeZone: string;
   utc: string;
   kundli: Kundli;
+  moonSignChanged: { from: number; to: number } | null;
   attribution: string;
 };
 
@@ -256,6 +257,14 @@ export function KundliCalculator() {
               Place used: {result.place} ({result.timeZone}).{" "}
               {result.attribution}.
             </p>
+            {result.moonSignChanged ? (
+              <p className="mt-2 text-xs font-semibold text-amber-800">
+                The Moon moved from {rashiLabel(result.moonSignChanged.from)} to{" "}
+                {rashiLabel(result.moonSignChanged.to)} on this day, so without
+                a birth time your rashi could be either. Add your time of birth
+                to be sure.
+              </p>
+            ) : null}
             {!kundli.lagna ? (
               <p className="mt-2 text-xs text-amber-700">
                 Without a birth time the chart below starts from your Moon sign,
