@@ -6,6 +6,8 @@ import {
 } from "@/lib/astrology";
 import { searchBusinesses } from "@/lib/businesses";
 import { AstrologerList } from "@/components/AstrologerList";
+import { AstrologyShop } from "@/components/AstrologyShop";
+import { DEFAULT_ASTRO_SHOP, astroShopItemsById } from "@/lib/astrologyShop";
 import { SIGN_EMOJI, SIGN_SLUGS, dailySky } from "@/lib/horoscope";
 import { RASHIS } from "@/lib/kundliSigns";
 import { SidebarBanners } from "@/components/Banners";
@@ -63,6 +65,7 @@ export default async function HoroscopePage() {
           <HoroscopeCard key={rashi.name} sign={sign} sky={sky} />
         ))}
 
+        <AstrologyShop items={astroShopItemsById(DEFAULT_ASTRO_SHOP)} />
         <AstrologerList astrologers={astrologers} />
 
         <p className="text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>

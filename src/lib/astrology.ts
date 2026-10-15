@@ -483,6 +483,61 @@ export const ASTROLOGY_GUIDES: AstrologyGuide[] = [
       },
     ],
   },
+  {
+    slug: "gemstones-and-puja-items",
+    emoji: "💎",
+    title: "Gemstones and puja items: a careful buyer's guide",
+    description:
+      "Which gemstone is traditionally linked to each of the nine grahas, how to check a stone before you pay, and the puja items desi homes abroad keep on hand.",
+    intro: [
+      "Astrologers often suggest a gemstone for a planet in your kundli, and families setting up a home mandir abroad need the basics in one place. This guide explains the traditional links and how to shop without being overcharged.",
+    ],
+    sections: [
+      {
+        heading: "The navaratna: one stone for each graha",
+        points: [
+          "Sun (Surya) — ruby (manik).",
+          "Moon (Chandra) — pearl (moti).",
+          "Mars (Mangal) — red coral (moonga).",
+          "Mercury (Budh) — emerald (panna).",
+          "Jupiter (Guru) — yellow sapphire (pukhraj).",
+          "Venus (Shukra) — diamond, or white sapphire as a common substitute.",
+          "Saturn (Shani) — blue sapphire (neelam), which many astrologers suggest only after a trial period.",
+          "Rahu — hessonite (gomed).",
+          "Ketu — cat's eye (lehsunia).",
+        ],
+      },
+      {
+        heading: "Before you buy a gemstone",
+        points: [
+          "Ask your astrologer which stone, what weight (in carats or ratti), which metal and which finger — and why.",
+          "Ask for a certificate from an independent gem lab, so you know the stone is natural and not glass, dyed or heated without disclosure.",
+          "Compare prices across sellers; a recommendation should never come with pressure to buy from one shop.",
+          "Gemstones are a matter of belief, not a treatment. Don't stop medicine or delay a doctor's visit because of a stone.",
+        ],
+      },
+      {
+        heading: "Puja items for a home abroad",
+        points: [
+          "A small home mandir or a clean shelf in the northeast corner.",
+          "A puja thali with a bell, kumkum and rice, and a brass diya with cotton wicks.",
+          "A rudraksha mala for japa, and a shree yantra if your family keeps one.",
+          "Havan samagri for occasions like griha pravesh — check your building's smoke and fire rules first.",
+          "A panchang calendar for tithis, fasts and festival dates in your time zone.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "Which gemstone is for which planet?",
+        a: "Traditionally: Sun–ruby, Moon–pearl, Mars–red coral, Mercury–emerald, Jupiter–yellow sapphire, Venus–diamond, Saturn–blue sapphire, Rahu–hessonite and Ketu–cat's eye. Which one, if any, suits you is a question for your astrologer.",
+      },
+      {
+        q: "How do I know a gemstone is real?",
+        a: "Buy stones that come with a certificate from an independent gem-testing lab, and check that the weight and details on the certificate match the stone.",
+      },
+    ],
+  },
 ];
 
 export function astrologyGuide(slug: string) {
