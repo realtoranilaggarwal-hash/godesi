@@ -83,7 +83,8 @@ export function SmallBannerRail({
   const [offset, setOffset] = useState(0);
   const firstPath = useRef(pathname);
   const railRef = useRef<HTMLElement>(null);
-  const [hasRoom, setHasRoom] = useState(false);
+  const [roomFor, setRoomFor] = useState<string | null>(null);
+  const hasRoom = roomFor === pathname;
 
   useEffect(() => {
     if (embedded) return;
@@ -98,11 +99,13 @@ export function SmallBannerRail({
         main.clientWidth -
         parseFloat(mainStyle.paddingLeft) -
         parseFloat(mainStyle.paddingRight);
-      setHasRoom(
+      setRoomFor(
         pathname !== "/" &&
           window.innerWidth >= 1280 &&
           !page.querySelector("[data-right-rail]") &&
-          usedWidth(page) + RAIL_SPACE < inner - 2,
+          usedWidth(page) + RAIL_SPACE < inner - 2
+          ? pathname
+          : null,
       );
     };
 
