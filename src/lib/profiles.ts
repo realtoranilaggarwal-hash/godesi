@@ -55,6 +55,7 @@ export const RESERVED_USERNAMES = new Set([
   "city",
   "claim",
   "connect",
+  "rishta",
   "deals",
   "shop",
   "desi-elite",
