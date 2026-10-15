@@ -89,6 +89,7 @@ export const RESERVED_USERNAMES = new Set([
   "why-list",
   "clubs",
   "complaints",
+  "astrology",
   "forgot-password",
   "guide",
   "media",
