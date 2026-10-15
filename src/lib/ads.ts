@@ -24,12 +24,7 @@ export type AdPlacement = {
 
 /** The part of a page a placement occupies, drawn on the placement map. */
 export type AdRegion =
-  | "header"
-  | "hero"
-  | "top"
-  | "incontent"
-  | "rail"
-  | "phone";
+  "header" | "hero" | "top" | "incontent" | "rail" | "phone";
 
 export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   HEADER: {
@@ -72,9 +67,7 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Rotates between three advertisers",
     ],
     region: "hero",
-    where: [
-      { label: "Homepage", href: "/" },
-    ],
+    where: [{ label: "Homepage", href: "/" }],
   },
   SIDEBAR: {
     slot: "SIDEBAR",
@@ -243,23 +236,23 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   },
   MOBILE: {
     slot: "MOBILE",
-    name: "Mobile banner",
+    name: "Small banner",
     size: { width: 320, height: 100 },
-    slots: 8,
+    slots: 10,
     blurb:
-      "Standard 320x100 shown between cards on phones, where most desi visitors browse.",
+      "Standard 320x100, stacked ten high down the right side of every page on computers and shown between cards on phones.",
     priceInr: 1999,
     priceUsd: 24,
     cpmInr: 150,
     cpmUsd: 1.8,
     highlights: [
-      "Phone-only placement",
-      "Most of our traffic is mobile",
+      "Ten on the right side of every page, rotating",
+      "Also shown between cards on phones",
       "Cheapest way to start",
     ],
     region: "phone",
     where: [
-      { label: "Every page, on a phone", href: "/" },
+      { label: "Every page", href: "/" },
       { label: "Category pages", href: "/categories" },
       { label: "News", href: "/news" },
     ],

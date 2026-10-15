@@ -134,7 +134,7 @@ export default async function GuidePage({
         </div>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0 space-y-6">
           <section className="space-y-3 text-[15px] leading-relaxed text-slate-700">
             {guide.intro.map((paragraph) => (

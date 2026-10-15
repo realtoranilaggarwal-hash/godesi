@@ -20,6 +20,7 @@ import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { HousePromo } from "@/components/HousePromo";
 import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
+import { SmallBannerRail } from "@/components/SmallBannerRail";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
@@ -246,6 +247,32 @@ export async function SidebarBanners({
         ))}
       </div>
     </aside>
+  );
+}
+
+/**
+ * The 320x100 small banners stacked down the right side. Up to twenty are sent
+ * so the stack can show a fresh set on each page change.
+ */
+export async function SmallBanners({
+  show = 10,
+  embedded = false,
+}: {
+  show?: number;
+  embedded?: boolean;
+} = {}) {
+  if (isPhoneRequest()) return null;
+  const banners = await activeBanners("MOBILE", 20);
+  return (
+    <SmallBannerRail
+      show={show}
+      embedded={embedded}
+      banners={banners.map((banner) => ({
+        id: banner.id,
+        title: banner.title,
+        imageUrl: proxyImage(banner.imageUrl),
+      }))}
+    />
   );
 }
 
