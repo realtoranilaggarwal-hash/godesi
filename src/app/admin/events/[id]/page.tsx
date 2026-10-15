@@ -111,6 +111,7 @@ export default async function AdminEditEventPage({
             videoUrl: event.videoUrl ?? "",
             liveUrl: event.liveUrl ?? "",
             liveTicketOnly: event.liveTicketOnly,
+            askReferredBy: event.askReferredBy,
             albumUrl: event.albumUrl ?? "",
             featured: event.featured,
             status: event.status,
@@ -128,6 +129,7 @@ export default async function AdminEditEventPage({
         <TicketTypesForm
           eventId={event.id}
           currency={event.currency}
+          needsPayoutTerms={!event.payoutTermsAt}
           tiers={event.tiers}
         />
       </Card>

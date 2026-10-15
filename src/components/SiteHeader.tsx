@@ -14,7 +14,6 @@ import type { StripGroup } from "@/components/CategoryStrip";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
-import { PostFab } from "@/components/PostFab";
 import { PromoLinks } from "@/components/PromoLinks";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
@@ -34,6 +33,7 @@ const NAV = [
   { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/rishta", label: "Rishta", icon: "💍" },
   { href: "/clubs", label: "Clubs", icon: "🎤" },
   { href: "/people", label: "People", icon: "👥" },
   { href: "/professionals", label: "Professionals", icon: "👔" },
@@ -218,7 +218,6 @@ export async function SiteHeader() {
 
   return (
     <>
-      <PostFab signedIn={Boolean(user)} />
       <HeaderShell
         items={categoryItems}
         groups={STRIP_GROUPS}

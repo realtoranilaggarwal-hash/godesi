@@ -26,6 +26,8 @@ import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
+import { RailRectangles } from "@/components/Banners";
+import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
 import { thumbImage } from "@/lib/proxyImage";
@@ -550,9 +552,11 @@ export default async function PublicProfilePage({
           {!activity && !user.business ? (
             <PostIdeasBanner name={user.name} />
           ) : null}
+
+          <MoreOnGodesi city={user.business?.city ?? null} />
         </div>
 
-        <aside className="space-y-4">
+        <aside data-right-rail className="space-y-4">
           {user.skills.length || user.languages.length ? (
             <Card className="space-y-3">
               {user.skills.length ? (
@@ -602,6 +606,7 @@ export default async function PublicProfilePage({
               </a>
             </Card>
           ) : null}
+          <RailRectangles />
         </aside>
       </div>
     </div>

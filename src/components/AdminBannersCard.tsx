@@ -5,6 +5,7 @@ import {
   updateBannerCreativeAction,
 } from "@/app/actions/admin";
 import { BannerForm } from "@/components/forms/BannerForm";
+import { BannerCreativeInput } from "@/components/forms/BannerCreativeInput";
 import { formatCtr } from "@/lib/ads";
 import { proxyImage } from "@/lib/proxyImage";
 import { Card } from "@/components/ui";
@@ -82,12 +83,7 @@ export function AdminBannersCard({
                         className="mt-1 flex flex-wrap items-center gap-1"
                       >
                         <input type="hidden" name="id" value={banner.id} />
-                        <input
-                          name="imageUrl"
-                          defaultValue={banner.imageUrl}
-                          placeholder="image URL"
-                          className="w-56 rounded border border-slate-200 px-2 py-1 text-[11px]"
-                        />
+                        <BannerCreativeInput defaultValue={banner.imageUrl} />
                         <input
                           name="linkUrl"
                           defaultValue={banner.linkUrl}

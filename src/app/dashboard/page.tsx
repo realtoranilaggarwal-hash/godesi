@@ -269,7 +269,7 @@ export default async function DashboardPage({
 
         {user.offerInterests.length ? (
           <p className="rounded-xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
-            🎁 You get offers on{" "}
+            🎁 Your member benefits are set for{" "}
             <strong>
               {user.offerInterests
                 .map((id) => offerInterest(id)?.label)
@@ -278,22 +278,22 @@ export default async function DashboardPage({
             </strong>
             .{" "}
             <Link href="/dashboard/offers" className="font-semibold underline">
-              Change
+              See my benefits
             </Link>
           </p>
         ) : (
           <Card className="border-indigo-200 bg-indigo-50">
             <h2 className="text-lg font-bold text-indigo-900">
-              🎁 What would you like offers on?
+              🎁 Unlock your GoDesi member benefits
             </h2>
             <p className="mt-1 text-sm text-indigo-900/80">
-              Buying a home, life insurance, saving tax, missed tax refunds,
-              cheap flights to India, a franchise, investing in India and more
-              — tick what you want and we&apos;ll connect you with trusted desi
-              professionals.
+              Member coupons, local business discounts, event deals and shopping
+              offers — pick what you&apos;d like to save on, from buying a home
+              and saving tax to flights to India. Nobody contacts you unless you
+              say so.
             </p>
             <div className="mt-3">
-              <LinkButton href="/dashboard/offers">Pick my offers</LinkButton>
+              <LinkButton href="/dashboard/offers">See my benefits</LinkButton>
             </div>
           </Card>
         )}

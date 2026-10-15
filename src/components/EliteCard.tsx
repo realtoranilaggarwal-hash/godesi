@@ -55,7 +55,9 @@ export function EliteCard({
             <p className="truncate text-sm text-slate-600">{entry.businessName}</p>
           ) : null}
           <p className="text-xs text-slate-500">
-            {entry.category} · <PlaceLink city={entry.city} country={entry.country} />
+            {entry.category}
+            {entry.city || entry.country ? " · " : null}
+            <PlaceLink city={entry.city} country={entry.country} />
           </p>
           {entry.awardTitle ? (
             <p className="mt-1 inline-block rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2 py-0.5 text-[11px] font-black text-white">

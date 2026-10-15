@@ -23,6 +23,9 @@ import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
+import { DealOfTheDay } from "@/components/DealOfTheDay";
+import { PanchangCard } from "@/components/PanchangCard";
+import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +67,7 @@ const homeEvents = cachedQuery("home-events", CONTENT_TTL, () =>
     take: 24,
     include: {
       category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
       organizer: { select: { plan: true } },
     },
   }),
@@ -115,6 +119,7 @@ export default async function HomePage() {
     createdAt: new Date(member.createdAt),
   }));
   const pickerGroups = await categoryPickerGroups();
+  const today = visitorPanchang();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
   const events = [...upcoming]
@@ -123,75 +128,78 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <RecentStrip />
+      <div className="space-y-3">
+        <RecentStrip />
 
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-6 text-white sm:px-8 sm:py-8">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-              Free desi page · first come, first served
-            </p>
-            <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-5xl">
-              Get your name:{" "}
-              <span className="whitespace-nowrap">godesi.com/you</span>
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
-              One short link for everything you do — your work, your shop, your
-              WhatsApp, your links. Names go once. Take yours before somebody
-              else does.
-            </p>
+        <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6">
+          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
+                Free desi page · first come, first served
+              </p>
+              <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-4xl">
+                Get your name:{" "}
+                <span className="whitespace-nowrap">godesi.com/you</span>
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
+                One short link for everything you do — your work, your shop,
+                your WhatsApp, your links. Names go once. Take yours before
+                somebody else does.
+              </p>
 
-            <div className="mt-4">
-              <HandleClaim />
+              <div className="mt-4">
+                <HandleClaim />
+              </div>
+              <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
+                {HERO_PROOF.map((line) => (
+                  <li key={line}>✓ {line}</li>
+                ))}
+              </ul>
+
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <Link
+                  href="/add-business"
+                  className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
+                >
+                  Add your business free
+                </Link>
+                <Link
+                  href="/why-godesi"
+                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  Everything you get on GoDesi
+                </Link>
+                <Link
+                  href="/people"
+                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  See members&rsquo; pages
+                </Link>
+              </div>
             </div>
-
-            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
-              {HERO_PROOF.map((line) => (
-                <li key={line}>✓ {line}</li>
-              ))}
-            </ul>
-
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <Link
-                href="/add-business"
-                className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
-              >
-                Add your business free
-              </Link>
-              <Link
-                href="/why-godesi"
-                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-              >
-                Everything you get on GoDesi
-              </Link>
-              <Link
-                href="/people"
-                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-              >
-                See members&rsquo; pages
-              </Link>
+            <div>
+              <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-lg font-black">
+                    Looking for someone? Pick a service 👇
+                  </h2>
+                  <Link
+                    href="/categories"
+                    className="text-sm font-semibold text-indigo-600 hover:underline"
+                  >
+                    All {categories.length} →
+                  </Link>
+                </div>
+                <CategoryPicker
+                  groups={pickerGroups}
+                  quickCount={10}
+                  label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
+                />
+              </div>
             </div>
           </div>
-          <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-black">
-                Looking for someone? Pick a service 👇
-              </h2>
-              <Link
-                href="/categories"
-                className="text-sm font-semibold text-indigo-600 hover:underline"
-              >
-                All {categories.length} →
-              </Link>
-            </div>
-            <CategoryPicker
-              groups={pickerGroups}
-              quickCount={10}
-              label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {newMembers.length ? (
         <section>
@@ -212,6 +220,12 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      {today.panchang ? (
+        <PanchangCard panchang={today.panchang} place={today.label} compact />
+      ) : null}
+
+      <DealOfTheDay />
 
       <DealsStrip />
 

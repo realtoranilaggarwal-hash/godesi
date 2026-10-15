@@ -55,6 +55,7 @@ async function loadClub(slug: string) {
         orderBy: { startsAt: "asc" },
         include: {
           category: { select: { name: true, icon: true, color: true } },
+          tiers: { select: { price: true } },
         },
       },
     },
@@ -345,7 +346,7 @@ export default async function ClubPage({
         </div>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           <Card>
             <h2 className="font-bold text-slate-900">About</h2>

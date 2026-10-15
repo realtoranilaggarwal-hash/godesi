@@ -119,7 +119,7 @@ export default async function GigPage({
         <Alert tone="info">This gig is paused; the seller is not taking new orders.</Alert>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="order-2 space-y-6 lg:order-1">
           <header className="space-y-3">
             <h1 className="text-2xl font-black text-slate-900 sm:text-3xl">

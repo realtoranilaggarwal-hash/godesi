@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { publicProfileIds } from "@/lib/peopleLookup";
+import { eliteForFamousSpeaker } from "@/lib/famousPeople";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
@@ -21,7 +22,11 @@ import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
-import { EVENT_FEATURES, PARTNER_COMMITMENTS } from "@/lib/eventOptions";
+import {
+  EVENT_FEATURES,
+  ONLINE_OPEN_SEATS,
+  PARTNER_COMMITMENTS,
+} from "@/lib/eventOptions";
 import {
   cleanEventCategories,
   cleanEventLanguages,
@@ -88,6 +93,7 @@ type SpeakerInput = {
   bio: string | null;
   photoUrl: string | null;
   userId: string | null;
+  eliteEntryId: string | null;
 };
 type SessionInput = {
   title: string;
@@ -114,6 +120,9 @@ async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
   const users = formData
     .getAll("speakerUser")
     .map((value) => String(value).trim());
+  const famous = formData
+    .getAll("speakerWiki")
+    .map((value) => String(value).trim());
   const linkable = await publicProfileIds(users);
 
   const speakers: SpeakerInput[] = [];
@@ -123,11 +132,16 @@ async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
     index += 1
   ) {
     if (!names[index]) continue;
+    const userId = linkable.has(users[index]) ? users[index] : null;
     speakers.push({
       name: names[index].slice(0, 120),
       bio: bios[index]?.slice(0, 600) || null,
       photoUrl: photos[index] || null,
-      userId: linkable.has(users[index]) ? users[index] : null,
+      userId,
+      eliteEntryId:
+        !userId && famous[index]
+          ? await eliteForFamousSpeaker(famous[index]).catch(() => null)
+          : null,
     });
   }
   return speakers;
@@ -187,8 +201,8 @@ const eventSchema = z.object({
   address: z.string().trim().max(300).optional(),
   mapsUrl: optionalUrl,
   city: z.string().trim().min(2, "City is required"),
-  state: z.string().trim().min(2, "State is required"),
-  country: z.string().trim().min(2, "Country is required"),
+  state: z.string().trim().min(2, "State is required").optional(),
+  country: z.string().trim().min(2, "Country is required").optional(),
   eventType: z.string().trim().min(2, "Pick an event type"),
   mode: z.enum(["OFFLINE", "ONLINE", "HYBRID"]).default("OFFLINE"),
   frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
@@ -254,6 +268,7 @@ export async function createEventAction(
   let slug: string;
   try {
     const user = await requireUser();
+    const onlineOnly = formData.get("mode") === "ONLINE";
     const parsed = eventSchema.safeParse({
       title: formData.get("title"),
       description: formData.get("description"),
@@ -267,9 +282,9 @@ export async function createEventAction(
       venueUrl: formData.get("venueUrl") ?? undefined,
       address: formData.get("address") ?? undefined,
       mapsUrl: formData.get("mapsUrl") ?? undefined,
-      city: formData.get("city"),
-      state: formData.get("state"),
-      country: formData.get("country"),
+      city: formData.get("city") || (onlineOnly ? "Online" : ""),
+      state: formData.get("state") || (onlineOnly ? undefined : ""),
+      country: formData.get("country") || (onlineOnly ? undefined : ""),
       eventType: formData.get("eventType"),
       mode: formData.get("mode") || "OFFLINE",
       frequency: formData.get("frequency") || "ONE_TIME",
@@ -281,18 +296,14 @@ export async function createEventAction(
       subcategorySlug: formData.get("subcategorySlug") ?? undefined,
       price: formData.get("price") || 0,
       currency: formData.get("currency") || undefined,
-      seatsTotal: formData.get("seatsTotal") || 1,
+      seatsTotal:
+        formData.get("seatsTotal") || (onlineOnly ? ONLINE_OPEN_SEATS : 1),
       imageUrl: formData.get("imageUrl") ?? undefined,
       videoUrl: formData.get("videoUrl") ?? undefined,
       liveUrl: formData.get("liveUrl") ?? undefined,
       albumUrl: formData.get("albumUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
-    if (formData.get("acceptPayoutTerms") !== "on") {
-      return {
-        error: "Please confirm you understand how ticket money and fees work.",
-      };
-    }
 
     // An organiser types the time of the town the event is in; the zone box
     // says which, and defaults to the one their state suggests.
@@ -320,6 +331,17 @@ export async function createEventAction(
 
     const tiers = readTiers(formData);
     if ("error" in tiers) return { error: tiers.error };
+
+    // Free online-only events take no money, so there are no payout terms.
+    const takesMoney =
+      !onlineOnly ||
+      parsed.data.price > 0 ||
+      tiers.some((tier) => tier.price > 0);
+    if (takesMoney && formData.get("acceptPayoutTerms") !== "on") {
+      return {
+        error: "Please confirm you understand how ticket money and fees work.",
+      };
+    }
 
     if (parsed.data.mode !== "OFFLINE" && !parsed.data.onlineUrl) {
       return { error: "Add the join link for an online or hybrid event." };
@@ -455,8 +477,8 @@ export async function createEventAction(
         partnerStatus: wantsPartnership ? "REQUESTED" : "NONE",
         partnerAgreedAt: wantsPartnership ? new Date() : null,
         city: titleCase(parsed.data.city),
-        state: parsed.data.state,
-        country: parsed.data.country,
+        state: parsed.data.state ?? null,
+        country: parsed.data.country ?? null,
         eventType: parsed.data.eventType,
         genres,
         languages,
@@ -467,7 +489,7 @@ export async function createEventAction(
           String(formData.get("bonusNote") ?? "")
             .trim()
             .slice(0, 200) || null,
-        payoutTermsAt: new Date(),
+        payoutTermsAt: takesMoney ? new Date() : null,
         frequency: parsed.data.frequency,
         recurrence:
           parsed.data.frequency === "RECURRING"
@@ -480,6 +502,7 @@ export async function createEventAction(
         liveTicketOnly:
           Boolean(parsed.data.liveUrl) &&
           formData.get("liveTicketOnly") === "on",
+        askReferredBy: formData.get("askReferredBy") === "on",
         albumUrl: parsed.data.albumUrl ?? null,
         price,
         currency: parsed.data.currency ?? requestCurrency(),
@@ -545,6 +568,11 @@ const bookingSchema = z.object({
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
   buyerPhone: z.string().trim().optional(),
+  referredBy: z
+    .string()
+    .trim()
+    .max(120, "Keep \"Referred by\" under 120 characters")
+    .optional(),
 });
 
 /**
@@ -561,12 +589,13 @@ export async function bookTicketAction(
     const user = await requireUser();
     const parsed = bookingSchema.safeParse({
       eventId: formData.get("eventId"),
-      tierId: formData.get("tierId"),
+      tierId: formData.get("tierId") ?? undefined,
       couponCode: formData.get("couponCode") ?? undefined,
       quantity: formData.get("quantity") || 1,
       buyerName: formData.get("buyerName") || user.name,
       buyerEmail: formData.get("buyerEmail") || user.email,
       buyerPhone: formData.get("buyerPhone") ?? undefined,
+      referredBy: formData.get("referredBy") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -641,6 +670,9 @@ export async function bookTicketAction(
         buyerName: parsed.data.buyerName,
         buyerEmail: parsed.data.buyerEmail,
         buyerPhone: parsed.data.buyerPhone || null,
+        referredBy: event.askReferredBy
+          ? parsed.data.referredBy || null
+          : null,
         quantity: parsed.data.quantity,
         amountMinor,
         currency: event.currency,
@@ -830,7 +862,13 @@ async function ownedEvent(id: string) {
   const user = await requireUser();
   const event = await db.event.findUnique({
     where: { id },
-    select: { id: true, slug: true, organizerId: true, currency: true },
+    select: {
+      id: true,
+      slug: true,
+      organizerId: true,
+      currency: true,
+      payoutTermsAt: true,
+    },
   });
   if (!event || (event.organizerId !== user.id && !can(user, "events"))) {
     throw new Error("FORBIDDEN");
@@ -872,6 +910,15 @@ export async function saveTicketTypeAction(
     seatsTotal: formData.get("seatsTotal"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  // Free online events skip the payout terms at posting, so the first paid
+  // ticket type collects them.
+  const firstPaid = parsed.data.price > 0 && !event.payoutTermsAt;
+  if (firstPaid && formData.get("acceptPayoutTerms") !== "on") {
+    return {
+      error:
+        "To sell paid tickets, tick that you understand how ticket money and fees are handled.",
+    };
+  }
 
   const tierId = String(formData.get("tierId") ?? "");
   const clash = await db.ticketTier.findFirst({
@@ -907,6 +954,12 @@ export async function saveTicketTypeAction(
     });
   }
 
+  if (firstPaid) {
+    await db.event.update({
+      where: { id: event.id },
+      data: { payoutTermsAt: new Date() },
+    });
+  }
   await syncEventFromTiers(event.id);
   revalidatePath(`/events/${event.slug}`);
   revalidatePath("/dashboard/tickets");

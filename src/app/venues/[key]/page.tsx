@@ -46,6 +46,7 @@ export default async function VenuePage({
       take: 48,
       include: {
         category: { select: { name: true, icon: true, color: true } },
+        tiers: { select: { price: true } },
       },
     }),
     db.event.findMany({
@@ -58,6 +59,7 @@ export default async function VenuePage({
       take: 12,
       include: {
         category: { select: { name: true, icon: true, color: true } },
+        tiers: { select: { price: true } },
       },
     }),
   ]);
