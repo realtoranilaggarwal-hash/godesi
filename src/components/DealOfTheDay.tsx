@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { dealDetails } from "@/lib/deals";
-import { dealOfTheDay } from "@/lib/dealOfTheDay";
+import { cachedDealOfTheDay } from "@/lib/dealOfTheDay";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { CopyButton } from "@/components/CopyButton";
 
 /** Today's one business deal and one store coupon, changing at midnight New York time. */
 export async function DealOfTheDay() {
-  const { deal, offer } = await dealOfTheDay();
+  const { deal, offer } = await cachedDealOfTheDay();
   if (!deal && !offer) return null;
 
   return (
@@ -52,7 +52,7 @@ export async function DealOfTheDay() {
 
 /** Home page: today's picks as one slim line, with the ways into deals and shopping. */
 export async function DealOfTheDayBar() {
-  const { deal, offer } = await dealOfTheDay();
+  const { deal, offer } = await cachedDealOfTheDay();
 
   return (
     <section className="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm">
