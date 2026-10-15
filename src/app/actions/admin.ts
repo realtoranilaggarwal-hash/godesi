@@ -19,6 +19,7 @@ import { isSupportedVideoUrl } from "@/lib/video";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { levelFor } from "@/lib/journalists";
 import { formatEventDate } from "@/lib/events";
+import { readSpeakers } from "@/lib/eventSpeakers";
 import {
   cleanEventCategories,
   cleanEventLanguages,
@@ -732,6 +733,7 @@ async function saveEventEdits(
         mapsUrl: true,
         state: true,
         country: true,
+        speakers: { select: { eliteEntryId: true } },
       },
     });
     if (!existing) return { error: "Event not found." };
@@ -766,9 +768,32 @@ async function saveEventEdits(
           hall: parsed.data.hallName || null,
         });
 
+    const speakers =
+      formData.get("speakersEdited") === "1"
+        ? await readSpeakers(
+            formData,
+            new Set(
+              existing.speakers.flatMap((speaker) =>
+                speaker.eliteEntryId ? [speaker.eliteEntryId] : [],
+              ),
+            ),
+          )
+        : null;
+
     const event = await db.event.update({
       where: { id: parsed.data.id },
       data: {
+        ...(speakers
+          ? {
+              speakers: {
+                deleteMany: {},
+                create: speakers.map((speaker, index) => ({
+                  ...speaker,
+                  sortOrder: index,
+                })),
+              },
+            }
+          : {}),
         title: titleCase(parsed.data.title),
         description: sentenceCase(parsed.data.description),
         startsAt,

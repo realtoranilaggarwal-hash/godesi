@@ -25,6 +25,7 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { EarnStrip } from "@/components/EarnStrip";
 import { pointValues, wallet } from "@/lib/rewardsQueries";
 import { offerInterest } from "@/lib/offerInterests";
+import { formatEventDate } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -87,7 +88,7 @@ export default async function DashboardPage({
     pointValues(),
   ]);
 
-  const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats] =
+  const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats, myEvents] =
     await Promise.all([
       business
         ? db.analyticsEvent.count({
@@ -113,6 +114,20 @@ export default async function DashboardPage({
         where: { advertiserId: user.id },
         _sum: { impressions: true, clicks: true },
         _count: { _all: true },
+      }),
+      db.event.findMany({
+        where: { organizerId: user.id },
+        orderBy: { startsAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          startsAt: true,
+          timeZone: true,
+          status: true,
+          sourceId: true,
+        },
       }),
     ]);
 
@@ -399,7 +414,7 @@ export default async function DashboardPage({
                   Reviews on my card
                 </LinkButton>
                 <LinkButton href="/dashboard/tickets" variant="secondary">
-                  My tickets
+                  My tickets &amp; events
                 </LinkButton>
                 <LinkButton href="/dashboard/gigs" variant="secondary">
                   🛠️ My gigs
@@ -435,6 +450,74 @@ export default async function DashboardPage({
             </div>
           </Card>
         )}
+
+        <Card>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold">Events you posted</h2>
+            <LinkButton href="/events/new" variant="secondary">
+              Post an event
+            </LinkButton>
+          </div>
+          {myEvents.length ? (
+            <>
+              <ul className="divide-y divide-slate-100">
+                {myEvents.map((event) => (
+                  <li
+                    key={event.id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                  >
+                    <div className="min-w-0">
+                      <Link
+                        href={`/events/${event.slug}`}
+                        className="font-medium text-indigo-600 hover:underline"
+                      >
+                        {event.title}
+                      </Link>
+                      <p className="text-sm text-slate-500">
+                        {formatEventDate(event.startsAt, event.timeZone)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        tone={
+                          event.status === "APPROVED"
+                            ? "green"
+                            : event.status === "PENDING"
+                              ? "amber"
+                              : "red"
+                        }
+                      >
+                        {event.status === "APPROVED"
+                          ? "Live"
+                          : event.status === "PENDING"
+                            ? "Waiting for review"
+                            : "Not approved"}
+                      </Badge>
+                      {event.sourceId ? null : (
+                        <Link
+                          href={`/events/${event.slug}/edit`}
+                          className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm font-semibold hover:bg-slate-50"
+                        >
+                          ✏️ Edit
+                        </Link>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/dashboard/tickets"
+                className="mt-2 inline-block text-sm font-semibold text-indigo-600 hover:underline"
+              >
+                All my events, bookings &amp; ticket types →
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-slate-500">
+              You have not posted any events.
+            </p>
+          )}
+        </Card>
 
         <Card>
           <div className="mb-3 flex items-center justify-between">
