@@ -10,6 +10,7 @@ import { siteUrl } from "@/lib/format";
 import { resultsAreThin, robotsFor } from "@/lib/thinContent";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Card } from "@/components/ui";
+import { SmallBanners } from "@/components/Banners";
 
 export const revalidate = 3600;
 
@@ -244,6 +245,7 @@ export default async function GuidePage({
               )}
             </ul>
           </Card>
+          <SmallBanners show={6} embedded />
         </aside>
       </div>
     </div>

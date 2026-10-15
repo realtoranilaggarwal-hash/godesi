@@ -26,7 +26,7 @@ import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
-import { RailRectangles } from "@/components/Banners";
+import { RailRectangles, SmallBanners } from "@/components/Banners";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
@@ -607,6 +607,7 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
           <RailRectangles />
+          <SmallBanners show={6} embedded />
         </aside>
       </div>
     </div>

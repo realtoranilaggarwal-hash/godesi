@@ -18,6 +18,7 @@ import { ActionForm } from "@/components/gigs/GigForms";
 import { FeeNote, GigCard, SellerFace } from "@/components/gigs/GigCard";
 import { Gallery, OrderBox } from "@/components/gigs/GigPagePieces";
 import { Alert, Badge, Card, LinkButton, Stars, inputClass } from "@/components/ui";
+import { SmallBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 
@@ -417,6 +418,9 @@ export default async function GigPage({
               </LinkButton>
             ) : null}
           </Card>
+          <div className="mt-4 hidden lg:block">
+            <SmallBanners show={6} embedded />
+          </div>
         </aside>
       </div>
     </div>

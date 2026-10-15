@@ -19,6 +19,7 @@ import {
 } from "@/app/actions/clubs";
 import { thumbImage } from "@/lib/proxyImage";
 import { properName } from "@/lib/names";
+import { SmallBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 
@@ -565,6 +566,7 @@ export default async function ClubPage({
               className="mt-2"
             />
           </Card>
+          <SmallBanners show={6} embedded />
         </div>
       </div>
     </div>
