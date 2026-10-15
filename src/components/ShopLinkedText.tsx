@@ -9,9 +9,11 @@ import { amazonSearchUrl, ebaySearchUrl, shopConfig } from "@/lib/shop";
 export function ShopLinkedText({
   text,
   linked,
+  linkClassName = "font-semibold text-amber-700 underline decoration-dotted underline-offset-2 hover:text-amber-800",
 }: {
   text: string;
   linked: Set<string>;
+  linkClassName?: string;
 }) {
   const { amazonTag, ebayCampaignId } = shopConfig();
   if (!amazonTag && !ebayCampaignId) return <>{text}</>;
@@ -35,7 +37,7 @@ export function ShopLinkedText({
         target="_blank"
         rel="noopener noreferrer sponsored nofollow"
         title={`Shop ${item.label} (paid link)`}
-        className="font-semibold text-amber-700 underline decoration-dotted underline-offset-2 hover:text-amber-800"
+        className={linkClassName}
       >
         {match[0]}
       </a>,

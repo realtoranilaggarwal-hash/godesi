@@ -42,6 +42,12 @@ export const ASTRO_SHOP_ITEMS: AstroShopItem[] = [
     terms: ["yellow sapphire", "pukhraj"],
   },
   {
+    id: "whitesapphire",
+    label: "White sapphire (for Shukra)",
+    query: "white sapphire gemstone certified",
+    terms: ["white sapphire"],
+  },
+  {
     id: "neelam",
     label: "Blue sapphire (neelam)",
     query: "blue sapphire neelam certified",

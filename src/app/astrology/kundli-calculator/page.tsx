@@ -104,10 +104,10 @@ export default function KundliCalculatorPage() {
             "coral",
             "emerald",
             "pukhraj",
+            "whitesapphire",
             "neelam",
             "gomed",
             "catseye",
-            "navagraha",
           ])}
         />
         <p className="text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>

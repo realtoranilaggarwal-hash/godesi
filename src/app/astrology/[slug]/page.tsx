@@ -54,6 +54,7 @@ export default async function AstrologyGuidePage({
   });
   const linked = new Set<string>();
   const mentioned = astroShopItemsIn([
+    ...guide.intro,
     ...guide.sections.flatMap((section) => [
       ...(section.paragraphs ?? []),
       ...(section.points ?? []),
@@ -104,7 +105,11 @@ export default async function AstrologyGuidePage({
           </h1>
           {guide.intro.map((paragraph) => (
             <p key={paragraph} className="mt-3 max-w-2xl text-white/90">
-              {paragraph}
+              <ShopLinkedText
+                text={paragraph}
+                linked={linked}
+                linkClassName="font-semibold text-white underline decoration-dotted underline-offset-2 hover:text-amber-200"
+              />
             </p>
           ))}
         </section>
