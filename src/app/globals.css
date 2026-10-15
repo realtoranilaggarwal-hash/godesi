@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pages with their own right-hand column skip the site-wide banner rail. */
-main:has([data-right-rail]) > [data-site-rail] {
-  display: none;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
