@@ -51,6 +51,12 @@ export default async function AstrologyPage() {
             >
               🌙 Today&apos;s horoscope
             </Link>
+            <Link
+              href="/astrology/panchang"
+              className="rounded-xl bg-white px-3 py-2 text-violet-700"
+            >
+              🪔 Today&apos;s panchang
+            </Link>
             <a
               href="#astrologers"
               className="rounded-xl bg-white px-3 py-2 text-violet-700"

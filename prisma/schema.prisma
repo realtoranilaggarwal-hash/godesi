@@ -233,6 +233,10 @@ model User {
   digestOptOutAt  DateTime?
   /// Last weekly digest we sent them, so a retry never double-sends.
   digestSentAt    DateTime?
+  /// Set while the member wants the morning panchang + deal email; null = off.
+  morningEmailAt  DateTime?
+  /// GoDesi day (YYYY-MM-DD, New York) of the last morning email, so a retry never double-sends.
+  morningSentDay  String?
 
   /// 1..1000 for the first thousand members — powers the 🏅 Founding member
   /// badge and their double reward points. Null once the spots are gone.
