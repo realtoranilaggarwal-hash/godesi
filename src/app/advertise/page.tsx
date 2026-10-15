@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Advertise to desi buyers on Godesi",
   description:
-    "Reach desi buyers across the Godesi directory with billboard, leaderboard, in-content, sidebar and mobile banners — all rotating, with live view and click reporting.",
+    "Reach desi buyers across the Godesi directory with billboard, leaderboard, in-content, sidebar and small banners — all rotating, with live view and click reporting.",
 };
 
 const ERRORS: Record<string, string> = {

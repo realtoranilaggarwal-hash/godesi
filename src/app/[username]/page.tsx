@@ -555,7 +555,7 @@ export default async function PublicProfilePage({
           <MoreOnGodesi city={user.business?.city ?? null} />
         </div>
 
-        <aside className="space-y-4">
+        <aside data-right-rail className="space-y-4">
           {user.skills.length || user.languages.length ? (
             <Card className="space-y-3">
               {user.skills.length ? (

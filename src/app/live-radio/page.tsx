@@ -60,7 +60,7 @@ export default async function LiveRadioPage() {
         </p>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div data-right-rail className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <ul className="grid gap-2 sm:grid-cols-2">
           {ordered.map((station) => (
             <LiveRadioRow
