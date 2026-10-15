@@ -1,14 +1,14 @@
-import { createHash } from "crypto";
 import { db } from "@/lib/db";
 import { dealSelect, liveDealWhere } from "@/lib/deals";
 import { HOROSCOPE_ZONE } from "@/lib/horoscope";
 import { todayIn } from "@/lib/panchang";
 import { liveStoreOfferWhere, storeOfferSelect } from "@/lib/storeOffers";
 
+/** Steps through the list one per day, so tomorrow never repeats today. */
 const pick = <T>(rows: T[], day: string) =>
   rows.length
     ? rows[
-        createHash("sha256").update(day).digest().readUInt32BE(0) % rows.length
+        Math.floor(Date.parse(`${day}T00:00:00Z`) / 86_400_000) % rows.length
       ]
     : null;
 
@@ -32,5 +32,5 @@ export async function dealOfTheDay(now = new Date()) {
       select: storeOfferSelect,
     }),
   ]);
-  return { day, deal: pick(deals, day), offer: pick(offers, `${day}:store`) };
+  return { day, deal: pick(deals, day), offer: pick(offers, day) };
 }

@@ -124,9 +124,13 @@ export async function sendMorningEmails({ dryRun = false } = {}) {
       emailVerifiedAt: { not: null },
       OR: [{ morningSentDay: null }, { morningSentDay: { not: day } }],
     },
-    orderBy: { morningEmailAt: "asc" },
+    // Whoever waited longest goes first, so a cap never starves later sign-ups.
+    orderBy: [
+      { morningSentDay: { sort: "asc", nulls: "first" } },
+      { morningEmailAt: "asc" },
+    ],
     take: dailyCap(),
-    select: { id: true, email: true, name: true },
+    select: { id: true, email: true, name: true, morningSentDay: true },
   });
 
   if (dryRun) return { sent: 0, wouldSend: members.length, day };
@@ -137,16 +141,27 @@ export async function sendMorningEmails({ dryRun = false } = {}) {
     // eslint-disable-next-line no-await-in-loop
     await Promise.all(
       batch.map(async (member) => {
+        // Claim the member for today first, so an overlapping run skips them.
+        const claimed = await db.user.updateMany({
+          where: {
+            id: member.id,
+            OR: [{ morningSentDay: null }, { morningSentDay: { not: day } }],
+          },
+          data: { morningSentDay: day },
+        });
+        if (!claimed.count) return;
         const ok = await sendEmail({
           to: member.email,
           subject,
           html: emailFor(member.id, member.name, body),
         });
-        if (!ok) return;
-        sent += 1;
-        await db.user.update({
-          where: { id: member.id },
-          data: { morningSentDay: day },
+        if (ok) {
+          sent += 1;
+          return;
+        }
+        await db.user.updateMany({
+          where: { id: member.id, morningSentDay: day },
+          data: { morningSentDay: member.morningSentDay },
         });
       }),
     );
