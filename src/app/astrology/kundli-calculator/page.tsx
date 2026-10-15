@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ASTROLOGY_DISCLAIMER } from "@/lib/astrology";
+import { AstrologyShop } from "@/components/AstrologyShop";
+import { astroShopItemsById } from "@/lib/astrologyShop";
 import { siteUrl } from "@/lib/format";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
@@ -94,6 +96,20 @@ export default function KundliCalculatorPage() {
           </p>
         </Card>
 
+        <AstrologyShop
+          title="Gemstones for the nine grahas"
+          items={astroShopItemsById([
+            "ruby",
+            "pearl",
+            "coral",
+            "emerald",
+            "pukhraj",
+            "neelam",
+            "gomed",
+            "catseye",
+            "navagraha",
+          ])}
+        />
         <p className="text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>
       </div>
       <SidebarBanners />

@@ -14,6 +14,8 @@ import {
 } from "@/lib/horoscope";
 import { RASHIS } from "@/lib/kundliSigns";
 import { AstrologerList } from "@/components/AstrologerList";
+import { AstrologyShop } from "@/components/AstrologyShop";
+import { DEFAULT_ASTRO_SHOP, astroShopItemsById } from "@/lib/astrologyShop";
 import { SidebarBanners } from "@/components/Banners";
 import { DailySkyBox } from "@/components/DailySkyBox";
 import { HoroscopeCard } from "@/components/HoroscopeCard";
@@ -85,6 +87,7 @@ export default async function SignHoroscopePage({
           )}
         </nav>
 
+        <AstrologyShop items={astroShopItemsById(DEFAULT_ASTRO_SHOP)} />
         <AstrologerList astrologers={astrologers} />
 
         <p className="text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>
