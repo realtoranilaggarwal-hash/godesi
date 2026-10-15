@@ -10,6 +10,7 @@ import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { GUIDES } from "@/lib/guides";
 import { COMPLAINT_GUIDES } from "@/lib/complaints";
 import { ASTROLOGY_GUIDES } from "@/lib/astrology";
+import { SIGN_SLUGS } from "@/lib/horoscope";
 import { FESTIVALS, festivalSlug } from "@/lib/festivals";
 
 export const dynamic = "force-dynamic";
@@ -185,6 +186,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/live-tv`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/categories`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/connect`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${base}/rishta`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/clubs`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/alumni`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "weekly", priority: 0.5 },
@@ -198,6 +200,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/safety`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/complaints`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/astrology`, changeFrequency: "weekly", priority: 0.7 },
+    {
+      url: `${base}/astrology/kundli-calculator`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${base}/astrology/horoscope`,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    ...SIGN_SLUGS.map((sign) => ({
+      url: `${base}/astrology/horoscope/${sign}`,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    })),
     { url: `${base}/media`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/media/join`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/traffic`, changeFrequency: "hourly", priority: 0.5 },

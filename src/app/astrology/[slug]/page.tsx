@@ -12,6 +12,13 @@ import { siteUrl } from "@/lib/format";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { AstrologerList } from "@/components/AstrologerList";
+import { AstrologyShop } from "@/components/AstrologyShop";
+import { ShopLinkedText } from "@/components/ShopLinkedText";
+import {
+  DEFAULT_ASTRO_SHOP,
+  astroShopItemsById,
+  astroShopItemsIn,
+} from "@/lib/astrologyShop";
 
 export const revalidate = 3600;
 
@@ -45,6 +52,18 @@ export default async function AstrologyGuidePage({
     categorySlugs: ASTROLOGER_SUBCATEGORIES,
     take: 6,
   });
+  const linked = new Set<string>();
+  const mentioned = astroShopItemsIn([
+    ...guide.intro,
+    ...guide.sections.flatMap((section) => [
+      ...(section.paragraphs ?? []),
+      ...(section.points ?? []),
+    ]),
+    ...guide.faqs.map((faq) => faq.a),
+  ]);
+  const shopItems = mentioned.length
+    ? mentioned
+    : astroShopItemsById(DEFAULT_ASTRO_SHOP);
   const others = ASTROLOGY_GUIDES.filter((row) => row.slug !== guide.slug);
 
   const jsonLd = [
@@ -86,7 +105,11 @@ export default async function AstrologyGuidePage({
           </h1>
           {guide.intro.map((paragraph) => (
             <p key={paragraph} className="mt-3 max-w-2xl text-white/90">
-              {paragraph}
+              <ShopLinkedText
+                text={paragraph}
+                linked={linked}
+                linkClassName="font-semibold text-white underline decoration-dotted underline-offset-2 hover:text-amber-200"
+              />
             </p>
           ))}
         </section>
@@ -99,18 +122,22 @@ export default async function AstrologyGuidePage({
                 key={paragraph}
                 className="mt-2 text-sm leading-relaxed text-slate-700"
               >
-                {paragraph}
+                <ShopLinkedText text={paragraph} linked={linked} />
               </p>
             ))}
             {section.points ? (
               <ul className="mt-2 space-y-1 text-sm text-slate-700">
                 {section.points.map((point) => (
-                  <li key={point}>• {point}</li>
+                  <li key={point}>
+                    • <ShopLinkedText text={point} linked={linked} />
+                  </li>
                 ))}
               </ul>
             ) : null}
           </Card>
         ))}
+
+        <AstrologyShop items={shopItems} />
 
         <AstrologerList astrologers={astrologers} />
 
@@ -121,7 +148,9 @@ export default async function AstrologyGuidePage({
               {guide.faqs.map((faq) => (
                 <div key={faq.q}>
                   <dt className="text-sm font-bold text-slate-900">{faq.q}</dt>
-                  <dd className="mt-1 text-sm text-slate-600">{faq.a}</dd>
+                  <dd className="mt-1 text-sm text-slate-600">
+                    <ShopLinkedText text={faq.a} linked={linked} />
+                  </dd>
                 </div>
               ))}
             </dl>

@@ -59,6 +59,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   },
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁", need: "admin" },
   { href: "/admin/connect", label: "Connect", icon: "🤝", need: "admin" },
+  { href: "/admin/rishta", label: "Rishta", icon: "💍", need: "admin" },
   { href: "/admin/temples", label: "Temples", icon: "🛕", need: "worship" },
   {
     href: "/admin/resources",
