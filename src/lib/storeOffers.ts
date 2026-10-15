@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 
 export function liveStoreOfferWhere(
   now = new Date(),
@@ -49,4 +50,16 @@ export async function liveStoreOffers(take = 24): Promise<PublicStoreOffer[]> {
     if (picked.length >= take) break;
   }
   return picked;
+}
+
+const cachedOffers = cachedQuery("live-store-offers", CONTENT_TTL, (take: number) =>
+  liveStoreOffers(take),
+);
+
+/** liveStoreOffers for public pages, read from the database once a minute. */
+export async function cachedLiveStoreOffers(take = 24) {
+  return (await cachedOffers(take)).map((offer) => ({
+    ...offer,
+    endsAt: offer.endsAt ? new Date(offer.endsAt) : null,
+  }));
 }
