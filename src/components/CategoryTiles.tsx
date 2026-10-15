@@ -29,7 +29,7 @@ export function CategoryTiles({
   return (
     <div
       className={`grid sm:grid-cols-2 lg:grid-cols-3 ${
-        dense ? "gap-3 xl:grid-cols-6" : "gap-4"
+        dense ? "gap-3 2xl:grid-cols-4" : "gap-4"
       }`}
     >
       {categories.map((category) => (
