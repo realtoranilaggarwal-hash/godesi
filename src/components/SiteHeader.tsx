@@ -86,6 +86,7 @@ const PROMO_LINKS = [
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/clubs", label: "Clubs", icon: "🎤" },
+  { href: "/rishta", label: "Rishta", icon: "💍" },
   { href: "/deals", label: "Deals", icon: "🏷️" },
   { href: "/shop", label: "Shop", icon: "🛍️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
@@ -103,6 +104,7 @@ const STRIP_LINKS = [
   { href: "/guide", label: "City guides", icon: "🗺️" },
   { href: "/people", label: "Community", icon: "👥" },
   { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/rishta", label: "Rishta — marriage profiles", icon: "💍" },
   { href: "/buzz", label: "#godesi social wall", icon: "🌍" },
 ];
 
@@ -203,6 +205,7 @@ export async function SiteHeader() {
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
+    { href: "/rishta/new", label: "Post a Rishta profile", icon: "💍" },
     { href: "/resources", label: "Resources", icon: "🔗" },
     { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/shop", label: "Shop", icon: "🛍️" },
