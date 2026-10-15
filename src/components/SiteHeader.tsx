@@ -33,6 +33,7 @@ const NAV = [
   { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/rishta", label: "Rishta", icon: "💍" },
   { href: "/clubs", label: "Clubs", icon: "🎤" },
   { href: "/people", label: "People", icon: "👥" },
   { href: "/professionals", label: "Professionals", icon: "👔" },

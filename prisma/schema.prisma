@@ -346,6 +346,9 @@ model User {
   couponRedemptions CouponRedemption[]
 
   meetupProfile MeetupProfile?
+
+  rishtaProfile RishtaProfile?
+  rishtaReports RishtaReport[]
   meetupReports MeetupReport[]
   alumni        AlumniRecord[]
   upiRequests   UpiRequest[]
@@ -1864,6 +1867,73 @@ model MeetupProfile {
   reports MeetupReport[]
 
   @@index([status, city])
+}
+
+enum RishtaPostedBy {
+  SELF
+  PARENT
+  SIBLING
+  RELATIVE
+  FRIEND
+}
+
+enum RishtaMarital {
+  NEVER_MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+/// Marriage-minded "Rishta" profile, posted by the person or their family.
+/// Reviewed before it goes public; contact shows only while the poster's plan is paid.
+model RishtaProfile {
+  id             String         @id @default(cuid())
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postedBy       RishtaPostedBy @default(SELF)
+  displayName    String
+  gender         MeetupGender
+  birthYear      Int
+  heightCm       Int?
+  maritalHistory RishtaMarital  @default(NEVER_MARRIED)
+  religion       String?
+  community      String?
+  gotra          String?
+  motherTongue   String?
+  education      String?
+  profession     String?
+  city           String
+  state          String?
+  country        String?
+  about          String
+  photoUrl       String?
+  /// Photo stays private (owner and staff only) when set.
+  hidePhoto      Boolean        @default(false)
+  /// Sidereal Moon sign 0-11 and nakshatra 0-26 for guna milan; birth details are not stored.
+  moonSign       Int?
+  nakshatra      Int?
+  whatsappNumber String?
+  status         ListingStatus  @default(PENDING)
+  visible        Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  reports RishtaReport[]
+
+  @@index([status, gender])
+}
+
+/// Member-flagged Rishta profile, queued for admin review.
+model RishtaReport {
+  id         String        @id @default(cuid())
+  profileId  String
+  profile    RishtaProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  createdAt  DateTime      @default(now())
+
+  @@unique([profileId, reporterId])
+  @@index([profileId])
 }
 
 /// Member-flagged profile, queued for admin review.
