@@ -86,7 +86,9 @@ export type SpeakerDefaults = {
 };
 
 export function speakerDefaults(
-  rows: Prisma.EventSpeakerGetPayload<{ select: typeof EDIT_SPEAKERS.select }>[],
+  rows: Prisma.EventSpeakerGetPayload<{
+    select: typeof EDIT_SPEAKERS.select;
+  }>[],
 ): SpeakerDefaults[] {
   return rows.map((row) => ({
     name: row.name,
