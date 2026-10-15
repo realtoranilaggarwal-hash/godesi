@@ -36,6 +36,9 @@ export const EVENT_TYPES = [
   "Other",
 ] as const;
 
+/** Spots on an online-only event, about the size of a typical Zoom meeting. */
+export const ONLINE_OPEN_SEATS = 100;
+
 export const EVENT_MODES = [
   { value: "OFFLINE", label: "Offline — in person", icon: "📍" },
   { value: "ONLINE", label: "Online — join from anywhere", icon: "💻" },

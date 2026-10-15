@@ -283,6 +283,14 @@ export default async function AdvertisePage({
         <div className="mt-3">
           <DesignHelp size={AD_PLACEMENTS.SIDEBAR.size} />
         </div>
+        <p className="mt-2 text-sm">
+          <Link
+            href="/advertise/design"
+            className="font-semibold text-indigo-600"
+          >
+            Prompts for every banner size, and where to upload →
+          </Link>
+        </p>
       </Card>
 
       <Card>

@@ -10,7 +10,6 @@ export const SIDEBAR_SLOTS = AD_PLACEMENTS.SIDEBAR.slots;
 export const HEADER_SLOTS = AD_PLACEMENTS.HEADER.slots;
 export const SKYSCRAPER_SLOTS = AD_PLACEMENTS.SKYSCRAPER.slots;
 export const SIDEBAR_SIZE = AD_PLACEMENTS.SIDEBAR.size;
-export const HERO_SIZE = AD_PLACEMENTS.HERO.size;
 export const HEADER_SIZE = AD_PLACEMENTS.HEADER.size;
 export const SKYSCRAPER_SIZE = AD_PLACEMENTS.SKYSCRAPER.size;
 
@@ -47,6 +46,7 @@ export async function nextPosition(slot: BannerSlot, exceptId?: string) {
 
 type RotatingBanner = {
   id: string;
+  slot: BannerSlot;
   title: string;
   imageUrl: string;
   linkUrl: string;
@@ -132,15 +132,19 @@ function rotate(banners: RotatingBanner[], take: number) {
  * with impressions left on an impression pack. More advertisers than there are
  * slots is fine — the extras rotate in on later page views.
  */
-export async function activeBanners(slot: BannerSlot, limit?: number) {
+export async function activeBanners(
+  slot: BannerSlot | BannerSlot[],
+  limit?: number,
+) {
+  const slots = Array.isArray(slot) ? slot : [slot];
   const eligible = (await inventory()).filter(
     (banner) =>
-      banner.slot === slot &&
+      slots.includes(banner.slot) &&
       (banner.impressionCap === null ||
         banner.impressions < banner.impressionCap),
   );
 
-  return rotate(eligible, limit ?? slotCapacity(slot));
+  return rotate(eligible, limit ?? slotCapacity(slots[0]));
 }
 
 /** How many advertisers currently share a slot, used to show unsold inventory. */

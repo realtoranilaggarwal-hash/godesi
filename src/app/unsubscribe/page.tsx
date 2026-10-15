@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { digestTokenValid } from "@/lib/digest";
+import { morningTokenValid } from "@/lib/morningEmail";
 import { canonicalEmail, inviteOptOutValid } from "@/lib/invites";
 import { Card } from "@/components/ui";
 
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { u?: string; t?: string; e?: string };
+  searchParams: { u?: string; m?: string; t?: string; e?: string };
 }) {
   const userId = searchParams.u ?? "";
   const token = searchParams.t ?? "";
@@ -27,7 +28,11 @@ export default async function Page({
   // friend asking never to be invited again.
   const invite = Boolean(email && token && inviteOptOutValid(email, token));
   const digest = Boolean(userId && token && digestTokenValid(userId, token));
-  const ok = invite || digest;
+  const morningId = searchParams.m ?? "";
+  const morning = Boolean(
+    morningId && token && morningTokenValid(morningId, token),
+  );
+  const ok = invite || digest || morning;
 
   if (invite) {
     await db.inviteOptOut
@@ -35,6 +40,13 @@ export default async function Page({
         where: { emailCanonical: email },
         update: {},
         create: { emailCanonical: email },
+      })
+      .catch(() => null);
+  } else if (morning) {
+    await db.user
+      .update({
+        where: { id: morningId },
+        data: { morningEmailAt: null },
       })
       .catch(() => null);
   } else if (digest) {
@@ -54,9 +66,11 @@ export default async function Page({
       <p className="text-sm text-slate-600">
         {invite
           ? "Done — nobody on Godesi can send an invitation to that address again. We keep only the address itself, so we can honour this."
-          : ok
-          ? "No more weekly digests. Your account, business card and listings are untouched, and you'll still get emails about things you do — bookings, payments and replies."
-          : "The link may have been cut in half by your email app. Copy the whole link, or email us and we'll take you off the list."}
+          : morning
+            ? "No more morning emails. The panchang and deal of the day are still on GoDesi whenever you want them, and you can switch the email back on under Notifications."
+            : ok
+              ? "No more weekly digests. Your account, business card and listings are untouched, and you'll still get emails about things you do — bookings, payments and replies."
+              : "The link may have been cut in half by your email app. Copy the whole link, or email us and we'll take you off the list."}
       </p>
       <div className="flex flex-wrap gap-2 text-sm font-bold">
         <Link

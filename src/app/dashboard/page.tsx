@@ -24,6 +24,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { SignOutButton } from "@/components/SignOutButton";
 import { EarnStrip } from "@/components/EarnStrip";
 import { pointValues, wallet } from "@/lib/rewardsQueries";
+import { offerInterest } from "@/lib/offerInterests";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -265,6 +266,37 @@ export default async function DashboardPage({
             }
           />
         ) : null}
+
+        {user.offerInterests.length ? (
+          <p className="rounded-xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+            🎁 Your member benefits are set for{" "}
+            <strong>
+              {user.offerInterests
+                .map((id) => offerInterest(id)?.label)
+                .filter(Boolean)
+                .join(" · ")}
+            </strong>
+            .{" "}
+            <Link href="/dashboard/offers" className="font-semibold underline">
+              See my benefits
+            </Link>
+          </p>
+        ) : (
+          <Card className="border-indigo-200 bg-indigo-50">
+            <h2 className="text-lg font-bold text-indigo-900">
+              🎁 Unlock your GoDesi member benefits
+            </h2>
+            <p className="mt-1 text-sm text-indigo-900/80">
+              Member coupons, local business discounts, event deals and shopping
+              offers — pick what you&apos;d like to save on, from buying a home
+              and saving tax to flights to India. Nobody contacts you unless you
+              say so.
+            </p>
+            <div className="mt-3">
+              <LinkButton href="/dashboard/offers">See my benefits</LinkButton>
+            </div>
+          </Card>
+        )}
 
         <ElitePrompt userId={user.id} answered={user.elitePrompt} />
 

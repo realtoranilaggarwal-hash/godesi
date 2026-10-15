@@ -25,6 +25,7 @@ export function TicketForm({
   tiers,
   defaultName,
   defaultEmail,
+  askReferredBy = false,
 }: {
   eventId: string;
   price: number;
@@ -34,6 +35,7 @@ export function TicketForm({
   tiers: TicketTierOption[];
   defaultName?: string;
   defaultEmail?: string;
+  askReferredBy?: boolean;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
@@ -101,6 +103,19 @@ export function TicketForm({
             className={inputClass}
           />
         </Field>
+        {askReferredBy ? (
+          <Field
+            label="Referred by"
+            hint="Optional — who invited you? The organiser sees this."
+          >
+            <input
+              name="referredBy"
+              maxLength={120}
+              placeholder="Name of the person or group"
+              className={inputClass}
+            />
+          </Field>
+        ) : null}
         {unitPrice ? (
           <Field label="Coupon code" hint="Optional — from the organiser">
             <input

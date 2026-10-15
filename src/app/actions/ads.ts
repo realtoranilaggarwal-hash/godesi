@@ -153,14 +153,14 @@ export async function saveAdCreativeAction(
         title: parsed.data.title,
         imageUrl: parsed.data.imageUrl,
         linkUrl: parsed.data.linkUrl,
-        status: paid ? "PENDING" : "DRAFT",
+        status: paid || banner.status === "ACTIVE" ? "PENDING" : "DRAFT",
       },
     });
 
     revalidatePath("/dashboard/ads");
     revalidatePath("/admin");
     return {
-      success: paid
+      success: paid || banner.status === "ACTIVE"
         ? "Creative saved — it goes live once an admin approves it."
         : "Creative saved. Complete payment to book the slot.",
     };

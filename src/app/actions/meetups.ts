@@ -11,6 +11,9 @@ import {
   INTENT_LABELS,
   MEETUP_MAX_AGE,
   MEETUP_MIN_AGE,
+  ageRangeById,
+  isMeetRadius,
+  parseInterests,
   roundCoord,
 } from "@/lib/meetups";
 
@@ -70,7 +73,15 @@ export async function saveMeetupProfileAction(
       .getAll("intents")
       .map((value) => String(value))
       .filter((value) => value in INTENT_LABELS);
-    if (!intents.length) return { error: "Pick at least one thing you are open to." };
+    if (!intents.length)
+      return { error: "Pick at least one thing you are open to." };
+    const interests = parseInterests(
+      formData.getAll("interests").map((value) => String(value)),
+    );
+    const ageRange =
+      ageRangeById(String(formData.get("ageRange") ?? ""))?.id ?? null;
+    const radius = Number(formData.get("meetRadiusMiles"));
+    const meetRadiusMiles = isMeetRadius(radius) ? radius : null;
 
     const blocked = findBlockedTerm(
       `${parsed.data.displayName} ${parsed.data.bio} ${parsed.data.city}`,
@@ -97,6 +108,9 @@ export async function saveMeetupProfileAction(
       city: parsed.data.city,
       state: parsed.data.state ?? null,
       intents: intents.join(","),
+      interests,
+      ageRange,
+      meetRadiusMiles,
       bio: parsed.data.bio,
       whatsappNumber: parsed.data.whatsapp
         ? normalizeWhatsApp(parsed.data.whatsapp)
@@ -184,7 +198,9 @@ export async function stopSharingMeetupLocationAction() {
 /** Members can hide their own profile without deleting it. */
 export async function toggleMeetupVisibilityAction() {
   const user = await requireUser();
-  const profile = await db.meetupProfile.findUnique({ where: { userId: user.id } });
+  const profile = await db.meetupProfile.findUnique({
+    where: { userId: user.id },
+  });
   if (!profile) return;
 
   await db.meetupProfile.update({
@@ -208,13 +224,18 @@ export async function reportMeetupProfileAction(
   try {
     const user = await requireUser();
     const profileId = String(formData.get("profileId") ?? "");
-    const reason = String(formData.get("reason") ?? "").trim().slice(0, 300);
+    const reason = String(formData.get("reason") ?? "")
+      .trim()
+      .slice(0, 300);
     if (!profileId) return { error: "Nothing to report." };
     if (reason.length < 5) return { error: "Tell us briefly what is wrong." };
 
-    const profile = await db.meetupProfile.findUnique({ where: { id: profileId } });
+    const profile = await db.meetupProfile.findUnique({
+      where: { id: profileId },
+    });
     if (!profile) return { error: "That profile no longer exists." };
-    if (profile.userId === user.id) return { error: "You cannot report yourself." };
+    if (profile.userId === user.id)
+      return { error: "You cannot report yourself." };
 
     await db.meetupReport.upsert({
       where: { profileId_reporterId: { profileId, reporterId: user.id } },

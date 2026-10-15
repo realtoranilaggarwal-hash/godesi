@@ -1,10 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { BannerSlot } from "@prisma/client";
 import {
   activeBanners,
   HEADER_SIZE,
-  HERO_SIZE,
   SIDEBAR_SIZE,
   SIDEBAR_SLOTS,
   SKYSCRAPER_SIZE,
@@ -25,7 +23,6 @@ import { AD_PLACEMENTS } from "@/lib/ads";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
-  HERO: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HERO,
   HEADER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER,
   SIDEBAR: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR,
   SKYSCRAPER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SKYSCRAPER,
@@ -101,15 +98,18 @@ function AdvertiseHere({
   width,
   slot,
   className = "",
+  network = true,
 }: {
   label: string;
   height: number;
   width: number;
   slot: BannerSlot;
   className?: string;
+  /** False keeps ad-network units off; GoDesi's own promos fill the spot. */
+  network?: boolean;
 }) {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const adsenseSlot = ADSENSE_SLOTS[slot];
+  const adsenseSlot = network ? ADSENSE_SLOTS[slot] : undefined;
 
   if (client && adsenseSlot) {
     return (
@@ -154,7 +154,10 @@ function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
 export async function SidebarBanners({
   categorySlug = null,
   parentSlug = null,
+  network = true,
 }: {
+  /** False for pages kept out of the ad network (see thinContent.ts). */
+  network?: boolean;
   /** Lets a category page offer its own "how it works" clip. */
   categorySlug?: string | null;
   parentSlug?: string | null;
@@ -211,6 +214,7 @@ export async function SidebarBanners({
           height={SIDEBAR_SIZE.height}
           width={SIDEBAR_SIZE.width}
           slot="SIDEBAR"
+          network={network}
         />
       ))}
       {/* One 300x600 half page under the rectangles, if anyone has booked it. */}
@@ -245,76 +249,11 @@ export async function SidebarBanners({
             height={SKYSCRAPER_SIZE.height}
             width={SKYSCRAPER_SIZE.width}
             slot="SKYSCRAPER"
+            network={network}
           />
         ))}
       </div>
     </aside>
-  );
-}
-
-/**
- * The homepage hero: a paid full-width creative when one is booked, otherwise our
- * own artwork with an "advertise here" ribbon so the space still sells itself.
- */
-export async function HeroBanner() {
-  const [banner] = await activeBanners("HERO", 1);
-
-  if (banner) {
-    return (
-      <div className="space-y-1">
-        <BannerLink
-          banner={banner}
-          width={HERO_SIZE.width}
-          height={HERO_SIZE.height}
-          className="rounded-3xl"
-        />
-        <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
-      </div>
-    );
-  }
-
-  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const adsenseSlot = ADSENSE_SLOTS.HERO;
-
-  if (client && adsenseSlot) {
-    return (
-      <div>
-        <AdSenseUnit
-          client={client}
-          slotId={adsenseSlot}
-          height={HERO_SIZE.height}
-          className="rounded-3xl"
-          fallback={
-            <HousePromo
-              width={HERO_SIZE.width}
-              height={HERO_SIZE.height}
-              seed="hero"
-            />
-          }
-        />
-        <BookThisSpot slot="HERO" label="homepage hero, monthly or per views" />
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href="/advertise?slot=HERO#book"
-      className="group relative block overflow-hidden rounded-3xl"
-    >
-      <Image
-        src="/hero-banner.jpg"
-        alt="Godesi — your desi community directory: businesses, leads, events, news, connections"
-        width={1983}
-        height={793}
-        priority
-        sizes="100vw"
-        className="h-auto w-full"
-      />
-      <span className="absolute bottom-3 right-3 rounded-xl bg-slate-900/80 px-3 py-2 text-xs font-bold text-white group-hover:bg-indigo-600 sm:text-sm">
-        Book this spot — monthly or pay per views →
-      </span>
-    </Link>
   );
 }
 
@@ -363,23 +302,20 @@ export async function InContentBanner({
     full: "FULLBANNER",
   };
   const desktopSlot = bySize[size];
-  // A 468x60 booking fills the leaderboard spot too, since affiliate creatives
-  // mostly come in that size and the wider unit would otherwise sit empty.
-  const fallbackSlot: BannerSlot | null =
-    desktopSlot === "LEADERBOARD" ? "FULLBANNER" : null;
+  // 468x60 bookings take turns in the leaderboard spot, since affiliate
+  // creatives mostly come in that size.
+  const sharedSlots: BannerSlot[] =
+    desktopSlot === "LEADERBOARD"
+      ? ["LEADERBOARD", "FULLBANNER"]
+      : [desktopSlot];
   const mobile = AD_PLACEMENTS.MOBILE.size;
 
-  const [primary, fallback, phone] = await Promise.all([
-    activeBanners(desktopSlot, 1),
-    fallbackSlot ? activeBanners(fallbackSlot, 1) : Promise.resolve([]),
+  const [wide, phone] = await Promise.all([
+    activeBanners(sharedSlots, 1),
     activeBanners("MOBILE", 1),
   ]);
 
-  const wide = primary.length ? primary : fallback;
-  const wideSlot =
-    !primary.length && fallback.length && fallbackSlot
-      ? fallbackSlot
-      : desktopSlot;
+  const wideSlot = wide[0]?.slot ?? desktopSlot;
   const desktop = AD_PLACEMENTS[wideSlot].size;
 
   return (
@@ -511,6 +447,45 @@ export async function HeaderBanner() {
         height={HEADER_SIZE.height}
       />
       <BookThisSpot slot="HEADER" label="970 × 90 leaderboard" />
+    </div>
+  );
+}
+
+/**
+ * Two 300x250 rectangles for a page's own right-hand column, so a short side
+ * column still carries rotating sponsors (or Godesi promos when unsold).
+ */
+export async function RailRectangles() {
+  const banners = await activeBanners("SIDEBAR", 2);
+
+  return (
+    <div className="space-y-4" aria-label="Sponsored">
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        Sponsored
+      </p>
+      {banners.map((banner) => (
+        <BannerLink
+          key={banner.id}
+          banner={banner}
+          width={SIDEBAR_SIZE.width}
+          height={SIDEBAR_SIZE.height}
+          className="mx-auto max-w-[300px]"
+          sellSlot="SIDEBAR"
+          sellLabel="post your banner here — 300 × 250"
+        />
+      ))}
+      {Array.from({ length: Math.max(2 - banners.length, 0) }).map(
+        (_, index) => (
+          <AdvertiseHere
+            key={`rail-open-${index}`}
+            label={`300 × 250 sidebar banner · profile ${index + 1}`}
+            height={SIDEBAR_SIZE.height}
+            width={SIDEBAR_SIZE.width}
+            slot="SIDEBAR"
+            className="mx-auto max-w-[300px]"
+          />
+        ),
+      )}
     </div>
   );
 }

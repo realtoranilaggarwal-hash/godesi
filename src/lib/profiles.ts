@@ -55,6 +55,7 @@ export const RESERVED_USERNAMES = new Set([
   "city",
   "claim",
   "connect",
+  "rishta",
   "deals",
   "shop",
   "desi-elite",
@@ -89,6 +90,7 @@ export const RESERVED_USERNAMES = new Set([
   "why-list",
   "clubs",
   "complaints",
+  "astrology",
   "forgot-password",
   "guide",
   "media",
@@ -203,7 +205,7 @@ export async function publicProfile(username: string) {
   });
   if (!user) return null;
 
-  const [events, leads, reviews, listings, gigs] = await Promise.all([
+  const [events, leads, reviews, listings, gigs, clubs] = await Promise.all([
     db.event.findMany({
       where: { organizerId: user.id, status: "APPROVED" },
       orderBy: { startsAt: "desc" },
@@ -247,9 +249,32 @@ export async function publicProfile(username: string) {
       take: 6,
       select: GIG_SELECT,
     }),
+    db.clubMember.findMany({
+      where: {
+        userId: user.id,
+        status: "ACTIVE",
+        club: { visibility: "PUBLIC" },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      select: {
+        role: true,
+        club: {
+          select: {
+            slug: true,
+            name: true,
+            imageUrl: true,
+            category: true,
+            city: true,
+            state: true,
+            createdById: true,
+          },
+        },
+      },
+    }),
   ]);
 
-  return { user, events, leads, reviews, listings, gigs };
+  return { user, events, leads, reviews, listings, gigs, clubs };
 }
 
 export type PostedBy = {

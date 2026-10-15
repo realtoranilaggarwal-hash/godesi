@@ -61,25 +61,40 @@ export function AiChat() {
     setSources([]);
     setError(null);
     setBusy(true);
-    try {
+    const body = JSON.stringify({ messages: next.slice(-10) });
+    const ask = async () => {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: next.slice(-10) }),
+        body,
       });
-      const data = (await res.json()) as {
+      const data = (await res.json().catch(() => null)) as {
         reply?: string;
         sources?: Source[];
         error?: string;
-      };
-      if (!res.ok || !data.reply) {
-        setError(data.error ?? "Something went wrong.");
+      } | null;
+      return { res, data };
+    };
+    try {
+      let result = await ask().catch(() => null);
+      if (!result || (!result.data && result.res.status >= 500))
+        result = await ask();
+      const { res, data } = result;
+      if (!res.ok || !data?.reply) {
+        setError(
+          data?.error ??
+            `The assistant didn't answer (error ${res.status}) — please try again.`,
+        );
         return;
       }
       setTurns([...next, { role: "assistant", content: data.reply }]);
       setSources(data.sources ?? []);
     } catch {
-      setError("Network error — please try again.");
+      setError(
+        navigator.onLine
+          ? "Couldn't reach the assistant — please try again."
+          : "You seem to be offline — check your connection and try again.",
+      );
     } finally {
       setBusy(false);
     }

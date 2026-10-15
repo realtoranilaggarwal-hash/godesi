@@ -39,7 +39,9 @@ function StoreButton({ href, label }: { href: string; label: string }) {
 export default async function ShopPage() {
   const { amazonTag, ebayCampaignId, quicklyUrl } = shopConfig();
   const pinned = await recommendedLinks(null, 24, "shop");
-  const stores = pinned.length ? pinned : await recommendedLinks(null, 12);
+  const general =
+    pinned.length < 12 ? await recommendedLinks(null, 12 - pinned.length) : [];
+  const stores = [...pinned, ...general];
   const hasShelfStores = Boolean(amazonTag || ebayCampaignId);
   const storeOffers = await liveStoreOffers(9);
 

@@ -14,7 +14,7 @@ export type HowItWorksContent = ReturnType<typeof howItWorks>;
 
 export function howItWorks() {
   const fee = platformFeePercent();
-  const hero = AD_PLACEMENTS.HERO;
+  const header = AD_PLACEMENTS.HEADER;
   const leaderboard = AD_PLACEMENTS.LEADERBOARD;
   const featureCount = EVENT_FEATURE_GROUPS.reduce(
     (total, group) => total + group.options.length,
@@ -104,10 +104,10 @@ export function howItWorks() {
     ],
     ads: [
       {
-        name: hero.name,
-        priceUsd: hero.priceUsd,
-        priceInr: hero.priceInr,
-        blurb: "Showcase your event at the top of Godesi.com.",
+        name: header.name,
+        priceUsd: header.priceUsd,
+        priceInr: header.priceInr,
+        blurb: "Showcase your event at the top of every Godesi.com page.",
       },
       {
         name: leaderboard.name,

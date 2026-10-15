@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { recentActivity, type RecentBanner } from "@/lib/recentActivity";
 import { thumbImage } from "@/lib/proxyImage";
+import { getCurrentUser } from "@/lib/auth";
+import { optionalRead } from "@/lib/resilient";
 
 function Banner({ banner }: { banner: RecentBanner }) {
   return (
@@ -44,37 +46,71 @@ function Banner({ banner }: { banner: RecentBanner }) {
  * themselves here; hovering pauses it.
  */
 export async function RecentStrip() {
-  const banners = await recentActivity(30);
-  if (banners.length < 4) return null;
+  const [banners, user] = await Promise.all([
+    recentActivity(30),
+    optionalRead(() => getCurrentUser(), null),
+  ]);
+  const showTicker = banners.length >= 4;
 
   return (
     <section aria-label="Recently joined and posted">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-black uppercase tracking-wide text-slate-700">
-          🟢 Just now on GoDesi
-        </h2>
-        <Link
-          href="/people"
-          className="text-xs font-semibold text-indigo-600 hover:underline"
-        >
-          All members →
-        </Link>
+      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+        {showTicker ? (
+          <h2 className="text-sm font-black uppercase tracking-wide text-slate-700">
+            🟢 Just now on GoDesi
+          </h2>
+        ) : null}
+        {user ? null : (
+          <div className="order-last flex min-w-full flex-1 gap-2 sm:order-none sm:min-w-0">
+            <Link
+              href="/signup"
+              className="flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-red-600 px-3 py-2 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-white shadow-md shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:px-5 sm:text-base"
+            >
+              <span className="sm:hidden">📝 Register free →</span>
+              <span className="hidden sm:inline">
+                📝 Register now — it&apos;s free →
+              </span>
+            </Link>
+            <Link
+              href="/login"
+              className="flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl border-2 border-red-600 bg-white px-3 py-2 text-center text-sm min-[360px]:text-base font-black uppercase tracking-wide text-red-600 shadow-md shadow-red-600/20 transition hover:bg-red-50 sm:px-4 sm:text-base"
+            >
+              🔑 Log in
+            </Link>
+          </div>
+        )}
+        {showTicker ? (
+          <Link
+            href="/people"
+            className="text-xs font-semibold text-indigo-600 hover:underline"
+          >
+            All members →
+          </Link>
+        ) : null}
       </div>
-      <div className="ticker-window -mx-4 px-4 py-1 sm:mx-0 sm:px-0">
-        <div
-          className="ticker-track ticker-track--right flex gap-3"
-          style={{ animationDuration: `${Math.max(40, banners.length * 3)}s` }}
-        >
-          {banners.map((banner) => (
-            <Banner key={banner.key} banner={banner} />
-          ))}
-          {banners.map((banner) => (
-            <span key={`repeat-${banner.key}`} aria-hidden className="contents">
-              <Banner banner={banner} />
-            </span>
-          ))}
+      {showTicker ? (
+        <div className="ticker-window -mx-4 px-4 py-1 sm:mx-0 sm:px-0">
+          <div
+            className="ticker-track ticker-track--right flex gap-3"
+            style={{
+              animationDuration: `${Math.max(40, banners.length * 3)}s`,
+            }}
+          >
+            {banners.map((banner) => (
+              <Banner key={banner.key} banner={banner} />
+            ))}
+            {banners.map((banner) => (
+              <span
+                key={`repeat-${banner.key}`}
+                aria-hidden
+                className="contents"
+              >
+                <Banner banner={banner} />
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }

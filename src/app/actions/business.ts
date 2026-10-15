@@ -25,12 +25,13 @@ import {
   missingChoiceGroups,
   specialtySet,
 } from "@/lib/specialties";
-import { uniqueSlug } from "@/lib/uniqueSlug";
+import { slugTaken, uniqueSlug } from "@/lib/uniqueSlug";
+import { slugify } from "@/lib/slug";
 import { normalizeWhatsApp } from "@/lib/format";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
-import { isPlaylistLink } from "@/lib/youtubePlaylist";
+import { isPlaylistLink, resolvePlaylistField } from "@/lib/youtubePlaylist";
 import { titleCase } from "@/lib/titlecase";
 import {
   CONDITIONS,
@@ -165,7 +166,7 @@ const profileSchema = z.object({
   ),
   playlistUrl: optionalUrl.refine(
     (value) => !value || isPlaylistLink(value),
-    "Paste a YouTube playlist link (youtube.com/playlist?list=…)",
+    "Paste a YouTube playlist or channel link (youtube.com/playlist?list=… or youtube.com/@yourchannel)",
   ),
   linkedinUrl: optionalUrl,
   xUrl: optionalUrl,
@@ -258,10 +259,12 @@ export async function saveBusinessProfileAction(
   formData: FormData,
 ): Promise<ActionState> {
   let slug: string;
+  let movedFrom: string | null = null;
   let staffEdit = false;
   let isNew = false;
   try {
     const user = await requireUser();
+    await resolvePlaylistField(formData);
     const parsed = readProfileForm(formData);
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -480,10 +483,32 @@ export async function saveBusinessProfileAction(
     isNew = !existing;
     let businessId: string;
     if (existing) {
+      const typedSlug = String(formData.get("slug") ?? "").trim();
+      const wantedSlug = slugify(typedSlug);
+      if (typedSlug && !wantedSlug)
+        return { error: "The page address needs at least 3 letters or numbers." };
+      const newSlug =
+        wantedSlug && wantedSlug !== existing.slug ? wantedSlug : null;
+      if (newSlug && newSlug.length < 3)
+        return { error: "The page address needs at least 3 letters or numbers." };
+      if (newSlug && (await slugTaken(newSlug, existing.id)))
+        return {
+          error: `godesi.com/b/${newSlug} is already taken — try adding your city, e.g. ${newSlug}-${slugify(data.city) || "usa"}.`,
+        };
       const updated = await db.business.update({
         where: { id: existing.id },
-        data,
+        data: newSlug
+          ? {
+              ...data,
+              slug: newSlug,
+              previousSlugs: [
+                ...existing.previousSlugs.filter((old) => old !== newSlug),
+                existing.slug,
+              ],
+            }
+          : data,
       });
+      if (newSlug) movedFrom = existing.slug;
       slug = updated.slug;
       businessId = updated.id;
     } else {
@@ -521,6 +546,7 @@ export async function saveBusinessProfileAction(
   }
   revalidatePath("/dashboard");
   revalidatePath(`/b/${slug}`);
+  if (movedFrom) revalidatePath(`/b/${movedFrom}`);
   pingIndexNowInBackground(`/b/${slug}`);
   invalidateDirectory();
   if (staffEdit) redirect(`/b/${slug}?saved=1`);
