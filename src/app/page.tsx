@@ -23,7 +23,7 @@ import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
-import { DealOfTheDay } from "@/components/DealOfTheDay";
+import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
 import { visitorPanchang } from "@/lib/panchangGeo";
 
@@ -199,6 +199,8 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        <DealOfTheDayBar />
       </div>
 
       {newMembers.length ? (
@@ -224,8 +226,6 @@ export default async function HomePage() {
       {today.panchang ? (
         <PanchangCard panchang={today.panchang} place={today.label} compact />
       ) : null}
-
-      <DealOfTheDay />
 
       <DealsStrip />
 
