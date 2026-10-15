@@ -22,6 +22,7 @@ import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDay } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
 import { visitorPanchang } from "@/lib/panchangGeo";
@@ -58,34 +59,65 @@ const HERO_PROOF: string[] = [
   "WhatsApp button so customers message you",
 ];
 
+/** Every visitor (and crawler) sees the same shelves, so they are read once a minute. */
+const homeEvents = cachedQuery("home-events", CONTENT_TTL, () =>
+  db.event.findMany({
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    orderBy: { startsAt: "asc" },
+    take: 24,
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
+      organizer: { select: { plan: true } },
+    },
+  }),
+);
+
+const homeNews = cachedQuery("home-news", CONTENT_TTL, () =>
+  db.newsItem.findMany({
+    where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+    orderBy: { publishedAt: "desc" },
+    take: 4,
+  }),
+);
+
+const homeSpaCount = cachedQuery("home-spa-count", CONTENT_TTL, () =>
+  db.business.count({
+    where: {
+      status: "APPROVED",
+      subcategorySlug: "beauty-lifestyle-spa-and-massage",
+    },
+  }),
+);
+
+const homeMembers = cachedQuery("home-members", CONTENT_TTL, () =>
+  newestMembers(12, { withPage: true }),
+);
+
 export default async function HomePage() {
-  const [categories, businesses, upcoming, news, spaCount, newMembers] =
+  const [categories, businesses, eventRows, newsRows, spaCount, memberRows] =
     await Promise.all([
       getCategoryTree(),
       searchBusinesses({ take: 8, sort: "recent" }),
-      db.event.findMany({
-        where: { status: "APPROVED", startsAt: { gte: new Date() } },
-        orderBy: { startsAt: "asc" },
-        take: 24,
-        include: {
-          category: { select: { name: true, icon: true, color: true } },
-          tiers: { select: { price: true } },
-          organizer: { select: { plan: true } },
-        },
-      }),
-      db.newsItem.findMany({
-        where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-        orderBy: { publishedAt: "desc" },
-        take: 4,
-      }),
-      db.business.count({
-        where: {
-          status: "APPROVED",
-          subcategorySlug: "beauty-lifestyle-spa-and-massage",
-        },
-      }),
-      newestMembers(12, { withPage: true }),
+      homeEvents(),
+      homeNews(),
+      homeSpaCount(),
+      homeMembers(),
     ]);
+  // Cached rows come back JSON-serialised, so dates are strings again.
+  const upcoming = eventRows.map((event) => ({
+    ...event,
+    startsAt: new Date(event.startsAt),
+    endsAt: event.endsAt ? new Date(event.endsAt) : null,
+  }));
+  const news = newsRows.map((item) => ({
+    ...item,
+    publishedAt: new Date(item.publishedAt),
+  }));
+  const newMembers = memberRows.map((member) => ({
+    ...member,
+    createdAt: new Date(member.createdAt),
+  }));
   const pickerGroups = await categoryPickerGroups();
   const today = visitorPanchang();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
