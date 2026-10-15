@@ -24,7 +24,12 @@ export type AdPlacement = {
 
 /** The part of a page a placement occupies, drawn on the placement map. */
 export type AdRegion =
-  "header" | "hero" | "top" | "incontent" | "rail" | "phone";
+  | "header"
+  | "hero"
+  | "top"
+  | "incontent"
+  | "rail"
+  | "phone";
 
 export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   HEADER: {
@@ -67,7 +72,9 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       "Rotates between three advertisers",
     ],
     region: "hero",
-    where: [{ label: "Homepage", href: "/" }],
+    where: [
+      { label: "Homepage", href: "/" },
+    ],
   },
   SIDEBAR: {
     slot: "SIDEBAR",

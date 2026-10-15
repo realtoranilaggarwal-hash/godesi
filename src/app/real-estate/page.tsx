@@ -2,15 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { ListingCard } from "@/components/ListingCard";
-import {
-  PropertyFilters,
-  type PropertySearch,
-} from "@/components/PropertyFilters";
-import {
-  InlineBanner,
-  SidebarBanners,
-  SmallBanners,
-} from "@/components/Banners";
+import { PropertyFilters, type PropertySearch } from "@/components/PropertyFilters";
+import { InlineBanner, SidebarBanners, SmallBanners } from "@/components/Banners";
 import { FairHousingNotice } from "@/components/FairHousingNotice";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
@@ -30,9 +23,7 @@ export function generateMetadata({
 }): Metadata {
   const group =
     searchParams.group && searchParams.group in PROPERTY_GROUP_LABELS
-      ? PROPERTY_GROUP_LABELS[
-          searchParams.group as keyof typeof PROPERTY_GROUP_LABELS
-        ]
+      ? PROPERTY_GROUP_LABELS[searchParams.group as keyof typeof PROPERTY_GROUP_LABELS]
       : null;
   const city = searchParams.city?.trim();
   const what = group ? `${group} property` : "Property";
@@ -185,11 +176,7 @@ export default async function RealEstatePage({
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {rooms.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  listing={listing}
-                  cityBase="/rooms"
-                />
+                <ListingCard key={listing.id} listing={listing} cityBase="/rooms" />
               ))}
             </div>
           </section>
@@ -198,9 +185,9 @@ export default async function RealEstatePage({
         <Card className="bg-amber-50">
           <h2 className="font-bold">Selling faster on Godesi</h2>
           <p className="mt-1 text-sm text-slate-700">
-            Free listings show in every search. A featured listing sits on top
-            of its city and in the ⭐ strip on the home page, and agents can run
-            a banner across the property pages.
+            Free listings show in every search. A featured listing sits on top of
+            its city and in the ⭐ strip on the home page, and agents can run a
+            banner across the property pages.
           </p>
           <div className="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
             <Link
@@ -223,10 +210,7 @@ export default async function RealEstatePage({
         <InlineBanner />
       </div>
 
-      <aside
-        data-right-rail
-        className="hidden w-[300px] shrink-0 space-y-4 lg:block"
-      >
+      <aside data-right-rail className="hidden w-[300px] shrink-0 space-y-4 lg:block">
         <TradingTips compact />
         <NeedHelpBox />
         <SidebarBanners />

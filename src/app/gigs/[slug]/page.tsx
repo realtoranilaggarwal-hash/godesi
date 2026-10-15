@@ -17,14 +17,7 @@ import { replyGigReviewAction } from "@/app/actions/gigs";
 import { ActionForm } from "@/components/gigs/GigForms";
 import { FeeNote, GigCard, SellerFace } from "@/components/gigs/GigCard";
 import { Gallery, OrderBox } from "@/components/gigs/GigPagePieces";
-import {
-  Alert,
-  Badge,
-  Card,
-  LinkButton,
-  Stars,
-  inputClass,
-} from "@/components/ui";
+import { Alert, Badge, Card, LinkButton, Stars, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -52,11 +45,7 @@ export async function generateMetadata({
 }
 
 function memberSince(date: Date) {
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  return date.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 }
 
 export default async function GigPage({
@@ -92,9 +81,7 @@ export default async function GigPage({
       where: { gigId: gig.id },
       orderBy: { createdAt: "desc" },
       take: 20,
-      include: {
-        author: { select: { name: true, avatarUrl: true, location: true } },
-      },
+      include: { author: { select: { name: true, avatarUrl: true, location: true } } },
     }),
     sellerStats(gig.sellerId),
   ]);
@@ -117,10 +104,7 @@ export default async function GigPage({
         {gig.tags[0] ? (
           <>
             {" / "}
-            <Link
-              href={`/gigs?tag=${encodeURIComponent(gig.tags[0])}`}
-              className="underline"
-            >
+            <Link href={`/gigs?tag=${encodeURIComponent(gig.tags[0])}`} className="underline">
               {gig.tags[0]}
             </Link>
           </>
@@ -132,9 +116,7 @@ export default async function GigPage({
         <Alert>Payment cancelled — nothing was charged.</Alert>
       ) : null}
       {gig.status === "PAUSED" ? (
-        <Alert tone="info">
-          This gig is paused; the seller is not taking new orders.
-        </Alert>
+        <Alert tone="info">This gig is paused; the seller is not taking new orders.</Alert>
       ) : null}
 
       <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -147,10 +129,7 @@ export default async function GigPage({
               <span className="flex items-center gap-2">
                 <SellerFace seller={gig.seller} size="h-9 w-9" />
                 {gig.seller.username ? (
-                  <Link
-                    href={`/${gig.seller.username}`}
-                    className="font-bold text-slate-900 hover:underline"
-                  >
+                  <Link href={`/${gig.seller.username}`} className="font-bold text-slate-900 hover:underline">
                     {sellerName}
                   </Link>
                 ) : (
@@ -168,8 +147,7 @@ export default async function GigPage({
               )}
               {stats.completed ? (
                 <span className="text-slate-600">
-                  {stats.completed} order{stats.completed === 1 ? "" : "s"}{" "}
-                  completed
+                  {stats.completed} order{stats.completed === 1 ? "" : "s"} completed
                 </span>
               ) : null}
               {stats.inProgress ? (
@@ -213,15 +191,11 @@ export default async function GigPage({
               <dl className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
                 <div>
                   <dt className="text-xs text-slate-500">From</dt>
-                  <dd className="font-semibold">
-                    {gig.seller.location ?? "—"}
-                  </dd>
+                  <dd className="font-semibold">{gig.seller.location ?? "—"}</dd>
                 </div>
                 <div>
                   <dt className="text-xs text-slate-500">Member since</dt>
-                  <dd className="font-semibold">
-                    {memberSince(gig.seller.createdAt)}
-                  </dd>
+                  <dd className="font-semibold">{memberSince(gig.seller.createdAt)}</dd>
                 </div>
                 <div>
                   <dt className="text-xs text-slate-500">Orders completed</dt>
@@ -230,18 +204,12 @@ export default async function GigPage({
                 <div>
                   <dt className="text-xs text-slate-500">Rating</dt>
                   <dd className="font-semibold">
-                    {stats.ratingCount
-                      ? `${stats.rating.toFixed(1)} ★ (${stats.ratingCount})`
-                      : "No reviews yet"}
+                    {stats.ratingCount ? `${stats.rating.toFixed(1)} ★ (${stats.ratingCount})` : "No reviews yet"}
                   </dd>
                 </div>
               </dl>
               {gig.seller.username ? (
-                <LinkButton
-                  href={`/${gig.seller.username}`}
-                  variant="secondary"
-                  className="mt-3 !py-1.5"
-                >
+                <LinkButton href={`/${gig.seller.username}`} variant="secondary" className="mt-3 !py-1.5">
                   See {sellerName}&apos;s card
                 </LinkButton>
               ) : null}
@@ -255,18 +223,12 @@ export default async function GigPage({
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 text-left">
                     <tr>
-                      <th className="px-3 py-2 font-medium text-slate-500">
-                        Package
-                      </th>
+                      <th className="px-3 py-2 font-medium text-slate-500">Package</th>
                       {packages.map((p) => (
                         <th key={p.tier} className="px-3 py-2">
-                          <p className="text-lg font-black">
-                            {usd(p.priceMinor)}
-                          </p>
+                          <p className="text-lg font-black">{usd(p.priceMinor)}</p>
                           <p className="font-bold">{p.name}</p>
-                          <p className="text-xs font-normal text-slate-600">
-                            {p.description}
-                          </p>
+                          <p className="text-xs font-normal text-slate-600">{p.description}</p>
                         </th>
                       ))}
                     </tr>
@@ -316,14 +278,10 @@ export default async function GigPage({
                 {faq.map((row) => (
                   <details key={row.q} className="group px-4 py-3">
                     <summary className="cursor-pointer list-none font-semibold text-slate-900 marker:content-none">
-                      <span className="mr-2 inline-block transition group-open:rotate-90">
-                        ›
-                      </span>
+                      <span className="mr-2 inline-block transition group-open:rotate-90">›</span>
                       {row.q}
                     </summary>
-                    <p className="mt-2 whitespace-pre-line text-sm text-slate-700">
-                      {row.a}
-                    </p>
+                    <p className="mt-2 whitespace-pre-line text-sm text-slate-700">{row.a}</p>
                   </details>
                 ))}
               </div>
@@ -337,28 +295,20 @@ export default async function GigPage({
             {gig.ratingCount ? (
               <div className="mt-2 grid gap-4 sm:grid-cols-[auto_1fr]">
                 <div className="flex items-center gap-2">
-                  <span className="text-3xl font-black">
-                    {rating.toFixed(1)}
-                  </span>
+                  <span className="text-3xl font-black">{rating.toFixed(1)}</span>
                   <Stars rating={rating} size={18} />
                 </div>
                 <ul className="space-y-1 text-xs">
                   {breakdown.map(({ star, count }) => (
                     <li key={star} className="flex items-center gap-2">
-                      <span className="w-12 text-slate-600">
-                        {star} star{star === 1 ? "" : "s"}
-                      </span>
+                      <span className="w-12 text-slate-600">{star} star{star === 1 ? "" : "s"}</span>
                       <span className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
                         <span
                           className="block h-full bg-amber-400"
-                          style={{
-                            width: `${reviews.length ? (count / reviews.length) * 100 : 0}%`,
-                          }}
+                          style={{ width: `${reviews.length ? (count / reviews.length) * 100 : 0}%` }}
                         />
                       </span>
-                      <span className="w-6 text-right text-slate-600">
-                        {count}
-                      </span>
+                      <span className="w-6 text-right text-slate-600">{count}</span>
                     </li>
                   ))}
                 </ul>
@@ -375,17 +325,10 @@ export default async function GigPage({
                   <div className="flex items-center gap-3">
                     <SellerFace seller={review.author} size="h-9 w-9" />
                     <div>
-                      <p className="font-semibold">
-                        {properName(review.author.name)}
-                      </p>
+                      <p className="font-semibold">{properName(review.author.name)}</p>
                       <p className="text-xs text-slate-500">
-                        {review.author.location
-                          ? `${review.author.location} · `
-                          : ""}
-                        {review.createdAt.toLocaleDateString("en-US", {
-                          dateStyle: "medium",
-                          timeZone: "UTC",
-                        })}
+                        {review.author.location ? `${review.author.location} · ` : ""}
+                        {review.createdAt.toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "UTC" })}
                       </p>
                     </div>
                     <Stars rating={review.rating} size={14} />
@@ -403,24 +346,9 @@ export default async function GigPage({
                       <summary className="cursor-pointer text-xs font-semibold text-indigo-700">
                         Reply publicly
                       </summary>
-                      <ActionForm
-                        action={replyGigReviewAction}
-                        submitLabel="Post reply"
-                        className="mt-2"
-                      >
-                        <input
-                          type="hidden"
-                          name="reviewId"
-                          value={review.id}
-                        />
-                        <textarea
-                          name="reply"
-                          required
-                          minLength={2}
-                          maxLength={600}
-                          rows={2}
-                          className={inputClass}
-                        />
+                      <ActionForm action={replyGigReviewAction} submitLabel="Post reply" className="mt-2">
+                        <input type="hidden" name="reviewId" value={review.id} />
+                        <textarea name="reply" required minLength={2} maxLength={600} rows={2} className={inputClass} />
                       </ActionForm>
                     </details>
                   ) : null}
@@ -458,11 +386,7 @@ export default async function GigPage({
           <Card className="space-y-3 lg:sticky lg:top-24">
             {isSeller ? (
               <>
-                <OrderBox
-                  slug={gig.slug}
-                  packages={packages}
-                  canOrder={false}
-                />
+                <OrderBox slug={gig.slug} packages={packages} canOrder={false} />
                 <p className="text-sm text-slate-600">This is your gig.</p>
                 <LinkButton href="/dashboard/gigs" variant="secondary">
                   Manage my gigs
@@ -470,22 +394,12 @@ export default async function GigPage({
               </>
             ) : gig.status !== "ACTIVE" ? (
               <>
-                <OrderBox
-                  slug={gig.slug}
-                  packages={packages}
-                  canOrder={false}
-                />
-                <p className="text-sm text-slate-600">
-                  Not taking orders right now.
-                </p>
+                <OrderBox slug={gig.slug} packages={packages} canOrder={false} />
+                <p className="text-sm text-slate-600">Not taking orders right now.</p>
               </>
             ) : !user ? (
               <>
-                <OrderBox
-                  slug={gig.slug}
-                  packages={packages}
-                  canOrder={false}
-                />
+                <OrderBox slug={gig.slug} packages={packages} canOrder={false} />
                 <p className="text-sm text-slate-600">
                   Sign in to order. Your card is charged now and the money is
                   held by Godesi until you confirm the work.
@@ -498,11 +412,7 @@ export default async function GigPage({
               <OrderBox slug={gig.slug} packages={packages} canOrder />
             )}
             {gig.seller.username && !isSeller ? (
-              <LinkButton
-                href={`/${gig.seller.username}`}
-                variant="ghost"
-                className="w-full"
-              >
+              <LinkButton href={`/${gig.seller.username}`} variant="ghost" className="w-full">
                 Contact {sellerName} first
               </LinkButton>
             ) : null}
