@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -41,8 +42,9 @@ import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 
 export const dynamic = "force-dynamic";
 
-async function getBusiness(slug: string) {
-  return db.business.findUnique({
+/** Shared by generateMetadata and the page, so each visit reads the card once. */
+const getBusiness = cache((slug: string) =>
+  db.business.findUnique({
     where: { slug },
     include: {
       owner: {
@@ -69,31 +71,15 @@ async function getBusiness(slug: string) {
       },
       vehicle: true,
     },
-  });
-}
+  }),
+);
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const business = await db.business.findUnique({
-    where: { slug: params.slug },
-    select: {
-      name: true,
-      category: true,
-      city: true,
-      description: true,
-      logoUrl: true,
-      websiteUrl: true,
-      albumUrl: true,
-      videoUrl: true,
-      address: true,
-      specialties: true,
-      ownerId: true,
-      _count: { select: { media: true, reviews: true } },
-    },
-  });
+  const business = await getBusiness(params.slug);
   if (!business) return { title: "Business not found" };
 
   const title = `${business.name} — ${business.category} in ${business.city}`;
@@ -109,8 +95,8 @@ export async function generateMetadata({
     robots: robotsFor(
       businessIsThin({
         ...business,
-        mediaCount: business._count.media,
-        reviewCount: business._count.reviews,
+        mediaCount: business.media.length,
+        reviewCount: business.reviews.length,
       }),
     ),
     alternates: { canonical: `/b/${params.slug}` },

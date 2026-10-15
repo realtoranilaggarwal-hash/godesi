@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
 import { FeaturedEventStrip } from "@/components/FeaturedEvents";
@@ -31,6 +32,37 @@ import {
   EVENT_LANGUAGES,
   isEventCategory,
 } from "@/lib/eventCategories";
+
+/** The state, venue and category chips are the same for every visitor. */
+const upcomingEventFacets = cachedQuery("event-facets", CONTENT_TTL, () => {
+  const now = new Date();
+  return Promise.all([
+    db.event.groupBy({
+      by: ["state"],
+      where: {
+        status: "APPROVED",
+        startsAt: { gte: now },
+        state: { not: null },
+      },
+      _count: { state: true },
+      orderBy: { _count: { state: "desc" } },
+      take: 40,
+    }),
+    // The halls people ask for by name, so "parties at Royal Albert Palace" is one tap.
+    db.event.groupBy({
+      by: ["venue"],
+      where: { status: "APPROVED", startsAt: { gte: now } },
+      _count: { venue: true },
+      orderBy: [{ _count: { venue: "desc" } }, { venue: "asc" }],
+      take: 200,
+    }),
+    db.event.findMany({
+      where: { status: "APPROVED", startsAt: { gte: now } },
+      select: { genres: true, languages: true },
+      take: 1000,
+    }),
+  ]);
+});
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -174,17 +206,7 @@ export default async function EventsPage({
   // "Events in Florida" is how people ask, so states get their own chip row.
   // "NJ" and "New Jersey" are the same state, so rows are merged on the label
   // they display under rather than on the raw stored text.
-  const rawStateRows = await db.event.groupBy({
-    by: ["state"],
-    where: {
-      status: "APPROVED",
-      startsAt: { gte: new Date() },
-      state: { not: null },
-    },
-    _count: { state: true },
-    orderBy: { _count: { state: "desc" } },
-    take: 40,
-  });
+  const [rawStateRows, venueRows, facetRows] = await upcomingEventFacets();
   const byStateLabel = new Map<string, { code: string; count: number }>();
   for (const row of rawStateRows) {
     const code = row.state ?? "";
@@ -202,22 +224,8 @@ export default async function EventsPage({
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
-  // The halls people ask for by name, so "parties at Royal Albert Palace" is one tap.
-  const venueRows = await db.event.groupBy({
-    by: ["venue"],
-    where: { status: "APPROVED", startsAt: { gte: new Date() } },
-    _count: { venue: true },
-    orderBy: [{ _count: { venue: "desc" } }, { venue: "asc" }],
-    take: 200,
-  });
-
   // Postgres cannot group by the members of an array, so the facets are counted
   // here from the upcoming events and only the ones with events are offered.
-  const facetRows = await db.event.findMany({
-    where: { status: "APPROVED", startsAt: { gte: new Date() } },
-    select: { genres: true, languages: true },
-    take: 1000,
-  });
   const genreCounts = new Map<string, number>();
   const languageCounts = new Map<string, number>();
   for (const row of facetRows) {

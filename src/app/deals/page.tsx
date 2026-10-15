@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { siteUrl } from "@/lib/format";
-import { dealDetails, liveDeals } from "@/lib/deals";
-import { liveStoreOffers } from "@/lib/storeOffers";
+import { dealDetails, cachedLiveDeals } from "@/lib/deals";
+import { cachedLiveStoreOffers } from "@/lib/storeOffers";
 import { DealOfTheDay } from "@/components/DealOfTheDay";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
@@ -22,8 +22,8 @@ export default async function DealsPage({
   searchParams: { category?: string };
 }) {
   const [all, storeOffers] = await Promise.all([
-    liveDeals({ take: 200 }),
-    liveStoreOffers(12),
+    cachedLiveDeals({ take: 200 }),
+    cachedLiveStoreOffers(12),
   ]);
   // Only categories that have an offer running get a chip.
   const categories = Array.from(
