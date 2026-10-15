@@ -7,6 +7,55 @@ import { BannerImpression } from "@/components/BannerImpression";
 
 export type SmallBanner = { id: string; title: string; imageUrl: string };
 
+/** Rail width plus the gap beside it. */
+const RAIL_SPACE = 320 + 24;
+
+/**
+ * Width the page's content really uses. A plain block that only wraps other
+ * blocks (e.g. a centred `max-w-3xl` column) is as wide as its widest child,
+ * and a row of columns where one grows is as wide as its columns added up.
+ */
+function usedWidth(element: Element, depth = 0): number {
+  const width = element.getBoundingClientRect().width;
+  const style = getComputedStyle(element);
+  const children = Array.from(element.children).filter((child) => {
+    const childStyle = getComputedStyle(child);
+    return (
+      childStyle.display !== "none" &&
+      childStyle.position !== "absolute" &&
+      childStyle.position !== "fixed"
+    );
+  });
+  if (depth > 5 || children.length === 0) return width;
+
+  if (style.display === "flex") {
+    const columns =
+      style.flexDirection === "row" &&
+      style.flexWrap === "nowrap" &&
+      !style.justifyContent.startsWith("space-") &&
+      children.some(
+        (child) => parseFloat(getComputedStyle(child).flexGrow) > 0,
+      );
+    if (!columns) return width;
+    const gap = parseFloat(style.columnGap) || 0;
+    const total = children.reduce(
+      (sum, child) => sum + usedWidth(child, depth + 1),
+      gap * (children.length - 1),
+    );
+    return Math.min(width, total);
+  }
+
+  if (
+    style.display !== "block" ||
+    children.some((child) =>
+      getComputedStyle(child).display.startsWith("inline"),
+    )
+  ) {
+    return width;
+  }
+  return Math.max(...children.map((child) => usedWidth(child, depth + 1)));
+}
+
 /** Sections where the page needs the full width and ads would be in the way. */
 const HIDDEN_ON = [
   "/admin",
@@ -33,6 +82,41 @@ export function SmallBannerRail({
   const pathname = usePathname();
   const [offset, setOffset] = useState(0);
   const firstPath = useRef(pathname);
+  const railRef = useRef<HTMLElement>(null);
+  const [hasRoom, setHasRoom] = useState(false);
+
+  useEffect(() => {
+    if (embedded) return;
+    const rail = railRef.current;
+    const page = rail?.previousElementSibling;
+    const main = rail?.parentElement;
+    if (!page || !main) return;
+
+    const check = () => {
+      const mainStyle = getComputedStyle(main);
+      const inner =
+        main.clientWidth -
+        parseFloat(mainStyle.paddingLeft) -
+        parseFloat(mainStyle.paddingRight);
+      setHasRoom(
+        pathname !== "/" &&
+          window.innerWidth >= 1280 &&
+          !page.querySelector("[data-right-rail]") &&
+          usedWidth(page) + RAIL_SPACE < inner - 2,
+      );
+    };
+
+    check();
+    const settle = window.setTimeout(check, 600);
+    const observer = new ResizeObserver(check);
+    observer.observe(page);
+    window.addEventListener("resize", check);
+    return () => {
+      window.clearTimeout(settle);
+      observer.disconnect();
+      window.removeEventListener("resize", check);
+    };
+  }, [pathname, embedded]);
 
   useEffect(() => {
     if (pathname === firstPath.current) return;
@@ -87,8 +171,12 @@ export function SmallBannerRail({
   if (embedded) return stack;
 
   return (
-    <aside data-site-rail className="hidden w-[320px] shrink-0 xl:block">
-      {stack}
+    <aside
+      ref={railRef}
+      data-site-rail
+      className={hasRoom ? "w-[320px] shrink-0" : "hidden"}
+    >
+      {hasRoom && stack}
     </aside>
   );
 }
