@@ -379,7 +379,7 @@ export async function InContentBanner({
           />
         ) : (
           <AdvertiseHere
-            label="320 × 100 mobile banner"
+            label="320 × 100 small banner"
             width={mobile.width}
             height={mobile.height}
             slot="MOBILE"
