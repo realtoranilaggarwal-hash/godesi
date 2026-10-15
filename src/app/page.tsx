@@ -22,6 +22,9 @@ import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
+import { DealOfTheDay } from "@/components/DealOfTheDay";
+import { PanchangCard } from "@/components/PanchangCard";
+import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +87,7 @@ export default async function HomePage() {
       newestMembers(12, { withPage: true }),
     ]);
   const pickerGroups = await categoryPickerGroups();
+  const today = visitorPanchang();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
   const events = [...upcoming]
@@ -184,6 +188,12 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      {today.panchang ? (
+        <PanchangCard panchang={today.panchang} place={today.label} compact />
+      ) : null}
+
+      <DealOfTheDay />
 
       <DealsStrip />
 

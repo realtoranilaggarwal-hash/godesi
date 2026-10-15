@@ -17,6 +17,8 @@ const SIZE = 260;
 const R = SIZE / 2;
 const SLICE_DEG = 360 / SPIN_SLICES.length;
 const SPIN_MS = 4200;
+/** Dispatch on `window` to open the wheel from anywhere on the page. */
+export const OPEN_SPIN_EVENT = "godesi:open-spin";
 
 function point(deg: number, radius: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
@@ -98,7 +100,15 @@ function Wheel({ rotation, animate }: { rotation: number; animate: boolean }) {
   );
 }
 
-function ResultBox({ result }: { result: SpinResult }) {
+function ResultBox({
+  result,
+  bonus,
+  onSpinAgain,
+}: {
+  result: SpinResult;
+  bonus: number;
+  onSpinAgain: () => void;
+}) {
   return (
     <div className="space-y-2 text-center">
       {result.points > 0 ? (
@@ -115,6 +125,15 @@ function ResultBox({ result }: { result: SpinResult }) {
             <DealCard {...result.deal} />
           </div>
         </>
+      ) : null}
+      {bonus > 0 ? (
+        <button
+          type="button"
+          onClick={onSpinAgain}
+          className="rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-6 py-2.5 text-sm font-black text-white shadow hover:brightness-110"
+        >
+          🎁 Spin again — {bonus} bonus {bonus === 1 ? "spin" : "spins"} left
+        </button>
       ) : null}
       <p className="text-xs text-slate-500">
         Come back tomorrow for another free spin ·{" "}
@@ -141,7 +160,16 @@ export function SpinWheel() {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!open || status) return;
+    const show = () => setOpen(true);
+    window.addEventListener(OPEN_SPIN_EVENT, show);
+    return () => window.removeEventListener(OPEN_SPIN_EVENT, show);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    setStatus(null);
+    setShown(null);
+    setAnimate(false);
     spinStatusAction()
       .then((next) => {
         setStatus(next);
@@ -151,12 +179,13 @@ export function SpinWheel() {
         }
       })
       .catch(() => setError("Couldn't load the wheel. Please try again."));
-  }, [open, status]);
+  }, [open]);
 
   if (HIDDEN_ON.some((path) => pathname.startsWith(path))) return null;
 
   const spin = () => {
     setError(null);
+    setShown(null);
     startTransition(async () => {
       try {
         const next = await spinAction();
@@ -164,7 +193,9 @@ export function SpinWheel() {
         if (next.state !== "spun") return;
         setAnimate(true);
         setRotation(
-          landingAngle(next.result.slice, 6, Math.random() * 30 - 15),
+          (prev) =>
+            Math.ceil(prev / 360) * 360 +
+            landingAngle(next.result.slice, 6, Math.random() * 30 - 15),
         );
         window.setTimeout(() => setShown(next.result), SPIN_MS);
       } catch {
@@ -254,18 +285,33 @@ export function SpinWheel() {
                 </Link>
               </p>
             ) : status.state === "ready" ? (
-              <div className="text-center">
+              <div className="space-y-1 text-center">
                 <button
                   type="button"
                   onClick={spin}
                   disabled={pending}
                   className="rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-8 py-3 text-base font-black text-white shadow hover:brightness-110 disabled:opacity-60"
                 >
-                  {pending ? "Spinning…" : "Spin the wheel"}
+                  {pending
+                    ? "Spinning…"
+                    : status.daily
+                      ? "Spin the wheel"
+                      : "🎁 Use a bonus spin"}
                 </button>
+                {status.bonus > 0 ? (
+                  <p className="text-xs font-semibold text-emerald-700">
+                    {status.daily ? "Plus " : "You have "}
+                    {status.bonus} bonus {status.bonus === 1 ? "spin" : "spins"}{" "}
+                    for the interests you picked.
+                  </p>
+                ) : null}
               </div>
             ) : shown ? (
-              <ResultBox result={shown} />
+              <ResultBox
+                result={shown}
+                bonus={status.state === "spun" ? status.bonus : 0}
+                onSpinAgain={spin}
+              />
             ) : (
               <p className="text-center text-sm font-semibold text-slate-600">
                 Spinning…
@@ -281,6 +327,14 @@ export function SpinWheel() {
                   No purchase needed. One free spin per signed-in member with a
                   confirmed email, per day; the day resets at midnight New York
                   time.
+                </li>
+                <li>
+                  Plus one bonus spin for each interest you pick on{" "}
+                  <Link href="/dashboard/offers" className="underline">
+                    My member benefits
+                  </Link>
+                  , once per interest. Unpicking and picking again doesn&apos;t
+                  add another.
                 </li>
                 <li>
                   Odds per spin:{" "}

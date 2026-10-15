@@ -99,15 +99,18 @@ function AdvertiseHere({
   width,
   slot,
   className = "",
+  network = true,
 }: {
   label: string;
   height: number;
   width: number;
   slot: BannerSlot;
   className?: string;
+  /** False keeps ad-network units off; GoDesi's own promos fill the spot. */
+  network?: boolean;
 }) {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  const adsenseSlot = ADSENSE_SLOTS[slot];
+  const adsenseSlot = network ? ADSENSE_SLOTS[slot] : undefined;
 
   if (client && adsenseSlot) {
     return (
@@ -152,7 +155,10 @@ function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
 export async function SidebarBanners({
   categorySlug = null,
   parentSlug = null,
+  network = true,
 }: {
+  /** False for pages kept out of the ad network (see thinContent.ts). */
+  network?: boolean;
   /** Lets a category page offer its own "how it works" clip. */
   categorySlug?: string | null;
   parentSlug?: string | null;
@@ -209,6 +215,7 @@ export async function SidebarBanners({
           height={SIDEBAR_SIZE.height}
           width={SIDEBAR_SIZE.width}
           slot="SIDEBAR"
+          network={network}
         />
       ))}
       {/* One 300x600 half page under the rectangles, if anyone has booked it. */}
@@ -243,6 +250,7 @@ export async function SidebarBanners({
             height={SKYSCRAPER_SIZE.height}
             width={SKYSCRAPER_SIZE.width}
             slot="SKYSCRAPER"
+            network={network}
           />
         ))}
       </div>

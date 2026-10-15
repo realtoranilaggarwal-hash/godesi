@@ -7,6 +7,7 @@ import { HASHTAG_LINKS, PLATFORM_LABELS, SOCIAL_TAG } from "@/lib/social";
 import { socialWallPosts } from "@/lib/socialQueries";
 import { wallItems } from "@/lib/wall";
 import { WallCard } from "@/components/ActivityWall";
+import { TweetEmbed } from "@/components/TweetEmbed";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
 
 export default async function BuzzPage() {
   const [posts, live] = await Promise.all([socialWallPosts(40), wallItems(30)]);
+  const tweets = posts.filter((post) => post.platform === "X");
+  const others = posts.filter((post) => post.platform !== "X");
 
   return (
     <div className="flex gap-6">
@@ -68,6 +71,38 @@ export default async function BuzzPage() {
           </div>
         </Card>
 
+        {tweets.length ? (
+          <section>
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-lg font-bold">
+                #{SOCIAL_TAG} on X 𝕏{" "}
+                <span className="text-sm font-semibold text-slate-500">
+                  {tweets.length} post{tweets.length === 1 ? "" : "s"}
+                </span>
+              </h2>
+              <a
+                href={HASHTAG_LINKS.X}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-indigo-600 hover:underline"
+              >
+                See every #{SOCIAL_TAG} tweet on X ↗
+              </a>
+            </div>
+            <div className="mt-2 grid items-start gap-3 sm:grid-cols-2">
+              {tweets.map((post) => (
+                <TweetEmbed
+                  key={post.id}
+                  url={post.url}
+                  author={post.author}
+                  handle={post.handle}
+                  text={post.text}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         {live.length ? (
           <section>
             <h2 className="text-lg font-bold">Live on Godesi 🟢</h2>
@@ -84,11 +119,11 @@ export default async function BuzzPage() {
           />
         )}
 
-        {posts.length ? (
+        {others.length ? (
           <section>
             <h2 className="text-lg font-bold">Picked from other networks 💬</h2>
             <div className="mt-2 grid gap-3 sm:grid-cols-2">
-              {posts.map((post) => (
+              {others.map((post) => (
                 <SocialWallCard key={post.id} post={post} />
               ))}
             </div>

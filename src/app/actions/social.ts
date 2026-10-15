@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { handleFromUrl, platformFromUrl } from "@/lib/social";
+import { fetchTweet, tweetUrl } from "@/lib/tweetEmbed";
 
 async function requireSocialStaff() {
   const user = await requireUser();
@@ -19,19 +20,60 @@ export async function addSocialPostAction(
 ): Promise<ActionState> {
   try {
     await requireSocialStaff();
-    const url = String(formData.get("url") ?? "").trim();
-    const author = String(formData.get("author") ?? "").trim().slice(0, 80);
-    const text = String(formData.get("text") ?? "").trim().slice(0, 400);
-    const handle = String(formData.get("handle") ?? "").trim().slice(0, 40);
+    const pasted = String(formData.get("url") ?? "").trim();
+    let author = String(formData.get("author") ?? "")
+      .trim()
+      .slice(0, 80);
+    let text = String(formData.get("text") ?? "")
+      .trim()
+      .slice(0, 400);
+    let handle = String(formData.get("handle") ?? "")
+      .trim()
+      .slice(0, 40);
     const imageUrl = String(formData.get("imageUrl") ?? "").trim();
-    const postedAt = String(formData.get("postedAt") ?? "").trim();
+    let postedAt = String(formData.get("postedAt") ?? "").trim();
 
-    if (!/^https?:\/\//i.test(url)) return { error: "Paste the link to the post." };
+    if (!/^https?:\/\//i.test(pasted))
+      return { error: "Paste the link to the post." };
+
+    // A tweet link is enough on its own: X fills in who posted it and what.
+    const canonicalTweet = tweetUrl(pasted);
+    const url = canonicalTweet ?? pasted;
+    let textFromX = false;
+    if (canonicalTweet && (!author || !text)) {
+      const tweet = await fetchTweet(url);
+      if (!tweet) {
+        return {
+          error:
+            "X didn't return that tweet — it may be deleted or private. Check the link, or type who posted it and a line from it.",
+        };
+      }
+      author ||= tweet.author.slice(0, 80);
+      if (!text) {
+        text = tweet.text.slice(0, 400);
+        textFromX = true;
+      }
+      handle ||= tweet.handle;
+      if (!postedAt && tweet.postedAt) postedAt = tweet.postedAt.toISOString();
+    }
     if (author.length < 2) return { error: "Who posted it?" };
-    if (text.length < 10) return { error: "Add a line or two from the post." };
+    if (textFromX ? !text : text.length < 10)
+      return { error: "Add a line or two from the post." };
+
+    // The same tweet may already be saved under a twitter.com or tracking-link form.
+    const tweetId = canonicalTweet?.split("/").pop();
+    const saved = tweetId
+      ? (
+          await db.socialPost.findMany({
+            where: { url: { contains: `/status/${tweetId}` } },
+            select: { id: true, url: true },
+          })
+        ).filter((post) => tweetUrl(post.url) === canonicalTweet)
+      : [];
+    const existing = saved.find((post) => post.url === url) ?? saved[0] ?? null;
 
     await db.socialPost.upsert({
-      where: { url },
+      where: existing ? { id: existing.id } : { url },
       create: {
         url,
         platform: platformFromUrl(url),
@@ -42,6 +84,7 @@ export async function addSocialPostAction(
         postedAt: postedAt ? new Date(postedAt) : new Date(),
       },
       update: {
+        ...(existing && !saved.some((post) => post.url === url) ? { url } : {}),
         author,
         handle: handle || handleFromUrl(url),
         text,

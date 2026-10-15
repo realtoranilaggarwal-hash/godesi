@@ -88,3 +88,14 @@ export const SPIN_TOTAL_WEIGHT = SPIN_SLICES.reduce(
   (sum, s) => sum + s.weight,
   0,
 );
+
+/**
+ * Bonus spins are DailySpin rows keyed by interest instead of by date, so the
+ * (member, day) unique index also pays each picked interest at most once ever.
+ */
+const OFFER_SPIN_PREFIX = "offer:";
+
+export function offerSpinDay(interestId: string) {
+  return `${OFFER_SPIN_PREFIX}${interestId}`;
+}
+

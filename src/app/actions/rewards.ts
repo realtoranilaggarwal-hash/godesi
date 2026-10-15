@@ -155,3 +155,15 @@ export async function setDigestAction(formData: FormData) {
   });
   revalidatePath("/dashboard/notifications");
 }
+
+/** Morning panchang + deal email on or off. */
+export async function setMorningEmailAction(formData: FormData) {
+  const user = await requireUser();
+  const on = formData.get("on") === "yes";
+  await db.user.update({
+    where: { id: user.id },
+    data: { morningEmailAt: on ? new Date() : null },
+  });
+  revalidatePath("/dashboard/notifications");
+  revalidatePath("/astrology/panchang");
+}

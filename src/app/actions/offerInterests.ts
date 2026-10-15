@@ -9,6 +9,7 @@ import {
   parseOfferContact,
   parseOfferInterests,
 } from "@/lib/offerInterests";
+import { offerSpinDay } from "@/lib/spin";
 
 export async function saveOfferInterestsAction(
   _prev: ActionState,
@@ -37,10 +38,19 @@ export async function saveOfferInterestsAction(
       return {
         success: "Saved — no topics picked, so no personalised offers.",
       };
+    const usedSpins = await db.dailySpin.count({
+      where: { userId: user.id, day: { in: offerInterests.map(offerSpinDay) } },
+    });
+    const bonus = offerInterests.length - usedSpins;
+    const spins = bonus
+      ? ` 🎡 You have ${bonus} bonus ${bonus === 1 ? "spin" : "spins"} waiting — tap Spin.`
+      : "";
     return {
-      success: offerContactOk
-        ? "Saved — your benefits are personalised, and a trusted professional may contact you about your topics."
-        : "Saved — your benefits are personalised. Nobody will contact you about them.",
+      success:
+        (offerContactOk
+          ? "Saved — your benefits are personalised, and a trusted professional may contact you about your topics."
+          : "Saved — your benefits are personalised. Nobody will contact you about them.") +
+        spins,
     };
   } catch (error) {
     return fieldError(error);

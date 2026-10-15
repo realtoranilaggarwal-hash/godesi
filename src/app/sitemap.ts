@@ -11,6 +11,7 @@ import { GUIDES } from "@/lib/guides";
 import { COMPLAINT_GUIDES } from "@/lib/complaints";
 import { ASTROLOGY_GUIDES } from "@/lib/astrology";
 import { SIGN_SLUGS } from "@/lib/horoscope";
+import { PANCHANG_CITIES } from "@/lib/panchang";
 import { FESTIVALS, festivalSlug } from "@/lib/festivals";
 
 export const dynamic = "force-dynamic";
@@ -205,6 +206,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${base}/astrology/panchang`,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    ...PANCHANG_CITIES.map((city) => ({
+      url: `${base}/astrology/panchang/${city.slug}`,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    })),
     {
       url: `${base}/astrology/horoscope`,
       changeFrequency: "daily",

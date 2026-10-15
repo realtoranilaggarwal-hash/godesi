@@ -26,6 +26,7 @@ import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
 import { RailRectangles } from "@/components/Banners";
+import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
 import { thumbImage } from "@/lib/proxyImage";
@@ -550,6 +551,8 @@ export default async function PublicProfilePage({
           {!activity && !user.business ? (
             <PostIdeasBanner name={user.name} />
           ) : null}
+
+          <MoreOnGodesi city={user.business?.city ?? null} />
         </div>
 
         <aside data-right-rail className="space-y-4">
