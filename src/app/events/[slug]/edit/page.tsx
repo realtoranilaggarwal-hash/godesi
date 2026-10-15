@@ -8,6 +8,7 @@ import { AdminEventForm } from "@/components/forms/AdminEventForm";
 import { venueSuggestions } from "@/lib/venues";
 import { LEGACY_EVENT_ZONE, wallClockIn } from "@/lib/time";
 import { Card } from "@/components/ui";
+import { EDIT_SPEAKERS, speakerDefaults } from "@/lib/eventSpeakers";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -29,7 +30,10 @@ export default async function EditOwnEventPage({
 
   const event = await db.event.findUnique({
     where: { slug: params.slug },
-    include: { category: { select: { slug: true, parentSlug: true } } },
+    include: {
+      category: { select: { slug: true, parentSlug: true } },
+      speakers: EDIT_SPEAKERS,
+    },
   });
   if (!event || event.sourceId) notFound();
   if (event.organizerId !== user.id) {
@@ -106,6 +110,7 @@ export default async function EditOwnEventPage({
             albumUrl: event.albumUrl ?? "",
             featured: event.featured,
             status: event.status,
+            speakers: speakerDefaults(event.speakers),
           }}
         />
       </Card>

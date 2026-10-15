@@ -21,6 +21,8 @@ import { FormSuccess } from "@/components/forms/FormSuccess";
 import type { VenueOption } from "@/components/forms/EventVenueFields";
 import { LiveStreamFields } from "@/components/forms/LiveStreamFields";
 import { AskReferredByField } from "@/components/forms/AskReferredByField";
+import { SpeakerRow } from "@/components/forms/SpeakerRow";
+import type { SpeakerDefaults } from "@/lib/eventSpeakers";
 
 export type AdminEventValues = {
   id: string;
@@ -58,6 +60,7 @@ export type AdminEventValues = {
   albumUrl: string;
   featured: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
+  speakers: SpeakerDefaults[];
 };
 
 export function AdminEventForm({
@@ -99,6 +102,10 @@ export function AdminEventForm({
     // The hall belonged to the previous venue.
     if (id !== pickedId) setHallName("");
   };
+  // Rows below event.speakers.length are the saved speakers; later ones are new.
+  const [speakerRows, setSpeakerRows] = useState(() =>
+    event.speakers.length ? event.speakers.map((_, index) => index) : [0],
+  );
 
   return (
     <form action={formAction} className="space-y-4">
@@ -404,6 +411,46 @@ export function AdminEventForm({
           </>
         ) : null}
       </div>
+
+      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          Speakers &amp; guests (optional)
+        </legend>
+        <input type="hidden" name="speakersEdited" value="1" />
+        <p className="text-xs text-slate-500">
+          Type a name and we check whether they already have a godesi.com
+          profile, so the event links to the real person. Clear a name or press
+          Remove to take a speaker off.
+        </p>
+        {speakerRows.map((row) => {
+          const saved = event.speakers[row];
+          return (
+            <SpeakerRow
+              key={row}
+              defaultName={saved?.name}
+              defaultBio={saved?.bio}
+              defaultPhotoUrl={saved?.photoUrl}
+              defaultProfile={saved?.profile ?? null}
+              defaultEliteEntryId={saved?.eliteEntryId}
+              onRemove={() =>
+                setSpeakerRows((rows) => rows.filter((item) => item !== row))
+              }
+            />
+          );
+        })}
+        <button
+          type="button"
+          onClick={() =>
+            setSpeakerRows((rows) => [
+              ...rows,
+              Math.max(event.speakers.length - 1, ...rows) + 1,
+            ])
+          }
+          className="text-sm font-semibold text-indigo-600 hover:underline"
+        >
+          + Add another speaker
+        </button>
+      </fieldset>
 
       <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton>Save event</SubmitButton>

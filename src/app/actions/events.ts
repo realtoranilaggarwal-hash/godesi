@@ -5,8 +5,7 @@ import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { publicProfileIds } from "@/lib/peopleLookup";
-import { eliteForFamousSpeaker } from "@/lib/famousPeople";
+import { readSpeakers } from "@/lib/eventSpeakers";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
@@ -88,13 +87,6 @@ const optionalUrl = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
-type SpeakerInput = {
-  name: string;
-  bio: string | null;
-  photoUrl: string | null;
-  userId: string | null;
-  eliteEntryId: string | null;
-};
 type SessionInput = {
   title: string;
   stage: string | null;
@@ -103,49 +95,7 @@ type SessionInput = {
   endTime: string | null;
 };
 
-const MAX_SPEAKERS = 12;
 const MAX_SESSIONS = 20;
-
-/** Repeated speaker rows; rows without a name are skipped. */
-async function readSpeakers(formData: FormData): Promise<SpeakerInput[]> {
-  const names = formData
-    .getAll("speakerName")
-    .map((value) => String(value).trim());
-  const bios = formData
-    .getAll("speakerBio")
-    .map((value) => String(value).trim());
-  const photos = formData
-    .getAll("speakerPhoto")
-    .map((value) => String(value).trim());
-  const users = formData
-    .getAll("speakerUser")
-    .map((value) => String(value).trim());
-  const famous = formData
-    .getAll("speakerWiki")
-    .map((value) => String(value).trim());
-  const linkable = await publicProfileIds(users);
-
-  const speakers: SpeakerInput[] = [];
-  for (
-    let index = 0;
-    index < names.length && speakers.length < MAX_SPEAKERS;
-    index += 1
-  ) {
-    if (!names[index]) continue;
-    const userId = linkable.has(users[index]) ? users[index] : null;
-    speakers.push({
-      name: names[index].slice(0, 120),
-      bio: bios[index]?.slice(0, 600) || null,
-      photoUrl: photos[index] || null,
-      userId,
-      eliteEntryId:
-        !userId && famous[index]
-          ? await eliteForFamousSpeaker(famous[index]).catch(() => null)
-          : null,
-    });
-  }
-  return speakers;
-}
 
 /** Repeated agenda rows; rows without a title are skipped. */
 function readSessions(formData: FormData): SessionInput[] {
