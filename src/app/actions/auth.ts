@@ -23,6 +23,7 @@ import {
   parseOfferContact,
   parseOfferInterests,
 } from "@/lib/offerInterests";
+import { parseJoinGoals } from "@/lib/joinGoals";
 
 /**
  * A name claimed on the homepage. It is only kept if it is still free when the
@@ -89,6 +90,8 @@ export async function signupAction(
       offerInterests.length > 0 &&
       parseOfferContact(formData.get("offerContact"));
 
+    const joinGoals = parseJoinGoals(formData.getAll("goals"));
+
     const role: Role = parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS";
     const claimed = await claimedUsername(formData.get("username"));
     const account = {
@@ -103,6 +106,8 @@ export async function signupAction(
       offerInterestsAt: offerInterests.length ? new Date() : null,
       offerContactOk,
       offerContactAt: offerContactOk ? new Date() : null,
+      joinGoals,
+      joinGoalsAt: joinGoals.length ? new Date() : null,
     };
 
     // The name may be gone between the check and the insert. Losing that race

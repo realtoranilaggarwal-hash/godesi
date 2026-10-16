@@ -261,6 +261,11 @@ model User {
   /// When the member last gave that contact permission.
   offerContactAt   DateTime?
 
+  /// What the member said they want to do on GoDesi (lib/joinGoals ids), asked at signup.
+  joinGoals   String[]  @default([])
+  /// Last time the member saved those goals.
+  joinGoalsAt DateTime?
+
   /// Phone kept for journalist verification; never shown publicly.
   phone           String?
   phoneVerifiedAt DateTime?
@@ -352,6 +357,7 @@ model User {
   meetupProfile MeetupProfile?
 
   rishtaProfile RishtaProfile?
+  ambassador    Ambassador?
   rishtaReports RishtaReport[]
   meetupReports MeetupReport[]
   alumni        AlumniRecord[]
@@ -2837,6 +2843,39 @@ model MediaApplication {
   adminNote    String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([status])
+}
+
+enum AmbassadorStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+/// A member applying to be a GoDesi local ambassador. They sign the ethics
+/// pledge by typing their name; staff approve them on /admin/ambassadors, and
+/// approval gives the profile badge and the printable certificate.
+model Ambassador {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city          String
+  phone         String?
+  /// Why they want to represent GoDesi and what they can do.
+  pitch         String
+  /// Ways they want to help (lib/joinGoals AMBASSADOR_HELP ids).
+  helps         String[]         @default([])
+  /// Name typed under the ethics pledge, and when they signed it.
+  signedName    String
+  pledgedAt     DateTime
+  status        AmbassadorStatus @default(PENDING)
+  /// Certificate number shown on the certificate, set on approval.
+  certificateNo Int?             @unique
+  approvedAt    DateTime?
+  adminNote     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 
   @@index([status])
 }

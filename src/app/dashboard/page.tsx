@@ -26,6 +26,7 @@ import { EarnStrip } from "@/components/EarnStrip";
 import { pointValues, wallet } from "@/lib/rewardsQueries";
 import { offerInterest } from "@/lib/offerInterests";
 import { formatEventDate } from "@/lib/events";
+import { JoinGoalSteps } from "@/components/JoinGoalSteps";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -281,6 +282,8 @@ export default async function DashboardPage({
             }
           />
         ) : null}
+
+        <JoinGoalSteps goals={user.joinGoals} />
 
         {user.offerInterests.length ? (
           <p className="rounded-xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
