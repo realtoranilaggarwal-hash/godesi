@@ -75,6 +75,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆", need: "staff" },
   { href: "/admin/media", label: "Media team", icon: "🎙️", need: "staff" },
   {
+    href: "/admin/ambassadors",
+    label: "Ambassadors",
+    icon: "🤝",
+    need: "staff",
+  },
+  {
     href: "/admin/live-channels",
     label: "Radio & TV",
     icon: "🎧",
