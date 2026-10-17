@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useFormState } from "react-dom";
 import { editChatterPostAction } from "@/app/actions/chatter";
 import { emptyState } from "@/lib/actions";
-import { CHATTER_LANGUAGES, CHATTER_MAX, CHATTER_TOPICS } from "@/lib/chatter";
+import {
+  CHATTER_LANGUAGES,
+  CHATTER_MAX,
+  CHATTER_TOPICS,
+} from "@/lib/chatterConstants";
 import { SubmitButton } from "@/components/SubmitButton";
 import { inputClass } from "@/components/ui";
 
