@@ -268,16 +268,19 @@ export async function SmallBanners({
   embedded = false,
   start = 0,
   side,
+  tree = true,
 }: {
   show?: number;
   embedded?: boolean;
+  /** Category tree above the banners; off where the page already lists them. */
+  tree?: boolean;
   start?: number;
   side?: "left" | "right";
 } = {}) {
   if (isPhoneRequest()) return null;
   const [banners, categories] = await Promise.all([
     activeBanners("MOBILE", 20),
-    embedded || side === "left" ? [] : categoryPickerGroups(),
+    tree && side !== "left" ? categoryPickerGroups() : [],
   ]);
   return (
     <SmallBannerRail

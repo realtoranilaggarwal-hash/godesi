@@ -6,6 +6,7 @@ import { BusinessTile } from "@/components/BusinessTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryFeatured } from "@/components/CategoryFeatured";
+import { CategoryTree } from "@/components/CategoryTree";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
@@ -232,7 +233,14 @@ export default async function HomePage() {
 
       <DealsStrip />
 
-      <CategoryFeatured />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <CategoryFeatured />
+        <aside className="hidden xl:block">
+          <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <CategoryTree groups={pickerGroups} />
+          </div>
+        </aside>
+      </div>
 
       <DjsWikiCard />
 
