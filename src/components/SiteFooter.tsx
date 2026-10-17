@@ -61,6 +61,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Community",
       links: [
         { href: "/connect", label: "Connect" },
+        { href: "/chatter", label: "💬 GoDesi Chatter" },
         { href: "/rishta", label: "💍 Rishta — marriage profiles" },
         { href: "/rishta/new", label: "Post a Rishta profile" },
         { href: "/clubs", label: "🎤 Clubs — karaoke, cricket, foodies" },

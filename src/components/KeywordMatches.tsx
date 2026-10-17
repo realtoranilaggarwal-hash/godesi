@@ -5,7 +5,7 @@ import { Card } from "@/components/ui";
 import { formatEventDate } from "@/lib/events";
 import type { KeywordResults } from "@/lib/keywordSearch";
 
-type Section = "deals" | "events" | "news" | "posts";
+type Section = "deals" | "events" | "news" | "posts" | "chatter";
 
 /** Deals, coupons, events and stories that mention what the visitor searched. */
 export function KeywordMatches({
@@ -22,9 +22,38 @@ export function KeywordMatches({
   const events = show.includes("events") ? results.events : [];
   const news = show.includes("news") ? results.news : [];
   const posts = show.includes("posts") ? results.posts : [];
+  const chatter = show.includes("chatter") ? results.chatter : [];
 
   return (
     <>
+      {chatter.length ? (
+        <Card>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-bold">
+              💬 On GoDesi Chatter about “{term}”
+            </h2>
+            <Link
+              href={`/chatter?tag=${encodeURIComponent(term.replace(/^#/, "").toLowerCase())}`}
+              className="text-xs font-semibold text-indigo-700 underline"
+            >
+              See all on Chatter
+            </Link>
+          </div>
+          <ul className="mt-2 divide-y divide-slate-100">
+            {chatter.map((post) => (
+              <li key={post.id} className="py-2">
+                <Link
+                  href={`/chatter/${post.id}`}
+                  className="text-sm text-slate-800 hover:underline"
+                >
+                  {post.excerpt}
+                </Link>
+                <p className="text-xs text-slate-500">— {post.author}</p>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
       {deals.length || offers.length ? (
         <section className="space-y-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">

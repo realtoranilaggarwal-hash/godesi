@@ -55,7 +55,8 @@ export async function storeImage({
     | "classifieds"
     | "banners"
     | "gigs"
-    | "websites";
+    | "websites"
+    | "chatter";
   ownerId: string;
 }) {
   const blob = await put(
