@@ -27,6 +27,7 @@ import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
+import { RishtaHomeBox } from "@/components/RishtaHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
@@ -226,6 +227,8 @@ export default async function HomePage() {
       ) : null}
 
       <ChatterHomeBox />
+
+      <RishtaHomeBox />
 
       {today.panchang ? (
         <PanchangCard panchang={today.panchang} place={today.label} compact />
