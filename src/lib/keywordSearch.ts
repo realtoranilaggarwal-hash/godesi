@@ -1,6 +1,8 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
+import { chatterExcerpt } from "@/lib/chatter";
+import { properName } from "@/lib/names";
 import { dealDetails, dealSelect, liveDealWhere } from "@/lib/deals";
 import { liveStoreOfferWhere, storeOfferSelect } from "@/lib/storeOffers";
 
@@ -206,6 +208,24 @@ async function search(query: string) {
       select: { slug: true, title: true, excerpt: true, publishedAt: true },
     }),
   ]);
+  const chatter = await db.chatterPost.findMany({
+    where: {
+      hiddenAt: null,
+      author: { bannedAt: null },
+      OR: [
+        { tags: { hasSome: tagTerms } },
+        ...(anyWordIn(["body"], words) as Prisma.ChatterPostWhereInput[]),
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+    select: {
+      id: true,
+      body: true,
+      createdAt: true,
+      author: { select: { name: true } },
+    },
+  });
 
   // Dates leave as ISO strings: the cache serialises whatever it holds.
   return {
@@ -257,6 +277,12 @@ async function search(query: string) {
       title,
       excerpt,
       publishedAt: publishedAt.toISOString(),
+    })),
+    chatter: chatter.map((post) => ({
+      id: post.id,
+      excerpt: chatterExcerpt(post.body, 140),
+      author: properName(post.author.name),
+      createdAt: post.createdAt.toISOString(),
     })),
   };
 }

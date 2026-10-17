@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { chatterPath } from "@/lib/chatter";
 import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
@@ -78,6 +79,18 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
         select: { slug: true, updatedAt: true },
       }),
     ]);
+  // A lone one-liner is a thin page; only posts people answered or liked go in.
+  const chats = await db.chatterPost.findMany({
+    where: {
+      parentId: null,
+      hiddenAt: null,
+      author: { bannedAt: null },
+      OR: [{ replyCount: { gt: 0 } }, { likeCount: { gte: 2 } }],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 2000,
+    select: { id: true, createdAt: true, editedAt: true },
+  });
   return {
     businesses: businesses
       .filter(
@@ -115,13 +128,17 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       slug: row.slug,
       updatedAt: row.updatedAt.toISOString(),
     })),
+    chats: chats.map((row) => ({
+      id: row.id,
+      updatedAt: (row.editedAt ?? row.createdAt).toISOString(),
+    })),
   };
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const [
-    { businesses, categories, events, reports, posts, worship, clubs },
+    { businesses, categories, events, reports, posts, worship, clubs, chats },
     cities,
     professionals,
   ] = await Promise.all([
@@ -187,6 +204,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/live-tv`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/categories`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/connect`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${base}/chatter`, changeFrequency: "hourly", priority: 0.6 },
     { url: `${base}/rishta`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/clubs`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/alumni`, changeFrequency: "daily", priority: 0.6 },
@@ -262,6 +280,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(club.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.6,
+    })),
+    ...chats.map((chat) => ({
+      url: `${base}${chatterPath(chat.id)}`,
+      lastModified: new Date(chat.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.4,
     })),
     ...cities.map((city) => ({
       url: `${base}/city/${city.slug}`,

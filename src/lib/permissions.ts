@@ -22,6 +22,11 @@ export const STAFF_PERMISSIONS = [
     label: "Gigs",
     hint: "Settle gig disputes and record hand payouts",
   },
+  {
+    key: "chatter",
+    label: "Chatter",
+    hint: "Remove or restore Chatter posts and clear reports",
+  },
 ] as const;
 
 export type StaffPermission = (typeof STAFF_PERMISSIONS)[number]["key"];

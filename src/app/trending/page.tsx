@@ -58,6 +58,7 @@ export default async function TrendingPage({
   const localCount = local
     ? local.news.length +
       local.posts.length +
+      local.chatter.length +
       local.deals.length +
       local.storeOffers.length +
       local.links.length
@@ -104,7 +105,7 @@ export default async function TrendingPage({
             <KeywordMatches
               term={tag}
               results={local}
-              show={["news", "posts", "deals"]}
+              show={["chatter", "news", "posts", "deals"]}
             />
             {local.links.length ? (
               <p className="text-sm text-slate-600">
