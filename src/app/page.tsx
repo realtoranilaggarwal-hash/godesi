@@ -134,6 +134,8 @@ export default async function HomePage() {
       <div className="space-y-3">
         <RecentStrip />
 
+        <ChatterHomeBox />
+
         <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6">
           <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <div>
@@ -225,8 +227,6 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
-
-      <ChatterHomeBox />
 
       <RishtaHomeBox />
 
