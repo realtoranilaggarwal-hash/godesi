@@ -154,37 +154,39 @@ export default async function HomePage() {
                   somebody else does.
                 </p>
 
-                <div className="xl:flex xl:items-center xl:gap-4">
-                  <div className="mt-4 xl:mt-3 xl:w-[34rem] xl:shrink-0">
+                <div className="xl:flex xl:items-start xl:gap-4">
+                  <div className="mt-4 xl:mt-3 xl:w-[30rem] xl:shrink-0">
                     <HandleClaim />
                   </div>
 
-                  <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90 xl:mt-0">
-                    {HERO_PROOF.map((line) => (
-                      <li key={line}>✓ {line}</li>
-                    ))}
-                  </ul>
-                </div>
+                  <div className="min-w-0 xl:mt-3">
+                    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90 xl:mt-0">
+                      {HERO_PROOF.map((line) => (
+                        <li key={line}>✓ {line}</li>
+                      ))}
+                    </ul>
 
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  <Link
-                    href="/add-business"
-                    className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
-                  >
-                    Add your business free
-                  </Link>
-                  <Link
-                    href="/why-godesi"
-                    className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                  >
-                    Everything you get on GoDesi
-                  </Link>
-                  <Link
-                    href="/people"
-                    className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                  >
-                    See members&rsquo; pages
-                  </Link>
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5 xl:mt-2">
+                      <Link
+                        href="/add-business"
+                        className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
+                      >
+                        Add your business free
+                      </Link>
+                      <Link
+                        href="/why-godesi"
+                        className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                      >
+                        Everything you get on GoDesi
+                      </Link>
+                      <Link
+                        href="/people"
+                        className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                      >
+                        See members&rsquo; pages
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="xl:hidden">
