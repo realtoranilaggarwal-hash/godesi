@@ -26,13 +26,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Resources" },
         { href: "/news", label: "News" },
-        { href: "/trending", label: "🔥 Trending hashtags" },
-        { href: "/festivals", label: "🪔 Festival calendar" },
-        { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
-        { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
         { href: "/blog", label: "Blog" },
         { href: "/guide", label: "City guides" },
-        { href: "/astrology", label: "🔮 Astrology guides" },
         { href: "/find", label: "Search everything" },
       ],
     },
@@ -74,13 +69,10 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/journalists", label: "Become a local journalist" },
         { href: "/rewards", label: "Refer & earn rewards" },
         { href: "/leaderboard", label: "🏅 Top contributors" },
-        { href: "/safety", label: "Trust & safety" },
-        { href: "/complaints", label: "⚠️ How to file a complaint" },
-        { href: "/news/report?topic=consumer", label: "Post a consumer alert" },
       ],
     },
     {
-      title: "Live & media",
+      title: "Live, media & daily",
       links: [
         { href: "/live-radio", label: "🎧 Listen live — desi radio" },
         { href: "/live-tv", label: "📺 Watch live — desi TV" },
@@ -90,6 +82,11 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
         { href: "/media", label: "🎙️ GoDesi Media · Desi Who's Who" },
         { href: "/media/join", label: "Join the media team" },
+        { href: "/trending", label: "🔥 Trending hashtags" },
+        { href: "/festivals", label: "🪔 Festival calendar" },
+        { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
+        { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
+        { href: "/astrology", label: "🔮 Astrology guides" },
       ],
     },
     {
@@ -105,6 +102,9 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/privacy", label: "Privacy policy" },
         { href: "/cookies", label: "Cookie policy" },
         { href: "/refunds", label: "Refund policy" },
+        { href: "/safety", label: "Trust & safety" },
+        { href: "/complaints", label: "⚠️ How to file a complaint" },
+        { href: "/news/report?topic=consumer", label: "Post a consumer alert" },
       ],
     },
   ];
@@ -187,7 +187,7 @@ export function SiteFooter() {
                   )}
                 </li>
               ))}
-              {section.title === "Live & media" && statsUrl ? (
+              {section.title === "Live, media & daily" && statsUrl ? (
                 <li>
                   <a
                     href={statsUrl}

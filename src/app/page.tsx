@@ -7,6 +7,7 @@ import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryFeatured } from "@/components/CategoryFeatured";
 import { CategoryTree } from "@/components/CategoryTree";
+import { SmallBanners } from "@/components/Banners";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
@@ -205,7 +206,16 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <DealOfTheDayBar />
+        <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+          <DealOfTheDayBar />
+          {today.panchang ? (
+            <PanchangCard
+              panchang={today.panchang}
+              place={today.label}
+              compact
+            />
+          ) : null}
+        </div>
       </div>
 
       {newMembers.length ? (
@@ -230,46 +240,43 @@ export default async function HomePage() {
 
       <RishtaHomeBox />
 
-      {today.panchang ? (
-        <PanchangCard panchang={today.panchang} place={today.label} compact />
-      ) : null}
-
       <DealsStrip />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <CategoryFeatured />
-        <aside className="hidden xl:block">
-          <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
-            <CategoryTree groups={pickerGroups} />
-          </div>
+        <aside className="hidden space-y-4 xl:block">
+          <CategoryTree groups={pickerGroups} />
+          <SmallBanners embedded tree={false} show={5} />
         </aside>
       </div>
 
-      <DjsWikiCard />
-
       <div className="space-y-8">
-        <section className="flex flex-col gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            <span className="font-bold">
-              ⚠️ Mouldy sweets, kept deposit, unpaid wages?
-            </span>{" "}
-            Step-by-step: who to call and what to photograph — US &amp; Canada.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/complaints"
-              className="rounded-xl bg-rose-600 px-3 py-1.5 font-bold text-white hover:bg-rose-700"
-            >
-              How to file a complaint
-            </Link>
-            <Link
-              href="/news/report?topic=consumer"
-              className="rounded-xl border border-rose-300 bg-white px-3 py-1.5 font-bold text-rose-700 hover:bg-rose-100"
-            >
-              Post a consumer alert
-            </Link>
-          </div>
-        </section>
+        <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+          <DjsWikiCard />
+          <section className="flex flex-col justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+            <p>
+              <span className="font-bold">
+                ⚠️ Mouldy sweets, kept deposit, unpaid wages?
+              </span>{" "}
+              Step-by-step: who to call and what to photograph — US &amp;
+              Canada.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/complaints"
+                className="rounded-xl bg-rose-600 px-3 py-1.5 font-bold text-white hover:bg-rose-700"
+              >
+                How to file a complaint
+              </Link>
+              <Link
+                href="/news/report?topic=consumer"
+                className="rounded-xl border border-rose-300 bg-white px-3 py-1.5 font-bold text-rose-700 hover:bg-rose-100"
+              >
+                Post a consumer alert
+              </Link>
+            </div>
+          </section>
+        </div>
         <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
           {news.length ? (
             <section className="lg:col-span-2">

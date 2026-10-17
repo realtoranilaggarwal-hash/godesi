@@ -55,77 +55,93 @@ export async function DealOfTheDayBar() {
   const { deal, offer } = await cachedDealOfTheDay();
 
   return (
-    <section className="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm">
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <h2 className="shrink-0 font-bold text-emerald-900">
-          ⏰ Deal of the day
-        </h2>
-        {deal ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-            <Link
-              href={`/b/${deal.business.slug}`}
-              className="min-w-0 truncate font-semibold text-slate-800 hover:text-indigo-700"
-            >
-              🏷️ {deal.title}{" "}
-              <span className="font-normal text-slate-500">
-                · {deal.business.name}
-              </span>
-            </Link>
-            {deal.code ? <DealCode code={deal.code} /> : null}
-            {deal.linkUrl ? (
-              <a
-                href={deal.linkUrl}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="text-xs font-semibold text-indigo-700 hover:underline"
+    <section className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm">
+      <span
+        aria-hidden
+        className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-3xl"
+      >
+        🛍️
+        <span className="absolute -right-1 -top-1 text-lg">⏰</span>
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-col gap-1">
+          <h2 className="shrink-0 font-bold text-emerald-900">
+            ⏰ Deal of the day
+          </h2>
+          {deal ? (
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+              <Link
+                href={`/b/${deal.business.slug}`}
+                className="min-w-0 truncate font-semibold text-slate-800 hover:text-indigo-700"
               >
-                Claim →
+                🏷️ {deal.title}{" "}
+                <span className="font-normal text-slate-500">
+                  · {deal.business.name}
+                </span>
+              </Link>
+              {deal.code ? <DealCode code={deal.code} /> : null}
+              {deal.linkUrl ? (
+                <a
+                  href={deal.linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="text-xs font-semibold text-indigo-700 hover:underline"
+                >
+                  Claim →
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+          {offer ? (
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+              <a
+                href={`/api/offers/${offer.id}/click`}
+                target="_blank"
+                rel="noopener noreferrer sponsored nofollow"
+                className="min-w-0 truncate font-semibold text-slate-800 hover:text-indigo-700"
+              >
+                🛒 {offer.title}{" "}
+                <span className="font-normal text-slate-500">
+                  · {offer.advertiserName}
+                </span>
               </a>
-            ) : null}
-          </div>
-        ) : null}
-        {offer ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-            <a
-              href={`/api/offers/${offer.id}/click`}
-              target="_blank"
-              rel="noopener noreferrer sponsored nofollow"
-              className="min-w-0 truncate font-semibold text-slate-800 hover:text-indigo-700"
-            >
-              🛒 {offer.title}{" "}
-              <span className="font-normal text-slate-500">
-                · {offer.advertiserName}
+              {offer.code ? <DealCode code={offer.code} /> : null}
+              <span className="text-[10px] uppercase tracking-wide text-slate-400">
+                Paid link
               </span>
-            </a>
-            {offer.code ? <DealCode code={offer.code} /> : null}
-            <span className="text-[10px] uppercase tracking-wide text-slate-400">
-              Paid link
-            </span>
-          </div>
-        ) : null}
-        {!deal && !offer ? (
-          <p className="flex-1 text-slate-600">
-            Today&rsquo;s pick is on its way — see every offer on the deals page.
-          </p>
-        ) : null}
-      </div>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-emerald-200/70 pt-1.5 text-xs">
-        <Link href="/deals" className="font-semibold text-indigo-700 hover:underline">
-          All deals →
-        </Link>
-        <Link href="/shop" className="font-semibold text-indigo-700 hover:underline">
-          🛍️ Shop →
-        </Link>
-        <span className="text-slate-600">
-          Own a business?{" "}
+            </div>
+          ) : null}
+          {!deal && !offer ? (
+            <p className="flex-1 text-slate-600">
+              Today&rsquo;s pick is on its way — see every offer on the deals
+              page.
+            </p>
+          ) : null}
+        </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-emerald-200/70 pt-1.5 text-xs">
           <Link
-            href="/dashboard/deals"
-            className="font-semibold text-emerald-800 underline hover:text-emerald-900"
+            href="/deals"
+            className="font-semibold text-indigo-700 hover:underline"
           >
-            Post your deal free
-          </Link>{" "}
-          — it shows here, on your page and on /deals.
-        </span>
+            All deals →
+          </Link>
+          <Link
+            href="/shop"
+            className="font-semibold text-indigo-700 hover:underline"
+          >
+            🛍️ Shop →
+          </Link>
+          <span className="text-slate-600">
+            Own a business?{" "}
+            <Link
+              href="/dashboard/deals"
+              className="font-semibold text-emerald-800 underline hover:text-emerald-900"
+            >
+              Post your deal free
+            </Link>{" "}
+            — it shows here, on your page and on /deals.
+          </span>
+        </div>
       </div>
     </section>
   );
