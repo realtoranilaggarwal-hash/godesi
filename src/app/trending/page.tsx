@@ -3,6 +3,8 @@ import Link from "next/link";
 import { cleanTag, hashtagWall } from "@/lib/hashtag";
 import { siteUrl } from "@/lib/format";
 import { SidebarBanners } from "@/components/Banners";
+import { KeywordMatches } from "@/components/KeywordMatches";
+import { keywordSearch } from "@/lib/keywordSearch";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -48,7 +50,18 @@ export default async function TrendingPage({
   searchParams: { tag?: string };
 }) {
   const tag = cleanTag(searchParams.tag ?? "");
-  const hits = tag ? await hashtagWall(tag) : [];
+  const [hits, local] = await Promise.all([
+    tag ? hashtagWall(tag) : Promise.resolve([]),
+    tag ? keywordSearch(tag) : Promise.resolve(null),
+  ]);
+  const word = tag.replace(/^#/, "");
+  const localCount = local
+    ? local.news.length +
+      local.posts.length +
+      local.deals.length +
+      local.storeOffers.length +
+      local.links.length
+    : 0;
 
   return (
     <div className="flex gap-6">
@@ -58,8 +71,8 @@ export default async function TrendingPage({
             Trending hashtags #️⃣
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-white/90">
-            Type a hashtag or keyword — live headlines and public posts about it
-            appear below.
+            Type a hashtag or keyword — GoDesi news, blogs and deals that use
+            it, plus live headlines and public posts, appear below.
           </p>
           <form action="/trending" className="mt-4 flex flex-wrap gap-2">
             <input
@@ -86,7 +99,29 @@ export default async function TrendingPage({
           </div>
         </section>
 
-        {tag && !hits.length ? (
+        {local && localCount ? (
+          <>
+            <KeywordMatches
+              term={tag}
+              results={local}
+              show={["news", "posts", "deals"]}
+            />
+            {local.links.length ? (
+              <p className="text-sm text-slate-600">
+                🔗 {local.links.length} useful link
+                {local.links.length === 1 ? "" : "s"} about {tag}{" "}
+                <Link
+                  href={`/resources?q=${encodeURIComponent(word)}`}
+                  className="font-semibold text-indigo-700 underline"
+                >
+                  in Resources
+                </Link>
+              </p>
+            ) : null}
+          </>
+        ) : null}
+
+        {tag && !hits.length && !localCount ? (
           <EmptyState
             title={`Nothing published about ${tag} right now`}
             body="Try a broader word — a city, a festival or a topic."
