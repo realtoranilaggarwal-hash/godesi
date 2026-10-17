@@ -22,6 +22,8 @@ import { foundingFeatureActive } from "@/lib/founding";
 import { contactDetailKind } from "@/lib/moderation";
 import { autoShareInBackground } from "@/lib/autoShare";
 import { titleCase } from "@/lib/titlecase";
+import { normalizeCouponCode } from "@/lib/coupons";
+import { endOfDay } from "@/lib/dealFormat";
 import {
   AMENITIES,
   AREA_UNITS,
@@ -127,6 +129,24 @@ const schema = z.object({
   contactName: z.string().trim().max(80).optional(),
   contactPhone: z.string().trim().max(30).optional(),
   contactEmail: z.string().trim().email("Check the contact email").optional(),
+  offerTitle: z
+    .string()
+    .trim()
+    .max(90, "Keep the offer under 90 characters")
+    .optional(),
+  offerCode: z
+    .string()
+    .trim()
+    .regex(
+      /^[A-Za-z0-9-]{3,24}$/,
+      "Coupon code: 3–24 letters, numbers or dashes",
+    )
+    .optional(),
+  offerExpiresAt: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Check the offer's last day")
+    .optional(),
 });
 
 function oneOf(value: string | undefined, allowed: { slug: string }[]) {
@@ -217,8 +237,16 @@ export async function createListingAction(
       contactName: formData.get("contactName") || undefined,
       contactPhone: formData.get("contactPhone") || undefined,
       contactEmail: formData.get("contactEmail") || undefined,
+      offerTitle: formData.get("offerTitle") || undefined,
+      offerCode: formData.get("offerCode") || undefined,
+      offerExpiresAt: formData.get("offerExpiresAt") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+    if (parsed.data.offerCode && !parsed.data.offerTitle) {
+      return {
+        error: "Add an offer headline so buyers know what the code gives them",
+      };
+    }
 
     // Items live in the Buy & sell tree; anything else has no category to pick.
     let categorySlug: string | null = null;
@@ -233,7 +261,9 @@ export async function createListingAction(
     }
 
     if (effectivePlan(user) === "FREE") {
-      const kind = contactDetailKind(parsed.data.description);
+      const kind = contactDetailKind(
+        `${parsed.data.description}\n${parsed.data.offerTitle ?? ""}`,
+      );
       if (kind) {
         return {
           error: `Please remove the ${kind} from the description — free listings are contacted on WhatsApp. Upgrade to Pro to show your phone, email and website.`,
@@ -353,6 +383,15 @@ export async function createListingAction(
         whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
         videoUrl: parsed.data.videoUrl ?? null,
         albumUrl: parsed.data.albumUrl ?? null,
+        offerTitle: parsed.data.offerTitle || null,
+        offerCode:
+          parsed.data.offerTitle && parsed.data.offerCode
+            ? normalizeCouponCode(parsed.data.offerCode)
+            : null,
+        offerExpiresAt:
+          parsed.data.offerTitle && parsed.data.offerExpiresAt
+            ? endOfDay(parsed.data.offerExpiresAt)
+            : null,
         ...property,
         featured: foundingFeatureActive(user),
         ownerId: user.id,
