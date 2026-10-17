@@ -261,6 +261,11 @@ model User {
   /// When the member last gave that contact permission.
   offerContactAt   DateTime?
 
+  /// What the member said they want to do on GoDesi (lib/joinGoals ids), asked at signup.
+  joinGoals   String[]  @default([])
+  /// Last time the member saved those goals.
+  joinGoalsAt DateTime?
+
   /// Phone kept for journalist verification; never shown publicly.
   phone           String?
   phoneVerifiedAt DateTime?
@@ -273,10 +278,17 @@ model User {
   pressCardIssuedAt  DateTime?
   pressCardExpiresAt DateTime?
 
-  speakerAt       EventSpeaker[] @relation("SpeakerProfile")
-  clubsCreated    Club[]
-  clubMemberships ClubMember[]
-  eventRsvps      EventRsvp[]
+  speakerAt        EventSpeaker[]  @relation("SpeakerProfile")
+  clubsCreated     Club[]
+  clubMemberships  ClubMember[]
+  eventRsvps       EventRsvp[]
+  chatterPosts     ChatterPost[]
+  chatterLikes     ChatterLike[]
+  chatterReports   ChatterReport[]
+  chatterFollowing ChatterFollow[] @relation("ChatterFollower")
+  chatterFollowers ChatterFollow[] @relation("ChatterFollowed")
+  chatterBlocking  ChatterBlock[]  @relation("ChatterBlocker")
+  chatterBlockedBy ChatterBlock[]  @relation("ChatterBlocked")
 
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
@@ -352,6 +364,7 @@ model User {
   meetupProfile MeetupProfile?
 
   rishtaProfile RishtaProfile?
+  ambassador    Ambassador?
   rishtaReports RishtaReport[]
   meetupReports MeetupReport[]
   alumni        AlumniRecord[]
@@ -2839,4 +2852,118 @@ model MediaApplication {
   updatedAt    DateTime @updatedAt
 
   @@index([status])
+}
+
+enum AmbassadorStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+/// A member applying to be a GoDesi local ambassador. They sign the ethics
+/// pledge by typing their name; staff approve them on /admin/ambassadors, and
+/// approval gives the profile badge and the printable certificate.
+model Ambassador {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city          String
+  phone         String?
+  /// Why they want to represent GoDesi and what they can do.
+  pitch         String
+  /// Ways they want to help (lib/joinGoals AMBASSADOR_HELP ids).
+  helps         String[]         @default([])
+  /// Name typed under the ethics pledge, and when they signed it.
+  signedName    String
+  pledgedAt     DateTime
+  status        AmbassadorStatus @default(PENDING)
+  /// Certificate number shown on the certificate, set on approval.
+  certificateNo Int?             @unique
+  approvedAt    DateTime?
+  adminNote     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([status])
+}
+
+/// Short public post on GoDesi Chatter; a reply when `parentId` is set.
+model ChatterPost {
+  id           String        @id @default(cuid())
+  authorId     String
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body         String
+  imageUrl     String?
+  /// lib/chatter CHATTER_TOPICS id.
+  topic        String        @default("general")
+  city         String?
+  /// lib/chatter CHATTER_LANGUAGES code.
+  language     String        @default("en")
+  /// #words from the body, lower-case and without the #.
+  tags         String[]      @default([])
+  parentId     String?
+  parent       ChatterPost?  @relation("ChatterReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      ChatterPost[] @relation("ChatterReplies")
+  likeCount    Int           @default(0)
+  replyCount   Int           @default(0)
+  /// Set by staff, or automatically once enough members report it.
+  hiddenAt     DateTime?
+  hiddenReason String?
+  editedAt     DateTime?
+  createdAt    DateTime      @default(now())
+
+  likes   ChatterLike[]
+  reports ChatterReport[]
+
+  @@index([parentId, hiddenAt, createdAt])
+  @@index([authorId, createdAt])
+  @@index([topic, createdAt])
+  @@index([city, createdAt])
+}
+
+model ChatterLike {
+  postId    String
+  post      ChatterPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@id([postId, userId])
+  @@index([userId])
+}
+
+model ChatterFollow {
+  followerId  String
+  follower    User     @relation("ChatterFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("ChatterFollowed", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+/// The blocker stops seeing the blocked member's posts, and the blocked member cannot reply to the blocker.
+model ChatterBlock {
+  blockerId String
+  blocker   User     @relation("ChatterBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("ChatterBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model ChatterReport {
+  id         String      @id @default(cuid())
+  postId     String
+  post       ChatterPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User        @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  createdAt  DateTime    @default(now())
+
+  @@unique([postId, reporterId])
+  @@index([postId])
 }

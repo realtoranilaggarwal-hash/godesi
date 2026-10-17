@@ -10,8 +10,9 @@ import {
 } from "@/lib/resources";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { TagCloud } from "@/components/TagCloud";
-import { formatEventDate } from "@/lib/events";
-import { Alert, Badge, Card, EmptyState, LinkButton } from "@/components/ui";
+import { KeywordMatches } from "@/components/KeywordMatches";
+import { keywordSearch } from "@/lib/keywordSearch";
+import { Alert, Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -23,12 +24,16 @@ export const metadata: Metadata = {
 export default async function ResourcesPage({
   searchParams,
 }: {
-  searchParams: { paid?: string; tag?: string };
+  searchParams: { paid?: string; tag?: string; q?: string };
 }) {
   const currency = requestCurrency();
   const tag = searchParams.tag?.trim().toLowerCase() || null;
-  const [links, categories, taggedEvents] = await Promise.all([
-    db.resourceLink.findMany({
+  const query = searchParams.q?.trim().slice(0, 80) || null;
+  const term = query ?? tag;
+  const [tagLinks, categories, matches] = await Promise.all([
+    query
+      ? Promise.resolve([])
+      : db.resourceLink.findMany({
       where: {
         status: "APPROVED",
         active: true,
@@ -39,22 +44,9 @@ export default async function ResourcesPage({
       include: { category: { select: { name: true, icon: true } } },
     }),
     getCategoryTree(),
-    tag
-      ? db.event.findMany({
-          where: { status: "APPROVED", tags: { has: tag }, startsAt: { gte: new Date() } },
-          orderBy: { startsAt: "asc" },
-          take: 6,
-          select: {
-            id: true,
-            slug: true,
-            title: true,
-            city: true,
-            startsAt: true,
-            timeZone: true,
-          },
-        })
-      : Promise.resolve([]),
+    term ? keywordSearch(term) : Promise.resolve(null),
   ]);
+  const links = query ? (matches?.links ?? []) : tagLinks;
 
   const grouped = new Map<string, typeof links>();
   for (const link of links) {
@@ -76,7 +68,19 @@ export default async function ResourcesPage({
             Useful tools, services and guides for desi businesses, professionals and
             families. Sponsored and affiliate links are always labelled.
           </p>
-          <div className="mt-5">
+          <form action="/resources" className="mt-5 flex max-w-xl flex-wrap gap-2">
+            <input
+              name="q"
+              defaultValue={query ?? ""}
+              placeholder="What are you looking for? e.g. domain registrar, tax help…"
+              aria-label="Search resources and deals"
+              className={`${inputClass} min-w-0 flex-1 text-slate-900`}
+            />
+            <button className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900">
+              🔍 Search
+            </button>
+          </form>
+          <div className="mt-4">
             <LinkButton href="/resources/new" variant="secondary">
               Advertise link — from {formatResourcePrice(currency, RESOURCE_PACKS[0])} /
               1,000 views
@@ -84,21 +88,37 @@ export default async function ResourcesPage({
           </div>
         </section>
 
-        {tag ? (
+        {term ? (
           <Card className="flex flex-wrap items-center justify-between gap-3 bg-indigo-50/60">
             <p className="text-sm font-semibold text-indigo-900">
-              Showing everything tagged <span className="font-black">#{tag}</span>{" "}
+              {query ? (
+                <>
+                  Results for <span className="font-black">“{query}”</span>
+                </>
+              ) : (
+                <>
+                  Showing everything tagged <span className="font-black">#{tag}</span>
+                </>
+              )}{" "}
               — {links.length} link{links.length === 1 ? "" : "s"}
-              {taggedEvents.length
-                ? ` and ${taggedEvents.length} event${taggedEvents.length === 1 ? "" : "s"}`
+              {matches?.deals.length || matches?.storeOffers.length
+                ? `, ${(matches.deals.length + matches.storeOffers.length)} deal${matches.deals.length + matches.storeOffers.length === 1 ? "" : "s"}`
+                : ""}
+              {matches?.events.length
+                ? ` and ${matches.events.length} event${matches.events.length === 1 ? "" : "s"}`
                 : ""}
             </p>
-            <Link
-              href="/resources"
-              className="text-sm font-semibold text-indigo-700 underline"
-            >
-              Show all resources
-            </Link>
+            <span className="flex gap-3 text-sm font-semibold">
+              <Link
+                href={`/trending?tag=${encodeURIComponent(query ?? `#${tag}`)}`}
+                className="text-indigo-700 underline"
+              >
+                {query ? `“${query}”` : `#${tag}`} on Trending
+              </Link>
+              <Link href="/resources" className="text-indigo-700 underline">
+                Show all resources
+              </Link>
+            </span>
           </Card>
         ) : null}
 
@@ -106,25 +126,8 @@ export default async function ResourcesPage({
           <TagCloud active={tag ?? undefined} />
         </div>
 
-        {taggedEvents.length ? (
-          <Card>
-            <h2 className="text-lg font-bold">Events tagged #{tag}</h2>
-            <ul className="mt-2 divide-y divide-slate-100">
-              {taggedEvents.map((event) => (
-                <li key={event.id} className="py-2">
-                  <Link
-                    href={`/events/${event.slug}`}
-                    className="text-sm font-semibold text-indigo-700 hover:underline"
-                  >
-                    {event.title}
-                  </Link>
-                  <p className="text-xs text-slate-500">
-                    {formatEventDate(event.startsAt, event.timeZone)} · {event.city}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </Card>
+        {matches && term ? (
+          <KeywordMatches term={term} results={matches} show={["deals", "events"]} />
         ) : null}
 
         {searchParams.paid ? (
@@ -178,8 +181,12 @@ export default async function ResourcesPage({
           ))
         ) : (
           <EmptyState
-            title="No links published yet"
-            body="Recommended links appear here and in the boxes on category and listing pages."
+            title={term ? `No links for “${term}” yet` : "No links published yet"}
+            body={
+              term
+                ? "Try a shorter word, or advertise your own link here."
+                : "Recommended links appear here and in the boxes on category and listing pages."
+            }
             action={<LinkButton href="/resources/new">Advertise link</LinkButton>}
           />
         )}
@@ -215,7 +222,7 @@ export default async function ResourcesPage({
       </div>
 
       <aside className="hidden w-[260px] shrink-0 lg:order-first lg:block">
-        <div className="sticky top-24 space-y-4">
+        <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto overscroll-contain pr-1">
           <TagCloud active={tag ?? undefined} />
           <SidebarBanners />
         </div>

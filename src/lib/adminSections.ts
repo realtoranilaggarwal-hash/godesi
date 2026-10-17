@@ -60,6 +60,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁", need: "admin" },
   { href: "/admin/connect", label: "Connect", icon: "🤝", need: "admin" },
   { href: "/admin/rishta", label: "Rishta", icon: "💍", need: "admin" },
+  { href: "/admin/chatter", label: "Chatter", icon: "💬", need: "chatter" },
   { href: "/admin/temples", label: "Temples", icon: "🛕", need: "worship" },
   {
     href: "/admin/resources",
@@ -74,6 +75,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/content", label: "Content desk", icon: "✍️", need: "staff" },
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆", need: "staff" },
   { href: "/admin/media", label: "Media team", icon: "🎙️", need: "staff" },
+  {
+    href: "/admin/ambassadors",
+    label: "Ambassadors",
+    icon: "🤝",
+    need: "staff",
+  },
   {
     href: "/admin/live-channels",
     label: "Radio & TV",

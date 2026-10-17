@@ -9,6 +9,7 @@ import {
   slotSoldCount,
 } from "@/lib/banners";
 import { ActivityWall } from "@/components/ActivityWall";
+import { categoryPickerGroups } from "@/components/CategoryNav";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { HelpClipCard } from "@/components/HelpClipCard";
 import { CategoryNav } from "@/components/CategoryNav";
@@ -276,9 +277,13 @@ export async function SmallBanners({
   strip?: boolean;
 } = {}) {
   if (isPhoneRequest()) return null;
-  const banners = await activeBanners("MOBILE", 20);
+  const [banners, categories] = await Promise.all([
+    activeBanners("MOBILE", 20),
+    embedded || side === "left" ? [] : categoryPickerGroups(),
+  ]);
   return (
     <SmallBannerRail
+      categories={categories}
       show={show}
       embedded={embedded}
       start={start}

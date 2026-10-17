@@ -20,6 +20,7 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
+import { AmbassadorBadge } from "@/components/AmbassadorBadge";
 import { GigCard } from "@/components/gigs/GigCard";
 import { journalistStats } from "@/lib/journalistsQueries";
 import { alumniFor } from "@/lib/alumniQueries";
@@ -152,6 +153,7 @@ export default async function PublicProfilePage({
                 ) : null}
                 {user.location ? <Badge>📍 {user.location}</Badge> : null}
                 <FoundingBadge number={user.foundingNumber} />
+                <AmbassadorBadge ambassador={user.ambassador} />
                 {journalist?.level ? (
                   <JournalistBadge
                     level={journalist.level}

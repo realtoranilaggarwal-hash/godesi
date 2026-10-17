@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { gradientFor, softFor } from "@/lib/categories";
+import { CategoryArt } from "@/components/CategoryArt";
 
 export type TileCategory = {
   slug: string;
@@ -38,6 +39,11 @@ export function CategoryTiles({
           href={`/categories/${category.slug}`}
           className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
         >
+          <CategoryArt
+            slug={category.slug}
+            icon={category.icon}
+            className="block h-auto w-full rounded-none"
+          />
           <div
             className={`flex items-center gap-3 bg-gradient-to-r ${gradientFor(category.color)} ${
               dense ? "px-3 py-2" : "px-4 py-3"
