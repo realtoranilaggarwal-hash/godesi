@@ -1,3 +1,4 @@
+import { CategoryArt } from "@/components/CategoryArt";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -239,52 +240,59 @@ export default async function CategoryPage({
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-6">
         <section
-          className={`rounded-3xl bg-gradient-to-r ${gradientFor(category.color)} px-5 py-8 text-white sm:px-8`}
+          className={`flex items-center gap-6 rounded-3xl bg-gradient-to-r ${gradientFor(category.color)} px-5 py-8 text-white sm:px-8`}
         >
-          <p className="text-sm text-white/80">
-            <Link href="/categories" className="hover:underline">
-              All categories
-            </Link>
-            {category.parent ? (
-              <>
-                {" / "}
-                <Link
-                  href={`/categories/${category.parent.slug}`}
-                  className="hover:underline"
-                >
-                  {category.parent.name}
-                </Link>
-              </>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-white/80">
+              <Link href="/categories" className="hover:underline">
+                All categories
+              </Link>
+              {category.parent ? (
+                <>
+                  {" / "}
+                  <Link
+                    href={`/categories/${category.parent.slug}`}
+                    className="hover:underline"
+                  >
+                    {category.parent.name}
+                  </Link>
+                </>
+              ) : null}
+            </p>
+            <h1 className="mt-1 text-3xl font-black">
+              <span aria-hidden>{category.icon}</span> {category.name}
+            </h1>
+            {category.blurb ? (
+              <p className="mt-1 text-white/90">{category.blurb}</p>
             ) : null}
-          </p>
-          <h1 className="mt-1 text-3xl font-black">
-            <span aria-hidden>{category.icon}</span> {category.name}
-          </h1>
-          {category.blurb ? (
-            <p className="mt-1 text-white/90">{category.blurb}</p>
-          ) : null}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href={`/dashboard/profile?${postQuery}`}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-white/90"
-            >
-              ➕ Add your business in this category
-            </Link>
-            <Link
-              href={`/leads/new?category=${category.slug}`}
-              className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
-            >
-              Request a service
-            </Link>
-            {memberListings?.section === "marketplace" ? (
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link
-                href="/listings/new?kind=MARKETPLACE"
+                href={`/dashboard/profile?${postQuery}`}
+                className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-white/90"
+              >
+                ➕ Add your business in this category
+              </Link>
+              <Link
+                href={`/leads/new?category=${category.slug}`}
                 className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
               >
-                🛍️ Sell an item
+                Request a service
               </Link>
-            ) : null}
+              {memberListings?.section === "marketplace" ? (
+                <Link
+                  href="/listings/new?kind=MARKETPLACE"
+                  className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
+                >
+                  🛍️ Sell an item
+                </Link>
+              ) : null}
+            </div>
           </div>
+          <CategoryArt
+            slug={category.parent?.slug ?? category.slug}
+            icon={category.icon}
+            className="hidden w-72 shrink-0 drop-shadow-xl md:block"
+          />
         </section>
 
         {DJ_CATEGORY_SLUGS.includes(category.slug) ? <DjsWikiBanner /> : null}
