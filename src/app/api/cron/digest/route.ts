@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { sendWeeklyDigest } from "@/lib/digest";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+/** Sends are paced at 5 a second, so a long list needs more than a minute. */
+export const maxDuration = 300;
 
 /** Weekly (see vercel.json). Vercel Cron sends CRON_SECRET as a bearer token. */
 function authorized(request: Request) {

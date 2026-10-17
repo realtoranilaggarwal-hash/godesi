@@ -1,14 +1,12 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
-import { sendEmail, shell, emailEnabled } from "@/lib/email";
+import { sendEmail, sendPaced, shell, emailEnabled } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { newsPath } from "@/lib/newsLinks";
 
 /** How far back the digest looks, and how many of each kind it carries. */
 const WINDOW_DAYS = 7;
 const PER_SECTION = 5;
-/** Resend accepts a burst, but a slow drip keeps us well inside its limits. */
-const BATCH = 20;
 
 /**
  * Unsubscribe links are signed rather than stored: no extra column, and the
@@ -155,25 +153,19 @@ export async function sendWeeklyDigest({ dryRun = false } = {}) {
   if (dryRun) return { sent: 0, wouldSend: members.length, items: count };
 
   let sent = 0;
-  for (let start = 0; start < members.length; start += BATCH) {
-    const batch = members.slice(start, start + BATCH);
-    // eslint-disable-next-line no-await-in-loop
-    await Promise.all(
-      batch.map(async (member) => {
-        const ok = await sendEmail({
-          to: member.email,
-          subject: "Your week on Godesi",
-          html: emailFor(member.id, member.name, body),
-        });
-        if (!ok) return;
-        sent += 1;
-        await db.user.update({
-          where: { id: member.id },
-          data: { digestSentAt: new Date() },
-        });
-      }),
-    );
-  }
+  await sendPaced(members, async (member) => {
+    const ok = await sendEmail({
+      to: member.email,
+      subject: "Your week on Godesi",
+      html: emailFor(member.id, member.name, body),
+    });
+    if (!ok) return;
+    sent += 1;
+    await db.user.update({
+      where: { id: member.id },
+      data: { digestSentAt: new Date() },
+    });
+  });
 
   return { sent, recipients: members.length, items: count };
 }
