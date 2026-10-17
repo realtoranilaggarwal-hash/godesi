@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { chatterPath } from "@/lib/chatter";
 import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
@@ -9,6 +10,10 @@ import { professionalCount } from "@/lib/professionalsQueries";
 import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { GUIDES } from "@/lib/guides";
 import { COMPLAINT_GUIDES } from "@/lib/complaints";
+import { ASTROLOGY_GUIDES } from "@/lib/astrology";
+import { SIGN_SLUGS } from "@/lib/horoscope";
+import { PANCHANG_CITIES } from "@/lib/panchang";
+import { FESTIVALS, festivalSlug } from "@/lib/festivals";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +79,18 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
         select: { slug: true, updatedAt: true },
       }),
     ]);
+  // A lone one-liner is a thin page; only posts people answered or liked go in.
+  const chats = await db.chatterPost.findMany({
+    where: {
+      parentId: null,
+      hiddenAt: null,
+      author: { bannedAt: null },
+      OR: [{ replyCount: { gt: 0 } }, { likeCount: { gte: 2 } }],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 2000,
+    select: { id: true, createdAt: true, editedAt: true },
+  });
   return {
     businesses: businesses
       .filter(
@@ -111,13 +128,17 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       slug: row.slug,
       updatedAt: row.updatedAt.toISOString(),
     })),
+    chats: chats.map((row) => ({
+      id: row.id,
+      updatedAt: (row.editedAt ?? row.createdAt).toISOString(),
+    })),
   };
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const [
-    { businesses, categories, events, reports, posts, worship, clubs },
+    { businesses, categories, events, reports, posts, worship, clubs, chats },
     cities,
     professionals,
   ] = await Promise.all([
@@ -154,6 +175,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/news`, changeFrequency: "hourly", priority: 0.7 },
     { url: `${base}/city`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/trending`, changeFrequency: "daily", priority: 0.5 },
+    { url: `${base}/festivals`, changeFrequency: "weekly", priority: 0.7 },
+    ...FESTIVALS.map((festival) => ({
+      url: `${base}/festivals/${festivalSlug(festival)}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+    { url: `${base}/visa-bulletin`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/usd-to-inr`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/deals`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/shop`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/guide`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/desi-elite`, changeFrequency: "daily", priority: 0.8 },
@@ -173,6 +204,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/live-tv`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/categories`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/connect`, changeFrequency: "daily", priority: 0.6 },
+    { url: `${base}/chatter`, changeFrequency: "hourly", priority: 0.6 },
+    { url: `${base}/rishta`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/clubs`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/alumni`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "weekly", priority: 0.5 },
@@ -183,8 +216,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/website`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/badge`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${base}/faq`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/ambassador`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/safety`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/complaints`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/astrology`, changeFrequency: "weekly", priority: 0.7 },
+    {
+      url: `${base}/astrology/kundli-calculator`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${base}/astrology/panchang`,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    ...PANCHANG_CITIES.map((city) => ({
+      url: `${base}/astrology/panchang/${city.slug}`,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    })),
+    {
+      url: `${base}/astrology/horoscope`,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    ...SIGN_SLUGS.map((sign) => ({
+      url: `${base}/astrology/horoscope/${sign}`,
+      changeFrequency: "daily" as const,
+      priority: 0.6,
+    })),
     { url: `${base}/media`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/media/join`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/traffic`, changeFrequency: "hourly", priority: 0.5 },
@@ -221,6 +281,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),
+    ...chats.map((chat) => ({
+      url: `${base}${chatterPath(chat.id)}`,
+      lastModified: new Date(chat.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.4,
+    })),
     ...cities.map((city) => ({
       url: `${base}/city/${city.slug}`,
       changeFrequency: "daily" as const,
@@ -236,6 +302,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/guide/${guide.slug}`,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    ...ASTROLOGY_GUIDES.map((guide) => ({
+      url: `${base}/astrology/${guide.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     })),
     ...COMPLAINT_GUIDES.map((guide) => ({
       url: `${base}/complaints/${guide.slug}`,

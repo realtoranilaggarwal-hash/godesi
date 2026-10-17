@@ -19,12 +19,13 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/search", label: "Businesses" },
         { href: "/leads", label: "Leads" },
         { href: "/events", label: "Events" },
-        { href: "/clubs", label: "Clubs — karaoke, cricket, foodies" },
+        { href: "/clubs", label: "Clubs" },
+        { href: "/deals", label: "🏷️ Deals & offers" },
+        { href: "/shop", label: "🛍️ Desi shop" },
         { href: "/gigs", label: "Gigs — services $5–$100" },
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Resources" },
         { href: "/news", label: "News" },
-        { href: "/trending", label: "🔥 Trending hashtags" },
         { href: "/blog", label: "Blog" },
         { href: "/guide", label: "City guides" },
         { href: "/find", label: "Search everything" },
@@ -35,7 +36,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       links: [
         { href: "/claim", label: "Claim godesi.com/yourname" },
         { href: "/signup", label: "List your business free" },
-        { href: "/why-godesi", label: "Why Godesi — everything you get" },
+        { href: "/why-godesi", label: "Why Godesi" },
         { href: "/why-list", label: "Why list on Godesi?" },
         { href: "/pricing", label: "Membership plans" },
         {
@@ -46,6 +47,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/advertise", label: "Advertise on Godesi" },
         { href: "/events/new", label: "Post an event" },
         { href: "/clubs/new", label: "Start a club" },
+        { href: "/dashboard/deals", label: "Post a deal" },
         { href: "/dashboard/gigs", label: "Sell a gig" },
         { href: "/dashboard", label: "Dashboard" },
       ],
@@ -54,7 +56,10 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Community",
       links: [
         { href: "/connect", label: "Connect" },
-        { href: "/clubs", label: "🎤 Clubs — karaoke, cricket, foodies" },
+        { href: "/chatter", label: "💬 GoDesi Chatter" },
+        { href: "/rishta", label: "💍 Rishta — marriage profiles" },
+        { href: "/rishta/new", label: "Post a Rishta profile" },
+        { href: "/clubs", label: "🎤 Clubs & meetups" },
         { href: "/people", label: "People on GoDesi" },
         { href: "/professionals", label: "GoDesi Professionals" },
         { href: "/alumni", label: "Find your batchmates" },
@@ -63,14 +68,11 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/news/report", label: "Share news" },
         { href: "/journalists", label: "Become a local journalist" },
         { href: "/rewards", label: "Refer & earn rewards" },
-        { href: "/leaderboard", label: "🏅 Top contributors" },
-        { href: "/safety", label: "Trust & safety" },
-        { href: "/complaints", label: "⚠️ How to file a complaint" },
-        { href: "/news/report?topic=consumer", label: "Post a consumer alert" },
+        { href: "/ambassador", label: "🤝 Become an ambassador" },
       ],
     },
     {
-      title: "Live & media",
+      title: "Live, media & daily",
       links: [
         { href: "/live-radio", label: "🎧 Listen live — desi radio" },
         { href: "/live-tv", label: "📺 Watch live — desi TV" },
@@ -78,8 +80,14 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/desi-elite", label: "GoDesi Elite" },
         { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
         { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
-        { href: "/media", label: "🎙️ GoDesi Media · Desi Who's Who" },
+        { href: "/media", label: "🎙️ GoDesi Media" },
         { href: "/media/join", label: "Join the media team" },
+        { href: "/leaderboard", label: "🏅 Top contributors" },
+        { href: "/trending", label: "🔥 Trending hashtags" },
+        { href: "/festivals", label: "🪔 Festival calendar" },
+        { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
+        { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
+        { href: "/astrology", label: "🔮 Astrology guides" },
       ],
     },
     {
@@ -95,6 +103,9 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/privacy", label: "Privacy policy" },
         { href: "/cookies", label: "Cookie policy" },
         { href: "/refunds", label: "Refund policy" },
+        { href: "/safety", label: "Trust & safety" },
+        { href: "/complaints", label: "⚠️ How to file a complaint" },
+        { href: "/news/report?topic=consumer", label: "Post a consumer alert" },
       ],
     },
   ];
@@ -105,10 +116,10 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
-      <div className="mx-auto w-full max-w-7xl px-4 pt-6">
+      <div className="mx-auto w-full max-w-screen-2xl px-4 pt-6">
         <FooterBanner />
       </div>
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mx-auto grid max-w-screen-2xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
         <div>
           <Link href="/" aria-label="Godesi home">
             <Image
@@ -158,7 +169,7 @@ export function SiteFooter() {
         {SECTIONS.map((section) => (
           <div key={section.title}>
             <p className="text-sm font-bold text-slate-900">{section.title}</p>
-            <ul className="mt-2 space-y-1 text-sm text-slate-600">
+            <ul className="mt-2 space-y-1 text-sm text-slate-600 [&>li]:truncate">
               {section.links.map((link) => (
                 <li key={link.href}>
                   {link.href.startsWith("http") ? (
@@ -177,7 +188,7 @@ export function SiteFooter() {
                   )}
                 </li>
               ))}
-              {section.title === "Live & media" && statsUrl ? (
+              {section.title === "Company" && statsUrl ? (
                 <li>
                   <a
                     href={statsUrl}
@@ -196,7 +207,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-slate-100">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
+        <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-slate-500">
           <span>© {new Date().getFullYear()} Godesi. All rights reserved.</span>
           <TrafficCounter />
           <LocalePicker currency={displayCurrency()} open />

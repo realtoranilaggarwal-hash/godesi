@@ -145,6 +145,23 @@ export function BusinessProfileForm({
         <Field label="Business or professional name" required>
           <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
         </Field>
+        {business ? (
+          <Field
+            label="Page address"
+            hint="Letters, numbers and dashes. Old links and printed QR codes keep working."
+          >
+            <div className="flex items-center gap-1">
+              <span className="shrink-0 text-sm text-slate-500">godesi.com/b/</span>
+              <input
+                name="slug"
+                defaultValue={business.slug}
+                pattern="[A-Za-z0-9 \-]{3,60}"
+                title="3–60 letters, numbers or dashes"
+                className={inputClass}
+              />
+            </div>
+          </Field>
+        ) : null}
         <CategorySelect
           required={!starterCard}
           categories={categories}

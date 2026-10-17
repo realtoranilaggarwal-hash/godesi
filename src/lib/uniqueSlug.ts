@@ -12,9 +12,21 @@ export async function uniqueSlug(name: string, city?: string) {
   let candidate = base;
   let counter = 1;
   // eslint-disable-next-line no-await-in-loop
-  while (await db.business.findUnique({ where: { slug: candidate } })) {
+  while (await slugTaken(candidate)) {
     counter += 1;
     candidate = `${base}-${counter}`;
   }
   return candidate;
+}
+
+/** A page address is taken when any other card uses it now or used it before. */
+export async function slugTaken(slug: string, exceptBusinessId?: string) {
+  const hit = await db.business.findFirst({
+    where: {
+      OR: [{ slug }, { previousSlugs: { has: slug } }],
+      ...(exceptBusinessId ? { id: { not: exceptBusinessId } } : {}),
+    },
+    select: { id: true },
+  });
+  return hit !== null;
 }

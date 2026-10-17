@@ -29,6 +29,7 @@ export const RESOURCE_PLACEMENTS = [
     value: "event-suppliers",
     label: "Party supplies & printers (Events)",
   },
+  { value: "shop", label: "More stores (Shop page)" },
 ] as const;
 
 export type ResourcePlacement = (typeof RESOURCE_PLACEMENTS)[number]["value"];

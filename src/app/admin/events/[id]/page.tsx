@@ -10,6 +10,7 @@ import { venueSuggestions } from "@/lib/venues";
 import { TicketTypesForm } from "@/components/forms/TicketTypesForm";
 import { LEGACY_EVENT_ZONE, wallClockIn } from "@/lib/time";
 import { Card, inputClass } from "@/components/ui";
+import { EDIT_SPEAKERS, speakerDefaults } from "@/lib/eventSpeakers";
 import { reviewPartnerAction } from "@/app/actions/events";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export default async function AdminEditEventPage({
           },
         },
         _count: { select: { tickets: true } },
+        speakers: EDIT_SPEAKERS,
       },
     }),
     getCategoryTree(),
@@ -109,9 +111,13 @@ export default async function AdminEditEventPage({
             seatsBooked: event.seatsBooked,
             imageUrl: event.imageUrl ?? "",
             videoUrl: event.videoUrl ?? "",
+            liveUrl: event.liveUrl ?? "",
+            liveTicketOnly: event.liveTicketOnly,
+            askReferredBy: event.askReferredBy,
             albumUrl: event.albumUrl ?? "",
             featured: event.featured,
             status: event.status,
+            speakers: speakerDefaults(event.speakers),
           }}
         />
       </Card>
@@ -126,6 +132,7 @@ export default async function AdminEditEventPage({
         <TicketTypesForm
           eventId={event.id}
           currency={event.currency}
+          needsPayoutTerms={!event.payoutTermsAt}
           tiers={event.tiers}
         />
       </Card>

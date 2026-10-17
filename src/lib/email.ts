@@ -83,13 +83,28 @@ export function noAccountEmail() {
   };
 }
 
-export function otpEmail(code: string) {
+export type OtpPurpose = "verify" | "reset";
+
+export function otpEmail(code: string, email: string, purpose: OtpPurpose) {
+  const link =
+    purpose === "reset"
+      ? `${siteUrl()}/forgot-password?email=${encodeURIComponent(email)}&sent=1`
+      : `${siteUrl()}/verify-email`;
+  const action = purpose === "reset" ? "Set a new password" : "Verify my email";
   return {
     subject: `${code} is your Godesi verification code`,
     html: shell(
-      "Verify your email",
-      `<p style="margin:0 0 16px;color:#334155">Enter this code on Godesi to verify your email or reset your password. It expires in 10 minutes.</p>
+      purpose === "reset" ? "Reset your password" : "Verify your email",
+      `<p style="margin:0 0 16px;color:#334155">${
+        purpose === "reset"
+          ? "Use this code to set a new Godesi password."
+          : "Use this code to confirm your email and finish setting up your Godesi account."
+      } It expires in 10 minutes.</p>
        <p style="margin:0 0 16px;font-size:34px;font-weight:800;letter-spacing:8px">${code}</p>
+       <p style="margin:0 0 16px"><a href="${link}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:12px">${action} →</a></p>
+       <p style="margin:0 0 16px;font-size:13px;color:#334155">The button opens the page where you type the code${
+         purpose === "reset" ? "" : " (sign in first if it asks)"
+       }.</p>
        <p style="margin:0;font-size:13px;color:#64748b">If you did not ask for this, you can ignore this email — nothing changes without the code.</p>`,
     ),
   };

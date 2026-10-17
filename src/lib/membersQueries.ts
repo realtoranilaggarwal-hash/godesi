@@ -9,6 +9,9 @@ const PUBLIC_MEMBER = {
   bannedAt: null,
 } as const;
 
+/** Confirmed members who have a page to link to. */
+const WITH_PAGE = { ...PUBLIC_MEMBER, username: { not: null } };
+
 const CARD_FIELDS = {
   id: true,
   name: true,
@@ -34,9 +37,12 @@ export type MemberCard = {
 };
 
 /** Newest members, for the home page shelf. */
-export function newestMembers(take: number): Promise<MemberCard[]> {
+export function newestMembers(
+  take: number,
+  { withPage = false }: { withPage?: boolean } = {},
+): Promise<MemberCard[]> {
   return db.user.findMany({
-    where: PUBLIC_MEMBER,
+    where: withPage ? WITH_PAGE : PUBLIC_MEMBER,
     orderBy: { createdAt: "desc" },
     take,
     select: CARD_FIELDS,
@@ -51,13 +57,13 @@ export function publicMemberCount() {
 export async function memberPage(page: number, perPage: number) {
   const [members, total] = await Promise.all([
     db.user.findMany({
-      where: PUBLIC_MEMBER,
+      where: WITH_PAGE,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * perPage,
       take: perPage,
       select: CARD_FIELDS,
     }),
-    publicMemberCount(),
+    db.user.count({ where: WITH_PAGE }),
   ]);
 
   return { members, total, pages: Math.max(1, Math.ceil(total / perPage)) };

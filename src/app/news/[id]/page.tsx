@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { getCurrentUser, can } from "@/lib/auth";
 import { levelFor } from "@/lib/journalists";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
-import { ShareRail } from "@/components/ShareRail";
 import { StoryBody } from "@/components/StoryBody";
 import { ListenButton } from "@/components/ListenButton";
 import { SidebarBanners } from "@/components/Banners";
@@ -23,7 +23,7 @@ import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
 
 export const dynamic = "force-dynamic";
 
-async function loadReport(param: string) {
+const loadReport = cache(async (param: string) => {
   return db.newsItem.findUnique({
     where: { id: newsIdFromParam(param) },
     include: {
@@ -32,7 +32,7 @@ async function loadReport(param: string) {
       },
     },
   });
-}
+});
 
 export async function generateMetadata({
   params,
@@ -353,7 +353,6 @@ export default async function ReportPage({
             isAuthor={isAuthor}
           />
 
-          <ShareRail title={report.title} />
           <ShareButtons url={`${siteUrl()}${canonical}`} title={report.title} />
 
           <p className="text-xs text-slate-500">

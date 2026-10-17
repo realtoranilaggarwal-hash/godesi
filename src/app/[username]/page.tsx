@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import {
   normalizeUsername,
   publicProfile,
@@ -19,20 +20,26 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
+import { AmbassadorBadge } from "@/components/AmbassadorBadge";
 import { GigCard } from "@/components/gigs/GigCard";
 import { journalistStats } from "@/lib/journalistsQueries";
 import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
+import { RailRectangles, SmallBanners } from "@/components/Banners";
+import { MoreOnGodesi } from "@/components/MoreOnGodesi";
+import { cachedCurrentUser } from "@/lib/auth";
+import { clubCategory } from "@/lib/clubs";
+import { thumbImage } from "@/lib/proxyImage";
 
 export const dynamic = "force-dynamic";
 
-async function load(usernameParam: string) {
+const load = cache(async (usernameParam: string) => {
   const username = normalizeUsername(decodeURIComponent(usernameParam));
   if (RESERVED_USERNAMES.has(username)) return null;
   return publicProfile(username);
-}
+});
 
 export async function generateMetadata({
   params,
@@ -59,9 +66,13 @@ export default async function PublicProfilePage({
   const profile = await load(params.username);
   if (!profile) notFound();
 
-  const { user, events, leads, reviews, listings, gigs } = profile;
+  const { user, events, leads, reviews, listings, gigs, clubs } = profile;
   const journalist = await journalistStats(user.id, { publicOnly: true });
-  const points = await wallet(user.id);
+  const [points, viewer] = await Promise.all([
+    wallet(user.id),
+    cachedCurrentUser(),
+  ]);
+  const isOwner = viewer?.id === user.id;
   const plan = effectivePlan(user);
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
@@ -70,6 +81,7 @@ export default async function PublicProfilePage({
     reviews.length +
     listings.length +
     gigs.length +
+    clubs.length +
     (journalist?.approved ?? 0);
   const socialLinks = PERSONAL_SOCIALS.map((social) => ({
     ...social,
@@ -88,6 +100,27 @@ export default async function PublicProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {isOwner ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+          <span className="font-semibold">
+            This is your page — this is how everyone sees it.
+          </span>
+          <span className="flex flex-wrap gap-2">
+            <Link
+              href="/dashboard/me"
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 font-bold text-white hover:bg-indigo-700"
+            >
+              ✏️ Edit my profile
+            </Link>
+            <Link
+              href="/dashboard"
+              className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 font-bold text-indigo-700 hover:bg-indigo-100"
+            >
+              My dashboard
+            </Link>
+          </span>
+        </div>
+      ) : null}
       <Card className="overflow-hidden !p-0">
         <div className="h-2 bg-gradient-to-r from-orange-400 via-rose-500 to-fuchsia-600" />
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
@@ -120,6 +153,7 @@ export default async function PublicProfilePage({
                 ) : null}
                 {user.location ? <Badge>📍 {user.location}</Badge> : null}
                 <FoundingBadge number={user.foundingNumber} />
+                <AmbassadorBadge ambassador={user.ambassador} />
                 {journalist?.level ? (
                   <JournalistBadge
                     level={journalist.level}
@@ -411,6 +445,47 @@ export default async function PublicProfilePage({
             </section>
           ) : null}
 
+          {clubs.length ? (
+            <section className="space-y-2">
+              <h2 className="text-lg font-bold">Clubs</h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {clubs.map(({ role, club }) => (
+                  <Link
+                    key={club.slug}
+                    href={`/clubs/${club.slug}`}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-xl">
+                      {club.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={thumbImage(club.imageUrl, 384)}
+                          alt={club.name}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        clubCategory(club.category).emoji
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold text-slate-900">
+                        {club.name}
+                      </span>
+                      <span className="block text-sm text-slate-600">
+                        {club.createdById === user.id
+                          ? "Started this club"
+                          : role === "ORGANIZER"
+                            ? "Organiser"
+                            : "Member"}
+                        {club.city ? ` · ${club.city}` : ""}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           {events.length ? (
             <section className="space-y-2">
               <h2 className="text-lg font-bold">Events</h2>
@@ -479,9 +554,11 @@ export default async function PublicProfilePage({
           {!activity && !user.business ? (
             <PostIdeasBanner name={user.name} />
           ) : null}
+
+          <MoreOnGodesi city={user.business?.city ?? null} />
         </div>
 
-        <aside className="space-y-4">
+        <aside data-right-rail className="space-y-4">
           {user.skills.length || user.languages.length ? (
             <Card className="space-y-3">
               {user.skills.length ? (
@@ -531,6 +608,8 @@ export default async function PublicProfilePage({
               </a>
             </Card>
           ) : null}
+          <RailRectangles />
+          <SmallBanners show={6} embedded />
         </aside>
       </div>
     </div>

@@ -24,11 +24,21 @@ export function TicketTypesForm({
   eventId,
   currency,
   tiers,
+  needsPayoutTerms = false,
 }: {
   eventId: string;
   currency: string;
   tiers: TicketTypeRow[];
+  /** No payout terms on record yet (a free online event): ask with the first paid type. */
+  needsPayoutTerms?: boolean;
 }) {
+  const payoutTerms = needsPayoutTerms ? (
+    <label className="flex basis-full items-center gap-2 text-xs font-semibold text-slate-700">
+      <input type="checkbox" name="acceptPayoutTerms" />
+      For a paid type: I understand how ticket money and fees are handled.
+    </label>
+  ) : null;
+
   const [saved, save] = useFormState(saveTicketTypeAction, emptyState);
   const [removed, remove] = useFormState(removeTicketTypeAction, emptyState);
   const state = saved.error || saved.success ? saved : removed;
@@ -78,6 +88,7 @@ export function TicketTypesForm({
             >
               Save
             </button>
+            {payoutTerms}
           </form>
           <span className="text-xs text-slate-500">
             {tier.seatsBooked}/{tier.seatsTotal} booked
@@ -131,6 +142,7 @@ export function TicketTypesForm({
         >
           + Add ticket type
         </button>
+        {payoutTerms}
       </form>
     </div>
   );

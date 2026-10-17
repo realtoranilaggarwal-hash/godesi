@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SmallBanners } from "@/components/Banners";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleTranslate } from "@/components/GoogleTranslate";
@@ -12,9 +13,11 @@ import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
 import { AiChat } from "@/components/AiChat";
 import { BackToTop } from "@/components/BackToTop";
+import { SpinWheel } from "@/components/SpinWheel";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { QuoraSignupEvent } from "@/components/QuoraSignupEvent";
 import { aiEnabled } from "@/lib/ai";
+import { currentUserId } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
 import { TELEGRAM_GROUP } from "@/lib/site";
 
@@ -44,11 +47,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const signedInId = await currentUserId();
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   const umamiId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   const umamiSrc =
@@ -56,7 +60,8 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
   const quoraPixel =
-    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ?? "e1f78f6226a74980abda723156b819ed";
+    process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ??
+    "e1f78f6226a74980abda723156b819ed";
 
   return (
     <html lang="en" className="overflow-x-hidden">
@@ -183,15 +188,20 @@ export default function RootLayout({
         <UnregisterServiceWorkers />
         <SiteHeader />
         <SiteTicker />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-screen-2xl gap-6 px-4 py-6">
+          <SmallBanners side="left" start={10} />
+          <div className="min-w-0 flex-1">{children}</div>
+          <SmallBanners />
+        </main>
         <SiteFooter />
         <QuoraSignupEvent />
-        <LiveMediaPlayer />
+        <LiveMediaPlayer signedIn={Boolean(signedInId)} />
         <CookieConsent />
         <RewardsNudge />
         <LiveActivity />
         <GoogleTranslate />
         <BackToTop />
+        <SpinWheel />
         {aiEnabled() && <AiChat />}
       </body>
     </html>

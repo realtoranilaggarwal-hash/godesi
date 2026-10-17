@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Advertise to desi buyers on Godesi",
   description:
-    "Reach desi buyers across the Godesi directory with billboard, leaderboard, in-content, sidebar and mobile banners — all rotating, with live view and click reporting.",
+    "Reach desi buyers across the Godesi directory with billboard, leaderboard, in-content, sidebar and small banners — all rotating, with live view and click reporting.",
 };
 
 const ERRORS: Record<string, string> = {
@@ -283,6 +283,14 @@ export default async function AdvertisePage({
         <div className="mt-3">
           <DesignHelp size={AD_PLACEMENTS.SIDEBAR.size} />
         </div>
+        <p className="mt-2 text-sm">
+          <Link
+            href="/advertise/design"
+            className="font-semibold text-indigo-600"
+          >
+            Prompts for every banner size, and where to upload →
+          </Link>
+        </p>
       </Card>
 
       <Card>

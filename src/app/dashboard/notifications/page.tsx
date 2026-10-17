@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   markNotificationsReadAction,
   setDigestAction,
+  setMorningEmailAction,
 } from "@/app/actions/rewards";
 import { Card, EmptyState } from "@/components/ui";
 
@@ -24,10 +25,11 @@ export default async function NotificationsPage() {
     }),
     db.user.findUnique({
       where: { id: user.id },
-      select: { digestOptOutAt: true },
+      select: { digestOptOutAt: true, morningEmailAt: true },
     }),
   ]);
   const digestOn = !member?.digestOptOutAt;
+  const morningOn = Boolean(member?.morningEmailAt);
   const unread = notifications.filter((item) => !item.readAt).length;
 
   return (
@@ -64,6 +66,28 @@ export default async function NotificationsPage() {
             }`}
           >
             {digestOn ? "On" : "Off"}
+          </button>
+        </form>
+      </Card>
+
+      <Card className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-bold">☀️ Morning panchang &amp; deal email</p>
+          <p className="text-sm text-slate-500">
+            Every morning: today&apos;s panchang, the Moon&apos;s rashi, the
+            deal of the day and events coming up.
+          </p>
+        </div>
+        <form action={setMorningEmailAction}>
+          <input type="hidden" name="on" value={morningOn ? "no" : "yes"} />
+          <button
+            className={`rounded-xl px-3 py-1.5 text-sm font-bold ${
+              morningOn
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {morningOn ? "On" : "Off"}
           </button>
         </form>
       </Card>

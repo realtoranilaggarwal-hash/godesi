@@ -6,11 +6,12 @@ import { BusinessTile } from "@/components/BusinessTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryFeatured } from "@/components/CategoryFeatured";
+import { CategoryTree } from "@/components/CategoryTree";
+import { SmallBanners } from "@/components/Banners";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
 import { freshNewsCutoff } from "@/lib/news";
-import { MemberBubbles } from "@/components/MemberBubbles";
 import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
 import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
@@ -22,6 +23,13 @@ import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
 import { RecentStrip } from "@/components/RecentStrip";
+import { DealsStrip } from "@/components/DealsStrip";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
+import { DealOfTheDayBar } from "@/components/DealOfTheDay";
+import { PanchangCard } from "@/components/PanchangCard";
+import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
+import { RishtaHomeBox } from "@/components/RishtaHomeBox";
+import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
 
@@ -55,53 +63,67 @@ const HERO_PROOF: string[] = [
   "WhatsApp button so customers message you",
 ];
 
+/** Every visitor (and crawler) sees the same shelves, so they are read once a minute. */
+const homeEvents = cachedQuery("home-events", CONTENT_TTL, () =>
+  db.event.findMany({
+    where: { status: "APPROVED", startsAt: { gte: new Date() } },
+    orderBy: { startsAt: "asc" },
+    take: 24,
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
+      organizer: { select: { plan: true } },
+    },
+  }),
+);
+
+const homeNews = cachedQuery("home-news", CONTENT_TTL, () =>
+  db.newsItem.findMany({
+    where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+    orderBy: { publishedAt: "desc" },
+    take: 4,
+  }),
+);
+
+const homeSpaCount = cachedQuery("home-spa-count", CONTENT_TTL, () =>
+  db.business.count({
+    where: {
+      status: "APPROVED",
+      subcategorySlug: "beauty-lifestyle-spa-and-massage",
+    },
+  }),
+);
+
+const homeMembers = cachedQuery("home-members", CONTENT_TTL, () =>
+  newestMembers(12, { withPage: true }),
+);
+
 export default async function HomePage() {
-  const [
-    categories,
-    businesses,
-    upcoming,
-    news,
-    members,
-    spaCount,
-    newMembers,
-  ] = await Promise.all([
-    getCategoryTree(),
-    searchBusinesses({ take: 8, sort: "recent" }),
-    db.event.findMany({
-      where: { status: "APPROVED", startsAt: { gte: new Date() } },
-      orderBy: { startsAt: "asc" },
-      take: 24,
-      include: {
-        category: { select: { name: true, icon: true, color: true } },
-        organizer: { select: { plan: true } },
-      },
-    }),
-    db.newsItem.findMany({
-      where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
-      orderBy: { publishedAt: "desc" },
-      take: 4,
-    }),
-    db.user.findMany({
-      where: { emailVerifiedAt: { not: null } },
-      orderBy: { createdAt: "desc" },
-      take: 44,
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        avatarUrl: true,
-        location: true,
-      },
-    }),
-    db.business.count({
-      where: {
-        status: "APPROVED",
-        subcategorySlug: "beauty-lifestyle-spa-and-massage",
-      },
-    }),
-    newestMembers(6),
-  ]);
+  const [categories, businesses, eventRows, newsRows, spaCount, memberRows] =
+    await Promise.all([
+      getCategoryTree(),
+      searchBusinesses({ take: 8, sort: "recent" }),
+      homeEvents(),
+      homeNews(),
+      homeSpaCount(),
+      homeMembers(),
+    ]);
+  // Cached rows come back JSON-serialised, so dates are strings again.
+  const upcoming = eventRows.map((event) => ({
+    ...event,
+    startsAt: new Date(event.startsAt),
+    endsAt: event.endsAt ? new Date(event.endsAt) : null,
+  }));
+  const news = newsRows.map((item) => ({
+    ...item,
+    publishedAt: new Date(item.publishedAt),
+  }));
+  const newMembers = memberRows.map((member) => ({
+    ...member,
+    createdAt: new Date(member.createdAt),
+  }));
   const pickerGroups = await categoryPickerGroups();
+  const today = visitorPanchang();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
   const events = [...upcoming]
@@ -110,108 +132,151 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-6 text-white sm:px-8 sm:py-8">
-        <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-              Free desi page · first come, first served
-            </p>
-            <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-5xl">
-              Get your name:{" "}
-              <span className="whitespace-nowrap">godesi.com/you</span>
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
-              One short link for everything you do — your work, your shop, your
-              WhatsApp, your links. Names go once. Take yours before somebody
-              else does.
-            </p>
+      <div className="space-y-3">
+        <RecentStrip />
 
-            <div className="mt-4">
-              <HandleClaim />
+        <ChatterHomeBox />
+
+        <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6">
+          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
+                Free desi page · first come, first served
+              </p>
+              <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-4xl">
+                Get your name:{" "}
+                <span className="whitespace-nowrap">godesi.com/you</span>
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
+                One short link for everything you do — your work, your shop,
+                your WhatsApp, your links. Names go once. Take yours before
+                somebody else does.
+              </p>
+
+              <div className="mt-4">
+                <HandleClaim />
+              </div>
+              <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
+                {HERO_PROOF.map((line) => (
+                  <li key={line}>✓ {line}</li>
+                ))}
+              </ul>
+
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <Link
+                  href="/add-business"
+                  className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
+                >
+                  Add your business free
+                </Link>
+                <Link
+                  href="/why-godesi"
+                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  Everything you get on GoDesi
+                </Link>
+                <Link
+                  href="/people"
+                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  See members&rsquo; pages
+                </Link>
+              </div>
             </div>
-
-            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
-              {HERO_PROOF.map((line) => (
-                <li key={line}>✓ {line}</li>
-              ))}
-            </ul>
-
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <Link
-                href="/add-business"
-                className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
-              >
-                Add your business free
-              </Link>
-              <Link
-                href="/why-godesi"
-                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-              >
-                Everything you get on GoDesi
-              </Link>
-              <Link
-                href="/people"
-                className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-              >
-                See members&rsquo; pages
-              </Link>
+            <div>
+              <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-lg font-black">
+                    Looking for someone? Pick a service 👇
+                  </h2>
+                  <Link
+                    href="/categories"
+                    className="text-sm font-semibold text-indigo-600 hover:underline"
+                  >
+                    All {categories.length} →
+                  </Link>
+                </div>
+                <CategoryPicker
+                  groups={pickerGroups}
+                  quickCount={10}
+                  label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
+                />
+              </div>
             </div>
-          </div>
-          <MemberBubbles members={members} />
-        </div>
-      </section>
-
-      {/* One bold box instead of a wall of category tiles: the whole taxonomy
-          is one click down, and nothing else competes with it. */}
-      <section className="rounded-3xl border-2 border-slate-900 bg-white p-4 shadow-sm sm:p-5">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-xl font-black">
-            Looking for someone? Pick a service 👇
-          </h2>
-          <Link
-            href="/categories"
-            className="text-sm font-semibold text-indigo-600 hover:underline"
-          >
-            All {categories.length} categories →
-          </Link>
-        </div>
-        <CategoryPicker
-          groups={pickerGroups}
-          quickCount={10}
-          label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-          big
-        />
-      </section>
-
-      <RecentStrip />
-
-      <CategoryFeatured />
-
-      <DjsWikiCard />
-
-      <div className="space-y-8">
-        <section className="flex flex-col gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            <span className="font-bold">
-              ⚠️ Mouldy sweets, kept deposit, unpaid wages?
-            </span>{" "}
-            Step-by-step: who to call and what to photograph — US &amp; Canada.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/complaints"
-              className="rounded-xl bg-rose-600 px-3 py-1.5 font-bold text-white hover:bg-rose-700"
-            >
-              How to file a complaint
-            </Link>
-            <Link
-              href="/news/report?topic=consumer"
-              className="rounded-xl border border-rose-300 bg-white px-3 py-1.5 font-bold text-rose-700 hover:bg-rose-100"
-            >
-              Post a consumer alert
-            </Link>
           </div>
         </section>
+
+        <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+          <DealOfTheDayBar />
+          {today.panchang ? (
+            <PanchangCard
+              panchang={today.panchang}
+              place={today.label}
+              compact
+            />
+          ) : null}
+        </div>
+      </div>
+
+      {newMembers.length ? (
+        <section>
+          <SectionHeading
+            title="Newest members 👋"
+            href="/people"
+            linkLabel="All members"
+          />
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {newMembers.map((member, index) => (
+              <div
+                key={member.id}
+                className={index >= 6 ? "hidden sm:block" : ""}
+              >
+                <MemberTile member={member} compact />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <RishtaHomeBox />
+
+      <DealsStrip />
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <CategoryFeatured />
+        <aside className="hidden space-y-4 xl:block">
+          <CategoryTree groups={pickerGroups} />
+          <SmallBanners embedded tree={false} show={5} />
+        </aside>
+      </div>
+
+      <div className="space-y-8">
+        <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+          <DjsWikiCard />
+          <section className="flex flex-col justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+            <p>
+              <span className="font-bold">
+                ⚠️ Mouldy sweets, kept deposit, unpaid wages?
+              </span>{" "}
+              Step-by-step: who to call and what to photograph — US &amp;
+              Canada.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/complaints"
+                className="rounded-xl bg-rose-600 px-3 py-1.5 font-bold text-white hover:bg-rose-700"
+              >
+                How to file a complaint
+              </Link>
+              <Link
+                href="/news/report?topic=consumer"
+                className="rounded-xl border border-rose-300 bg-white px-3 py-1.5 font-bold text-rose-700 hover:bg-rose-100"
+              >
+                Post a consumer alert
+              </Link>
+            </div>
+          </section>
+        </div>
         <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
           {news.length ? (
             <section className="lg:col-span-2">
@@ -268,21 +333,6 @@ export default async function HomePage() {
             </Card>
           )}
         </section>
-
-        {newMembers.length ? (
-          <section>
-            <SectionHeading
-              title="Newest members 👋"
-              href="/people"
-              linkLabel="All members"
-            />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {newMembers.map((member) => (
-                <MemberTile key={member.id} member={member} />
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         <div className="grid gap-3 sm:grid-cols-3">
           <SpaSpotlight listings={spaCount} />

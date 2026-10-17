@@ -14,6 +14,7 @@ import {
 } from "@/lib/memberEmails";
 import { invalidateDirectory } from "@/lib/cache";
 import { ALL_PERMISSIONS } from "@/lib/permissions";
+import { ensureUsername } from "@/lib/profiles";
 
 const ASSIGNABLE_ROLES: Role[] = ["CLIENT", "BUSINESS", "MODERATOR", "ADMIN"];
 
@@ -59,6 +60,7 @@ export async function setMemberVerifiedAction(formData: FormData) {
     where: { id },
     data: { emailVerifiedAt: verified ? new Date() : null },
   });
+  if (verified) await ensureUsername(id);
   refresh(id);
 }
 

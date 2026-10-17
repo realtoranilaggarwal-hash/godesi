@@ -42,6 +42,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/banners", label: "Banners", icon: "🖼️", need: "admin" },
   { href: "/admin/ads", label: "Ad orders", icon: "📢", need: "admin" },
   { href: "/admin/members", label: "Members", icon: "👥", need: "admin" },
+  {
+    href: "/admin/offer-leads",
+    label: "Offer leads",
+    icon: "🎁",
+    need: "admin",
+  },
   { href: "/admin/upi", label: "UPI payments", icon: "🧾", need: "admin" },
   { href: "/admin/coupons", label: "Coupons", icon: "🏷️", need: "admin" },
   { href: "/admin/news", label: "News", icon: "📰", need: "admin" },
@@ -53,6 +59,8 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   },
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁", need: "admin" },
   { href: "/admin/connect", label: "Connect", icon: "🤝", need: "admin" },
+  { href: "/admin/rishta", label: "Rishta", icon: "💍", need: "admin" },
+  { href: "/admin/chatter", label: "Chatter", icon: "💬", need: "chatter" },
   { href: "/admin/temples", label: "Temples", icon: "🛕", need: "worship" },
   {
     href: "/admin/resources",
@@ -67,6 +75,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/content", label: "Content desk", icon: "✍️", need: "staff" },
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆", need: "staff" },
   { href: "/admin/media", label: "Media team", icon: "🎙️", need: "staff" },
+  {
+    href: "/admin/ambassadors",
+    label: "Ambassadors",
+    icon: "🤝",
+    need: "staff",
+  },
   {
     href: "/admin/live-channels",
     label: "Radio & TV",

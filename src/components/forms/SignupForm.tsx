@@ -6,6 +6,8 @@ import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
+import { OfferChips } from "@/components/OfferChips";
+import { JoinGoalChips } from "@/components/JoinGoalChips";
 
 export function SignupForm({
   defaultRole = "BUSINESS",
@@ -57,6 +59,20 @@ export function SignupForm({
       <Field label="Password" hint="At least 8 characters">
         <input name="password" type="password" required minLength={8} className={inputClass} />
       </Field>
+      <fieldset className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
+        <legend className="px-1 text-sm font-bold text-emerald-900">
+          ✅ What would you like to do on GoDesi? (tick all that apply)
+        </legend>
+        <JoinGoalChips />
+      </fieldset>
+      <details open className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
+        <summary className="cursor-pointer text-sm font-bold text-indigo-900">
+          🎁 Unlock Your GoDesi Member Benefits (optional)
+        </summary>
+        <div className="mt-3">
+          <OfferChips />
+        </div>
+      </details>
       <SubmitButton pendingLabel="Creating account..." className="w-full">
         Create account
       </SubmitButton>
