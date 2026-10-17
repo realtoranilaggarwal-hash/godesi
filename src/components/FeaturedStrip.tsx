@@ -5,7 +5,7 @@ import { PLANS } from "@/lib/plans";
 
 /** Six to a row, up to three rows, so a full strip still fits above the fold. */
 const ROW = 4;
-const MAX_SLOTS = ROW * 3;
+const MAX_SLOTS = ROW * 5;
 
 /** An unsold slot sells itself rather than leaving a hole in the row. */
 function SlotForSale({ index, total }: { index: number; total: number }) {
