@@ -14,6 +14,7 @@ import type { AlumniEntry } from "@/lib/alumni";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { PlaylistField } from "@/components/forms/PlaylistField";
+import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 
@@ -31,6 +32,7 @@ export type PersonalProfileValues = {
   languages: string[];
   videoUrls: string[];
   playlistUrl: string | null;
+  albumUrl: string | null;
   openToWork: boolean;
   whatsappNumber: string | null;
   socials: Record<string, string | null>;
@@ -179,7 +181,7 @@ export function PersonalProfileForm({
 
       <Field
         label="Work & achievements"
-        hint="Roles, projects, awards — one per line"
+        hint="Roles, projects, awards — one per line. Video and photo-album links go in the boxes below, where they play; pasted here they move there automatically."
       >
         <textarea
           name="experience"
@@ -206,6 +208,11 @@ export function PersonalProfileForm({
           />
         </Field>
       </div>
+
+      <PhotoAlbumField
+        defaultValue={profile.albumUrl ?? ""}
+        hint="Show all your photos without uploading them — paste a public Google Photos album link and your profile displays a gallery that opens the album."
+      />
 
       <PlaylistField defaultValue={profile.playlistUrl ?? ""} />
 

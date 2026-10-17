@@ -176,6 +176,7 @@ export async function publicProfile(username: string) {
       languages: true,
       videoUrls: true,
       playlistUrl: true,
+      albumUrl: true,
       openToWork: true,
       whatsappNumber: true,
       websiteUrl: true,
