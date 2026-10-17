@@ -88,7 +88,6 @@ export default async function ChatterPostPage({
       liked={viewer.liked.has(row.id)}
       following={viewer.following.has(row.author.id)}
       uploads={uploads}
-      linkToPost={row.id !== post.id}
     />
   );
   const jsonLd = {

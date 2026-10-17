@@ -5,6 +5,7 @@ import { siteUrl } from "@/lib/format";
 import { uploadsEnabled } from "@/lib/uploads";
 import {
   CHATTER_TOPICS,
+  blockedAuthorIds,
   chatterFeed,
   followingFeed,
   isChatterTopic,
@@ -81,8 +82,11 @@ export default async function ChatterPage({
     tag: searchParams.tag?.replace(/^#/, ""),
     before: searchParams.before,
   };
+  const blocked = await blockedAuthorIds(user?.id ?? null);
   const [feed, tags] = await Promise.all([
-    following && user ? followingFeed(user.id, filter) : chatterFeed(filter),
+    following && user
+      ? followingFeed(user.id, filter, blocked)
+      : chatterFeed(filter, blocked),
     trendingChatterTags(),
   ]);
   const viewer = await viewerState(user?.id ?? null, feed.posts);

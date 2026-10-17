@@ -189,7 +189,16 @@ function page(posts: ChatterPostRow[]) {
 }
 
 /** One page of top-level posts, newest first; shared by every visitor. */
-export async function chatterFeed(filter: FeedFilter) {
+export async function chatterFeed(filter: FeedFilter, blocked: string[] = []) {
+  if (blocked.length > 0) {
+    const posts = await db.chatterPost.findMany({
+      where: { ...feedWhere(filter), authorId: { notIn: blocked } },
+      orderBy: { createdAt: "desc" },
+      take: CHATTER_PAGE + 1,
+      select: postSelect,
+    });
+    return page(posts);
+  }
   const key = JSON.stringify({
     topic: filter.topic || undefined,
     city: filter.city?.trim().toLowerCase() || undefined,
@@ -201,10 +210,15 @@ export async function chatterFeed(filter: FeedFilter) {
 }
 
 /** Posts from the members this viewer follows. Per-viewer, so never cached. */
-export async function followingFeed(viewerId: string, filter: FeedFilter) {
+export async function followingFeed(
+  viewerId: string,
+  filter: FeedFilter,
+  blocked: string[] = [],
+) {
   const posts = await db.chatterPost.findMany({
     where: {
       ...feedWhere(filter),
+      authorId: { notIn: blocked },
       author: {
         bannedAt: null,
         chatterFollowers: { some: { followerId: viewerId } },
@@ -220,7 +234,15 @@ export async function followingFeed(viewerId: string, filter: FeedFilter) {
 /** A post with its visible replies, oldest reply first. */
 export async function chatterThread(id: string) {
   const post = await db.chatterPost.findFirst({
-    where: { id, hiddenAt: null, author: { bannedAt: null } },
+    where: {
+      id,
+      hiddenAt: null,
+      author: { bannedAt: null },
+      OR: [
+        { parentId: null },
+        { parent: { hiddenAt: null, author: { bannedAt: null } } },
+      ],
+    },
     select: {
       ...postSelect,
       parent: {
@@ -236,11 +258,21 @@ export async function chatterThread(id: string) {
   if (!post) return null;
   const replies = await db.chatterPost.findMany({
     where: { parentId: id, hiddenAt: null, author: { bannedAt: null } },
-    orderBy: { createdAt: "asc" },
+    orderBy: { createdAt: "desc" },
     take: 200,
     select: postSelect,
   });
-  return { post, replies };
+  return { post, replies: replies.reverse() };
+}
+
+/** Members this viewer has blocked; their posts are left out of the feed. */
+export async function blockedAuthorIds(viewerId: string | null) {
+  if (!viewerId) return [];
+  const blocks = await db.chatterBlock.findMany({
+    where: { blockerId: viewerId },
+    select: { blockedId: true },
+  });
+  return blocks.map((block) => block.blockedId);
 }
 
 /** What the signed-in viewer has liked, follows and blocks among these authors. */
@@ -283,6 +315,7 @@ async function recentTags() {
   const posts = await db.chatterPost.findMany({
     where: {
       hiddenAt: null,
+      author: { bannedAt: null },
       createdAt: { gte: since },
       NOT: { tags: { isEmpty: true } },
     },

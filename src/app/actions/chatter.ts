@@ -214,6 +214,12 @@ export async function editChatterPostAction(
           : { topic: parsed.data.topic, city: parsed.data.city || null }),
       },
     });
+    if (!post.parentId) {
+      await db.chatterPost.updateMany({
+        where: { parentId: id },
+        data: { topic: parsed.data.topic, city: parsed.data.city || null },
+      });
+    }
     refreshChatter(id, post.parentId);
     return { success: "Saved." };
   } catch (error) {
@@ -239,6 +245,7 @@ export async function deleteChatterPostAction(formData: FormData) {
     }
   });
   refreshChatter(post.parentId);
+  revalidateTag("sitemap-rows");
   redirect(post.parentId ? chatterPath(post.parentId) : "/chatter");
 }
 
@@ -292,7 +299,11 @@ export async function toggleChatterFollowAction(formData: FormData) {
     await db.chatterFollow.delete({ where: key });
   } else {
     const target = await db.user.findFirst({
-      where: { id: followingId, bannedAt: null },
+      where: {
+        id: followingId,
+        bannedAt: null,
+        chatterBlocking: { none: { blockedId: user.id } },
+      },
       select: { id: true },
     });
     if (!target) return;
@@ -359,6 +370,9 @@ export async function reportChatterPostAction(
 ): Promise<ActionState> {
   try {
     const user = await requireUser();
+    if (!user.emailVerifiedAt) {
+      return { error: "Verify your email before reporting posts." };
+    }
     const parsed = reportSchema.safeParse({
       postId: formData.get("postId"),
       reason: formData.get("reason"),
@@ -447,5 +461,6 @@ export async function moderateChatterPostAction(formData: FormData) {
     return;
   }
   refreshChatter(post.id, post.parentId);
+  revalidateTag("sitemap-rows");
   revalidatePath("/admin/chatter");
 }

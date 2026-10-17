@@ -76,14 +76,12 @@ export function ChatterPostCard({
   liked,
   following,
   uploads,
-  linkToPost = true,
 }: {
   post: ChatterPostRow;
   viewerId: string | null;
   liked: boolean;
   following: boolean;
   uploads: boolean;
-  linkToPost?: boolean;
 }) {
   const author = post.author;
   const name = properName(author.name);
@@ -162,13 +160,7 @@ export function ChatterPostCard({
             ) : null}
           </div>
         )}
-        {linkToPost ? (
-          <Link href={path} className="block">
-            <ChatterBody body={post.body} />
-          </Link>
-        ) : (
-          <ChatterBody body={post.body} />
-        )}
+        <ChatterBody body={post.body} />
         {post.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
