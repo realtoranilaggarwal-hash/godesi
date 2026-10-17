@@ -11,7 +11,9 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } },
 ) {
-  const ref = new URL(request.url).searchParams.get("ref")?.trim() || undefined;
+  const ref =
+    new URL(request.url).searchParams.get("ref")?.trim().slice(0, 40) ||
+    undefined;
   const thread = await chatterThread(params.id);
 
   if (!thread) {
@@ -29,7 +31,9 @@ export async function GET(
         ? {
             id: parent.id,
             author: properName(parent.author.name),
-            url: `${siteUrl()}${chatterPath(parent.id)}`,
+            url: `${siteUrl()}${chatterPath(parent.id)}${
+              ref ? `?ref=${encodeURIComponent(ref)}` : ""
+            }`,
           }
         : null,
       replies: thread.replies.map((reply) => chatterJson(reply, ref)),
