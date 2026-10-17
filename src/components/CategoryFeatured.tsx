@@ -159,8 +159,8 @@ export async function CategoryFeatured() {
                   href={`/pricing?category=${encodeURIComponent(group.slug ?? "")}`}
                   className="text-[11px] font-semibold text-rose-600 hover:underline"
                 >
-                  Your spot here from ₹{pro.priceInr} / $
-                  {pro.priceUsd.toFixed(2)} a month →
+                  Your spot here starts from ${pro.priceUsd.toFixed(2)} a month
+                  →
                 </Link>
               )}
             </div>
@@ -186,8 +186,8 @@ export async function CategoryFeatured() {
                     Be featured in {group.name}
                   </span>
                   <span className="mt-1 text-[11px] text-white/90">
-                    ₹{pro.priceInr} / ${pro.priceUsd.toFixed(2)} a month — on
-                    the home page in your own category.
+                    Starts from ${pro.priceUsd.toFixed(2)} a month — on the home
+                    page in your own category.
                   </span>
                   <span className="mt-2 text-[11px] font-bold underline">
                     Take this spot →
