@@ -25,6 +25,7 @@ import { DealsStrip } from "@/components/DealsStrip";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
+import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
@@ -222,6 +223,8 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
+
+      <ChatterHomeBox />
 
       {today.panchang ? (
         <PanchangCard panchang={today.panchang} place={today.label} compact />
