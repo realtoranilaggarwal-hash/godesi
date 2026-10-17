@@ -28,7 +28,7 @@ export default async function CategoriesPage() {
       </div>
       <SidebarBanners />
       <aside data-right-rail className="hidden w-[320px] shrink-0 xl:block">
-        <SmallBanners show={10} embedded />
+        <SmallBanners show={10} embedded tree={false} />
       </aside>
     </div>
   );

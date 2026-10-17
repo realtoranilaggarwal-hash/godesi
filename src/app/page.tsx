@@ -6,6 +6,7 @@ import { BusinessTile } from "@/components/BusinessTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryFeatured } from "@/components/CategoryFeatured";
+import { CategoryTree } from "@/components/CategoryTree";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { AboutGodesi } from "@/components/AboutGodesi";
 import { Card } from "@/components/ui";
@@ -26,6 +27,7 @@ import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
+import { RishtaHomeBox } from "@/components/RishtaHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
 
 export const dynamic = "force-dynamic";
@@ -226,13 +228,22 @@ export default async function HomePage() {
 
       <ChatterHomeBox />
 
+      <RishtaHomeBox />
+
       {today.panchang ? (
         <PanchangCard panchang={today.panchang} place={today.label} compact />
       ) : null}
 
       <DealsStrip />
 
-      <CategoryFeatured />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <CategoryFeatured />
+        <aside className="hidden xl:block">
+          <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto">
+            <CategoryTree groups={pickerGroups} />
+          </div>
+        </aside>
+      </div>
 
       <DjsWikiCard />
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { searchBusinesses, type BusinessListItem } from "@/lib/businesses";
 import { BusinessTile } from "@/components/BusinessTile";
+import { CategoryArt } from "@/components/CategoryArt";
 import { PLANS, planRank } from "@/lib/plans";
 
 /** One full row per trade, so no single category can take over the page. */
@@ -176,21 +177,18 @@ export async function CategoryFeatured() {
 
               {openSlots > 0 ? (
                 <Link
-                  href={`/pricing?category=${encodeURIComponent(group.slug ?? "")}`}
-                  className={`flex flex-col justify-center rounded-2xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 p-3 text-white transition hover:brightness-110 ${promoSpan}`}
+                  href={
+                    group.slug ? `/categories/${group.slug}` : "/categories"
+                  }
+                  className={`group flex flex-col items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 text-center transition hover:shadow-md ${promoSpan}`}
                 >
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
-                    {group.name} · open
-                  </span>
-                  <span className="mt-1 text-sm font-black leading-tight">
-                    Be featured in {group.name}
-                  </span>
-                  <span className="mt-1 text-[11px] text-white/90">
-                    Starts from ${pro.priceUsd.toFixed(2)} a month — on the home
-                    page in your own category.
-                  </span>
-                  <span className="mt-2 text-[11px] font-bold underline">
-                    Take this spot →
+                  <CategoryArt
+                    slug={group.slug ?? ""}
+                    icon={group.icon ?? undefined}
+                    className="h-auto w-full max-w-[240px]"
+                  />
+                  <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-700">
+                    More in {group.name} →
                   </span>
                 </Link>
               ) : null}
