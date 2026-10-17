@@ -12,7 +12,7 @@ import { ActivityWall } from "@/components/ActivityWall";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { HelpClipCard } from "@/components/HelpClipCard";
-import { CategoryNav } from "@/components/CategoryNav";
+import { CategoryTree } from "@/components/CategoryTree";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { GodesiWikiCard } from "@/components/GodesiWikiPromo";
 import { isPhoneRequest } from "@/lib/device";
@@ -168,20 +168,21 @@ export async function SidebarBanners({
   // live map, a chat poll, banner impressions and ad units nobody could see.
   if (isPhoneRequest()) return null;
 
-  const [rectangles, halfPages, skyscrapers, rectanglesSold] =
+  const [rectangles, halfPages, skyscrapers, rectanglesSold, categories] =
     await Promise.all([
       activeBanners("SIDEBAR", 2),
       activeBanners("HALFPAGE", 1),
       activeBanners("SKYSCRAPER", 2),
       slotSoldCount("SIDEBAR"),
+      categoryPickerGroups(),
     ]);
 
   return (
     <aside
-      className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
+      className="hidden w-[260px] shrink-0 space-y-4 lg:order-last lg:block"
       aria-label="Sponsored"
     >
-      <CategoryNav />
+      <CategoryTree groups={categories} />
 
       <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
 

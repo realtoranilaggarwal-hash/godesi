@@ -132,90 +132,100 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-3">
-        <RecentStrip />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0 space-y-3">
+          <RecentStrip />
 
-        <ChatterHomeBox />
+          <ChatterHomeBox />
 
-        <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6">
-          <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-                Free desi page · first come, first served
-              </p>
-              <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-4xl">
-                Get your name:{" "}
-                <span className="whitespace-nowrap">godesi.com/you</span>
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base">
-                One short link for everything you do — your work, your shop,
-                your WhatsApp, your links. Names go once. Take yours before
-                somebody else does.
-              </p>
+          <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6 xl:px-6 xl:py-4">
+            <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-1">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
+                  Free desi page · first come, first served
+                </p>
+                <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-4xl xl:text-3xl">
+                  Get your name:{" "}
+                  <span className="whitespace-nowrap">godesi.com/you</span>
+                </h1>
+                <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base xl:mt-1 xl:max-w-none xl:text-sm">
+                  One short link for everything you do — your work, your shop,
+                  your WhatsApp, your links. Names go once. Take yours before
+                  somebody else does.
+                </p>
 
-              <div className="mt-4">
-                <HandleClaim />
-              </div>
-              <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90">
-                {HERO_PROOF.map((line) => (
-                  <li key={line}>✓ {line}</li>
-                ))}
-              </ul>
+                <div className="xl:flex xl:items-center xl:gap-4">
+                  <div className="mt-4 xl:mt-3 xl:w-[34rem] xl:shrink-0">
+                    <HandleClaim />
+                  </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                <Link
-                  href="/add-business"
-                  className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
-                >
-                  Add your business free
-                </Link>
-                <Link
-                  href="/why-godesi"
-                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                >
-                  Everything you get on GoDesi
-                </Link>
-                <Link
-                  href="/people"
-                  className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                >
-                  See members&rsquo; pages
-                </Link>
-              </div>
-            </div>
-            <div>
-              <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-lg font-black">
-                    Looking for someone? Pick a service 👇
-                  </h2>
+                  <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90 xl:mt-0">
+                    {HERO_PROOF.map((line) => (
+                      <li key={line}>✓ {line}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   <Link
-                    href="/categories"
-                    className="text-sm font-semibold text-indigo-600 hover:underline"
+                    href="/add-business"
+                    className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
                   >
-                    All {categories.length} →
+                    Add your business free
+                  </Link>
+                  <Link
+                    href="/why-godesi"
+                    className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                  >
+                    Everything you get on GoDesi
+                  </Link>
+                  <Link
+                    href="/people"
+                    className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                  >
+                    See members&rsquo; pages
                   </Link>
                 </div>
-                <CategoryPicker
-                  groups={pickerGroups}
-                  quickCount={10}
-                  label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-                />
+              </div>
+              <div className="xl:hidden">
+                <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <h2 className="text-lg font-black">
+                      Looking for someone? Pick a service 👇
+                    </h2>
+                    <Link
+                      href="/categories"
+                      className="text-sm font-semibold text-indigo-600 hover:underline"
+                    >
+                      All {categories.length} →
+                    </Link>
+                  </div>
+                  <CategoryPicker
+                    groups={pickerGroups}
+                    quickCount={10}
+                    label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
-          <DealOfTheDayBar />
-          {today.panchang ? (
-            <PanchangCard
-              panchang={today.panchang}
-              place={today.label}
-              compact
-            />
-          ) : null}
+          <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+            <DealOfTheDayBar />
+            {today.panchang ? (
+              <PanchangCard
+                panchang={today.panchang}
+                place={today.label}
+                compact
+              />
+            ) : null}
+          </div>
         </div>
+        <aside className="relative hidden xl:block">
+          <div className="absolute inset-0 overflow-y-auto">
+            <CategoryTree groups={pickerGroups} />
+          </div>
+        </aside>
       </div>
 
       {newMembers.length ? (
@@ -244,8 +254,7 @@ export default async function HomePage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <CategoryFeatured />
-        <aside className="hidden space-y-4 xl:block">
-          <CategoryTree groups={pickerGroups} />
+        <aside className="hidden xl:block">
           <SmallBanners embedded tree={false} show={5} />
         </aside>
       </div>
