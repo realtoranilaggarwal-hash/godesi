@@ -303,7 +303,7 @@ export default async function PricingPage({
                 currency === "INR" &&
                 priceUsd !== null ? (
                   <p className="text-xs text-slate-500">
-                    or {formatUsd(priceUsd)} via PayPal
+                    or {formatUsd(afterCoupon(priceUsd, "USD"))} via PayPal
                   </p>
                 ) : null}
               </div>
