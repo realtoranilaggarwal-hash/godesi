@@ -146,6 +146,20 @@ export function EventCouponForm({
           />
         </Field>
         <DiscountFields withCurrency={false} />
+        <label className="flex items-start gap-2 text-sm sm:col-span-2">
+          <input
+            type="checkbox"
+            name="publicOffer"
+            defaultChecked
+            className="mt-1 h-4 w-4 accent-rose-600"
+          />
+          <span>
+            Show as a ✂️ clip-out coupon on the event page
+            <span className="block text-xs text-slate-500">
+              Untick for a private code you only send to your own list.
+            </span>
+          </span>
+        </label>
       </div>
 
       <SubmitButton pendingLabel="Creating…">Create coupon</SubmitButton>

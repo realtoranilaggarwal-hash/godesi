@@ -25,6 +25,7 @@ export function TicketForm({
   tiers,
   defaultName,
   defaultEmail,
+  defaultCoupon,
   askReferredBy = false,
 }: {
   eventId: string;
@@ -35,6 +36,7 @@ export function TicketForm({
   tiers: TicketTierOption[];
   defaultName?: string;
   defaultEmail?: string;
+  defaultCoupon?: string;
   askReferredBy?: boolean;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
@@ -117,9 +119,13 @@ export function TicketForm({
           </Field>
         ) : null}
         {unitPrice ? (
-          <Field label="Coupon code" hint="Optional — from the organiser">
+          <Field
+            label="Coupon code (optional)"
+            hint="Got a code from the organiser or a ✂️ coupon on this page? Type it here — the discount comes off before you pay."
+          >
             <input
               name="couponCode"
+              defaultValue={defaultCoupon}
               placeholder="e.g. EARLYBIRD"
               className={`${inputClass} uppercase`}
             />
