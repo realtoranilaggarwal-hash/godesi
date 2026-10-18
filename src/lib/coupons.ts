@@ -1,6 +1,7 @@
-import type { Coupon, CouponScope } from "@prisma/client";
+import type { Coupon, CouponScope, Plan } from "@prisma/client";
 import { db } from "@/lib/db";
 import { toMinor } from "@/lib/format";
+import type { TermId } from "@/lib/plans";
 
 export function normalizeCouponCode(input: string) {
   return input.trim().toUpperCase().replace(/\s+/g, "");
@@ -40,6 +41,13 @@ export function discountFor({
   return Math.min(subtotalMinor, toMinor(coupon.amount));
 }
 
+/** Five-year Featured also takes the package codes, so HALF5 halves it. */
+export function planCouponScopes(plan: Plan, term: TermId): CouponScope[] {
+  return plan === "PREMIUM" && term === "FIVE_YEAR"
+    ? ["PLAN", "BUNDLE"]
+    : ["PLAN"];
+}
+
 export type CouponCheck =
   | { ok: true; coupon: Coupon; discountMinor: number }
   | { ok: false; error: string };
@@ -58,7 +66,7 @@ export async function checkCoupon({
   requireDiscount = true,
 }: {
   code: string;
-  scope: CouponScope;
+  scope: CouponScope | CouponScope[];
   userId: string;
   eventId?: string;
   subtotalMinor: number;
@@ -72,7 +80,7 @@ export async function checkCoupon({
   const coupon = await db.coupon.findUnique({ where: { code: normalized } });
   if (!coupon || !coupon.active)
     return { ok: false, error: "That coupon code is not valid." };
-  if (coupon.scope !== scope) {
+  if (!(Array.isArray(scope) ? scope : [scope]).includes(coupon.scope)) {
     return { ok: false, error: "That coupon cannot be used on this purchase." };
   }
   if (coupon.eventId && coupon.eventId !== eventId) {

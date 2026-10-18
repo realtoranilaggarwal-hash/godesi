@@ -22,6 +22,9 @@ import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT, dialCodeForCountry } from "@/lib/dialCodes";
 
+const MEDIA_LOCKED_HINT =
+  "Free plan: you can save it now, but it stays hidden until you go Pro.";
+
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
   make: "",
@@ -57,6 +60,7 @@ export function BusinessProfileForm({
   staffEdit = false,
   videoLimit = 1,
   albumPhotoLimit = 6,
+  mediaLocked = false,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -79,6 +83,8 @@ export function BusinessProfileForm({
   videoLimit?: number;
   /** Album thumbnails the plan shows before the "see all photos" link. */
   albumPhotoLimit?: number;
+  /** Free plan: album and playlist links are saved but not shown. */
+  mediaLocked?: boolean;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -289,9 +295,20 @@ export function BusinessProfileForm({
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
-          hint={`Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`}
+          hint={
+            mediaLocked
+              ? `🔒 ${MEDIA_LOCKED_HINT} Pro shows 15 photos from your album, with a link that opens the whole album.`
+              : `Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`
+          }
         />
-        <PlaylistField defaultValue={business?.playlistUrl ?? ""} />
+        <PlaylistField
+          defaultValue={business?.playlistUrl ?? ""}
+          hint={
+            mediaLocked
+              ? `🔒 ${MEDIA_LOCKED_HINT} Pro shows every video in your playlist or channel.`
+              : undefined
+          }
+        />
         <Field
           label={
             videoLimit > 1

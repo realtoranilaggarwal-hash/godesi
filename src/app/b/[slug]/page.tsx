@@ -6,7 +6,14 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { albumPhotoLimit, effectivePlan, PLANS, videoLimit } from "@/lib/plans";
+import {
+  albumPhotoLimit,
+  effectivePlan,
+  PLANS,
+  showsAlbumAndPlaylist,
+  videoLimit,
+  visibleMediaLink,
+} from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -191,6 +198,19 @@ export default async function BusinessProfilePage({
         ? [business.videoUrl]
         : []
   ).slice(0, business.owner ? videoLimit(business.owner) : 1);
+  const mediaUnlocked = showsAlbumAndPlaylist(business.owner);
+  const playlistUrl = visibleMediaLink(
+    business.playlistUrl,
+    business.keptPlaylistUrl,
+    mediaUnlocked,
+  );
+  const albumUrl = visibleMediaLink(
+    business.albumUrl,
+    business.keptAlbumUrl,
+    mediaUnlocked,
+  );
+  const mediaHidden =
+    (business.playlistUrl && !playlistUrl) || (business.albumUrl && !albumUrl);
   const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
@@ -520,19 +540,26 @@ export default async function BusinessProfilePage({
                 </div>
               ) : null}
 
-              {business.playlistUrl ? (
+              {playlistUrl ? (
                 <div className="mt-3">
-                  <PlaylistGallery
-                    url={business.playlistUrl}
-                    owner={business.name}
-                  />
+                  <PlaylistGallery url={playlistUrl} owner={business.name} />
                 </div>
               ) : null}
 
-              {business.albumUrl ? (
+              {isOwner && mediaHidden ? (
+                <Link
+                  href="/pricing"
+                  className="mt-3 block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+                >
+                  🔒 Your Google Photos album or YouTube playlist is saved but
+                  hidden on the Free plan. Go Pro to show it to everyone →
+                </Link>
+              ) : null}
+
+              {albumUrl ? (
                 <div className="mt-3">
                   <PhotoAlbumGallery
-                    url={business.albumUrl}
+                    url={albumUrl}
                     heading="Photos"
                     limit={albumPhotoLimit(business.owner)}
                   />
