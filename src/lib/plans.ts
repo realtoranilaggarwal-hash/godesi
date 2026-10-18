@@ -68,10 +68,12 @@ export function planTermPrice(
   plan: PlanInfo,
   term: TermId,
   currency: Currency,
+  inrPerUsd?: number,
 ): number | null {
   const price = plan.terms[term];
   if (!price) return null;
-  return currency === "INR" ? price.inr : price.usd;
+  if (currency === "USD") return price.usd;
+  return inrPerUsd ? Math.round(price.usd * inrPerUsd) : price.inr;
 }
 
 export const PLANS: Record<Plan, PlanInfo> = {

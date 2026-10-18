@@ -21,7 +21,14 @@ import { upiEnabled, upiVpa } from "@/lib/upi";
 import { startUpiPaymentAction } from "@/app/actions/upi";
 import { PayPalCheckout } from "@/components/PayPalCheckout";
 import { Alert, Badge, Card } from "@/components/ui";
+import { headers } from "next/headers";
 import { formatMoney, requestCurrency } from "@/lib/currency";
+import {
+  convert,
+  COUNTRY_CURRENCY,
+  formatDisplay,
+  getRates,
+} from "@/lib/rates";
 import { formatUsd } from "@/lib/format";
 import { WhyGodesi } from "@/components/WhyGodesi";
 import {
@@ -74,6 +81,13 @@ export default async function PricingPage({
   const upiOn = upiEnabled();
   const providersOn = stripeOn || paypalOn || upiOn;
   const currency = requestCurrency();
+  const rates = await getRates();
+  const country = headers().get("x-vercel-ip-country") ?? "";
+  const localCurrency = COUNTRY_CURRENCY[country];
+  const showLocal =
+    localCurrency && localCurrency !== "USD" && localCurrency !== "INR"
+      ? localCurrency
+      : null;
   const wanted: TermId = TERM_TABS.some((tab) => tab.id === searchParams.term)
     ? (searchParams.term as TermId)
     : "YEAR";
@@ -148,8 +162,16 @@ export default async function PricingPage({
           const isFree = id === "FREE";
           const terms = planTerms(plan);
           const term = terms.includes(wanted) ? wanted : terms[terms.length - 1];
-          const price = term ? planTermPrice(plan, term, currency) : null;
-          const priceInr = term ? planTermPrice(plan, term, "INR") : null;
+          const price = term
+            ? planTermPrice(plan, term, currency, rates.INR)
+            : null;
+          const priceInr = term
+            ? planTermPrice(plan, term, "INR", rates.INR)
+            : null;
+          const localPrice =
+            showLocal && currency === "USD" && price !== null
+              ? convert(price, "USD", showLocal, rates)
+              : null;
           const priceUsd = term ? planTermPrice(plan, term, "USD") : null;
           const label = price === null ? "" : formatMoney(price, currency);
           const prefill =
@@ -175,6 +197,18 @@ export default async function PricingPage({
                     </span>
                   )}
                 </p>
+                {!isFree && showLocal && localPrice !== null ? (
+                  <p className="text-xs text-slate-500">
+                    about {formatDisplay(localPrice, showLocal)} at today&apos;s
+                    rate, charged in US dollars
+                  </p>
+                ) : null}
+                {!isFree && currency === "INR" ? (
+                  <p className="text-xs text-slate-500">
+                    {priceUsd === null ? "" : formatUsd(priceUsd)} at
+                    today&apos;s rupee rate
+                  </p>
+                ) : null}
                 {!isFree && term === "FIVE_YEAR" ? (
                   <p className="text-xs font-semibold text-amber-700">
                     {prefill

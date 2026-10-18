@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   requestCurrency,
   formatPlanPrice,
+  inrPerUsd,
   type Currency,
 } from "@/lib/currency";
 import { PLANS } from "@/lib/plans";
@@ -77,6 +78,7 @@ export default async function UpgradePage({
 }) {
   const user = await getCurrentUser();
   const currency = requestCurrency();
+  const rate = await inrPerUsd();
   const saving = bundleSaving(currency);
   const flash = await flashOffer(currency);
 
@@ -145,8 +147,8 @@ export default async function UpgradePage({
             <Link href="/pricing" className="font-semibold text-indigo-600">
               Membership only
             </Link>{" "}
-            — Pro {formatPlanPrice(PLANS.PRO, currency)} or Featured{" "}
-            {formatPlanPrice(PLANS.PREMIUM, currency)} a month, or a year and
+            — Pro {formatPlanPrice(PLANS.PRO, currency, rate)} or Featured{" "}
+            {formatPlanPrice(PLANS.PREMIUM, currency, rate)} a month, or a year and
             five-year terms
           </li>
           <li>
