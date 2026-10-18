@@ -167,14 +167,6 @@ export async function CategoryFeatured() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {picks.map((business) => (
-                <BusinessTile
-                  key={business.id}
-                  business={business}
-                  premium={spotlightable(business)}
-                />
-              ))}
-
               {openSlots > 0 ? (
                 <Link
                   href={
@@ -192,6 +184,14 @@ export async function CategoryFeatured() {
                   </span>
                 </Link>
               ) : null}
+
+              {picks.map((business) => (
+                <BusinessTile
+                  key={business.id}
+                  business={business}
+                  premium={spotlightable(business)}
+                />
+              ))}
             </div>
           </div>
         );

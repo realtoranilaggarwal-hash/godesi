@@ -67,7 +67,7 @@ export function LiveMediaChips({ className = "" }: { className?: string }) {
   );
 }
 
-/** "🎧 Live Radio | 📺 Live TV" pair used in the header bar and the footer. */
+/** "🎧 Live Radio | 📺 Live TV | 🔗 Links" row used in the header bar and the footer. */
 export function LiveMediaLinks({
   className = "",
   buttonClass = "",
@@ -97,17 +97,20 @@ export function LiveMediaLinks({
       >
         📺 Live TV
       </button>
+      <Link href="/resources" className={base}>
+        🔗 Links
+      </Link>
+      <Link
+        href="/resources/new"
+        className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
+      >
+        add links
+      </Link>
       <Link
         href="/live-radio"
         className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
       >
         all stations
-      </Link>
-      <Link
-        href="/live/submit"
-        className="hidden sm:block text-xs font-semibold text-white/80 underline hover:text-white"
-      >
-        add yours
       </Link>
       <Link
         href="/news/report"

@@ -6,7 +6,11 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessProfileForm } from "@/components/forms/BusinessProfileForm";
 import { Card } from "@/components/ui";
-import { MAX_VIDEO_LIMIT, albumPhotoLimit } from "@/lib/plans";
+import {
+  MAX_VIDEO_LIMIT,
+  albumPhotoLimit,
+  showsAlbumAndPlaylist,
+} from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -101,6 +105,7 @@ export default async function StaffBusinessEditPage({
           staffEdit
           videoLimit={MAX_VIDEO_LIMIT}
           albumPhotoLimit={albumPhotoLimit(business.owner)}
+          mediaLocked={!showsAlbumAndPlaylist(business.owner)}
         />
       </Card>
     </div>

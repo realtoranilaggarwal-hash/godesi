@@ -610,12 +610,11 @@ export default async function CategoryPage({
         {thin ? null : <InlineBanner />}
       </div>
 
-      {thin ? null : (
-        <SidebarBanners
-          categorySlug={category.slug}
-          parentSlug={category.parent?.slug ?? null}
-        />
-      )}
+      <SidebarBanners
+        categorySlug={category.slug}
+        parentSlug={category.parent?.slug ?? null}
+        network={!thin}
+      />
     </div>
   );
 }

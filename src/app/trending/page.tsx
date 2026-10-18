@@ -5,7 +5,7 @@ import { siteUrl } from "@/lib/format";
 import { SidebarBanners } from "@/components/Banners";
 import { KeywordMatches } from "@/components/KeywordMatches";
 import { keywordSearch } from "@/lib/keywordSearch";
-import { Card, EmptyState, inputClass } from "@/components/ui";
+import { EmptyState, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +35,23 @@ export function generateMetadata({
     alternates: { canonical: `${siteUrl()}/trending` },
     robots: tag ? { index: false, follow: true } : undefined,
   };
+}
+
+/** X search for the visitor's word, with #GoDesi added unless they want the exact word. */
+function xSearchUrl(tag: string, exact = false) {
+  const word = tag.replace(/^#+/, "").trim();
+  const query =
+    !word || word.toLowerCase() === "godesi"
+      ? "#godesi"
+      : exact
+        ? tag
+        : `${tag} #GoDesi`;
+  return `https://x.com/search?q=${encodeURIComponent(query)}&src=typed_query`;
+}
+
+function bingSearchUrl(tag: string) {
+  const word = tag.replace(/^#+/, "").trim() || "GoDesi";
+  return `https://www.bing.com/search?q=${encodeURIComponent(word)}`;
 }
 
 function ago(iso: string) {
@@ -87,6 +104,41 @@ export default async function TrendingPage({
               Show me
             </button>
           </form>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
+            <span className="text-white/80">
+              Search{" "}
+              {word && word.toLowerCase() !== "godesi"
+                ? `“${word}”`
+                : "#godesi"}{" "}
+              on:
+            </span>
+            <a
+              href={xSearchUrl(tag)}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-black px-3 py-1 hover:bg-slate-800"
+            >
+              {word && word.toLowerCase() !== "godesi" ? "𝕏 with #GoDesi" : "𝕏"}
+            </a>
+            {word && word.toLowerCase() !== "godesi" ? (
+              <a
+                href={xSearchUrl(tag, true)}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full bg-black/60 px-3 py-1 hover:bg-black/80"
+              >
+                𝕏 exact word only
+              </a>
+            ) : null}
+            <a
+              href={bingSearchUrl(tag)}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-teal-600 px-3 py-1 hover:bg-teal-700"
+            >
+              🔎 Bing
+            </a>
+          </div>
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
             {SUGGESTIONS.map((suggestion) => (
               <Link
@@ -130,14 +182,14 @@ export default async function TrendingPage({
         ) : null}
 
         {hits.length ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {hits.map((hit) => (
               <a
                 key={hit.link}
                 href={hit.link}
                 target="_blank"
                 rel="noreferrer"
-                className="flex flex-col gap-1 rounded-2xl border border-slate-200 bg-white p-3 hover:border-indigo-300 hover:shadow-sm"
+                className="flex min-w-0 flex-col gap-1 break-words rounded-2xl border border-slate-200 bg-white p-3 hover:border-indigo-300 hover:shadow-sm"
               >
                 <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
                   {hit.source === "news" ? "📰 News" : "💬 Post"}
@@ -155,16 +207,6 @@ export default async function TrendingPage({
             ))}
           </div>
         ) : null}
-
-        {tag ? null : (
-          <Card>
-            <p className="text-sm text-slate-600">
-              Headlines come from Google News and posts from Mastodon&apos;s
-              public timeline — both free and open. X (Twitter) charges for
-              search access, so tweets can&apos;t be shown here.
-            </p>
-          </Card>
-        )}
       </div>
 
       <SidebarBanners />

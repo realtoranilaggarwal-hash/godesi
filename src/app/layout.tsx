@@ -5,7 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SmallBanners } from "@/components/Banners";
+import { PhoneSmallBanners, SmallBanners } from "@/components/Banners";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleTranslate } from "@/components/GoogleTranslate";
@@ -190,7 +190,10 @@ export default async function RootLayout({
         <SiteTicker />
         <main className="mx-auto flex w-full max-w-screen-2xl gap-6 px-4 py-6">
           <SmallBanners side="left" start={10} />
-          <div className="min-w-0 flex-1">{children}</div>
+          <div className="min-w-0 flex-1">
+            {children}
+            <PhoneSmallBanners />
+          </div>
           <SmallBanners />
         </main>
         <SmallBanners strip start={20} />

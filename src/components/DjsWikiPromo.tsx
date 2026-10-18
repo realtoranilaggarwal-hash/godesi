@@ -17,10 +17,26 @@ const DJ_SIGNUP =
   "/dashboard/profile?category=events-wedding&subcategory=events-wedding-dj-and-sound&type=business";
 
 const PERKS = [
-  { icon: "🔗", title: "One profile, two sites", text: "Godesi.com and DJs.wiki" },
-  { icon: "🔄", title: "Published for you", text: "Your card appears on DJs.wiki" },
-  { icon: "🔍", title: "Marketing and SEO on us", text: "We promote the directory" },
-  { icon: "📞", title: "Enquiries come to you", text: "No commission on bookings" },
+  {
+    icon: "🔗",
+    title: "One profile, two sites",
+    text: "Godesi.com and DJs.wiki",
+  },
+  {
+    icon: "🔄",
+    title: "Published for you",
+    text: "Your card appears on DJs.wiki",
+  },
+  {
+    icon: "🔍",
+    title: "Marketing and SEO on us",
+    text: "We promote the directory",
+  },
+  {
+    icon: "📞",
+    title: "Enquiries come to you",
+    text: "No commission on bookings",
+  },
 ];
 
 /** The full offer, for the top of a DJ category page. */
@@ -48,8 +64,8 @@ export function DjsWikiBanner() {
             List your DJ service here — services, music languages, equipment and
             rig, packages, event types, performance area, years of experience,
             availability, videos and photos — and the same profile is published
-            on DJs.wiki, the world&apos;s first DJs wiki directory. One form, two
-            directories, free for your first year.
+            on DJs.wiki, the world&apos;s first DJs wiki directory. One form,
+            two directories, free for your first year.
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
             {PERKS.map((perk) => (
@@ -105,21 +121,30 @@ export function DjsWikiCard({ className = "" }: { className?: string }) {
   return (
     <Link
       href="/categories/events-wedding-dj-and-sound"
-      className={`block rounded-2xl bg-gradient-to-br from-fuchsia-800 to-purple-900 p-4 text-white shadow-sm transition hover:brightness-110 ${className}`}
+      className={`flex items-center gap-3 rounded-2xl bg-gradient-to-br from-fuchsia-800 to-purple-900 p-4 text-white shadow-sm transition hover:brightness-110 ${className}`}
     >
-      <p className="text-[11px] font-black uppercase tracking-wide text-amber-300">
-        Free for 1 year
-      </p>
-      <p className="mt-1 text-base font-black leading-tight">
-        🎧 DJs — get a free DJs.wiki listing
-      </p>
-      <p className="mt-1 text-xs text-white/85">
-        List in Godesi&apos;s DJ &amp; sound section and your profile is
-        published on DJs.wiki too — the world&apos;s first DJs wiki directory.
-      </p>
-      <span className="mt-2 inline-block text-xs font-bold text-amber-300">
-        List free →
+      <span
+        aria-hidden
+        className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/15 text-3xl"
+      >
+        🧑‍🎤
+        <span className="absolute -right-1 -top-1 text-lg">🎶</span>
       </span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-black uppercase tracking-wide text-amber-300">
+          Free for 1 year
+        </p>
+        <p className="mt-1 text-base font-black leading-tight">
+          🎧 DJs — get a free DJs.wiki listing
+        </p>
+        <p className="mt-1 text-xs text-white/85">
+          List in Godesi&apos;s DJ &amp; sound section and your profile is
+          published on DJs.wiki too — the world&apos;s first DJs wiki directory.
+        </p>
+        <span className="mt-2 inline-block text-xs font-bold text-amber-300">
+          List free →
+        </span>
+      </div>
     </Link>
   );
 }

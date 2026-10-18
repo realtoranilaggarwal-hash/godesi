@@ -55,13 +55,33 @@ export async function DealOfTheDayBar() {
   const { deal, offer } = await cachedDealOfTheDay();
 
   return (
-    <section className="rounded-2xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-sm">
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
-        <h2 className="shrink-0 font-bold text-emerald-900">
-          ⏰ Deal of the day
-        </h2>
+    <section className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-2.5 py-1.5 text-sm">
+      <span
+        aria-hidden
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-2xl"
+      >
+        🛍️
+      </span>
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <p className="flex flex-wrap items-baseline gap-x-2 text-xs">
+          <span className="text-sm font-bold text-emerald-900">
+            ⏰ Deal of the day
+          </span>
+          <Link
+            href="/deals"
+            className="font-semibold text-indigo-700 hover:underline"
+          >
+            All deals →
+          </Link>
+          <Link
+            href="/dashboard/deals"
+            className="font-semibold text-emerald-800 hover:underline"
+          >
+            Post yours free
+          </Link>
+        </p>
         {deal ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+          <div className="flex min-w-0 items-center gap-2">
             <Link
               href={`/b/${deal.business.slug}`}
               className="min-w-0 truncate font-semibold text-slate-800 hover:text-indigo-700"
@@ -77,7 +97,7 @@ export async function DealOfTheDayBar() {
                 href={deal.linkUrl}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
-                className="text-xs font-semibold text-indigo-700 hover:underline"
+                className="shrink-0 text-xs font-semibold text-indigo-700 hover:underline"
               >
                 Claim →
               </a>
@@ -85,7 +105,7 @@ export async function DealOfTheDayBar() {
           </div>
         ) : null}
         {offer ? (
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+          <div className="flex min-w-0 items-center gap-2">
             <a
               href={`/api/offers/${offer.id}/click`}
               target="_blank"
@@ -98,34 +118,17 @@ export async function DealOfTheDayBar() {
               </span>
             </a>
             {offer.code ? <DealCode code={offer.code} /> : null}
-            <span className="text-[10px] uppercase tracking-wide text-slate-400">
+            <span className="shrink-0 text-[10px] uppercase tracking-wide text-slate-400">
               Paid link
             </span>
           </div>
         ) : null}
         {!deal && !offer ? (
-          <p className="flex-1 text-slate-600">
-            Today&rsquo;s pick is on its way — see every offer on the deals page.
+          <p className="truncate text-xs text-slate-600">
+            Today&rsquo;s pick is on its way — see every offer on the deals
+            page.
           </p>
         ) : null}
-      </div>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-emerald-200/70 pt-1.5 text-xs">
-        <Link href="/deals" className="font-semibold text-indigo-700 hover:underline">
-          All deals →
-        </Link>
-        <Link href="/shop" className="font-semibold text-indigo-700 hover:underline">
-          🛍️ Shop →
-        </Link>
-        <span className="text-slate-600">
-          Own a business?{" "}
-          <Link
-            href="/dashboard/deals"
-            className="font-semibold text-emerald-800 underline hover:text-emerald-900"
-          >
-            Post your deal free
-          </Link>{" "}
-          — it shows here, on your page and on /deals.
-        </span>
       </div>
     </section>
   );
@@ -133,7 +136,7 @@ export async function DealOfTheDayBar() {
 
 function DealCode({ code }: { code: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 bg-white px-1.5 py-0.5 text-xs">
+    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-emerald-300 bg-white px-1.5 py-0.5 text-xs">
       <span className="font-mono font-bold tracking-wider text-emerald-900">
         {code}
       </span>

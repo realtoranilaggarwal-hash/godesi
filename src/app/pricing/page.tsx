@@ -173,7 +173,7 @@ export default async function PricingPage({
                 </p>
                 {!isFree && term === "FIVE_YEAR" ? (
                   <p className="text-xs font-semibold text-amber-700">
-                    One year&apos;s price for five years — until{" "}
+                    Enter code HALF5 to pay half — until{" "}
                     {FOUNDING_OFFER_ENDS_LABEL}
                   </p>
                 ) : null}

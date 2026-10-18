@@ -12,7 +12,7 @@ import { ActivityWall } from "@/components/ActivityWall";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { HelpClipCard } from "@/components/HelpClipCard";
-import { CategoryNav } from "@/components/CategoryNav";
+import { CategoryTree } from "@/components/CategoryTree";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { GodesiWikiCard } from "@/components/GodesiWikiPromo";
 import { isPhoneRequest } from "@/lib/device";
@@ -168,20 +168,24 @@ export async function SidebarBanners({
   // live map, a chat poll, banner impressions and ad units nobody could see.
   if (isPhoneRequest()) return null;
 
-  const [rectangles, halfPages, skyscrapers, rectanglesSold] =
+  const [rectangles, halfPages, skyscrapers, rectanglesSold, categories] =
     await Promise.all([
       activeBanners("SIDEBAR", 2),
       activeBanners("HALFPAGE", 1),
       activeBanners("SKYSCRAPER", 2),
       slotSoldCount("SIDEBAR"),
+      categoryPickerGroups(),
     ]);
 
   return (
     <aside
-      className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
+      data-right-rail
+      className="hidden w-[260px] shrink-0 space-y-4 lg:order-last lg:block"
       aria-label="Sponsored"
     >
-      <CategoryNav />
+      <CategoryTree groups={categories} />
+
+      <SmallBanners embedded tree={false} show={4} />
 
       <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
 
@@ -270,9 +274,12 @@ export async function SmallBanners({
   side,
   strip = false,
   tree = true,
+  fill = false,
 }: {
   show?: number;
   embedded?: boolean;
+  /** Fill the height of the surrounding box with as many banners as fit. */
+  fill?: boolean;
   /** Category tree above the banners; off where the page already lists them. */
   tree?: boolean;
   start?: number;
@@ -289,9 +296,27 @@ export async function SmallBanners({
       categories={categories}
       show={show}
       embedded={embedded}
+      fill={fill}
       start={start}
       side={side}
       strip={strip}
+      banners={banners.map((banner) => ({
+        id: banner.id,
+        title: banner.title,
+        imageUrl: proxyImage(banner.imageUrl),
+      }))}
+    />
+  );
+}
+
+/** Two small banners under the page content, for phones only. */
+export async function PhoneSmallBanners() {
+  if (!isPhoneRequest()) return null;
+  const banners = await activeBanners("MOBILE", 20);
+  return (
+    <SmallBannerRail
+      phone
+      show={2}
       banners={banners.map((banner) => ({
         id: banner.id,
         title: banner.title,

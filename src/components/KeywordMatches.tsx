@@ -65,7 +65,7 @@ export function KeywordMatches({
               Have a deal? Post it free
             </Link>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {deals.map((deal) => (
               <DealCard key={deal.id} {...deal} />
             ))}

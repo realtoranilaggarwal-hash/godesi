@@ -23,7 +23,9 @@ export function CategoryTree({ groups }: { groups: PickerGroup[] }) {
             <details className="group">
               <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1.5 font-semibold text-slate-800 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
                 <span aria-hidden>{group.icon}</span>
-                <span className="min-w-0 flex-1 truncate">{group.name}</span>
+                <span className="min-w-0 flex-1 leading-tight">
+                  {group.name}
+                </span>
                 <span
                   aria-hidden
                   className="text-xs text-slate-400 transition group-open:rotate-90"
@@ -44,7 +46,7 @@ export function CategoryTree({ groups }: { groups: PickerGroup[] }) {
                   <li key={child.slug}>
                     <Link
                       href={`/categories/${child.slug}`}
-                      className="block truncate rounded px-2 py-1 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      className="block rounded px-2 py-1 text-xs leading-tight text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     >
                       {child.name}
                     </Link>

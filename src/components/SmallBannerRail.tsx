@@ -77,6 +77,8 @@ export function SmallBannerRail({
   side = "right",
   strip = false,
   categories = [],
+  fill = false,
+  phone = false,
 }: {
   banners: SmallBanner[];
   /** Category tree shown above the banners. */
@@ -93,6 +95,10 @@ export function SmallBannerRail({
    * nor a page's own column shows small banners.
    */
   strip?: boolean;
+  /** As many banners as fit the height of the box it sits in. */
+  fill?: boolean;
+  /** Under the page content on phones, where there is no side rail. */
+  phone?: boolean;
 }) {
   const pathname = usePathname();
   const [offset, setOffset] = useState(start);
@@ -101,7 +107,8 @@ export function SmallBannerRail({
   const [roomFor, setRoomFor] = useState<string | null>(null);
   const hasRoom = roomFor === pathname;
   const [columns, setColumns] = useState(4);
-  const count = strip ? columns : show;
+  const fillRef = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState<number | null>(null);
 
   useEffect(() => {
     if (embedded || !strip) return;
@@ -134,11 +141,26 @@ export function SmallBannerRail({
   }, [pathname, embedded, strip]);
 
   useEffect(() => {
-    if (!embedded && !strip) window.dispatchEvent(new Event(RAIL_CHANGED));
-  }, [hasRoom, embedded, strip]);
+    if (!embedded && !strip && !phone)
+      window.dispatchEvent(new Event(RAIL_CHANGED));
+  }, [hasRoom, embedded, strip, phone]);
 
   useEffect(() => {
-    if (embedded || strip) return;
+    const box = fillRef.current;
+    if (!fill || !box) return;
+    const measure = () => {
+      const { width, height } = box.getBoundingClientRect();
+      // Label row on top and the "book this spot" tile at the end.
+      setFit(Math.max(1, Math.floor((height - 16) / (width / 3 + 12)) - 1));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [fill]);
+
+  useEffect(() => {
+    if (embedded || strip || phone) return;
     const rail = railRef.current;
     const page =
       side === "left" ? rail?.nextElementSibling : rail?.previousElementSibling;
@@ -171,7 +193,7 @@ export function SmallBannerRail({
       observer.disconnect();
       window.removeEventListener("resize", check);
     };
-  }, [pathname, embedded, side, strip]);
+  }, [pathname, embedded, phone, side, strip]);
 
   useEffect(() => {
     if (pathname === firstPath.current) return;
@@ -179,10 +201,18 @@ export function SmallBannerRail({
     setOffset((value) => value + show);
   }, [pathname, show]);
 
-  if (!embedded && HIDDEN_ON.some((prefix) => pathname.startsWith(prefix))) {
+  if (
+    (!embedded || phone) &&
+    HIDDEN_ON.some((prefix) => pathname.startsWith(prefix))
+  ) {
     return null;
   }
 
+  const count = fill
+    ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length)
+    : strip
+      ? columns
+      : show;
   const visible = Array.from(
     { length: Math.min(count, banners.length) },
     (_, index) => banners[(offset + index) % banners.length],
@@ -264,6 +294,18 @@ export function SmallBannerRail({
       </Link>
     </div>
   );
+
+  if (fill) {
+    return (
+      <div ref={fillRef} className="h-full overflow-hidden">
+        {stack}
+      </div>
+    );
+  }
+
+  if (phone) {
+    return <div className="mx-auto mt-6 max-w-sm lg:hidden">{stack}</div>;
+  }
 
   if (embedded) {
     return categories.length ? (
