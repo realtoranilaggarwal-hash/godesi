@@ -37,21 +37,24 @@ export function generateMetadata({
   };
 }
 
-/** X search for the visitor's word, with #GoDesi added unless they want the exact word. */
-function xSearchUrl(tag: string, exact = false) {
+/** Every outside search carries #godesi and godesi.com alongside the visitor's word. */
+function godesiQuery(tag: string) {
   const word = tag.replace(/^#+/, "").trim();
-  const query =
-    !word || word.toLowerCase() === "godesi"
-      ? "#godesi"
-      : exact
-        ? tag
-        : `${tag} #GoDesi`;
-  return `https://x.com/search?q=${encodeURIComponent(query)}&src=typed_query`;
+  return !word || word.toLowerCase() === "godesi"
+    ? "#godesi godesi.com"
+    : `${tag.trim()} #godesi godesi.com`;
+}
+
+function xSearchUrl(tag: string) {
+  return `https://x.com/search?q=${encodeURIComponent(godesiQuery(tag))}&src=typed_query`;
 }
 
 function bingSearchUrl(tag: string) {
-  const word = tag.replace(/^#+/, "").trim() || "GoDesi";
-  return `https://www.bing.com/search?q=${encodeURIComponent(word)}`;
+  return `https://www.bing.com/search?q=${encodeURIComponent(godesiQuery(tag))}`;
+}
+
+function googleSearchUrl(tag: string) {
+  return `https://www.google.com/search?q=${encodeURIComponent(godesiQuery(tag))}`;
 }
 
 function ago(iso: string) {
@@ -106,11 +109,7 @@ export default async function TrendingPage({
           </form>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
             <span className="text-white/80">
-              Search{" "}
-              {word && word.toLowerCase() !== "godesi"
-                ? `“${word}”`
-                : "#godesi"}{" "}
-              on:
+              Search “{godesiQuery(tag)}” on:
             </span>
             <a
               href={xSearchUrl(tag)}
@@ -118,18 +117,8 @@ export default async function TrendingPage({
               rel="noreferrer"
               className="rounded-full bg-black px-3 py-1 hover:bg-slate-800"
             >
-              {word && word.toLowerCase() !== "godesi" ? "𝕏 with #GoDesi" : "𝕏"}
+              𝕏
             </a>
-            {word && word.toLowerCase() !== "godesi" ? (
-              <a
-                href={xSearchUrl(tag, true)}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-full bg-black/60 px-3 py-1 hover:bg-black/80"
-              >
-                𝕏 exact word only
-              </a>
-            ) : null}
             <a
               href={bingSearchUrl(tag)}
               target="_blank"
@@ -137,6 +126,14 @@ export default async function TrendingPage({
               className="rounded-full bg-teal-600 px-3 py-1 hover:bg-teal-700"
             >
               🔎 Bing
+            </a>
+            <a
+              href={googleSearchUrl(tag)}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-blue-600 px-3 py-1 hover:bg-blue-700"
+            >
+              G Google
             </a>
           </div>
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
