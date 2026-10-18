@@ -73,6 +73,7 @@ export function SmallBannerRail({
   start = 0,
   side = "right",
   categories = [],
+  fill = false,
   phone = false,
 }: {
   banners: SmallBanner[];
@@ -85,6 +86,8 @@ export function SmallBannerRail({
   start?: number;
   /** Which side of the page the site-wide rail sits on. */
   side?: "left" | "right";
+  /** As many banners as fit the height of the box it sits in. */
+  fill?: boolean;
   /** Under the page content on phones, where there is no side rail. */
   phone?: boolean;
 }) {
@@ -94,6 +97,22 @@ export function SmallBannerRail({
   const railRef = useRef<HTMLElement>(null);
   const [roomFor, setRoomFor] = useState<string | null>(null);
   const hasRoom = roomFor === pathname;
+  const fillRef = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState<number | null>(null);
+
+  useEffect(() => {
+    const box = fillRef.current;
+    if (!fill || !box) return;
+    const measure = () => {
+      const { width, height } = box.getBoundingClientRect();
+      // Label row on top and the "book this spot" tile at the end.
+      setFit(Math.max(1, Math.floor((height - 16) / (width / 3 + 12)) - 1));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(box);
+    return () => observer.disconnect();
+  }, [fill]);
 
   useEffect(() => {
     if (embedded || phone) return;
@@ -144,12 +163,15 @@ export function SmallBannerRail({
     return null;
   }
 
+  const count = fill
+    ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length)
+    : show;
   const visible = Array.from(
-    { length: Math.min(show, banners.length) },
+    { length: Math.min(count, banners.length) },
     (_, index) => banners[(offset + index) % banners.length],
   );
   const house = Array.from(
-    { length: show - visible.length },
+    { length: count - visible.length },
     (_, index) => HOUSE_BANNERS[(offset + index) % HOUSE_BANNERS.length],
   );
 
@@ -218,6 +240,14 @@ export function SmallBannerRail({
       </Link>
     </div>
   );
+
+  if (fill) {
+    return (
+      <div ref={fillRef} className="h-full overflow-hidden">
+        {stack}
+      </div>
+    );
+  }
 
   if (phone) {
     return <div className="mx-auto mt-6 max-w-sm lg:hidden">{stack}</div>;
