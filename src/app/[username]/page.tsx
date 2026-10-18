@@ -8,7 +8,11 @@ import {
   publicProfile,
   RESERVED_USERNAMES,
 } from "@/lib/profiles";
-import { effectivePlan } from "@/lib/plans";
+import {
+  effectivePlan,
+  showsAlbumAndPlaylist,
+  visibleMediaLink,
+} from "@/lib/plans";
 import { formatEventDate } from "@/lib/events";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { properName } from "@/lib/names";
@@ -74,6 +78,11 @@ export default async function PublicProfilePage({
   ]);
   const isOwner = viewer?.id === user.id;
   const plan = effectivePlan(user);
+  const playlistUrl = visibleMediaLink(
+    user.playlistUrl,
+    user.keptPlaylistUrl,
+    showsAlbumAndPlaylist(user),
+  );
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
     events.length +
@@ -289,14 +298,22 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
 
-          {user.playlistUrl ? (
-            <PlaylistGallery url={user.playlistUrl} owner={user.name} />
+          {playlistUrl ? (
+            <PlaylistGallery url={playlistUrl} owner={user.name} />
+          ) : isOwner && user.playlistUrl ? (
+            <Link
+              href="/pricing"
+              className="block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+            >
+              🔒 Your YouTube playlist is saved but hidden on the Free plan. Go
+              Pro to show it to everyone →
+            </Link>
           ) : null}
 
           {user.videoUrls.length ? (
             <section className="space-y-3">
               <h2 className="text-lg font-bold">
-                {user.playlistUrl ? "More videos" : "Videos"}
+                {playlistUrl ? "More videos" : "Videos"}
               </h2>
               {user.videoUrls.map((url) => (
                 <VideoEmbed key={url} url={url} title={`${user.name} video`} />

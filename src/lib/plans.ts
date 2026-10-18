@@ -88,7 +88,8 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Unique QR code + download",
       "WhatsApp click-to-chat button",
       "1 uploaded photo",
-      "1 YouTube video and 6 photos from your Google Photos album",
+      "1 YouTube video",
+      "Google Photos album and YouTube playlist: save them now, they show once you go Pro",
       "1 category",
       "Phone, email and links hidden in your description",
       "Post events and sell tickets (Godesi keeps a 2% service fee)",
@@ -110,9 +111,9 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Everything in Free",
       "Listed above free cards in your category",
       "Up to 3 uploaded photos",
-      "2 YouTube videos and 15 photos from your Google Photos album",
+      "2 YouTube videos, your YouTube playlist and 15 photos from your Google Photos album",
       "Phone and email shown on your listing (you can hide them)",
-      "2 categories in all — your main one plus 1 more",
+      "3 categories in all — your main one plus 2 more",
       "No Godesi service fee on ticket sales",
       "2 news stories a week",
       "Higher search ranking than Free",
@@ -122,10 +123,10 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "PREMIUM",
     name: "Featured",
     priceInr: 999,
-    priceUsd: 50,
+    priceUsd: 19.99,
     terms: {
-      MONTH: { inr: 999, usd: 50 },
-      YEAR: { inr: 4_999, usd: 600 },
+      MONTH: { inr: 999, usd: 19.99 },
+      YEAR: { inr: 4_999, usd: 100 },
       FIVE_YEAR: { inr: 4_999, usd: 600 },
     },
     mediaLimit: 5,
@@ -137,7 +138,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Top of your category, above Pro and free cards",
       "Phone and email shown to everyone (a switch you can turn off)",
       "Up to 5 uploaded photos",
-      "3 YouTube videos and 30 photos from your Google Photos album",
+      "3 YouTube videos, your YouTube playlist and 30 photos from your Google Photos album",
       "5 categories in all — your main one plus 4 more",
       "10 news stories a week",
       "Create deals and coupon codes for your customers",
@@ -214,6 +215,31 @@ export function albumPhotoLimit(
 }
 
 /**
+ * Google Photos albums and YouTube playlists show on paid cards and profiles.
+ * Founding members keep them as part of their seat.
+ */
+export function showsAlbumAndPlaylist(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber"> | null,
+) {
+  if (!user) return false;
+  if (user.foundingNumber !== null) return true;
+  return effectivePlan(user) !== "FREE";
+}
+
+/**
+ * A free member may still save an album or playlist link; it shows only if it
+ * is the one they had before these became a paid perk.
+ */
+export function visibleMediaLink(
+  url: string | null,
+  kept: string | null,
+  unlocked: boolean,
+) {
+  if (!url) return null;
+  return unlocked || url === kept ? url : null;
+}
+
+/**
  * Founding members post without a weekly cap while we are still filling the
  * site with content; everyone else gets their plan's allowance.
  */
@@ -242,6 +268,6 @@ export function extraCategoryLimit(
 
 const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
   FREE: 0,
-  PRO: 1,
+  PRO: 2,
   PREMIUM: 4,
 };

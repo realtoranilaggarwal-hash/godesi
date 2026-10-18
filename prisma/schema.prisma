@@ -297,20 +297,22 @@ model User {
   location  String?
 
   /// One-line "who I am" shown under the name on the public profile.
-  headline    String?
+  headline        String?
   /// What the member wants from the community — work, clients, partners, help.
-  lookingFor  String?
+  lookingFor      String?
   /// School, college and courses, one per line.
-  education   String?
+  education       String?
   /// Work history, projects and achievements, one per line.
-  experience  String?
-  skills      String[] @default([])
-  languages   String[] @default([])
+  experience      String?
+  skills          String[] @default([])
+  languages       String[] @default([])
   /// YouTube/Vimeo links embedded on the profile.
-  videoUrls   String[] @default([])
+  videoUrls       String[] @default([])
   /// Public YouTube playlist; every video in it is listed on the profile.
-  playlistUrl String?
-  openToWork  Boolean  @default(false)
+  playlistUrl     String?
+  /// Playlist saved while free members could still show one; it stays visible.
+  keptPlaylistUrl String?
+  openToWork      Boolean  @default(false)
 
   websiteUrl     String?
   instagramUrl   String?
@@ -772,6 +774,9 @@ model Business {
   albumUrl           String?
   /// Public YouTube playlist; every video in it is listed on the card.
   playlistUrl        String?
+  /// Album and playlist saved while free cards could still show them; they stay visible.
+  keptAlbumUrl       String?
+  keptPlaylistUrl    String?
   mapsUrl            String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
