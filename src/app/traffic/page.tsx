@@ -229,7 +229,7 @@ function Ranking({
 }) {
   const max = Math.max(1, ...rows.map((r) => r.value));
   return (
-    <Card>
+    <Card className="min-w-0">
       <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
       {rows.length ? (
         <ol className="mt-3 space-y-2">
