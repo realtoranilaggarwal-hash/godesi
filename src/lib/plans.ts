@@ -273,3 +273,22 @@ const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
   PRO: 2,
   PREMIUM: 4,
 };
+
+const SERVICE_PICK_LIMITS: Record<Plan, number> = {
+  FREE: 3,
+  PRO: 6,
+  PREMIUM: 10,
+};
+
+/**
+ * Services a card may tick in each picker: the specialisations ("acts you
+ * perform") and, separately, the multi-choice service details. Founding members
+ * keep the top allowance as part of their seat.
+ */
+export function servicePickLimit(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber"> | null,
+) {
+  if (!user) return SERVICE_PICK_LIMITS.FREE;
+  if (user.foundingNumber !== null) return SERVICE_PICK_LIMITS.PREMIUM;
+  return SERVICE_PICK_LIMITS[effectivePlan(user)];
+}

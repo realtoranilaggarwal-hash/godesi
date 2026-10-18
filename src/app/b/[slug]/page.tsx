@@ -10,6 +10,7 @@ import {
   albumPhotoLimit,
   effectivePlan,
   PLANS,
+  servicePickLimit,
   showsAlbumAndPlaylist,
   videoLimit,
   visibleMediaLink,
@@ -36,7 +37,11 @@ import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { LogoTile } from "@/components/LogoTile";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
-import { disclaimerFor, specialtySet } from "@/lib/specialties";
+import {
+  disclaimerFor,
+  specialtySet,
+  visibleServicePicks,
+} from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
@@ -199,6 +204,13 @@ export default async function BusinessProfilePage({
         : []
   ).slice(0, business.owner ? videoLimit(business.owner) : 1);
   const mediaUnlocked = showsAlbumAndPlaylist(business.owner);
+  const picks = visibleServicePicks(
+    business.subcategorySlug,
+    business,
+    business.owner
+      ? servicePickLimit(business.owner)
+      : Number.POSITIVE_INFINITY,
+  );
   const playlistUrl = visibleMediaLink(
     business.playlistUrl,
     business.keptPlaylistUrl,
@@ -356,7 +368,7 @@ export default async function BusinessProfilePage({
                 </p>
               ) : null}
 
-              {business.specialties.length ? (
+              {picks.specialties.length ? (
                 <div className="mt-3">
                   <h2 className="text-sm font-bold text-slate-900">
                     {specialtySet(business.subcategorySlug)?.title ??
@@ -368,7 +380,7 @@ export default async function BusinessProfilePage({
                         ⭐ {business.featuredSpecialty}
                       </span>
                     ) : null}
-                    {business.specialties
+                    {picks.specialties
                       .filter((item) => item !== business.featuredSpecialty)
                       .map((item) => (
                         <Link
@@ -443,7 +455,7 @@ export default async function BusinessProfilePage({
                 </div>
               ) : null}
 
-              {business.serviceOptions.length ||
+              {picks.serviceOptions.length ||
               business.priceFrom ||
               business.priceHourly ||
               business.priceExtra ||
@@ -458,7 +470,7 @@ export default async function BusinessProfilePage({
                         ✅ Verified provider
                       </span>
                     ) : null}
-                    {business.serviceOptions.map((option) => (
+                    {picks.serviceOptions.map((option) => (
                       <Link
                         key={option}
                         href={`/categories/${business.subcategorySlug}?opt=${encodeURIComponent(option)}`}
