@@ -780,6 +780,8 @@ model Business {
   mapsUrl            String?
   /// "Write a review" page for the business on Google (or a review tool such as Trustindex).
   googleReviewUrl    String?
+  /// Public page collecting the business's reviews, e.g. on Trustindex.
+  reviewsUrl         String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
   startingPrice      Int?

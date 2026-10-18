@@ -418,8 +418,9 @@ export function BusinessProfileForm({
         <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
           <strong>Want more Google reviews?</strong> Paste your Google
           &quot;write a review&quot; link above and a ✍️ Review us on Google
-          button shows on your card. Tools like Trustindex also give you a
-          review link, a QR code and a reviews widget for your website.{" "}
+          button shows on your card. Add a public reviews page too and visitors
+          get a ⭐ Read our reviews button. Tools like Trustindex give you
+          both, plus a QR code and a reviews widget for your website.{" "}
           <a
             href={TRUSTINDEX_AFFILIATE}
             target="_blank"

@@ -25,6 +25,12 @@ export const BUSINESS_SOCIALS = [
     icon: "✍️",
     placeholder: "https://g.page/r/…/review",
   },
+  {
+    key: "reviewsUrl",
+    label: "Read our reviews",
+    icon: "⭐",
+    placeholder: "https://trustindex.io/reviews/yourwebsite.com",
+  },
   { key: "zillowUrl", label: "Zillow profile", icon: "🏡", placeholder: "https://zillow.com/profile/…" },
   { key: "realtorUrl", label: "Realtor.com profile", icon: "🏘️", placeholder: "https://realtor.com/realestateagents/…" },
 ] as const;
