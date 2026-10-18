@@ -20,18 +20,25 @@ export function SpeakerRow({
   defaultBio = "",
   defaultPhotoUrl = "",
   defaultUserId = "",
+  defaultProfile = null,
+  defaultEliteEntryId = "",
   onRemove,
 }: {
   defaultName?: string;
   defaultBio?: string;
   defaultPhotoUrl?: string;
   defaultUserId?: string;
+  /** The GoDesi profile an existing speaker is already linked to. */
+  defaultProfile?: ProfileMatch | null;
+  /** The Elite profile an existing speaker is already linked to. */
+  defaultEliteEntryId?: string;
   onRemove?: () => void;
 }) {
   const [name, setName] = useState(defaultName);
   const [matches, setMatches] = useState<ProfileMatch[]>([]);
-  const [picked, setPicked] = useState<ProfileMatch | null>(null);
-  const [userId, setUserId] = useState(defaultUserId);
+  const [picked, setPicked] = useState<ProfileMatch | null>(defaultProfile);
+  const [userId, setUserId] = useState(defaultProfile?.id ?? defaultUserId);
+  const [eliteId, setEliteId] = useState(defaultEliteEntryId);
   const [searched, setSearched] = useState(false);
   const [copied, setCopied] = useState(false);
   const [famous, setFamous] = useState<FamousMatch[]>([]);
@@ -97,6 +104,7 @@ export function SpeakerRow({
     setPicked(match);
     setPickedFamous(null);
     setUserId(match.id);
+    setEliteId("");
     setName(match.name);
     setMatches([]);
     setFamous([]);
@@ -106,6 +114,7 @@ export function SpeakerRow({
     setPickedFamous(match);
     setPicked(null);
     setUserId("");
+    setEliteId("");
     setName(match.name);
     setMatches([]);
     setFamous([]);
@@ -115,6 +124,7 @@ export function SpeakerRow({
     setPicked(null);
     setPickedFamous(null);
     setUserId("");
+    setEliteId("");
   };
 
   const copyInvite = async () => {
@@ -131,6 +141,7 @@ export function SpeakerRow({
   return (
     <div className="grid gap-2 rounded-xl bg-slate-50 p-3">
       <input type="hidden" name="speakerUser" value={userId} />
+      <input type="hidden" name="speakerElite" value={eliteId} />
       <input
         type="hidden"
         name="speakerWiki"
@@ -142,7 +153,7 @@ export function SpeakerRow({
           value={name}
           onChange={(event) => {
             setName(event.target.value);
-            if (picked || pickedFamous) unlink();
+            if (picked || pickedFamous || eliteId) unlink();
           }}
           placeholder="Name — e.g. Dr. Meera Iyer"
           className={inputClass}

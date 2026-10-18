@@ -29,7 +29,7 @@ import { PropertySpec } from "@/components/PropertySpec";
 import { PropertyContact } from "@/components/PropertyContact";
 import { WhatsAppLead } from "@/components/WhatsAppLead";
 import { ListingCard } from "@/components/ListingCard";
-import { getCurrentUser } from "@/lib/auth";
+import { can, getCurrentUser } from "@/lib/auth";
 import { PROPERTY_GROUP_LABELS } from "@/lib/property";
 import Link from "next/link";
 import { ClipCoupon } from "@/components/ClipCoupon";
@@ -145,7 +145,18 @@ export default async function ListingPage({
           </p>
 
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
-            <PostedBy user={listing.owner} prefix="Listed by" />
+            <div className="flex flex-wrap items-center gap-3">
+              <PostedBy user={listing.owner} prefix="Listed by" />
+              {viewer &&
+              (viewer.id === listing.ownerId || can(viewer, "listings")) ? (
+                <Link
+                  href={`/listings/${listing.slug}/edit`}
+                  className="rounded-lg border border-indigo-200 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+                >
+                  ✏️ Edit listing
+                </Link>
+              ) : null}
+            </div>
             <ShareButtons
               url={`${siteUrl()}/listings/${listing.slug}`}
               title={listing.title}

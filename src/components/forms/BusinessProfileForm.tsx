@@ -22,6 +22,9 @@ import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT, dialCodeForCountry } from "@/lib/dialCodes";
 
+const MEDIA_LOCKED_HINT =
+  "Free plan: you can save it now, but it stays hidden until you go Pro.";
+
 const EMPTY_VEHICLE: VehicleDefaults = {
   vehicleType: "",
   make: "",
@@ -41,6 +44,9 @@ const EMPTY_VEHICLE: VehicleDefaults = {
 };
 
 /** Individual sellers in Buy & Sell only need these — the rest is business clutter. */
+const TRUSTINDEX_AFFILIATE =
+  "https://www.trustindex.io/ti-redirect.php?a=anilaggarw&c=my_campaign";
+
 const PERSONAL_SOCIALS = ["websiteUrl", "instagramUrl", "facebookUrl"];
 
 export function BusinessProfileForm({
@@ -57,6 +63,8 @@ export function BusinessProfileForm({
   staffEdit = false,
   videoLimit = 1,
   albumPhotoLimit = 6,
+  mediaLocked = false,
+  servicePickLimit,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -79,6 +87,10 @@ export function BusinessProfileForm({
   videoLimit?: number;
   /** Album thumbnails the plan shows before the "see all photos" link. */
   albumPhotoLimit?: number;
+  /** Free plan: album and playlist links are saved but not shown. */
+  mediaLocked?: boolean;
+  /** Ticks allowed per service picker; staff edits leave it unset. */
+  servicePickLimit?: number;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -224,6 +236,7 @@ export function BusinessProfileForm({
         }}
         canFeature={canFeatureSpecialty}
         cardSaved={Boolean(business)}
+        pickLimit={staffEdit ? undefined : servicePickLimit}
       />
 
       <VehicleFields
@@ -289,9 +302,20 @@ export function BusinessProfileForm({
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
-          hint={`Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`}
+          hint={
+            mediaLocked
+              ? `🔒 ${MEDIA_LOCKED_HINT} Pro shows 15 photos from your album, with a link that opens the whole album.`
+              : `Your card holds one uploaded picture. Paste a public Google Photos album link and Godesi shows ${albumPhotoLimit} photos from it${albumPhotoLimit <= 6 ? " — upgrade to show more" : ""}, with a link that opens the whole album. No upload limit, no storage cost.`
+          }
         />
-        <PlaylistField defaultValue={business?.playlistUrl ?? ""} />
+        <PlaylistField
+          defaultValue={business?.playlistUrl ?? ""}
+          hint={
+            mediaLocked
+              ? `🔒 ${MEDIA_LOCKED_HINT} Pro shows every video in your playlist or channel.`
+              : undefined
+          }
+        />
         <Field
           label={
             videoLimit > 1
@@ -391,6 +415,22 @@ export function BusinessProfileForm({
             </Field>
           ))}
         </div>
+        <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+          <strong>Want more Google reviews?</strong> Paste your Google
+          &quot;write a review&quot; link above and a ✍️ Review us on Google
+          button shows on your card. Add a public reviews page too and visitors
+          get a ⭐ Read our reviews button. Tools like Trustindex give you
+          both, plus a QR code and a reviews widget for your website.{" "}
+          <a
+            href={TRUSTINDEX_AFFILIATE}
+            target="_blank"
+            rel="noopener sponsored"
+            className="font-bold underline"
+          >
+            Try Trustindex →
+          </a>{" "}
+          <span className="text-amber-700">(affiliate link)</span>
+        </p>
         <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
           <strong>No website yet?</strong> Godesi builds you a {WEBSITE_OFFER.pages}-page
           mobile-friendly site for ${WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}

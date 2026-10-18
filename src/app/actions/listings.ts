@@ -173,13 +173,36 @@ function openHouseWindow(date?: string, start?: string, end?: string) {
   };
 }
 
-export async function createListingAction(
+/**
+ * Posts a new listing, or saves changes to an existing one when the form
+ * carries a `listingId`. Only the poster (or listings staff) may edit.
+ */
+export async function saveListingAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
   let destination = "/real-estate";
   try {
     const user = await requireUser();
+    const listingId = String(formData.get("listingId") ?? "");
+    const existing = listingId
+      ? await db.listing.findUnique({
+          where: { id: listingId },
+          select: {
+            id: true,
+            slug: true,
+            ownerId: true,
+            owner: { select: { name: true } },
+            _count: { select: { images: true } },
+          },
+        })
+      : null;
+    if (listingId && !existing) {
+      return { error: "That listing no longer exists" };
+    }
+    if (existing && existing.ownerId !== user.id && !can(user, "listings")) {
+      return { error: "Only the person who posted this listing can edit it" };
+    }
     const parsed = schema.safeParse({
       kind: formData.get("kind"),
       title: formData.get("title"),
@@ -352,7 +375,8 @@ export async function createListingAction(
           investmentDeal: parsed.data.investmentDeal ?? false,
           // Nobody is asked their own name and number twice: enquiries fall
           // back to the poster and the WhatsApp number given above.
-          contactName: parsed.data.contactName || user.name || null,
+          contactName:
+            parsed.data.contactName || (existing?.owner ?? user).name || null,
           contactPhone:
             parsed.data.contactPhone || normalizeWhatsApp(parsed.data.whatsapp),
           contactEmail: parsed.data.contactEmail || null,
@@ -363,69 +387,91 @@ export async function createListingAction(
       .getAll("images")
       .map((value) => String(value).trim())
       .filter((value) => value.startsWith("https://"))
-      .slice(0, listingImageLimit(user));
+      .slice(
+        0,
+        Math.max(listingImageLimit(user), existing?._count.images ?? 0),
+      );
 
-    const listing = await db.listing.create({
-      data: {
-        slug: await uniqueListingSlug(parsed.data.title, parsed.data.city),
-        kind: parsed.data.kind,
-        title: titleCase(parsed.data.title),
-        description: parsed.data.description,
-        city: parsed.data.city,
-        area: parsed.data.area ?? null,
-        price: parsed.data.price,
-        currency: parsed.data.currency ?? requestCurrency(),
-        perMonth: isMonthly(parsed.data.kind),
-        bedrooms: parsed.data.bedrooms ?? null,
-        furnishing: parsed.data.furnishing ?? null,
-        genderPref: parsed.data.genderPref ?? null,
-        categorySlug,
-        whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
-        videoUrl: parsed.data.videoUrl ?? null,
-        albumUrl: parsed.data.albumUrl ?? null,
-        offerTitle: parsed.data.offerTitle || null,
-        offerCode:
-          parsed.data.offerTitle && parsed.data.offerCode
-            ? normalizeCouponCode(parsed.data.offerCode)
-            : null,
-        offerExpiresAt:
-          parsed.data.offerTitle && parsed.data.offerExpiresAt
-            ? endOfDay(parsed.data.offerExpiresAt)
-            : null,
-        ...property,
-        featured: foundingFeatureActive(user),
-        ownerId: user.id,
-        images: {
-          create: images.map((url, index) => ({ url, sortOrder: index })),
+    const fields = {
+      kind: parsed.data.kind,
+      title: titleCase(parsed.data.title),
+      description: parsed.data.description,
+      city: parsed.data.city,
+      area: parsed.data.area ?? null,
+      price: parsed.data.price,
+      currency: parsed.data.currency ?? requestCurrency(),
+      perMonth: isMonthly(parsed.data.kind),
+      bedrooms: parsed.data.bedrooms ?? null,
+      furnishing: parsed.data.furnishing ?? null,
+      genderPref: parsed.data.genderPref ?? null,
+      categorySlug,
+      whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
+      videoUrl: parsed.data.videoUrl ?? null,
+      albumUrl: parsed.data.albumUrl ?? null,
+      offerTitle: parsed.data.offerTitle || null,
+      offerCode:
+        parsed.data.offerTitle && parsed.data.offerCode
+          ? normalizeCouponCode(parsed.data.offerCode)
+          : null,
+      offerExpiresAt:
+        parsed.data.offerTitle && parsed.data.offerExpiresAt
+          ? endOfDay(parsed.data.offerExpiresAt)
+          : null,
+      ...property,
+    };
+    const imageRows = images.map((url, index) => ({ url, sortOrder: index }));
+
+    if (existing) {
+      await db.listing.update({
+        where: { id: existing.id },
+        data: {
+          ...fields,
+          images: { deleteMany: {}, create: imageRows },
         },
-      },
-    });
-
-    await awardPoints({
-      userId: user.id,
-      reason: "LISTING_POSTED",
-      note: `Listing ${listing.slug}`,
-    });
-
-    if (listing.status === "APPROVED") {
-      autoShareInBackground({
-        kind: "listing",
-        id: listing.id,
-        title: `🏠 ${listing.title}`,
-        body: `${listing.city}${listing.area ? `, ${listing.area}` : ""} · ${listing.description.slice(0, 300)}`,
-        path: `/listings/${listing.slug}`,
-        imageUrl: images[0] ?? null,
-        tags: [listing.city, "desihousing"],
       });
-    }
+      revalidatePath("/real-estate");
+      revalidatePath("/rooms");
+      revalidatePath("/marketplace");
+      revalidatePath("/dashboard/listings");
+      revalidatePath(`/listings/${existing.slug}`);
+      destination = `/listings/${existing.slug}`;
+    } else {
+      const listing = await db.listing.create({
+        data: {
+          ...fields,
+          slug: await uniqueListingSlug(parsed.data.title, parsed.data.city),
+          featured: foundingFeatureActive(user),
+          ownerId: user.id,
+          images: { create: imageRows },
+        },
+      });
 
-    revalidatePath("/real-estate");
-    revalidatePath("/rooms");
-    revalidatePath("/marketplace");
-    revalidatePath("/categories/real-estate");
-    if (listing.status === "APPROVED")
-      pingIndexNowInBackground(`/listings/${listing.slug}`);
-    destination = `/listings/${listing.slug}`;
+      await awardPoints({
+        userId: user.id,
+        reason: "LISTING_POSTED",
+        note: `Listing ${listing.slug}`,
+      });
+
+      if (listing.status === "APPROVED") {
+        autoShareInBackground({
+          kind: "listing",
+          id: listing.id,
+          title: `🏠 ${listing.title}`,
+          body: `${listing.city}${listing.area ? `, ${listing.area}` : ""} · ${listing.description.slice(0, 300)}`,
+          path: `/listings/${listing.slug}`,
+          imageUrl: images[0] ?? null,
+          tags: [listing.city, "desihousing"],
+        });
+      }
+
+      revalidatePath("/real-estate");
+      revalidatePath("/rooms");
+      revalidatePath("/marketplace");
+      revalidatePath("/categories/real-estate");
+      if (listing.status === "APPROVED")
+        pingIndexNowInBackground(`/listings/${listing.slug}`);
+      destination = `/listings/${listing.slug}`;
+    }
   } catch (error) {
     return fieldError(error);
   }

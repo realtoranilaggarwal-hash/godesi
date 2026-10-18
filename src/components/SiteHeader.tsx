@@ -33,6 +33,7 @@ const NAV = [
   { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/chatter", label: "Chatter", icon: "💬" },
   { href: "/rishta", label: "Rishta", icon: "💍" },
   { href: "/clubs", label: "Clubs", icon: "🎤" },
   { href: "/people", label: "People", icon: "👥" },
@@ -85,11 +86,13 @@ const PROMO_LINKS = [
   { href: "/search", label: "Directory", icon: "🏪" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
+  { href: "/chatter", label: "Chatter", icon: "💬" },
   { href: "/clubs", label: "Clubs", icon: "🎤" },
+  { href: "/rishta", label: "Rishta", icon: "💍" },
   { href: "/deals", label: "Deals", icon: "🏷️" },
   { href: "/shop", label: "Shop", icon: "🛍️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
-  { href: "/resources", label: "Resources", icon: "🔗" },
+  { href: "/resources", label: "Links", icon: "🔗" },
   { href: "/advertise", label: "Advertise", icon: "📢" },
 ];
 
@@ -103,6 +106,8 @@ const STRIP_LINKS = [
   { href: "/guide", label: "City guides", icon: "🗺️" },
   { href: "/people", label: "Community", icon: "👥" },
   { href: "/connect", label: "Connect", icon: "🤝" },
+  { href: "/chatter", label: "Chatter — are you a Gapodi?", icon: "💬" },
+  { href: "/rishta", label: "Rishta — marriage profiles", icon: "💍" },
   { href: "/buzz", label: "#godesi social wall", icon: "🌍" },
 ];
 
@@ -203,7 +208,8 @@ export async function SiteHeader() {
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
-    { href: "/resources", label: "Resources", icon: "🔗" },
+    { href: "/rishta/new", label: "Post a Rishta profile", icon: "💍" },
+    { href: "/resources", label: "Links", icon: "🔗" },
     { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/shop", label: "Shop", icon: "🛍️" },
     { href: "/festivals", label: "Festival calendar", icon: "🪔" },

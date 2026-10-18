@@ -1,3 +1,4 @@
+import { CategoryArt } from "@/components/CategoryArt";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -239,52 +240,59 @@ export default async function CategoryPage({
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-6">
         <section
-          className={`rounded-3xl bg-gradient-to-r ${gradientFor(category.color)} px-5 py-8 text-white sm:px-8`}
+          className={`flex items-center gap-6 rounded-3xl bg-gradient-to-r ${gradientFor(category.color)} px-5 py-8 text-white sm:px-8`}
         >
-          <p className="text-sm text-white/80">
-            <Link href="/categories" className="hover:underline">
-              All categories
-            </Link>
-            {category.parent ? (
-              <>
-                {" / "}
-                <Link
-                  href={`/categories/${category.parent.slug}`}
-                  className="hover:underline"
-                >
-                  {category.parent.name}
-                </Link>
-              </>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-white/80">
+              <Link href="/categories" className="hover:underline">
+                All categories
+              </Link>
+              {category.parent ? (
+                <>
+                  {" / "}
+                  <Link
+                    href={`/categories/${category.parent.slug}`}
+                    className="hover:underline"
+                  >
+                    {category.parent.name}
+                  </Link>
+                </>
+              ) : null}
+            </p>
+            <h1 className="mt-1 text-3xl font-black">
+              <span aria-hidden>{category.icon}</span> {category.name}
+            </h1>
+            {category.blurb ? (
+              <p className="mt-1 text-white/90">{category.blurb}</p>
             ) : null}
-          </p>
-          <h1 className="mt-1 text-3xl font-black">
-            <span aria-hidden>{category.icon}</span> {category.name}
-          </h1>
-          {category.blurb ? (
-            <p className="mt-1 text-white/90">{category.blurb}</p>
-          ) : null}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href={`/dashboard/profile?${postQuery}`}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-white/90"
-            >
-              ➕ Add your business in this category
-            </Link>
-            <Link
-              href={`/leads/new?category=${category.slug}`}
-              className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
-            >
-              Request a service
-            </Link>
-            {memberListings?.section === "marketplace" ? (
+            <div className="mt-4 flex flex-wrap gap-2">
               <Link
-                href="/listings/new?kind=MARKETPLACE"
+                href={`/dashboard/profile?${postQuery}`}
+                className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900 hover:bg-white/90"
+              >
+                ➕ Add your business in this category
+              </Link>
+              <Link
+                href={`/leads/new?category=${category.slug}`}
                 className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
               >
-                🛍️ Sell an item
+                Request a service
               </Link>
-            ) : null}
+              {memberListings?.section === "marketplace" ? (
+                <Link
+                  href="/listings/new?kind=MARKETPLACE"
+                  className="rounded-xl border border-white/70 px-4 py-2 text-sm font-bold text-white hover:bg-white/10"
+                >
+                  🛍️ Sell an item
+                </Link>
+              ) : null}
+            </div>
           </div>
+          <CategoryArt
+            slug={category.parent?.slug ?? category.slug}
+            icon={category.icon}
+            className="hidden w-72 shrink-0 drop-shadow-xl md:block"
+          />
         </section>
 
         {DJ_CATEGORY_SLUGS.includes(category.slug) ? <DjsWikiBanner /> : null}
@@ -512,6 +520,45 @@ export default async function CategoryPage({
           </Card>
         ) : null}
 
+        {category.slug === "real-estate-property-dealers" ? (
+          <Card className="border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-sky-50">
+            <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">
+              Real estate agents — get discovered on two websites
+            </p>
+            <h2 className="mt-1 text-lg font-bold">
+              Your next client could be looking for you right now.
+            </h2>
+            <p className="mt-1 text-sm text-slate-700">
+              One profile. Two websites. Your GoDesi card also shows on
+              RealEstateYP.com, our real estate directory, and you update it in
+              one place.
+            </p>
+            <ul className="mt-2 grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
+              <li>✔ Your services, brokerage and service areas</li>
+              <li>✔ Enquiries from buyers, sellers, landlords and investors</li>
+              <li>✔ Photos, videos and your property posts</li>
+              <li>✔ A professional page with QR code and WhatsApp</li>
+            </ul>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+              <Link
+                href={`/dashboard/profile?${postQuery}`}
+                className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+              >
+                Claim your profile free
+              </Link>
+              <Link
+                href="/pricing"
+                className="rounded-xl border border-indigo-300 bg-white px-3 py-2 text-indigo-700 hover:bg-indigo-50"
+              >
+                ⭐ Get Featured
+              </Link>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Visibility and enquiries are not guaranteed.
+            </p>
+          </Card>
+        ) : null}
+
         {category.slug === "real-estate" ? (
           <Card className="bg-gradient-to-r from-orange-50 to-fuchsia-50">
             <h2 className="font-bold">Godesi property marketplace 🏢</h2>
@@ -602,12 +649,11 @@ export default async function CategoryPage({
         {thin ? null : <InlineBanner />}
       </div>
 
-      {thin ? null : (
-        <SidebarBanners
-          categorySlug={category.slug}
-          parentSlug={category.parent?.slug ?? null}
-        />
-      )}
+      <SidebarBanners
+        categorySlug={category.slug}
+        parentSlug={category.parent?.slug ?? null}
+        network={!thin}
+      />
     </div>
   );
 }

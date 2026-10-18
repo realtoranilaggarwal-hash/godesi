@@ -20,15 +20,46 @@ export const metadata: Metadata = {
   alternates: { canonical: "/leads/new" },
 };
 
+/** Prefill for the "Compare agents" box on the real estate pages. */
+const AGENT_REQUESTS = {
+  sell: {
+    title: (city?: string) =>
+      city ? `Selling my home in ${city}` : "Selling my home",
+    description:
+      "I'd like to compare local real estate agents to sell my home. Please share your experience, recent sales nearby and how you would market it.",
+  },
+  buy: {
+    title: (city?: string) =>
+      city ? `Looking to buy a home in ${city}` : "Looking to buy a home",
+    description:
+      "I'd like to compare local buyer's agents. Please share your experience in the area and how you would help me find and win the right home.",
+  },
+};
+
 export default async function NewLeadPage({
   searchParams,
 }: {
-  searchParams: { category?: string };
+  searchParams: { category?: string; do?: string; city?: string };
 }) {
   if (searchParams.category === WEDDING_SLUG) redirect("/wedding/requirements/new");
 
   const user = await getCurrentUser();
-  if (!user) redirect("/signup?role=CLIENT");
+  if (!user) {
+    const back = new URLSearchParams(
+      Object.entries(searchParams).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    ).toString();
+    const next = back ? `/leads/new?${back}` : "/leads/new";
+    redirect(`/signup?role=CLIENT&next=${encodeURIComponent(next)}`);
+  }
+
+  const city = searchParams.city?.trim().slice(0, 80) || undefined;
+  const agentRequest =
+    searchParams.category === "real-estate" &&
+    (searchParams.do === "sell" || searchParams.do === "buy")
+      ? AGENT_REQUESTS[searchParams.do]
+      : null;
 
   const category = searchParams.category
     ? await getCategory(searchParams.category)
@@ -67,6 +98,10 @@ export default async function NewLeadPage({
             defaultName={user.name}
             defaultEmail={user.email}
             defaultCategory={category?.name}
+            defaultTitle={agentRequest ? agentRequest.title(city) : undefined}
+            defaultDescription={agentRequest?.description}
+            defaultCity={city}
+            defaultServices={agentRequest ? ["Real Estate Agents"] : undefined}
             groups={groups.filter((group) => group.items.length)}
             optionSets={optionSets}
             defaultOptionSlug={category?.slug}

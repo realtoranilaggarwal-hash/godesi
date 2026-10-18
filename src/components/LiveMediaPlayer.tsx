@@ -277,12 +277,14 @@ function RadioLoginGate({ onClose }: { onClose: () => void }) {
         <div className="mt-4 flex flex-col gap-2">
           <Link
             href={`/signup?next=${next}`}
+            onClick={onClose}
             className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-red-700"
           >
             📝 Register free →
           </Link>
           <Link
             href={`/login?next=${next}`}
+            onClick={onClose}
             className="rounded-xl border-2 border-red-600 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-50"
           >
             🔑 Log in

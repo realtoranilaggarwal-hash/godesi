@@ -38,7 +38,7 @@ export const PLAN_TERMS: Record<
     id: "FIVE_YEAR",
     months: 60,
     label: "5 years",
-    founding: true,
+    founding: false,
   },
 };
 
@@ -68,10 +68,12 @@ export function planTermPrice(
   plan: PlanInfo,
   term: TermId,
   currency: Currency,
+  inrPerUsd?: number,
 ): number | null {
   const price = plan.terms[term];
   if (!price) return null;
-  return currency === "INR" ? price.inr : price.usd;
+  if (currency === "USD") return price.usd;
+  return inrPerUsd ? Math.round(price.usd * inrPerUsd) : price.inr;
 }
 
 export const PLANS: Record<Plan, PlanInfo> = {
@@ -88,8 +90,9 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Unique QR code + download",
       "WhatsApp click-to-chat button",
       "1 uploaded photo",
-      "1 YouTube video and 6 photos from your Google Photos album",
-      "3 categories in all — your main one plus 2 more",
+      "1 YouTube video",
+      "Google Photos album and YouTube playlist: save them now, they show once you go Pro",
+      "1 category",
       "Phone, email and links hidden in your description",
       "Post events and sell tickets (Godesi keeps a 2% service fee)",
       "1 news story a week",
@@ -105,16 +108,16 @@ export const PLANS: Record<Plan, PlanInfo> = {
       YEAR: { inr: 2_999, usd: 59 },
     },
     mediaLimit: 3,
-    newsPostsPerWeek: 10,
+    newsPostsPerWeek: 2,
     features: [
       "Everything in Free",
       "Listed above free cards in your category",
       "Up to 3 uploaded photos",
-      "2 YouTube videos and 15 photos from your Google Photos album",
+      "2 YouTube videos, your YouTube playlist and 15 photos from your Google Photos album",
       "Phone and email shown on your listing (you can hide them)",
-      "5 categories in all — your main one plus 4 more",
+      "3 categories in all — your main one plus 2 more",
       "No Godesi service fee on ticket sales",
-      "10 news stories a week",
+      "2 news stories a week",
       "Higher search ranking than Free",
     ],
   },
@@ -122,11 +125,11 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "PREMIUM",
     name: "Featured",
     priceInr: 999,
-    priceUsd: 50,
+    priceUsd: 20,
     terms: {
-      MONTH: { inr: 999, usd: 50 },
-      YEAR: { inr: 4_999, usd: 600 },
-      FIVE_YEAR: { inr: 4_999, usd: 600 },
+      MONTH: { inr: 999, usd: 20 },
+      YEAR: { inr: 4_999, usd: 100 },
+      FIVE_YEAR: { inr: 4_999, usd: 500 },
     },
     mediaLimit: 5,
     newsPostsPerWeek: 10,
@@ -137,8 +140,10 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "Top of your category, above Pro and free cards",
       "Phone and email shown to everyone (a switch you can turn off)",
       "Up to 5 uploaded photos",
-      "3 YouTube videos and 30 photos from your Google Photos album",
-      "10 categories in all — your main one plus 9 more",
+      "3 YouTube videos, your YouTube playlist and 30 photos from your Google Photos album",
+      "5 categories in all — your main one plus 4 more",
+      "10 news stories a week",
+      "Create deals and coupon codes for your customers",
       "Unlock lead contact details",
       "Get ticket money paid straight into your own Stripe account",
       "Analytics dashboard",
@@ -212,6 +217,31 @@ export function albumPhotoLimit(
 }
 
 /**
+ * Google Photos albums and YouTube playlists show on paid cards and profiles.
+ * Founding members keep them as part of their seat.
+ */
+export function showsAlbumAndPlaylist(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber"> | null,
+) {
+  if (!user) return false;
+  if (user.foundingNumber !== null) return true;
+  return effectivePlan(user) !== "FREE";
+}
+
+/**
+ * A free member may still save an album or playlist link; it shows only if it
+ * is the one they had before these became a paid perk.
+ */
+export function visibleMediaLink(
+  url: string | null,
+  kept: string | null,
+  unlocked: boolean,
+) {
+  if (!url) return null;
+  return unlocked || url === kept ? url : null;
+}
+
+/**
  * Founding members post without a weekly cap while we are still filling the
  * site with content; everyone else gets their plan's allowance.
  */
@@ -239,7 +269,26 @@ export function extraCategoryLimit(
 }
 
 const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
-  FREE: 2,
-  PRO: 4,
-  PREMIUM: 9,
+  FREE: 0,
+  PRO: 2,
+  PREMIUM: 4,
 };
+
+const SERVICE_PICK_LIMITS: Record<Plan, number> = {
+  FREE: 3,
+  PRO: 6,
+  PREMIUM: 10,
+};
+
+/**
+ * Services a card may tick in each picker: the specialisations ("acts you
+ * perform") and, separately, the multi-choice service details. Founding members
+ * keep the top allowance as part of their seat.
+ */
+export function servicePickLimit(
+  user: Pick<User, "plan" | "planExpiresAt" | "foundingNumber"> | null,
+) {
+  if (!user) return SERVICE_PICK_LIMITS.FREE;
+  if (user.foundingNumber !== null) return SERVICE_PICK_LIMITS.PREMIUM;
+  return SERVICE_PICK_LIMITS[effectivePlan(user)];
+}

@@ -12,6 +12,8 @@ import {
   albumPhotoLimit,
   effectivePlan,
   extraCategoryLimit,
+  servicePickLimit,
+  showsAlbumAndPlaylist,
   videoLimit,
 } from "@/lib/plans";
 import { requestCountry } from "@/lib/currency";
@@ -123,7 +125,9 @@ export default async function ProfileEditorPage({
             canFeatureSpecialty={effectivePlan(user) !== "FREE"}
             extraCategoryLimit={extraCategoryLimit(user)}
             videoLimit={videoLimit(user)}
+            servicePickLimit={servicePickLimit(user)}
             albumPhotoLimit={albumPhotoLimit(user)}
+            mediaLocked={!showsAlbumAndPlaylist(user)}
             foundingMember={user.foundingNumber !== null}
           />
         </Card>

@@ -40,9 +40,12 @@ export type PersonalProfileValues = {
 export function PersonalProfileForm({
   profile,
   suggestedUsername,
+  playlistLocked = false,
 }: {
   profile: PersonalProfileValues;
   suggestedUsername: string;
+  /** Free plan: the playlist link is saved but not shown. */
+  playlistLocked?: boolean;
 }) {
   const [state, formAction] = useFormState(savePersonalProfileAction, emptyState);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl ?? "");
@@ -207,7 +210,14 @@ export function PersonalProfileForm({
         </Field>
       </div>
 
-      <PlaylistField defaultValue={profile.playlistUrl ?? ""} />
+      <PlaylistField
+        defaultValue={profile.playlistUrl ?? ""}
+        hint={
+          playlistLocked
+            ? "🔒 Free plan: you can save it now, but it stays hidden until you go Pro. Pro shows every video in your playlist or channel."
+            : undefined
+        }
+      />
 
       <Field
         label="Videos"

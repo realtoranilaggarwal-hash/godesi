@@ -3,7 +3,9 @@ import Link from "next/link";
 import { cleanTag, hashtagWall } from "@/lib/hashtag";
 import { siteUrl } from "@/lib/format";
 import { SidebarBanners } from "@/components/Banners";
-import { Card, EmptyState, inputClass } from "@/components/ui";
+import { KeywordMatches } from "@/components/KeywordMatches";
+import { keywordSearch } from "@/lib/keywordSearch";
+import { EmptyState, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,26 @@ export function generateMetadata({
   };
 }
 
+/** Every outside search carries #godesi and godesi.com alongside the visitor's word. */
+function godesiQuery(tag: string) {
+  const word = tag.replace(/^#+/, "").trim();
+  return !word || word.toLowerCase() === "godesi"
+    ? "#godesi godesi.com"
+    : `${tag.trim()} #godesi godesi.com`;
+}
+
+function xSearchUrl(tag: string) {
+  return `https://x.com/search?q=${encodeURIComponent(godesiQuery(tag))}&src=typed_query`;
+}
+
+function bingSearchUrl(tag: string) {
+  return `https://www.bing.com/search?q=${encodeURIComponent(godesiQuery(tag))}`;
+}
+
+function googleSearchUrl(tag: string) {
+  return `https://www.google.com/search?q=${encodeURIComponent(godesiQuery(tag))}`;
+}
+
 function ago(iso: string) {
   const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   if (minutes < 60) return `${Math.max(minutes, 1)}m ago`;
@@ -48,7 +70,19 @@ export default async function TrendingPage({
   searchParams: { tag?: string };
 }) {
   const tag = cleanTag(searchParams.tag ?? "");
-  const hits = tag ? await hashtagWall(tag) : [];
+  const [hits, local] = await Promise.all([
+    tag ? hashtagWall(tag) : Promise.resolve([]),
+    tag ? keywordSearch(tag) : Promise.resolve(null),
+  ]);
+  const word = tag.replace(/^#/, "");
+  const localCount = local
+    ? local.news.length +
+      local.posts.length +
+      local.chatter.length +
+      local.deals.length +
+      local.storeOffers.length +
+      local.links.length
+    : 0;
 
   return (
     <div className="flex gap-6">
@@ -58,8 +92,8 @@ export default async function TrendingPage({
             Trending hashtags #️⃣
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-white/90">
-            Type a hashtag or keyword — live headlines and public posts about it
-            appear below.
+            Type a hashtag or keyword — GoDesi news, blogs and deals that use
+            it, plus live headlines and public posts, appear below.
           </p>
           <form action="/trending" className="mt-4 flex flex-wrap gap-2">
             <input
@@ -73,6 +107,35 @@ export default async function TrendingPage({
               Show me
             </button>
           </form>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-semibold">
+            <span className="text-white/80">
+              Search “{godesiQuery(tag)}” on:
+            </span>
+            <a
+              href={xSearchUrl(tag)}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-black px-3 py-1 hover:bg-slate-800"
+            >
+              𝕏
+            </a>
+            <a
+              href={bingSearchUrl(tag)}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-teal-600 px-3 py-1 hover:bg-teal-700"
+            >
+              🔎 Bing
+            </a>
+            <a
+              href={googleSearchUrl(tag)}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-blue-600 px-3 py-1 hover:bg-blue-700"
+            >
+              G Google
+            </a>
+          </div>
           <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
             {SUGGESTIONS.map((suggestion) => (
               <Link
@@ -86,7 +149,29 @@ export default async function TrendingPage({
           </div>
         </section>
 
-        {tag && !hits.length ? (
+        {local && localCount ? (
+          <>
+            <KeywordMatches
+              term={tag}
+              results={local}
+              show={["chatter", "news", "posts", "deals"]}
+            />
+            {local.links.length ? (
+              <p className="text-sm text-slate-600">
+                🔗 {local.links.length} useful link
+                {local.links.length === 1 ? "" : "s"} about {tag}{" "}
+                <Link
+                  href={`/resources?q=${encodeURIComponent(word)}`}
+                  className="font-semibold text-indigo-700 underline"
+                >
+                  in Resources
+                </Link>
+              </p>
+            ) : null}
+          </>
+        ) : null}
+
+        {tag && !hits.length && !localCount ? (
           <EmptyState
             title={`Nothing published about ${tag} right now`}
             body="Try a broader word — a city, a festival or a topic."
@@ -94,14 +179,14 @@ export default async function TrendingPage({
         ) : null}
 
         {hits.length ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {hits.map((hit) => (
               <a
                 key={hit.link}
                 href={hit.link}
                 target="_blank"
                 rel="noreferrer"
-                className="flex flex-col gap-1 rounded-2xl border border-slate-200 bg-white p-3 hover:border-indigo-300 hover:shadow-sm"
+                className="flex min-w-0 flex-col gap-1 break-words rounded-2xl border border-slate-200 bg-white p-3 hover:border-indigo-300 hover:shadow-sm"
               >
                 <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-slate-400">
                   {hit.source === "news" ? "📰 News" : "💬 Post"}
@@ -119,16 +204,6 @@ export default async function TrendingPage({
             ))}
           </div>
         ) : null}
-
-        {tag ? null : (
-          <Card>
-            <p className="text-sm text-slate-600">
-              Headlines come from Google News and posts from Mastodon&apos;s
-              public timeline — both free and open. X (Twitter) charges for
-              search access, so tweets can&apos;t be shown here.
-            </p>
-          </Card>
-        )}
       </div>
 
       <SidebarBanners />

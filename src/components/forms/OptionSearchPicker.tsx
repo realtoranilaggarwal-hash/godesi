@@ -13,12 +13,15 @@ export function OptionSearchPicker({
   tabs,
   bundles,
   defaultSelected = [],
+  limit = Number.POSITIVE_INFINITY,
   onSelectionChange,
 }: {
   name: string;
   tabs: OptionTab[];
   bundles?: OptionBundle[];
   defaultSelected?: string[];
+  /** Most picks the member's plan allows; extra ticks are refused. */
+  limit?: number;
   /** Lets the parent react, e.g. to offer a featured badge from the picks. */
   onSelectionChange?: (selected: string[]) => void;
 }) {
@@ -47,15 +50,23 @@ export function OptionSearchPicker({
     return active ? [active] : [];
   }, [search, tab, tabs]);
 
-  const toggle = (option: string) =>
-    update(
-      selected.includes(option)
-        ? selected.filter((value) => value !== option)
-        : [...selected, option],
-    );
+  const full = selected.length >= limit;
+
+  const toggle = (option: string) => {
+    if (selected.includes(option)) {
+      update(selected.filter((value) => value !== option));
+    } else if (!full) {
+      update([...selected, option]);
+    }
+  };
 
   const addAll = (options: string[]) =>
-    update(Array.from(new Set([...selected, ...options])));
+    update(
+      Array.from(new Set([...selected, ...options])).slice(
+        0,
+        Math.max(limit, selected.length),
+      ),
+    );
 
   return (
     <div className="space-y-3">
@@ -158,6 +169,7 @@ export function OptionSearchPicker({
                 <input
                   type="checkbox"
                   checked={selected.includes(option)}
+                  disabled={full && !selected.includes(option)}
                   onChange={() => toggle(option)}
                   className="mt-0.5 h-4 w-4"
                 />

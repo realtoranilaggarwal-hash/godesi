@@ -2,12 +2,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import {
   normalizeUsername,
   publicProfile,
   RESERVED_USERNAMES,
 } from "@/lib/profiles";
-import { effectivePlan } from "@/lib/plans";
+import {
+  effectivePlan,
+  showsAlbumAndPlaylist,
+  visibleMediaLink,
+} from "@/lib/plans";
 import { formatEventDate } from "@/lib/events";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { properName } from "@/lib/names";
@@ -19,13 +24,14 @@ import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
 import { FoundingBadge } from "@/components/FoundingBadge";
+import { AmbassadorBadge } from "@/components/AmbassadorBadge";
 import { GigCard } from "@/components/gigs/GigCard";
 import { journalistStats } from "@/lib/journalistsQueries";
 import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
-import { RailRectangles } from "@/components/Banners";
+import { RailRectangles, SmallBanners } from "@/components/Banners";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
@@ -33,11 +39,11 @@ import { thumbImage } from "@/lib/proxyImage";
 
 export const dynamic = "force-dynamic";
 
-async function load(usernameParam: string) {
+const load = cache(async (usernameParam: string) => {
   const username = normalizeUsername(decodeURIComponent(usernameParam));
   if (RESERVED_USERNAMES.has(username)) return null;
   return publicProfile(username);
-}
+});
 
 export async function generateMetadata({
   params,
@@ -72,6 +78,11 @@ export default async function PublicProfilePage({
   ]);
   const isOwner = viewer?.id === user.id;
   const plan = effectivePlan(user);
+  const playlistUrl = visibleMediaLink(
+    user.playlistUrl,
+    user.keptPlaylistUrl,
+    showsAlbumAndPlaylist(user),
+  );
   const shareUrl = `${siteUrl()}/${user.username}`;
   const activity =
     events.length +
@@ -151,6 +162,7 @@ export default async function PublicProfilePage({
                 ) : null}
                 {user.location ? <Badge>📍 {user.location}</Badge> : null}
                 <FoundingBadge number={user.foundingNumber} />
+                <AmbassadorBadge ambassador={user.ambassador} />
                 {journalist?.level ? (
                   <JournalistBadge
                     level={journalist.level}
@@ -286,14 +298,22 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
 
-          {user.playlistUrl ? (
-            <PlaylistGallery url={user.playlistUrl} owner={user.name} />
+          {playlistUrl ? (
+            <PlaylistGallery url={playlistUrl} owner={user.name} />
+          ) : isOwner && user.playlistUrl ? (
+            <Link
+              href="/pricing"
+              className="block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+            >
+              🔒 Your YouTube playlist is saved but hidden on the Free plan. Go
+              Pro to show it to everyone →
+            </Link>
           ) : null}
 
           {user.videoUrls.length ? (
             <section className="space-y-3">
               <h2 className="text-lg font-bold">
-                {user.playlistUrl ? "More videos" : "Videos"}
+                {playlistUrl ? "More videos" : "Videos"}
               </h2>
               {user.videoUrls.map((url) => (
                 <VideoEmbed key={url} url={url} title={`${user.name} video`} />
@@ -555,7 +575,7 @@ export default async function PublicProfilePage({
           <MoreOnGodesi city={user.business?.city ?? null} />
         </div>
 
-        <aside className="space-y-4">
+        <aside data-right-rail className="space-y-4">
           {user.skills.length || user.languages.length ? (
             <Card className="space-y-3">
               {user.skills.length ? (
@@ -606,6 +626,7 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
           <RailRectangles />
+          <SmallBanners show={6} embedded />
         </aside>
       </div>
     </div>

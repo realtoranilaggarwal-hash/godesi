@@ -18,6 +18,7 @@ import { ActionForm } from "@/components/gigs/GigForms";
 import { FeeNote, GigCard, SellerFace } from "@/components/gigs/GigCard";
 import { Gallery, OrderBox } from "@/components/gigs/GigPagePieces";
 import { Alert, Badge, Card, LinkButton, Stars, inputClass } from "@/components/ui";
+import { SmallBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 
@@ -119,7 +120,7 @@ export default async function GigPage({
         <Alert tone="info">This gig is paused; the seller is not taking new orders.</Alert>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="order-2 space-y-6 lg:order-1">
           <header className="space-y-3">
             <h1 className="text-2xl font-black text-slate-900 sm:text-3xl">
@@ -417,6 +418,9 @@ export default async function GigPage({
               </LinkButton>
             ) : null}
           </Card>
+          <div className="mt-4 hidden lg:block">
+            <SmallBanners show={6} embedded />
+          </div>
         </aside>
       </div>
     </div>

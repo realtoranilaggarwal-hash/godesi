@@ -1,3 +1,4 @@
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { db } from "@/lib/db";
 import { dealSelect, liveDealWhere } from "@/lib/deals";
 import { HOROSCOPE_ZONE } from "@/lib/horoscope";
@@ -33,4 +34,33 @@ export async function dealOfTheDay(now = new Date()) {
     }),
   ]);
   return { day, deal: pick(deals, day), offer: pick(offers, day) };
+}
+
+const cachedPicks = cachedQuery("deal-of-the-day", CONTENT_TTL, (day: string) =>
+  dealOfTheDay(new Date(`${day}T12:00:00Z`)),
+);
+
+/**
+ * The same picks for every visitor, read from the database once a minute.
+ * Cached rows come back JSON-serialised, so dates are strings again.
+ */
+export async function cachedDealOfTheDay(now = new Date()) {
+  const { day, deal, offer } = await cachedPicks(todayIn(HOROSCOPE_ZONE, now));
+  const date = (value: Date | string | null) => (value ? new Date(value) : null);
+  return {
+    day,
+    deal: deal && {
+      ...deal,
+      expiresAt: date(deal.expiresAt),
+      createdAt: new Date(deal.createdAt),
+      business: {
+        ...deal.business,
+        owner: deal.business.owner && {
+          ...deal.business.owner,
+          planExpiresAt: date(deal.business.owner.planExpiresAt),
+        },
+      },
+    },
+    offer: offer && { ...offer, endsAt: date(offer.endsAt) },
+  };
 }

@@ -60,6 +60,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/auto-share", label: "Auto-share", icon: "🔁", need: "admin" },
   { href: "/admin/connect", label: "Connect", icon: "🤝", need: "admin" },
   { href: "/admin/rishta", label: "Rishta", icon: "💍", need: "admin" },
+  { href: "/admin/chatter", label: "Chatter", icon: "💬", need: "chatter" },
   { href: "/admin/temples", label: "Temples", icon: "🛕", need: "worship" },
   {
     href: "/admin/resources",
@@ -75,6 +76,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/desi-elite", label: "Elite", icon: "🏆", need: "staff" },
   { href: "/admin/media", label: "Media team", icon: "🎙️", need: "staff" },
   {
+    href: "/admin/ambassadors",
+    label: "Ambassadors",
+    icon: "🤝",
+    need: "staff",
+  },
+  {
     href: "/admin/live-channels",
     label: "Radio & TV",
     icon: "🎧",
@@ -83,6 +90,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/help-clips", label: "Help clips", icon: "▶️", need: "admin" },
   { href: "/admin/outreach", label: "Outreach", icon: "📣", need: "staff" },
   { href: "/admin/prospects", label: "Call list", icon: "☎️", need: "staff" },
+  {
+    href: "/admin/real-estate",
+    label: "Real estate",
+    icon: "🏡",
+    need: "staff",
+  },
   { href: "/admin/team", label: "Team", icon: "🔑", need: "admin" },
   { href: "/admin/handbook", label: "Handbook", icon: "📗", need: "staff" },
 ];

@@ -9,9 +9,10 @@ import {
   slotSoldCount,
 } from "@/lib/banners";
 import { ActivityWall } from "@/components/ActivityWall";
+import { categoryPickerGroups } from "@/components/CategoryNav";
 import { TelegramJoin } from "@/components/TelegramJoin";
 import { HelpClipCard } from "@/components/HelpClipCard";
-import { CategoryNav } from "@/components/CategoryNav";
+import { CategoryTree } from "@/components/CategoryTree";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
 import { GodesiWikiCard } from "@/components/GodesiWikiPromo";
 import { isPhoneRequest } from "@/lib/device";
@@ -20,6 +21,7 @@ import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { HousePromo } from "@/components/HousePromo";
 import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
+import { SmallBannerRail } from "@/components/SmallBannerRail";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
@@ -166,20 +168,24 @@ export async function SidebarBanners({
   // live map, a chat poll, banner impressions and ad units nobody could see.
   if (isPhoneRequest()) return null;
 
-  const [rectangles, halfPages, skyscrapers, rectanglesSold] =
+  const [rectangles, halfPages, skyscrapers, rectanglesSold, categories] =
     await Promise.all([
       activeBanners("SIDEBAR", 2),
       activeBanners("HALFPAGE", 1),
       activeBanners("SKYSCRAPER", 2),
       slotSoldCount("SIDEBAR"),
+      categoryPickerGroups(),
     ]);
 
   return (
     <aside
-      className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block"
+      data-right-rail
+      className="hidden w-[260px] shrink-0 space-y-4 lg:order-last lg:block"
       aria-label="Sponsored"
     >
-      <CategoryNav />
+      <CategoryTree groups={categories} />
+
+      <SmallBanners embedded tree={false} show={4} />
 
       <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
 
@@ -254,6 +260,66 @@ export async function SidebarBanners({
         ))}
       </div>
     </aside>
+  );
+}
+
+/**
+ * The 320x100 small banners stacked down the right side. Up to twenty are sent
+ * so the stack can show a fresh set on each page change.
+ */
+export async function SmallBanners({
+  show = 10,
+  embedded = false,
+  start = 0,
+  side,
+  tree = true,
+  fill = false,
+}: {
+  show?: number;
+  embedded?: boolean;
+  /** Fill the height of the surrounding box with as many banners as fit. */
+  fill?: boolean;
+  /** Category tree above the banners; off where the page already lists them. */
+  tree?: boolean;
+  start?: number;
+  side?: "left" | "right";
+} = {}) {
+  if (isPhoneRequest()) return null;
+  const [banners, categories] = await Promise.all([
+    activeBanners("MOBILE", 20),
+    tree && side !== "left" ? categoryPickerGroups() : [],
+  ]);
+  return (
+    <SmallBannerRail
+      categories={categories}
+      show={show}
+      embedded={embedded}
+      fill={fill}
+      start={start}
+      side={side}
+      banners={banners.map((banner) => ({
+        id: banner.id,
+        title: banner.title,
+        imageUrl: proxyImage(banner.imageUrl),
+      }))}
+    />
+  );
+}
+
+/** Two small banners under the page content, for phones only. */
+export async function PhoneSmallBanners() {
+  if (!isPhoneRequest()) return null;
+  const banners = await activeBanners("MOBILE", 20);
+  return (
+    <SmallBannerRail
+      phone
+      show={2}
+      banners={banners.map((banner) => ({
+        id: banner.id,
+        title: banner.title,
+        imageUrl: proxyImage(banner.imageUrl),
+      }))}
+    />
   );
 }
 
@@ -352,7 +418,7 @@ export async function InContentBanner({
           />
         ) : (
           <AdvertiseHere
-            label="320 × 100 mobile banner"
+            label="320 × 100 small banner"
             width={mobile.width}
             height={mobile.height}
             slot="MOBILE"

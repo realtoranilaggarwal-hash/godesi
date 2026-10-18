@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import {
   effectivePlan,
-  FOUNDING_OFFER_ENDS_LABEL,
   PLANS,
   PLAN_ORDER,
   PLAN_TERMS,
@@ -22,9 +21,19 @@ import { upiEnabled, upiVpa } from "@/lib/upi";
 import { startUpiPaymentAction } from "@/app/actions/upi";
 import { PayPalCheckout } from "@/components/PayPalCheckout";
 import { Alert, Badge, Card } from "@/components/ui";
-import { formatMoney, requestCurrency } from "@/lib/currency";
-import { formatUsd } from "@/lib/format";
+import { headers } from "next/headers";
+import { formatMoney, requestCurrency, type Currency } from "@/lib/currency";
+import {
+  convert,
+  COUNTRY_CURRENCY,
+  formatDisplay,
+  getRates,
+} from "@/lib/rates";
+import { formatUsd, fromMinor, toMinor } from "@/lib/format";
+import { checkCoupon, discountFor, planCouponScopes } from "@/lib/coupons";
 import { WhyGodesi } from "@/components/WhyGodesi";
+import { monthlyOffer } from "@/lib/monthlyOffer";
+import { FiveYearUpsell } from "@/components/FiveYearUpsell";
 import {
   bundleListPrice,
   bundlePrice,
@@ -50,16 +59,25 @@ const ERRORS: Record<string, string> = {
   term: "That membership length is not on sale — pick another one.",
 };
 
+/** Drops ".00" so round prices read "$250", not "$250.00". */
+function wholeMoney(amount: number, currency: Currency) {
+  return formatMoney(amount, currency).replace(/\.00$/, "");
+}
+
 const TERM_TABS: { id: TermId; label: string }[] = [
   { id: "MONTH", label: "Monthly" },
   { id: "YEAR", label: "Yearly" },
-  { id: "FIVE_YEAR", label: "5 years — founding price" },
 ];
 
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: { reason?: string; error?: string; term?: string };
+  searchParams: {
+    reason?: string;
+    error?: string;
+    term?: string;
+    coupon?: string;
+  };
 }) {
   const user = await getCurrentUser();
   const current = user ? effectivePlan(user) : null;
@@ -70,9 +88,39 @@ export default async function PricingPage({
   const upiOn = upiEnabled();
   const providersOn = stripeOn || paypalOn || upiOn;
   const currency = requestCurrency();
-  const wanted: TermId = TERM_TABS.some((tab) => tab.id === searchParams.term)
-    ? (searchParams.term as TermId)
-    : "YEAR";
+  const [rates, offer] = await Promise.all([getRates(), monthlyOffer()]);
+  const offerCode = offer?.code ?? "HALF5";
+  const country = headers().get("x-vercel-ip-country") ?? "";
+  const localCurrency = COUNTRY_CURRENCY[country];
+  const showLocal =
+    localCurrency && localCurrency !== "USD" && localCurrency !== "INR"
+      ? localCurrency
+      : null;
+  const wanted: TermId =
+    searchParams.term === "MONTH" ||
+    searchParams.term === "YEAR" ||
+    searchParams.term === "FIVE_YEAR"
+      ? searchParams.term
+      : "YEAR";
+  const tabs =
+    wanted === "FIVE_YEAR"
+      ? [...TERM_TABS, { id: "FIVE_YEAR" as const, label: "5 years" }]
+      : TERM_TABS;
+  const coupon = /^[A-Za-z0-9_-]{1,32}$/.test(searchParams.coupon ?? "")
+    ? searchParams.coupon?.toUpperCase()
+    : undefined;
+  const fiveYearUsd = planTermPrice(PLANS.PREMIUM, "FIVE_YEAR", "USD");
+  const couponCheck =
+    user && coupon && wanted === "FIVE_YEAR" && fiveYearUsd !== null
+      ? await checkCoupon({
+          code: coupon,
+          scope: planCouponScopes("PREMIUM", "FIVE_YEAR"),
+          userId: user.id,
+          subtotalMinor: toMinor(fiveYearUsd),
+          currency: "USD",
+        })
+      : null;
+  const validCoupon = couponCheck?.ok ? couponCheck.coupon : null;
 
   return (
     <div className="space-y-6">
@@ -83,7 +131,7 @@ export default async function PricingPage({
           contacts.
         </p>
         <div className="mt-4 inline-flex flex-wrap justify-center gap-1 rounded-2xl bg-slate-100 p-1">
-          {TERM_TABS.map((tab) => (
+          {tabs.map((tab) => (
             <Link
               key={tab.id}
               href={`/pricing?term=${tab.id}`}
@@ -97,12 +145,6 @@ export default async function PricingPage({
             </Link>
           ))}
         </div>
-        {wanted === "FIVE_YEAR" ? (
-          <p className="mt-2 text-sm font-semibold text-amber-700">
-            Founding price: pay one year, stay five. Ends{" "}
-            {FOUNDING_OFFER_ENDS_LABEL}.
-          </p>
-        ) : null}
       </div>
 
       <Link
@@ -147,15 +189,66 @@ export default async function PricingPage({
           const isFree = id === "FREE";
           const terms = planTerms(plan);
           const term = terms.includes(wanted) ? wanted : terms[terms.length - 1];
-          const price = term ? planTermPrice(plan, term, currency) : null;
-          const priceInr = term ? planTermPrice(plan, term, "INR") : null;
+          const price = term
+            ? planTermPrice(plan, term, currency, rates.INR)
+            : null;
+          const priceInr = term
+            ? planTermPrice(plan, term, "INR", rates.INR)
+            : null;
+          const localPrice =
+            showLocal && currency === "USD" && price !== null
+              ? convert(price, "USD", showLocal, rates)
+              : null;
           const priceUsd = term ? planTermPrice(plan, term, "USD") : null;
-          const label = price === null ? "" : formatMoney(price, currency);
+          const monthly = planTermPrice(plan, "MONTH", currency, rates.INR);
+          const twelveMonths =
+            term === "YEAR" && monthly !== null && price !== null
+              ? monthly * 12
+              : null;
+          const fiveYear = planTermPrice(
+            plan,
+            "FIVE_YEAR",
+            currency,
+            rates.INR,
+          );
+          const upsell =
+            id === "PREMIUM" &&
+            term === "YEAR" &&
+            offer &&
+            fiveYear !== null &&
+            price !== null
+              ? {
+                  code: offer.code,
+                  endsAt: offer.endsAt.toISOString(),
+                  offerLabel: wholeMoney(fiveYear / 2, currency),
+                  listLabel: wholeMoney(fiveYear, currency),
+                  perYearLabel: wholeMoney(fiveYear / 10, currency),
+                  yearLabel: wholeMoney(price, currency),
+                  href: `/pricing?term=FIVE_YEAR&coupon=${offer.code}#plan-PREMIUM`,
+                }
+              : null;
+          const label = price === null ? "" : wholeMoney(price, currency);
+          const prefill =
+            id === "PREMIUM" && term === "FIVE_YEAR" ? coupon : undefined;
+          const afterCoupon = (amount: number, money: Currency) =>
+            prefill && validCoupon
+              ? amount -
+                fromMinor(
+                  discountFor({
+                    coupon: validCoupon,
+                    subtotalMinor: toMinor(amount),
+                    currency: money,
+                  }),
+                )
+              : amount;
+          const payLabel =
+            price === null ? "" : wholeMoney(afterCoupon(price, currency), currency);
 
-          return (
+          const card = (
             <Card
               key={id}
-              className={`flex flex-col gap-4 ${id === "PREMIUM" ? "ring-2 ring-indigo-500" : ""}`}
+              id={`plan-${id}`}
+              className={`flex h-full flex-col gap-4 ${id === "PREMIUM" ? "ring-2 ring-indigo-500" : ""}`}
             >
               <div>
                 <div className="flex items-center gap-2">
@@ -171,10 +264,38 @@ export default async function PricingPage({
                     </span>
                   )}
                 </p>
+                {!isFree &&
+                twelveMonths !== null &&
+                price !== null &&
+                twelveMonths > price ? (
+                  <p className="text-sm font-semibold text-emerald-700">
+                    <span className="text-slate-400 line-through">
+                      {wholeMoney(twelveMonths, currency)}
+                    </span>{" "}
+                    Yearly deal — save{" "}
+                    {wholeMoney(twelveMonths - price, currency)} on 12 monthly
+                    payments
+                  </p>
+                ) : null}
+                {!isFree && showLocal && localPrice !== null ? (
+                  <p className="text-xs text-slate-500">
+                    about {formatDisplay(localPrice, showLocal)} at today&apos;s
+                    rate, charged in US dollars
+                  </p>
+                ) : null}
+                {!isFree && currency === "INR" && !paypalOn ? (
+                  <p className="text-xs text-slate-500">
+                    {priceUsd === null ? "" : formatUsd(priceUsd)} at
+                    today&apos;s rupee rate
+                  </p>
+                ) : null}
                 {!isFree && term === "FIVE_YEAR" ? (
                   <p className="text-xs font-semibold text-amber-700">
-                    One year&apos;s price for five years — until{" "}
-                    {FOUNDING_OFFER_ENDS_LABEL}
+                    {prefill && validCoupon
+                      ? `Code ${prefill} is filled in below — you pay ${payLabel}`
+                      : prefill
+                        ? `Code ${prefill} is filled in below — pay by card to get it`
+                        : `Enter code ${offerCode} to pay half`}
                   </p>
                 ) : null}
                 {!isFree &&
@@ -182,7 +303,7 @@ export default async function PricingPage({
                 currency === "INR" &&
                 priceUsd !== null ? (
                   <p className="text-xs text-slate-500">
-                    or {formatUsd(priceUsd)} via PayPal
+                    or {formatUsd(afterCoupon(priceUsd, "USD"))} via PayPal
                   </p>
                 ) : null}
               </div>
@@ -231,6 +352,7 @@ export default async function PricingPage({
                         <input type="hidden" name="term" value={term} />
                         <input
                           name="couponCode"
+                          defaultValue={prefill}
                           placeholder="Coupon code (optional)"
                           aria-label="Coupon code"
                           className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
@@ -239,7 +361,7 @@ export default async function PricingPage({
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                         >
-                          Pay by card — {label}
+                          Pay by card — {payLabel}
                         </button>
                       </form>
                     ) : null}
@@ -249,6 +371,7 @@ export default async function PricingPage({
                         plan={id}
                         term={term}
                         clientId={paypalClientId}
+                        couponCode={validCoupon ? prefill : undefined}
                       />
                     ) : null}
 
@@ -262,6 +385,7 @@ export default async function PricingPage({
                         {stripeOn ? null : (
                           <input
                             name="couponCode"
+                            defaultValue={prefill}
                             placeholder="Coupon code (optional)"
                             aria-label="Coupon code"
                             className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
@@ -272,7 +396,9 @@ export default async function PricingPage({
                           className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
                         >
                           Pay by UPI —{" "}
-                          {priceInr === null ? "" : formatMoney(priceInr, "INR")}
+                          {priceInr === null
+                            ? ""
+                            : formatMoney(afterCoupon(priceInr, "INR"), "INR")}
                         </button>
                         <p className="text-center text-xs text-slate-500">
                           PhonePe · Google Pay · Paytm · any bank app
@@ -296,6 +422,13 @@ export default async function PricingPage({
                 )}
               </div>
             </Card>
+          );
+          return upsell ? (
+            <FiveYearUpsell key={id} {...upsell}>
+              {card}
+            </FiveYearUpsell>
+          ) : (
+            card
           );
         })}
       </div>

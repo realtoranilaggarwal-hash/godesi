@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { Money } from "@/components/Money";
-import { albumPhotoLimit, effectivePlan, PLANS, videoLimit } from "@/lib/plans";
+import {
+  albumPhotoLimit,
+  effectivePlan,
+  PLANS,
+  servicePickLimit,
+  showsAlbumAndPlaylist,
+  videoLimit,
+  visibleMediaLink,
+} from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
@@ -28,7 +37,11 @@ import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { LogoTile } from "@/components/LogoTile";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
-import { disclaimerFor, specialtySet } from "@/lib/specialties";
+import {
+  disclaimerFor,
+  specialtySet,
+  visibleServicePicks,
+} from "@/lib/specialties";
 import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
@@ -41,8 +54,9 @@ import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 
 export const dynamic = "force-dynamic";
 
-async function getBusiness(slug: string) {
-  return db.business.findUnique({
+/** Shared by generateMetadata and the page, so each visit reads the card once. */
+const getBusiness = cache((slug: string) =>
+  db.business.findUnique({
     where: { slug },
     include: {
       owner: {
@@ -69,31 +83,15 @@ async function getBusiness(slug: string) {
       },
       vehicle: true,
     },
-  });
-}
+  }),
+);
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const business = await db.business.findUnique({
-    where: { slug: params.slug },
-    select: {
-      name: true,
-      category: true,
-      city: true,
-      description: true,
-      logoUrl: true,
-      websiteUrl: true,
-      albumUrl: true,
-      videoUrl: true,
-      address: true,
-      specialties: true,
-      ownerId: true,
-      _count: { select: { media: true, reviews: true } },
-    },
-  });
+  const business = await getBusiness(params.slug);
   if (!business) return { title: "Business not found" };
 
   const title = `${business.name} — ${business.category} in ${business.city}`;
@@ -109,8 +107,8 @@ export async function generateMetadata({
     robots: robotsFor(
       businessIsThin({
         ...business,
-        mediaCount: business._count.media,
-        reviewCount: business._count.reviews,
+        mediaCount: business.media.length,
+        reviewCount: business.reviews.length,
       }),
     ),
     alternates: { canonical: `/b/${params.slug}` },
@@ -205,6 +203,26 @@ export default async function BusinessProfilePage({
         ? [business.videoUrl]
         : []
   ).slice(0, business.owner ? videoLimit(business.owner) : 1);
+  const mediaUnlocked = showsAlbumAndPlaylist(business.owner);
+  const picks = visibleServicePicks(
+    business.subcategorySlug,
+    business,
+    business.owner
+      ? servicePickLimit(business.owner)
+      : Number.POSITIVE_INFINITY,
+  );
+  const playlistUrl = visibleMediaLink(
+    business.playlistUrl,
+    business.keptPlaylistUrl,
+    mediaUnlocked,
+  );
+  const albumUrl = visibleMediaLink(
+    business.albumUrl,
+    business.keptAlbumUrl,
+    mediaUnlocked,
+  );
+  const mediaHidden =
+    (business.playlistUrl && !playlistUrl) || (business.albumUrl && !albumUrl);
   const isAgent = isAgentCard(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
@@ -350,7 +368,7 @@ export default async function BusinessProfilePage({
                 </p>
               ) : null}
 
-              {business.specialties.length ? (
+              {picks.specialties.length ? (
                 <div className="mt-3">
                   <h2 className="text-sm font-bold text-slate-900">
                     {specialtySet(business.subcategorySlug)?.title ??
@@ -362,7 +380,7 @@ export default async function BusinessProfilePage({
                         ⭐ {business.featuredSpecialty}
                       </span>
                     ) : null}
-                    {business.specialties
+                    {picks.specialties
                       .filter((item) => item !== business.featuredSpecialty)
                       .map((item) => (
                         <Link
@@ -437,7 +455,7 @@ export default async function BusinessProfilePage({
                 </div>
               ) : null}
 
-              {business.serviceOptions.length ||
+              {picks.serviceOptions.length ||
               business.priceFrom ||
               business.priceHourly ||
               business.priceExtra ||
@@ -452,7 +470,7 @@ export default async function BusinessProfilePage({
                         ✅ Verified provider
                       </span>
                     ) : null}
-                    {business.serviceOptions.map((option) => (
+                    {picks.serviceOptions.map((option) => (
                       <Link
                         key={option}
                         href={`/categories/${business.subcategorySlug}?opt=${encodeURIComponent(option)}`}
@@ -534,19 +552,26 @@ export default async function BusinessProfilePage({
                 </div>
               ) : null}
 
-              {business.playlistUrl ? (
+              {playlistUrl ? (
                 <div className="mt-3">
-                  <PlaylistGallery
-                    url={business.playlistUrl}
-                    owner={business.name}
-                  />
+                  <PlaylistGallery url={playlistUrl} owner={business.name} />
                 </div>
               ) : null}
 
-              {business.albumUrl ? (
+              {isOwner && mediaHidden ? (
+                <Link
+                  href="/pricing"
+                  className="mt-3 block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+                >
+                  🔒 Your Google Photos album or YouTube playlist is saved but
+                  hidden on the Free plan. Go Pro to show it to everyone →
+                </Link>
+              ) : null}
+
+              {albumUrl ? (
                 <div className="mt-3">
                   <PhotoAlbumGallery
-                    url={business.albumUrl}
+                    url={albumUrl}
                     heading="Photos"
                     limit={albumPhotoLimit(business.owner)}
                   />

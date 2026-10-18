@@ -10,6 +10,7 @@ import { siteUrl } from "@/lib/format";
 import { resultsAreThin, robotsFor } from "@/lib/thinContent";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Card } from "@/components/ui";
+import { SmallBanners } from "@/components/Banners";
 
 export const revalidate = 3600;
 
@@ -134,7 +135,7 @@ export default async function GuidePage({
         </div>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0 space-y-6">
           <section className="space-y-3 text-[15px] leading-relaxed text-slate-700">
             {guide.intro.map((paragraph) => (
@@ -244,6 +245,7 @@ export default async function GuidePage({
               )}
             </ul>
           </Card>
+          <SmallBanners show={6} embedded />
         </aside>
       </div>
     </div>

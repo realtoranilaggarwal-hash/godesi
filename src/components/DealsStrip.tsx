@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { dealDetails, liveDeals } from "@/lib/deals";
+import { dealDetails, cachedLiveDeals } from "@/lib/deals";
 import { DealCard } from "@/components/DealCard";
 
 /** The newest business offers, with a way into /deals and to post one. */
 export async function DealsStrip() {
-  const deals = await liveDeals({ take: 4 });
+  const deals = await cachedLiveDeals({ take: 4 });
   if (!deals.length) return null;
 
   return (

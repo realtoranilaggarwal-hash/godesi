@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { dealDetails, liveDeals } from "@/lib/deals";
-import { liveStoreOffers } from "@/lib/storeOffers";
+import { dealDetails, cachedLiveDeals } from "@/lib/deals";
+import { cachedLiveStoreOffers } from "@/lib/storeOffers";
 import { SHOP_SHELVES } from "@/lib/shop";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
@@ -8,8 +8,8 @@ import { StoreOfferCard } from "@/components/StoreOfferCard";
 /** Business deals, online store offers and shop shelves, for the foot of posting pages. */
 export async function DealsAndShopStrip() {
   const [deals, storeOffers] = await Promise.all([
-    liveDeals({ take: 4 }),
-    liveStoreOffers(3),
+    cachedLiveDeals({ take: 4 }),
+    cachedLiveStoreOffers(3),
   ]);
 
   return (

@@ -63,6 +63,12 @@ export default async function MyListingsPage() {
               <Badge tone={listing.status === "APPROVED" ? "green" : "amber"}>
                 {listing.status.toLowerCase()}
               </Badge>
+              <Link
+                href={`/listings/${listing.slug}/edit`}
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                Edit
+              </Link>
               <form action={deleteListingAction}>
                 <input type="hidden" name="id" value={listing.id} />
                 <button

@@ -8,8 +8,9 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { activatePlan, planOrNull } from "@/lib/billing";
 import { PLAN_TERMS, planTermPrice, planTerms, termOrNull } from "@/lib/plans";
 import { toMinor } from "@/lib/format";
+import { inrPerUsd } from "@/lib/currency";
 import { newUpiReference, upiEnabled } from "@/lib/upi";
-import { checkCoupon } from "@/lib/coupons";
+import { checkCoupon, planCouponScopes } from "@/lib/coupons";
 
 /** Creates a UPI request and sends the buyer to the QR page. */
 export async function startUpiPaymentAction(formData: FormData) {
@@ -23,12 +24,14 @@ export async function startUpiPaymentAction(formData: FormData) {
     termOrNull(String(formData.get("term") ?? "MONTH")) ??
     redirect("/pricing?error=term");
   if (!planTerms(plan).includes(term)) redirect("/pricing?error=term");
-  const listAmount = toMinor(planTermPrice(plan, term, "INR") ?? 0);
+  const listAmount = toMinor(
+    planTermPrice(plan, term, "INR", await inrPerUsd()) ?? 0,
+  );
   const code = String(formData.get("couponCode") ?? "").trim();
   const check = code
     ? await checkCoupon({
         code,
-        scope: "PLAN",
+        scope: planCouponScopes(plan.id, term),
         userId: user.id,
         subtotalMinor: listAmount,
         currency: "INR",

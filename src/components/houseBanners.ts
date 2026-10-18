@@ -1,0 +1,173 @@
+/** GoDesi's own small banners, shown in banner stacks wherever no paid banner is. */
+export type HouseBanner = {
+  slug: string;
+  href: string;
+  emoji: string;
+  title: string;
+  line: string;
+  /** Tailwind gradient stops; kept as literals so Tailwind ships them. */
+  colors: string;
+};
+
+export const HOUSE_BANNERS: HouseBanner[] = [
+  {
+    slug: "rishta",
+    href: "/rishta",
+    emoji: "💍",
+    title: "Rishta",
+    line: "Marriage profiles posted by self or family",
+    colors: "from-pink-500 to-rose-600",
+  },
+  {
+    slug: "kundli",
+    href: "/astrology/kundli-calculator",
+    emoji: "🪐",
+    title: "Free Kundli",
+    line: "Your rashi, nakshatra & lagna in seconds",
+    colors: "from-violet-600 to-indigo-700",
+  },
+  {
+    slug: "horoscope",
+    href: "/astrology/horoscope",
+    emoji: "✨",
+    title: "Today's horoscope",
+    line: "All 12 rashis, fresh every day",
+    colors: "from-purple-600 to-fuchsia-500",
+  },
+  {
+    slug: "panchang",
+    href: "/astrology/panchang",
+    emoji: "🪔",
+    title: "Today's Panchang",
+    line: "Tithi, Rahu Kaal & fasts for your city",
+    colors: "from-amber-500 to-orange-600",
+  },
+  {
+    slug: "deals",
+    href: "/deals",
+    emoji: "🏷️",
+    title: "Desi deals",
+    line: "Offers & coupons from desi businesses",
+    colors: "from-red-500 to-orange-500",
+  },
+  {
+    slug: "shop",
+    href: "/shop",
+    emoji: "🛍️",
+    title: "Desi shop",
+    line: "Puja items, groceries, gifts & more",
+    colors: "from-emerald-500 to-teal-600",
+  },
+  {
+    slug: "events",
+    href: "/events",
+    emoji: "🎉",
+    title: "Desi events",
+    line: "Concerts, garba, melas near you",
+    colors: "from-orange-500 to-pink-600",
+  },
+  {
+    slug: "post-event",
+    href: "/events/new",
+    emoji: "🎟️",
+    title: "Post your event",
+    line: "Free listing — sell tickets on GoDesi",
+    colors: "from-sky-500 to-indigo-600",
+  },
+  {
+    slug: "clubs",
+    href: "/clubs",
+    emoji: "🎤",
+    title: "Desi clubs",
+    line: "Karaoke, cricket, foodies — join one",
+    colors: "from-lime-500 to-emerald-600",
+  },
+  {
+    slug: "gigs",
+    href: "/gigs",
+    emoji: "💼",
+    title: "Gigs from $5",
+    line: "Hire desi experts for quick jobs",
+    colors: "from-cyan-500 to-blue-600",
+  },
+  {
+    slug: "radio",
+    href: "/live-radio",
+    emoji: "🎧",
+    title: "Desi radio live",
+    line: "Bollywood & regional stations",
+    colors: "from-indigo-500 to-purple-600",
+  },
+  {
+    slug: "tv",
+    href: "/live-tv",
+    emoji: "📺",
+    title: "Desi TV live",
+    line: "News & entertainment channels",
+    colors: "from-rose-500 to-red-600",
+  },
+  {
+    slug: "news",
+    href: "/news",
+    emoji: "📰",
+    title: "Desi news",
+    line: "Local stories from our community",
+    colors: "from-blue-500 to-sky-600",
+  },
+  {
+    slug: "list-business",
+    href: "/add-business",
+    emoji: "🏪",
+    title: "List your business",
+    line: "Free card — get found by desi customers",
+    colors: "from-yellow-500 to-amber-600",
+  },
+  {
+    slug: "directory",
+    href: "/search",
+    emoji: "🔎",
+    title: "Find desi businesses",
+    line: "Restaurants, doctors, realtors & more",
+    colors: "from-teal-500 to-cyan-600",
+  },
+  {
+    slug: "connect",
+    href: "/connect",
+    emoji: "🤝",
+    title: "Desi Connect",
+    line: "Make friends & find your circle",
+    colors: "from-fuchsia-500 to-purple-600",
+  },
+  {
+    slug: "festivals",
+    href: "/festivals",
+    emoji: "🪷",
+    title: "Festival calendar",
+    line: "Diwali, Holi, Eid — every date",
+    colors: "from-orange-500 to-red-600",
+  },
+  {
+    slug: "visa-bulletin",
+    href: "/visa-bulletin",
+    emoji: "🛂",
+    title: "Visa Bulletin",
+    line: "Green card dates, every month",
+    colors: "from-blue-600 to-indigo-700",
+  },
+  {
+    slug: "usd-to-inr",
+    href: "/usd-to-inr",
+    emoji: "💱",
+    title: "Dollar to rupee",
+    line: "Today's USD → INR rate",
+    colors: "from-green-500 to-emerald-600",
+  },
+  {
+    slug: "rewards",
+    href: "/rewards",
+    emoji: "🎡",
+    title: "Spin & earn points",
+    line: "Free daily spin for GoDesi members",
+    colors: "from-pink-500 to-fuchsia-600",
+  },
+];

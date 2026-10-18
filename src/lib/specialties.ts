@@ -2984,6 +2984,58 @@ export function cleanServiceOptions(
   });
 }
 
+/** The first multi-choice detail group with more ticks than `limit`. */
+export function overfullChoiceGroup(
+  subcategorySlug: string | null | undefined,
+  values: string[],
+  limit: number,
+) {
+  const groups = specialtySet(subcategorySlug)?.choices ?? [];
+  for (const group of groups) {
+    if (group.mode !== "multi") continue;
+    const picked = group.options.filter((option) => values.includes(option));
+    if (picked.length > limit)
+      return { title: group.title, picked: picked.length };
+  }
+  return null;
+}
+
+/**
+ * The picks a card shows under its owner's plan: the featured badge first, then
+ * the earliest specialisations, and the earliest ticks of each detail group.
+ */
+export function visibleServicePicks(
+  subcategorySlug: string | null | undefined,
+  card: {
+    specialties: string[];
+    serviceOptions: string[];
+    featuredSpecialty: string | null;
+  },
+  limit: number,
+) {
+  const featured =
+    card.featuredSpecialty && card.specialties.includes(card.featuredSpecialty)
+      ? [card.featuredSpecialty]
+      : [];
+  const specialties = [
+    ...featured,
+    ...card.specialties.filter((item) => item !== card.featuredSpecialty),
+  ].slice(0, limit);
+  const hidden = new Set(
+    (specialtySet(subcategorySlug)?.choices ?? [])
+      .filter((group) => group.mode === "multi")
+      .flatMap((group) =>
+        group.options
+          .filter((option) => card.serviceOptions.includes(option))
+          .slice(limit),
+      ),
+  );
+  const serviceOptions = card.serviceOptions.filter(
+    (option) => !hidden.has(option),
+  );
+  return { specialties, serviceOptions };
+}
+
 /** Names the groups whose required answer is missing, for a clear error. */
 export function missingChoiceGroups(
   subcategorySlug: string | null | undefined,

@@ -17,10 +17,25 @@ export const BUSINESS_SOCIALS = [
   },
   { key: "pinterestUrl", label: "Pinterest", icon: "📌", placeholder: "https://pinterest.com/you" },
   { key: "snapchatUrl", label: "Snapchat", icon: "👻", placeholder: "https://snapchat.com/add/you" },
+  { key: "linktreeUrl", label: "Linktree", icon: "🌳", placeholder: "https://linktr.ee/yourname" },
+  { key: "alignableUrl", label: "Alignable", icon: "🤝", placeholder: "https://alignable.com/your-town/your-business" },
   { key: "mapsUrl", label: "Google Maps / Business", icon: "📍", placeholder: "https://maps.app.goo.gl/…" },
   { key: "yelpUrl", label: "Yelp", icon: "⭐", placeholder: "https://yelp.com/biz/…" },
+  {
+    key: "googleReviewUrl",
+    label: "Review us on Google",
+    icon: "✍️",
+    placeholder: "https://g.page/r/…/review",
+  },
+  {
+    key: "reviewsUrl",
+    label: "Read our reviews",
+    icon: "⭐",
+    placeholder: "https://trustindex.io/reviews/yourwebsite.com",
+  },
   { key: "zillowUrl", label: "Zillow profile", icon: "🏡", placeholder: "https://zillow.com/profile/…" },
   { key: "realtorUrl", label: "Realtor.com profile", icon: "🏘️", placeholder: "https://realtor.com/realestateagents/…" },
+  { key: "homesUrl", label: "Homes.com profile", icon: "🏠", placeholder: "https://homes.com/real-estate-agents/…" },
 ] as const;
 
 export type BusinessSocialKey = (typeof BUSINESS_SOCIALS)[number]["key"];

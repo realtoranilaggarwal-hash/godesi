@@ -12,6 +12,7 @@ import {
   MAX_VIDEO_LIMIT,
   effectivePlan,
   extraCategoryLimit,
+  servicePickLimit,
   mediaLimit,
   videoLimit,
 } from "@/lib/plans";
@@ -21,6 +22,7 @@ import {
   cleanCertifications,
   cleanCustomOptions,
   cleanSpecialties,
+  overfullChoiceGroup,
   cleanServiceOptions,
   missingChoiceGroups,
   specialtySet,
@@ -177,8 +179,13 @@ const profileSchema = z.object({
   pinterestUrl: optionalUrl,
   snapchatUrl: optionalUrl,
   yelpUrl: optionalUrl,
+  googleReviewUrl: optionalUrl,
+  reviewsUrl: optionalUrl,
+  linktreeUrl: optionalUrl,
+  alignableUrl: optionalUrl,
   zillowUrl: optionalUrl,
   realtorUrl: optionalUrl,
+  homesUrl: optionalUrl,
   mapsUrl: optionalUrl,
   startingPrice: z.coerce
     .number()
@@ -245,8 +252,13 @@ function readProfileForm(formData: FormData) {
     pinterestUrl: value("pinterestUrl"),
     snapchatUrl: value("snapchatUrl"),
     yelpUrl: value("yelpUrl"),
+    googleReviewUrl: value("googleReviewUrl"),
+    reviewsUrl: value("reviewsUrl"),
+    linktreeUrl: value("linktreeUrl"),
+    alignableUrl: value("alignableUrl"),
     zillowUrl: value("zillowUrl"),
     realtorUrl: value("realtorUrl"),
+    homesUrl: value("homesUrl"),
     mapsUrl: value("mapsUrl"),
     startingPrice: value("startingPrice") || undefined,
     priceCurrency: value("priceCurrency") || undefined,
@@ -345,6 +357,14 @@ export async function saveBusinessProfileAction(
     if (set && specialties.length === 0) {
       return { error: `${set.title}: pick at least one.` };
     }
+    const pickLimit = staffEdit
+      ? Number.POSITIVE_INFINITY
+      : servicePickLimit(user);
+    if (specialties.length > pickLimit) {
+      return {
+        error: `${set?.title ?? "Services"}: your plan allows ${pickLimit} — untick ${specialties.length - pickLimit}, or upgrade to pick more.`,
+      };
+    }
     const wantedBadge = String(formData.get("featuredSpecialty") ?? "");
     const featuredSpecialty =
       (staffEdit || effectivePlan(user) !== "FREE") &&
@@ -365,6 +385,16 @@ export async function saveBusinessProfileAction(
         .map((group) => String(formData.get(`choice-${group.key}`) ?? "")),
     ].filter(Boolean);
     const serviceOptions = cleanServiceOptions(subcategory?.slug, choiceValues);
+    const overfull = overfullChoiceGroup(
+      subcategory?.slug,
+      serviceOptions,
+      pickLimit,
+    );
+    if (overfull) {
+      return {
+        error: `${overfull.title}: your plan allows ${pickLimit} — untick ${overfull.picked - pickLimit}, or upgrade to pick more.`,
+      };
+    }
     const missing = missingChoiceGroups(subcategory?.slug, serviceOptions);
     if (missing.length) {
       return { error: `${missing[0]}: pick an option.` };
@@ -455,8 +485,13 @@ export async function saveBusinessProfileAction(
       pinterestUrl: parsed.data.pinterestUrl ?? null,
       snapchatUrl: parsed.data.snapchatUrl ?? null,
       yelpUrl: parsed.data.yelpUrl ?? null,
+      googleReviewUrl: parsed.data.googleReviewUrl ?? null,
+      reviewsUrl: parsed.data.reviewsUrl ?? null,
+      linktreeUrl: parsed.data.linktreeUrl ?? null,
+      alignableUrl: parsed.data.alignableUrl ?? null,
       zillowUrl: parsed.data.zillowUrl ?? null,
       realtorUrl: parsed.data.realtorUrl ?? null,
+      homesUrl: parsed.data.homesUrl ?? null,
       mapsUrl: parsed.data.mapsUrl ?? null,
       startingPrice: parsed.data.startingPrice ?? null,
       priceCurrency: parsed.data.startingPrice
