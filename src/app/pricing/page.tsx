@@ -4,6 +4,9 @@ import { getCurrentUser } from "@/lib/auth";
 import {
   effectivePlan,
   FOUNDING_OFFER_ENDS_LABEL,
+  foundingOfferOpen,
+  laterTermPrice,
+  launchDaysLeft,
   PLANS,
   PLAN_ORDER,
   PLAN_TERMS,
@@ -53,7 +56,7 @@ const ERRORS: Record<string, string> = {
 const TERM_TABS: { id: TermId; label: string }[] = [
   { id: "MONTH", label: "Monthly" },
   { id: "YEAR", label: "Yearly" },
-  { id: "FIVE_YEAR", label: "5 years — founding price" },
+  { id: "FIVE_YEAR", label: "5 years" },
 ];
 
 export default async function PricingPage({
@@ -73,6 +76,12 @@ export default async function PricingPage({
   const wanted: TermId = TERM_TABS.some((tab) => tab.id === searchParams.term)
     ? (searchParams.term as TermId)
     : "YEAR";
+  const launchOpen = foundingOfferOpen();
+  const daysLeft = launchDaysLeft();
+  const featuredLater = (term: TermId) => {
+    const amount = laterTermPrice(PLANS.PREMIUM, term, currency);
+    return amount === null ? null : formatMoney(amount, currency);
+  };
 
   return (
     <div className="space-y-6">
@@ -97,10 +106,24 @@ export default async function PricingPage({
             </Link>
           ))}
         </div>
-        {wanted === "FIVE_YEAR" ? (
-          <p className="mt-2 text-sm font-semibold text-amber-700">
-            Founding price: pay one year, stay five. Ends{" "}
-            {FOUNDING_OFFER_ENDS_LABEL}.
+        {launchOpen && featuredLater("YEAR") ? (
+          <p className="mx-auto mt-3 max-w-2xl rounded-2xl bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200">
+            ⏳ Launch price ends {FOUNDING_OFFER_ENDS_LABEL}
+            {daysLeft > 0
+              ? ` — ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`
+              : ""}
+            : Featured is{" "}
+            {formatMoney(
+              planTermPrice(PLANS.PREMIUM, "YEAR", currency) ?? 0,
+              currency,
+            )}{" "}
+            a year, then {featuredLater("YEAR")} a year from 1 January. Lock in
+            5 years for{" "}
+            {formatMoney(
+              (planTermPrice(PLANS.PREMIUM, "FIVE_YEAR", currency) ?? 0) / 2,
+              currency,
+            )}{" "}
+            with code HALF5.
           </p>
         ) : null}
       </div>
@@ -151,6 +174,10 @@ export default async function PricingPage({
           const priceInr = term ? planTermPrice(plan, term, "INR") : null;
           const priceUsd = term ? planTermPrice(plan, term, "USD") : null;
           const label = price === null ? "" : formatMoney(price, currency);
+          const later =
+            launchOpen && term && !isFree
+              ? laterTermPrice(plan, term, currency)
+              : null;
 
           return (
             <Card
@@ -171,10 +198,18 @@ export default async function PricingPage({
                     </span>
                   )}
                 </p>
+                {later !== null ? (
+                  <p className="text-xs font-semibold text-amber-700">
+                    Launch price —{" "}
+                    <span className="text-slate-400 line-through">
+                      {formatMoney(later, currency)}
+                    </span>{" "}
+                    from 1 January
+                  </p>
+                ) : null}
                 {!isFree && term === "FIVE_YEAR" ? (
                   <p className="text-xs font-semibold text-amber-700">
-                    Enter code HALF5 to pay half — until{" "}
-                    {FOUNDING_OFFER_ENDS_LABEL}
+                    Enter code HALF5 to pay half
                   </p>
                 ) : null}
                 {!isFree &&

@@ -183,8 +183,7 @@ export async function startBundleCheckoutAction(formData: FormData) {
 }
 
 /**
- * The term the buyer picked, refusing anything this plan does not sell (the
- * five-year founding price, for instance, once the offer has closed).
+ * The term the buyer picked, refusing anything this plan does not sell.
  */
 function requestedTerm(formData: FormData, plan: PlanInfo): TermId {
   const term =

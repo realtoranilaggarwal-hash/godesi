@@ -78,7 +78,7 @@ export const HANDBOOK_ONBOARDING: HandbookStep[] = [
 
 export const HANDBOOK_WHAT_WE_ARE = [
   "Godesi.com is a desi directory and marketplace: free digital business cards with a QR code and a WhatsApp button, a requirements board where customers post what they need, events with ticketing, property, rooms, jobs, news and the Elite section.",
-  "A listing is free and stays free. Pro is $5.99 (₹499) a month, and Featured is $19.99 (₹999) a month or $100 (₹4,999) a year, and until the end of 2026 five years of Featured is $500 that the code HALF5 halves to $250 — that is the whole price list for a member. We charge no commission on enquiries.",
+  "A listing is free and stays free. Pro is $5.99 (₹499) a month, and Featured is $19.99 (₹999) a month or $100 (₹4,999) a year until the end of 2026, then $20 a month or $240 a year from 1 January. Five years of Featured is $500, and the code HALF5 halves it to $250 — that is the whole price list for a member. We charge no commission on enquiries.",
   "Featured is the thing to lead with: a featured member is shown on the godesi.com home page inside their own trade — Real Estate, Catering, Salons — up to three at a time, taking turns with the other featured members of that trade so everybody gets home-page time. Never promise an only-you or permanent spot.",
   "Whatever a member puts on Godesi also publishes to our own network — godesi.wiki, eventringer.com for events, djs.wiki for the music trades, desiwhoswho.com for Elite — free for the first year. Nobody else in this market gives a small business four sites for nothing.",
   "Many pages already exist as unclaimed listings we built from public sources. Your job is usually not to sell — it is to tell the real owner that their page is already there, and hand it over.",
@@ -876,7 +876,7 @@ If it is easier, send me your timings and three photos and I will set it up with
       {
         question: "What does it cost, really?",
         answer:
-          "The listing is free forever. If they later want Featured — gold ring, contact shown to everyone, top of their category, and on the home page inside their own trade in rotation with the other featured members — that is $19.99 a month or $100 a year. Do not sell that on the first call.",
+          "The listing is free forever. If they later want Featured — gold ring, contact shown to everyone, top of their category, and on the home page inside their own trade in rotation with the other featured members — that is $19.99 a month or $100 a year until 31 December 2026, then $20 a month or $240 a year. Do not sell that on the first call.",
       },
       {
         question: "I don't have time for this.",

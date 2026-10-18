@@ -13,13 +13,15 @@ export type PlanInfo = {
   priceUsd: number;
   /** What each term costs; a term the plan does not sell is absent. */
   terms: Partial<Record<TermId, Price>>;
+  /** Term prices that replace `terms` once the launch price ends. */
+  laterTerms?: Partial<Record<TermId, Price>>;
   mediaLimit: number;
   /** Local news reports a member may publish in a rolling week. */
   newsPostsPerWeek: number;
   features: string[];
 };
 
-/** The five-year price is a founding offer, and it stops on this date. */
+/** Launch prices stop on this date; `laterTerms` apply from the next day. */
 export const FOUNDING_OFFER_ENDS = new Date("2026-12-31T23:59:59Z");
 
 export function foundingOfferOpen(now: Date = new Date()) {
@@ -27,6 +29,14 @@ export function foundingOfferOpen(now: Date = new Date()) {
 }
 
 export const FOUNDING_OFFER_ENDS_LABEL = "31 December 2026";
+
+/** Whole days left before the launch price ends, counting today. */
+export function launchDaysLeft(now: Date = new Date()) {
+  return Math.max(
+    0,
+    Math.ceil((FOUNDING_OFFER_ENDS.getTime() - now.getTime()) / 86_400_000),
+  );
+}
 
 export const PLAN_TERMS: Record<
   TermId,
@@ -38,7 +48,7 @@ export const PLAN_TERMS: Record<
     id: "FIVE_YEAR",
     months: 60,
     label: "5 years",
-    founding: true,
+    founding: false,
   },
 };
 
@@ -68,10 +78,25 @@ export function planTermPrice(
   plan: PlanInfo,
   term: TermId,
   currency: Currency,
+  now: Date = new Date(),
 ): number | null {
-  const price = plan.terms[term];
+  const price =
+    (foundingOfferOpen(now) ? undefined : plan.laterTerms?.[term]) ??
+    plan.terms[term];
   if (!price) return null;
   return currency === "INR" ? price.inr : price.usd;
+}
+
+/** The price a term moves to after the launch price, when it changes. */
+export function laterTermPrice(
+  plan: PlanInfo,
+  term: TermId,
+  currency: Currency,
+): number | null {
+  const later = plan.laterTerms?.[term];
+  if (!later) return null;
+  const amount = currency === "INR" ? later.inr : later.usd;
+  return amount === planTermPrice(plan, term, currency) ? null : amount;
 }
 
 export const PLANS: Record<Plan, PlanInfo> = {
@@ -123,11 +148,17 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "PREMIUM",
     name: "Featured",
     priceInr: 999,
-    priceUsd: 19.99,
+    get priceUsd() {
+      return planTermPrice(PLANS.PREMIUM, "MONTH", "USD") ?? 19.99;
+    },
     terms: {
       MONTH: { inr: 999, usd: 19.99 },
       YEAR: { inr: 4_999, usd: 100 },
       FIVE_YEAR: { inr: 4_999, usd: 500 },
+    },
+    laterTerms: {
+      MONTH: { inr: 999, usd: 20 },
+      YEAR: { inr: 4_999, usd: 240 },
     },
     mediaLimit: 5,
     newsPostsPerWeek: 10,

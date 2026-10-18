@@ -147,7 +147,7 @@ export default async function UpgradePage({
             </Link>{" "}
             — Pro {formatPlanPrice(PLANS.PRO, currency)} or Featured{" "}
             {formatPlanPrice(PLANS.PREMIUM, currency)} a month, or a year and
-            five-year founding terms
+            five-year terms
           </li>
           <li>
             <Link href="/advertise" className="font-semibold text-indigo-600">
