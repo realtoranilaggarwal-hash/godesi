@@ -21,6 +21,7 @@ export const BUSINESS_SOCIALS = [
   { key: "yelpUrl", label: "Yelp", icon: "⭐", placeholder: "https://yelp.com/biz/…" },
   { key: "zillowUrl", label: "Zillow profile", icon: "🏡", placeholder: "https://zillow.com/profile/…" },
   { key: "realtorUrl", label: "Realtor.com profile", icon: "🏘️", placeholder: "https://realtor.com/realestateagents/…" },
+  { key: "homesUrl", label: "Homes.com profile", icon: "🏠", placeholder: "https://homes.com/real-estate-agents/…" },
 ] as const;
 
 export type BusinessSocialKey = (typeof BUSINESS_SOCIALS)[number]["key"];
