@@ -91,10 +91,10 @@ export async function RishtaHomeBox() {
 
   return (
     <section className="overflow-hidden rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 via-amber-50 to-orange-50">
-      <div className="grid md:grid-cols-[200px_minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div className="grid grid-cols-[96px_minmax(0,1fr)] sm:grid-cols-[110px_minmax(0,1fr)] lg:grid-cols-[110px_minmax(0,1fr)_minmax(0,1.4fr)]">
         <Link
           href="/rishta"
-          className="relative block min-h-[170px] md:min-h-0"
+          className="relative block min-h-[96px]"
           aria-label="Open Rishta"
         >
           <MandapScene className="absolute inset-0 h-full w-full" />
@@ -122,41 +122,30 @@ export async function RishtaHomeBox() {
             </Link>
           </div>
         </div>
-        <ul className="grid grid-cols-2 gap-2 border-t border-rose-100 p-3 sm:grid-cols-4 md:col-span-2 lg:col-span-1 lg:border-l lg:border-t-0">
-          {profiles.map((profile) => (
-            <li key={profile.id}>
-              <Link
-                href={`/rishta/${profile.id}`}
-                className="block rounded-xl bg-white/90 p-1.5 text-center hover:bg-white"
-              >
-                <RishtaPhoto
-                  profile={profile}
-                  canSee={canSeeRishtaPhoto(profile, viewer)}
-                  className="h-20 text-[11px]"
-                />
-                <p className="mt-1 truncate text-xs font-bold text-slate-900">
-                  {profile.displayName}
-                </p>
-                <p className="truncate text-[11px] text-slate-500">
-                  {ageFromBirthYear(profile.birthYear)} · {profile.city}
-                </p>
-              </Link>
-            </li>
-          ))}
-          {Array.from({ length: 4 - profiles.length }, (_, index) => (
-            <li key={`open-${index}`}>
-              <Link
-                href="/rishta/new"
-                className="flex h-full min-h-[118px] flex-col items-center justify-center rounded-xl border border-dashed border-rose-300 bg-white/60 p-1.5 text-center text-xs font-semibold text-rose-700 hover:bg-white"
-              >
-                <span aria-hidden className="text-2xl">
-                  {["💐", "🪔", "💞", "🌸"][index % 4]}
-                </span>
-                Your profile here
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {profiles.length ? (
+          <ul className="col-span-2 grid grid-cols-2 gap-2 border-t border-rose-100 p-3 sm:grid-cols-4 lg:col-span-1 lg:border-l lg:border-t-0">
+            {profiles.map((profile) => (
+              <li key={profile.id}>
+                <Link
+                  href={`/rishta/${profile.id}`}
+                  className="block rounded-xl bg-white/90 p-1.5 text-center hover:bg-white"
+                >
+                  <RishtaPhoto
+                    profile={profile}
+                    canSee={canSeeRishtaPhoto(profile, viewer)}
+                    className="h-20 text-[11px]"
+                  />
+                  <p className="mt-1 truncate text-xs font-bold text-slate-900">
+                    {profile.displayName}
+                  </p>
+                  <p className="truncate text-[11px] text-slate-500">
+                    {ageFromBirthYear(profile.birthYear)} · {profile.city}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
     </section>
   );
