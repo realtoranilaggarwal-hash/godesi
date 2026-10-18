@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useFormState } from "react-dom";
-import { createListingAction } from "@/app/actions/listings";
+import { saveListingAction } from "@/app/actions/listings";
 import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
@@ -17,7 +17,7 @@ import {
   RoomSharingNotice,
 } from "@/components/FairHousingNotice";
 import { FURNISHING_LABELS, GENDER_LABELS, KIND_LABELS } from "@/lib/listings";
-import type { ListingKind, PropertyGroup } from "@prisma/client";
+import type { Listing, ListingKind, PropertyGroup } from "@prisma/client";
 import { FormError } from "@/components/forms/FormError";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PhoneInput } from "@/components/forms/PhoneInput";
@@ -38,6 +38,7 @@ export function ListingForm({
   defaultGroup,
   defaultCountry,
   paidImageLimit,
+  listing,
 }: {
   defaultKind: ListingKind;
   imageLimit: number;
@@ -49,8 +50,10 @@ export function ListingForm({
   /** Preselected property branch when arriving from the real-estate flow. */
   defaultGroup?: PropertyGroup;
   defaultCountry?: string;
+  /** The saved listing, when its poster is editing it. */
+  listing?: Listing & { images: { url: string }[] };
 }) {
-  const [state, formAction] = useFormState(createListingAction, emptyState);
+  const [state, formAction] = useFormState(saveListingAction, emptyState);
   const [kind, setKind] = useState<ListingKind>(defaultKind);
   const router = useRouter();
   const pathname = usePathname();
@@ -64,7 +67,9 @@ export function ListingForm({
     params.set("kind", next);
     router.replace(`${pathname}?${params}`, { scroll: false });
   }
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>(
+    listing?.images.map((image) => image.url) ?? [],
+  );
 
   const isRoom = kind === "ROOM_OFFERED" || kind === "ROOM_WANTED";
   const isProperty = kind === "PROPERTY_SALE" || kind === "PROPERTY_RENT";
@@ -74,6 +79,7 @@ export function ListingForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
+      {listing ? <input type="hidden" name="listingId" value={listing.id} /> : null}
 
       <Field label="What are you listing?">
         <select
@@ -100,7 +106,12 @@ export function ListingForm({
           hint="Buyers browse by category, so pick the closest one."
           required
         >
-          <select name="categorySlug" required defaultValue="" className={inputClass}>
+          <select
+            name="categorySlug"
+            required
+            defaultValue={listing?.categorySlug ?? ""}
+            className={inputClass}
+          >
             <option value="" disabled>
               Choose a category
             </option>
@@ -121,7 +132,13 @@ export function ListingForm({
             : "e.g. 2 BHK in Kothrud, close to metro"
         }
       >
-        <input name="title" required minLength={6} className={inputClass} />
+        <input
+          name="title"
+          required
+          minLength={6}
+          defaultValue={listing?.title}
+          className={inputClass}
+        />
       </Field>
       <Field
         label="Description"
@@ -131,7 +148,13 @@ export function ListingForm({
             : "Amenities, house rules, what's included"
         }
       >
-        <textarea name="description" rows={5} required className={inputClass} />
+        <textarea
+          name="description"
+          rows={5}
+          required
+          defaultValue={listing?.description}
+          className={inputClass}
+        />
         <WriteHelper
           kind="listing"
           target="description"
@@ -147,21 +170,35 @@ export function ListingForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="City">
-          <input name="city" required className={inputClass} />
+          <input
+            name="city"
+            required
+            defaultValue={listing?.city}
+            className={inputClass}
+          />
         </Field>
         <Field label={isItem ? "Area (optional)" : "Area / locality"}>
-          <input name="area" className={inputClass} />
+          <input
+            name="area"
+            defaultValue={listing?.area ?? undefined}
+            className={inputClass}
+          />
         </Field>
         {isProperty ? (
           <>
             <Field label="State / province">
-              <input name="state" maxLength={80} className={inputClass} />
+              <input
+                name="state"
+                maxLength={80}
+                defaultValue={listing?.state ?? undefined}
+                className={inputClass}
+              />
             </Field>
             <Field label="Country">
               <input
                 name="country"
                 maxLength={80}
-                defaultValue={defaultCountry}
+                defaultValue={listing?.country ?? defaultCountry}
                 className={inputClass}
               />
             </Field>
@@ -175,17 +212,18 @@ export function ListingForm({
             name="price"
             type="number"
             min={0}
-            defaultValue={0}
+            defaultValue={listing?.price ?? 0}
             className={inputClass}
           />
         </Field>
-        <CurrencySelect defaultValue={defaultCurrency} />
+        <CurrencySelect defaultValue={listing?.currency ?? defaultCurrency} />
         <Field
           label="Video link (YouTube or Vimeo)"
           hint={`Optional ${isItem ? "clip of the item" : "walkthrough"} — paste a link like https://youtu.be/abc123.`}
         >
           <input
             name="videoUrl"
+            defaultValue={listing?.videoUrl ?? undefined}
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />
@@ -195,18 +233,33 @@ export function ListingForm({
           hint={`Buyers message you directly here. ${DIAL_CODE_HINT}`}
           required
         >
-          <PhoneInput name="whatsapp" required defaultValue={defaultWhatsapp} />
+          <PhoneInput
+            name="whatsapp"
+            required
+            defaultValue={listing?.whatsapp ?? defaultWhatsapp}
+          />
         </Field>
 
         {isProperty ? (
           <Field label="Bedrooms (BHK)">
-            <input name="bedrooms" type="number" min={0} max={20} className={inputClass} />
+            <input
+              name="bedrooms"
+              type="number"
+              min={0}
+              max={20}
+              defaultValue={listing?.bedrooms ?? undefined}
+              className={inputClass}
+            />
           </Field>
         ) : null}
 
         {isRoom || isProperty ? (
           <Field label="Furnishing">
-            <select name="furnishing" className={inputClass}>
+            <select
+              name="furnishing"
+              defaultValue={listing?.furnishing ?? ""}
+              className={inputClass}
+            >
               <option value="">Not specified</option>
               {Object.entries(FURNISHING_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
@@ -219,7 +272,11 @@ export function ListingForm({
 
         {isRoom ? (
           <Field label="Preferred flatmate">
-            <select name="genderPref" defaultValue="ANY" className={inputClass}>
+            <select
+              name="genderPref"
+              defaultValue={listing?.genderPref ?? "ANY"}
+              className={inputClass}
+            >
               {Object.entries(GENDER_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -288,10 +345,15 @@ export function ListingForm({
       </Field>
 
       {isProperty ? (
-        <PropertyFields forRent={kind === "PROPERTY_RENT"} defaultGroup={defaultGroup} />
+        <PropertyFields
+          forRent={kind === "PROPERTY_RENT"}
+          defaultGroup={defaultGroup}
+          values={listing}
+        />
       ) : null}
 
       <PhotoAlbumField
+        defaultValue={listing?.albumUrl ?? ""}
         hint={
           isProperty
             ? "Every room, for free — put the photos in a Google Photos album, paste the link, and Godesi shows a gallery that opens the whole album. Nothing to upload and no limit."
@@ -311,7 +373,11 @@ export function ListingForm({
         </a>
       </p>
 
-      <SubmitButton pendingLabel="Publishing...">Publish listing</SubmitButton>
+      {listing ? (
+        <SubmitButton pendingLabel="Saving...">Save changes</SubmitButton>
+      ) : (
+        <SubmitButton pendingLabel="Publishing...">Publish listing</SubmitButton>
+      )}
     </form>
   );
 }
