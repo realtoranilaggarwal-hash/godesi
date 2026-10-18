@@ -44,6 +44,9 @@ const EMPTY_VEHICLE: VehicleDefaults = {
 };
 
 /** Individual sellers in Buy & Sell only need these — the rest is business clutter. */
+const TRUSTINDEX_AFFILIATE =
+  "https://www.trustindex.io/ti-redirect.php?a=anilaggarw&c=my_campaign";
+
 const PERSONAL_SOCIALS = ["websiteUrl", "instagramUrl", "facebookUrl"];
 
 export function BusinessProfileForm({
@@ -412,6 +415,21 @@ export function BusinessProfileForm({
             </Field>
           ))}
         </div>
+        <p className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+          <strong>Want more Google reviews?</strong> Paste your Google
+          &quot;write a review&quot; link above and a ✍️ Review us on Google
+          button shows on your card. Tools like Trustindex also give you a
+          review link, a QR code and a reviews widget for your website.{" "}
+          <a
+            href={TRUSTINDEX_AFFILIATE}
+            target="_blank"
+            rel="noopener sponsored"
+            className="font-bold underline"
+          >
+            Try Trustindex →
+          </a>{" "}
+          <span className="text-amber-700">(affiliate link)</span>
+        </p>
         <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
           <strong>No website yet?</strong> Godesi builds you a {WEBSITE_OFFER.pages}-page
           mobile-friendly site for ${WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}

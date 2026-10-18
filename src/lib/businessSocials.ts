@@ -19,6 +19,12 @@ export const BUSINESS_SOCIALS = [
   { key: "snapchatUrl", label: "Snapchat", icon: "👻", placeholder: "https://snapchat.com/add/you" },
   { key: "mapsUrl", label: "Google Maps / Business", icon: "📍", placeholder: "https://maps.app.goo.gl/…" },
   { key: "yelpUrl", label: "Yelp", icon: "⭐", placeholder: "https://yelp.com/biz/…" },
+  {
+    key: "googleReviewUrl",
+    label: "Review us on Google",
+    icon: "✍️",
+    placeholder: "https://g.page/r/…/review",
+  },
   { key: "zillowUrl", label: "Zillow profile", icon: "🏡", placeholder: "https://zillow.com/profile/…" },
   { key: "realtorUrl", label: "Realtor.com profile", icon: "🏘️", placeholder: "https://realtor.com/realestateagents/…" },
 ] as const;
