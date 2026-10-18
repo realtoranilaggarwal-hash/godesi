@@ -21,7 +21,7 @@ import {
   type PlanInfo,
   type TermId,
 } from "@/lib/plans";
-import { checkCoupon, couponMetadata } from "@/lib/coupons";
+import { checkCoupon, couponMetadata, planCouponScopes } from "@/lib/coupons";
 import {
   BUNDLE_MONTHS,
   cartItem,
@@ -53,7 +53,7 @@ export async function startStripeCheckoutAction(formData: FormData) {
   const check = code
     ? await checkCoupon({
         code,
-        scope: "PLAN",
+        scope: planCouponScopes(plan.id, term),
         userId: user.id,
         subtotalMinor: listAmount,
         currency,

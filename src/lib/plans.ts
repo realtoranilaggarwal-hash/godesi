@@ -127,7 +127,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
     terms: {
       MONTH: { inr: 999, usd: 19.99 },
       YEAR: { inr: 4_999, usd: 100 },
-      FIVE_YEAR: { inr: 4_999, usd: 600 },
+      FIVE_YEAR: { inr: 4_999, usd: 500 },
     },
     mediaLimit: 5,
     newsPostsPerWeek: 10,
