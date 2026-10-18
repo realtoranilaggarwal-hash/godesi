@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { createPayPalOrder, paypalEnabled } from "@/lib/paypal";
 import { planOrThrow } from "@/lib/billing";
 import { PLAN_TERMS, planTermPrice, planTerms, termOrThrow } from "@/lib/plans";
+import { checkCoupon, planCouponScopes } from "@/lib/coupons";
+import { fromMinor, toMinor } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     plan?: string;
     term?: string;
+    couponCode?: string;
   } | null;
 
   try {
@@ -26,11 +29,24 @@ export async function POST(request: Request) {
       ? planTermPrice(plan, term, "USD")
       : null;
     if (amount === null) throw new Error("That term is not on sale");
+    const code = String(body?.couponCode ?? "").trim();
+    const check = code
+      ? await checkCoupon({
+          code,
+          scope: planCouponScopes(plan.id, term),
+          userId: user.id,
+          subtotalMinor: toMinor(amount),
+          currency: "USD",
+        })
+      : null;
+    if (check && !check.ok) throw new Error(check.error);
+    const discountMinor = check?.ok ? check.discountMinor : 0;
+    const couponPart = check?.ok ? `:${check.coupon.id}:${discountMinor}` : "";
     const order = await createPayPalOrder({
-      amount,
+      amount: fromMinor(toMinor(amount) - discountMinor),
       currency: "USD",
-      description: `Godesi ${plan.name} — ${PLAN_TERMS[term].label}`,
-      customId: `${user.id}:${plan.id}:${PLAN_TERMS[term].months}`,
+      description: `Godesi ${plan.name} — ${PLAN_TERMS[term].label}${discountMinor ? " · coupon applied" : ""}`,
+      customId: `${user.id}:${plan.id}:${PLAN_TERMS[term].months}${couponPart}`,
     });
     return NextResponse.json({ id: order.id });
   } catch (error) {
