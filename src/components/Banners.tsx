@@ -185,6 +185,8 @@ export async function SidebarBanners({
     >
       <CategoryTree groups={categories} />
 
+      <SmallBanners embedded tree={false} show={4} />
+
       <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
 
       <GodesiWikiCard />
@@ -295,6 +297,23 @@ export async function SmallBanners({
       fill={fill}
       start={start}
       side={side}
+      banners={banners.map((banner) => ({
+        id: banner.id,
+        title: banner.title,
+        imageUrl: proxyImage(banner.imageUrl),
+      }))}
+    />
+  );
+}
+
+/** Two small banners under the page content, for phones only. */
+export async function PhoneSmallBanners() {
+  if (!isPhoneRequest()) return null;
+  const banners = await activeBanners("MOBILE", 20);
+  return (
+    <SmallBannerRail
+      phone
+      show={2}
       banners={banners.map((banner) => ({
         id: banner.id,
         title: banner.title,
