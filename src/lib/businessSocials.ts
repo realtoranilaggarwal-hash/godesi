@@ -17,6 +17,7 @@ export const BUSINESS_SOCIALS = [
   },
   { key: "pinterestUrl", label: "Pinterest", icon: "📌", placeholder: "https://pinterest.com/you" },
   { key: "snapchatUrl", label: "Snapchat", icon: "👻", placeholder: "https://snapchat.com/add/you" },
+  { key: "linktreeUrl", label: "Linktree", icon: "🌳", placeholder: "https://linktr.ee/yourname" },
   { key: "mapsUrl", label: "Google Maps / Business", icon: "📍", placeholder: "https://maps.app.goo.gl/…" },
   { key: "yelpUrl", label: "Yelp", icon: "⭐", placeholder: "https://yelp.com/biz/…" },
   {

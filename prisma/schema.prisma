@@ -782,6 +782,7 @@ model Business {
   googleReviewUrl    String?
   /// Public page collecting the business's reviews, e.g. on Trustindex.
   reviewsUrl         String?
+  linktreeUrl        String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
   startingPrice      Int?
