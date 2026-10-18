@@ -21,6 +21,10 @@ export function LeadForm({
   defaultName,
   defaultEmail,
   defaultCategory,
+  defaultTitle,
+  defaultDescription,
+  defaultCity,
+  defaultServices,
   groups,
   optionSets,
   defaultOptionSlug,
@@ -29,6 +33,11 @@ export function LeadForm({
   defaultName?: string;
   defaultEmail?: string;
   defaultCategory?: string;
+  defaultTitle?: string;
+  defaultDescription?: string;
+  defaultCity?: string;
+  /** Services ticked when the form opens. */
+  defaultServices?: string[];
   /** Tick-box services; falls back to a plain text field when omitted. */
   groups?: ServiceGroup[];
   /** Per-subcategory option groups, mirroring the posting form. */
@@ -44,7 +53,12 @@ export function LeadForm({
       <FormError>{state.error}</FormError>
 
       <Field label="Title" hint="e.g. Need 500 wedding invitation cards printed">
-        <input name="title" required className={inputClass} />
+        <input
+          name="title"
+          required
+          defaultValue={defaultTitle ?? ""}
+          className={inputClass}
+        />
       </Field>
       <Field label="Description">
         <WriteHelper
@@ -53,12 +67,19 @@ export function LeadForm({
           photoTarget={false}
           fields={{ title: "What I need", city: "City", budget: "Budget" }}
         />
-        <textarea name="description" rows={4} required className={inputClass} />
+        <textarea
+          name="description"
+          rows={4}
+          required
+          defaultValue={defaultDescription ?? ""}
+          className={inputClass}
+        />
       </Field>
 
       {groups?.length ? (
         <ServicePicker
           groups={groups}
+          defaultSelected={defaultServices}
           fallbackLabel={defaultCategory ?? "General requirement"}
           legend="What do you need?"
           hint="Tick everything you need — matching businesses will see your post."
@@ -83,7 +104,7 @@ export function LeadForm({
             />
           </Field>
         )}
-        <LocationScopeField />
+        <LocationScopeField defaultCity={defaultCity} />
         <BudgetFields currency={currency} />
         <Field label="Event date" hint="Optional — helps vendors check availability">
           <input name="eventDate" type="date" className={inputClass} />
