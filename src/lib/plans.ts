@@ -38,7 +38,7 @@ export const PLAN_TERMS: Record<
     id: "FIVE_YEAR",
     months: 60,
     label: "5 years",
-    founding: true,
+    founding: false,
   },
 };
 
@@ -68,10 +68,12 @@ export function planTermPrice(
   plan: PlanInfo,
   term: TermId,
   currency: Currency,
+  inrPerUsd?: number,
 ): number | null {
   const price = plan.terms[term];
   if (!price) return null;
-  return currency === "INR" ? price.inr : price.usd;
+  if (currency === "USD") return price.usd;
+  return inrPerUsd ? Math.round(price.usd * inrPerUsd) : price.inr;
 }
 
 export const PLANS: Record<Plan, PlanInfo> = {
@@ -123,9 +125,9 @@ export const PLANS: Record<Plan, PlanInfo> = {
     id: "PREMIUM",
     name: "Featured",
     priceInr: 999,
-    priceUsd: 19.99,
+    priceUsd: 20,
     terms: {
-      MONTH: { inr: 999, usd: 19.99 },
+      MONTH: { inr: 999, usd: 20 },
       YEAR: { inr: 4_999, usd: 100 },
       FIVE_YEAR: { inr: 4_999, usd: 500 },
     },

@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import type { PlanInfo } from "@/lib/plans";
 import { formatInr, formatUsd } from "@/lib/format";
+import { getRates } from "@/lib/rates";
 
 export type Currency = "INR" | "USD";
 
@@ -21,8 +22,18 @@ export function formatMoney(amount: number, currency: Currency) {
   return currency === "INR" ? formatInr(amount) : formatUsd(amount);
 }
 
-export function formatPlanPrice(plan: PlanInfo, currency: Currency) {
-  return currency === "INR" ? formatInr(plan.priceInr) : formatUsd(plan.priceUsd);
+/** Rupees per dollar today; plan prices in rupees follow the dollar price. */
+export async function inrPerUsd() {
+  return (await getRates()).INR;
+}
+
+export function formatPlanPrice(
+  plan: PlanInfo,
+  currency: Currency,
+  rate?: number,
+) {
+  if (currency === "USD") return formatUsd(plan.priceUsd);
+  return formatInr(rate ? Math.round(plan.priceUsd * rate) : plan.priceInr);
 }
 
 /** Stripe takes the smallest currency unit; both INR and USD have 100 of them. */

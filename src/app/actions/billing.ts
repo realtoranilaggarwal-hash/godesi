@@ -12,7 +12,7 @@ import {
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { paypalEnabled } from "@/lib/paypal";
 import { siteUrl, toMinor } from "@/lib/format";
-import { requestCurrency } from "@/lib/currency";
+import { inrPerUsd, requestCurrency } from "@/lib/currency";
 import {
   PLAN_TERMS,
   planTermPrice,
@@ -45,7 +45,7 @@ export async function startStripeCheckoutAction(formData: FormData) {
   if (!stripeEnabled()) redirect("/pricing?error=stripe_unavailable");
 
   const currency = requestCurrency();
-  const price = planTermPrice(plan, term, currency);
+  const price = planTermPrice(plan, term, currency, await inrPerUsd());
   if (price === null) redirect("/pricing?error=term");
   const listAmount = toMinor(price);
 
@@ -183,8 +183,7 @@ export async function startBundleCheckoutAction(formData: FormData) {
 }
 
 /**
- * The term the buyer picked, refusing anything this plan does not sell (the
- * five-year founding price, for instance, once the offer has closed).
+ * The term the buyer picked, refusing anything this plan does not sell.
  */
 function requestedTerm(formData: FormData, plan: PlanInfo): TermId {
   const term =
@@ -223,7 +222,9 @@ export async function mockSubscribeAction(formData: FormData) {
     plan: plan.id,
     provider: "mock",
     reference: `mock_${user.id}_${Date.now()}`,
-    amountMinor: toMinor(planTermPrice(plan, term, mockCurrency) ?? 0),
+    amountMinor: toMinor(
+      planTermPrice(plan, term, mockCurrency, await inrPerUsd()) ?? 0,
+    ),
     currency: mockCurrency,
     months: PLAN_TERMS[term].months,
   });
