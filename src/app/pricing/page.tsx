@@ -3,10 +3,6 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import {
   effectivePlan,
-  FOUNDING_OFFER_ENDS_LABEL,
-  foundingOfferOpen,
-  laterTermPrice,
-  launchDaysLeft,
   PLANS,
   PLAN_ORDER,
   PLAN_TERMS,
@@ -62,7 +58,12 @@ const TERM_TABS: { id: TermId; label: string }[] = [
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: { reason?: string; error?: string; term?: string };
+  searchParams: {
+    reason?: string;
+    error?: string;
+    term?: string;
+    coupon?: string;
+  };
 }) {
   const user = await getCurrentUser();
   const current = user ? effectivePlan(user) : null;
@@ -76,12 +77,9 @@ export default async function PricingPage({
   const wanted: TermId = TERM_TABS.some((tab) => tab.id === searchParams.term)
     ? (searchParams.term as TermId)
     : "YEAR";
-  const launchOpen = foundingOfferOpen();
-  const daysLeft = launchDaysLeft();
-  const featuredLater = (term: TermId) => {
-    const amount = laterTermPrice(PLANS.PREMIUM, term, currency);
-    return amount === null ? null : formatMoney(amount, currency);
-  };
+  const coupon = /^[A-Za-z0-9_-]{1,32}$/.test(searchParams.coupon ?? "")
+    ? searchParams.coupon?.toUpperCase()
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -106,26 +104,6 @@ export default async function PricingPage({
             </Link>
           ))}
         </div>
-        {launchOpen && featuredLater("YEAR") ? (
-          <p className="mx-auto mt-3 max-w-2xl rounded-2xl bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200">
-            ⏳ Launch price ends {FOUNDING_OFFER_ENDS_LABEL}
-            {daysLeft > 0
-              ? ` — ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`
-              : ""}
-            : Featured is{" "}
-            {formatMoney(
-              planTermPrice(PLANS.PREMIUM, "YEAR", currency) ?? 0,
-              currency,
-            )}{" "}
-            a year, then {featuredLater("YEAR")} a year from 1 January. Lock in
-            5 years for{" "}
-            {formatMoney(
-              (planTermPrice(PLANS.PREMIUM, "FIVE_YEAR", currency) ?? 0) / 2,
-              currency,
-            )}{" "}
-            with code HALF5.
-          </p>
-        ) : null}
       </div>
 
       <Link
@@ -174,14 +152,13 @@ export default async function PricingPage({
           const priceInr = term ? planTermPrice(plan, term, "INR") : null;
           const priceUsd = term ? planTermPrice(plan, term, "USD") : null;
           const label = price === null ? "" : formatMoney(price, currency);
-          const later =
-            launchOpen && term && !isFree
-              ? laterTermPrice(plan, term, currency)
-              : null;
+          const prefill =
+            id === "PREMIUM" && term === "FIVE_YEAR" ? coupon : undefined;
 
           return (
             <Card
               key={id}
+              id={`plan-${id}`}
               className={`flex flex-col gap-4 ${id === "PREMIUM" ? "ring-2 ring-indigo-500" : ""}`}
             >
               <div>
@@ -198,18 +175,11 @@ export default async function PricingPage({
                     </span>
                   )}
                 </p>
-                {later !== null ? (
-                  <p className="text-xs font-semibold text-amber-700">
-                    Launch price —{" "}
-                    <span className="text-slate-400 line-through">
-                      {formatMoney(later, currency)}
-                    </span>{" "}
-                    from 1 January
-                  </p>
-                ) : null}
                 {!isFree && term === "FIVE_YEAR" ? (
                   <p className="text-xs font-semibold text-amber-700">
-                    Enter code HALF5 to pay half
+                    {prefill
+                      ? `Code ${prefill} is filled in below — pay by card to get it`
+                      : "Enter code HALF5 to pay half"}
                   </p>
                 ) : null}
                 {!isFree &&
@@ -266,6 +236,7 @@ export default async function PricingPage({
                         <input type="hidden" name="term" value={term} />
                         <input
                           name="couponCode"
+                          defaultValue={prefill}
                           placeholder="Coupon code (optional)"
                           aria-label="Coupon code"
                           className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
@@ -297,6 +268,7 @@ export default async function PricingPage({
                         {stripeOn ? null : (
                           <input
                             name="couponCode"
+                            defaultValue={prefill}
                             placeholder="Coupon code (optional)"
                             aria-label="Coupon code"
                             className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm uppercase"
