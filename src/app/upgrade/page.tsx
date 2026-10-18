@@ -8,7 +8,7 @@ import {
   inrPerUsd,
   type Currency,
 } from "@/lib/currency";
-import { PLANS } from "@/lib/plans";
+import { PLANS, planTermPrice } from "@/lib/plans";
 import {
   bundleListPrice,
   bundlePrice,
@@ -81,6 +81,9 @@ export default async function UpgradePage({
   const rate = await inrPerUsd();
   const saving = bundleSaving(currency);
   const flash = await flashOffer(currency);
+  const yearPrice = planTermPrice(PLANS.PREMIUM, "YEAR", currency, rate) ?? 0;
+  const yearListPrice =
+    (planTermPrice(PLANS.PREMIUM, "MONTH", currency, rate) ?? 0) * 12;
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
@@ -138,6 +141,8 @@ export default async function UpgradePage({
         flashPercent={flash.percent}
         flashFixed={flash.fixed}
         flashBonusMonths={flash.bonusMonths}
+        yearPrice={yearPrice}
+        yearListPrice={yearListPrice}
       />
 
       <Card>
