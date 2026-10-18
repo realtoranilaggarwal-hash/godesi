@@ -783,6 +783,7 @@ model Business {
   /// Public page collecting the business's reviews, e.g. on Trustindex.
   reviewsUrl         String?
   linktreeUrl        String?
+  alignableUrl       String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
   startingPrice      Int?
