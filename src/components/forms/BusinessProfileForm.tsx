@@ -61,6 +61,7 @@ export function BusinessProfileForm({
   videoLimit = 1,
   albumPhotoLimit = 6,
   mediaLocked = false,
+  servicePickLimit,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -85,6 +86,8 @@ export function BusinessProfileForm({
   albumPhotoLimit?: number;
   /** Free plan: album and playlist links are saved but not shown. */
   mediaLocked?: boolean;
+  /** Ticks allowed per service picker; staff edits leave it unset. */
+  servicePickLimit?: number;
 }) {
   const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
   const [subcategory, setSubcategory] = useState(
@@ -230,6 +233,7 @@ export function BusinessProfileForm({
         }}
         canFeature={canFeatureSpecialty}
         cardSaved={Boolean(business)}
+        pickLimit={staffEdit ? undefined : servicePickLimit}
       />
 
       <VehicleFields

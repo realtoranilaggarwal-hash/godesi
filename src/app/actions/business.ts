@@ -12,6 +12,7 @@ import {
   MAX_VIDEO_LIMIT,
   effectivePlan,
   extraCategoryLimit,
+  servicePickLimit,
   mediaLimit,
   videoLimit,
 } from "@/lib/plans";
@@ -21,6 +22,7 @@ import {
   cleanCertifications,
   cleanCustomOptions,
   cleanSpecialties,
+  overfullChoiceGroup,
   cleanServiceOptions,
   missingChoiceGroups,
   specialtySet,
@@ -345,6 +347,14 @@ export async function saveBusinessProfileAction(
     if (set && specialties.length === 0) {
       return { error: `${set.title}: pick at least one.` };
     }
+    const pickLimit = staffEdit
+      ? Number.POSITIVE_INFINITY
+      : servicePickLimit(user);
+    if (specialties.length > pickLimit) {
+      return {
+        error: `${set?.title ?? "Services"}: your plan allows ${pickLimit} — untick ${specialties.length - pickLimit}, or upgrade to pick more.`,
+      };
+    }
     const wantedBadge = String(formData.get("featuredSpecialty") ?? "");
     const featuredSpecialty =
       (staffEdit || effectivePlan(user) !== "FREE") &&
@@ -365,6 +375,16 @@ export async function saveBusinessProfileAction(
         .map((group) => String(formData.get(`choice-${group.key}`) ?? "")),
     ].filter(Boolean);
     const serviceOptions = cleanServiceOptions(subcategory?.slug, choiceValues);
+    const overfull = overfullChoiceGroup(
+      subcategory?.slug,
+      serviceOptions,
+      pickLimit,
+    );
+    if (overfull) {
+      return {
+        error: `${overfull.title}: your plan allows ${pickLimit} — untick ${overfull.picked - pickLimit}, or upgrade to pick more.`,
+      };
+    }
     const missing = missingChoiceGroups(subcategory?.slug, serviceOptions);
     if (missing.length) {
       return { error: `${missing[0]}: pick an option.` };

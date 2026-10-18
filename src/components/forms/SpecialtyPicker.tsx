@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { Field, inputClass } from "@/components/ui";
 import { customOptionsOf, disclaimerFor, specialtySet } from "@/lib/specialties";
 import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
@@ -34,21 +34,48 @@ export function SpecialtyPicker({
   defaults,
   canFeature,
   cardSaved,
+  pickLimit = Number.POSITIVE_INFINITY,
 }: {
   subcategorySlug: string;
   defaults: SpecialtyDefaults;
   canFeature: boolean;
   /** Agent extras live on their own page, which needs a saved card to attach to. */
   cardSaved: boolean;
+  /** Most ticks the member's plan allows, per picker. */
+  pickLimit?: number;
 }) {
   const set = specialtySet(subcategorySlug);
   const [selected, setSelected] = useState<string[]>(defaults.specialties);
   const [featured, setFeatured] = useState(defaults.featuredSpecialty ?? "");
+  const [fullGroup, setFullGroup] = useState("");
+  const detailsRef = useRef<HTMLDetailsElement>(null);
 
   if (!set) return null;
 
+  const limited = Number.isFinite(pickLimit);
+  const full = selected.length >= pickLimit;
+
+  const countGroup = (key: string) =>
+    detailsRef.current?.querySelectorAll(
+      `input[name="serviceOptions"][data-group="${key}"]:checked`,
+    ).length ?? 0;
+
+  const onDetailChange = (event: ChangeEvent<HTMLDetailsElement>) => {
+    const input = event.target as unknown as HTMLInputElement;
+    const key = input.dataset.group;
+    if (input.name !== "serviceOptions" || !key) return;
+    if (input.checked && countGroup(key) > pickLimit) {
+      input.checked = false;
+      setFullGroup(key);
+      return;
+    }
+    if (fullGroup === key) setFullGroup("");
+  };
+
   const toggle = (option: string) =>
     setSelected((current) => {
+      if (!current.includes(option) && current.length >= pickLimit)
+        return current;
       const next = current.includes(option)
         ? current.filter((item) => item !== option)
         : [...current, option];
@@ -58,7 +85,9 @@ export function SpecialtyPicker({
 
   return (
     <details
+      ref={detailsRef}
       open
+      onChange={onDetailChange}
       className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-4 [&_summary::-webkit-details-marker]:hidden"
     >
       <summary className="cursor-pointer list-none text-sm font-bold text-cyan-900">
@@ -76,6 +105,7 @@ export function SpecialtyPicker({
             defaultSelected={defaults.specialties.filter((option) =>
               set.options.includes(option),
             )}
+            limit={pickLimit}
             onSelectionChange={(next) => {
               setSelected(next);
               if (featured && !next.includes(featured)) setFeatured("");
@@ -91,6 +121,7 @@ export function SpecialtyPicker({
                 name="specialties"
                 value={option}
                 checked={selected.includes(option)}
+                disabled={full && !selected.includes(option)}
                 onChange={() => toggle(option)}
                 className="mt-0.5 h-4 w-4"
               />
@@ -115,12 +146,35 @@ export function SpecialtyPicker({
         </div>
       ) : null}
 
+      {limited ? (
+        <PickLimitNote picked={selected.length} limit={pickLimit} />
+      ) : null}
+
       {selected.length === 0 ? (
         <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
           Pick at least one before saving.
         </p>
       ) : null}
 
+      {limited && set.choices?.some((group) => group.mode === "multi") ? (
+        <p className="mt-4 text-xs text-cyan-900/80">
+          Each list below: tick up to {pickLimit} on your plan.
+          {fullGroup ? (
+            <>
+              {" "}
+              <span className="font-semibold text-rose-700">
+                That&apos;s the most your plan allows.
+              </span>{" "}
+              <Link
+                href="/pricing"
+                className="font-semibold text-indigo-700 underline"
+              >
+                Upgrade to pick more
+              </Link>
+            </>
+          ) : null}
+        </p>
+      ) : null}
       {set.choices?.map((group) => (
         <div key={group.key} className="mt-4">
           <p className="text-sm font-bold text-cyan-900">
@@ -140,6 +194,7 @@ export function SpecialtyPicker({
                   type={group.mode === "single" ? "radio" : "checkbox"}
                   name={group.mode === "single" ? `choice-${group.key}` : "serviceOptions"}
                   value={option}
+                  data-group={group.key}
                   defaultChecked={defaults.serviceOptions.includes(option)}
                   className="mt-0.5 h-4 w-4"
                 />
@@ -327,5 +382,25 @@ export function SpecialtyPicker({
         {disclaimerFor(subcategorySlug)}
       </p>
     </details>
+  );
+}
+
+function PickLimitNote({ picked, limit }: { picked: number; limit: number }) {
+  return (
+    <p className="mt-2 text-xs text-cyan-900/80">
+      {picked} of {limit} picked on your plan.
+      {picked >= limit ? (
+        <>
+          {" "}
+          <Link
+            href="/pricing"
+            className="font-semibold text-indigo-700 underline"
+          >
+            Upgrade to pick more
+          </Link>{" "}
+          — Pro allows 6, Featured 10.
+        </>
+      ) : null}
+    </p>
   );
 }
