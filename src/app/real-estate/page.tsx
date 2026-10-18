@@ -7,12 +7,18 @@ import { InlineBanner, SidebarBanners, SmallBanners } from "@/components/Banners
 import { FairHousingNotice } from "@/components/FairHousingNotice";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { NeedHelpBox, TradingTips } from "@/components/NeedHelp";
+import { WhyAgent } from "@/components/realestate/WhyAgent";
 import { LISTING_INCLUDE, listingWhere } from "@/lib/listings";
 import {
   PROPERTY_GROUP_LABELS,
   hasPropertyFilters,
   propertySearchWhere,
 } from "@/lib/property";
+import {
+  AGENT_SELECT,
+  REAL_ESTATE_AGENT_WHERE,
+  agentJson,
+} from "@/lib/realEstateFeed";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +47,9 @@ export function generateMetadata({
   };
 }
 
+const AGENT_JOIN =
+  "/signup?next=%2Fdashboard%2Fprofile%3Fcategory%3Dreal-estate%26subcategory%3Dreal-estate-property-dealers%26type%3Dprofessional";
+
 const QUICK_LINKS = [
   { href: "/real-estate?kind=PROPERTY_SALE", label: "🔍 Buy" },
   { href: "/real-estate?kind=PROPERTY_RENT", label: "🔑 Rent" },
@@ -62,7 +71,7 @@ export default async function RealEstatePage({
   delete narrowing.kind;
   const narrowed = hasPropertyFilters(narrowing);
 
-  const [listings, featured, rooms] = await Promise.all([
+  const [listings, featured, rooms, agentRow] = await Promise.all([
     db.listing.findMany({
       where,
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
@@ -85,7 +94,13 @@ export default async function RealEstatePage({
           include: LISTING_INCLUDE,
           take: 3,
         }),
+    db.business.findFirst({
+      where: { AND: [REAL_ESTATE_AGENT_WHERE, { logoUrl: { not: null } }] },
+      orderBy: [{ featuredRank: "desc" }, { verifiedProvider: "desc" }, { updatedAt: "desc" }],
+      select: AGENT_SELECT,
+    }),
   ]);
+  const agent = agentRow ? agentJson(agentRow) : null;
 
   return (
     <div className="flex gap-6">
@@ -122,6 +137,28 @@ export default async function RealEstatePage({
             </Link>
           ))}
         </div>
+
+        {narrowed ? null : (
+          <WhyAgent
+            action="/leads/new"
+            joinHref={AGENT_JOIN}
+            agent={
+              agent
+                ? {
+                    name: agent.name,
+                    place: [agent.city, agent.state].filter(Boolean).join(", "),
+                    logoUrl: agent.logoUrl,
+                    href: `/b/${agent.slug}`,
+                    verified: agent.verified,
+                    claimed: agent.claimed,
+                    featured: agent.featured,
+                    yearsExperience: agent.yearsExperience,
+                    specialties: agent.specialties,
+                  }
+                : null
+            }
+          />
+        )}
 
         <Card>
           <PropertyFilters filters={searchParams} />
@@ -204,6 +241,27 @@ export default async function RealEstatePage({
             </Link>
           </div>
         </Card>
+
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm">
+          <span aria-hidden className="text-2xl">🧑‍💼</span>
+          <p className="min-w-0 flex-1">
+            <span className="font-bold">Real estate agent?</span> Get buyer and
+            seller requests from our community. Free card, no referral fee, and
+            it also shows on RealEstateYP.com.
+          </p>
+          <Link
+            href={AGENT_JOIN}
+            className="rounded-xl bg-indigo-600 px-3 py-1.5 font-semibold text-white hover:bg-indigo-700"
+          >
+            Join free
+          </Link>
+          <Link
+            href="/leads?category=Real%20Estate%20Agents"
+            className="font-semibold text-indigo-700 hover:underline"
+          >
+            See requests →
+          </Link>
+        </div>
 
         <FairHousingNotice />
         <TradingTips />

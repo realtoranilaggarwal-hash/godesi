@@ -520,6 +520,45 @@ export default async function CategoryPage({
           </Card>
         ) : null}
 
+        {category.slug === "real-estate-property-dealers" ? (
+          <Card className="border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-sky-50">
+            <p className="text-xs font-bold uppercase tracking-wide text-indigo-700">
+              Real estate agents — get discovered on two websites
+            </p>
+            <h2 className="mt-1 text-lg font-bold">
+              Your next client could be looking for you right now.
+            </h2>
+            <p className="mt-1 text-sm text-slate-700">
+              One profile. Two websites. Your GoDesi card also shows on
+              RealEstateYP.com, our real estate directory, and you update it in
+              one place.
+            </p>
+            <ul className="mt-2 grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
+              <li>✔ Your services, brokerage and service areas</li>
+              <li>✔ Enquiries from buyers, sellers, landlords and investors</li>
+              <li>✔ Photos, videos and your property posts</li>
+              <li>✔ A professional page with QR code and WhatsApp</li>
+            </ul>
+            <div className="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+              <Link
+                href={`/dashboard/profile?${postQuery}`}
+                className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+              >
+                Claim your profile free
+              </Link>
+              <Link
+                href="/pricing"
+                className="rounded-xl border border-indigo-300 bg-white px-3 py-2 text-indigo-700 hover:bg-indigo-50"
+              >
+                ⭐ Get Featured
+              </Link>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Visibility and enquiries are not guaranteed.
+            </p>
+          </Card>
+        ) : null}
+
         {category.slug === "real-estate" ? (
           <Card className="bg-gradient-to-r from-orange-50 to-fuchsia-50">
             <h2 className="font-bold">Godesi property marketplace 🏢</h2>

@@ -766,6 +766,7 @@ model Business {
   yelpUrl            String?
   zillowUrl          String?
   realtorUrl         String?
+  homesUrl           String?
   /// Intro/showcase video pasted from YouTube or Vimeo. The first of `videoUrls`.
   videoUrl           String?
   /// Every showcase video, in order. A free card shows one; paid plans show more.

@@ -185,6 +185,7 @@ const profileSchema = z.object({
   alignableUrl: optionalUrl,
   zillowUrl: optionalUrl,
   realtorUrl: optionalUrl,
+  homesUrl: optionalUrl,
   mapsUrl: optionalUrl,
   startingPrice: z.coerce
     .number()
@@ -257,6 +258,7 @@ function readProfileForm(formData: FormData) {
     alignableUrl: value("alignableUrl"),
     zillowUrl: value("zillowUrl"),
     realtorUrl: value("realtorUrl"),
+    homesUrl: value("homesUrl"),
     mapsUrl: value("mapsUrl"),
     startingPrice: value("startingPrice") || undefined,
     priceCurrency: value("priceCurrency") || undefined,
@@ -489,6 +491,7 @@ export async function saveBusinessProfileAction(
       alignableUrl: parsed.data.alignableUrl ?? null,
       zillowUrl: parsed.data.zillowUrl ?? null,
       realtorUrl: parsed.data.realtorUrl ?? null,
+      homesUrl: parsed.data.homesUrl ?? null,
       mapsUrl: parsed.data.mapsUrl ?? null,
       startingPrice: parsed.data.startingPrice ?? null,
       priceCurrency: parsed.data.startingPrice
