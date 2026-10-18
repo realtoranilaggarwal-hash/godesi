@@ -31,6 +31,7 @@ import {
 } from "@/lib/rates";
 import { formatUsd } from "@/lib/format";
 import { WhyGodesi } from "@/components/WhyGodesi";
+import { monthlyOffer } from "@/lib/monthlyOffer";
 import {
   bundleListPrice,
   bundlePrice,
@@ -81,7 +82,8 @@ export default async function PricingPage({
   const upiOn = upiEnabled();
   const providersOn = stripeOn || paypalOn || upiOn;
   const currency = requestCurrency();
-  const rates = await getRates();
+  const [rates, offer] = await Promise.all([getRates(), monthlyOffer()]);
+  const offerCode = offer?.code ?? "HALF5";
   const country = headers().get("x-vercel-ip-country") ?? "";
   const localCurrency = COUNTRY_CURRENCY[country];
   const showLocal =
@@ -203,7 +205,7 @@ export default async function PricingPage({
                     rate, charged in US dollars
                   </p>
                 ) : null}
-                {!isFree && currency === "INR" ? (
+                {!isFree && currency === "INR" && !paypalOn ? (
                   <p className="text-xs text-slate-500">
                     {priceUsd === null ? "" : formatUsd(priceUsd)} at
                     today&apos;s rupee rate
@@ -213,7 +215,7 @@ export default async function PricingPage({
                   <p className="text-xs font-semibold text-amber-700">
                     {prefill
                       ? `Code ${prefill} is filled in below — pay by card to get it`
-                      : "Enter code HALF5 to pay half"}
+                      : `Enter code ${offerCode} to pay half`}
                   </p>
                 ) : null}
                 {!isFree &&
