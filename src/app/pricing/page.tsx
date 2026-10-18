@@ -29,7 +29,8 @@ import {
   formatDisplay,
   getRates,
 } from "@/lib/rates";
-import { formatUsd } from "@/lib/format";
+import { formatUsd, fromMinor, toMinor } from "@/lib/format";
+import { checkCoupon, discountFor, planCouponScopes } from "@/lib/coupons";
 import { WhyGodesi } from "@/components/WhyGodesi";
 import { monthlyOffer } from "@/lib/monthlyOffer";
 import { FiveYearUpsell } from "@/components/FiveYearUpsell";
@@ -108,6 +109,18 @@ export default async function PricingPage({
   const coupon = /^[A-Za-z0-9_-]{1,32}$/.test(searchParams.coupon ?? "")
     ? searchParams.coupon?.toUpperCase()
     : undefined;
+  const fiveYearUsd = planTermPrice(PLANS.PREMIUM, "FIVE_YEAR", "USD");
+  const couponCheck =
+    user && coupon && wanted === "FIVE_YEAR" && fiveYearUsd !== null
+      ? await checkCoupon({
+          code: coupon,
+          scope: planCouponScopes("PREMIUM", "FIVE_YEAR"),
+          userId: user.id,
+          subtotalMinor: toMinor(fiveYearUsd),
+          currency: "USD",
+        })
+      : null;
+  const validCoupon = couponCheck?.ok ? couponCheck.coupon : null;
 
   return (
     <div className="space-y-6">
@@ -217,6 +230,19 @@ export default async function PricingPage({
           const label = price === null ? "" : wholeMoney(price, currency);
           const prefill =
             id === "PREMIUM" && term === "FIVE_YEAR" ? coupon : undefined;
+          const afterCoupon = (amount: number, money: Currency) =>
+            prefill && validCoupon
+              ? amount -
+                fromMinor(
+                  discountFor({
+                    coupon: validCoupon,
+                    subtotalMinor: toMinor(amount),
+                    currency: money,
+                  }),
+                )
+              : amount;
+          const payLabel =
+            price === null ? "" : wholeMoney(afterCoupon(price, currency), currency);
 
           const card = (
             <Card
@@ -265,9 +291,11 @@ export default async function PricingPage({
                 ) : null}
                 {!isFree && term === "FIVE_YEAR" ? (
                   <p className="text-xs font-semibold text-amber-700">
-                    {prefill
-                      ? `Code ${prefill} is filled in below — pay by card to get it`
-                      : `Enter code ${offerCode} to pay half`}
+                    {prefill && validCoupon
+                      ? `Code ${prefill} is filled in below — you pay ${payLabel}`
+                      : prefill
+                        ? `Code ${prefill} is filled in below — pay by card to get it`
+                        : `Enter code ${offerCode} to pay half`}
                   </p>
                 ) : null}
                 {!isFree &&
@@ -333,7 +361,7 @@ export default async function PricingPage({
                           type="submit"
                           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
                         >
-                          Pay by card — {label}
+                          Pay by card — {payLabel}
                         </button>
                       </form>
                     ) : null}
@@ -343,6 +371,7 @@ export default async function PricingPage({
                         plan={id}
                         term={term}
                         clientId={paypalClientId}
+                        couponCode={validCoupon ? prefill : undefined}
                       />
                     ) : null}
 
@@ -367,7 +396,9 @@ export default async function PricingPage({
                           className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
                         >
                           Pay by UPI —{" "}
-                          {priceInr === null ? "" : formatMoney(priceInr, "INR")}
+                          {priceInr === null
+                            ? ""
+                            : formatMoney(afterCoupon(priceInr, "INR"), "INR")}
                         </button>
                         <p className="text-center text-xs text-slate-500">
                           PhonePe · Google Pay · Paytm · any bank app

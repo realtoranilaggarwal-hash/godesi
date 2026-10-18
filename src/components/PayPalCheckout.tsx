@@ -62,10 +62,13 @@ export function PayPalCheckout({
   plan,
   term = "MONTH",
   clientId,
+  couponCode,
 }: {
   plan: Plan;
   term?: string;
   clientId: string;
+  /** A code already checked on the page; the server checks it again. */
+  couponCode?: string;
 }) {
   const container = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
@@ -87,7 +90,7 @@ export function PayPalCheckout({
               const response = await fetch("/api/paypal/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ plan, term }),
+                body: JSON.stringify({ plan, term, couponCode }),
               });
               const data = await response.json();
               if (!response.ok) throw new Error(data.error ?? "Could not start payment");
@@ -117,7 +120,7 @@ export function PayPalCheckout({
     return () => {
       cancelled = true;
     };
-  }, [clientId, plan, term, router]);
+  }, [clientId, plan, term, couponCode, router]);
 
   return (
     <div className="space-y-2">

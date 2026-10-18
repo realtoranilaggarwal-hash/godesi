@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { capturePayPalOrder, paypalEnabled } from "@/lib/paypal";
 import { toMinor } from "@/lib/format";
 import { activatePlan, assertPaidPlan } from "@/lib/billing";
+import { recordCouponUse } from "@/lib/coupons";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,9 @@ export async function POST(request: Request) {
     }
 
     // custom_id is set server-side at order creation, so the buyer cannot forge it.
-    const [userId, planId, termMonths] = (unit?.custom_id ?? "").split(":");
+    const [userId, planId, termMonths, couponId, couponMinor] = (
+      unit?.custom_id ?? ""
+    ).split(":");
     const months = Number(termMonths ?? 1);
     if (userId !== user.id || !planId) {
       return NextResponse.json({ error: "Payment does not match account" }, { status: 403 });
@@ -45,6 +48,16 @@ export async function POST(request: Request) {
       currency: capture.amount.currency_code,
       months: Number.isFinite(months) && months > 0 ? months : 1,
     });
+
+    if (couponId) {
+      await recordCouponUse({
+        couponId,
+        userId: user.id,
+        amountMinor: Number(couponMinor ?? 0),
+        currency: capture.amount.currency_code,
+        reference: capture.id,
+      });
+    }
 
     revalidatePath("/dashboard");
     revalidatePath("/pricing");
