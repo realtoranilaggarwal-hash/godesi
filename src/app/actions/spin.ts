@@ -6,10 +6,12 @@ import { getCurrentUser } from "@/lib/auth";
 import { uniqueViolation } from "@/lib/actions";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { dealDetails, dealSelect, liveDealWhere } from "@/lib/deals";
+import { offerInterest } from "@/lib/offerInterests";
 import {
   NO_DEAL_FALLBACK,
   SPIN_SLICES,
   SPIN_TOTAL_WEIGHT,
+  offerSpinDay,
   sliceForRoll,
   sliceIndex,
   spinDay,
@@ -23,11 +25,12 @@ export type SpinResult = {
   deal: DealCardProps | null;
 };
 
+/** `bonus` counts spins earned by picked interests that are still unused. */
 export type SpinStatus =
   | { state: "signed-out" }
   | { state: "unverified" }
-  | { state: "ready" }
-  | { state: "spun"; result: SpinResult };
+  | { state: "ready"; daily: boolean; bonus: number }
+  | { state: "spun"; result: SpinResult; bonus: number };
 
 async function resultFor(spin: {
   prize: string;
@@ -67,31 +70,62 @@ async function resultFor(spin: {
   } satisfies SpinResult;
 }
 
+type Member = { id: string; offerInterests: string[] };
+
+/** Picked interests whose one-off bonus spin hasn't been used yet. */
+async function unusedBonusInterests(member: Member) {
+  if (!member.offerInterests.length) return [];
+  const used = await db.dailySpin.findMany({
+    where: {
+      userId: member.id,
+      day: { in: member.offerInterests.map(offerSpinDay) },
+    },
+    select: { day: true },
+  });
+  const usedDays = new Set(used.map((spin) => spin.day));
+  return member.offerInterests.filter((id) => !usedDays.has(offerSpinDay(id)));
+}
+
 export async function spinStatusAction(): Promise<SpinStatus> {
   const user = await getCurrentUser();
   if (!user) return { state: "signed-out" };
   if (!user.emailVerifiedAt) return { state: "unverified" };
-  const spin = await db.dailySpin.findUnique({
-    where: { userId_day: { userId: user.id, day: spinDay() } },
-  });
-  return spin
-    ? { state: "spun", result: await resultFor(spin) }
-    : { state: "ready" };
+  const [spin, bonus] = await Promise.all([
+    db.dailySpin.findUnique({
+      where: { userId_day: { userId: user.id, day: spinDay() } },
+    }),
+    unusedBonusInterests(user),
+  ]);
+  if (!spin) return { state: "ready", daily: true, bonus: bonus.length };
+  if (bonus.length)
+    return { state: "ready", daily: false, bonus: bonus.length };
+  return { state: "spun", result: await resultFor(spin), bonus: 0 };
 }
 
 /**
- * The outcome is rolled here, never in the browser, and the (member, day)
- * unique index makes a replayed or double-clicked request return the first spin.
+ * The outcome is rolled here, never in the browser. Today's free spin is used
+ * first, then one bonus spin per picked interest; the (member, day) unique
+ * index makes a replayed or double-clicked request return the first spin.
  */
 export async function spinAction(): Promise<SpinStatus> {
   const user = await getCurrentUser();
   if (!user) return { state: "signed-out" };
   if (!user.emailVerifiedAt) return { state: "unverified" };
 
-  const day = spinDay();
+  const today = spinDay();
+  const [todaySpin, unused] = await Promise.all([
+    db.dailySpin.findUnique({
+      where: { userId_day: { userId: user.id, day: today } },
+    }),
+    unusedBonusInterests(user),
+  ]);
+  const bonusId = todaySpin ? unused[0] : undefined;
+  if (todaySpin && !bonusId)
+    return { state: "spun", result: await resultFor(todaySpin), bonus: 0 };
+
+  const day = bonusId ? offerSpinDay(bonusId) : today;
+  const bonusLeft = bonusId ? unused.length - 1 : unused.length;
   const where = { userId_day: { userId: user.id, day } };
-  const existing = await db.dailySpin.findUnique({ where });
-  if (existing) return { state: "spun", result: await resultFor(existing) };
 
   let slice = sliceForRoll(randomInt(SPIN_TOTAL_WEIGHT));
   let dealId: string | null = null;
@@ -104,6 +138,7 @@ export async function spinAction(): Promise<SpinStatus> {
     else slice = SPIN_SLICES[sliceIndex(NO_DEAL_FALLBACK)];
   }
 
+  const interest = bonusId ? offerInterest(bonusId) : null;
   try {
     const spin = await db.dailySpin.create({
       data: {
@@ -120,15 +155,21 @@ export async function spinAction(): Promise<SpinStatus> {
         reason: "DAILY_SPIN",
         points: spin.points,
         key: day,
-        note: `Daily spin: ${slice.label}`,
+        note: interest
+          ? `Bonus spin for picking "${interest.label}": ${slice.label}`
+          : `Daily spin: ${slice.label}`,
         skipReferralBonus: true,
       });
     }
-    return { state: "spun", result: await resultFor(spin) };
+    return {
+      state: "spun",
+      result: await resultFor(spin),
+      bonus: bonusLeft,
+    };
   } catch (error) {
     if (!uniqueViolation(error)) throw error;
     const first = await db.dailySpin.findUnique({ where });
     if (!first) throw error;
-    return { state: "spun", result: await resultFor(first) };
+    return { state: "spun", result: await resultFor(first), bonus: bonusLeft };
   }
 }

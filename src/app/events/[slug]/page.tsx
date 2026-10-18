@@ -18,7 +18,6 @@ import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
-import { ShareRail } from "@/components/ShareRail";
 import { EventShareKit } from "@/components/EventShareKit";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
@@ -38,12 +37,15 @@ import {
   eventCategoryLabel,
   eventLanguageLabel,
 } from "@/lib/eventCategories";
+import { FreeRibbon } from "@/components/FreeRibbon";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { matchProfilesByExactName, nameKey } from "@/lib/peopleLookup";
 import { EventRsvpPanel } from "@/components/EventRsvpPanel";
+import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 
 type SpeakerRow =
@@ -54,9 +56,11 @@ type SpeakerRow =
     : never;
 
 type SpeakerProfile = {
-  username: string;
+  href: string;
   avatarUrl: string | null;
   headline: string | null;
+  /** A GoDesi Elite profile rather than a member page. */
+  elite: boolean;
 };
 
 type Organizer = {
@@ -71,19 +75,21 @@ type Organizer = {
 /**
  * A speaker links to the profile the organiser picked. A typed-in name links
  * to the organiser when it is their own name or handle, otherwise to a public
- * member with that name (case, spaces and punctuation ignored).
+ * member with that name (case, spaces and punctuation ignored). A well-known
+ * speaker the organiser picked links to their GoDesi Elite profile.
  */
 async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
   const unlinked = speakers
-    .filter((speaker) => !speaker.user)
+    .filter((speaker) => !speaker.user && !speaker.eliteEntry)
     .map((speaker) => speaker.name);
   const byName = await matchProfilesByExactName(unlinked);
   const host =
     organizer?.username && organizer.emailVerifiedAt && !organizer.bannedAt
       ? {
-          username: organizer.username,
+          href: `/${organizer.username}`,
           avatarUrl: organizer.avatarUrl,
           headline: organizer.headline,
+          elite: false,
         }
       : null;
   const hostKeys = new Set(
@@ -94,11 +100,20 @@ async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
   return speakers.map((speaker) => {
     let profile: SpeakerProfile | null = null;
     const linked = speaker.user;
+    const elite = speaker.eliteEntry;
     if (linked?.username && linked.emailVerifiedAt && !linked.bannedAt) {
       profile = {
-        username: linked.username,
+        href: `/${linked.username}`,
         avatarUrl: linked.avatarUrl,
         headline: linked.headline,
+        elite: false,
+      };
+    } else if (elite?.status === "PUBLISHED") {
+      profile = {
+        href: `/desi-elite/${elite.slug}`,
+        avatarUrl: elite.photoUrl,
+        headline: elite.shortBio,
+        elite: true,
       };
     } else if (host && hostKeys.has(nameKey(speaker.name))) {
       profile = host;
@@ -106,9 +121,10 @@ async function withProfiles(speakers: SpeakerRow[], organizer: Organizer) {
       const match = byName.get(nameKey(speaker.name));
       if (match?.username) {
         profile = {
-          username: match.username,
+          href: `/${match.username}`,
           avatarUrl: match.avatarUrl,
           headline: match.headline,
+          elite: false,
         };
       }
     }
@@ -133,6 +149,14 @@ async function loadEvent(slug: string) {
               headline: true,
               emailVerifiedAt: true,
               bannedAt: true,
+            },
+          },
+          eliteEntry: {
+            select: {
+              slug: true,
+              status: true,
+              photoUrl: true,
+              shortBio: true,
             },
           },
         },
@@ -178,6 +202,32 @@ async function loadEvent(slug: string) {
     },
   });
 }
+
+const relatedEvents = cachedQuery(
+  "event-related",
+  CONTENT_TTL,
+  (eventId: string, city: string, genres: string[], state: string | null) =>
+    db.event.findMany({
+      where: {
+        status: "APPROVED",
+        startsAt: { gte: new Date() },
+        id: { not: eventId },
+        OR: [
+          { city: { equals: city, mode: "insensitive" } },
+          ...(genres.length ? [{ genres: { hasSome: genres } }] : []),
+          ...(state
+            ? [{ state: { equals: state, mode: "insensitive" as const } }]
+            : []),
+        ],
+      },
+      orderBy: { startsAt: "asc" },
+      take: 8,
+      include: {
+        category: { select: { name: true, icon: true, color: true } },
+        tiers: { select: { price: true } },
+      },
+    }),
+);
 
 export async function generateMetadata({
   params,
@@ -247,20 +297,22 @@ export default async function EventPage({
     : null;
   // An event waiting on moderation is only visible to its organiser and the desk.
   if (event.status !== "APPROVED" && !isOwnerOrDesk) notFound();
-  // The join link is what an online seat buys, so only a ticket holder, the
-  // organiser and the events desk may see it.
-  const joinUrl =
+  // The join link (and a ticket-only stream) is what an online seat buys, so
+  // only a ticket holder, the organiser and the events desk may see it.
+  const hasSeat =
     isOwnerOrDesk ||
-    (user &&
+    (Boolean(user) &&
+      Boolean(event.onlineUrl || (event.liveUrl && event.liveTicketOnly)) &&
       (await db.ticket.count({
         where: {
           eventId: event.id,
-          userId: user.id,
+          userId: user!.id,
           status: "CONFIRMED",
         },
-      })) > 0)
-      ? event.onlineUrl
-      : null;
+      })) > 0);
+  const joinUrl = hasSeat ? event.onlineUrl : null;
+  const liveUrl =
+    event.liveUrl && (!event.liveTicketOnly || hasSeat) ? event.liveUrl : null;
   // Imported from someone else's public calendar: we list it and send people to
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
@@ -281,25 +333,9 @@ export default async function EventPage({
   // The page runs out of content well before the ad rail does, so it ends with
   // what the visitor most likely wants next: the same kind of event, or
   // anything else on in their city.
-  const related = await db.event.findMany({
-    where: {
-      status: "APPROVED",
-      startsAt: { gte: new Date() },
-      id: { not: event.id },
-      OR: [
-        { city: { equals: event.city, mode: "insensitive" } },
-        ...(event.genres.length ? [{ genres: { hasSome: event.genres } }] : []),
-        ...(event.state
-          ? [{ state: { equals: event.state, mode: "insensitive" as const } }]
-          : []),
-      ],
-    },
-    orderBy: { startsAt: "asc" },
-    take: 8,
-    include: {
-      category: { select: { name: true, icon: true, color: true } },
-    },
-  });
+  const related = (
+    await relatedEvents(event.id, event.city, event.genres, event.state)
+  ).map((item) => ({ ...item, startsAt: new Date(item.startsAt) }));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -413,7 +449,10 @@ export default async function EventPage({
           </Link>
         </nav>
 
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          {event.price || event.tiers.length || imported ? null : (
+            <FreeRibbon large />
+          )}
           {event.imageUrl ? (
             <a
               href={event.imageUrl}
@@ -488,6 +527,14 @@ export default async function EventPage({
                 {event.title}
               </h1>
               <StaffEditLink href={`/admin/events/${event.id}`} />
+              {user?.id === event.organizerId && !imported ? (
+                <Link
+                  href={`/events/${event.slug}/edit`}
+                  className="rounded-lg border border-indigo-300 bg-white px-2 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+                >
+                  ✏️ Edit event
+                </Link>
+              ) : null}
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>
@@ -563,19 +610,21 @@ export default async function EventPage({
                 </p>
               ) : null}
               {joinUrl ? (
-                <p>
+                <p className="text-base font-black">
                   🔗{" "}
                   <a
                     href={joinUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="font-semibold text-indigo-600 hover:underline"
+                    className="text-indigo-600 underline hover:text-indigo-800"
                   >
                     Join link
                   </a>
                 </p>
               ) : event.onlineUrl ? (
-                <p>🔗 Join link — shown here once you have a ticket</p>
+                <p className="font-bold">
+                  🔗 Join link — shown here once you have a ticket
+                </p>
               ) : null}
               {event.bonusNote ? (
                 <p className="font-semibold text-emerald-700">
@@ -613,7 +662,11 @@ export default async function EventPage({
                   "Free entry"
                 )}
               </p>
-              {imported ? null : (
+              {imported ? null : event.mode === "ONLINE" ? (
+                <p>
+                  💻 Online — {left} of {event.seatsTotal} spots available
+                </p>
+              ) : (
                 <p>
                   🪑 {left} of {event.seatsTotal} seats available
                 </p>
@@ -658,6 +711,22 @@ export default async function EventPage({
                 ))}
               </div>
             ) : null}
+            {liveUrl ? (
+              <div className="space-y-2">
+                <h2 className="font-bold text-rose-600">🔴 Watch live</h2>
+                <VideoEmbed url={liveUrl} title={`${event.title} — live`} />
+              </div>
+            ) : event.liveUrl ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+                <p className="font-bold">
+                  🔴 This event streams live on GoDesi
+                </p>
+                <p>
+                  Book a ticket below and the live video plays right here on
+                  this page.
+                </p>
+              </div>
+            ) : null}
             <p className="whitespace-pre-line text-slate-700">
               {event.description}
             </p>
@@ -674,7 +743,6 @@ export default async function EventPage({
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
-              <ShareRail title={event.title} />
               <ShareButtons
                 url={`${siteUrl()}/events/${event.slug}`}
                 title={event.title}
@@ -714,252 +782,6 @@ export default async function EventPage({
             )}
           </div>
         </div>
-
-        <Card>
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
-            <div className="min-w-0">
-              <h2 className="font-bold">Put this event on your own website</h2>
-              <p className="mb-3 mt-1 text-sm text-slate-600">
-                Copy this code into your site and the card below appears there,
-                always up to date. Visitors tap it and book here — free, no
-                account needed on their side.
-              </p>
-              <EventEmbed
-                eventUrl={`${siteUrl()}/events/${event.slug}`}
-                title={event.title}
-              />
-            </div>
-
-            {imported ? (
-              <EventClaimPitch
-                anchorId="claim-event"
-                eventId={event.id}
-                slug={event.slug}
-                signedIn={Boolean(user)}
-              />
-            ) : (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-                  Organisers
-                </p>
-                <h3 className="mt-1 text-base font-black text-slate-900">
-                  Running your own event?
-                </h3>
-                <p className="mt-2">
-                  Listing is free and unlimited. We keep {platformFeePercent()}%
-                  of tickets you sell on the free plan and nothing on a paid
-                  plan, and free-entry events never cost anything.
-                </p>
-                <div className="mt-3 flex flex-col gap-2">
-                  <LinkButton href="/events/new">
-                    Post your event free
-                  </LinkButton>
-                  <Link
-                    href="/events/how-it-works"
-                    className="text-sm font-bold text-indigo-600 hover:underline"
-                  >
-                    Fees, tickets and where you get listed →
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-        </Card>
-
-        {user?.id === event.organizerId && event.partnerStatus !== "NONE" ? (
-          <EventPartnerProof
-            eventId={event.id}
-            status={event.partnerStatus}
-            bannerUrl={event.partnerBannerUrl}
-            standeeUrl={event.partnerStandeeUrl}
-            salesUrl={event.partnerSalesUrl}
-          />
-        ) : null}
-
-        {event.sessions.length ? (
-          <Card className="!border-2 !border-indigo-200">
-            <h2 className="font-bold">Agenda</h2>
-            <ol className="mt-3 space-y-2">
-              {event.sessions.map((session, index) => {
-                const profile = profileFor(session.speaker);
-                return (
-                  <li
-                    key={session.id}
-                    className="flex flex-wrap gap-x-3 gap-y-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
-                  >
-                    <p className="w-28 shrink-0 text-sm font-semibold text-indigo-700">
-                      {session.startTime
-                        ? `${session.startTime}${session.endTime ? `–${session.endTime}` : ""}`
-                        : `#${index + 1}`}
-                    </p>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-slate-900">
-                        {session.title}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        {session.stage}
-                        {session.stage && session.speaker ? " · " : null}
-                        {session.speaker ? (
-                          profile ? (
-                            <Link
-                              href={`/${profile.username}`}
-                              className="font-semibold text-indigo-700 hover:underline"
-                            >
-                              {session.speaker}
-                            </Link>
-                          ) : (
-                            session.speaker
-                          )
-                        ) : null}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </Card>
-        ) : null}
-
-        {speakers.length ? (
-          <Card>
-            <h2 className="font-bold">Speakers & guests</h2>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {speakers.map((speaker) => {
-                const photo = speaker.photoUrl || speaker.profile?.avatarUrl;
-                const href = speaker.profile
-                  ? `/${speaker.profile.username}`
-                  : null;
-                const avatar = photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photo}
-                    alt={speaker.name}
-                    className="h-14 w-14 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg font-black text-white">
-                    {speaker.name.slice(0, 1).toUpperCase()}
-                  </div>
-                );
-                return (
-                  <div key={speaker.id} className="flex gap-3">
-                    {href ? <Link href={href}>{avatar}</Link> : avatar}
-                    <div className="min-w-0">
-                      {href ? (
-                        <Link
-                          href={href}
-                          className="font-semibold text-indigo-700 hover:underline"
-                        >
-                          {speaker.name}
-                        </Link>
-                      ) : (
-                        <p className="font-semibold text-slate-900">
-                          {speaker.name}
-                        </p>
-                      )}
-                      {speaker.bio || speaker.profile?.headline ? (
-                        <p className="text-sm text-slate-600">
-                          {speaker.bio || speaker.profile?.headline}
-                        </p>
-                      ) : null}
-                      {href ? (
-                        <Link
-                          href={href}
-                          className="mt-1 inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700"
-                        >
-                          ✓ GoDesi profile →
-                        </Link>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        ) : null}
-
-        {rsvpOpen && !imported ? (
-          <EventRsvpPanel
-            event={event}
-            rsvps={rsvpRows}
-            mine={myRsvp}
-            viewer={Boolean(user)}
-            canRsvp={canRsvp}
-            isOrganizer={
-              isOwnerOrDesk ||
-              (clubMembership?.role === "ORGANIZER" &&
-                clubMembership.status === "ACTIVE")
-            }
-          />
-        ) : null}
-
-        {event.tiers.length ? (
-          <Card>
-            <h2 className="font-bold">Ticket types</h2>
-            <ul className="mt-3 divide-y divide-slate-100">
-              {event.tiers.map((tier) => (
-                <li
-                  key={tier.id}
-                  className="flex items-center justify-between gap-3 py-2"
-                >
-                  <div>
-                    <p className="font-semibold">{tier.name}</p>
-                    <p className="text-sm text-slate-500">
-                      {seatsLeft(tier)} of {tier.seatsTotal} seats left
-                    </p>
-                  </div>
-                  <p className="font-bold">
-                    {tier.price
-                      ? formatMoney(tier.price, event.currency)
-                      : "Free"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        ) : null}
-
-        <Card>
-          <h2 className="font-bold">Organiser</h2>
-          {event.business ? (
-            <div className="mt-2 flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={event.business.logoUrl || "/placeholder-logo.svg"}
-                alt={`${event.business.name} logo`}
-                className="h-12 w-12 rounded-xl object-cover"
-              />
-              <div>
-                <Link
-                  href={`/b/${event.business.slug}`}
-                  className="font-semibold text-indigo-600 hover:underline"
-                >
-                  {event.business.name}
-                </Link>
-                <p className="text-sm text-slate-500">{event.business.city}</p>
-              </div>
-            </div>
-          ) : (
-            <PostedBy user={event.organizer} className="mt-1" />
-          )}
-          {event.club ? (
-            <p className="mt-2 text-sm text-slate-600">
-              Hosted by{" "}
-              <Link
-                href={`/clubs/${event.club.slug}`}
-                className="font-semibold text-indigo-600 hover:underline"
-              >
-                {event.club.name}
-              </Link>{" "}
-              · a GoDesi club
-            </p>
-          ) : null}
-          {event.claimedAt && event.importedFrom ? (
-            <p className="mt-2 text-xs text-slate-500">
-              Claimed by the organiser. First listed from {event.importedFrom}.
-            </p>
-          ) : null}
-        </Card>
 
         {imported ? (
           <Card>
@@ -1026,11 +848,270 @@ export default async function EventPage({
                   }))}
                   defaultName={user.name}
                   defaultEmail={user.email}
+                  askReferredBy={event.askReferredBy}
                 />
               </div>
             )}
           </Card>
         )}
+
+        {speakers.length ? (
+          <Card>
+            <h2 className="font-bold">Speakers & guests</h2>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {speakers.map((speaker) => {
+                const photo = speaker.photoUrl || speaker.profile?.avatarUrl;
+                const href = speaker.profile?.href ?? null;
+                const avatar = photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={photo}
+                    alt={speaker.name}
+                    className="h-14 w-14 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg font-black text-white">
+                    {speaker.name.slice(0, 1).toUpperCase()}
+                  </div>
+                );
+                return (
+                  <div key={speaker.id} className="flex gap-3">
+                    {href ? <Link href={href}>{avatar}</Link> : avatar}
+                    <div className="min-w-0">
+                      {href ? (
+                        <Link
+                          href={href}
+                          className="font-semibold text-indigo-700 hover:underline"
+                        >
+                          {speaker.name}
+                        </Link>
+                      ) : (
+                        <p className="font-semibold text-slate-900">
+                          {speaker.name}
+                        </p>
+                      )}
+                      {speaker.bio || speaker.profile?.headline ? (
+                        <p className="text-sm text-slate-600">
+                          {speaker.bio || speaker.profile?.headline}
+                        </p>
+                      ) : null}
+                      {href ? (
+                        <Link
+                          href={href}
+                          className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            speaker.profile?.elite
+                              ? "bg-amber-100 text-amber-900"
+                              : "bg-indigo-50 text-indigo-700"
+                          }`}
+                        >
+                          {speaker.profile?.elite
+                            ? "⭐ GoDesi Elite →"
+                            : "✓ GoDesi profile →"}
+                        </Link>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        ) : null}
+
+        <Card>
+          <h2 className="font-bold">Organiser</h2>
+          {event.business ? (
+            <div className="mt-2 flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={event.business.logoUrl || "/placeholder-logo.svg"}
+                alt={`${event.business.name} logo`}
+                className="h-12 w-12 rounded-xl object-cover"
+              />
+              <div>
+                <Link
+                  href={`/b/${event.business.slug}`}
+                  className="font-semibold text-indigo-600 hover:underline"
+                >
+                  {event.business.name}
+                </Link>
+                <p className="text-sm text-slate-500">{event.business.city}</p>
+              </div>
+            </div>
+          ) : (
+            <PostedBy user={event.organizer} className="mt-1" />
+          )}
+          {event.club ? (
+            <p className="mt-2 text-sm text-slate-600">
+              Hosted by{" "}
+              <Link
+                href={`/clubs/${event.club.slug}`}
+                className="font-semibold text-indigo-600 hover:underline"
+              >
+                {event.club.name}
+              </Link>{" "}
+              · a GoDesi club
+            </p>
+          ) : null}
+          {event.claimedAt && event.importedFrom ? (
+            <p className="mt-2 text-xs text-slate-500">
+              Claimed by the organiser. First listed from {event.importedFrom}.
+            </p>
+          ) : null}
+        </Card>
+
+        {user?.id === event.organizerId && event.partnerStatus !== "NONE" ? (
+          <EventPartnerProof
+            eventId={event.id}
+            status={event.partnerStatus}
+            bannerUrl={event.partnerBannerUrl}
+            standeeUrl={event.partnerStandeeUrl}
+            salesUrl={event.partnerSalesUrl}
+          />
+        ) : null}
+
+        {event.sessions.length ? (
+          <Card className="!border-2 !border-indigo-200">
+            <h2 className="font-bold">Agenda</h2>
+            <ol className="mt-3 space-y-2">
+              {event.sessions.map((session, index) => {
+                const profile = profileFor(session.speaker);
+                return (
+                  <li
+                    key={session.id}
+                    className="flex flex-wrap gap-x-3 gap-y-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                  >
+                    <p className="w-28 shrink-0 text-sm font-semibold text-indigo-700">
+                      {session.startTime
+                        ? `${session.startTime}${session.endTime ? `–${session.endTime}` : ""}`
+                        : `#${index + 1}`}
+                    </p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900">
+                        {session.title}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {session.stage}
+                        {session.stage && session.speaker ? " · " : null}
+                        {session.speaker ? (
+                          profile ? (
+                            <Link
+                              href={profile.href}
+                              className="font-semibold text-indigo-700 hover:underline"
+                            >
+                              {session.speaker}
+                            </Link>
+                          ) : (
+                            session.speaker
+                          )
+                        ) : null}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </Card>
+        ) : null}
+
+        {rsvpOpen && !imported ? (
+          <EventRsvpPanel
+            event={event}
+            rsvps={rsvpRows}
+            mine={myRsvp}
+            viewer={Boolean(user)}
+            canRsvp={canRsvp}
+            isOrganizer={
+              isOwnerOrDesk ||
+              (clubMembership?.role === "ORGANIZER" &&
+                clubMembership.status === "ACTIVE")
+            }
+          />
+        ) : null}
+
+        {event.tiers.length ? (
+          <Card>
+            <h2 className="font-bold">Ticket types</h2>
+            <ul className="mt-3 divide-y divide-slate-100">
+              {event.tiers.map((tier) => (
+                <li
+                  key={tier.id}
+                  className="flex items-center justify-between gap-3 py-2"
+                >
+                  <div>
+                    <p className="font-semibold">{tier.name}</p>
+                    <p className="text-sm text-slate-500">
+                      {seatsLeft(tier)} of {tier.seatsTotal} seats left
+                    </p>
+                  </div>
+                  <p className="font-bold">
+                    {tier.price
+                      ? formatMoney(tier.price, event.currency)
+                      : "Free"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
+        {isOwnerOrDesk && !imported ? (
+          <EventAttendees
+            eventId={event.id}
+            slug={event.slug}
+            askReferredBy={event.askReferredBy}
+          />
+        ) : null}
+
+        <Card>
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
+            <div className="min-w-0">
+              <h2 className="font-bold">Put this event on your own website</h2>
+              <p className="mb-3 mt-1 text-sm text-slate-600">
+                Copy this code into your site and the card below appears there,
+                always up to date. Visitors tap it and book here — free, no
+                account needed on their side.
+              </p>
+              <EventEmbed
+                eventUrl={`${siteUrl()}/events/${event.slug}`}
+                title={event.title}
+              />
+            </div>
+
+            {imported ? (
+              <EventClaimPitch
+                anchorId="claim-event"
+                eventId={event.id}
+                slug={event.slug}
+                signedIn={Boolean(user)}
+              />
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                <p className="text-xs font-black uppercase tracking-wide text-slate-500">
+                  Organisers
+                </p>
+                <h3 className="mt-1 text-base font-black text-slate-900">
+                  Running your own event?
+                </h3>
+                <p className="mt-2">
+                  Listing is free and unlimited. We keep {platformFeePercent()}%
+                  of tickets you sell on the free plan and nothing on a paid
+                  plan, and free-entry events never cost anything.
+                </p>
+                <div className="mt-3 flex flex-col gap-2">
+                  <LinkButton href="/events/new">
+                    Post your event free
+                  </LinkButton>
+                  <Link
+                    href="/events/how-it-works"
+                    className="text-sm font-bold text-indigo-600 hover:underline"
+                  >
+                    Fees, tickets and where you get listed →
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
 
         {thin ? null : <InContentBanner size="leaderboard" />}
 

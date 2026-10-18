@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { showsAlbumAndPlaylist } from "@/lib/plans";
 import { suggestUsername } from "@/lib/profiles";
 import { PersonalProfileForm } from "@/components/forms/PersonalProfileForm";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
@@ -111,6 +112,7 @@ export default async function PersonalProfilePage() {
               ),
             }}
             suggestedUsername={suggested}
+            playlistLocked={!showsAlbumAndPlaylist(user)}
           />
         </Card>
       </div>

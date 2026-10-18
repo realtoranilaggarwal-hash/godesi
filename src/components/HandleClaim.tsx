@@ -86,19 +86,23 @@ export function HandleClaim({ tone = "hero" }: { tone?: "hero" | "plain" }) {
         </button>
       </form>
 
-      <p
-        className={`mt-2 min-h-5 text-xs font-semibold ${
-          dark ? "text-white" : "text-slate-700"
-        }`}
-        aria-live="polite"
-      >
-        {state === "checking" ? "Checking…" : null}
-        {state === "free" ? `✅ godesi.com/${handle} is free — grab it` : null}
-        {state === "taken"
-          ? `❌ godesi.com/${handle} is taken — try another`
-          : null}
-        {state === "invalid" ? `⚠️ ${message}` : null}
-      </p>
+      {state === "empty" ? null : (
+        <p
+          className={`mt-2 text-xs font-semibold ${
+            dark ? "text-white" : "text-slate-700"
+          }`}
+          aria-live="polite"
+        >
+          {state === "checking" ? "Checking…" : null}
+          {state === "free"
+            ? `✅ godesi.com/${handle} is free — grab it`
+            : null}
+          {state === "taken"
+            ? `❌ godesi.com/${handle} is taken — try another`
+            : null}
+          {state === "invalid" ? `⚠️ ${message}` : null}
+        </p>
+      )}
     </div>
   );
 }

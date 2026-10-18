@@ -44,7 +44,21 @@ export default async function EliteProfilePage({
   const entry = await getEntry(params.slug);
   if (!entry) notFound();
 
-  const viewer = await getCurrentUser();
+  const [viewer, talks] = await Promise.all([
+    getCurrentUser(),
+    db.eventSpeaker.findMany({
+      where: {
+        eliteEntryId: entry.id,
+        event: { status: "APPROVED", startsAt: { gte: new Date() } },
+      },
+      select: {
+        id: true,
+        event: { select: { slug: true, title: true, startsAt: true, city: true } },
+      },
+      orderBy: { event: { startsAt: "asc" } },
+      take: 6,
+    }),
+  ]);
   // Compiled by our team from public record and nobody has taken it over yet.
   const unclaimed = Boolean(entry.sourceUrl) && entry.userId === null;
 
@@ -93,7 +107,8 @@ export default async function EliteProfilePage({
               </p>
             ) : null}
             <p className="text-sm text-slate-600">
-              {entry.category} ·{" "}
+              {entry.category}
+              {entry.city || entry.state || entry.country ? " · " : null}
               <PlaceLink city={entry.city} state={entry.state} country={entry.country} />
               {entry.yearsExperience !== null
                 ? ` · ${entry.yearsExperience} yrs experience`
@@ -140,6 +155,33 @@ export default async function EliteProfilePage({
               className="h-full w-full"
             />
           </div>
+        </Card>
+      ) : null}
+
+      {talks.length ? (
+        <Card>
+          <h2 className="mb-2 text-lg font-bold">🎤 Speaking at</h2>
+          <ul className="space-y-1 text-sm">
+            {talks.map(({ id, event }) => (
+              <li key={id}>
+                <Link
+                  href={`/events/${event.slug}`}
+                  className="font-semibold text-indigo-700 hover:underline"
+                >
+                  {event.title}
+                </Link>{" "}
+                <span className="text-slate-500">
+                  ·{" "}
+                  {event.startsAt.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                  {event.city ? ` · ${event.city}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
         </Card>
       ) : null}
 

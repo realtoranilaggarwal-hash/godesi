@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SmallBanners } from "@/components/Banners";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
 import { GoogleTranslate } from "@/components/GoogleTranslate";
@@ -16,6 +17,7 @@ import { SpinWheel } from "@/components/SpinWheel";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { QuoraSignupEvent } from "@/components/QuoraSignupEvent";
 import { aiEnabled } from "@/lib/ai";
+import { currentUserId } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
 import { TELEGRAM_GROUP } from "@/lib/site";
 
@@ -45,11 +47,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const signedInId = await currentUserId();
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   const umamiId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
   const umamiSrc =
@@ -185,12 +188,14 @@ export default function RootLayout({
         <UnregisterServiceWorkers />
         <SiteHeader />
         <SiteTicker />
-        <main className="mx-auto w-full max-w-screen-2xl px-4 py-6">
-          {children}
+        <main className="mx-auto flex w-full max-w-screen-2xl gap-6 px-4 py-6">
+          <SmallBanners side="left" start={10} />
+          <div className="min-w-0 flex-1">{children}</div>
+          <SmallBanners />
         </main>
         <SiteFooter />
         <QuoraSignupEvent />
-        <LiveMediaPlayer />
+        <LiveMediaPlayer signedIn={Boolean(signedInId)} />
         <CookieConsent />
         <RewardsNudge />
         <LiveActivity />

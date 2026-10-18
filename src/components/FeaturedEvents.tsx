@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { planRank } from "@/lib/plans";
 import { EventCard } from "@/components/EventCard";
+import { SmallBanners } from "@/components/Banners";
 import { formatEventDate } from "@/lib/events";
 
 /**
@@ -18,6 +19,7 @@ async function paidEvents(take: number) {
     take: 40,
     include: {
       category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
       organizer: { select: { plan: true } },
     },
   });
@@ -84,6 +86,7 @@ export async function FeaturedEventRail({ take = 4 }: { take?: number }) {
 
   return (
     <aside
+      data-right-rail
       className="hidden w-[300px] shrink-0 space-y-3 lg:block"
       aria-label="Featured events"
     >
@@ -112,6 +115,8 @@ export async function FeaturedEventRail({ take = 4 }: { take?: number }) {
         <p className="mt-1 text-xs text-white/90">{UPGRADE_COPY}</p>
         <p className="mt-2 text-xs font-bold underline">See plans →</p>
       </Link>
+
+      <SmallBanners show={6} embedded />
     </aside>
   );
 }

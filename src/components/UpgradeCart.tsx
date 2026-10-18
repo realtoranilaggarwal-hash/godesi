@@ -95,7 +95,7 @@ export function UpgradeCart({
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-start">
+    <div data-right-rail className="grid gap-4 lg:grid-cols-[1fr_320px] lg:items-start">
       <div className="space-y-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h3 className="text-lg font-bold">Build your package</h3>

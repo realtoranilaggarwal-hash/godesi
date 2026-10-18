@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteUrl } from "@/lib/format";
 import { recommendedLinks } from "@/lib/resourcesQueries";
-import { liveStoreOffers } from "@/lib/storeOffers";
+import { cachedLiveStoreOffers } from "@/lib/storeOffers";
 import { LinkImpressions } from "@/components/LinkImpressions";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { Card } from "@/components/ui";
@@ -39,9 +39,11 @@ function StoreButton({ href, label }: { href: string; label: string }) {
 export default async function ShopPage() {
   const { amazonTag, ebayCampaignId, quicklyUrl } = shopConfig();
   const pinned = await recommendedLinks(null, 24, "shop");
-  const stores = pinned.length ? pinned : await recommendedLinks(null, 12);
+  const general =
+    pinned.length < 12 ? await recommendedLinks(null, 12 - pinned.length) : [];
+  const stores = [...pinned, ...general];
   const hasShelfStores = Boolean(amazonTag || ebayCampaignId);
-  const storeOffers = await liveStoreOffers(9);
+  const storeOffers = await cachedLiveStoreOffers(9);
 
   return (
     <div className="space-y-6">

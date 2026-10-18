@@ -14,6 +14,8 @@ export type StripItem = {
 
 export type StripGroup = { id: string; label: string; icon: string };
 
+export type StripLink = { href: string; label: string; icon: string };
+
 /**
  * One line of section buttons that swipes sideways on phones. Each section opens
  * a panel of its category chips under the line, so the header stays one row tall.
@@ -21,9 +23,12 @@ export type StripGroup = { id: string; label: string; icon: string };
 export function CategoryStrip({
   items,
   groups = [],
+  links = [],
 }: {
   items: StripItem[];
   groups?: StripGroup[];
+  /** Plain page links after the section buttons. */
+  links?: StripLink[];
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -86,6 +91,18 @@ export function CategoryStrip({
             </button>
           );
         })}
+        {links.length ? (
+          <span aria-hidden className="mx-1 w-px shrink-0 bg-slate-200" />
+        ) : null}
+        {links.map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-slate-700 hover:bg-slate-200 sm:px-3 sm:py-1.5"
+          >
+            {link.icon} {link.label}
+          </Link>
+        ))}
       </div>
 
       {current ? (

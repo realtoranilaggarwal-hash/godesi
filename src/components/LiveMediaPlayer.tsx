@@ -14,6 +14,18 @@ import {
 } from "@/lib/liveMedia";
 
 const STORAGE_KEY = "godesi:live-media";
+const FREE_RADIO_KEY = "godesi:free-radio";
+
+/** Signed-out visitors get one radio station free; another needs an account. */
+function radioAllowed(request: LiveMediaRequest, signedIn: boolean) {
+  if (signedIn || request.kind === "tv") return true;
+  const free = localStorage.getItem(FREE_RADIO_KEY);
+  if (!free) {
+    localStorage.setItem(FREE_RADIO_KEY, request.id);
+    return true;
+  }
+  return free === request.id;
+}
 
 /**
  * Floating mini player. Lives in the root layout, so the stream keeps playing
@@ -21,8 +33,9 @@ const STORAGE_KEY = "godesi:live-media";
  * iframes are only mounted after a click, and TV always starts muted because
  * browsers block audible autoplay.
  */
-export function LiveMediaPlayer() {
+export function LiveMediaPlayer({ signedIn }: { signedIn: boolean }) {
   const [request, setRequest] = useState<LiveMediaRequest | null>(null);
+  const [gated, setGated] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [muted, setMuted] = useState(true);
   const [videoId, setVideoId] = useState<string | null>(null);
@@ -33,7 +46,9 @@ export function LiveMediaPlayer() {
     const stored = sessionStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setRequest(JSON.parse(stored) as LiveMediaRequest);
+        const restored = JSON.parse(stored) as LiveMediaRequest;
+        if (radioAllowed(restored, signedIn)) setRequest(restored);
+        else sessionStorage.removeItem(STORAGE_KEY);
       } catch {
         sessionStorage.removeItem(STORAGE_KEY);
       }
@@ -41,6 +56,10 @@ export function LiveMediaPlayer() {
 
     function onOpen(event: Event) {
       const detail = (event as CustomEvent<LiveMediaRequest>).detail;
+      if (!radioAllowed(detail, signedIn)) {
+        setGated(true);
+        return;
+      }
       setRequest(detail);
       setPlaying(true);
       setMuted(detail.kind === "tv");
@@ -49,7 +68,7 @@ export function LiveMediaPlayer() {
 
     window.addEventListener(LIVE_MEDIA_EVENT, onOpen);
     return () => window.removeEventListener(LIVE_MEDIA_EVENT, onOpen);
-  }, []);
+  }, [signedIn]);
 
   // The live stream behind a channel changes through the day, so resolve it.
   useEffect(() => {
@@ -77,6 +96,7 @@ export function LiveMediaPlayer() {
     );
   }, []);
 
+  if (gated) return <RadioLoginGate onClose={() => setGated(false)} />;
   if (!request) return null;
 
   const station = request.kind === "radio" ? findRadio(request.id) : null;
@@ -196,6 +216,12 @@ export function LiveMediaPlayer() {
               kind: isTv ? "tv" : "radio",
               id: event.target.value,
             };
+            if (!radioAllowed(next, signedIn)) {
+              setRequest(null);
+              sessionStorage.removeItem(STORAGE_KEY);
+              setGated(true);
+              return;
+            }
             setRequest(next);
             setPlaying(true);
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -218,6 +244,59 @@ export function LiveMediaPlayer() {
         <Link href="/live-tv" className="text-indigo-700 hover:underline">
           📺 All TV channels
         </Link>
+      </div>
+    </div>
+  );
+}
+
+function RadioLoginGate({ onClose }: { onClose: () => void }) {
+  const next = encodeURIComponent(
+    `${window.location.pathname}${window.location.search}`,
+  );
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="radio-gate-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4"
+    >
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl">
+        <p aria-hidden className="text-4xl">
+          🎧
+        </p>
+        <h2
+          id="radio-gate-title"
+          className="mt-2 text-lg font-extrabold text-slate-900"
+        >
+          Log in or register free to keep listening
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Your first station was on us. Members listen to every station free,
+          save favourites and earn reward points.
+        </p>
+        <div className="mt-4 flex flex-col gap-2">
+          <Link
+            href={`/signup?next=${next}`}
+            onClick={onClose}
+            className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-red-700"
+          >
+            📝 Register free →
+          </Link>
+          <Link
+            href={`/login?next=${next}`}
+            onClick={onClose}
+            className="rounded-xl border-2 border-red-600 px-4 py-2 text-sm font-bold text-red-700 hover:bg-red-50"
+          >
+            🔑 Log in
+          </Link>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-3 text-xs font-semibold text-slate-500 hover:underline"
+        >
+          Not now
+        </button>
       </div>
     </div>
   );

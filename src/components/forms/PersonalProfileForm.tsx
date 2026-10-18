@@ -42,9 +42,12 @@ export type PersonalProfileValues = {
 export function PersonalProfileForm({
   profile,
   suggestedUsername,
+  playlistLocked = false,
 }: {
   profile: PersonalProfileValues;
   suggestedUsername: string;
+  /** Free plan: the playlist link is saved but not shown. */
+  playlistLocked?: boolean;
 }) {
   const [state, formAction] = useFormState(savePersonalProfileAction, emptyState);
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl ?? "");
@@ -211,10 +214,21 @@ export function PersonalProfileForm({
 
       <PhotoAlbumField
         defaultValue={profile.albumUrl ?? ""}
-        hint="Show all your photos without uploading them — paste a public Google Photos album link and your profile displays a gallery that opens the album."
+        hint={
+          playlistLocked
+            ? "🔒 Free plan: you can save it now, but it stays hidden until you go Pro."
+            : "Show all your photos without uploading them — paste a public Google Photos album link and your profile displays a gallery that opens the album."
+        }
       />
 
-      <PlaylistField defaultValue={profile.playlistUrl ?? ""} />
+      <PlaylistField
+        defaultValue={profile.playlistUrl ?? ""}
+        hint={
+          playlistLocked
+            ? "🔒 Free plan: you can save it now, but it stays hidden until you go Pro. Pro shows every video in your playlist or channel."
+            : undefined
+        }
+      />
 
       <Field
         label="Videos"

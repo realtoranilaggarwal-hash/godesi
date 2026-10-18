@@ -10,7 +10,7 @@ import {
 import { marketplaceCategories } from "@/lib/listingsQueries";
 import { ListingCard } from "@/components/ListingCard";
 import { ListingFilters } from "@/components/ListingFilters";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners, SmallBanners } from "@/components/Banners";
 import {
   FairHousingNotice,
   RoomSharingNotice,
@@ -178,10 +178,11 @@ export async function ListingSectionPage({
         <InlineBanner />
       </div>
 
-      <aside className="hidden w-[300px] shrink-0 space-y-4 lg:block">
+      <aside data-right-rail className="hidden w-[300px] shrink-0 space-y-4 lg:block">
         <TradingTips compact />
         <NeedHelpBox />
         <SidebarBanners />
+        <SmallBanners show={6} embedded />
       </aside>
     </div>
   );

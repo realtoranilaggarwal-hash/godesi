@@ -8,6 +8,7 @@ import {
   upcomingFestivals,
 } from "@/lib/festivals";
 import { SidebarBanners } from "@/components/Banners";
+import { FestivalShop } from "@/components/FestivalShop";
 import { Card, LinkButton } from "@/components/ui";
 
 export const revalidate = 3600;
@@ -59,6 +60,11 @@ export default function FestivalsPage() {
             </LinkButton>
           </div>
         </section>
+
+        <FestivalShop
+          festivals={upcoming.slice(0, 3)}
+          title="Shop for the next festivals"
+        />
 
         {Array.from(byMonth.entries()).map(([month, festivals]) => (
           <Card key={month}>

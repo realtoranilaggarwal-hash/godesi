@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { PLANS } from "@/lib/plans";
 import { notify } from "@/lib/notifications";
 import { awardPoints, awardSpendPoints } from "@/lib/rewardsQueries";
-import { cartItem, type CartItem } from "@/lib/bundles";
+import { orderedItem, type CartItem } from "@/lib/bundles";
 
 /** Banners inside a package are still booked a year at a time. */
 export const BANNER_MONTHS = 12;
@@ -126,7 +126,7 @@ export async function grantBundle({
   currency: string;
 }) {
   const items = itemKeys
-    .map((key) => cartItem(key))
+    .map((key) => orderedItem(key))
     .filter((item): item is CartItem => Boolean(item));
 
   const result = await activatePlan({

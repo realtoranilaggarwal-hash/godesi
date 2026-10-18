@@ -213,7 +213,7 @@ const MEDIA = [
 ];
 
 export default function EventFeesPage() {
-  const hero = AD_PLACEMENTS.HERO;
+  const header = AD_PLACEMENTS.HEADER;
   const leaderboard = AD_PLACEMENTS.LEADERBOARD;
   const pageUrl = `${siteUrl()}/events/how-it-works`;
   const embedSnippet = `<iframe src="${siteUrl()}/events/your-event/embed"
@@ -786,7 +786,7 @@ export default function EventFeesPage() {
               <span className="font-semibold text-slate-900">
                 A paid banner across the site
               </span>{" "}
-              — the homepage hero is ${hero.priceUsd} / ₹{hero.priceInr} a month
+              — the header leaderboard is ${header.priceUsd} / ₹{header.priceInr} a month
               and the in-content leaderboard ${leaderboard.priceUsd} / ₹
               {leaderboard.priceInr}, rotating with other advertisers, or buy
               impressions by the pack.{" "}

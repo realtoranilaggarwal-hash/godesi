@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { effectivePlan } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 
@@ -62,4 +63,34 @@ export async function liveDeals({
     take,
     select: dealSelect,
   });
+}
+
+const cachedDeals = cachedQuery(
+  "live-deals",
+  CONTENT_TTL,
+  (take: number, categorySlug: string | null) =>
+    liveDeals({ take, categorySlug: categorySlug ?? undefined }),
+);
+
+/** liveDeals for public pages, read from the database once a minute. */
+export async function cachedLiveDeals({
+  categorySlug,
+  take = 60,
+}: { categorySlug?: string; take?: number } = {}) {
+  const rows = await cachedDeals(take, categorySlug ?? null);
+  // Cached rows come back JSON-serialised, so dates are strings again.
+  return rows.map((deal) => ({
+    ...deal,
+    expiresAt: deal.expiresAt ? new Date(deal.expiresAt) : null,
+    createdAt: new Date(deal.createdAt),
+    business: {
+      ...deal.business,
+      owner: deal.business.owner && {
+        ...deal.business.owner,
+        planExpiresAt: deal.business.owner.planExpiresAt
+          ? new Date(deal.business.owner.planExpiresAt)
+          : null,
+      },
+    },
+  }));
 }

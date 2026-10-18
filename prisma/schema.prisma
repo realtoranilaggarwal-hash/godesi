@@ -233,6 +233,10 @@ model User {
   digestOptOutAt  DateTime?
   /// Last weekly digest we sent them, so a retry never double-sends.
   digestSentAt    DateTime?
+  /// Set while the member wants the morning panchang + deal email; null = off.
+  morningEmailAt  DateTime?
+  /// GoDesi day (YYYY-MM-DD, New York) of the last morning email, so a retry never double-sends.
+  morningSentDay  String?
 
   /// 1..1000 for the first thousand members — powers the 🏅 Founding member
   /// badge and their double reward points. Null once the spots are gone.
@@ -246,6 +250,22 @@ model User {
   journalistSince DateTime?
   journalistBeat  String?
 
+  /// Offer topics the member asked to hear about (lib/offerInterests ids); each pick is a sales lead.
+  offerInterests   String[]  @default([])
+  /// Optional number the member gave for those offers; never shown publicly.
+  offerPhone       String?
+  /// Last time the member saved their offer picks (their consent timestamp).
+  offerInterestsAt DateTime?
+  /// Separate, opt-in permission to be contacted about the picked topics; picks alone only personalise offers.
+  offerContactOk   Boolean   @default(false)
+  /// When the member last gave that contact permission.
+  offerContactAt   DateTime?
+
+  /// What the member said they want to do on GoDesi (lib/joinGoals ids), asked at signup.
+  joinGoals   String[]  @default([])
+  /// Last time the member saved those goals.
+  joinGoalsAt DateTime?
+
   /// Phone kept for journalist verification; never shown publicly.
   phone           String?
   phoneVerifiedAt DateTime?
@@ -258,10 +278,17 @@ model User {
   pressCardIssuedAt  DateTime?
   pressCardExpiresAt DateTime?
 
-  speakerAt       EventSpeaker[] @relation("SpeakerProfile")
-  clubsCreated    Club[]
-  clubMemberships ClubMember[]
-  eventRsvps      EventRsvp[]
+  speakerAt        EventSpeaker[]  @relation("SpeakerProfile")
+  clubsCreated     Club[]
+  clubMemberships  ClubMember[]
+  eventRsvps       EventRsvp[]
+  chatterPosts     ChatterPost[]
+  chatterLikes     ChatterLike[]
+  chatterReports   ChatterReport[]
+  chatterFollowing ChatterFollow[] @relation("ChatterFollower")
+  chatterFollowers ChatterFollow[] @relation("ChatterFollowed")
+  chatterBlocking  ChatterBlock[]  @relation("ChatterBlocker")
+  chatterBlockedBy ChatterBlock[]  @relation("ChatterBlocked")
 
   /// Public handle powering godesi.com/<username> and the personal QR code.
   username  String? @unique
@@ -270,22 +297,24 @@ model User {
   location  String?
 
   /// One-line "who I am" shown under the name on the public profile.
-  headline    String?
+  headline        String?
   /// What the member wants from the community — work, clients, partners, help.
-  lookingFor  String?
+  lookingFor      String?
   /// School, college and courses, one per line.
-  education   String?
+  education       String?
   /// Work history, projects and achievements, one per line.
-  experience  String?
-  skills      String[] @default([])
-  languages   String[] @default([])
+  experience      String?
+  skills          String[] @default([])
+  languages       String[] @default([])
   /// YouTube/Vimeo links embedded on the profile.
-  videoUrls   String[] @default([])
+  videoUrls       String[] @default([])
   /// Public YouTube playlist; every video in it is listed on the profile.
-  playlistUrl String?
+  playlistUrl     String?
+  /// Playlist saved while free members could still show one; it stays visible.
+  keptPlaylistUrl String?
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
-  albumUrl    String?
-  openToWork  Boolean  @default(false)
+  albumUrl        String?
+  openToWork      Boolean  @default(false)
 
   websiteUrl     String?
   instagramUrl   String?
@@ -337,6 +366,10 @@ model User {
   couponRedemptions CouponRedemption[]
 
   meetupProfile MeetupProfile?
+
+  rishtaProfile RishtaProfile?
+  ambassador    Ambassador?
+  rishtaReports RishtaReport[]
   meetupReports MeetupReport[]
   alumni        AlumniRecord[]
   upiRequests   UpiRequest[]
@@ -705,6 +738,8 @@ model Category {
 model Business {
   id                 String        @id @default(cuid())
   slug               String        @unique
+  /// Earlier page addresses; /b/<old> redirects to the current one so printed QR codes keep working.
+  previousSlugs      String[]      @default([])
   name               String
   /// A shop/company card versus an individual professional (realtor, attorney…).
   profileType        ProfileType   @default(BUSINESS)
@@ -741,6 +776,9 @@ model Business {
   albumUrl           String?
   /// Public YouTube playlist; every video in it is listed on the card.
   playlistUrl        String?
+  /// Album and playlist saved while free cards could still show them; they stay visible.
+  keptAlbumUrl       String?
+  keptPlaylistUrl    String?
   mapsUrl            String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.
@@ -1123,6 +1161,12 @@ model Event {
   imageUrl          String?
   /// Promo video pasted from YouTube or Vimeo.
   videoUrl          String?
+  /// YouTube Live (or Vimeo) stream played at the top of the event page.
+  liveUrl           String?
+  /// Only ticket holders, the organiser and the desk see the stream.
+  liveTicketOnly    Boolean            @default(false)
+  /// Booking form asks "Referred by" (networking events track who brought whom).
+  askReferredBy     Boolean            @default(false)
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl          String?
   price             Int                @default(0)
@@ -1267,8 +1311,14 @@ model EventSpeaker {
   userId String?
   user   User?   @relation("SpeakerProfile", fields: [userId], references: [id], onDelete: SetNull)
 
+  /// GoDesi Elite profile of a well-known speaker the organiser picked from
+  /// the famous-people suggestions.
+  eliteEntryId String?
+  eliteEntry   EliteEntry? @relation(fields: [eliteEntryId], references: [id], onDelete: SetNull)
+
   @@index([eventId])
   @@index([userId])
+  @@index([eliteEntryId])
 }
 
 /// A permanent group — a karaoke circle, cricket team, book club — that puts
@@ -1392,6 +1442,8 @@ model Ticket {
   buyerName   String
   buyerEmail  String
   buyerPhone  String?
+  /// Who referred the buyer, typed at booking when the event asks for it.
+  referredBy  String?
   quantity    Int          @default(1)
   amountMinor Int          @default(0)
   currency    String       @default("INR")
@@ -1823,6 +1875,12 @@ model MeetupProfile {
   state            String?
   /// Comma separated intents: business, coffee, chit-chat, community.
   intents          String
+  /// Club-category slugs (lib/clubs CLUB_CATEGORIES) the member enjoys; they drive suggestions.
+  interests        String[]      @default([])
+  /// Preferred age band for suggestions (lib/meetups AGE_RANGES); null = any age.
+  ageRange         String?
+  /// How far to look for people, in miles; null = anywhere / online.
+  meetRadiusMiles  Int?
   bio              String
   whatsappNumber   String?
   status           ListingStatus @default(PENDING)
@@ -1833,6 +1891,73 @@ model MeetupProfile {
   reports MeetupReport[]
 
   @@index([status, city])
+}
+
+enum RishtaPostedBy {
+  SELF
+  PARENT
+  SIBLING
+  RELATIVE
+  FRIEND
+}
+
+enum RishtaMarital {
+  NEVER_MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+/// Marriage-minded "Rishta" profile, posted by the person or their family.
+/// Reviewed before it goes public; contact shows only while the poster's plan is paid.
+model RishtaProfile {
+  id             String         @id @default(cuid())
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postedBy       RishtaPostedBy @default(SELF)
+  displayName    String
+  gender         MeetupGender
+  birthYear      Int
+  heightCm       Int?
+  maritalHistory RishtaMarital  @default(NEVER_MARRIED)
+  religion       String?
+  community      String?
+  gotra          String?
+  motherTongue   String?
+  education      String?
+  profession     String?
+  city           String
+  state          String?
+  country        String?
+  about          String
+  photoUrl       String?
+  /// Photo stays private (owner and staff only) when set.
+  hidePhoto      Boolean        @default(false)
+  /// Sidereal Moon sign 0-11 and nakshatra 0-26 for guna milan; birth details are not stored.
+  moonSign       Int?
+  nakshatra      Int?
+  whatsappNumber String?
+  status         ListingStatus  @default(PENDING)
+  visible        Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  reports RishtaReport[]
+
+  @@index([status, gender])
+}
+
+/// Member-flagged Rishta profile, queued for admin review.
+model RishtaReport {
+  id         String        @id @default(cuid())
+  profileId  String
+  profile    RishtaProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  createdAt  DateTime      @default(now())
+
+  @@unique([profileId, reporterId])
+  @@index([profileId])
 }
 
 /// Member-flagged profile, queued for admin review.
@@ -2315,8 +2440,10 @@ model EliteEntry {
   /// End of the paid Elite term; null for staff-compiled and unpaid profiles.
   eliteUntil    DateTime?
 
-  orders EliteOrder[]
-  claims EliteClaim[]
+  orders    EliteOrder[]
+  claims    EliteClaim[]
+  /// Events this person was booked to speak at.
+  speakerAt EventSpeaker[]
 
   /// Where a staff-compiled profile's facts came from, e.g. the person's own
   /// site or their Wikipedia page. Unique, so a source is only compiled once.
@@ -2732,4 +2859,118 @@ model MediaApplication {
   updatedAt    DateTime @updatedAt
 
   @@index([status])
+}
+
+enum AmbassadorStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+/// A member applying to be a GoDesi local ambassador. They sign the ethics
+/// pledge by typing their name; staff approve them on /admin/ambassadors, and
+/// approval gives the profile badge and the printable certificate.
+model Ambassador {
+  id            String           @id @default(cuid())
+  userId        String           @unique
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city          String
+  phone         String?
+  /// Why they want to represent GoDesi and what they can do.
+  pitch         String
+  /// Ways they want to help (lib/joinGoals AMBASSADOR_HELP ids).
+  helps         String[]         @default([])
+  /// Name typed under the ethics pledge, and when they signed it.
+  signedName    String
+  pledgedAt     DateTime
+  status        AmbassadorStatus @default(PENDING)
+  /// Certificate number shown on the certificate, set on approval.
+  certificateNo Int?             @unique
+  approvedAt    DateTime?
+  adminNote     String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([status])
+}
+
+/// Short public post on GoDesi Chatter; a reply when `parentId` is set.
+model ChatterPost {
+  id           String        @id @default(cuid())
+  authorId     String
+  author       User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  body         String
+  imageUrl     String?
+  /// lib/chatter CHATTER_TOPICS id.
+  topic        String        @default("general")
+  city         String?
+  /// lib/chatter CHATTER_LANGUAGES code.
+  language     String        @default("en")
+  /// #words from the body, lower-case and without the #.
+  tags         String[]      @default([])
+  parentId     String?
+  parent       ChatterPost?  @relation("ChatterReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      ChatterPost[] @relation("ChatterReplies")
+  likeCount    Int           @default(0)
+  replyCount   Int           @default(0)
+  /// Set by staff, or automatically once enough members report it.
+  hiddenAt     DateTime?
+  hiddenReason String?
+  editedAt     DateTime?
+  createdAt    DateTime      @default(now())
+
+  likes   ChatterLike[]
+  reports ChatterReport[]
+
+  @@index([parentId, hiddenAt, createdAt])
+  @@index([authorId, createdAt])
+  @@index([topic, createdAt])
+  @@index([city, createdAt])
+}
+
+model ChatterLike {
+  postId    String
+  post      ChatterPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@id([postId, userId])
+  @@index([userId])
+}
+
+model ChatterFollow {
+  followerId  String
+  follower    User     @relation("ChatterFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("ChatterFollowed", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+/// The blocker stops seeing the blocked member's posts, and the blocked member cannot reply to the blocker.
+model ChatterBlock {
+  blockerId String
+  blocker   User     @relation("ChatterBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("ChatterBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model ChatterReport {
+  id         String      @id @default(cuid())
+  postId     String
+  post       ChatterPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User        @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  createdAt  DateTime    @default(now())
+
+  @@unique([postId, reporterId])
+  @@index([postId])
 }

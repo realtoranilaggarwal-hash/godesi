@@ -52,9 +52,12 @@ export const RESERVED_USERNAMES = new Set([
   "badge",
   "blog",
   "buzz",
+  "chatter",
+  "gapodi",
   "city",
   "claim",
   "connect",
+  "rishta",
   "deals",
   "shop",
   "desi-elite",
@@ -89,10 +92,12 @@ export const RESERVED_USERNAMES = new Set([
   "why-list",
   "clubs",
   "complaints",
+  "astrology",
   "forgot-password",
   "guide",
   "media",
   "traffic",
+  "ambassador",
 ]);
 
 export const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._-]{1,28})[a-z0-9]$/;
@@ -172,6 +177,7 @@ export async function publicProfile(username: string) {
       videoUrls: true,
       playlistUrl: true,
       albumUrl: true,
+      keptPlaylistUrl: true,
       openToWork: true,
       whatsappNumber: true,
       websiteUrl: true,
@@ -190,6 +196,7 @@ export async function publicProfile(username: string) {
       planExpiresAt: true,
       createdAt: true,
       foundingNumber: true,
+      ambassador: { select: { id: true, status: true, city: true } },
       business: {
         select: {
           slug: true,

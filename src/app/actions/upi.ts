@@ -9,7 +9,7 @@ import { activatePlan, planOrNull } from "@/lib/billing";
 import { PLAN_TERMS, planTermPrice, planTerms, termOrNull } from "@/lib/plans";
 import { toMinor } from "@/lib/format";
 import { newUpiReference, upiEnabled } from "@/lib/upi";
-import { checkCoupon } from "@/lib/coupons";
+import { checkCoupon, planCouponScopes } from "@/lib/coupons";
 
 /** Creates a UPI request and sends the buyer to the QR page. */
 export async function startUpiPaymentAction(formData: FormData) {
@@ -28,7 +28,7 @@ export async function startUpiPaymentAction(formData: FormData) {
   const check = code
     ? await checkCoupon({
         code,
-        scope: "PLAN",
+        scope: planCouponScopes(plan.id, term),
         userId: user.id,
         subtotalMinor: listAmount,
         currency: "INR",

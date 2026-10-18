@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
-import { adminUpdateEventAction } from "@/app/actions/admin";
+import {
+  adminUpdateEventAction,
+  organiserUpdateEventAction,
+} from "@/app/actions/admin";
 import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { CurrencySelect } from "@/components/forms/CurrencySelect";
@@ -16,6 +19,10 @@ import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
 import type { VenueOption } from "@/components/forms/EventVenueFields";
+import { LiveStreamFields } from "@/components/forms/LiveStreamFields";
+import { AskReferredByField } from "@/components/forms/AskReferredByField";
+import { SpeakerRow } from "@/components/forms/SpeakerRow";
+import type { SpeakerDefaults } from "@/lib/eventSpeakers";
 
 export type AdminEventValues = {
   id: string;
@@ -47,21 +54,31 @@ export type AdminEventValues = {
   seatsBooked: number;
   imageUrl: string;
   videoUrl: string;
+  liveUrl: string;
+  liveTicketOnly: boolean;
+  askReferredBy: boolean;
   albumUrl: string;
   featured: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
+  speakers: SpeakerDefaults[];
 };
 
 export function AdminEventForm({
   event,
   categories,
   venues,
+  staff = true,
 }: {
   event: AdminEventValues;
   categories: CategoryOption[];
   venues: VenueOption[];
+  /** Off for the organiser's own edit page: no featured or status controls. */
+  staff?: boolean;
 }) {
-  const [state, formAction] = useFormState(adminUpdateEventAction, emptyState);
+  const [state, formAction] = useFormState(
+    staff ? adminUpdateEventAction : organiserUpdateEventAction,
+    emptyState,
+  );
   const [mode, setMode] = useState<string>(event.mode);
   const [venue, setVenue] = useState(event.venue);
   const [venueUrl, setVenueUrl] = useState(event.venueUrl);
@@ -85,6 +102,10 @@ export function AdminEventForm({
     // The hall belonged to the previous venue.
     if (id !== pickedId) setHallName("");
   };
+  // Rows below event.speakers.length are the saved speakers; later ones are new.
+  const [speakerRows, setSpeakerRows] = useState(() =>
+    event.speakers.length ? event.speakers.map((_, index) => index) : [0],
+  );
 
   return (
     <form action={formAction} className="space-y-4">
@@ -155,74 +176,83 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
-        <Field
-          label="Pick a venue on Godesi"
-          hint="Fills the venue, city and website below; or type a new venue by hand"
-        >
-          <select
-            value={pickedId}
-            onChange={(e) => pickVenue(e.target.value)}
-            className={inputClass}
-            aria-label="Venue on Godesi"
-          >
-            <option value="">Choose a saved venue…</option>
-            {cities.map((c) => (
-              <optgroup key={c} label={c}>
-                {venues
-                  .filter((item) => item.city === c)
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-              </optgroup>
-            ))}
-          </select>
-        </Field>
-        <Field label="Venue" hint="New venues are saved to /venues for other organisers">
-          <input
-            name="venue"
-            value={venue}
-            onChange={(e) => setVenue(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
-          <input
-            name="hallName"
-            value={hallName}
-            onChange={(e) => setHallName(e.target.value)}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
-          <input
-            name="hallCapacity"
-            type="number"
-            min={0}
-            defaultValue={event.hallCapacity ?? ""}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
-          <input
-            name="venueUrl"
-            value={venueUrl}
-            onChange={(e) => setVenueUrl(e.target.value)}
-            placeholder="https://royalalbertspalace.com"
-            className={inputClass}
-          />
-        </Field>
-        <Field label="City">
-          <input
-            name="city"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            required
-            className={inputClass}
-          />
-        </Field>
+        {mode === "ONLINE" ? (
+          <>
+            <input type="hidden" name="venue" value="Online" />
+            <input type="hidden" name="city" value="Online" />
+          </>
+        ) : (
+          <>
+            <Field
+              label="Pick a venue on Godesi"
+              hint="Fills the venue, city and website below; or type a new venue by hand"
+            >
+              <select
+                value={pickedId}
+                onChange={(e) => pickVenue(e.target.value)}
+                className={inputClass}
+                aria-label="Venue on Godesi"
+              >
+                <option value="">Choose a saved venue…</option>
+                {cities.map((c) => (
+                  <optgroup key={c} label={c}>
+                    {venues
+                      .filter((item) => item.city === c)
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                  </optgroup>
+                ))}
+              </select>
+            </Field>
+            <Field label="Venue" hint="New venues are saved to /venues for other organisers">
+              <input
+                name="venue"
+                value={venue}
+                onChange={(e) => setVenue(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Hall / room" hint="Which hall inside the venue, e.g. Crystal Hall">
+              <input
+                name="hallName"
+                value={hallName}
+                onChange={(e) => setHallName(e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Hall capacity" hint="How many people it holds — leave blank if unknown">
+              <input
+                name="hallCapacity"
+                type="number"
+                min={0}
+                defaultValue={event.hallCapacity ?? ""}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Hall or venue website" hint="Optional — link to the venue's own page">
+              <input
+                name="venueUrl"
+                value={venueUrl}
+                onChange={(e) => setVenueUrl(e.target.value)}
+                placeholder="https://royalalbertspalace.com"
+                className={inputClass}
+              />
+            </Field>
+            <Field label="City">
+              <input
+                name="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                required
+                className={inputClass}
+              />
+            </Field>
+          </>
+        )}
         <Field label="Repeats">
           <select
             name="frequency"
@@ -344,34 +374,83 @@ export function AdminEventForm({
             className={inputClass}
           />
         </Field>
+        <LiveStreamFields
+          liveUrl={event.liveUrl}
+          ticketOnly={event.liveTicketOnly}
+        />
+        <AskReferredByField defaultChecked={event.askReferredBy} />
         <div className="sm:col-span-2">
           <PhotoAlbumField
             defaultValue={event.albumUrl}
             hint="Paste a public Google Photos album link and the event page shows a 3×3 gallery that opens the album."
           />
         </div>
-        <Field
-          label="Feature this event"
-          hint="Pins it to the featured strip at the top of /events, ahead of paid plans."
-        >
-          <label className="flex items-center gap-2 text-sm font-semibold">
-            <input
-              type="checkbox"
-              name="featured"
-              defaultChecked={event.featured}
-              className="h-4 w-4"
-            />
-            Show in featured events
-          </label>
-        </Field>
-        <Field label="Status">
-          <select name="status" defaultValue={event.status} className={inputClass}>
-            <option value="APPROVED">Approved (public)</option>
-            <option value="PENDING">Pending review</option>
-            <option value="REJECTED">Rejected (hidden)</option>
-          </select>
-        </Field>
+        {staff ? (
+          <>
+            <Field
+              label="Feature this event"
+              hint="Pins it to the featured strip at the top of /events, ahead of paid plans."
+            >
+              <label className="flex items-center gap-2 text-sm font-semibold">
+                <input
+                  type="checkbox"
+                  name="featured"
+                  defaultChecked={event.featured}
+                  className="h-4 w-4"
+                />
+                Show in featured events
+              </label>
+            </Field>
+            <Field label="Status">
+              <select name="status" defaultValue={event.status} className={inputClass}>
+                <option value="APPROVED">Approved (public)</option>
+                <option value="PENDING">Pending review</option>
+                <option value="REJECTED">Rejected (hidden)</option>
+              </select>
+            </Field>
+          </>
+        ) : null}
       </div>
+
+      <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
+        <legend className="px-1 text-sm font-bold text-slate-900">
+          Speakers &amp; guests (optional)
+        </legend>
+        <input type="hidden" name="speakersEdited" value="1" />
+        <p className="text-xs text-slate-500">
+          Type a name and we check whether they already have a godesi.com
+          profile, so the event links to the real person. Clear a name or press
+          Remove to take a speaker off.
+        </p>
+        {speakerRows.map((row) => {
+          const saved = event.speakers[row];
+          return (
+            <SpeakerRow
+              key={row}
+              defaultName={saved?.name}
+              defaultBio={saved?.bio}
+              defaultPhotoUrl={saved?.photoUrl}
+              defaultProfile={saved?.profile ?? null}
+              defaultEliteEntryId={saved?.eliteEntryId}
+              onRemove={() =>
+                setSpeakerRows((rows) => rows.filter((item) => item !== row))
+              }
+            />
+          );
+        })}
+        <button
+          type="button"
+          onClick={() =>
+            setSpeakerRows((rows) => [
+              ...rows,
+              Math.max(event.speakers.length - 1, ...rows) + 1,
+            ])
+          }
+          className="text-sm font-semibold text-indigo-600 hover:underline"
+        >
+          + Add another speaker
+        </button>
+      </fieldset>
 
       <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton>Save event</SubmitButton>

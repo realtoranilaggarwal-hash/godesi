@@ -109,6 +109,14 @@ export default async function MyTicketsPage() {
                     >
                       {event.title}
                     </Link>
+                    {event.sourceId ? null : (
+                      <Link
+                        href={`/events/${event.slug}/edit`}
+                        className="ml-2 text-sm font-semibold text-slate-600 hover:underline"
+                      >
+                        ✏️ Edit
+                      </Link>
+                    )}
                     <p className="text-sm text-slate-500">
                       {formatEventDate(event.startsAt, event.timeZone)} ·{" "}
                       {event.seatsBooked}/{event.seatsTotal} booked ·{" "}
@@ -143,6 +151,7 @@ export default async function MyTicketsPage() {
                 <TicketTypesForm
                   eventId={event.id}
                   currency={event.currency}
+                  needsPayoutTerms={!event.payoutTermsAt}
                   tiers={event.tiers.map((tier) => ({
                     id: tier.id,
                     name: tier.name,

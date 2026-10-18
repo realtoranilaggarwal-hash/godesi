@@ -19,6 +19,7 @@ import {
 } from "@/app/actions/clubs";
 import { thumbImage } from "@/lib/proxyImage";
 import { properName } from "@/lib/names";
+import { SmallBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,7 @@ async function loadClub(slug: string) {
         orderBy: { startsAt: "asc" },
         include: {
           category: { select: { name: true, icon: true, color: true } },
+          tiers: { select: { price: true } },
         },
       },
     },
@@ -345,7 +347,7 @@ export default async function ClubPage({
         </div>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           <Card>
             <h2 className="font-bold text-slate-900">About</h2>
@@ -564,6 +566,7 @@ export default async function ClubPage({
               className="mt-2"
             />
           </Card>
+          <SmallBanners show={6} embedded />
         </div>
       </div>
     </div>

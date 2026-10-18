@@ -18,6 +18,12 @@ import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
 import { canonicalEmail, screenSignup } from "@/lib/signupGuard";
 import { normalizeUsername, usernameError } from "@/lib/profiles";
+import {
+  cleanOfferPhone,
+  parseOfferContact,
+  parseOfferInterests,
+} from "@/lib/offerInterests";
+import { parseJoinGoals } from "@/lib/joinGoals";
 
 /**
  * A name claimed on the homepage. It is only kept if it is still free when the
@@ -78,6 +84,14 @@ export async function signupAction(
     });
     if (!verdict.ok) return { error: verdict.reason };
 
+    const offerInterests = parseOfferInterests(formData.getAll("offers"));
+    const offerPhone = cleanOfferPhone(formData.get("offerPhone"));
+    const offerContactOk =
+      offerInterests.length > 0 &&
+      parseOfferContact(formData.get("offerContact"));
+
+    const joinGoals = parseJoinGoals(formData.getAll("goals"));
+
     const role: Role = parsed.data.role === "CLIENT" ? "CLIENT" : "BUSINESS";
     const claimed = await claimedUsername(formData.get("username"));
     const account = {
@@ -87,6 +101,13 @@ export async function signupAction(
       signupIp: ip,
       role,
       passwordHash: await hashPassword(parsed.data.password),
+      offerInterests,
+      offerPhone,
+      offerInterestsAt: offerInterests.length ? new Date() : null,
+      offerContactOk,
+      offerContactAt: offerContactOk ? new Date() : null,
+      joinGoals,
+      joinGoalsAt: joinGoals.length ? new Date() : null,
     };
 
     // The name may be gone between the check and the insert. Losing that race
