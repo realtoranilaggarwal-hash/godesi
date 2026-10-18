@@ -256,8 +256,10 @@ export default async function HomePage() {
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <CategoryFeatured />
-        <aside className="hidden xl:block">
-          <SmallBanners embedded tree={false} show={5} />
+        <aside className="relative hidden xl:block">
+          <div className="absolute inset-0">
+            <SmallBanners embedded fill tree={false} show={5} />
+          </div>
         </aside>
       </div>
 

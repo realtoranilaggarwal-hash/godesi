@@ -92,7 +92,7 @@ const PROMO_LINKS = [
   { href: "/deals", label: "Deals", icon: "🏷️" },
   { href: "/shop", label: "Shop", icon: "🛍️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
-  { href: "/resources", label: "Resources", icon: "🔗" },
+  { href: "/resources", label: "Links", icon: "🔗" },
   { href: "/advertise", label: "Advertise", icon: "📢" },
 ];
 
@@ -209,7 +209,7 @@ export async function SiteHeader() {
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },
     { href: "/rishta/new", label: "Post a Rishta profile", icon: "💍" },
-    { href: "/resources", label: "Resources", icon: "🔗" },
+    { href: "/resources", label: "Links", icon: "🔗" },
     { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/shop", label: "Shop", icon: "🛍️" },
     { href: "/festivals", label: "Festival calendar", icon: "🪔" },

@@ -27,7 +27,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/wedding", label: "Wedding services" },
         { href: "/religious", label: "Temples & places of worship" },
         { href: "/connect", label: "Connect — meet desis near you" },
-        { href: "/resources", label: "Resources & important links" },
+        { href: "/resources", label: "Links & important resources" },
         { href: "/news", label: "News" },
         { href: "/city", label: "Browse by city" },
         { href: "/trending", label: "Trending hashtags" },

@@ -16,7 +16,7 @@ import { Alert, Badge, Card, EmptyState, LinkButton, inputClass } from "@/compon
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Resources & important links",
+  title: "Links — important desi links & resources",
   description:
     "Hand-picked links, tools and services for desi businesses, professionals and families — plus how to promote your own link.",
 };
@@ -61,7 +61,7 @@ export default async function ResourcesPage({
       <div className="min-w-0 flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 py-8 text-white sm:px-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-            Resources
+            Links
           </p>
           <h1 className="mt-2 text-3xl font-bold sm:text-4xl">Important links 🔗</h1>
           <p className="mt-3 max-w-2xl text-white/90">
@@ -73,7 +73,7 @@ export default async function ResourcesPage({
               name="q"
               defaultValue={query ?? ""}
               placeholder="What are you looking for? e.g. domain registrar, tax help…"
-              aria-label="Search resources and deals"
+              aria-label="Search links and deals"
               className={`${inputClass} min-w-0 flex-1 text-slate-900`}
             />
             <button className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-900">
@@ -116,15 +116,11 @@ export default async function ResourcesPage({
                 {query ? `“${query}”` : `#${tag}`} on Trending
               </Link>
               <Link href="/resources" className="text-indigo-700 underline">
-                Show all resources
+                Show all links
               </Link>
             </span>
           </Card>
         ) : null}
-
-        <div className="lg:hidden">
-          <TagCloud active={tag ?? undefined} />
-        </div>
 
         {matches && term ? (
           <KeywordMatches term={term} results={matches} show={["deals", "events"]} />
@@ -191,6 +187,10 @@ export default async function ResourcesPage({
           />
         )}
 
+        <div className="lg:hidden">
+          <TagCloud active={tag ?? undefined} />
+        </div>
+
         <Card>
           <h2 className="text-lg font-bold">Promote your link here</h2>
           <p className="mt-1 text-sm text-slate-600">
@@ -221,8 +221,8 @@ export default async function ResourcesPage({
         <InlineBanner />
       </div>
 
-      <aside className="hidden w-[260px] shrink-0 lg:order-first lg:block">
-        <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto overscroll-contain pr-1">
+      <aside className="hidden w-[320px] shrink-0 lg:order-first lg:block">
+        <div className="sticky top-24 max-h-[calc(100vh-7rem)] space-y-4 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin] [&>aside]:w-full">
           <TagCloud active={tag ?? undefined} />
           <SidebarBanners />
         </div>

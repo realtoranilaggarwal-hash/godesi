@@ -179,6 +179,7 @@ export async function SidebarBanners({
 
   return (
     <aside
+      data-right-rail
       className="hidden w-[260px] shrink-0 space-y-4 lg:order-last lg:block"
       aria-label="Sponsored"
     >
@@ -270,9 +271,12 @@ export async function SmallBanners({
   start = 0,
   side,
   tree = true,
+  fill = false,
 }: {
   show?: number;
   embedded?: boolean;
+  /** Fill the height of the surrounding box with as many banners as fit. */
+  fill?: boolean;
   /** Category tree above the banners; off where the page already lists them. */
   tree?: boolean;
   start?: number;
@@ -288,6 +292,7 @@ export async function SmallBanners({
       categories={categories}
       show={show}
       embedded={embedded}
+      fill={fill}
       start={start}
       side={side}
       banners={banners.map((banner) => ({
