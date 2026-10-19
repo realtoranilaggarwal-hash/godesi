@@ -674,6 +674,39 @@ export default async function EventPage({
                 </p>
               )}
             </div>
+            {!imported && !past && left > 0 && (event.tiers.length || event.price) ? (
+              <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-3">
+                <p className="text-sm font-bold text-indigo-900">🎟️ Tickets</p>
+                {event.tiers.length ? (
+                  <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {event.tiers.map((tier) => (
+                      <li
+                        key={tier.id}
+                        className="flex min-w-0 items-center justify-between gap-2 rounded-xl border border-dashed border-indigo-300 bg-white px-3 py-2"
+                      >
+                        <span className="min-w-0">
+                          <span className="block break-words font-semibold text-slate-900">
+                            {tier.name}
+                          </span>
+                          <span className="block text-xs text-slate-500">
+                            {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Sold out"}
+                          </span>
+                        </span>
+                        <span className="shrink-0 font-black text-indigo-700">
+                          {tier.price ? formatMoney(tier.price, event.currency) : "Free"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                <a
+                  href="#tickets"
+                  className="mt-3 inline-block rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700"
+                >
+                  🎟️ Buy tickets
+                </a>
+              </div>
+            ) : null}
             {event.mode !== "ONLINE" ? (
               <MapEmbed
                 parts={[event.venue, event.address, event.city, event.state]}
@@ -815,7 +848,7 @@ export default async function EventPage({
             </p>
           </Card>
         ) : (
-          <Card>
+          <Card id="tickets">
             <h2 className="font-bold">🎟️ Get your tickets</h2>
             {past ? (
               <p className="mt-2 text-sm text-slate-600">
@@ -1028,32 +1061,6 @@ export default async function EventPage({
                 clubMembership.status === "ACTIVE")
             }
           />
-        ) : null}
-
-        {event.tiers.length ? (
-          <Card>
-            <h2 className="font-bold">Ticket types</h2>
-            <ul className="mt-3 divide-y divide-slate-100">
-              {event.tiers.map((tier) => (
-                <li
-                  key={tier.id}
-                  className="flex items-center justify-between gap-3 py-2"
-                >
-                  <div>
-                    <p className="font-semibold">{tier.name}</p>
-                    <p className="text-sm text-slate-500">
-                      {seatsLeft(tier)} of {tier.seatsTotal} seats left
-                    </p>
-                  </div>
-                  <p className="font-bold">
-                    {tier.price
-                      ? formatMoney(tier.price, event.currency)
-                      : "Free"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </Card>
         ) : null}
 
         {isOwnerOrDesk && !imported ? (
