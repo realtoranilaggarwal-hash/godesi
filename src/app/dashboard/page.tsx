@@ -27,6 +27,7 @@ import { pointValues, wallet } from "@/lib/rewardsQueries";
 import { offerInterest } from "@/lib/offerInterests";
 import { formatEventDate } from "@/lib/events";
 import { JoinGoalSteps } from "@/components/JoinGoalSteps";
+import { BusinessNextSteps } from "@/components/BusinessNextSteps";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -223,6 +224,7 @@ export default async function DashboardPage({
             </div>
           </Card>
         ) : null}
+        {searchParams.business && business ? <BusinessNextSteps /> : null}
         {searchParams.saved ? (
           <Alert tone="success">Profile saved.</Alert>
         ) : null}

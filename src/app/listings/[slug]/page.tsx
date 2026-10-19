@@ -32,6 +32,7 @@ import { ListingCard } from "@/components/ListingCard";
 import { can, getCurrentUser } from "@/lib/auth";
 import { PROPERTY_GROUP_LABELS } from "@/lib/property";
 import Link from "next/link";
+import { GodesiMark } from "@/components/GodesiMark";
 
 export const dynamic = "force-dynamic";
 
@@ -185,14 +186,16 @@ export default async function ListingPage({
         {listing.images.length ? (
           <div className="grid gap-3 sm:grid-cols-2">
             {listing.images.map((image) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={image.id}
-                src={image.url}
-                alt={listing.title}
-                className="h-56 w-full rounded-2xl border border-slate-200 object-cover"
-                loading="lazy"
-              />
+              <div key={image.id} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={image.url}
+                  alt={listing.title}
+                  className="h-56 w-full rounded-2xl border border-slate-200 object-cover"
+                  loading="lazy"
+                />
+                <GodesiMark />
+              </div>
             ))}
           </div>
         ) : null}

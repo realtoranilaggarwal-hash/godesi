@@ -48,6 +48,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     icon: "🎁",
     need: "admin",
   },
+  {
+    href: "/admin/partner-leads",
+    label: "Network requests",
+    icon: "🏡",
+    need: "admin",
+  },
   { href: "/admin/upi", label: "UPI payments", icon: "🧾", need: "admin" },
   { href: "/admin/coupons", label: "Coupons", icon: "🏷️", need: "admin" },
   { href: "/admin/news", label: "News", icon: "📰", need: "admin" },
