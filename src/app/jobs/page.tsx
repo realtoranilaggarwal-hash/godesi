@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { JOB_CATEGORIES, jobCategory, payLabel, workTypeLabel } from "@/lib/jobs";
+import { CareerjetSearchBox } from "@/components/CareerjetSearchBox";
 import { Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -162,6 +163,15 @@ export default async function JobsPage({
               action={<LinkButton href="/jobs/new">Post a job</LinkButton>}
             />
           )}
+          <Card>
+            <h2 className="text-lg font-bold text-slate-900">Search more jobs</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Jobs from across the web, by Careerjet. These open on other websites.
+            </p>
+            <div className="mt-3">
+              <CareerjetSearchBox />
+            </div>
+          </Card>
         </>
       )}
     </div>
