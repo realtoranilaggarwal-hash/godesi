@@ -8,6 +8,7 @@ import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
+import { LinkifiedText } from "@/components/LinkifiedText";
 import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -100,12 +101,14 @@ export default async function BlogPostPage({
               ) : block.type === "list" ? (
                 <ul key={index} className="list-disc space-y-1 pl-5">
                   {block.items.map((item, itemIndex) => (
-                    <li key={itemIndex}>{item}</li>
+                    <li key={itemIndex}>
+                      <LinkifiedText text={item} />
+                    </li>
                   ))}
                 </ul>
               ) : (
                 <p key={index} className="whitespace-pre-line">
-                  {block.text}
+                  <LinkifiedText text={block.text} />
                 </p>
               ),
             )}
