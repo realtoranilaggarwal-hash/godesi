@@ -34,6 +34,7 @@ export function UpgradeCart({
   flashBonusMonths,
   yearPrice,
   yearListPrice,
+  defaultTerm = "FIVE_YEAR",
 }: {
   currency: Currency;
   signedIn: boolean;
@@ -46,8 +47,9 @@ export function UpgradeCart({
   /** Featured for one year, already discounted, and its 12-month list price. */
   yearPrice: number;
   yearListPrice: number;
+  defaultTerm?: "FIVE_YEAR" | "YEAR";
 }) {
-  const [term, setTerm] = useState<"FIVE_YEAR" | "YEAR">("FIVE_YEAR");
+  const [term, setTerm] = useState<"FIVE_YEAR" | "YEAR">(defaultTerm);
   const [selected, setSelected] = useState<CartItemKey[]>([
     "membership",
     "banner-sidebar",

@@ -48,6 +48,7 @@ export function ImageDropzone({
   hint,
   fields,
   onUploaded,
+  compact = false,
 }: {
   purpose: UploadPurpose;
   multiple?: boolean;
@@ -56,6 +57,8 @@ export function ImageDropzone({
   /** Extra form fields the upload route needs, e.g. a project id. */
   fields?: Record<string, string>;
   onUploaded: (url: string) => void;
+  /** Smaller box for a single square photo or logo. */
+  compact?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -109,7 +112,7 @@ export function ImageDropzone({
           void upload(event.dataTransfer.files);
         }}
         disabled={busy}
-        className={`flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed p-6 text-center text-sm transition ${
+        className={`flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed text-center text-sm transition ${compact ? "p-3" : "p-6"} ${
           dragging
             ? "border-fuchsia-500 bg-fuchsia-50"
             : "border-slate-300 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50"

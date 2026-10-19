@@ -73,14 +73,33 @@ const SECTIONS: { title: string; options: PostOption[] }[] = [
 ];
 
 /** Every kind of post a member can make, grouped, each one click from its form. */
-export function PostAnything({ title }: { title: string }) {
+export function PostAnything({
+  title,
+  hasCard = false,
+}: {
+  title: string;
+  /** The member already has their one business/professional card. */
+  hasCard?: boolean;
+}) {
+  const sections = hasCard
+    ? SECTIONS.map((section) => ({
+        ...section,
+        options: section.options.flatMap((option) =>
+          option.href === "/post?type=professional"
+            ? []
+            : option.href === "/dashboard/profile"
+              ? [{ ...option, label: "My card ✓ — edit" }]
+              : [option],
+        ),
+      }))
+    : SECTIONS;
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
-      <h2 className="text-sm font-bold text-slate-900">{title}</h2>
+      <h2 className="text-lg font-bold text-slate-900">{title}</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {SECTIONS.map((section) => (
+        {sections.map((section) => (
           <div key={section.title}>
-            <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+            <p className="mb-1.5 text-sm font-bold text-slate-900">
               {section.title}
             </p>
             <ul className="space-y-1 text-sm">

@@ -3,9 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCategoryTree } from "@/lib/directory";
 import { gradientFor } from "@/lib/categories";
-import { Card } from "@/components/ui";
+import { Card, LinkButton } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 import { DealsAndShopStrip } from "@/components/DealsAndShopStrip";
+import { getCurrentUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -197,7 +199,16 @@ export default async function PostPage({
   const type = selected?.id;
   if (type === "report") redirect("/news/report");
 
-  const categories = await getCategoryTree();
+  const user = await getCurrentUser();
+  const [categories, card] = await Promise.all([
+    getCategoryTree(),
+    user && (type === "business" || type === "professional")
+      ? db.business.findUnique({
+          where: { ownerId: user.id },
+          select: { slug: true, name: true, category: true, profileType: true },
+        })
+      : null,
+  ]);
 
   return (
     <div className="flex justify-center gap-6">
@@ -210,7 +221,30 @@ export default async function PostPage({
           </p>
         </div>
 
-        {!type ? (
+        {card ? (
+          <Card className="space-y-3 border-emerald-200 bg-emerald-50">
+            <h2 className="text-lg font-bold text-emerald-900">
+              ✅ Your{" "}
+              {card.profileType === "PROFESSIONAL"
+                ? "professional profile"
+                : "business card"}{" "}
+              is already made
+            </h2>
+            <p className="text-sm text-emerald-900/80">
+              <b>{card.name}</b> · {card.category}. Each account has one card;
+              you can change its category, photos and text any time.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <LinkButton href="/dashboard/profile">Edit my card</LinkButton>
+              <LinkButton href={`/b/${card.slug}`} variant="secondary">
+                View it
+              </LinkButton>
+              <LinkButton href="/post" variant="secondary">
+                Post something else
+              </LinkButton>
+            </div>
+          </Card>
+        ) : !type ? (
           <Card className="space-y-3">
             <Step n={1} total={2} title="What are you posting?" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -154,8 +154,8 @@ export default async function DashboardPage({
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <LinkButton href="/pricing" variant="secondary">
-              Manage plan
+            <LinkButton href="/dashboard/plan" variant="secondary">
+              My plan
             </LinkButton>
             <LinkButton href="/dashboard/listings" variant="secondary">
               My listings
