@@ -33,12 +33,13 @@ const ERRORS: Record<string, string> = {
 };
 
 /** The newest live package code with uses left, shown as the flash offer. */
-async function flashOffer(currency: Currency) {
+async function flashOffer(currency: Currency, percentOnly = false) {
   const coupon = await db.coupon.findFirst({
     where: {
       scope: "BUNDLE",
       active: true,
       publicOffer: true,
+      ...(percentOnly ? { discountKind: "PERCENT" as const } : {}),
       OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
     },
     orderBy: { createdAt: "desc" },
@@ -80,7 +81,7 @@ export default async function UpgradePage({
   const currency = requestCurrency();
   const rate = await inrPerUsd();
   const saving = bundleSaving(currency);
-  const flash = await flashOffer(currency);
+  const flash = await flashOffer(currency, searchParams.offer === "today");
   const yearPrice = planTermPrice(PLANS.PREMIUM, "YEAR", currency, rate) ?? 0;
   const yearListPrice =
     (planTermPrice(PLANS.PREMIUM, "MONTH", currency, rate) ?? 0) * 12;
