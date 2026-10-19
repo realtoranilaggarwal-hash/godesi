@@ -6,13 +6,17 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatMinor } from "@/lib/format";
 import { formatEventDate, seatsLeft } from "@/lib/events";
 import { cancelEventAction } from "@/app/actions/events";
-import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
+import { Alert, Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 import { TicketTypesForm } from "@/components/forms/TicketTypesForm";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My tickets & events" };
 
-export default async function MyTicketsPage() {
+export default async function MyTicketsPage({
+  searchParams,
+}: {
+  searchParams: { booked?: string };
+}) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/dashboard/tickets");
 
@@ -30,6 +34,7 @@ export default async function MyTicketsPage() {
             city: true,
           },
         },
+        tier: { select: { name: true } },
       },
     }),
     db.event.findMany({
@@ -49,6 +54,13 @@ export default async function MyTicketsPage() {
         <LinkButton href="/events/new">Post an event</LinkButton>
       </div>
 
+      {searchParams.booked ? (
+        <Alert tone="success">
+          🎉 You&apos;re in! Each ticket type has its own QR code below, and we
+          emailed them all to you.
+        </Alert>
+      ) : null}
+
       <Card>
         <h2 className="mb-3 text-lg font-bold">Tickets you booked</h2>
         {tickets.length ? (
@@ -65,7 +77,8 @@ export default async function MyTicketsPage() {
                       ticket.event.startsAt,
                       ticket.event.timeZone,
                     )}{" "}
-                    · {ticket.event.city} · {ticket.quantity} ticket(s) ·{" "}
+                    · {ticket.event.city} · {ticket.quantity}{" "}
+                    {ticket.tier ? `${ticket.tier.name} ` : ""}ticket(s) ·{" "}
                     {ticket.amountMinor
                       ? formatMinor(ticket.amountMinor, ticket.currency)
                       : "Free"}

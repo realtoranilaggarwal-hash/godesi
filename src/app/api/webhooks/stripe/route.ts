@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { activatePlan, assertPaidPlan, grantBundle } from "@/lib/billing";
-import { confirmTicket } from "@/lib/events";
+import { confirmTicketOrder, orderTicketIds } from "@/lib/events";
 import { confirmAdOrder } from "@/lib/adOrders";
 import { confirmResourceOrder } from "@/lib/resourceOrders";
 import { confirmEliteOrder } from "@/lib/eliteOrders";
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     if (session.payment_status === "paid") {
-      const ticketId = session.metadata?.ticketId;
+      const ticketIds = orderTicketIds(session.metadata);
       const adOrderId = session.metadata?.adOrderId;
       const resourceOrderId = session.metadata?.resourceOrderId;
       const reviewDisputeId = session.metadata?.reviewDisputeId;
@@ -54,9 +54,9 @@ export async function POST(request: Request) {
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
-      if (session.metadata?.kind === "ticket" && ticketId) {
-        await confirmTicket({
-          ticketId,
+      if (session.metadata?.kind === "ticket" && ticketIds.length) {
+        await confirmTicketOrder({
+          ticketIds,
           provider: "stripe",
           reference: session.id,
           amountMinor: session.amount_total ?? 0,

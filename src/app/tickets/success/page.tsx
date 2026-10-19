@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
-import { confirmTicket } from "@/lib/events";
+import { confirmTicketOrder, orderTicketIds } from "@/lib/events";
 import { Alert, Card, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -23,39 +23,42 @@ export default async function TicketSuccessPage({
   if (!user) redirect("/login");
   if (!searchParams.session_id || !stripeEnabled()) redirect("/events");
 
-  let code: string | null = null;
+  let destination: string | null = null;
   let error: string | null = null;
 
   try {
     const session = await getStripe().checkout.sessions.retrieve(searchParams.session_id);
-    const ticketId = session.metadata?.ticketId;
+    const ticketIds = orderTicketIds(session.metadata);
 
-    if (session.metadata?.kind !== "ticket" || !ticketId) {
+    if (session.metadata?.kind !== "ticket" || !ticketIds.length) {
       error = "This payment is not a ticket purchase.";
     } else if (session.payment_status !== "paid") {
       error = "Your payment has not completed yet.";
     } else {
-      const ticket = await db.ticket.findUnique({ where: { id: ticketId } });
-      if (!ticket) {
+      const tickets = await db.ticket.findMany({ where: { id: { in: ticketIds } } });
+      if (tickets.length !== ticketIds.length) {
         error = "We could not find that ticket.";
-      } else if (ticket.userId !== user.id) {
+      } else if (tickets.some((ticket) => ticket.userId !== user.id)) {
         error = "This ticket belongs to a different account.";
       } else {
-        const result = await confirmTicket({
-          ticketId,
+        const confirmed = await confirmTicketOrder({
+          ticketIds,
           provider: "stripe",
           reference: session.id,
           amountMinor: session.amount_total ?? 0,
           currency: (session.currency ?? "inr").toUpperCase(),
         });
-        code = result.ticket.code;
+        destination =
+          confirmed.length === 1
+            ? `/tickets/${confirmed[0].code}?paid=1`
+            : "/dashboard/tickets?booked=1";
       }
     }
   } catch {
     error = "We could not verify this payment. Please contact support.";
   }
 
-  if (code) redirect(`/tickets/${code}?paid=1`);
+  if (destination) redirect(destination);
 
   return (
     <div className="mx-auto max-w-lg space-y-4 py-8 text-center">

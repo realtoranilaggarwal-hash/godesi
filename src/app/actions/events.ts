@@ -514,7 +514,7 @@ const bookingSchema = z.object({
     .number()
     .int()
     .min(1, "Book at least 1 seat")
-    .max(10, "Maximum 10 seats"),
+    .max(10, "Maximum 10 tickets per booking."),
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
   buyerPhone: z.string().trim().optional(),
@@ -570,22 +570,44 @@ export async function bookTicketAction(
     if (event.startsAt.getTime() < Date.now())
       return { error: "This event has already ended." };
 
-    const tier = event.tiers.length
-      ? event.tiers.find((candidate) => candidate.id === parsed.data.tierId)
-      : undefined;
-    if (event.tiers.length && !tier) return { error: "Choose a ticket type." };
-
-    const available = tier ? seatsLeft(tier) : seatsLeft(event);
-    if (available < parsed.data.quantity) {
+    /** One line per ticket type: the form sends `qty_<tierId>` for each type it shows. */
+    const requested = event.tiers.length
+      ? event.tiers.some((tier) => formData.has(`qty_${tier.id}`))
+        ? event.tiers.map((tier) => ({
+            tier,
+            quantity: Number(formData.get(`qty_${tier.id}`) || 0),
+          }))
+        : event.tiers
+            .filter((tier) => tier.id === parsed.data.tierId)
+            .map((tier) => ({ tier, quantity: parsed.data.quantity }))
+      : [{ tier: undefined, quantity: parsed.data.quantity }];
+    if (requested.some((line) => !Number.isInteger(line.quantity) || line.quantity < 0))
+      return { error: "Enter a whole number of tickets." };
+    const lines = requested.filter((line) => line.quantity > 0);
+    const totalQuantity = lines.reduce((sum, line) => sum + line.quantity, 0);
+    if (!totalQuantity)
       return {
-        error: tier
-          ? `Only ${available} ${tier.name} seat(s) left.`
-          : `Only ${available} seat(s) left for this event.`,
+        error: event.tiers.length
+          ? "Pick at least one ticket."
+          : "Book at least 1 seat",
       };
+    if (totalQuantity > 10) return { error: "Maximum 10 tickets per booking." };
+
+    const eventLeft = seatsLeft(event);
+    if (!event.tiers.length && eventLeft < totalQuantity)
+      return { error: `Only ${eventLeft} seat(s) left for this event.` };
+    for (const line of lines) {
+      if (line.tier && seatsLeft(line.tier) < line.quantity)
+        return {
+          error: `Only ${seatsLeft(line.tier)} ${line.tier.name} seat(s) left.`,
+        };
     }
 
-    const unitPrice = tier ? tier.price : event.price;
-    const subtotalMinor = toMinor(unitPrice * parsed.data.quantity);
+    const priced = lines.map((line) => ({
+      ...line,
+      subtotalMinor: toMinor((line.tier ? line.tier.price : event.price) * line.quantity),
+    }));
+    const subtotalMinor = priced.reduce((sum, line) => sum + line.subtotalMinor, 0);
 
     let discountMinor = 0;
     let couponId: string | null = null;
@@ -599,53 +621,81 @@ export async function bookTicketAction(
         currency: event.currency,
       });
       if (!check.ok) return { error: check.error };
-      discountMinor = check.discountMinor;
+      discountMinor = Math.min(check.discountMinor, subtotalMinor);
       couponId = check.coupon.id;
     }
 
-    const amountMinor = Math.max(0, subtotalMinor - discountMinor);
-    /** Free organisers pay Godesi's service fee; paid plans and Premium clubs keep the whole ticket. */
-    const feeMinor = clubIsPremium(event.club)
-      ? 0
-      : platformFeeMinor(amountMinor, event.organizer);
-
-    const ticket = await db.ticket.create({
-      data: {
-        code: ticketCode(),
-        eventId: event.id,
-        tierId: tier?.id ?? null,
-        couponId,
-        discountMinor,
-        userId: user.id,
-        buyerName: parsed.data.buyerName,
-        buyerEmail: parsed.data.buyerEmail,
-        buyerPhone: parsed.data.buyerPhone || null,
-        referredBy: event.askReferredBy
-          ? parsed.data.referredBy || null
-          : null,
-        quantity: parsed.data.quantity,
+    /**
+     * The discount comes off the lines in order, and the coupon is recorded on the
+     * first ticket only, so one booking counts as one redemption.
+     */
+    let discountLeft = discountMinor;
+    const premiumClub = clubIsPremium(event.club);
+    const orderLines = priced.map((line, index) => {
+      const lineDiscount = Math.min(discountLeft, line.subtotalMinor);
+      discountLeft -= lineDiscount;
+      const amountMinor = line.subtotalMinor - lineDiscount;
+      return {
+        ...line,
         amountMinor,
-        currency: event.currency,
-        platformFeeMinor: feeMinor,
-        provider: amountMinor === 0 ? "free" : "stripe",
-      },
+        /** Free organisers pay Godesi's service fee; paid plans and Premium clubs keep the whole ticket. */
+        feeMinor: premiumClub ? 0 : platformFeeMinor(amountMinor, event.organizer),
+        couponId: index === 0 ? couponId : null,
+        discountMinor: index === 0 ? discountMinor : 0,
+      };
     });
+    const amountMinor = orderLines.reduce((sum, line) => sum + line.amountMinor, 0);
+    const feeMinor = orderLines.reduce((sum, line) => sum + line.feeMinor, 0);
+
+    const tickets = await db.$transaction(
+      orderLines.map((line) =>
+        db.ticket.create({
+          data: {
+            code: ticketCode(),
+            eventId: event.id,
+            tierId: line.tier?.id ?? null,
+            couponId: line.couponId,
+            discountMinor: line.discountMinor,
+            userId: user.id,
+            buyerName: parsed.data.buyerName,
+            buyerEmail: parsed.data.buyerEmail,
+            buyerPhone: parsed.data.buyerPhone || null,
+            referredBy: event.askReferredBy
+              ? parsed.data.referredBy || null
+              : null,
+            quantity: line.quantity,
+            amountMinor: line.amountMinor,
+            currency: event.currency,
+            platformFeeMinor: line.feeMinor,
+            provider: amountMinor === 0 ? "free" : "stripe",
+          },
+        }),
+      ),
+    );
+    const ticketsPage =
+      tickets.length === 1 ? `/tickets/${tickets[0].code}` : "/dashboard/tickets?booked=1";
 
     if (amountMinor === 0) {
-      await confirmTicket({
-        ticketId: ticket.id,
-        provider: "free",
-        reference: `free_${ticket.id}`,
-        amountMinor: 0,
-        currency: event.currency,
-      });
-      destination = `/tickets/${ticket.code}`;
+      for (const ticket of tickets) {
+        await confirmTicket({
+          ticketId: ticket.id,
+          provider: "free",
+          reference: `free_${ticket.id}`,
+          amountMinor: 0,
+          currency: event.currency,
+        });
+      }
+      destination = ticketsPage;
     } else {
       if (!stripeEnabled()) {
         return {
           error: "Ticket payments are not configured yet. Please try later.",
         };
       }
+
+      const summary = orderLines
+        .map((line) => `${line.tier ? `${line.tier.name} × ` : ""}${line.quantity}`)
+        .join(", ");
 
       /**
        * When the organiser has connected Stripe, the buyer pays them directly and
@@ -656,7 +706,12 @@ export async function bookTicketAction(
         mode: "payment",
         customer_email: parsed.data.buyerEmail,
         client_reference_id: user.id,
-        metadata: { kind: "ticket", ticketId: ticket.id, eventId: event.id },
+        metadata: {
+          kind: "ticket",
+          ticketId: tickets[0].id,
+          ticketIds: tickets.map((ticket) => ticket.id).join(","),
+          eventId: event.id,
+        },
         ...(destinationAccount
           ? {
               payment_intent_data: {
@@ -673,7 +728,7 @@ export async function bookTicketAction(
               /** Charged as one line so a coupon discount is reflected exactly. */
               unit_amount: amountMinor,
               product_data: {
-                name: `${event.title} — ${tier ? `${tier.name} × ` : ""}${parsed.data.quantity} seat(s)`,
+                name: `${event.title} — ${summary} seat(s)`,
                 description: `${event.venue}, ${event.city}${
                   discountMinor ? " · coupon applied" : ""
                 }`,

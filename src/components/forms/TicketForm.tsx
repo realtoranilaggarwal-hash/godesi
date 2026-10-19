@@ -23,12 +23,15 @@ function TicketStub({
   currency,
   seatsLeft,
   selected,
+  action,
 }: {
   name: string;
   price: number;
   currency: string;
   seatsLeft: number;
   selected: boolean;
+  /** Shown in place of the tick, e.g. a − / + counter. */
+  action?: React.ReactNode;
 }) {
   return (
     <span
@@ -66,6 +69,7 @@ function TicketStub({
             {seatsLeft} ticket{seatsLeft === 1 ? "" : "s"} left
           </span>
         </span>
+        {action ?? (
         <span
           className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
             selected
@@ -76,6 +80,7 @@ function TicketStub({
         >
           ✓
         </span>
+        )}
       </span>
     </span>
   );
@@ -104,100 +109,151 @@ export function TicketForm({
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
-  const [tierId, setTierId] = useState(bookable[0]?.id ?? "");
+  const tiered = bookable.length > 0;
+  const [counts, setCounts] = useState<Record<string, number>>(
+    bookable[0] ? { [bookable[0].id]: 1 } : {},
+  );
   const [quantity, setQuantity] = useState(1);
   const [email, setEmail] = useState(defaultEmail ?? "");
 
-  const selected = bookable.find((tier) => tier.id === tierId);
-  const unitPrice = selected ? selected.price : price;
-  const available = selected ? selected.seatsLeft : seatsLeft;
-  const maxSeats = Math.max(1, Math.min(maxPerBooking, available));
-  const count = Math.min(Math.max(1, quantity || 1), maxSeats);
-  const total = unitPrice * count;
+  const lines = bookable
+    .map((tier) => ({ tier, count: counts[tier.id] ?? 0 }))
+    .filter((line) => line.count > 0);
+  const maxSeats = Math.max(1, Math.min(maxPerBooking, seatsLeft));
+  const single = Math.min(Math.max(1, quantity || 1), maxSeats);
+  const count = tiered
+    ? lines.reduce((sum, line) => sum + line.count, 0)
+    : single;
+  const total = tiered
+    ? lines.reduce((sum, line) => sum + line.tier.price * line.count, 0)
+    : price * single;
+  const paid = tiered ? bookable.some((tier) => tier.price > 0) : price > 0;
   const ticketWord = `ticket${count === 1 ? "" : "s"}`;
+
+  function setTierCount(tier: TicketTierOption, next: number) {
+    const others = count - (counts[tier.id] ?? 0);
+    const cap = Math.max(0, Math.min(tier.seatsLeft, maxPerBooking - others));
+    setCounts({ ...counts, [tier.id]: Math.max(0, Math.min(cap, next)) });
+  }
 
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
       <input type="hidden" name="eventId" value={eventId} />
 
-      <fieldset className="space-y-2">
-        <legend className="mb-2 text-sm font-semibold text-slate-700">
-          1. Pick your ticket
-        </legend>
-        {bookable.length ? (
-          bookable.map((tier) => (
-            <label key={tier.id} className="block cursor-pointer">
+      {tiered ? (
+        <fieldset className="space-y-2">
+          <legend className="mb-2 text-sm font-semibold text-slate-700">
+            1. How many of each ticket?
+          </legend>
+          <input type="hidden" name="quantity" value={count} />
+          {bookable.map((tier) => {
+            const value = counts[tier.id] ?? 0;
+            const others = count - value;
+            const cap = Math.min(tier.seatsLeft, maxPerBooking - others);
+            return (
+              <div key={tier.id}>
+                <input type="hidden" name={`qty_${tier.id}`} value={value} />
+                <TicketStub
+                  name={tier.name}
+                  price={tier.price}
+                  currency={currency}
+                  seatsLeft={tier.seatsLeft}
+                  selected={value > 0}
+                  action={
+                    <span className="flex shrink-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setTierCount(tier, value - 1)}
+                        disabled={value <= 0}
+                        className="h-9 w-9 rounded-lg border border-slate-300 bg-white text-lg font-bold disabled:opacity-40"
+                        aria-label={`One less ${tier.name} ticket`}
+                      >
+                        −
+                      </button>
+                      <span
+                        className="w-6 text-center text-lg font-black"
+                        aria-live="polite"
+                      >
+                        {value}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setTierCount(tier, value + 1)}
+                        disabled={value >= cap}
+                        className="h-9 w-9 rounded-lg border border-slate-300 bg-white text-lg font-bold disabled:opacity-40"
+                        aria-label={`One more ${tier.name} ticket`}
+                      >
+                        +
+                      </button>
+                    </span>
+                  }
+                />
+              </div>
+            );
+          })}
+          <p className="text-xs text-slate-500">
+            Mix ticket types in one order, up to {maxPerBooking} tickets.
+          </p>
+        </fieldset>
+      ) : (
+        <>
+          <fieldset className="space-y-2">
+            <legend className="mb-2 text-sm font-semibold text-slate-700">
+              1. Your ticket
+            </legend>
+            <TicketStub
+              name="General admission"
+              price={price}
+              currency={currency}
+              seatsLeft={seatsLeft}
+              selected
+            />
+          </fieldset>
+
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-slate-700">
+              2. How many tickets?
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.max(1, single - 1))}
+                disabled={single <= 1}
+                className="h-10 w-10 rounded-lg border border-slate-300 text-lg font-bold disabled:opacity-40"
+                aria-label="One less ticket"
+              >
+                −
+              </button>
               <input
-                type="radio"
-                name="tierId"
-                value={tier.id}
-                checked={tier.id === tierId}
-                onChange={() => setTierId(tier.id)}
-                className="sr-only"
+                name="quantity"
+                type="number"
+                min={1}
+                max={maxSeats}
+                value={single}
+                onChange={(event) => setQuantity(Number(event.target.value))}
                 required
+                className={`${inputClass} w-20 text-center`}
+                aria-label="Number of tickets"
               />
-              <TicketStub
-                name={tier.name}
-                price={tier.price}
-                currency={currency}
-                seatsLeft={tier.seatsLeft}
-                selected={tier.id === tierId}
-              />
-            </label>
-          ))
-        ) : (
-          <TicketStub
-            name="General admission"
-            price={price}
-            currency={currency}
-            seatsLeft={seatsLeft}
-            selected
-          />
-        )}
-      </fieldset>
+              <button
+                type="button"
+                onClick={() => setQuantity(Math.min(maxSeats, single + 1))}
+                disabled={single >= maxSeats}
+                className="h-10 w-10 rounded-lg border border-slate-300 text-lg font-bold disabled:opacity-40"
+                aria-label="One more ticket"
+              >
+                +
+              </button>
+              <span className="text-xs text-slate-500">max {maxSeats}</span>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="space-y-2">
         <p className="text-sm font-semibold text-slate-700">
-          2. How many tickets?
-        </p>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setQuantity(Math.max(1, count - 1))}
-            disabled={count <= 1}
-            className="h-10 w-10 rounded-lg border border-slate-300 text-lg font-bold disabled:opacity-40"
-            aria-label="One less ticket"
-          >
-            −
-          </button>
-          <input
-            name="quantity"
-            type="number"
-            min={1}
-            max={maxSeats}
-            value={count}
-            onChange={(event) => setQuantity(Number(event.target.value))}
-            required
-            className={`${inputClass} w-20 text-center`}
-            aria-label="Number of tickets"
-          />
-          <button
-            type="button"
-            onClick={() => setQuantity(Math.min(maxSeats, count + 1))}
-            disabled={count >= maxSeats}
-            className="h-10 w-10 rounded-lg border border-slate-300 text-lg font-bold disabled:opacity-40"
-            aria-label="One more ticket"
-          >
-            +
-          </button>
-          <span className="text-xs text-slate-500">max {maxSeats}</span>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <p className="text-sm font-semibold text-slate-700">
-          3. Where should we send your tickets?
+          {tiered ? 2 : 3}. Where should we send your tickets?
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Your name">
@@ -234,7 +290,7 @@ export function TicketForm({
               />
             </Field>
           ) : null}
-          {unitPrice ? (
+          {paid ? (
             <Field label="Coupon code" hint="Optional — from the organiser">
               <input
                 name="couponCode"
@@ -246,27 +302,51 @@ export function TicketForm({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-slate-600">
-            {count} × {selected?.name ?? "ticket"}
-            {unitPrice ? ` @ ${formatMoney(unitPrice, currency)}` : ""}
-          </span>
+      <div className="space-y-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+        {tiered ? (
+          lines.length ? (
+            lines.map((line) => (
+              <div
+                key={line.tier.id}
+                className="flex items-baseline justify-between gap-2 text-slate-600"
+              >
+                <span>
+                  {line.count} × {line.tier.name}
+                </span>
+                <span>
+                  {line.tier.price
+                    ? formatMoney(line.tier.price * line.count, currency)
+                    : "Free"}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-slate-600">Pick at least one ticket above.</p>
+          )
+        ) : (
+          <p className="text-slate-600">
+            {single} × General admission
+            {price ? ` @ ${formatMoney(price, currency)}` : ""}
+          </p>
+        )}
+        <div className="flex items-baseline justify-between gap-2 border-t border-slate-200 pt-1">
+          <span className="font-semibold text-slate-700">Total</span>
           <span className="text-lg font-black text-slate-900">
-            {unitPrice ? formatMoney(total, currency) : "Free"}
+            {total ? formatMoney(total, currency) : "Free"}
           </span>
         </div>
-        {unitPrice ? (
-          <p className="mt-1 text-xs text-slate-500">
+        {paid ? (
+          <p className="text-xs text-slate-500">
             Coupon discounts are taken off on the payment page.
           </p>
         ) : null}
       </div>
 
       <SubmitButton
-        pendingLabel={unitPrice ? "Opening payment..." : "Getting your tickets..."}
+        disabled={count < 1}
+        pendingLabel={total ? "Opening payment..." : "Getting your tickets..."}
       >
-        {unitPrice
+        {total
           ? `🎟️ Buy ${count} ${ticketWord} — ${formatMoney(total, currency)}`
           : `🎟️ Get ${count} free ${ticketWord}`}
       </SubmitButton>
@@ -274,7 +354,7 @@ export function TicketForm({
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
         <p className="font-bold">What you get</p>
         <ol className="mt-1 list-decimal space-y-0.5 pl-5">
-          {unitPrice ? (
+          {total ? (
             <li>Pay safely by card on the secure Stripe page.</li>
           ) : null}
           <li>Your ticket with a QR code opens right away.</li>

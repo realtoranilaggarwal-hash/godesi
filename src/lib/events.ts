@@ -166,6 +166,60 @@ export async function confirmTicket({
   return { alreadyProcessed: false as const, ticket };
 }
 
+/** Ticket ids of a Checkout order: `ticketIds` for multi-type bookings, `ticketId` otherwise. */
+export function orderTicketIds(
+  metadata: Record<string, string> | null | undefined,
+): string[] {
+  const ids = metadata?.ticketIds ?? metadata?.ticketId ?? "";
+  return ids.split(",").map((id) => id.trim()).filter(Boolean);
+}
+
+/**
+ * Confirms every ticket paid by one Checkout session. Each ticket keeps the
+ * amount stored at booking, and extra tickets get `<session>:<n>` references
+ * because a reference is unique per ticket.
+ */
+export async function confirmTicketOrder({
+  ticketIds,
+  provider,
+  reference,
+  amountMinor,
+  currency,
+}: {
+  ticketIds: string[];
+  provider: string;
+  reference: string;
+  amountMinor: number;
+  currency: string;
+}) {
+  if (ticketIds.length === 1) {
+    const result = await confirmTicket({
+      ticketId: ticketIds[0],
+      provider,
+      reference,
+      amountMinor,
+      currency,
+    });
+    return [result.ticket];
+  }
+  const tickets = await db.ticket.findMany({ where: { id: { in: ticketIds } } });
+  const confirmed = [];
+  for (let index = 0; index < ticketIds.length; index += 1) {
+    const ticketId = ticketIds[index];
+    const ticket = tickets.find((candidate) => candidate.id === ticketId);
+    if (!ticket) throw new Error("Ticket not found");
+    const result = await confirmTicket({
+      ticketId,
+      provider,
+      reference: index === 0 ? reference : `${reference}:${index + 1}`,
+      amountMinor: ticket.amountMinor,
+      currency,
+    });
+    confirmed.push(result.ticket);
+  }
+  return confirmed;
+}
+
 /** Best-effort ticket receipt with the QR code; never blocks the booking. */
 async function sendTicketConfirmation(ticketId: string) {
   if (!emailEnabled()) return;
