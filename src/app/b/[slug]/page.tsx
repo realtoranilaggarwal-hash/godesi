@@ -51,6 +51,7 @@ import { businessIsThin, robotsFor } from "@/lib/thinContent";
 import { liveDealWhere } from "@/lib/deals";
 import { DealCard } from "@/components/DealCard";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
+import { GodesiMark } from "@/components/GodesiMark";
 
 export const dynamic = "force-dynamic";
 
@@ -877,6 +878,7 @@ export default async function BusinessProfilePage({
                           loading="lazy"
                           className="relative h-full w-full object-contain"
                         />
+                        <GodesiMark />
                       </a>
                     ),
                   )}

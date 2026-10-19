@@ -47,6 +47,7 @@ import { matchProfilesByExactName, nameKey } from "@/lib/peopleLookup";
 import { EventRsvpPanel } from "@/components/EventRsvpPanel";
 import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
+import { GodesiMark } from "@/components/GodesiMark";
 
 type SpeakerRow =
   Awaited<ReturnType<typeof loadEvent>> extends infer E
@@ -477,6 +478,7 @@ export default async function EventPage({
               <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-semibold text-white">
                 🔍 View full size
               </span>
+              <GodesiMark />
             </a>
           ) : null}
           <div className="space-y-3 p-5">
