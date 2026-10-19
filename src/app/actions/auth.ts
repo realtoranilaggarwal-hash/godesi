@@ -16,6 +16,7 @@ import { emailEnabled } from "@/lib/email";
 import { issueEmailOtp } from "@/lib/otp";
 import { creditReferral } from "@/lib/referrals";
 import { welcomeFoundingMember } from "@/lib/founding";
+import { awardOfferPickPoints } from "@/lib/rewardsQueries";
 import { canonicalEmail, screenSignup } from "@/lib/signupGuard";
 import { normalizeUsername, usernameError } from "@/lib/profiles";
 import {
@@ -132,6 +133,7 @@ export async function signupAction(
     });
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
+    await awardOfferPickPoints(user.id, offerInterests);
 
     if (emailEnabled()) {
       await issueEmailOtp(email);

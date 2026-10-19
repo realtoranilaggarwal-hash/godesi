@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { notify } from "@/lib/notifications";
 import { convert, getRates } from "@/lib/rates";
 import { effectivePlan } from "@/lib/plans";
+import { offerInterest } from "@/lib/offerInterests";
 import {
   Contributor,
   EarnReason,
@@ -312,4 +313,32 @@ export async function referralStats(userId: string) {
     pending,
     conversionRate: referrals ? Math.round((converted / referrals) * 100) : 0,
   };
+}
+
+/** Points for each benefit topic ticked, paid once per topic however often it is re-ticked. */
+export async function awardOfferPickPoints(
+  userId: string,
+  interestIds: string[],
+) {
+  const value = await pointsFor("OFFER_PICK");
+  if (!value || !interestIds.length) return 0;
+  const { count } = await db.pointsEntry.createMany({
+    data: interestIds.map((id) => ({
+      userId,
+      points: value,
+      reason: "OFFER_PICK" as const,
+      note: `Benefit topic: ${offerInterest(id)?.label ?? id}`,
+      uniqueKey: `${userId}:OFFER_PICK:${id}`,
+    })),
+    skipDuplicates: true,
+  });
+  if (count) {
+    await notify({
+      userId,
+      title: `+${count * value} points`,
+      body: `For the ${count} benefit ${count === 1 ? "topic" : "topics"} you ticked`,
+      href: "/dashboard/rewards",
+    });
+  }
+  return count * value;
 }

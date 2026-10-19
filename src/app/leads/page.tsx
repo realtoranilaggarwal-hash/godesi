@@ -20,6 +20,7 @@ import {
   SidebarBanners,
 } from "@/components/Banners";
 import { InArticleAd } from "@/components/InArticleAd";
+import { OfferDemandBox } from "@/components/OfferDemandBox";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -77,6 +78,8 @@ export default async function LeadsPage({
           </div>
           <LinkButton href="/leads/new">Post a requirement</LinkButton>
         </div>
+
+        <OfferDemandBox />
 
         {user && !premium ? (
           <Alert tone="info">
