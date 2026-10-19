@@ -9,15 +9,14 @@ export async function OfferDemandBox({
   category?: string | null;
   title?: string;
 }) {
-  const demand = await offerDemand(category);
+  const { topics: demand, members } = await offerDemand(category);
   if (!demand.length) return null;
-  const total = demand.reduce((sum, row) => sum + row.members, 0);
   return (
     <section className="rounded-2xl border border-amber-200 bg-amber-50 p-3">
       <h2 className="text-sm font-bold text-amber-900">
         {title}{" "}
         <span className="font-semibold text-amber-700">
-          · {total} {total === 1 ? "request" : "requests"}
+          · {members} {members === 1 ? "member" : "members"}
         </span>
       </h2>
       <ul className="mt-2 flex flex-wrap gap-1.5">
