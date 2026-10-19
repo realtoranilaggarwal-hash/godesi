@@ -75,7 +75,7 @@ export async function generateMetadata({
     : await searchBusinesses({ categorySlugs: categoryScopeSlugs(category) });
   return {
     robots: robotsFor(filtered || resultsAreThin(listed.length)),
-    title: `${category.name} in India — Godesi directory`,
+    title: `Desi ${category.name} near you`,
     description: metaDescription(
       category.blurb,
       names.length ? `Browse ${names.join(", ")} and more.` : null,

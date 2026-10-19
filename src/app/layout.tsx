@@ -27,8 +27,8 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "Godesi — The desi directory for businesses, leads, events & news",
-    template: "%s | Godesi",
+    default: "GoDesi — Desi businesses, events, tickets & news near you",
+    template: "%s | GoDesi",
   },
   description:
     "Godesi is a multi-category desi directory: business listings with QR cards and WhatsApp chat, buyer requirements, community events with online tickets and daily news.",
