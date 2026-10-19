@@ -183,6 +183,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: `${base}/visa-bulletin`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/usd-to-inr`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/crypto-fear-greed`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/deals`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/shop`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },

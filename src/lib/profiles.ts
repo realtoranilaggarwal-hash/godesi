@@ -85,6 +85,7 @@ export const RESERVED_USERNAMES = new Set([
   "sitemap",
   "trending",
   "usd-to-inr",
+  "crypto-fear-greed",
   "unsubscribe",
   "upgrade",
   "venues",

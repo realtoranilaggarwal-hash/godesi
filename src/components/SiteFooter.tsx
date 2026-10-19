@@ -89,6 +89,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/festivals", label: "🪔 Festival calendar" },
         { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
         { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
+        { href: "/crypto-fear-greed", label: "😱 Crypto Fear & Greed" },
         { href: "/astrology", label: "🔮 Astrology guides" },
       ],
     },
