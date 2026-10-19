@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { payLabel, workTypeLabel } from "@/lib/jobs";
+import { JOB_CATEGORIES, jobCategory, payLabel, workTypeLabel } from "@/lib/jobs";
 import { Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Jobs & mini jobs — work for desi businesses and families",
+  title: "Desi mini jobs — nanny, babysitting, spa at home & more",
   description:
     "Part-time, full-time and mini jobs posted by GoDesi members: sales callers, tutors, helpers, drivers and more. Sign in free to see the jobs and apply.",
   alternates: { canonical: "/jobs" },
@@ -17,9 +17,10 @@ export const metadata: Metadata = {
 export default async function JobsPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: { q?: string; type?: string };
 }) {
   const q = (searchParams.q ?? "").trim().slice(0, 80);
+  const type = JOB_CATEGORIES.find((category) => category.value === searchParams.type)?.value;
   const user = await getCurrentUser();
   const openWhere = { status: "OPEN" as const };
   const [count, jobs] = await Promise.all([
@@ -28,6 +29,7 @@ export default async function JobsPage({
       ? db.job.findMany({
           where: {
             ...openWhere,
+            ...(type ? { category: type } : {}),
             ...(q
               ? {
                   OR: [
@@ -51,8 +53,9 @@ export default async function JobsPage({
         <p className="text-xs font-bold uppercase tracking-widest text-white/70">Jobs</p>
         <h1 className="mt-1 text-3xl font-black sm:text-4xl">Jobs &amp; mini jobs</h1>
         <p className="mt-2 max-w-2xl text-sm text-white/90">
-          Members post work, from a one-day helper to a part-time sales caller,
-          and members apply. Pay can be hourly, monthly, per sale or commission,
+          Mini jobs from GoDesi members: nanny, babysitting, spa and beauty at
+          home, cleaning, cooking, tutoring, event help and more. Members post
+          the work, and members apply. Pay can be hourly, monthly, per sale or commission,
           by cash, Zelle or check. Jobs are for signed-in members only. Want to
           sell a fixed-price service instead? That&apos;s a{" "}
           <Link href="/gigs" className="font-semibold underline">
@@ -95,7 +98,31 @@ export default async function JobsPage({
         </Card>
       ) : (
         <>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/jobs"
+              className={`rounded-full border px-3 py-1 text-sm font-semibold ${
+                type ? "border-slate-300 bg-white" : "border-indigo-600 bg-indigo-600 text-white"
+              }`}
+            >
+              All
+            </Link>
+            {JOB_CATEGORIES.map((category) => (
+              <Link
+                key={category.value}
+                href={`/jobs?type=${category.value}`}
+                className={`rounded-full border px-3 py-1 text-sm font-semibold ${
+                  type === category.value
+                    ? "border-indigo-600 bg-indigo-600 text-white"
+                    : "border-slate-300 bg-white"
+                }`}
+              >
+                {category.icon} {category.label}
+              </Link>
+            ))}
+          </div>
           <form className="flex gap-2">
+            {type ? <input type="hidden" name="type" value={type} /> : null}
             <input
               name="q"
               defaultValue={q}
@@ -116,6 +143,9 @@ export default async function JobsPage({
                       <span className="font-bold text-emerald-700">{payLabel(job)}</span>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                      <Badge tone="amber">
+                        {jobCategory(job.category).icon} {jobCategory(job.category).label}
+                      </Badge>
                       <Badge tone="indigo">{workTypeLabel(job.workType)}</Badge>
                       <Badge>{job.remote ? "🏠 Work from home" : `📍 ${job.city}`}</Badge>
                       <span className="text-slate-500">by {job.poster.name}</span>

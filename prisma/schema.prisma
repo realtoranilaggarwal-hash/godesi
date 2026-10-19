@@ -3097,6 +3097,8 @@ model Job {
   description   String
   /// What the hire must do or bring, one item per line, e.g. "10 sales a month".
   requirements  String?
+  /// Slug from JOB_CATEGORIES, e.g. "nanny", "spa-at-home".
+  category      String           @default("other")
   workType      JobWorkType      @default(PART_TIME)
   remote        Boolean          @default(false)
   city          String?
@@ -3113,6 +3115,7 @@ model Job {
   updatedAt     DateTime         @updatedAt
 
   @@index([status, createdAt])
+  @@index([category, status])
   @@index([posterId])
 }
 

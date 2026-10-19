@@ -18,6 +18,7 @@ CREATE TABLE "Job" (
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "requirements" TEXT,
+    "category" TEXT NOT NULL DEFAULT 'other',
     "workType" "JobWorkType" NOT NULL DEFAULT 'PART_TIME',
     "remote" BOOLEAN NOT NULL DEFAULT false,
     "city" TEXT,
@@ -51,6 +52,9 @@ CREATE UNIQUE INDEX "Job_slug_key" ON "Job"("slug");
 
 -- CreateIndex
 CREATE INDEX "Job_status_createdAt_idx" ON "Job"("status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "Job_category_status_idx" ON "Job"("category", "status");
 
 -- CreateIndex
 CREATE INDEX "Job_posterId_idx" ON "Job"("posterId");

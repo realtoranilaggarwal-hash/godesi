@@ -6,6 +6,7 @@ import type { Job } from "@prisma/client";
 import { createJobAction, updateJobAction } from "@/app/actions/jobs";
 import { emptyState } from "@/lib/actions";
 import {
+  JOB_CATEGORIES,
   JOB_PAY_METHODS,
   JOB_PAY_TYPES,
   JOB_WORK_TYPES,
@@ -29,7 +30,24 @@ export function JobForm({ job }: { job?: Job }) {
       <FormError>{state.error}</FormError>
       {job ? <input type="hidden" name="jobId" value={job.id} /> : null}
 
-      <Field label="Job title" required hint="e.g. Phone sales caller, work from home">
+      <Field label="Kind of job" required>
+        <select
+          name="category"
+          required
+          defaultValue={job?.category ?? ""}
+          className={inputClass}
+        >
+          <option value="" disabled>
+            Pick one
+          </option>
+          {JOB_CATEGORIES.map((category) => (
+            <option key={category.value} value={category.value}>
+              {category.icon} {category.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label="Job title" required hint="e.g. Nanny for 2 kids, weekdays 9–3">
         <input
           name="title"
           required

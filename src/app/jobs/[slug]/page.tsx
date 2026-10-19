@@ -6,6 +6,7 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import {
   JOB_APPLICATION_STATUSES,
   applicationStatus,
+  jobCategory,
   payLabel,
   payMethodLabels,
   workTypeLabel,
@@ -59,6 +60,9 @@ export default async function JobPage({
           {job.status === "CLOSED" ? <Badge tone="red">Closed</Badge> : null}
         </div>
         <div className="mt-2 flex flex-wrap gap-2 text-sm">
+          <Badge tone="amber">
+            {jobCategory(job.category).icon} {jobCategory(job.category).label}
+          </Badge>
           <Badge tone="indigo">{workTypeLabel(job.workType)}</Badge>
           <Badge>{job.remote ? "🏠 Work from home" : `📍 ${job.city}`}</Badge>
           <span className="text-slate-500">

@@ -17,16 +17,17 @@ async function main() {
       title: "Phone sales caller — work from home",
       description: `Call desi businesses that are already listed on GoDesi (many of them already pay for print ads) and help them claim their free business card and move up to a Featured plan.
 
-You work from home on your own hours. We give you the GoDesi call handbook: ready-made call scripts, answers to the questions owners ask, follow-up WhatsApp and email messages, and a daily call list with each business's name, category, website and phone.
+This is freelance work: you work from home on your own hours. We give you the GoDesi call handbook: ready-made call scripts, answers to the questions owners ask, follow-up WhatsApp and email messages, and a daily call list with each business's name, category, website and phone.
 
-Pay: $200 a month plus 10% commission on every sale you close. The target is 10 sales a month.`,
+Pay: $200 every month plus 10% commission on every sale you close. The target is 10 sales a month.`,
       requirements: [
         "Make 10 sales a month",
         "Clear, friendly English on the phone (Hindi, Gujarati or Punjabi a plus)",
         "A phone and a laptop or tablet with internet",
         "Follow the call handbook and log every call",
       ].join("\n"),
-      workType: "PART_TIME",
+      category: "sales",
+      workType: "CONTRACT",
       remote: true,
       payType: "BASE_PLUS_COMMISSION",
       payMinor: 20000,

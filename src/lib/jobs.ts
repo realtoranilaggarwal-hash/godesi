@@ -2,6 +2,28 @@ import type { JobApplicationStatus, JobPayType, JobWorkType } from "@prisma/clie
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
 
+export const JOB_CATEGORIES = [
+  { value: "nanny", label: "Nanny", icon: "👶" },
+  { value: "babysitting", label: "Babysitting", icon: "🧸" },
+  { value: "elder-care", label: "Elder care", icon: "🧓" },
+  { value: "spa-at-home", label: "Spa & beauty at home", icon: "💆" },
+  { value: "cleaning", label: "House cleaning", icon: "🧹" },
+  { value: "cooking", label: "Cooking & tiffin", icon: "🍲" },
+  { value: "tutoring", label: "Tutoring", icon: "📚" },
+  { value: "driving", label: "Driving & errands", icon: "🚗" },
+  { value: "events", label: "Event help", icon: "🎉" },
+  { value: "sales", label: "Sales & phone calling", icon: "📞" },
+  { value: "office", label: "Office & admin", icon: "💻" },
+  { value: "other", label: "Other", icon: "🧰" },
+] as const;
+
+export function jobCategory(value: string) {
+  return (
+    JOB_CATEGORIES.find((category) => category.value === value) ??
+    JOB_CATEGORIES[JOB_CATEGORIES.length - 1]
+  );
+}
+
 export const JOB_WORK_TYPES: { value: JobWorkType; label: string }[] = [
   { value: "PART_TIME", label: "Part-time" },
   { value: "FULL_TIME", label: "Full-time" },

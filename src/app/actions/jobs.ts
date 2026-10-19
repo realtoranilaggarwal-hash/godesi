@@ -12,6 +12,7 @@ import { sendEmail, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { sentenceCase } from "@/lib/titlecase";
 import {
+  JOB_CATEGORIES,
   JOB_PAY_METHODS,
   applicationStatus,
   payHasCommission,
@@ -34,6 +35,9 @@ const jobSchema = z
       .min(40, "Describe the work in at least a couple of sentences")
       .max(4000),
     requirements: z.string().trim().max(1500).optional(),
+    category: z.enum(JOB_CATEGORIES.map((c) => c.value) as [string, ...string[]], {
+      message: "Pick what kind of job it is",
+    }),
     workType: z.nativeEnum(JobWorkType),
     remote: z.boolean(),
     city: z.string().trim().max(80).optional(),
@@ -59,6 +63,7 @@ function readJobForm(formData: FormData) {
     title: formData.get("title"),
     description: formData.get("description"),
     requirements: formData.get("requirements") ?? undefined,
+    category: formData.get("category"),
     workType: formData.get("workType"),
     remote: formData.get("remote") === "on",
     city: formData.get("city") || undefined,
@@ -74,6 +79,7 @@ function jobColumns(data: z.infer<typeof jobSchema>) {
     title: sentenceCase(data.title),
     description: data.description,
     requirements: data.requirements || null,
+    category: data.category,
     workType: data.workType,
     remote: data.remote,
     city: data.city || null,
