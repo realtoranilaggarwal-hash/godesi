@@ -197,6 +197,8 @@ enum PointsReason {
   /// Ticked a member-benefit topic; paid once per topic.
   OFFER_PICK
   DAILY_SPIN
+  /// Points won on a scratch card.
+  SCRATCH_WIN
   REDEMPTION
   ADJUSTMENT
 }
@@ -423,6 +425,7 @@ model User {
   gigReviews      GigReview[]
   websiteProjects WebsiteProject[]
   dailySpins      DailySpin[]
+  scratchCards    ScratchCard[]
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
@@ -861,6 +864,7 @@ model Business {
   trackedEvents AnalyticsEvent[]
   eventListings Event[]
   deals         Deal[]
+  scratchGifts  ScratchGift[]
 
   @@index([category])
   @@index([city])
@@ -2981,6 +2985,55 @@ model ChatterReport {
   @@unique([postId, reporterId])
   @@index([postId])
 }
+
+/// How a scratch-card winner collects a vendor's free gift.
+enum GiftClaim {
+  VISIT_STORE
+  VISIT_WEBSITE
+  POST_REVIEW
+}
+
+/// A free gift a business offers as a scratch-card prize.
+model ScratchGift {
+  id         String        @id @default(cuid())
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  title      String
+  details    String?
+  claimHow   GiftClaim     @default(VISIT_STORE)
+  /// How many winners the business will serve; the gift leaves the pool once all are won.
+  quantity   Int
+  wonCount   Int           @default(0)
+  expiresAt  DateTime?
+  active     Boolean       @default(true)
+  createdAt  DateTime      @default(now())
+  cards      ScratchCard[]
+
+  @@index([active, expiresAt])
+  @@index([businessId])
+}
+
+/// One scratch card a member bought with points, rolled on the server.
+model ScratchCard {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Points paid for the card.
+  cost       Int
+  /// "gift", "points" or "none".
+  prize      String
+  points     Int          @default(0)
+  giftId     String?
+  gift       ScratchGift? @relation(fields: [giftId], references: [id], onDelete: SetNull)
+  /// Code the winner shows the vendor; only set for gift prizes.
+  code       String?      @unique
+  redeemedAt DateTime?
+  createdAt  DateTime     @default(now())
+
+  @@index([userId, createdAt])
+  @@index([giftId])
+}
+||||||| 7433b58
 
 /// Buy/sell agent requests sent server-to-server by GoDesi network sites
 /// (realestateyp.com, whyuserealtor.com), so the visitor never leaves that site.

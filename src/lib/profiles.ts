@@ -60,6 +60,7 @@ export const RESERVED_USERNAMES = new Set([
   "rishta",
   "deals",
   "shop",
+  "scratch",
   "desi-elite",
   "faq",
   "feed.xml",
