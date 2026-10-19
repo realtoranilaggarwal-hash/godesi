@@ -65,7 +65,7 @@ export default async function MyTicketsPage() {
                       ticket.event.startsAt,
                       ticket.event.timeZone,
                     )}{" "}
-                    · {ticket.event.city} · {ticket.quantity} seat(s) ·{" "}
+                    · {ticket.event.city} · {ticket.quantity} ticket(s) ·{" "}
                     {ticket.amountMinor
                       ? formatMinor(ticket.amountMinor, ticket.currency)
                       : "Free"}
