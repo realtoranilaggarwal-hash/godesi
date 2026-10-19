@@ -54,6 +54,7 @@ const SECTIONS: { title: string; options: PostOption[] }[] = [
         icon: "🛠️",
         label: "A gig (fixed-price service)",
       },
+      { href: "/jobs/new", icon: "💼", label: "A job or mini job" },
     ],
   },
   {
