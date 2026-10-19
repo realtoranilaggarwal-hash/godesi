@@ -41,7 +41,11 @@ export type AgentRow = Prisma.BusinessGetPayload<{
  * The public face of an agent card, with the same contact rule as /b/[slug]:
  * phone and email only on paid cards whose owner left them on.
  */
-export function agentJson(agent: AgentRow, ref?: string) {
+export function agentJson(
+  agent: AgentRow,
+  ref?: string,
+  businessLabel = "brokerage",
+) {
   const paid = agent.owner !== null && effectivePlan(agent.owner) !== "FREE";
   const contact = paid && !agent.hideContact;
   const featured =
@@ -51,7 +55,7 @@ export function agentJson(agent: AgentRow, ref?: string) {
   return {
     slug: agent.slug,
     name: agent.name,
-    kind: agent.profileType === "PROFESSIONAL" ? "agent" : "brokerage",
+    kind: agent.profileType === "PROFESSIONAL" ? "agent" : businessLabel,
     city: agent.city,
     state: agent.state,
     country: agent.country,

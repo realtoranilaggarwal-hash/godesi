@@ -21,7 +21,7 @@ export async function GET(
       { status: 404, headers: FEED_HEADERS },
     );
   }
-  return NextResponse.json(agentJson(agent, ref || undefined), {
+  return NextResponse.json(agentJson(agent, ref || undefined, "agency"), {
     headers: FEED_HEADERS,
   });
 }
