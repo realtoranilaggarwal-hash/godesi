@@ -13,6 +13,7 @@ export const RESERVED_USERNAMES = new Set([
   "api",
   "b",
   "gigs",
+  "jobs",
   "categories",
   "contact",
   "cookies",

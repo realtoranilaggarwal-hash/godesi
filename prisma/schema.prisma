@@ -419,6 +419,8 @@ model User {
   elitePrepaid Boolean @default(false)
 
   gigs            Gig[]
+  jobsPosted      Job[]            @relation("JobPoster")
+  jobApplications JobApplication[] @relation("JobApplicant")
   gigSales        GigOrder[]       @relation("GigSeller")
   gigOrders       GigOrder[]       @relation("GigBuyer")
   gigMessages     GigMessage[]
@@ -3053,4 +3055,82 @@ model PartnerLead {
   handledAt DateTime?
 
   @@index([createdAt])
+}
+
+enum JobWorkType {
+  PART_TIME
+  FULL_TIME
+  ONE_OFF
+  CONTRACT
+}
+
+enum JobPayType {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  PER_TASK
+  FIXED
+  COMMISSION
+  BASE_PLUS_COMMISSION
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+}
+
+enum JobApplicationStatus {
+  NEW
+  SHORTLISTED
+  HIRED
+  DECLINED
+}
+
+/// Jobs and mini jobs; only signed-in members can read, post or apply.
+model Job {
+  id            String           @id @default(cuid())
+  slug          String           @unique
+  posterId      String
+  poster        User             @relation("JobPoster", fields: [posterId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  /// What the hire must do or bring, one item per line, e.g. "10 sales a month".
+  requirements  String?
+  /// Slug from JOB_CATEGORIES, e.g. "nanny", "spa-at-home".
+  category      String           @default("other")
+  workType      JobWorkType      @default(PART_TIME)
+  remote        Boolean          @default(false)
+  city          String?
+  payType       JobPayType
+  /// Amount per `payType` (base pay for BASE_PLUS_COMMISSION) in cents; null when agreed on the call.
+  payMinor      Int?
+  currency      String           @default("USD")
+  commissionPct Int?
+  /// Slugs from JOB_PAY_METHODS, e.g. "cash", "zelle".
+  payMethods    String[]         @default([])
+  status        JobStatus        @default(OPEN)
+  applications  JobApplication[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([status, createdAt])
+  @@index([category, status])
+  @@index([posterId])
+}
+
+model JobApplication {
+  id          String               @id @default(cuid())
+  jobId       String
+  job         Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicantId String
+  applicant   User                 @relation("JobApplicant", fields: [applicantId], references: [id], onDelete: Cascade)
+  message     String
+  phone       String?
+  status      JobApplicationStatus @default(NEW)
+  createdAt   DateTime             @default(now())
+
+  @@unique([jobId, applicantId])
+  @@index([jobId, status])
+  @@index([applicantId])
 }

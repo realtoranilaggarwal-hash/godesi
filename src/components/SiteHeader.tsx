@@ -26,6 +26,7 @@ const NAV = [
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
+  { href: "/jobs", label: "Jobs", icon: "💼" },
   { href: "/blog", label: "Blog", icon: "✍️" },
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
@@ -92,6 +93,7 @@ const PROMO_LINKS = [
   { href: "/deals", label: "Deals", icon: "🏷️" },
   { href: "/shop", label: "Shop", icon: "🛍️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
+  { href: "/jobs", label: "Jobs", icon: "💼" },
   { href: "/resources", label: "Links", icon: "🔗" },
   { href: "/advertise", label: "Advertise", icon: "📢" },
 ];
