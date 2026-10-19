@@ -74,7 +74,7 @@ async function flashOffer(currency: Currency) {
 export default async function UpgradePage({
   searchParams,
 }: {
-  searchParams: { error?: string; posted?: string; term?: string };
+  searchParams: { error?: string; posted?: string; term?: string; offer?: string };
 }) {
   const user = await getCurrentUser();
   const currency = requestCurrency();
@@ -144,6 +144,7 @@ export default async function UpgradePage({
         yearPrice={yearPrice}
         yearListPrice={yearListPrice}
         defaultTerm={searchParams.term === "year" ? "YEAR" : "FIVE_YEAR"}
+        autoLock={searchParams.offer === "today"}
       />
 
       <Card>

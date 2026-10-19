@@ -35,6 +35,7 @@ export function UpgradeCart({
   yearPrice,
   yearListPrice,
   defaultTerm = "FIVE_YEAR",
+  autoLock = false,
 }: {
   currency: Currency;
   signedIn: boolean;
@@ -48,6 +49,8 @@ export function UpgradeCart({
   yearPrice: number;
   yearListPrice: number;
   defaultTerm?: "FIVE_YEAR" | "YEAR";
+  /** Apply the flash code on arrival, e.g. from the new-business today-only offer. */
+  autoLock?: boolean;
 }) {
   const [term, setTerm] = useState<"FIVE_YEAR" | "YEAR">(defaultTerm);
   const [selected, setSelected] = useState<CartItemKey[]>([
@@ -73,6 +76,13 @@ export function UpgradeCart({
     setCode(flashCode);
     setHeld(HOLD_SECONDS);
   }
+
+  useEffect(() => {
+    if (autoLock && flashCode) {
+      setCode(flashCode);
+      setHeld(HOLD_SECONDS);
+    }
+  }, [autoLock, flashCode]);
 
   const cart = useMemo(
     () => priceCart(selected, currency),
