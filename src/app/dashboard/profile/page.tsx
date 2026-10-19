@@ -19,6 +19,7 @@ import {
 import { requestCountry } from "@/lib/currency";
 import { SignOutButton } from "@/components/SignOutButton";
 import { DealsAndShopStrip } from "@/components/DealsAndShopStrip";
+import { OfferDemandBox } from "@/components/OfferDemandBox";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -62,6 +63,14 @@ export default async function ProfileEditorPage({
           </h1>
           <SignOutButton />
         </div>
+        <OfferDemandBox
+          category={business?.categorySlug ?? searchParams.category ?? null}
+          title={
+            business?.categorySlug || searchParams.category
+              ? "🙋 Members looking for help in your trade"
+              : undefined
+          }
+        />
         {isAgentCard(business?.subcategorySlug ?? null) ||
         searchParams.subcategory === "real-estate-property-dealers" ? (
           <Card className="border-indigo-200 bg-indigo-50">

@@ -10,6 +10,7 @@ import {
   parseOfferInterests,
 } from "@/lib/offerInterests";
 import { offerSpinDay } from "@/lib/spin";
+import { awardOfferPickPoints } from "@/lib/rewardsQueries";
 
 export async function saveOfferInterestsAction(
   _prev: ActionState,
@@ -38,6 +39,7 @@ export async function saveOfferInterestsAction(
       return {
         success: "Saved — no topics picked, so no personalised offers.",
       };
+    const points = await awardOfferPickPoints(user.id, offerInterests);
     const usedSpins = await db.dailySpin.count({
       where: { userId: user.id, day: { in: offerInterests.map(offerSpinDay) } },
     });
@@ -50,6 +52,7 @@ export async function saveOfferInterestsAction(
         (offerContactOk
           ? "Saved — your benefits are personalised, and a trusted professional may contact you about your topics."
           : "Saved — your benefits are personalised. Nobody will contact you about them.") +
+        (points ? ` ⭐ +${points} points added to your wallet.` : "") +
         spins,
     };
   } catch (error) {

@@ -67,7 +67,7 @@ export function SignupForm({
       </fieldset>
       <details open className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
         <summary className="cursor-pointer text-sm font-bold text-indigo-900">
-          🎁 Unlock Your GoDesi Member Benefits (optional)
+          🎁 Unlock Your GoDesi Member Benefits — tick all that apply, earn points
         </summary>
         <div className="mt-3">
           <OfferChips />

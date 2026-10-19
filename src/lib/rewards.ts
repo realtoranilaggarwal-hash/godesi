@@ -25,6 +25,7 @@ export const POINTS: Record<EarnReason, number> = {
   FOUNDING_MEMBER: 50,
   /// Paid as a copy of whatever the member just earned, so it has no fixed value.
   FOUNDING_BONUS: 0,
+  OFFER_PICK: 5,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {
@@ -44,6 +45,7 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   FOUNDING_BONUS: "Founding member bonus — double points 🏅",
   REVIEW_POSTED: "You reviewed a business",
   PAYMENT_SPEND: "Points for money spent with Godesi",
+  OFFER_PICK: "You ticked member-benefit topics",
   REDEMPTION: "Points redeemed",
   ADJUSTMENT: "Adjusted by the Godesi team",
 };

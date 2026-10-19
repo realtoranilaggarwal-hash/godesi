@@ -194,6 +194,8 @@ enum PointsReason {
   REVIEW_POSTED
   /// One point per US dollar spent with Godesi.
   PAYMENT_SPEND
+  /// Ticked a member-benefit topic; paid once per topic.
+  OFFER_PICK
   DAILY_SPIN
   REDEMPTION
   ADJUSTMENT
