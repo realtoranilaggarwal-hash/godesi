@@ -238,11 +238,10 @@ export async function generateMetadata({
   const event = await loadEvent(params.slug);
   if (!event) return { title: "Event not found" };
   return {
-    title: `${event.title} — ${event.city}`,
+    title: `${event.title} — ${event.city} tickets`,
     description: metaDescription(
+      `${formatEventDate(event.startsAt, event.timeZone)} at ${event.venue}, ${event.city}. Buy tickets online and get a QR code for entry.`,
       event.description,
-      `${event.title} at ${event.venue}, ${event.city} on ${event.startsAt.toDateString()}.`,
-      "See the line-up, ticket prices and directions, and book online on Godesi.",
     ),
     robots: robotsFor(eventIsThin(event)),
     alternates: { canonical: `${siteUrl()}/events/${event.slug}` },
