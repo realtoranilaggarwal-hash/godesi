@@ -132,6 +132,13 @@ export default async function RootLayout({
               </noscript>
             </>
           ) : null}
+          {/* Travelpayouts Drive: turns travel links into partner links and verifies the site. */}
+          <Script
+            id="travelpayouts-drive"
+            strategy="afterInteractive"
+            src="https://emrldco.com/NTg3NTE5.js?t=587519"
+            data-cmp-ab="2"
+          />
         </head>
       ) : null}
       <body
