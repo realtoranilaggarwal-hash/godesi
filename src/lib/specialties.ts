@@ -993,6 +993,62 @@ const AGENT_SET: SpecialtySet = {
 SPECIALTY_SETS["real-estate-property-dealers"] = AGENT_SET;
 SPECIALTY_SETS["professionals-realtors"] = AGENT_SET;
 
+/** Listing media for agents, sellers, builders and landlords: the shoot plus what is delivered. */
+SPECIALTY_SETS["real-estate-photography"] = {
+  title: "Select the listing media you shoot",
+  clientTitle: "What do you need for the property?",
+  hint: "Pick everything you shoot or deliver — these show as tags on your card and let agents filter for you.",
+  options: [
+    "Listing photos (HDR)",
+    "Twilight / dusk photos",
+    "Drone / aerial photos",
+    "Drone / aerial video",
+    "Listing walkthrough video",
+    "Agent intro / branding video",
+    "Social media reels",
+    "3D virtual tour (Matterport / Zillow 3D)",
+    "2D floor plans",
+    "Virtual staging",
+    "Item removal & sky replacement",
+    "Commercial & retail property",
+    "Rental & Airbnb listings",
+    "New construction & builder models",
+    "Agent headshots",
+    "Single-property website",
+    "MLS-ready sizing",
+    "Next-day delivery",
+  ],
+  choices: [
+    {
+      key: "clients",
+      title: "Who you shoot for",
+      clientTitle: "This is for",
+      options: [
+        "Real estate agents & brokers",
+        "Home sellers (FSBO)",
+        "Builders & developers",
+        "Landlords & property managers",
+        "Airbnb & vacation rental hosts",
+        "Commercial property owners",
+      ],
+      mode: "multi",
+    },
+  ],
+  pricing: [
+    { key: "priceFrom", label: "Starting price per shoot", hint: "E.g. photos for a home under 2,000 sq ft" },
+    { key: "priceExtra", label: "Drone or 3D tour add-on", hint: "Optional" },
+  ],
+  availability: {
+    label: "Service area",
+    hint: "Towns or counties you travel to, e.g. Middlesex & Somerset County NJ",
+  },
+  certifications: {
+    title: "Licences & insurance",
+    options: ["FAA Part 107 drone licence", "Liability insurance", "Matterport Service Partner"],
+  },
+  experience: true,
+};
+
 /** Shared shape for the business-services trades: what you do, how and for whom. */
 function businessSet({
   hint,

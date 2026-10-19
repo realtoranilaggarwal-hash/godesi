@@ -202,6 +202,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
       "Builders & Developers",
       "Home Loans",
       "Property Management",
+      "Real Estate Photography",
     ],
   },
   {
@@ -593,6 +594,7 @@ export const CATEGORY_TREE: CategorySeed[] = [
  */
 const SUBCATEGORY_SLUGS: Record<string, string> = {
   "real-estate:Real Estate Agents": "real-estate-property-dealers",
+  "real-estate:Real Estate Photography": "real-estate-photography",
 };
 
 export function subcategorySlug(parentSlug: string, name: string) {
