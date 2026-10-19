@@ -16,6 +16,7 @@ import { PhoneInput } from "@/components/forms/PhoneInput";
 import { PlaylistField } from "@/components/forms/PlaylistField";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 import { FormSuccess } from "@/components/forms/FormSuccess";
+import { LogoHelp } from "@/components/forms/LogoHelp";
 
 export type PersonalProfileValues = {
   name: string;
@@ -78,13 +79,17 @@ export function PersonalProfileForm({
             </button>
           ) : null}
         </div>
-        <div className="flex-1">
-          <ImageDropzone
-            purpose="avatar"
-            label="Drag & drop your photo, or click to choose"
-            hint="Square photos look best — we resize and compress it for you."
-            onUploaded={setAvatarUrl}
-          />
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="max-w-xs">
+            <ImageDropzone
+              purpose="avatar"
+              compact
+              label="Upload a square photo or logo"
+              hint="Same width and height, e.g. 500 × 500"
+              onUploaded={setAvatarUrl}
+            />
+          </div>
+          <LogoHelp name={profile.name} />
         </div>
       </div>
       <input type="hidden" name="avatarUrl" value={avatarUrl} />

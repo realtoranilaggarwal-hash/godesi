@@ -7,10 +7,12 @@ export const CONTACT_TOPICS = [
   "Report content or a listing",
   "Remove my listing or data",
   "Partnership or bulk listings",
+  "Make a logo for me",
   "Something else",
 ] as const;
 
 export const SALES_TOPICS: readonly string[] = [
   "Advertising, banners and links",
   "Partnership or bulk listings",
+  "Make a logo for me",
 ];
