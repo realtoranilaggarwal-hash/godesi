@@ -1,6 +1,4 @@
 import type { JobApplicationStatus, JobPayType, JobWorkType } from "@prisma/client";
-import { db } from "@/lib/db";
-import { slugify } from "@/lib/slug";
 
 export const JOB_CATEGORIES = [
   { value: "nanny", label: "Nanny", icon: "👶" },
@@ -102,16 +100,4 @@ export function payMethodLabels(methods: string[]) {
   return JOB_PAY_METHODS.filter((method) => methods.includes(method.value)).map(
     (method) => method.label,
   );
-}
-
-export async function uniqueJobSlug(title: string) {
-  const base = slugify(title).slice(0, 70) || "job";
-  let candidate = base;
-  let counter = 1;
-  // eslint-disable-next-line no-await-in-loop
-  while (await db.job.findUnique({ where: { slug: candidate } })) {
-    counter += 1;
-    candidate = `${base}-${counter}`;
-  }
-  return candidate;
 }

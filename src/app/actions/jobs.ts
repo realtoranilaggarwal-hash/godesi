@@ -16,10 +16,22 @@ import {
   JOB_PAY_METHODS,
   applicationStatus,
   payHasCommission,
-  uniqueJobSlug,
 } from "@/lib/jobs";
+import { slugify } from "@/lib/slug";
 
 const MAX_OPEN_JOBS = 10;
+
+async function uniqueJobSlug(title: string) {
+  const base = slugify(title).slice(0, 70) || "job";
+  let candidate = base;
+  let counter = 1;
+  // eslint-disable-next-line no-await-in-loop
+  while (await db.job.findUnique({ where: { slug: candidate } })) {
+    counter += 1;
+    candidate = `${base}-${counter}`;
+  }
+  return candidate;
+}
 
 const optionalNumber = (formData: FormData, key: string) => {
   const value = String(formData.get(key) ?? "").trim();
