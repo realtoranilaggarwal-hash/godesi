@@ -36,6 +36,14 @@ export default async function DashboardDealsPage() {
         </p>
       </div>
 
+      <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+        🎁 Want new customers?{" "}
+        <a href="/dashboard/gifts" className="font-bold underline">
+          Offer a free gift on Scratch &amp; win
+        </a>{" "}
+        — winners visit your store, your website or review you.
+      </p>
+
       {business ? (
         <>
           <Card>

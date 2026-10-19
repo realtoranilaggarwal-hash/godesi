@@ -65,6 +65,9 @@ export default async function RewardsPage() {
             contact details.{" "}
             <Link href="/leaderboard" className="font-semibold underline">
               See the top contributors →
+            </Link>{" "}
+            <Link href="/scratch" className="font-semibold underline">
+              🎟️ Scratch &amp; win with your points →
             </Link>
           </p>
           <div className="mt-3 max-w-sm">
