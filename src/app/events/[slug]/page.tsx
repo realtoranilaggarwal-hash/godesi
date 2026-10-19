@@ -816,22 +816,22 @@ export default async function EventPage({
           </Card>
         ) : (
           <Card>
-            <h2 className="font-bold">Book your seats</h2>
+            <h2 className="font-bold">🎟️ Get your tickets</h2>
             {past ? (
               <p className="mt-2 text-sm text-slate-600">
                 This event has already taken place.
               </p>
             ) : left === 0 ? (
               <p className="mt-2 text-sm text-slate-600">
-                All seats are booked.
+                Sold out — all tickets are taken.
               </p>
             ) : !user ? (
               <div className="mt-3 space-y-2">
                 <p className="text-sm text-slate-600">
-                  Sign in to book a seat.
+                  Sign in (or join free) to buy tickets. Your tickets are saved in your account and emailed to you.
                 </p>
                 <LinkButton href={`/login?next=/events/${event.slug}`}>
-                  Sign in to book
+                  Sign in to buy tickets
                 </LinkButton>
               </div>
             ) : (

@@ -116,12 +116,14 @@ export function ticketEmail({
   venue,
   seats,
   code,
+  ticketType,
 }: {
   eventTitle: string;
   when: string;
   venue: string;
   seats: number;
   code: string;
+  ticketType?: string | null;
 }) {
   const url = `${siteUrl()}/tickets/${code}`;
   return {
@@ -131,10 +133,10 @@ export function ticketEmail({
       `<p style="margin:0 0 12px;color:#334155"><strong>${eventTitle}</strong></p>
        <p style="margin:0 0 4px;color:#334155">📅 ${when}</p>
        <p style="margin:0 0 4px;color:#334155">📍 ${venue}</p>
-       <p style="margin:0 0 16px;color:#334155">🎫 ${seats} seat${seats > 1 ? "s" : ""} · booking code <strong>${code}</strong></p>
+       <p style="margin:0 0 16px;color:#334155">🎫 ${ticketType ? `${ticketType} · ` : ""}${seats} ticket${seats > 1 ? "s" : ""} · booking code <strong>${code}</strong></p>
        <p style="margin:0 0 16px"><img src="${siteUrl()}/api/tickets/${code}/qr" alt="Ticket QR code" width="180" height="180" /></p>
        <p style="margin:0"><a href="${url}" style="display:inline-block;background:#4f46e5;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none">Open my ticket</a></p>
-       <p style="margin:16px 0 0;font-size:13px;color:#64748b">Show the QR code at the entrance.</p>`,
+       <p style="margin:16px 0 0;font-size:13px;color:#64748b">Show the QR code at the entrance, on your phone or printed. One code admits ${seats}. Your tickets are also saved under My tickets on GoDesi.com.</p>`,
     ),
   };
 }

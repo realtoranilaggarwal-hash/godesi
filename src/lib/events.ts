@@ -181,6 +181,7 @@ async function sendTicketConfirmation(ticketId: string) {
           city: true,
         },
       },
+      tier: { select: { name: true } },
     },
   });
   if (!ticket?.buyerEmail) return;
@@ -191,6 +192,7 @@ async function sendTicketConfirmation(ticketId: string) {
     venue: `${ticket.event.venue}, ${ticket.event.city}`,
     seats: ticket.quantity,
     code: ticket.code,
+    ticketType: ticket.tier?.name,
   });
   await sendEmail({ to: ticket.buyerEmail, subject, html });
 }
