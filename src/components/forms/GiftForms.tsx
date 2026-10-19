@@ -3,7 +3,7 @@
 import { useFormState } from "react-dom";
 import { addGiftAction, redeemGiftCodeAction } from "@/app/actions/scratch";
 import { emptyState } from "@/lib/actions";
-import { GIFT_CLAIM_LABELS } from "@/lib/scratch";
+import { GIFT_CLAIM_LABELS } from "@/lib/giftClaims";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
