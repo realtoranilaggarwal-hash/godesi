@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { showsAlbumAndPlaylist } from "@/lib/plans";
 import { suggestUsername } from "@/lib/profiles";
 import { PersonalProfileForm } from "@/components/forms/PersonalProfileForm";
@@ -11,6 +12,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { alumniFor } from "@/lib/alumniQueries";
 import { SignOutButton } from "@/components/SignOutButton";
 import { EarnStrip } from "@/components/EarnStrip";
+import { JoinGoalSteps } from "@/components/JoinGoalSteps";
 import { pointValues, wallet } from "@/lib/rewardsQueries";
 
 export const dynamic = "force-dynamic";
@@ -22,9 +24,13 @@ export default async function PersonalProfilePage() {
 
   const suggested =
     user.username ?? (await suggestUsername(user.name, user.email));
-  const [balance, points] = await Promise.all([
+  const [balance, points, business] = await Promise.all([
     wallet(user.id),
     pointValues(),
+    db.business.findUnique({
+      where: { ownerId: user.id },
+      select: { id: true },
+    }),
   ]);
   const alumni = (await alumniFor(user.id)).map((row) => ({
     institution: row.institution,
@@ -56,6 +62,16 @@ export default async function PersonalProfilePage() {
           </div>
           <SignOutButton />
         </div>
+
+        {business ? null : (
+          <JoinGoalSteps
+            goals={[
+              "business-profile",
+              ...user.joinGoals.filter((id) => id !== "business-profile"),
+            ]}
+            intro="Making a business profile? Start with your free business card — a personal profile is optional."
+          />
+        )}
 
         <EarnStrip
           user={user}

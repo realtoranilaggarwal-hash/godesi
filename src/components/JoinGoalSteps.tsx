@@ -3,7 +3,13 @@ import { joinGoal } from "@/lib/joinGoals";
 import { Card, LinkButton } from "@/components/ui";
 
 /** Dashboard card: one next step per goal the member ticked. */
-export function JoinGoalSteps({ goals }: { goals: string[] }) {
+export function JoinGoalSteps({
+  goals,
+  intro,
+}: {
+  goals: string[];
+  intro?: string;
+}) {
   const picked = goals.flatMap((id) => {
     const goal = joinGoal(id);
     return goal ? [goal] : [];
@@ -37,6 +43,7 @@ export function JoinGoalSteps({ goals }: { goals: string[] }) {
           Change
         </Link>
       </div>
+      {intro ? <p className="mt-1 text-sm text-slate-600">{intro}</p> : null}
       <ul className="mt-2 grid gap-2 sm:grid-cols-2">
         {picked.map((goal) => (
           <li key={goal.id}>
