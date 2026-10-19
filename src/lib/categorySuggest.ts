@@ -126,6 +126,15 @@ const SYNONYMS: Record<string, string[]> = {
     "landlord",
     "tenant",
   ],
+  "real-estate-photography": [
+    "real estate photography",
+    "real estate photographer",
+    "listing photos",
+    "property photos",
+    "virtual tour",
+    "matterport",
+    "floor plan",
+  ],
   "real-estate-builders-and-developers": [
     "builder",
     "developer",
