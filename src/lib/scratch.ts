@@ -1,4 +1,4 @@
-import type { GiftClaim, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 
 /** Points a scratch card costs; staff can override it with RewardSetting "SCRATCH_COST". */
@@ -6,11 +6,7 @@ export const SCRATCH_COST = 20;
 /** Cards a member may scratch per GoDesi day. */
 export const SCRATCH_DAILY_LIMIT = 5;
 
-export const GIFT_CLAIM_LABELS: Record<GiftClaim, string> = {
-  VISIT_STORE: "Visit the store and show your code",
-  VISIT_WEBSITE: "Visit their website and quote your code",
-  POST_REVIEW: "Post a review of the business on GoDesi",
-};
+export { GIFT_CLAIM_LABELS } from "@/lib/giftClaims";
 
 /** Odds out of 100; a gift slot falls back to points when no vendor gift is left. */
 export const SCRATCH_ODDS = [
