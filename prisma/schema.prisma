@@ -3033,7 +3033,6 @@ model ScratchCard {
   @@index([userId, createdAt])
   @@index([giftId])
 }
-||||||| 7433b58
 
 /// Buy/sell agent requests sent server-to-server by GoDesi network sites
 /// (realestateyp.com, whyuserealtor.com), so the visitor never leaves that site.
