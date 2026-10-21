@@ -67,7 +67,7 @@ const STEPS = [
   },
   {
     title: "Pick your categories",
-    body: `Choose one of ${typeCount} event types (mela, garba night, concert, puja, workshop, job fair, expo, fundraiser…), then a directory category and subcategory so the event also shows on that category's page. Paid plans add extra categories.`,
+    body: `Tick what kind of event it is — up to six kinds (mela, garba night, concert, puja, workshop, job fair, expo, fundraiser…) — then a directory category and subcategory so the event also shows on that category's page. Paid plans add extra categories.`,
   },
   {
     title: "Pick the venue",

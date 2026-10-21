@@ -1,3 +1,5 @@
+import { EVENT_TYPES } from "@/lib/eventOptions";
+
 /**
  * The event's own categories — what kind of night out it is, not which trade
  * runs it. Business categories (`Category`) answer "who provides this service";
@@ -193,4 +195,81 @@ export function guessEventLanguages(...parts: (string | null | undefined)[]) {
   return EVENT_LANGUAGES.filter((option) => option.match.test(text))
     .map((option) => option.slug)
     .slice(0, 2);
+}
+
+/**
+ * The single "event type" badge and filter value behind each genre, so the
+ * form only asks "what kind of event" once — the type falls out of the first
+ * category the organiser ticks instead of being a second question.
+ */
+export const GENRE_TO_EVENT_TYPE: Record<
+  string,
+  (typeof EVENT_TYPES)[number]
+> = {
+  "live-concert": "Concert / Live show",
+  "bollywood-night": "Concert / Live show",
+  "classical-music": "Concert / Live show",
+  "ghazal-sufi": "Concert / Live show",
+  "folk-music": "Concert / Live show",
+  "dj-night": "Music / DJ night",
+  "singing-contest": "Competition / Contest",
+  "garba-dandiya": "Dance / Garba / Bhangra",
+  "bhangra-gidda": "Dance / Garba / Bhangra",
+  "classical-dance": "Dance / Garba / Bhangra",
+  "dance-show": "Dance / Garba / Bhangra",
+  "dance-workshop": "Workshop",
+  "standup-comedy": "Comedy show",
+  "theatre-drama": "Theatre / Drama",
+  "film-screening": "Film screening",
+  "fashion-show": "Fashion show",
+  "art-exhibition": "Exhibition / Expo / Trade show",
+  "book-literature": "Other",
+  "festival-mela": "Festival / Mela",
+  diwali: "Festival / Mela",
+  holi: "Festival / Mela",
+  "onam-pongal-bihu": "Festival / Mela",
+  "durga-puja": "Festival / Mela",
+  "ganesh-utsav": "Festival / Mela",
+  "eid-christmas": "Festival / Mela",
+  "new-year-party": "Party / Social",
+  "independence-republic": "Festival / Mela",
+  parade: "Parade / Procession",
+  devotional: "Puja / Satsang / Kirtan",
+  "temple-service": "Puja / Satsang / Kirtan",
+  "katha-pravachan": "Puja / Satsang / Kirtan",
+  "yoga-meditation": "Health & fitness / Yoga",
+  "health-camp": "Health camp / Screening",
+  networking: "Meetup / Networking",
+  "conference-expo": "Conference",
+  "workshop-class": "Workshop",
+  "seminar-webinar": "Seminar / Webinar",
+  "startup-pitch": "Business / Startup event",
+  "job-fair": "Job fair / Career event",
+  "immigration-legal": "Seminar / Webinar",
+  "money-tax": "Seminar / Webinar",
+  "kids-family": "Kids & family",
+  "youth-college": "Youth / Student event",
+  seniors: "Senior / Community gathering",
+  women: "Meetup / Networking",
+  "charity-fundraiser": "Fundraiser / Charity",
+  "awards-night": "Award ceremony",
+  "civic-meeting": "Political / Civic meeting",
+  "food-drink": "Food & drink / Tasting",
+  "cooking-class": "Class / Course",
+  "sports-tournament": "Sports / Tournament",
+  "run-walkathon": "Sports / Tournament",
+  "picnic-tour": "Tour / Travel / Picnic",
+  "party-social": "Party / Social",
+  "wedding-expo": "Wedding-related event",
+  "sangeet-mehndi": "Wedding-related event",
+  "matrimony-meet": "Wedding-related event",
+};
+
+/** The event's broad type, from the first kind the organiser ticked. */
+export function eventTypeFromGenres(genres: string[]) {
+  for (const genre of genres) {
+    const type = GENRE_TO_EVENT_TYPE[genre];
+    if (type) return type;
+  }
+  return undefined;
 }

@@ -29,6 +29,7 @@ import {
 import {
   cleanEventCategories,
   cleanEventLanguages,
+  eventTypeFromGenres,
   guessEventCategories,
 } from "@/lib/eventCategories";
 import { rememberVenue } from "@/lib/venues";
@@ -153,7 +154,7 @@ const eventSchema = z.object({
   city: z.string().trim().min(2, "City is required"),
   state: z.string().trim().min(2, "State is required").optional(),
   country: z.string().trim().min(2, "Country is required").optional(),
-  eventType: z.string().trim().min(2, "Pick an event type"),
+  eventType: z.string().trim().max(60).optional(),
   mode: z.enum(["OFFLINE", "ONLINE", "HYBRID"]).default("OFFLINE"),
   frequency: z.enum(["ONE_TIME", "RECURRING"]).default("ONE_TIME"),
   recurrence: z.string().trim().max(120).optional(),
@@ -340,6 +341,9 @@ export async function createEventAction(
     const languages = cleanEventLanguages(
       formData.getAll("languages").map((value) => String(value)),
     );
+    // The kind ticks double as the broad type, so the form asks it only once.
+    const eventType =
+      parsed.data.eventType || eventTypeFromGenres(genres) || "Other";
     const tags = (parsed.data.tags ?? "")
       .split(",")
       .map((tag) => tag.trim().slice(0, 30))
@@ -429,7 +433,7 @@ export async function createEventAction(
         city: titleCase(parsed.data.city),
         state: parsed.data.state ?? null,
         country: parsed.data.country ?? null,
-        eventType: parsed.data.eventType,
+        eventType,
         genres,
         languages,
         mode: parsed.data.mode,

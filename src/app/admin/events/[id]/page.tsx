@@ -99,7 +99,6 @@ export default async function AdminEditEventPage({
             recurrence: event.recurrence ?? "",
             categorySlug: parentSlug,
             subcategorySlug: subSlug,
-            eventType: event.eventType ?? "",
             mode: event.mode,
             onlineUrl: event.onlineUrl ?? "",
             genres: event.genres,
