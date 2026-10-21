@@ -79,6 +79,14 @@ const PROMOS = [
     href: "/rewards",
     tone: "from-purple-600 to-indigo-700",
   },
+  {
+    emoji: "✈️",
+    title: "GoDesi Travel",
+    text: "Cheap flights & hotels to India — compare every airline.",
+    cta: "Search fares",
+    href: "/travel",
+    tone: "from-cyan-500 to-indigo-600",
+  },
 ] as const;
 
 export function HousePromo({

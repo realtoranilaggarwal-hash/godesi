@@ -170,4 +170,12 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     line: "Free daily spin for GoDesi members",
     colors: "from-pink-500 to-fuchsia-600",
   },
+  {
+    slug: "travel",
+    href: "/travel",
+    emoji: "✈️",
+    title: "GoDesi Travel",
+    line: "Cheap flights & hotels to India",
+    colors: "from-cyan-500 to-indigo-600",
+  },
 ];
