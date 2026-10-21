@@ -18,7 +18,7 @@ const SEARCH_SRC =
   "https://tpwdg.com/content?currency=usd&trs=587519&shmarker=792099&show_hotels=true&powered_by=true&locale=en&searchUrl=travel.godesi.com%2Fflights&primary_override=%2332a8dd&color_button=%2332a8dd&color_icons=%2332a8dd&dark=%23262626&light=%23FFFFFF&secondary=%23FFFFFF&special=%23C4C4C4&color_focused=%2332a8dd&border_radius=0&no_labels=&plain=false&promo_id=7879&campaign_id=100";
 
 const COMPACT_SRC =
-  "https://tpwdg.com/content?currency=usd&trs=587519&shmarker=792099&searchUrl=travel.godesi.com%2Fflights&locale=en&powered_by=false&one_way=false&only_direct=false&period=year&range=7%2C14&primary=%230C73FE&color_background=%23ffffff&dark=%23000000&light=%23FFFFFF&achieve=%2345AD35&promo_id=4041&campaign_id=100";
+  "https://tpwdg.com/content?currency=usd&trs=587519&shmarker=792099&show_hotels=true&powered_by=false&locale=en&searchUrl=travel.godesi.com%2Fflights&primary_override=%2332a8dd&color_button=%2332a8dd&color_icons=%2332a8dd&dark=%23262626&light=%23FFFFFF&secondary=%23FFFFFF&special=%23C4C4C4&color_focused=%2332a8dd&border_radius=0&no_labels=true&plain=true&promo_id=7879&campaign_id=100";
 
 const TOURS_SRC =
   "https://tpwdg.com/content?trs=587519&shmarker=792099&locale=en&city_id=5128581&tours=3&powered_by=true&campaign_id=150&promo_id=4489";

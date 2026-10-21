@@ -159,12 +159,6 @@ export default async function HomePage() {
                   Claim godesi.com/yourname
                 </Link>
                 <Link
-                  href="/astrology/panchang"
-                  className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                >
-                  Today&rsquo;s panchang
-                </Link>
-                <Link
                   href="/travel"
                   className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
                 >
@@ -196,21 +190,18 @@ export default async function HomePage() {
                 TradingView
               </a>
             </p>
-            <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-              <div className="rounded-2xl bg-white/95 p-2 text-slate-700 shadow">
-                <p className="flex flex-wrap items-baseline gap-x-2 px-1 text-xs">
-                  <span className="font-bold text-slate-900">
-                    ✈️ Book flights &amp; hotels
-                  </span>
+            <div className="mt-3 space-y-3">
+              <div className="rounded-2xl bg-white/95 p-3 text-slate-700 shadow">
+                <p className="flex flex-wrap items-baseline gap-x-3 px-1">
                   <Link
                     href="/travel"
-                    className="font-semibold text-indigo-600 hover:underline"
+                    className="text-lg font-black text-indigo-700 hover:underline"
                   >
-                    All travel deals →
+                    ✈️ Travel deals — cheap flights &amp; hotels →
                   </Link>
                   <Link
                     href="/travel/guides/flight-delay-compensation"
-                    className="font-semibold text-rose-600 hover:underline"
+                    className="text-xs font-semibold text-rose-600 hover:underline"
                   >
                     Flight delayed? Claim up to $650 →
                   </Link>
