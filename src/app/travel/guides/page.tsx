@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Card } from "@/components/ui";
+import { TravelWidget } from "@/components/travel/TravelWidget";
 import { TRAVEL_GUIDES } from "@/lib/travelGuides";
 
 export const metadata: Metadata = {
@@ -24,6 +25,10 @@ export default function TravelGuidesPage() {
           airlines owe you when things go wrong.
         </p>
       </section>
+
+      <Card className="p-4 sm:p-5">
+        <TravelWidget variant="search" />
+      </Card>
 
       <section className="grid gap-4 sm:grid-cols-2">
         {TRAVEL_GUIDES.map((guide) => (

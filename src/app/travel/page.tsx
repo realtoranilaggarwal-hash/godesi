@@ -48,7 +48,28 @@ export default function TravelPage() {
       </Card>
 
       <Card className="p-4 sm:p-5">
+        <h2 className="mb-3 text-base font-bold text-slate-900">
+          💺 Live fares to Delhi
+        </h2>
+        <TravelWidget variant="ticker" />
+      </Card>
+
+      <Card className="p-4 sm:p-5">
+        <h2 className="mb-3 text-base font-bold text-slate-900">
+          🛫 New York → Delhi flight schedule
+        </h2>
+        <TravelWidget variant="schedule" />
+      </Card>
+
+      <Card className="p-4 sm:p-5">
         <TravelWidget />
+      </Card>
+
+      <Card className="p-4 sm:p-5">
+        <h2 className="mb-3 text-base font-bold text-slate-900">
+          🗺️ Cheap flight deals on the map
+        </h2>
+        <TravelWidget variant="map" />
       </Card>
 
       <section className="space-y-5">
@@ -90,6 +111,13 @@ export default function TravelPage() {
           </Card>
         ))}
       </section>
+
+      <Card className="p-4 sm:p-5">
+        <h2 className="mb-3 text-base font-bold text-slate-900">
+          🗽 Popular tours &amp; activities
+        </h2>
+        <TravelWidget variant="tours" />
+      </Card>
 
       <Card className="space-y-3">
         <h2 className="text-base font-bold text-slate-900">
