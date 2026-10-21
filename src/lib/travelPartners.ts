@@ -169,7 +169,7 @@ export const TRAVEL_PARTNER_GROUPS: TravelPartnerGroup[] = [
         name: "AirHelp",
         emoji: "⚖️",
         blurb: "Get compensation when your flight is delayed or cancelled.",
-        url: "https://airhelp.tpo.li/4iaov6dm",
+        url: "https://airhelp.tpo.li/4FACJfKn",
       },
       {
         name: "Compensair",
