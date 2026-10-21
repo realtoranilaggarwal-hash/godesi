@@ -155,7 +155,9 @@ export default async function HomePage() {
                 </Link>
               </div>
             </div>
-            <MarketTape />
+            <div className="rounded-xl bg-white p-1">
+              <MarketTape />
+            </div>
             <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
               <div className="rounded-2xl bg-white/95 p-2 text-slate-700 shadow">
                 <p className="flex flex-wrap items-baseline gap-x-2 px-1 text-xs">
@@ -175,7 +177,7 @@ export default async function HomePage() {
                     Flight delayed? Claim up to $650 →
                   </Link>
                 </p>
-                <TravelWidget variant="search" />
+                <TravelWidget variant="compact" />
               </div>
               {today.panchang ? (
                 <DailyStars
