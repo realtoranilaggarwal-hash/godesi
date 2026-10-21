@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
-import { getCategoryTree } from "@/lib/directory";
 import { BusinessTile } from "@/components/BusinessTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
@@ -16,9 +15,10 @@ import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
 import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
-import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
-import { HandleClaim } from "@/components/HandleClaim";
+import { MarketTape } from "@/components/MarketTape";
+import { DailyStars } from "@/components/DailyStars";
+import { TravelWidget } from "@/components/travel/TravelWidget";
 import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
@@ -54,14 +54,6 @@ function SectionHeading({
     </div>
   );
 }
-
-/** What a claimed name actually gives you, said in four lines. */
-const HERO_PROOF: string[] = [
-  "Free forever — no card",
-  "One name, one page: photo, services, links",
-  "QR code for your visiting card",
-  "WhatsApp button so customers message you",
-];
 
 /** Every visitor (and crawler) sees the same shelves, so they are read once a minute. */
 const homeEvents = cachedQuery("home-events", CONTENT_TTL, () =>
@@ -99,9 +91,8 @@ const homeMembers = cachedQuery("home-members", CONTENT_TTL, () =>
 );
 
 export default async function HomePage() {
-  const [categories, businesses, eventRows, newsRows, spaCount, memberRows] =
+  const [businesses, eventRows, newsRows, spaCount, memberRows] =
     await Promise.all([
-      getCategoryTree(),
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
       homeNews(),
@@ -138,77 +129,60 @@ export default async function HomePage() {
 
           <ChatterHomeBox />
 
-          <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6 xl:px-6 xl:py-4">
-            <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-1">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-                  Free desi page · first come, first served
-                </p>
-                <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-4xl xl:text-3xl">
-                  Get your name:{" "}
-                  <span className="whitespace-nowrap">godesi.com/you</span>
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base xl:mt-1 xl:max-w-none xl:text-sm">
-                  One short link for everything you do — your work, your shop,
-                  your WhatsApp, your links. Names go once. Take yours before
-                  somebody else does.
-                </p>
-
-                <div className="xl:flex xl:items-start xl:gap-4">
-                  <div className="mt-4 xl:mt-3 xl:w-[30rem] xl:shrink-0">
-                    <HandleClaim />
-                  </div>
-
-                  <div className="min-w-0 xl:mt-3">
-                    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90 xl:mt-0">
-                      {HERO_PROOF.map((line) => (
-                        <li key={line}>✓ {line}</li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5 xl:mt-2">
-                      <Link
-                        href="/add-business"
-                        className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
-                      >
-                        Add your business free
-                      </Link>
-                      <Link
-                        href="/why-godesi"
-                        className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                      >
-                        Everything you get on GoDesi
-                      </Link>
-                      <Link
-                        href="/people"
-                        className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                      >
-                        See members&rsquo; pages
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+          <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-4 text-white sm:px-5">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h1 className="text-sm font-bold uppercase tracking-widest text-white/80">
+                📈 Markets today · live
+              </h1>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Link
+                  href="/claim"
+                  className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
+                >
+                  Claim godesi.com/yourname
+                </Link>
+                <Link
+                  href="/astrology/panchang"
+                  className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  Today&rsquo;s panchang
+                </Link>
+                <Link
+                  href="/travel"
+                  className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                >
+                  ✈️ Travel deals
+                </Link>
               </div>
-              <div className="xl:hidden">
-                <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <h2 className="text-lg font-black">
-                      Looking for someone? Pick a service 👇
-                    </h2>
-                    <Link
-                      href="/categories"
-                      className="text-sm font-semibold text-indigo-600 hover:underline"
-                    >
-                      All {categories.length} →
-                    </Link>
-                  </div>
-                  <CategoryPicker
-                    groups={pickerGroups}
-                    quickCount={10}
-                    label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-                  />
-                </div>
+            </div>
+            <MarketTape />
+            <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+              <div className="rounded-2xl bg-white/95 p-2 text-slate-700 shadow">
+                <p className="flex flex-wrap items-baseline gap-x-2 px-1 text-xs">
+                  <span className="font-bold text-slate-900">
+                    ✈️ Book flights &amp; hotels
+                  </span>
+                  <Link
+                    href="/travel"
+                    className="font-semibold text-indigo-600 hover:underline"
+                  >
+                    All travel deals →
+                  </Link>
+                  <Link
+                    href="/travel/guides/flight-delay-compensation"
+                    className="font-semibold text-rose-600 hover:underline"
+                  >
+                    Flight delayed? Claim up to $650 →
+                  </Link>
+                </p>
+                <TravelWidget variant="search" />
               </div>
+              {today.panchang ? (
+                <DailyStars
+                  panchang={today.panchang}
+                  place={today.label}
+                />
+              ) : null}
             </div>
           </section>
 
