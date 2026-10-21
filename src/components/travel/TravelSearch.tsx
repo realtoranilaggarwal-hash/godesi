@@ -185,14 +185,20 @@ export function TravelSearch() {
         <button
           type="button"
           className={`${tabBase} ${tab === "flights" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-600"}`}
-          onClick={() => setTab("flights")}
+          onClick={() => {
+            setTab("flights");
+            setDateError("");
+          }}
         >
           ✈️ Flights
         </button>
         <button
           type="button"
           className={`${tabBase} ${tab === "hotels" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-600"}`}
-          onClick={() => setTab("hotels")}
+          onClick={() => {
+            setTab("hotels");
+            setDateError("");
+          }}
         >
           🏨 Hotels
         </button>
