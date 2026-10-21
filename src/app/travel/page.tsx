@@ -205,6 +205,10 @@ export default function TravelPage() {
         ))}
       </section>
 
+      <div className="flex justify-center">
+        <TravelWidget variant="badge" />
+      </div>
+
       <p className="text-center text-sm text-slate-500">
         Direct link:{" "}
         <a

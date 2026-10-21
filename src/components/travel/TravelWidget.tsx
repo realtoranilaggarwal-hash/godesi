@@ -20,6 +20,9 @@ const SEARCH_SRC =
 const TOURS_SRC =
   "https://tpwdg.com/content?trs=587519&shmarker=792099&locale=en&city_id=5128581&tours=3&powered_by=true&campaign_id=150&promo_id=4489";
 
+const BADGE_SRC =
+  "https://tpwdg.com/content?trs=587519&shmarker=792099&locale=en&width=100&height=100&powered_by=true&campaign_id=10&promo_id=2082";
+
 const SOURCES = {
   deals: DEALS_SRC,
   map: MAP_SRC,
@@ -27,6 +30,7 @@ const SOURCES = {
   schedule: SCHEDULE_SRC,
   search: SEARCH_SRC,
   tours: TOURS_SRC,
+  badge: BADGE_SRC,
 };
 
 /**
