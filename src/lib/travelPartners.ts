@@ -145,7 +145,7 @@ export const TRAVEL_PARTNER_GROUPS: TravelPartnerGroup[] = [
         name: "Go City",
         emoji: "🏙️",
         blurb: "All-inclusive city passes covering the top sights.",
-        url: "https://gocity.com/",
+        url: "https://gocity.tpo.li/AUimH1Tz",
       },
       {
         name: "WeGoTrip",
