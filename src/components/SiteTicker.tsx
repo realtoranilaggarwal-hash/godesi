@@ -1,43 +1,25 @@
 import Link from "next/link";
-import { dollarRates, tickerHeadlines } from "@/lib/ticker";
+import { tickerHeadlines } from "@/lib/ticker";
 
 /**
- * The scrolling strip under the header: today's dollar rates for the countries
- * our members send money to, then the latest Godesi headlines. Both come from
- * free sources — daily reference rates and our own news wall — so there is no
- * market data bill and nothing here claims to be a live dealing price.
+ * The scrolling strip under the header: the latest Godesi headlines. Dollar
+ * rates used to ride along here; they moved to the markets box on the
+ * homepage, so this stays news-only.
  */
 export async function SiteTicker() {
-  const [{ rates, asOf }, headlines] = await Promise.all([
-    dollarRates(),
-    tickerHeadlines(8),
-  ]);
+  const headlines = await tickerHeadlines(8);
 
-  if (!rates.length && !headlines.length) return null;
+  if (!headlines.length) return null;
 
-  const items = [
-    ...rates.map((rate) => (
-      <span key={`fx-${rate.code}`} className="whitespace-nowrap">
-        <span className="font-semibold text-slate-900">$1</span> ={" "}
-        <span className="font-semibold text-emerald-700">
-          {rate.perDollar.toLocaleString(undefined, {
-            maximumFractionDigits: rate.perDollar > 10 ? 2 : 4,
-          })}
-        </span>{" "}
-        {rate.code}
-        <span className="text-slate-400"> · {rate.label}</span>
-      </span>
-    )),
-    ...headlines.map((headline) => (
-      <Link
-        key={headline.href}
-        href={headline.href}
-        className="whitespace-nowrap font-medium text-slate-700 hover:text-indigo-600"
-      >
-        📰 {headline.title}
-      </Link>
-    )),
-  ];
+  const items = headlines.map((headline) => (
+    <Link
+      key={headline.href}
+      href={headline.href}
+      className="whitespace-nowrap font-medium text-slate-700 hover:text-indigo-600"
+    >
+      📰 {headline.title}
+    </Link>
+  ));
 
   return (
     <div className="border-b border-slate-200 bg-slate-50">
@@ -61,19 +43,6 @@ export async function SiteTicker() {
             ))}
           </div>
         </div>
-        <a
-          href="https://www.exchangerate-api.com"
-          target="_blank"
-          rel="noreferrer"
-          title={
-            asOf
-              ? `Reference rates, updated ${asOf}. Not a live dealing price.`
-              : "Daily reference rates"
-          }
-          className="hidden shrink-0 text-[10px] text-slate-400 hover:text-slate-600 sm:block"
-        >
-          rates: exchangerate-api
-        </a>
       </div>
     </div>
   );
