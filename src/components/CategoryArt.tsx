@@ -162,7 +162,7 @@ export function CategoryArt({
           <stop offset="1" stopColor={scene.sky[1]} />
         </linearGradient>
       </defs>
-      <rect width="320" height="170" rx="22" fill={`url(#${id})`} />
+      <rect width="320" height="170" fill={`url(#${id})`} />
       <circle cx="262" cy="-6" r="62" fill="#fff" opacity="0.16" />
       <circle cx="40" cy="190" r="70" fill="#fff" opacity="0.12" />
       <ellipse cx="160" cy="176" rx="190" ry="46" fill="#fff" opacity="0.22" />
