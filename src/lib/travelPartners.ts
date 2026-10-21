@@ -79,7 +79,7 @@ export const TRAVEL_PARTNER_GROUPS: TravelPartnerGroup[] = [
         name: "intui.travel",
         emoji: "🚌",
         blurb: "Airport shuttles and private transfers in 175+ countries.",
-        url: "https://en.intui.travel/",
+        url: "https://intui.tpo.li/RAE25AYO",
       },
     ],
   },
