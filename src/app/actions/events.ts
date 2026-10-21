@@ -236,7 +236,7 @@ export async function createEventAction(
       city: formData.get("city") || (onlineOnly ? "Online" : ""),
       state: formData.get("state") || (onlineOnly ? undefined : ""),
       country: formData.get("country") || (onlineOnly ? undefined : ""),
-      eventType: formData.get("eventType"),
+      eventType: formData.get("eventType") ?? undefined,
       mode: formData.get("mode") || "OFFLINE",
       frequency: formData.get("frequency") || "ONE_TIME",
       recurrence: formData.get("recurrence") ?? undefined,
