@@ -90,14 +90,31 @@ const homeMembers = cachedQuery("home-members", CONTENT_TTL, () =>
   newestMembers(12, { withPage: true }),
 );
 
+/** Free public crypto Fear & Greed index (alternative.me), refetched every 30 min. */
+const cryptoFearGreed = cachedQuery("crypto-fng", 1800, async () => {
+  try {
+    const res = await fetch("https://api.alternative.me/fng/?limit=1", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    });
+    const row = (await res.json())?.data?.[0];
+    return row
+      ? { value: String(row.value), label: String(row.value_classification) }
+      : null;
+  } catch {
+    return null;
+  }
+});
+
 export default async function HomePage() {
-  const [businesses, eventRows, newsRows, spaCount, memberRows] =
+  const [businesses, eventRows, newsRows, spaCount, memberRows, fng] =
     await Promise.all([
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
       homeNews(),
       homeSpaCount(),
       homeMembers(),
+      cryptoFearGreed(),
     ]);
   // Cached rows come back JSON-serialised, so dates are strings again.
   const upcoming = eventRows.map((event) => ({
@@ -153,11 +170,32 @@ export default async function HomePage() {
                 >
                   ✈️ Travel deals
                 </Link>
+                {fng ? (
+                  <a
+                    href="https://alternative.me/crypto/fear-and-greed-index/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                  >
+                    😬 Crypto mood: {fng.value} · {fng.label}
+                  </a>
+                ) : null}
               </div>
             </div>
             <div className="rounded-xl bg-white p-1">
               <MarketTape />
             </div>
+            <p className="mt-1 text-right text-[10px] text-white/50">
+              Quotes by{" "}
+              <a
+                href="https://www.tradingview.com/?aff_id=1173084"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white/80"
+              >
+                TradingView
+              </a>
+            </p>
             <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
               <div className="rounded-2xl bg-white/95 p-2 text-slate-700 shadow">
                 <p className="flex flex-wrap items-baseline gap-x-2 px-1 text-xs">
