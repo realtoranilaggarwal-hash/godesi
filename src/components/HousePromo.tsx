@@ -87,6 +87,22 @@ const PROMOS = [
     href: "/travel",
     tone: "from-cyan-500 to-indigo-600",
   },
+  {
+    emoji: "⚖️",
+    title: "Flight delayed or cancelled?",
+    text: "You could be owed up to $650 — it takes a minute to check.",
+    cta: "Check my flight",
+    href: "/travel",
+    tone: "from-slate-600 to-indigo-700",
+  },
+  {
+    emoji: "🗺️",
+    title: "Cheap fares on the map",
+    text: "Live flight deals from your city — tap a route, see the price.",
+    cta: "Open the deals map",
+    href: "/travel",
+    tone: "from-teal-500 to-cyan-600",
+  },
 ] as const;
 
 export function HousePromo({

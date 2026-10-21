@@ -178,4 +178,20 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     line: "Cheap flights & hotels to India",
     colors: "from-cyan-500 to-indigo-600",
   },
+  {
+    slug: "travel-compensation",
+    href: "/travel",
+    emoji: "⚖️",
+    title: "Flight delayed?",
+    line: "Claim up to $650 compensation",
+    colors: "from-slate-600 to-indigo-700",
+  },
+  {
+    slug: "travel-map",
+    href: "/travel",
+    emoji: "🗺️",
+    title: "Cheap fares map",
+    line: "Live flight deals from your city",
+    colors: "from-teal-500 to-cyan-600",
+  },
 ];
