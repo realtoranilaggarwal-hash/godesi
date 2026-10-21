@@ -18,7 +18,6 @@ import { ActivityWall } from "@/components/ActivityWall";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { MarketTape } from "@/components/MarketTape";
 import { DailyStars } from "@/components/DailyStars";
-import { TravelWidget } from "@/components/travel/TravelWidget";
 import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
