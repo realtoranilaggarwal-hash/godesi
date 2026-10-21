@@ -23,6 +23,16 @@ async function suggest(term: string): Promise<TravelPlace[]> {
   }
 }
 
+/** White-label dates are DDMM only — cap picks ~11 months out so they stay unambiguous. */
+function isoDate(offsetDays = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
+
+const MIN_DATE = isoDate();
+const MAX_DATE = isoDate(330);
+
 function placeLabel(place: TravelPlace): string {
   return `${place.name} (${place.code})`;
 }
@@ -41,11 +51,15 @@ function PlaceField({
   const [options, setOptions] = useState<TravelPlace[]>([]);
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+  const requestId = useRef(0);
 
   useEffect(() => {
     if (picked && query === placeLabel(picked)) return;
     const id = setTimeout(() => {
-      void suggest(query).then(setOptions);
+      const seq = ++requestId.current;
+      void suggest(query).then((places) => {
+        if (seq === requestId.current) setOptions(places);
+      });
     }, 250);
     return () => clearTimeout(id);
   }, [query, picked]);
@@ -118,10 +132,20 @@ export function TravelSearch() {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
+  const [dateError, setDateError] = useState("");
 
   const searchFlights = (event: React.FormEvent) => {
     event.preventDefault();
     if (!from || !to) return;
+    if (back && !depart) {
+      setDateError("Pick a departure date too, or clear the return date.");
+      return;
+    }
+    if (depart && back && back < depart) {
+      setDateError("Return date must be after the departure date.");
+      return;
+    }
+    setDateError("");
     window.open(
       flightResultsUrl({
         origin: from.code,
@@ -138,6 +162,11 @@ export function TravelSearch() {
   const searchHotels = (event: React.FormEvent) => {
     event.preventDefault();
     if (!city) return;
+    if (checkIn && checkOut && checkOut <= checkIn) {
+      setDateError("Check-out must be after the check-in date.");
+      return;
+    }
+    setDateError("");
     window.open(
       hotelResultsUrl({
         destination: city.name,
@@ -189,6 +218,8 @@ export function TravelSearch() {
             <input
               type="date"
               className={`${inputClass} mt-1`}
+              min={MIN_DATE}
+              max={MAX_DATE}
               value={depart}
               onChange={(event) => setDepart(event.target.value)}
             />
@@ -198,6 +229,8 @@ export function TravelSearch() {
             <input
               type="date"
               className={`${inputClass} mt-1`}
+              min={depart || MIN_DATE}
+              max={MAX_DATE}
               value={back}
               onChange={(event) => setBack(event.target.value)}
             />
@@ -242,6 +275,8 @@ export function TravelSearch() {
             <input
               type="date"
               className={`${inputClass} mt-1`}
+              min={MIN_DATE}
+              max={MAX_DATE}
               value={checkIn}
               onChange={(event) => setCheckIn(event.target.value)}
             />
@@ -251,6 +286,8 @@ export function TravelSearch() {
             <input
               type="date"
               className={`${inputClass} mt-1`}
+              min={checkIn || MIN_DATE}
+              max={MAX_DATE}
               value={checkOut}
               onChange={(event) => setCheckOut(event.target.value)}
             />
@@ -280,6 +317,9 @@ export function TravelSearch() {
         </form>
       )}
 
+      {dateError ? (
+        <p className="mt-3 text-sm font-medium text-rose-600">{dateError}</p>
+      ) : null}
       <p className="mt-3 text-xs text-slate-500">
         Search opens GoDesi Travel — flight and hotel results from hundreds of
         airlines and booking sites, powered by our travel partner.
