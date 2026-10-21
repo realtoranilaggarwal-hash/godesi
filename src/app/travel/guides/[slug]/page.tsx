@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui";
 import { TravelSearch } from "@/components/travel/TravelSearch";
+import { TravelWidget } from "@/components/travel/TravelWidget";
 import { TRAVEL_GUIDES, getTravelGuide } from "@/lib/travelGuides";
 
 export function generateStaticParams() {
@@ -92,6 +93,10 @@ export default function TravelGuidePage({
           )}
         </Card>
       ))}
+
+      <Card className="p-4 sm:p-5">
+        <TravelWidget />
+      </Card>
 
       <Card className="space-y-3">
         <h2 className="text-lg font-bold text-slate-900">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Card } from "@/components/ui";
 import { TravelSearch } from "@/components/travel/TravelSearch";
+import { TravelWidget } from "@/components/travel/TravelWidget";
 import { TRAVEL_WHITELABEL } from "@/lib/travel";
 import { TRAVEL_PARTNER_GROUPS } from "@/lib/travelPartners";
 import { TRAVEL_GUIDES } from "@/lib/travelGuides";
@@ -44,6 +45,10 @@ export default function TravelPage() {
 
       <Card className="p-5 sm:p-6">
         <TravelSearch />
+      </Card>
+
+      <Card className="p-4 sm:p-5">
+        <TravelWidget />
       </Card>
 
       <section className="space-y-5">
