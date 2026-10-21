@@ -148,9 +148,17 @@ export default async function HomePage() {
 
           <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-4 text-white sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <h1 className="text-sm font-bold uppercase tracking-widest text-white/80">
-                📈 Markets today · live
-              </h1>
+              <div className="flex items-baseline gap-3">
+                <h1 className="text-sm font-bold uppercase tracking-widest text-white/80">
+                  📈 Markets today · live
+                </h1>
+                <Link
+                  href="/markets"
+                  className="text-xs font-bold text-indigo-300 underline hover:text-white"
+                >
+                  Full markets page →
+                </Link>
+              </div>
               <div className="flex flex-wrap items-center gap-1.5">
                 <Link
                   href="/claim"
@@ -206,7 +214,6 @@ export default async function HomePage() {
                     Flight delayed? Claim up to $650 →
                   </Link>
                 </p>
-                <TravelWidget variant="compact" />
               </div>
               {today.panchang ? (
                 <DailyStars
