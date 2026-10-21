@@ -23,6 +23,9 @@ const TOURS_SRC =
 const BADGE_SRC =
   "https://tpwdg.com/content?trs=587519&shmarker=792099&locale=en&width=100&height=100&powered_by=true&campaign_id=10&promo_id=2082";
 
+const ESIM_SRC =
+  "https://tpwdg.com/content?trs=587519&shmarker=792099&locale=en&country=India&powered_by=true&color_button=%23f2685f&color_focused=%23f2685f&secondary=%23FFFFFF&dark=%2311100f&light=%23FFFFFF&special=%23C4C4C4&border_radius=5&plain=false&no_labels=true&promo_id=8588&campaign_id=541";
+
 const SOURCES = {
   deals: DEALS_SRC,
   map: MAP_SRC,
@@ -31,6 +34,7 @@ const SOURCES = {
   search: SEARCH_SRC,
   tours: TOURS_SRC,
   badge: BADGE_SRC,
+  esim: ESIM_SRC,
 };
 
 /**

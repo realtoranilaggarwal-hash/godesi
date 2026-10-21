@@ -108,6 +108,11 @@ export default function TravelPage() {
                 </a>
               ))}
             </div>
+            {group.title === "eSIM & connectivity" && (
+              <div className="pt-2">
+                <TravelWidget variant="esim" />
+              </div>
+            )}
           </Card>
         ))}
       </section>
