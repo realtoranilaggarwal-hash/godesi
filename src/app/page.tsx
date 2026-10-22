@@ -145,7 +145,7 @@ export default async function HomePage() {
 
           <ChatterHomeBox />
 
-          <section className="overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 sm:px-5">
+          <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-baseline gap-3">
                 <h1 className="text-sm font-bold uppercase tracking-widest text-slate-600">

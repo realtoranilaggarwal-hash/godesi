@@ -48,6 +48,7 @@ import { EventRsvpPanel } from "@/components/EventRsvpPanel";
 import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 import { GodesiMark } from "@/components/GodesiMark";
+import { ScrollTop } from "@/components/ScrollTop";
 
 type SpeakerRow =
   Awaited<ReturnType<typeof loadEvent>> extends infer E
@@ -397,6 +398,7 @@ export default async function EventPage({
 
   return (
     <div className="flex gap-6">
+      <ScrollTop />
       <div className="min-w-0 flex-1 space-y-6">
         <script
           type="application/ld+json"
