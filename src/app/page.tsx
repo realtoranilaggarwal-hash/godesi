@@ -173,7 +173,7 @@ export default async function HomePage() {
                 </Link>
                 {fng ? (
                   <Link
-                    href="/markets"
+                    href="/crypto-fear-greed"
                     className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
                   >
                     😬 Crypto mood: {fng.value} · {fng.label}
