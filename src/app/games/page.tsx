@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default async function GamesPage() {
   const games = await gamesFeed();
-  const categories = [...new Set(games.map((g) => g.category))].sort();
+  const categories = Array.from(new Set(games.map((g) => g.category))).sort();
 
   return (
     <div className="space-y-5">
