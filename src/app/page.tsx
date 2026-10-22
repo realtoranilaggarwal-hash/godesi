@@ -172,14 +172,12 @@ export default async function HomePage() {
                   ✈️ Travel deals
                 </Link>
                 {fng ? (
-                  <a
-                    href="https://alternative.me/crypto/fear-and-greed-index/"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href="/markets"
                     className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
                   >
                     😬 Crypto mood: {fng.value} · {fng.label}
-                  </a>
+                  </Link>
                 ) : null}
               </div>
             </div>
