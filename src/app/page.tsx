@@ -145,15 +145,15 @@ export default async function HomePage() {
 
           <ChatterHomeBox />
 
-          <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-4 py-4 text-white sm:px-5">
+          <section className="overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-baseline gap-3">
-                <h1 className="text-sm font-bold uppercase tracking-widest text-white/80">
+                <h1 className="text-sm font-bold uppercase tracking-widest text-slate-600">
                   📈 Markets today · live
                 </h1>
                 <Link
                   href="/markets"
-                  className="text-xs font-bold text-indigo-300 underline hover:text-white"
+                  className="text-xs font-bold text-indigo-600 underline hover:text-indigo-800"
                 >
                   Full markets page →
                 </Link>
@@ -161,64 +161,54 @@ export default async function HomePage() {
               <div className="flex flex-wrap items-center gap-1.5">
                 <Link
                   href="/claim"
-                  className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
+                  className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white hover:bg-slate-700"
                 >
                   Claim godesi.com/yourname
                 </Link>
                 <Link
                   href="/travel"
-                  className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                 >
                   ✈️ Travel deals
+                </Link>
+                <Link
+                  href="/games"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  🎮 Games
                 </Link>
                 {fng ? (
                   <Link
                     href="/crypto-fear-greed"
-                    className="rounded-full border border-white/50 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+                    className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
                   >
                     😬 Crypto mood: {fng.value} · {fng.label}
                   </Link>
                 ) : null}
               </div>
             </div>
-            <div className="rounded-xl bg-white p-1">
+            <div className="rounded-xl border border-slate-200 bg-white p-1">
               <MarketTape />
             </div>
-            <p className="mt-1 text-right text-[10px] text-white/50">
+            <p className="mt-1 text-right text-[10px] text-slate-400">
               Quotes by{" "}
               <a
                 href="https://www.tradingview.com/?aff_id=1173084"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline hover:text-white/80"
+                className="underline hover:text-slate-600"
               >
                 TradingView
               </a>
             </p>
-            <div className="mt-3 space-y-3">
-              <div className="rounded-2xl bg-white/95 p-3 text-slate-700 shadow">
-                <p className="flex flex-wrap items-baseline gap-x-3 px-1">
-                  <Link
-                    href="/travel"
-                    className="text-lg font-black text-indigo-700 hover:underline"
-                  >
-                    ✈️ Travel deals — cheap flights &amp; hotels →
-                  </Link>
-                  <Link
-                    href="/travel/guides/flight-delay-compensation"
-                    className="text-xs font-semibold text-rose-600 hover:underline"
-                  >
-                    Flight delayed? Claim up to $650 →
-                  </Link>
-                </p>
-              </div>
-              {today.panchang ? (
+            {today.panchang ? (
+              <div className="mt-3">
                 <DailyStars
                   panchang={today.panchang}
                   place={today.label}
                 />
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </section>
 
           <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
