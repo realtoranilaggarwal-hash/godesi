@@ -41,6 +41,7 @@ const getBusiness = cache((slug: string) =>
       categoryRef: { select: { slug: true, name: true, icon: true } },
       subcategorySlug: true,
       subcategoryRef: { select: { slug: true, name: true, icon: true } },
+      extraCategorySlugs: true,
       featuredRank: true,
       featuredUntil: true,
       owner: {
@@ -86,6 +87,13 @@ export default async function CardPage({
     (business.featuredRank > 0 &&
       (!business.featuredUntil || business.featuredUntil > now)) ||
     (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
+  const extraCategories = business.extraCategorySlugs.length
+    ? await db.category.findMany({
+        where: { slug: { in: business.extraCategorySlugs } },
+        select: { slug: true, name: true, icon: true },
+        orderBy: { name: "asc" },
+      })
+    : [];
   const categories = await db.category.findMany({
     where: { parentSlug: null },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
@@ -243,6 +251,15 @@ export default async function CardPage({
                 {business.subcategoryRef.icon} {business.subcategoryRef.name}
               </Link>
             ) : null}
+            {extraCategories.map((extra) => (
+              <Link
+                key={extra.slug}
+                href={`/categories/${extra.slug}`}
+                className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 hover:bg-slate-200"
+              >
+                {extra.icon} {extra.name}
+              </Link>
+            ))}
           </div>
 
           {/* Live deals — part of the card face */}
@@ -269,8 +286,8 @@ export default async function CardPage({
             <img
               src={`/api/qr/${business.slug}?card=1`}
               alt={`QR code for ${business.name}`}
-              width={72}
-              height={72}
+              width={104}
+              height={104}
               className="shrink-0 rounded-lg border border-slate-200"
             />
             <div className="min-w-0">
