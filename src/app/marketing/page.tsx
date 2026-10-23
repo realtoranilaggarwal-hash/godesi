@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { Card } from "@/components/ui";
+import { EFAX_AFFILIATE_URL, EFAX_TRACKING_PIXEL } from "@/lib/shop";
 
 export const metadata: Metadata = {
   title: "Free marketing, free SEO and a free GoDesi.wiki membership | Godesi",
@@ -105,8 +106,8 @@ export default function MarketingPage() {
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           When you have a real announcement — a new office, a big sale, a
           community event — a press release puts it in front of consumers,
-          journalists and bloggers. Our partner 24-7PressRelease.com
-          distributes it online for instant visibility.
+          journalists and bloggers. Our partner 24-7PressRelease.com distributes
+          it online for instant visibility.
         </p>
         <div className="mt-4">
           <a
@@ -120,6 +121,35 @@ export default function MarketingPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://www.ftjcfx.com/image-100712969-10754888"
+            width="1"
+            height="1"
+            alt=""
+            aria-hidden
+            className="inline-block h-px w-px"
+          />
+          <p className="mt-2 text-[11px] text-slate-400">
+            Partner link — GoDesi may earn a commission.
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-sky-200 bg-gradient-to-r from-sky-50 to-white p-6">
+        <h2 className="text-xl font-black">Send business faxes online</h2>
+        <p className="mt-2 max-w-3xl text-sm text-slate-600">
+          Use eFax to send and receive business documents without a fax machine.
+        </p>
+        <div className="mt-4">
+          <a
+            href={EFAX_AFFILIATE_URL}
+            target="_blank"
+            rel="noopener noreferrer nofollow sponsored"
+            className="inline-flex items-center rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-sky-800"
+          >
+            Explore eFax →
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={EFAX_TRACKING_PIXEL}
             width="1"
             height="1"
             alt=""
