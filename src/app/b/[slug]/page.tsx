@@ -21,6 +21,8 @@ import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { reviewSourceLabel } from "@/lib/reviewSources";
 import { QrCard } from "@/components/QrCard";
 import { DigitalCardFace } from "@/components/DigitalCardFace";
+import { CardLeadForm } from "@/components/CardLeadForm";
+import { CardShareButton } from "@/components/CardShareButton";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoundingBadge } from "@/components/FoundingBadge";
 import { TrackVisit } from "@/components/TrackVisit";
@@ -607,12 +609,6 @@ export default async function BusinessProfilePage({
                   url={`${siteUrl()}/b/${business.slug}`}
                   title={business.name}
                 />
-                <Link
-                  href={`/card/${business.slug}`}
-                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
-                >
-                  🪪 Digital card
-                </Link>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
@@ -659,14 +655,66 @@ export default async function BusinessProfilePage({
             </div>
             </div>
           </Card>
-          <DigitalCardFace
-            business={business}
-            featured={business.featured || ownerPlan !== "FREE"}
-            paidContact={paidContact}
-            extraCategories={extraCategories}
-            ctaHref={`/card/${business.slug}`}
-            ctaLabel="Open card →"
-          />
+          <div className="w-full space-y-4">
+            <DigitalCardFace
+              business={business}
+              featured={business.featured || ownerPlan !== "FREE"}
+              paidContact={paidContact}
+              extraCategories={extraCategories}
+            />
+
+            {/* Card actions — everything the old /card page held lives here */}
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href={`/card/${business.slug}/vcf`}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-3 py-2.5 text-xs font-bold text-white hover:bg-slate-800"
+              >
+                ⬇️ Save contact
+              </a>
+              <CardShareButton
+                url={`${siteUrl()}/b/${business.slug}`}
+                name={business.name}
+                className="flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-3 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+              />
+              <Link
+                href={`/card/${business.slug}/poster`}
+                className="col-span-2 flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                🖨️ Print shop poster
+              </Link>
+            </div>
+
+            {/* Vendor's referral offer — scissors-style coupon to clip */}
+            {business.referralOffer ? (
+              <div className="relative mt-6 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3">
+                <div className="absolute -top-3 left-4 flex items-center gap-1.5 bg-amber-50 px-2">
+                  <span aria-hidden>✂️</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                    Clip this coupon
+                  </span>
+                </div>
+                <p className="mt-1 text-center text-sm font-extrabold text-slate-900">
+                  {business.referralOffer}
+                </p>
+                <p className="mt-1 text-center text-[11px] font-semibold text-amber-700">
+                  Show this card or mention GoDesi at {business.name} to redeem
+                </p>
+              </div>
+            ) : null}
+
+            {/* Lead capture */}
+            <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-4 shadow-sm">
+              <h2 className="text-center text-sm font-bold text-slate-900">
+                Share your card with {business.name}
+              </h2>
+              <p className="mt-1 text-center text-xs text-slate-500">
+                Leave your details and they&apos;ll get in touch.
+              </p>
+              <div className="mt-3">
+                <CardLeadForm slug={business.slug} />
+              </div>
+            </div>
+          </div>
         </div>
 
         {business.deals.length || isOwner ? (

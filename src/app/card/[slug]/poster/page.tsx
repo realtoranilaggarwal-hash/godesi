@@ -51,7 +51,7 @@ export default async function CardPosterPage({
         </PrintButton>
       </div>
       <p className="no-print text-xs text-slate-500">
-        <Link href={`/card/${business.slug}`} className="underline">
+        <Link href={`/b/${business.slug}`} className="underline">
           ← Back to the card
         </Link>
       </p>
@@ -104,7 +104,7 @@ export default async function CardPosterPage({
         ) : null}
 
         <p className="mt-5 text-base font-bold text-slate-900">
-          godesi.com/card/{business.slug}
+          godesi.com/b/{business.slug}
         </p>
         <p className="mt-1 text-xs text-slate-500">
           Call · WhatsApp · Save contact · Share your details — all from the card
