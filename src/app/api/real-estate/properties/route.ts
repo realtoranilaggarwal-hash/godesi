@@ -14,10 +14,10 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const limit = Math.min(
-    Math.max(Number(params.get("limit") ?? 24) || 24, 1),
+    Math.max(Math.floor(Number(params.get("limit") ?? 24) || 24), 1),
     100,
   );
-  const skip = Math.max(Number(params.get("offset") ?? 0) || 0, 0);
+  const skip = Math.max(Math.floor(Number(params.get("offset") ?? 0) || 0), 0);
   const city = params.get("city")?.trim() || undefined;
   const kind = params.get("kind");
   const ref = params.get("ref")?.trim() || undefined;
