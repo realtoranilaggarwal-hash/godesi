@@ -17,7 +17,6 @@ import {
   EVENT_FEATURE_GROUPS,
   EVENT_FREQUENCIES,
   EVENT_MODES,
-  EVENT_TYPES,
   ONLINE_OPEN_SEATS,
 } from "@/lib/eventOptions";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
@@ -150,16 +149,6 @@ export function EventForm({
           <input name="endDate" type="date" className={inputClass} />
         </Field>
         <EventCategoryPicker />
-        <Field label="Event type">
-          <select name="eventType" required className={inputClass}>
-            <option value="">Select a type</option>
-            {EVENT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </Field>
         <Field label="Event mode">
           <select
             name="mode"

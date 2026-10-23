@@ -195,6 +195,12 @@ const profileSchema = z.object({
     .or(z.literal("").transform(() => undefined)),
   priceCurrency: z.enum(["USD", "INR"]).optional(),
   customQuote: z.coerce.boolean().optional(),
+  referralOffer: z
+    .string()
+    .trim()
+    .max(160)
+    .optional()
+    .transform((value) => value || null),
 });
 
 /**
@@ -263,6 +269,7 @@ function readProfileForm(formData: FormData) {
     startingPrice: value("startingPrice") || undefined,
     priceCurrency: value("priceCurrency") || undefined,
     customQuote: formData.get("customQuote") === "on",
+    referralOffer: value("referralOffer"),
   });
 }
 

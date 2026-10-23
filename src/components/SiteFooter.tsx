@@ -52,6 +52,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/dashboard/deals", label: "Post a deal" },
         { href: "/dashboard/gigs", label: "Sell a gig" },
         { href: "/jobs/new", label: "Post a job" },
+        { href: "/card", label: "🪪 Digital business cards" },
         { href: "/dashboard", label: "Dashboard" },
       ],
     },
@@ -79,6 +80,8 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       links: [
         { href: "/live-radio", label: "🎧 Listen live — desi radio" },
         { href: "/live-tv", label: "📺 Watch live — desi TV" },
+        { href: "/games", label: "🎮 Free games" },
+        { href: "/markets", label: "📈 Markets today" },
         { href: "/live/submit", label: "Add your radio or TV channel" },
         { href: "/desi-elite", label: "GoDesi Elite" },
         { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },

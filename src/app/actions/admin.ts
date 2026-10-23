@@ -23,6 +23,7 @@ import { readSpeakers } from "@/lib/eventSpeakers";
 import {
   cleanEventCategories,
   cleanEventLanguages,
+  eventTypeFromGenres,
 } from "@/lib/eventCategories";
 import { DEFAULT_EVENT_ZONE, instantFrom, isEventZone } from "@/lib/time";
 import { sentenceCase, titleCase } from "@/lib/titlecase";
@@ -816,7 +817,8 @@ async function saveEventEdits(
           parsed.data.frequency === "RECURRING"
             ? parsed.data.recurrence || null
             : null,
-        eventType: parsed.data.eventType || null,
+        eventType:
+          parsed.data.eventType || eventTypeFromGenres(genres) || null,
         mode: parsed.data.mode,
         // An in-person event keeps no join link, so it cannot leak later.
         onlineUrl:

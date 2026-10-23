@@ -3,8 +3,8 @@ import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
-import { SiteTicker } from "@/components/SiteTicker";
 import { FeaturedOfferBar } from "@/components/FeaturedOfferBar";
+import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhoneSmallBanners, SmallBanners } from "@/components/Banners";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
@@ -44,6 +44,7 @@ export const metadata: Metadata = {
       "msvalidate.01": "9AC0C1E8C5BEEC4E0EF93C0575F608AE",
       // Impact.com — proves site ownership for the affiliate partnerships.
       "impact-site-verification": "b1bd1fb0-8d97-492f-9688-4ce75f5da2c6",
+      "fo-verify": "9984ba14-93d9-4671-bf88-535ec243d5e1",
     },
   },
 };

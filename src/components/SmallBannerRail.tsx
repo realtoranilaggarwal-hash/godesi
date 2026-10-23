@@ -205,6 +205,8 @@ export function SmallBannerRail({
         <Link
           key={banner.slug}
           href={banner.href}
+          target={banner.href.startsWith("http") ? "_blank" : undefined}
+          rel={banner.href.startsWith("http") ? "noopener noreferrer" : undefined}
           data-house-banner={banner.slug}
           className={`relative flex aspect-[3/1] w-full items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-br px-4 text-white shadow-sm transition hover:shadow-md ${banner.colors}`}
         >

@@ -79,6 +79,38 @@ const PROMOS = [
     href: "/rewards",
     tone: "from-purple-600 to-indigo-700",
   },
+  {
+    emoji: "✈️",
+    title: "GoDesi Travel",
+    text: "Cheap flights & hotels to India — compare every airline.",
+    cta: "Search fares",
+    href: "/travel",
+    tone: "from-cyan-500 to-indigo-600",
+  },
+  {
+    emoji: "⚖️",
+    title: "Flight delayed or cancelled?",
+    text: "You could be owed up to $650 — it takes a minute to check.",
+    cta: "Check my flight",
+    href: "/travel",
+    tone: "from-slate-600 to-indigo-700",
+  },
+  {
+    emoji: "🗺️",
+    title: "Cheap fares on the map",
+    text: "Live flight deals from your city — tap a route, see the price.",
+    cta: "Open the deals map",
+    href: "/travel",
+    tone: "from-teal-500 to-cyan-600",
+  },
+  {
+    emoji: "🛒",
+    title: "Start your online store",
+    text: "Shopify free trial — open a shop and sell to desi customers.",
+    cta: "Try Shopify free",
+    href: "https://shopify.pxf.io/POW4GX",
+    tone: "from-green-600 to-emerald-700",
+  },
 ] as const;
 
 export function HousePromo({
@@ -101,6 +133,8 @@ export function HousePromo({
   return (
     <Link
       href={promo.href}
+      target={promo.href.startsWith("http") ? "_blank" : undefined}
+      rel={promo.href.startsWith("http") ? "noopener noreferrer" : undefined}
       style={{ aspectRatio: `${width} / ${height}`, maxWidth: width }}
       className={`mx-auto flex flex-col justify-center gap-1 overflow-hidden rounded-xl bg-gradient-to-br ${promo.tone} p-3 text-center text-white transition hover:opacity-95 ${className}`}
     >

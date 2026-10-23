@@ -19,12 +19,18 @@ export async function GET(
   });
   if (!business) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  const url = new URL(request.url);
+  // ?card=1 targets the shareable digital card (/card/<slug>) instead of the profile.
+  const target = url.searchParams.get("card")
+    ? `${siteUrl()}/card/${business.slug}`
+    : `${siteUrl()}/b/${business.slug}?src=qr`;
+
   return brandedQr({
-    target: `${siteUrl()}/b/${business.slug}?src=qr`,
+    target,
     style: business.profileType === "PROFESSIONAL" ? "professional" : "business",
     name: business.name,
     featured: business.owner ? effectivePlan(business.owner) === "PREMIUM" : false,
     filename: `godesi-${business.slug}-qr.png`,
-    download: new URL(request.url).searchParams.get("download") === "1",
+    download: url.searchParams.get("download") === "1",
   });
 }

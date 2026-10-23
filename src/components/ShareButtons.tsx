@@ -63,13 +63,6 @@ const NETWORKS: Network[] = [
       `https://www.tumblr.com/widgets/share/tool?canonicalUrl=${url}&caption=${title}`,
   },
   {
-    key: "line",
-    label: "LINE",
-    glyph: "L",
-    style: "bg-[#06C755] text-white",
-    href: (url, title) => `https://social-plugins.line.me/lineit/share?url=${url}&text=${title}`,
-  },
-  {
     key: "sms",
     label: "SMS",
     glyph: "📱",

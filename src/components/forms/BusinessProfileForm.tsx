@@ -376,6 +376,18 @@ export function BusinessProfileForm({
             WhatsApp)
           </label>
         </Field>
+        <Field
+          label="🎁 Offer for customers who mention GoDesi"
+          hint="Shows on your digital card and the printable shop poster, e.g. “10% off — code GODESI10”"
+        >
+          <input
+            name="referralOffer"
+            defaultValue={business?.referralOffer ?? ""}
+            maxLength={160}
+            placeholder="e.g. 10% off first visit — code GODESI10"
+            className={inputClass}
+          />
+        </Field>
         <Field label="Custom quotes">
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input

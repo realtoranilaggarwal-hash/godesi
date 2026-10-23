@@ -39,7 +39,7 @@ export function howItWorks() {
       },
       {
         title: "Get listed",
-        body: `Pick one of ${EVENT_TYPES.length} event types and a directory category; it goes live on Godesi events, its city page and its category page.`,
+        body: `Tick what kind of event it is — up to six kinds like garba, standup or job fair — plus a directory category; it goes live on Godesi events, its city page and its category page.`,
       },
       {
         title: "Sell tickets",

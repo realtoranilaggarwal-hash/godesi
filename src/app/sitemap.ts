@@ -11,6 +11,7 @@ import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { GUIDES } from "@/lib/guides";
 import { COMPLAINT_GUIDES } from "@/lib/complaints";
 import { ASTROLOGY_GUIDES } from "@/lib/astrology";
+import { TRAVEL_GUIDES } from "@/lib/travelGuides";
 import { SIGN_SLUGS } from "@/lib/horoscope";
 import { PANCHANG_CITIES } from "@/lib/panchang";
 import { FESTIVALS, festivalSlug } from "@/lib/festivals";
@@ -160,7 +161,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: base, changeFrequency: "daily", priority: 1 },
     { url: `${base}/search`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/leads`, changeFrequency: "hourly", priority: 0.8 },
+    { url: `${base}/markets`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/games`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/card`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/travel`, changeFrequency: "daily", priority: 0.7 },
+    { url: `${base}/travel/guides`, changeFrequency: "weekly", priority: 0.6 },
+    ...TRAVEL_GUIDES.map((guide) => ({
+      url: `${base}/travel/guides/${guide.slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
     { url: `${base}/wedding`, changeFrequency: "daily", priority: 0.9 },
     {
       url: `${base}/wedding/requirements`,

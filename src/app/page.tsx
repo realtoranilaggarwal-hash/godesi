@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
-import { getCategoryTree } from "@/lib/directory";
 import { BusinessTile } from "@/components/BusinessTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
@@ -16,9 +15,9 @@ import { SpaSpotlight } from "@/components/SpaSpotlight";
 import { ReferEarnTile } from "@/components/ReferEarnTile";
 import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
-import { CategoryPicker } from "@/components/CategoryPicker";
 import { categoryPickerGroups } from "@/components/CategoryNav";
-import { HandleClaim } from "@/components/HandleClaim";
+import { MarketTape } from "@/components/MarketTape";
+import { DailyStars } from "@/components/DailyStars";
 import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
@@ -55,14 +54,6 @@ function SectionHeading({
   );
 }
 
-/** What a claimed name actually gives you, said in four lines. */
-const HERO_PROOF: string[] = [
-  "Free forever — no card",
-  "One name, one page: photo, services, links",
-  "QR code for your visiting card",
-  "WhatsApp button so customers message you",
-];
-
 /** Every visitor (and crawler) sees the same shelves, so they are read once a minute. */
 const homeEvents = cachedQuery("home-events", CONTENT_TTL, () =>
   db.event.findMany({
@@ -98,15 +89,31 @@ const homeMembers = cachedQuery("home-members", CONTENT_TTL, () =>
   newestMembers(12, { withPage: true }),
 );
 
+/** Free public crypto Fear & Greed index (alternative.me), refetched every 30 min. */
+const cryptoFearGreed = cachedQuery("crypto-fng", 1800, async () => {
+  try {
+    const res = await fetch("https://api.alternative.me/fng/?limit=1", {
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    });
+    const row = (await res.json())?.data?.[0];
+    return row
+      ? { value: String(row.value), label: String(row.value_classification) }
+      : null;
+  } catch {
+    return null;
+  }
+});
+
 export default async function HomePage() {
-  const [categories, businesses, eventRows, newsRows, spaCount, memberRows] =
+  const [businesses, eventRows, newsRows, spaCount, memberRows, fng] =
     await Promise.all([
-      getCategoryTree(),
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
       homeNews(),
       homeSpaCount(),
       homeMembers(),
+      cryptoFearGreed(),
     ]);
   // Cached rows come back JSON-serialised, so dates are strings again.
   const upcoming = eventRows.map((event) => ({
@@ -138,78 +145,59 @@ export default async function HomePage() {
 
           <ChatterHomeBox />
 
-          <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 via-rose-500 to-fuchsia-600 px-5 py-5 text-white sm:px-8 sm:py-6 xl:px-6 xl:py-4">
-            <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-1">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-                  Free desi page · first come, first served
-                </p>
-                <h1 className="mt-1 max-w-2xl text-3xl font-black leading-tight sm:text-4xl xl:text-3xl">
-                  Get your name:{" "}
-                  <span className="whitespace-nowrap">godesi.com/you</span>
+          <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-baseline gap-3">
+                <h1 className="text-sm font-medium text-slate-600">
+                  📈 Markets today · live
                 </h1>
-                <p className="mt-2 max-w-2xl text-sm text-white/90 sm:text-base xl:mt-1 xl:max-w-none xl:text-sm">
-                  One short link for everything you do — your work, your shop,
-                  your WhatsApp, your links. Names go once. Take yours before
-                  somebody else does.
-                </p>
-
-                <div className="xl:flex xl:items-start xl:gap-4">
-                  <div className="mt-4 xl:mt-3 xl:w-[30rem] xl:shrink-0">
-                    <HandleClaim />
-                  </div>
-
-                  <div className="min-w-0 xl:mt-3">
-                    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-white/90 xl:mt-0">
-                      {HERO_PROOF.map((line) => (
-                        <li key={line}>✓ {line}</li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5 xl:mt-2">
-                      <Link
-                        href="/add-business"
-                        className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 hover:bg-slate-100"
-                      >
-                        Add your business free
-                      </Link>
-                      <Link
-                        href="/why-godesi"
-                        className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                      >
-                        Everything you get on GoDesi
-                      </Link>
-                      <Link
-                        href="/people"
-                        className="rounded-full border border-white/60 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
-                      >
-                        See members&rsquo; pages
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <Link
+                  href="/markets"
+                  className="text-xs font-medium text-indigo-600 underline hover:text-indigo-800"
+                >
+                  Full markets page →
+                </Link>
               </div>
-              <div className="xl:hidden">
-                <div className="rounded-2xl bg-white p-4 text-slate-900 shadow-lg">
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <h2 className="text-lg font-black">
-                      Looking for someone? Pick a service 👇
-                    </h2>
-                    <Link
-                      href="/categories"
-                      className="text-sm font-semibold text-indigo-600 hover:underline"
-                    >
-                      All {categories.length} →
-                    </Link>
-                  </div>
-                  <CategoryPicker
-                    groups={pickerGroups}
-                    quickCount={10}
-                    label={`Open the full list — ${categories.reduce((sum, category) => sum + category.children.length, 0)} services`}
-                  />
-                </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Link
+                  href="/claim"
+                  className="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700"
+                >
+                  Claim godesi.com/yourname
+                </Link>
+                <Link
+                  href="/travel"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                >
+                  ✈️ Travel deals
+                </Link>
+                <Link
+                  href="/games"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                >
+                  🎮 Games
+                </Link>
+                {fng ? (
+                  <Link
+                    href="/crypto-fear-greed"
+                    className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                  >
+                    😬 Crypto mood: {fng.value} · {fng.label}
+                  </Link>
+                ) : null}
               </div>
             </div>
+            <div className="rounded-xl border border-slate-200 bg-white p-1">
+              <MarketTape />
+            </div>
+            {today.panchang ? (
+              <div className="mt-3">
+                <DailyStars
+                  panchang={today.panchang}
+                  place={today.label}
+                />
+              </div>
+            ) : null}
           </section>
 
           <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">

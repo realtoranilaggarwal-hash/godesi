@@ -14,7 +14,7 @@ import { CategorySelect, type CategoryOption } from "@/components/forms/Category
 import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { FormError } from "@/components/forms/FormError";
-import { EVENT_MODES, EVENT_TYPES } from "@/lib/eventOptions";
+import { EVENT_MODES } from "@/lib/eventOptions";
 import { EventCategoryPicker } from "@/components/forms/EventCategoryPicker";
 import { EVENT_TIME_ZONES } from "@/lib/time";
 import { FormSuccess } from "@/components/forms/FormSuccess";
@@ -42,7 +42,6 @@ export type AdminEventValues = {
   recurrence: string;
   categorySlug: string;
   subcategorySlug: string;
-  eventType: string;
   mode: "OFFLINE" | "ONLINE" | "HYBRID";
   onlineUrl: string;
   genres: string[];
@@ -284,20 +283,6 @@ export function AdminEventForm({
           defaultCategories={event.genres}
           defaultLanguages={event.languages}
         />
-        <Field label="Event type">
-          <select
-            name="eventType"
-            defaultValue={event.eventType}
-            className={inputClass}
-          >
-            <option value="">Not set</option>
-            {EVENT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </Field>
         <Field label="Event mode" hint="Hybrid means the hall and a stream">
           <select
             name="mode"
