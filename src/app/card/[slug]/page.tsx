@@ -38,6 +38,9 @@ const getBusiness = cache((slug: string) =>
       hideContact: true,
       referralOffer: true,
       categorySlug: true,
+      categoryRef: { select: { slug: true, name: true, icon: true } },
+      subcategorySlug: true,
+      subcategoryRef: { select: { slug: true, name: true, icon: true } },
       featuredRank: true,
       featuredUntil: true,
       owner: {
@@ -47,7 +50,7 @@ const getBusiness = cache((slug: string) =>
         where: liveDealWhere(),
         orderBy: { createdAt: "desc" },
         take: 3,
-        select: { id: true, title: true },
+        select: { id: true, title: true, price: true, currency: true },
       },
     },
   }),
@@ -221,6 +224,67 @@ export default async function CardPage({
               godesi.com/card/{business.slug}
             </p>
           </div>
+
+          {/* Picked categories — clickable chips inside the card */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {business.categoryRef ? (
+              <Link
+                href={`/categories/${business.categoryRef.slug}`}
+                className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-100"
+              >
+                {business.categoryRef.icon} {business.categoryRef.name}
+              </Link>
+            ) : null}
+            {business.subcategoryRef ? (
+              <Link
+                href={`/categories/${business.subcategoryRef.slug}`}
+                className="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-700 hover:bg-violet-100"
+              >
+                {business.subcategoryRef.icon} {business.subcategoryRef.name}
+              </Link>
+            ) : null}
+          </div>
+
+          {/* Live deals — part of the card face */}
+          {business.deals.length ? (
+            <div className="mt-3 space-y-1 rounded-xl bg-amber-50 p-3">
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+                🏷️ Deals
+              </p>
+              {business.deals.map((deal) => (
+                <Link
+                  key={deal.id}
+                  href={`/b/${business.slug}`}
+                  className="block truncate text-sm font-semibold text-slate-800 hover:text-indigo-700"
+                >
+                  • {deal.title}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          {/* QR — inside the card, like a printed card */}
+          <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/qr/${business.slug}?card=1`}
+              alt={`QR code for ${business.name}`}
+              width={72}
+              height={72}
+              className="shrink-0 rounded-lg border border-slate-200"
+            />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-700">
+                Scan to open this card
+              </p>
+              <a
+                href={`/api/qr/${business.slug}?card=1&download=1`}
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                Download QR →
+              </a>
+            </div>
+          </div>
         </div>
         <div
           className={`flex items-center justify-between px-6 py-2.5 ${
@@ -275,26 +339,6 @@ export default async function CardPage({
         title={`${business.name} — ${business.category} digital card`}
       />
 
-      {business.deals.length ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-            🏷️ Deals at {business.name}
-          </p>
-          <ul className="mt-2 space-y-1.5">
-            {business.deals.map((deal) => (
-              <li key={deal.id}>
-                <Link
-                  href={`/b/${business.slug}`}
-                  className="text-sm font-semibold text-indigo-700 hover:underline"
-                >
-                  {deal.title} →
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
       {/* Vendor's referral offer — scissors-style coupon to clip */}
       {business.referralOffer ? (
         <div className="relative mt-7 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50 px-5 py-4">
@@ -326,27 +370,6 @@ export default async function CardPage({
           </p>
         </div>
       ) : null}
-
-      {/* QR — print it, scan it, the card opens */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
-          Scan to open this card
-        </h2>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/api/qr/${business.slug}?card=1`}
-          alt={`QR code for ${business.name}`}
-          width={160}
-          height={160}
-          className="mx-auto mt-3 rounded-xl border border-slate-200"
-        />
-        <a
-          href={`/api/qr/${business.slug}?card=1&download=1`}
-          className="mt-3 inline-block rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          Download QR
-        </a>
-      </div>
 
       {/* Lead capture */}
       <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-5 shadow-sm">
