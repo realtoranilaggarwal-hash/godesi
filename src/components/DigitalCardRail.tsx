@@ -1,36 +1,57 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { effectivePlan } from "@/lib/plans";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 
 const RAIL_SIZE = 12;
 
 const railCards = cachedQuery("home-card-rail", CONTENT_TTL, async () => {
   const now = new Date();
-  const rows = await db.business.findMany({
-    where: { status: "APPROVED" },
-    orderBy: [{ featuredRank: "desc" }, { createdAt: "desc" }],
-    take: RAIL_SIZE * 2,
-    select: {
-      slug: true,
-      name: true,
-      category: true,
-      city: true,
-      logoUrl: true,
-      profileType: true,
-      featuredRank: true,
-      featuredUntil: true,
-      owner: { select: { plan: true, planExpiresAt: true } },
+  const select = {
+    slug: true,
+    name: true,
+    category: true,
+    city: true,
+    logoUrl: true,
+    profileType: true,
+    featuredRank: true,
+    featuredUntil: true,
+    owner: { select: { plan: true, planExpiresAt: true } },
+  } as const;
+  const featuredRows = await db.business.findMany({
+    where: {
+      status: "APPROVED",
+      OR: [
+        {
+          featuredRank: { gt: 0 },
+          OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }],
+        },
+        {
+          owner: {
+            is: {
+              plan: { in: ["PRO", "PREMIUM"] },
+              planExpiresAt: { gt: now },
+            },
+          },
+        },
+      ],
     },
+    orderBy: [{ featuredRank: "desc" }, { createdAt: "desc" }],
+    take: RAIL_SIZE,
+    select,
   });
-  const isFeatured = (row: (typeof rows)[number]) =>
-    (row.featuredRank > 0 &&
-      (!row.featuredUntil || row.featuredUntil > now)) ||
-    (row.owner ? effectivePlan(row.owner) !== "FREE" : false);
-  return [...rows]
-    .sort((a, b) => Number(isFeatured(b)) - Number(isFeatured(a)))
-    .slice(0, RAIL_SIZE)
-    .map((row) => ({ ...row, featured: isFeatured(row) }));
+  const fill = await db.business.findMany({
+    where: {
+      status: "APPROVED",
+      slug: { notIn: featuredRows.map((row) => row.slug) },
+    },
+    orderBy: { createdAt: "desc" },
+    take: RAIL_SIZE - featuredRows.length,
+    select,
+  });
+  return [...featuredRows, ...fill].map((row) => ({
+    ...row,
+    featured: featuredRows.includes(row),
+  }));
 });
 
 /**
