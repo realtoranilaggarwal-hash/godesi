@@ -24,6 +24,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/shop", label: "🛍️ Desi shop" },
         { href: "/gigs", label: "Gigs — services $5–$100" },
         { href: "/jobs", label: "Jobs & mini jobs" },
+        { href: "/travel", label: "✈️ Travel — flights & hotels" },
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Links" },
         { href: "/news", label: "News" },
