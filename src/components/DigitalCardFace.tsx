@@ -27,8 +27,8 @@ export type CardFaceBusiness = {
 
 /**
  * The Popl-style card face — name, contact lines with the QR on the right,
- * category chips and live deals, like a printed business card. Rendered on
- * /card/<slug> and embedded beside the info on /b/<slug>.
+ * category chips and live deals, like a printed business card. Embedded
+ * beside the info on /b/<slug>.
  */
 export function DigitalCardFace({
   business,
@@ -36,7 +36,7 @@ export function DigitalCardFace({
   paidContact,
   extraCategories = [],
   ctaHref,
-  ctaLabel = "Full profile →",
+  ctaLabel,
 }: {
   business: CardFaceBusiness;
   featured: boolean;
@@ -46,6 +46,7 @@ export function DigitalCardFace({
   extraCategories?: FaceCategory[];
   ctaHref?: string;
   ctaLabel?: string;
+  /** Optional footer call-to-action; hidden when unset. */
 }) {
   const place = [business.city, business.state, business.country]
     .filter(Boolean)
@@ -179,7 +180,7 @@ export function DigitalCardFace({
             })}
             <p className="flex items-center gap-2 text-xs font-semibold text-rose-700">
               <span aria-hidden>🪪</span>
-              godesi.com/card/{business.slug}
+              godesi.com/b/{business.slug}
             </p>
           </div>
           <div className="shrink-0 text-center">
@@ -258,12 +259,14 @@ export function DigitalCardFace({
         <span className="text-[11px] font-bold uppercase tracking-widest text-white/90">
           {featured ? "GoDesi featured card" : "GoDesi digital card"}
         </span>
-        <Link
-          href={ctaHref ?? `/b/${business.slug}`}
-          className="text-[11px] font-semibold text-white hover:underline"
-        >
-          {ctaLabel}
-        </Link>
+        {ctaHref ? (
+          <Link
+            href={ctaHref}
+            className="text-[11px] font-semibold text-white hover:underline"
+          >
+            {ctaLabel ?? "Open →"}
+          </Link>
+        ) : null}
       </div>
     </div>
   );

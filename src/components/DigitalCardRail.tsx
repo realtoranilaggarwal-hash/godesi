@@ -82,7 +82,7 @@ export async function DigitalCardRail() {
         {cards.map((card) => (
           <Link
             key={card.slug}
-            href={`/card/${card.slug}`}
+            href={`/b/${card.slug}`}
             className={`w-44 shrink-0 rounded-2xl border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
               card.featured
                 ? "border-amber-300 bg-gradient-to-b from-amber-50 to-white ring-1 ring-amber-200"

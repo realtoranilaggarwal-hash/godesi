@@ -50,7 +50,7 @@ export function BusinessCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href={`/card/${business.slug}`}
+              href={`/b/${business.slug}`}
               className="truncate font-semibold text-slate-900 hover:text-indigo-600"
             >
               {business.name}
@@ -184,7 +184,7 @@ export function BusinessCard({
 
       <div className="mt-auto flex gap-2">
         <Link
-          href={`/card/${business.slug}`}
+          href={`/b/${business.slug}`}
           className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-center text-sm font-semibold hover:bg-slate-50"
         >
           View card
