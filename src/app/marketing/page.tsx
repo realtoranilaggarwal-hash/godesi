@@ -98,6 +98,40 @@ export default function MarketingPage() {
         </div>
       </section>
 
+      <section className="rounded-3xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white p-6">
+        <h2 className="text-xl font-black">
+          📰 Go further — get your news in the press
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm text-slate-600">
+          When you have a real announcement — a new office, a big sale, a
+          community event — a press release puts it in front of consumers,
+          journalists and bloggers. Our partner 24-7PressRelease.com
+          distributes it online for instant visibility.
+        </p>
+        <div className="mt-4">
+          <a
+            href="https://www.anrdoezrs.net/click-100712969-10754888"
+            target="_blank"
+            rel="noopener noreferrer nofollow sponsored"
+            className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
+          >
+            Send a press release →
+          </a>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://www.ftjcfx.com/image-100712969-10754888"
+            width="1"
+            height="1"
+            alt=""
+            aria-hidden
+            className="inline-block h-px w-px"
+          />
+          <p className="mt-2 text-[11px] text-slate-400">
+            Partner link — GoDesi may earn a commission.
+          </p>
+        </div>
+      </section>
+
       <section className="rounded-3xl border border-slate-200 bg-white p-6">
         <h2 className="text-xl font-black">Start today</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">

@@ -161,6 +161,28 @@ export default async function CardPosterPage({
                 ) : null}
               </div>
             ))}
+            <div className="flex items-center gap-2 border-t border-slate-200 pt-2">
+              <span className="w-32 shrink-0 text-xs font-semibold text-slate-700">
+                📰 Press release
+              </span>
+              <a
+                href="https://www.anrdoezrs.net/click-100712969-10754888"
+                target="_blank"
+                rel="noopener noreferrer nofollow sponsored"
+                className="flex-1 rounded-lg bg-indigo-700 px-2 py-1.5 text-center text-[11px] font-bold text-white hover:bg-indigo-800"
+              >
+                24-7PressRelease.com — get in the news
+              </a>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://www.ftjcfx.com/image-100712969-10754888"
+                width="1"
+                height="1"
+                alt=""
+                aria-hidden
+                className="h-px w-px"
+              />
+            </div>
           </div>
           <p className="mt-3 text-[10px] text-slate-400">
             As an Amazon Associate, GoDesi earns from qualifying purchases. Other
