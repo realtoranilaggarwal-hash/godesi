@@ -3,20 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { PrintButton } from "@/components/PrintButton";
-import {
-  AMAZON_INFLUENCER_URL,
-  amazonSearchUrl,
-  ebaySearchUrl,
-  shopConfig,
-} from "@/lib/shop";
 
 export const metadata: Metadata = { title: "Print shop poster" };
-
-const PRINT_SEARCHES = [
-  { label: "Flyer / poster printing", query: "custom flyer printing service" },
-  { label: "Business cards", query: "business card printing 500" },
-  { label: "Vinyl banners", query: "custom vinyl banner printing" },
-] as const;
 
 export default async function CardPosterPage({
   params,
@@ -38,8 +26,6 @@ export default async function CardPosterPage({
   });
   if (!business || business.status !== "APPROVED") notFound();
 
-  const { amazonTag, ebayCampaignId } = shopConfig();
-
   return (
     <div className="mx-auto max-w-lg space-y-4 px-4 py-6">
       {/* Print only the poster — site chrome hides via the style block below. */}
@@ -57,7 +43,8 @@ export default async function CardPosterPage({
           <h1 className="text-xl font-bold">Shop poster</h1>
           <p className="text-sm text-slate-600">
             Print this, cut along the dashed edge and tape it at your counter —
-            customers scan the QR to open your card{business.referralOffer ? " and see your deal" : ""}.
+            customers scan the QR to open your card
+            {business.referralOffer ? " and see your deal" : ""}.
           </p>
         </div>
         <PrintButton className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 print:hidden">
@@ -121,89 +108,10 @@ export default async function CardPosterPage({
           godesi.com/b/{business.slug}
         </p>
         <p className="mt-1 text-xs text-slate-500">
-          Call · WhatsApp · Save contact · Share your details — all from the card
+          Call · WhatsApp · Save contact · Share your details — all from the
+          card
         </p>
       </div>
-
-      {/* Order prints online — affiliate links, hidden when printing */}
-      {amazonTag || ebayCampaignId ? (
-        <div className="no-print rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-bold text-slate-900">
-            🛒 No printer? Order prints online
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Flyers, cards and banners delivered to the shop.
-          </p>
-          <div className="mt-3 space-y-2">
-            {PRINT_SEARCHES.map((shelf) => (
-              <div key={shelf.label} className="flex items-center gap-2">
-                <span className="w-32 shrink-0 text-xs font-semibold text-slate-700">
-                  {shelf.label}
-                </span>
-                {amazonTag ? (
-                  <a
-                    href={amazonSearchUrl(shelf.query, amazonTag)}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow sponsored"
-                    className="flex-1 rounded-lg bg-slate-900 px-2 py-1.5 text-center text-[11px] font-bold text-white hover:bg-slate-800"
-                  >
-                    Amazon
-                  </a>
-                ) : null}
-                {ebayCampaignId ? (
-                  <a
-                    href={ebaySearchUrl(shelf.query, ebayCampaignId)}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow sponsored"
-                    className="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-center text-[11px] font-bold text-slate-700 hover:bg-slate-50"
-                  >
-                    eBay
-                  </a>
-                ) : null}
-              </div>
-            ))}
-            <div className="flex items-center gap-2 border-t border-slate-200 pt-2">
-              <span className="w-32 shrink-0 text-xs font-semibold text-slate-700">
-                ⭐ Amazon picks
-              </span>
-              <a
-                href={AMAZON_INFLUENCER_URL}
-                target="_blank"
-                rel="noopener noreferrer nofollow sponsored"
-                className="flex-1 rounded-lg bg-amber-500 px-2 py-1.5 text-center text-[11px] font-bold text-slate-950 hover:bg-amber-400"
-              >
-                Shop Anil&apos;s curated products
-              </a>
-            </div>
-            <div className="flex items-center gap-2 border-t border-slate-200 pt-2">
-              <span className="w-32 shrink-0 text-xs font-semibold text-slate-700">
-                📰 Press release
-              </span>
-              <a
-                href="https://www.anrdoezrs.net/click-100712969-10754888"
-                target="_blank"
-                rel="noopener noreferrer nofollow sponsored"
-                className="flex-1 rounded-lg bg-indigo-700 px-2 py-1.5 text-center text-[11px] font-bold text-white hover:bg-indigo-800"
-              >
-                24-7PressRelease.com — get in the news
-              </a>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://www.ftjcfx.com/image-100712969-10754888"
-                width="1"
-                height="1"
-                alt=""
-                aria-hidden
-                className="h-px w-px"
-              />
-            </div>
-          </div>
-          <p className="mt-3 text-[10px] text-slate-400">
-            As an Amazon Associate, GoDesi earns from qualifying purchases. Other
-            links may also earn us a commission — it keeps the cards free.
-          </p>
-        </div>
-      ) : null}
     </div>
   );
 }
