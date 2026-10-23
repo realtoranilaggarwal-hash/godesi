@@ -18,42 +18,6 @@ export type TravelPartnerGroup = {
 
 export const TRAVEL_PARTNER_GROUPS: TravelPartnerGroup[] = [
   {
-    title: "eSIM & connectivity",
-    emoji: "📱",
-    partners: [
-      {
-        name: "Airalo",
-        emoji: "📶",
-        blurb: "Data eSIMs for 200+ countries — land in India connected.",
-        url: "https://airalo.tpo.li/kCjBQrU7",
-      },
-      {
-        name: "Saily",
-        emoji: "🌐",
-        blurb: "Simple travel eSIM app from the NordVPN team.",
-        url: "https://saily.tpo.li/zj3bsd4S",
-      },
-      {
-        name: "Yesim",
-        emoji: "💳",
-        blurb: "eSIM plans with pay-as-you-go pricing for India trips.",
-        url: "https://yesim.tpo.li/h8PsXZWL",
-      },
-      {
-        name: "Drimsim",
-        emoji: "🧳",
-        blurb: "One physical SIM that works across countries, no roaming shock.",
-        url: "https://drimsim.com/",
-      },
-      {
-        name: "GigSky",
-        emoji: "✈️",
-        blurb: "eSIM data plans that also work on flights and cruises.",
-        url: "https://gigsky.tpo.li/C3uJ5Cz0",
-      },
-    ],
-  },
-  {
     title: "Airport transfers & taxis",
     emoji: "🚖",
     partners: [

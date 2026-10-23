@@ -108,11 +108,6 @@ export default function TravelPage() {
                 </a>
               ))}
             </div>
-            {group.title === "eSIM & connectivity" && (
-              <div className="pt-2">
-                <TravelWidget variant="esim" />
-              </div>
-            )}
           </Card>
         ))}
       </section>
@@ -209,10 +204,6 @@ export default function TravelPage() {
           </Card>
         ))}
       </section>
-
-      <div className="flex justify-center">
-        <TravelWidget variant="badge" />
-      </div>
 
       <p className="text-center text-sm text-slate-500">
         Direct link:{" "}
