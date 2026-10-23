@@ -20,6 +20,7 @@ import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { reviewSourceLabel } from "@/lib/reviewSources";
 import { QrCard } from "@/components/QrCard";
+import { DigitalCardFace } from "@/components/DigitalCardFace";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoundingBadge } from "@/components/FoundingBadge";
 import { TrackVisit } from "@/components/TrackVisit";
@@ -280,9 +281,10 @@ export default async function BusinessProfilePage({
           </Alert>
         ) : null}
 
-        <Card>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <LogoTile
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <Card>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <LogoTile
               name={business.name}
               icon={business.categoryRef?.icon}
               imageUrl={business.logoUrl}
@@ -655,8 +657,17 @@ export default async function BusinessProfilePage({
                 )}
               </div>
             </div>
-          </div>
-        </Card>
+            </div>
+          </Card>
+          <DigitalCardFace
+            business={business}
+            featured={business.featured || ownerPlan !== "FREE"}
+            paidContact={paidContact}
+            extraCategories={extraCategories}
+            ctaHref={`/card/${business.slug}`}
+            ctaLabel="Open card →"
+          />
+        </div>
 
         {business.deals.length || isOwner ? (
           <Card id="deals">

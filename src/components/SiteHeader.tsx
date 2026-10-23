@@ -22,7 +22,7 @@ import { emailEnabled } from "@/lib/email";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
-  { href: "/search", label: "Businesses", icon: "🏪" },
+  { href: "/search", label: "Cards", icon: "🪪" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
@@ -85,7 +85,7 @@ const STRIP_SECTION_OF: Record<string, string> = {
 
 /** Promoted pages beside the search box; any that don't fit stay under "More". */
 const PROMO_LINKS = [
-  { href: "/search", label: "Directory", icon: "🏪" },
+  { href: "/search", label: "Cards", icon: "🪪" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/chatter", label: "Chatter", icon: "💬" },

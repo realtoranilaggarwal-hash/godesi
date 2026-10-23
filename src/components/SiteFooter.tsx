@@ -16,7 +16,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       title: "Directory",
       links: [
         { href: "/categories", label: "Categories" },
-        { href: "/search", label: "Businesses" },
+        { href: "/search", label: "Cards" },
         { href: "/leads", label: "Leads" },
         { href: "/events", label: "Events" },
         { href: "/clubs", label: "Clubs" },
@@ -52,7 +52,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/dashboard/deals", label: "Post a deal" },
         { href: "/dashboard/gigs", label: "Sell a gig" },
         { href: "/jobs/new", label: "Post a job" },
-        { href: "/card", label: "🪪 Digital business cards" },
+        { href: "/search", label: "🪪 Digital business cards" },
         { href: "/dashboard", label: "Dashboard" },
       ],
     },
