@@ -415,6 +415,12 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/leads" variant="secondary">
                   Unlocked leads
                 </LinkButton>
+                <LinkButton href={`/card/${business.slug}`} variant="secondary">
+                  🪪 My digital card
+                </LinkButton>
+                <LinkButton href="/dashboard/card-leads" variant="secondary">
+                  Card leads
+                </LinkButton>
                 <LinkButton href="/dashboard/reviews" variant="secondary">
                   Reviews on my card
                 </LinkButton>

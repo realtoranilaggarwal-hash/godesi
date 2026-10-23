@@ -867,6 +867,7 @@ model Business {
   eventListings Event[]
   deals         Deal[]
   scratchGifts  ScratchGift[]
+  cardLeads     CardLead[]
 
   @@index([category])
   @@index([city])
@@ -3133,4 +3134,19 @@ model JobApplication {
   @@unique([jobId, applicantId])
   @@index([jobId, status])
   @@index([applicantId])
+}
+
+/// A visitor who shared their contact from a business's digital card (/card/<slug>),
+/// so the owner can follow up — Popl-style lead capture.
+model CardLead {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name       String
+  phone      String?
+  email      String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([businessId, createdAt])
 }

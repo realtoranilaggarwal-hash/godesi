@@ -605,6 +605,12 @@ export default async function BusinessProfilePage({
                   url={`${siteUrl()}/b/${business.slug}`}
                   title={business.name}
                 />
+                <Link
+                  href={`/card/${business.slug}`}
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                >
+                  🪪 Digital card
+                </Link>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
