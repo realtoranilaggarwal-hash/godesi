@@ -316,6 +316,8 @@ model User {
   playlistUrl     String?
   /// Playlist saved while free members could still show one; it stays visible.
   keptPlaylistUrl String?
+  /// Public Google Photos album shown as a gallery; Google hosts the photos.
+  albumUrl        String?
   openToWork      Boolean  @default(false)
 
   websiteUrl     String?
