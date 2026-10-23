@@ -190,17 +190,6 @@ export default async function HomePage() {
             <div className="rounded-xl border border-slate-200 bg-white p-1">
               <MarketTape />
             </div>
-            <p className="mt-1 text-right text-[10px] text-slate-400">
-              Quotes by{" "}
-              <a
-                href="https://www.tradingview.com/?aff_id=1173084"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-slate-600"
-              >
-                TradingView
-              </a>
-            </p>
             {today.panchang ? (
               <div className="mt-3">
                 <DailyStars

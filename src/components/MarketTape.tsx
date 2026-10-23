@@ -14,7 +14,7 @@ const TAPE_CONFIG = {
   ],
   showSymbolLogo: true,
   isTransparent: true,
-  displayMode: "adaptive",
+  displayMode: "compact",
   colorTheme: "light",
   locale: "en",
 };
