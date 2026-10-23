@@ -108,7 +108,7 @@ export function BusinessTile({
             href={href}
             className="shrink-0 rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
           >
-            View card
+            View profile
           </Link>
         )}
       </div>
