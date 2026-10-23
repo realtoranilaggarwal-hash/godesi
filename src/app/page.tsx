@@ -5,6 +5,7 @@ import { BusinessTile } from "@/components/BusinessTile";
 import { EventCard } from "@/components/EventCard";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryFeatured } from "@/components/CategoryFeatured";
+import { DigitalCardRail } from "@/components/DigitalCardRail";
 import { CategoryTree } from "@/components/CategoryTree";
 import { SmallBanners } from "@/components/Banners";
 import { DjsWikiCard } from "@/components/DjsWikiPromo";
@@ -217,6 +218,8 @@ export default async function HomePage() {
           </div>
         </aside>
       </div>
+
+      <DigitalCardRail />
 
       {newMembers.length ? (
         <section>

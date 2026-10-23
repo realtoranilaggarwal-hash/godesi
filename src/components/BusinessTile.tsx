@@ -19,7 +19,7 @@ export function BusinessTile({
   premium?: boolean;
 }) {
   const image = business.coverUrl ?? business.logoUrl;
-  const href = `/b/${business.slug}`;
+  const href = `/card/${business.slug}`;
   const frame = `group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
     premium ? "border-amber-300 ring-1 ring-amber-200" : "border-slate-200"
   }`;
