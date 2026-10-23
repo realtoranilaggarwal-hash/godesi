@@ -148,12 +148,12 @@ export default async function HomePage() {
           <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-baseline gap-3">
-                <h1 className="text-sm font-bold uppercase tracking-widest text-slate-600">
+                <h1 className="text-sm font-medium text-slate-600">
                   📈 Markets today · live
                 </h1>
                 <Link
                   href="/markets"
-                  className="text-xs font-bold text-indigo-600 underline hover:text-indigo-800"
+                  className="text-xs font-medium text-indigo-600 underline hover:text-indigo-800"
                 >
                   Full markets page →
                 </Link>
@@ -161,26 +161,26 @@ export default async function HomePage() {
               <div className="flex flex-wrap items-center gap-1.5">
                 <Link
                   href="/claim"
-                  className="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white hover:bg-slate-700"
+                  className="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700"
                 >
                   Claim godesi.com/yourname
                 </Link>
                 <Link
                   href="/travel"
-                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                 >
                   ✈️ Travel deals
                 </Link>
                 <Link
                   href="/games"
-                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                 >
                   🎮 Games
                 </Link>
                 {fng ? (
                   <Link
                     href="/crypto-fear-greed"
-                    className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                    className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                   >
                     😬 Crypto mood: {fng.value} · {fng.label}
                   </Link>
