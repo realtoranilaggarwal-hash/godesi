@@ -421,6 +421,9 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/card-leads" variant="secondary">
                   Card leads
                 </LinkButton>
+                <LinkButton href="/dashboard/scan-card" variant="secondary">
+                  📷 Scan card
+                </LinkButton>
                 <LinkButton href="/dashboard/reviews" variant="secondary">
                   Reviews on my card
                 </LinkButton>

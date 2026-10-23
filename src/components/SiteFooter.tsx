@@ -52,6 +52,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/dashboard/deals", label: "Post a deal" },
         { href: "/dashboard/gigs", label: "Sell a gig" },
         { href: "/jobs/new", label: "Post a job" },
+        { href: "/card", label: "🪪 Digital business cards" },
         { href: "/dashboard", label: "Dashboard" },
       ],
     },
