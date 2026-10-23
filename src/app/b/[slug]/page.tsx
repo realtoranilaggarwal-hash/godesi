@@ -19,14 +19,13 @@ import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { reviewSourceLabel } from "@/lib/reviewSources";
-import { QrCard } from "@/components/QrCard";
+import { ReviewForm } from "@/components/ReviewForm";
 import { DigitalCardFace } from "@/components/DigitalCardFace";
 import { CardLeadForm } from "@/components/CardLeadForm";
 import { CardShareButton } from "@/components/CardShareButton";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { FoundingBadge } from "@/components/FoundingBadge";
 import { TrackVisit } from "@/components/TrackVisit";
-import { ReviewForm } from "@/components/ReviewForm";
 import { PostedBy } from "@/components/PostedBy";
 import { PlaceLink } from "@/components/PlaceLink";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -267,6 +266,70 @@ export default async function BusinessProfilePage({
       : {}),
   };
 
+  // The digital card and its tools — beside the info on desktop (right rail),
+  // stacked under the header card on phones.
+  const cardColumn = (
+    <>
+      <DigitalCardFace
+        business={business}
+        featured={business.featured || ownerPlan !== "FREE"}
+        paidContact={paidContact}
+        extraCategories={extraCategories}
+      />
+
+      <div className="grid grid-cols-2 gap-2">
+        <a
+          href={`/card/${business.slug}/vcf`}
+          className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-3 py-2.5 text-xs font-bold text-white hover:bg-slate-800"
+        >
+          ⬇️ Save contact
+        </a>
+        <CardShareButton
+          url={`${siteUrl()}/b/${business.slug}`}
+          name={business.name}
+          className="flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-3 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+        />
+        <Link
+          href={`/card/${business.slug}/poster`}
+          className="col-span-2 flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          🖨️ Print shop poster
+        </Link>
+      </div>
+
+      {/* Vendor's referral offer — scissors-style coupon to clip */}
+      {business.referralOffer ? (
+        <div className="relative mt-6 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3">
+          <div className="absolute -top-3 left-4 flex items-center gap-1.5 bg-amber-50 px-2">
+            <span aria-hidden>✂️</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+              Clip this coupon
+            </span>
+          </div>
+          <p className="mt-1 text-center text-sm font-extrabold text-slate-900">
+            {business.referralOffer}
+          </p>
+          <p className="mt-1 text-center text-[11px] font-semibold text-amber-700">
+            Show this card or mention GoDesi at {business.name} to redeem
+          </p>
+        </div>
+      ) : null}
+
+      {/* Lead capture */}
+      <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-4 shadow-sm">
+        <h2 className="text-center text-sm font-bold text-slate-900">
+          Share your card with {business.name}
+        </h2>
+        <p className="mt-1 text-center text-xs text-slate-500">
+          Leave your details and they&apos;ll get in touch.
+        </p>
+        <div className="mt-3">
+          <CardLeadForm slug={business.slug} />
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
@@ -284,6 +347,7 @@ export default async function BusinessProfilePage({
         ) : null}
 
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="min-w-0 space-y-5">
           <Card>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <LogoTile
@@ -655,67 +719,9 @@ export default async function BusinessProfilePage({
             </div>
             </div>
           </Card>
-          <div className="w-full space-y-4">
-            <DigitalCardFace
-              business={business}
-              featured={business.featured || ownerPlan !== "FREE"}
-              paidContact={paidContact}
-              extraCategories={extraCategories}
-            />
 
-            {/* Card actions — everything the old /card page held lives here */}
-            <div className="grid grid-cols-2 gap-2">
-              <a
-                href={`/card/${business.slug}/vcf`}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-3 py-2.5 text-xs font-bold text-white hover:bg-slate-800"
-              >
-                ⬇️ Save contact
-              </a>
-              <CardShareButton
-                url={`${siteUrl()}/b/${business.slug}`}
-                name={business.name}
-                className="flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-3 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
-              />
-              <Link
-                href={`/card/${business.slug}/poster`}
-                className="col-span-2 flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                🖨️ Print shop poster
-              </Link>
-            </div>
-
-            {/* Vendor's referral offer — scissors-style coupon to clip */}
-            {business.referralOffer ? (
-              <div className="relative mt-6 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3">
-                <div className="absolute -top-3 left-4 flex items-center gap-1.5 bg-amber-50 px-2">
-                  <span aria-hidden>✂️</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">
-                    Clip this coupon
-                  </span>
-                </div>
-                <p className="mt-1 text-center text-sm font-extrabold text-slate-900">
-                  {business.referralOffer}
-                </p>
-                <p className="mt-1 text-center text-[11px] font-semibold text-amber-700">
-                  Show this card or mention GoDesi at {business.name} to redeem
-                </p>
-              </div>
-            ) : null}
-
-            {/* Lead capture */}
-            <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-4 shadow-sm">
-              <h2 className="text-center text-sm font-bold text-slate-900">
-                Share your card with {business.name}
-              </h2>
-              <p className="mt-1 text-center text-xs text-slate-500">
-                Leave your details and they&apos;ll get in touch.
-              </p>
-              <div className="mt-3">
-                <CardLeadForm slug={business.slug} />
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Card face + tools under the info on phones */}
+          <div className="space-y-4 lg:hidden">{cardColumn}</div>
 
         {business.deals.length || isOwner ? (
           <Card id="deals">
@@ -870,8 +876,7 @@ export default async function BusinessProfilePage({
           </Card>
         ) : null}
 
-        <div className="grid gap-5 lg:grid-cols-3">
-          <div className="space-y-5 lg:col-span-2">
+        <div className="space-y-5">
             {business.packages.length ? (
               <Card>
                 <h2 className="mb-3 text-lg font-bold">Packages & pricing</h2>
@@ -1014,15 +1019,11 @@ export default async function BusinessProfilePage({
               ) : null}
             </Card>
           </div>
+          </div>
 
-          <div className="space-y-5">
-            <Card>
-              <h2 className="mb-3 text-lg font-bold">Scan &amp; share</h2>
-              <QrCard
-                slug={business.slug}
-                shareUrl={`${siteUrl()}/b/${business.slug}`}
-              />
-            </Card>
+          {/* Desktop right rail — the digital card and all its tools */}
+          <div className="hidden space-y-4 lg:block">
+            {cardColumn}
 
             {business.address || business.mapsUrl ? (
               <Card>
