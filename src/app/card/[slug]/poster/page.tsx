@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { PrintButton } from "@/components/PrintButton";
 import {
+  AMAZON_INFLUENCER_URL,
   amazonSearchUrl,
   ebaySearchUrl,
   shopConfig,
@@ -161,6 +162,19 @@ export default async function CardPosterPage({
                 ) : null}
               </div>
             ))}
+            <div className="flex items-center gap-2 border-t border-slate-200 pt-2">
+              <span className="w-32 shrink-0 text-xs font-semibold text-slate-700">
+                ⭐ Amazon picks
+              </span>
+              <a
+                href={AMAZON_INFLUENCER_URL}
+                target="_blank"
+                rel="noopener noreferrer nofollow sponsored"
+                className="flex-1 rounded-lg bg-amber-500 px-2 py-1.5 text-center text-[11px] font-bold text-slate-950 hover:bg-amber-400"
+              >
+                Shop Anil&apos;s curated products
+              </a>
+            </div>
             <div className="flex items-center gap-2 border-t border-slate-200 pt-2">
               <span className="w-32 shrink-0 text-xs font-semibold text-slate-700">
                 📰 Press release

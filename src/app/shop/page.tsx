@@ -7,6 +7,7 @@ import { LinkImpressions } from "@/components/LinkImpressions";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { Card } from "@/components/ui";
 import {
+  AMAZON_INFLUENCER_URL,
   SHOP_SHELVES,
   amazonSearchUrl,
   ebaySearchUrl,
@@ -71,6 +72,22 @@ export default async function ShopPage() {
           links never earn GoDesi points.
         </p>
       </header>
+
+      <Card className="flex flex-col gap-3 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-amber-950">
+            ⭐ Anil&apos;s Amazon picks
+          </h2>
+          <p className="text-sm text-amber-900">
+            Browse Anil&apos;s curated products and shopping recommendations on
+            Amazon.
+          </p>
+        </div>
+        <StoreButton
+          href={AMAZON_INFLUENCER_URL}
+          label="Shop Anil's picks (paid link)"
+        />
+      </Card>
 
       {quicklyUrl ? (
         <Card className="flex flex-col gap-3 border-emerald-200 bg-emerald-50/60 sm:flex-row sm:items-center sm:justify-between">

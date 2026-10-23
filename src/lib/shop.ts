@@ -63,6 +63,10 @@ export const SHOP_SHELVES = [
 
 export type ShopShelf = (typeof SHOP_SHELVES)[number];
 
+/** Anil's curated Amazon Influencer storefront. Keep the full URL and tag intact. */
+export const AMAZON_INFLUENCER_URL =
+  "https://www.amazon.com/shop/influencer-bab9b509/photo/amzn1.shoppablemedia.v1.collage.3f55c0f1-7c0d-4396-9960-e0c967f1a93f?ref_=aip_sf_photo_spv_ons_cur_d&tag=anilaggarwal-20&originMarketplaceId=ATVPDKIKX0DER";
+
 /** Store IDs are public tracking IDs, set in the environment once each programme approves GoDesi. */
 export function shopConfig() {
   return {
