@@ -103,6 +103,14 @@ const PROMOS = [
     href: "/travel",
     tone: "from-teal-500 to-cyan-600",
   },
+  {
+    emoji: "🛒",
+    title: "Start your online store",
+    text: "Shopify free trial — open a shop and sell to desi customers.",
+    cta: "Try Shopify free",
+    href: "https://shopify.pxf.io/POW4GX",
+    tone: "from-green-600 to-emerald-700",
+  },
 ] as const;
 
 export function HousePromo({
@@ -125,6 +133,8 @@ export function HousePromo({
   return (
     <Link
       href={promo.href}
+      target={promo.href.startsWith("http") ? "_blank" : undefined}
+      rel={promo.href.startsWith("http") ? "noopener noreferrer" : undefined}
       style={{ aspectRatio: `${width} / ${height}`, maxWidth: width }}
       className={`mx-auto flex flex-col justify-center gap-1 overflow-hidden rounded-xl bg-gradient-to-br ${promo.tone} p-3 text-center text-white transition hover:opacity-95 ${className}`}
     >

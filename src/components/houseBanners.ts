@@ -194,4 +194,12 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     line: "Live flight deals from your city",
     colors: "from-teal-500 to-cyan-600",
   },
+  {
+    slug: "shopify",
+    href: "https://shopify.pxf.io/POW4GX",
+    emoji: "🛒",
+    title: "Start a store",
+    line: "Shopify free trial — open your shop",
+    colors: "from-green-600 to-emerald-700",
+  },
 ];
