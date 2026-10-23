@@ -50,7 +50,7 @@ const getBusiness = cache((slug: string) =>
         where: liveDealWhere(),
         orderBy: { createdAt: "desc" },
         take: 3,
-        select: { id: true, title: true, price: true, currency: true },
+        select: { id: true, title: true },
       },
     },
   }),
