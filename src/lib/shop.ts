@@ -67,6 +67,15 @@ export type ShopShelf = (typeof SHOP_SHELVES)[number];
 export const AMAZON_INFLUENCER_URL =
   "https://www.amazon.com/shop/influencer-bab9b509/photo/amzn1.shoppablemedia.v1.collage.3f55c0f1-7c0d-4396-9960-e0c967f1a93f?ref_=aip_sf_photo_spv_ons_cur_d&tag=anilaggarwal-20&originMarketplaceId=ATVPDKIKX0DER";
 
+export const EFAX_AFFILIATE_URL =
+  "https://www.dpbolvw.net/click-100712969-15560583";
+export const EFAX_TRACKING_PIXEL =
+  "https://www.tqlkg.com/image-100712969-15560583";
+export const TURBOTAX_AFFILIATE_URL =
+  "https://www.kqzyfj.com/click-100712969-17206111";
+export const TURBOTAX_TRACKING_PIXEL =
+  "https://www.ftjcfx.com/image-100712969-17206111";
+
 /** Store IDs are public tracking IDs, set in the environment once each programme approves GoDesi. */
 export function shopConfig() {
   return {

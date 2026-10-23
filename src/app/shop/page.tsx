@@ -8,7 +8,11 @@ import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { Card } from "@/components/ui";
 import {
   AMAZON_INFLUENCER_URL,
+  EFAX_AFFILIATE_URL,
+  EFAX_TRACKING_PIXEL,
   SHOP_SHELVES,
+  TURBOTAX_AFFILIATE_URL,
+  TURBOTAX_TRACKING_PIXEL,
   amazonSearchUrl,
   ebaySearchUrl,
   shopConfig,
@@ -88,6 +92,59 @@ export default async function ShopPage() {
           label="Shop Anil's picks (paid link)"
         />
       </Card>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-bold">Business &amp; money tools</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Card className="border-sky-200 bg-sky-50/60">
+            <h3 className="font-bold text-sky-950">eFax digital faxing</h3>
+            <p className="mt-1 text-sm text-sky-900">
+              Send and receive business faxes online with the largest digital
+              faxing network.
+            </p>
+            <div className="mt-3">
+              <StoreButton
+                href={EFAX_AFFILIATE_URL}
+                label="Explore eFax (paid link)"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={EFAX_TRACKING_PIXEL}
+                width="1"
+                height="1"
+                alt=""
+                aria-hidden
+                className="inline-block h-px w-px"
+              />
+            </div>
+          </Card>
+          <Card className="border-emerald-200 bg-emerald-50/60">
+            <h3 className="font-bold text-emerald-950">
+              TurboTax Free Edition
+            </h3>
+            <p className="mt-1 text-sm text-emerald-900">
+              File for free with TurboTax Free Edition. ~37% of filers qualify.
+              Simple Form 1040 returns only (no schedules, except for EITC, CTC,
+              student loan interest, and Schedule 1-A).
+            </p>
+            <div className="mt-3">
+              <StoreButton
+                href={TURBOTAX_AFFILIATE_URL}
+                label="Check TurboTax eligibility (paid link)"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={TURBOTAX_TRACKING_PIXEL}
+                width="1"
+                height="1"
+                alt=""
+                aria-hidden
+                className="inline-block h-px w-px"
+              />
+            </div>
+          </Card>
+        </div>
+      </section>
 
       {quicklyUrl ? (
         <Card className="flex flex-col gap-3 border-emerald-200 bg-emerald-50/60 sm:flex-row sm:items-center sm:justify-between">
