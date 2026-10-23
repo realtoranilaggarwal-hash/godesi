@@ -54,6 +54,8 @@ import { liveDealWhere } from "@/lib/deals";
 import { DealCard } from "@/components/DealCard";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { GodesiMark } from "@/components/GodesiMark";
+import { CardSearchStrip } from "@/components/CardSearchStrip";
+import { getCategoryTree } from "@/lib/directory";
 
 export const dynamic = "force-dynamic";
 
@@ -131,9 +133,10 @@ export default async function BusinessProfilePage({
   params: { slug: string };
   searchParams: { src?: string; claim?: string };
 }) {
-  const [business, viewer] = await Promise.all([
+  const [business, viewer, categories] = await Promise.all([
     getBusiness(params.slug),
     getCurrentUser(),
+    getCategoryTree(),
   ]);
   if (!business) {
     const moved = await db.business.findFirst({
@@ -338,6 +341,8 @@ export default async function BusinessProfilePage({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+
+        <CardSearchStrip categories={categories} />
 
         {business.status !== "APPROVED" ? (
           <Alert tone="info">

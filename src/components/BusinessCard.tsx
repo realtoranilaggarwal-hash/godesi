@@ -187,7 +187,7 @@ export function BusinessCard({
           href={`/b/${business.slug}`}
           className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-center text-sm font-semibold hover:bg-slate-50"
         >
-          View card
+          View profile
         </Link>
         {business.whatsappNumber ? (
           <WhatsAppButton
