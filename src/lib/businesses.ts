@@ -57,6 +57,8 @@ export type BusinessListItem = {
 
 export type SearchFilters = {
   q?: string;
+  /** First letter of the business name — powers the A–Z bar on /search. */
+  nameStartsWith?: string;
   category?: string;
   /** Matches the taxonomy: a top-level slug also matches its subcategories. */
   categorySlugs?: string[];
@@ -135,6 +137,14 @@ async function runSearchBusinesses(
   const rows = await db.business.findMany({
     where: {
       status: "APPROVED",
+      ...(filters.nameStartsWith
+        ? {
+            name: {
+              startsWith: filters.nameStartsWith,
+              mode: "insensitive" as const,
+            },
+          }
+        : {}),
       ...(category
         ? { category: { equals: category, mode: "insensitive" } }
         : {}),

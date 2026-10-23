@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { searchBusinesses, listCities, listCountries } from "@/lib/businesses";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { getCategoryTree } from "@/lib/directory";
@@ -13,14 +14,17 @@ import { gradientFor } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
 export const metadata: Metadata = {
-  title: "Search desi businesses near you",
+  title: "Cards — desi businesses near you",
   description:
     "Search verified desi small businesses by category, subcategory, city and rating. See photos, opening hours and reviews, and message the owner on WhatsApp free.",
 };
 
 type SearchParams = {
   q?: string;
+  letter?: string;
   category?: string;
   sub?: string;
   city?: string;
@@ -29,6 +33,18 @@ type SearchParams = {
   premium?: string;
 };
 
+/** Rebuilds /search URLs so the A–Z bar keeps every active filter. */
+function searchHref(params: SearchParams, letter?: string): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) query.set(key, value);
+  }
+  if (letter) query.set("letter", letter);
+  else query.delete("letter");
+  const qs = query.toString();
+  return `/search${qs ? `?${qs}` : ""}`;
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -36,6 +52,9 @@ export default async function SearchPage({
 }) {
   const minRating = Number(searchParams.minRating ?? 0) || 0;
   const premiumOnly = searchParams.premium === "1";
+  const letter = LETTERS.includes((searchParams.letter ?? "").toUpperCase())
+    ? (searchParams.letter ?? "").toUpperCase()
+    : "";
   const categories = await getCategoryTree();
 
   const selected = categories.find(
@@ -50,6 +69,7 @@ export default async function SearchPage({
   const [results, cities, countries] = await Promise.all([
     searchBusinesses({
       q: searchParams.q?.trim() || undefined,
+      nameStartsWith: letter || undefined,
       categorySlugs,
       city: searchParams.city || undefined,
       country: searchParams.country || undefined,
@@ -66,10 +86,10 @@ export default async function SearchPage({
         <section
           className={`rounded-3xl bg-gradient-to-r ${gradientFor("emerald")} px-5 py-7 text-white sm:px-8`}
         >
-          <h1 className="text-3xl font-black">Businesses 🏪</h1>
+          <h1 className="text-3xl font-black">Cards 🪪</h1>
           <p className="mt-1 text-white/90">
-            {categories.length} categories of verified desi businesses — filter
-            by subcategory, city and rating.
+            {categories.length} categories of desi business cards — filter by
+            letter, subcategory, city and rating.
           </p>
         </section>
 
@@ -163,6 +183,7 @@ export default async function SearchPage({
               Featured / Pro members only
             </label>
 
+            <input type="hidden" name="letter" value={letter} />
             <button
               type="submit"
               className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 sm:col-span-2 lg:col-span-1"
@@ -172,8 +193,36 @@ export default async function SearchPage({
           </form>
         </Card>
 
+        {/* A–Z quick pick — the cards-directory letter browse */}
+        <div className="flex flex-wrap items-center gap-1">
+          <Link
+            href={searchHref({ ...searchParams, letter: "" })}
+            className={`rounded-lg px-2 py-1 text-xs font-bold ${
+              letter === ""
+                ? "bg-indigo-600 text-white"
+                : "bg-white text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            All
+          </Link>
+          {LETTERS.map((letterOption) => (
+            <Link
+              key={letterOption}
+              href={searchHref({ ...searchParams, letter: letterOption })}
+              className={`rounded-lg px-2 py-1 text-xs font-bold ${
+                letter === letterOption
+                  ? "bg-indigo-600 text-white"
+                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              {letterOption}
+            </Link>
+          ))}
+        </div>
+
         <p className="text-sm text-slate-500">
-          {results.length} business{results.length === 1 ? "" : "es"} found
+          {results.length} card{results.length === 1 ? "" : "s"} found
+          {letter ? ` starting with ${letter}` : ""}
         </p>
 
         {results.length ? (
