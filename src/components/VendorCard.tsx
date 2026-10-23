@@ -21,7 +21,7 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
-      <Link href={`/b/${vendor.slug}`} className="relative block">
+      <Link href={`/card/${vendor.slug}`} className="relative block">
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -48,7 +48,7 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
       <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <Link
-            href={`/b/${vendor.slug}`}
+            href={`/card/${vendor.slug}`}
             className="line-clamp-1 font-bold text-slate-900 hover:text-rose-600"
           >
             {vendor.name}
@@ -80,10 +80,10 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
 
         <div className="mt-auto flex gap-2 pt-1">
           <Link
-            href={`/b/${vendor.slug}`}
+            href={`/card/${vendor.slug}`}
             className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-center text-sm font-semibold hover:bg-slate-50"
           >
-            View profile
+            View card
           </Link>
           {vendor.whatsappNumber ? (
             <WhatsAppButton

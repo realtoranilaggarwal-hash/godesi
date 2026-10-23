@@ -9,6 +9,7 @@ import { effectivePlan } from "@/lib/plans";
 import { liveDealWhere } from "@/lib/deals";
 import { CardLeadForm } from "@/components/CardLeadForm";
 import { CardShareButton } from "@/components/CardShareButton";
+import { ShareButtons } from "@/components/ShareButtons";
 
 export const revalidate = 3600;
 
@@ -36,6 +37,9 @@ const getBusiness = cache((slug: string) =>
       verifiedProvider: true,
       hideContact: true,
       referralOffer: true,
+      categorySlug: true,
+      featuredRank: true,
+      featuredUntil: true,
       owner: {
         select: { id: true, plan: true, planExpiresAt: true },
       },
@@ -74,6 +78,17 @@ export default async function CardPage({
   const paidContact = business.owner
     ? effectivePlan(business.owner) !== "FREE" && !business.hideContact
     : false;
+  const now = new Date();
+  const featured =
+    (business.featuredRank > 0 &&
+      (!business.featuredUntil || business.featuredUntil > now)) ||
+    (business.owner ? effectivePlan(business.owner) !== "FREE" : false);
+  const categories = await db.category.findMany({
+    where: { parentSlug: null },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    take: 14,
+    select: { slug: true, name: true, icon: true },
+  });
   const place = [business.city, business.state, business.country]
     .filter(Boolean)
     .join(", ");
@@ -116,8 +131,20 @@ export default async function CardPage({
   return (
     <div className="mx-auto max-w-md space-y-5 px-4 py-6">
       {/* The card face — laid out like a printed business card */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/10">
-        <div className="h-2 bg-gradient-to-r from-orange-500 via-rose-600 to-fuchsia-600" />
+      <div
+        className={`overflow-hidden rounded-2xl bg-white shadow-xl ${
+          featured
+            ? "ring-2 ring-amber-400"
+            : "ring-1 ring-slate-900/10"
+        }`}
+      >
+        <div
+          className={`h-2 ${
+            featured
+              ? "bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500"
+              : "bg-gradient-to-r from-orange-500 via-rose-600 to-fuchsia-600"
+          }`}
+        />
         <div className="p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -127,8 +154,13 @@ export default async function CardPage({
               <p className="mt-1 text-sm font-semibold text-indigo-700">
                 {business.category}
               </p>
+              {featured ? (
+                <span className="mt-2 inline-block rounded-full bg-amber-200 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-amber-900">
+                  ⭐ Featured
+                </span>
+              ) : null}
               {business.verifiedProvider ? (
-                <span className="mt-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                <span className="ml-1 mt-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
                   ✓ Verified on GoDesi
                 </span>
               ) : null}
@@ -190,13 +222,19 @@ export default async function CardPage({
             </p>
           </div>
         </div>
-        <div className="flex items-center justify-between bg-slate-900 px-6 py-2.5">
-          <span className="text-[11px] font-bold uppercase tracking-widest text-white/80">
-            GoDesi digital card
+        <div
+          className={`flex items-center justify-between px-6 py-2.5 ${
+            featured
+              ? "bg-gradient-to-r from-amber-500 to-yellow-600"
+              : "bg-slate-900"
+          }`}
+        >
+          <span className="text-[11px] font-bold uppercase tracking-widest text-white/90">
+            {featured ? "GoDesi featured card" : "GoDesi digital card"}
           </span>
           <Link
             href={`/b/${business.slug}`}
-            className="text-[11px] font-semibold text-amber-300 hover:text-amber-200"
+            className="text-[11px] font-semibold text-white hover:underline"
           >
             Full profile →
           </Link>
@@ -232,6 +270,11 @@ export default async function CardPage({
         </Link>
       </div>
 
+      <ShareButtons
+        url={cardUrl}
+        title={`${business.name} — ${business.category} digital card`}
+      />
+
       {business.deals.length ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
@@ -252,14 +295,20 @@ export default async function CardPage({
         </div>
       ) : null}
 
-      {/* Vendor's referral offer */}
+      {/* Vendor's referral offer — scissors-style coupon to clip */}
       {business.referralOffer ? (
-        <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-4 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
-            Mention GoDesi &amp; get
-          </p>
-          <p className="mt-1 text-base font-extrabold text-slate-900">
+        <div className="relative mt-7 rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50 px-5 py-4">
+          <div className="absolute -top-3 left-4 flex items-center gap-1.5 bg-amber-50 px-2">
+            <span aria-hidden>✂️</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-700">
+              Clip this coupon
+            </span>
+          </div>
+          <p className="mt-1 text-center text-base font-extrabold text-slate-900">
             {business.referralOffer}
+          </p>
+          <p className="mt-1 text-center text-[11px] font-semibold text-amber-700">
+            Show this card or mention GoDesi at {business.name} to redeem
           </p>
         </div>
       ) : null}
@@ -309,6 +358,46 @@ export default async function CardPage({
         </p>
         <div className="mt-4">
           <CardLeadForm slug={business.slug} />
+        </div>
+      </div>
+
+      {/* Browse more cards — every trade, one tap */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            🪪 Browse digital cards
+          </p>
+          <Link
+            href={
+              business.categorySlug
+                ? `/card?cat=${business.categorySlug}`
+                : "/card"
+            }
+            className="text-xs font-bold text-indigo-600 hover:underline"
+          >
+            More {business.category} cards →
+          </Link>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {categories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/card?cat=${category.slug}`}
+              className={`rounded-full border px-2.5 py-1 text-xs font-semibold hover:bg-slate-50 ${
+                category.slug === business.categorySlug
+                  ? "border-indigo-300 bg-indigo-50 text-indigo-700"
+                  : "border-slate-200 text-slate-600"
+              }`}
+            >
+              {category.icon} {category.name}
+            </Link>
+          ))}
+          <Link
+            href="/card"
+            className="rounded-full border border-slate-300 px-2.5 py-1 text-xs font-bold text-slate-800 hover:bg-slate-50"
+          >
+            All →
+          </Link>
         </div>
       </div>
 
