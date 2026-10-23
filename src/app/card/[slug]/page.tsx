@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import { maskContactDetails } from "@/lib/moderation";
 import { effectivePlan } from "@/lib/plans";
+import { liveDealWhere } from "@/lib/deals";
 import { CardLeadForm } from "@/components/CardLeadForm";
 import { CardShareButton } from "@/components/CardShareButton";
 
@@ -34,8 +35,15 @@ const getBusiness = cache((slug: string) =>
       specialties: true,
       verifiedProvider: true,
       hideContact: true,
+      referralOffer: true,
       owner: {
         select: { id: true, plan: true, planExpiresAt: true },
+      },
+      deals: {
+        where: liveDealWhere(),
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: { id: true, title: true },
       },
     },
   }),
@@ -70,11 +78,12 @@ export default async function CardPage({
     .filter(Boolean)
     .join(", ");
 
-  const actions: { emoji: string; label: string; href: string }[] = [];
+  // Contact rows drawn inside the card face, like a printed business card.
+  const cardLines: { emoji: string; text: string; href?: string }[] = [];
   if (business.whatsappNumber) {
-    actions.push({
+    cardLines.push({
       emoji: "💬",
-      label: "WhatsApp",
+      text: `WhatsApp ${business.whatsappNumber}`,
       href: whatsappLink(
         business.whatsappNumber,
         `Hi ${business.name}, I found your card on Godesi.`,
@@ -82,103 +91,181 @@ export default async function CardPage({
     });
   }
   if (paidContact && business.phone) {
-    actions.push({ emoji: "📞", label: "Call", href: `tel:${business.phone}` });
+    cardLines.push({
+      emoji: "📞",
+      text: business.phone,
+      href: `tel:${business.phone}`,
+    });
   }
   if (paidContact && business.publicEmail) {
-    actions.push({
+    cardLines.push({
       emoji: "✉️",
-      label: "Email",
+      text: business.publicEmail,
       href: `mailto:${business.publicEmail}`,
     });
   }
   if (business.websiteUrl) {
-    actions.push({ emoji: "🌐", label: "Website", href: business.websiteUrl });
-  }
-  if (business.mapsUrl) {
-    actions.push({
-      emoji: "📍",
-      label: "Directions",
-      href: business.mapsUrl,
+    cardLines.push({
+      emoji: "🌐",
+      text: business.websiteUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""),
+      href: business.websiteUrl,
     });
   }
+  if (place) cardLines.push({ emoji: "📍", text: business.address ?? place, href: business.mapsUrl ?? undefined });
 
   return (
     <div className="mx-auto max-w-md space-y-5 px-4 py-6">
-      {/* The card */}
-      <div className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-white shadow-lg">
-        <div className="bg-gradient-to-r from-orange-500 via-rose-600 to-fuchsia-600 px-6 pb-14 pt-6 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-white/80">
-            GoDesi digital card
-          </p>
-        </div>
-        <div className="-mt-10 flex flex-col items-center px-6 pb-6 text-center">
-          {business.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={business.logoUrl}
-              alt={business.name}
-              className="h-20 w-20 rounded-2xl border-4 border-white bg-white object-cover shadow"
-            />
-          ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border-4 border-white bg-indigo-100 text-3xl shadow">
-              {business.profileType === "PROFESSIONAL" ? "🧑‍💼" : "🏪"}
+      {/* The card face — laid out like a printed business card */}
+      <div className="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-900/10">
+        <div className="h-2 bg-gradient-to-r from-orange-500 via-rose-600 to-fuchsia-600" />
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold leading-tight text-slate-900">
+                {business.name}
+              </h1>
+              <p className="mt-1 text-sm font-semibold text-indigo-700">
+                {business.category}
+              </p>
+              {business.verifiedProvider ? (
+                <span className="mt-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                  ✓ Verified on GoDesi
+                </span>
+              ) : null}
             </div>
-          )}
-          <h1 className="mt-3 text-2xl font-extrabold text-slate-900">
-            {business.name}
-          </h1>
-          {business.verifiedProvider ? (
-            <span className="mt-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
-              ✓ Verified
-            </span>
-          ) : null}
-          <p className="mt-1 text-sm font-medium text-slate-600">
-            {business.category}
-            {place ? ` · ${place}` : ""}
-          </p>
+            {business.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={business.logoUrl}
+                alt=""
+                className="h-16 w-16 shrink-0 rounded-xl border border-slate-200 object-cover"
+              />
+            ) : (
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-2xl">
+                {business.profileType === "PROFESSIONAL" ? "🧑‍💼" : "🏪"}
+              </div>
+            )}
+          </div>
 
-          {actions.length ? (
-            <div
-              className="mt-4 grid w-full gap-2"
-              style={{
-                gridTemplateColumns: `repeat(${Math.min(actions.length, 4)}, 1fr)`,
-              }}
-            >
-              {actions.map((action) => (
+          {business.specialties.length ? (
+            <p className="mt-3 line-clamp-2 text-xs text-slate-500">
+              {business.specialties.slice(0, 5).join(" · ")}
+            </p>
+          ) : null}
+
+          <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-4">
+            {cardLines.map((line, index) => {
+              const inner = (
+                <>
+                  <span aria-hidden>{line.emoji}</span>
+                  <span className="truncate">{line.text}</span>
+                </>
+              );
+              return line.href ? (
                 <a
-                  key={action.label}
-                  href={action.href}
-                  target={action.href.startsWith("http") ? "_blank" : undefined}
+                  key={index}
+                  href={line.href}
+                  target={line.href.startsWith("http") ? "_blank" : undefined}
                   rel={
-                    action.href.startsWith("http")
+                    line.href.startsWith("http")
                       ? "noopener noreferrer"
                       : undefined
                   }
-                  className="flex flex-col items-center gap-1 rounded-2xl border border-slate-200 bg-slate-50 px-2 py-3 text-xs font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50"
+                  className="flex items-center gap-2 text-sm font-medium text-indigo-700 hover:underline"
                 >
-                  <span className="text-xl">{action.emoji}</span>
-                  {action.label}
+                  {inner}
                 </a>
-              ))}
-            </div>
-          ) : null}
-
-          <a
-            href={`/card/${business.slug}/vcf`}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white hover:bg-slate-800"
+              ) : (
+                <p
+                  key={index}
+                  className="flex items-center gap-2 text-sm font-medium text-slate-700"
+                >
+                  {inner}
+                </p>
+              );
+            })}
+            <p className="flex items-center gap-2 text-sm font-semibold text-rose-700">
+              <span aria-hidden>🪪</span>
+              godesi.com/card/{business.slug}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between bg-slate-900 px-6 py-2.5">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-white/80">
+            GoDesi digital card
+          </span>
+          <Link
+            href={`/b/${business.slug}`}
+            className="text-[11px] font-semibold text-amber-300 hover:text-amber-200"
           >
-            ⬇️ Save contact
-          </a>
-          <CardShareButton
-            url={cardUrl}
-            name={business.name}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-4 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-50"
-          />
+            Full profile →
+          </Link>
         </div>
       </div>
 
+      {/* Primary actions */}
+      <div className="grid grid-cols-2 gap-2">
+        <a
+          href={`/card/${business.slug}/vcf`}
+          className="flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
+        >
+          ⬇️ Save contact
+        </a>
+        <CardShareButton
+          url={cardUrl}
+          name={business.name}
+          className="flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-4 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-50"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          href={`/b/${business.slug}`}
+          className="flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          🏷️ Services &amp; deals
+        </Link>
+        <Link
+          href={`/card/${business.slug}/poster`}
+          className="flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          🖨️ Print shop poster
+        </Link>
+      </div>
+
+      {business.deals.length ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            🏷️ Deals at {business.name}
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {business.deals.map((deal) => (
+              <li key={deal.id}>
+                <Link
+                  href={`/b/${business.slug}`}
+                  className="text-sm font-semibold text-indigo-700 hover:underline"
+                >
+                  {deal.title} →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {/* Vendor's referral offer */}
+      {business.referralOffer ? (
+        <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-4 text-center">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
+            Mention GoDesi &amp; get
+          </p>
+          <p className="mt-1 text-base font-extrabold text-slate-900">
+            {business.referralOffer}
+          </p>
+        </div>
+      ) : null}
+
       {business.description ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
             About
           </h2>
@@ -191,21 +278,8 @@ export default async function CardPage({
         </div>
       ) : null}
 
-      {business.specialties.length ? (
-        <div className="flex flex-wrap justify-center gap-1.5">
-          {business.specialties.slice(0, 8).map((item) => (
-            <span
-              key={item}
-              className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-800"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
       {/* QR — print it, scan it, the card opens */}
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
         <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500">
           Scan to open this card
         </h2>
@@ -213,8 +287,8 @@ export default async function CardPage({
         <img
           src={`/api/qr/${business.slug}?card=1`}
           alt={`QR code for ${business.name}`}
-          width={180}
-          height={180}
+          width={160}
+          height={160}
           className="mx-auto mt-3 rounded-xl border border-slate-200"
         />
         <a
@@ -226,7 +300,7 @@ export default async function CardPage({
       </div>
 
       {/* Lead capture */}
-      <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-5 shadow-sm">
+      <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-5 shadow-sm">
         <h2 className="text-center text-base font-bold text-slate-900">
           Share your card with {business.name}
         </h2>
@@ -239,7 +313,7 @@ export default async function CardPage({
       </div>
 
       {/* Powered-by footer — the viral loop */}
-      <div className="rounded-3xl bg-gradient-to-r from-orange-500 via-rose-600 to-fuchsia-600 p-5 text-center text-white shadow-lg">
+      <div className="rounded-2xl bg-gradient-to-r from-orange-500 via-rose-600 to-fuchsia-600 p-5 text-center text-white shadow-lg">
         <p className="text-sm font-semibold">
           {business.owner
             ? "Want a card like this for your business?"
