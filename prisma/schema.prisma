@@ -774,6 +774,17 @@ model Business {
   zillowUrl          String?
   realtorUrl         String?
   homesUrl           String?
+  /// Music-platform profiles shown on DJ / band / singer cards.
+  soundcloudUrl      String?
+  spotifyUrl         String?
+  mixcloudUrl        String?
+  beatportUrl        String?
+  twitchUrl          String?
+  /// Wide banner shown across the top of the public profile page.
+  coverUrl           String?
+  /// Member-written Google title/description; blank falls back to the generated one.
+  seoTitle           String?
+  seoDescription     String?
   /// Intro/showcase video pasted from YouTube or Vimeo. The first of `videoUrls`.
   videoUrl           String?
   /// Every showcase video, in order. A free card shows one; paid plans show more.
