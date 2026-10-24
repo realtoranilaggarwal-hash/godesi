@@ -14,6 +14,7 @@ import {
 } from "@/lib/chatter";
 import { ChatterComposer } from "@/components/chatter/ChatterComposer";
 import { ChatterPostCard } from "@/components/chatter/ChatterPostCard";
+import { WallPromo } from "@/components/WallPromo";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -144,6 +145,7 @@ export default async function ChatterPostPage({
         </p>
       ) : null}
       {card(post)}
+      <WallPromo />
       <section id="reply" className="space-y-3 pl-4 sm:pl-8">
         <h2 className="text-sm font-bold text-slate-700">
           {post.replyCount === 1 ? "1 reply" : `${post.replyCount} replies`}

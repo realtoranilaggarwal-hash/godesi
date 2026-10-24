@@ -119,6 +119,12 @@ export async function startAdCheckoutAction(formData: FormData) {
 const PIXEL_BOARD = 1000; // the wall is 1000 x 1000 pixels = 1,000,000
 const PIXEL_PRICE_INR = 85; // ₹85 a pixel ≈ $1
 const PIXEL_PRICE_USD = 1; // $1 a pixel
+/** Bottom 100 rows of the board are the free zone — book there for $0. */
+const WALL_FREE_Y = 900;
+/** Free bookings (free zone or promo code) are capped at 400 px = 100 bricks. */
+const WALL_FREE_MAX_PX = 400;
+/** Promo code that makes any wall block free while the wall launches. */
+const WALL_FREE_CODE = "godesi.com";
 
 const pixelSchema = z.object({
   x: z.number().int().min(0),
@@ -128,6 +134,7 @@ const pixelSchema = z.object({
   title: z.string().trim().min(2, "Give your block a title").max(80),
   linkUrl: z.string().trim().url("Enter a valid destination URL"),
   imageUrl: z.string().trim().url("Enter a valid image URL").or(z.literal("")),
+  code: z.string().trim().max(40).optional(),
 });
 
 export type WallCheckoutResult = { error?: string };
@@ -146,11 +153,18 @@ export async function startPixelWallCheckoutAction(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { x, y, w, h, title, linkUrl } = parsed.data;
   const imageUrl = parsed.data.imageUrl || PLACEHOLDER_CREATIVE;
+  const pixels = w * h;
 
-  if (x + w > PIXEL_BOARD || y + h > PIXEL_BOARD || w * h < 4) {
+  if (x + w > PIXEL_BOARD || y + h > PIXEL_BOARD || pixels < 4) {
     return { error: "That spot doesn't fit on the board — drag a rectangle inside it." };
   }
-  if (!stripeEnabled()) return { error: "stripe_unavailable" };
+
+  const inFreeZone = y >= WALL_FREE_Y;
+  const codeFree =
+    (parsed.data.code ?? "").toLowerCase() === WALL_FREE_CODE;
+  const free = inFreeZone || codeFree;
+
+  if (!free && !stripeEnabled()) return { error: "stripe_unavailable" };
 
   const existing = await db.wallBlock.findMany({
     where: { status: { in: ["DRAFT", "PENDING", "ACTIVE"] } },
@@ -164,9 +178,54 @@ export async function startPixelWallCheckoutAction(
     return { error: "Part of that spot is already taken — drag somewhere free." };
   }
 
+  if (free) {
+    if (pixels > WALL_FREE_MAX_PX) {
+      return {
+        error:
+          "Free blocks are capped at 400 pixels (100 bricks) — drag a smaller box or pay for a bigger one.",
+      };
+    }
+    const alreadyFree = await db.wallBlock.findFirst({
+      where: {
+        advertiserId: user.id,
+        status: { in: ["DRAFT", "PENDING", "ACTIVE"] },
+        orders: { some: { amountMinor: 0 } },
+      },
+      select: { id: true },
+    });
+    if (alreadyFree) {
+      return { error: "You've already claimed a free block — the next one is paid." };
+    }
+
+    const block = await db.wallBlock.create({
+      data: {
+        x, y, w, h,
+        title,
+        imageUrl,
+        linkUrl,
+        status: "ACTIVE",
+        advertiserId: user.id,
+      },
+    });
+    await db.adOrder.create({
+      data: {
+        userId: user.id,
+        wallBlockId: block.id,
+        slot: "WALL",
+        pricing: "MONTHLY",
+        months: 1,
+        amountMinor: 0,
+        currency: requestCurrency(),
+        status: "PAID",
+      },
+    });
+    revalidatePath("/walloffame");
+    redirect("/walloffame?free=1");
+  }
+
   const currency = requestCurrency();
   const pxPrice = currency === "INR" ? PIXEL_PRICE_INR : PIXEL_PRICE_USD;
-  const chargeMinor = toMinor(w * h * pxPrice);
+  const chargeMinor = toMinor(pixels * pxPrice);
 
   const block = await db.wallBlock.create({
     data: {
@@ -203,7 +262,7 @@ export async function startPixelWallCheckoutAction(
           currency: currency.toLowerCase(),
           unit_amount: chargeMinor,
           product_data: {
-            name: `GoDesi Wall of Fame — ${(w * h).toLocaleString()} pixels`,
+            name: `GoDesi Wall of Fame — ${pixels.toLocaleString()} pixels`,
             description: `${w}×${h}px block at (${x}, ${y}) — permanent spot on godesi.com/walloffame`,
           },
         },
