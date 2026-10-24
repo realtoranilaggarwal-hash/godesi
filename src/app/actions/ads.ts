@@ -7,7 +7,6 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import {
-  AD_PLACEMENTS,
   adImpressionPrice,
   adPrice,
   durationOrThrow,
