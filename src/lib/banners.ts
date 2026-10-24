@@ -185,6 +185,30 @@ export async function wallAvailability() {
   return optionalRead(() => wallAll(), []);
 }
 
+const pixelWall = cachedQuery("wall-blocks", 30, async () =>
+  db.wallBlock.findMany({
+    where: { status: { in: ["DRAFT", "PENDING", "ACTIVE"] } },
+    select: {
+      id: true,
+      x: true,
+      y: true,
+      w: true,
+      h: true,
+      title: true,
+      imageUrl: true,
+      linkUrl: true,
+      status: true,
+      advertiserId: true,
+      advertiser: { select: { name: true } },
+    },
+  }),
+);
+
+/** All claimed rectangles on the million-pixel wall, any live-ish status. */
+export async function pixelWallBlocks() {
+  return optionalRead(() => pixelWall(), []);
+}
+
 /**
  * Counts one view and retires an impression-pack banner as soon as its quota is
  * used up, so a sold pack stops serving without an admin step.

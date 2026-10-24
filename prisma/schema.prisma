@@ -345,6 +345,7 @@ model User {
   tickets        Ticket[]
   news           NewsItem[]
   banners        Banner[]
+  wallBlocks     WallBlock[]
   adOrders       AdOrder[]
 
   listings     Listing[]
@@ -1533,6 +1534,9 @@ model AdOrder {
   banner      Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
   /// All banners booked under this order (wall bricks book several at once).
   bannerIds   String[]      @default([])
+  /// Pixel-wall purchase: the block this order paid for.
+  wallBlockId String?
+  wallBlock   WallBlock?    @relation(fields: [wallBlockId], references: [id], onDelete: SetNull)
   slot        BannerSlot
   pricing     AdPricing     @default(MONTHLY)
   months      Int           @default(1)
@@ -1546,6 +1550,28 @@ model AdOrder {
   createdAt   DateTime      @default(now())
 
   @@index([userId, status])
+}
+
+/// One purchased rectangle on the million-pixel Wall of Fame.
+model WallBlock {
+  id           String       @id @default(cuid())
+  /// Placement on the 1000x1000 pixel board (pixels).
+  x            Int
+  y            Int
+  w            Int
+  h            Int
+  title        String
+  imageUrl     String
+  linkUrl      String
+  status       BannerStatus @default(DRAFT)
+  clicks       Int          @default(0)
+  createdAt    DateTime     @default(now())
+
+  advertiserId String?
+  advertiser   User?        @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
+  orders       AdOrder[]
+
+  @@index([status])
 }
 
 model NewsFeed {
