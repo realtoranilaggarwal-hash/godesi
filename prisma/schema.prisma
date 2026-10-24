@@ -1531,6 +1531,8 @@ model AdOrder {
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   bannerId    String?
   banner      Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
+  /// All banners booked under this order (wall bricks book several at once).
+  bannerIds   String[]      @default([])
   slot        BannerSlot
   pricing     AdPricing     @default(MONTHLY)
   months      Int           @default(1)

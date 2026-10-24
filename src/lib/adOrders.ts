@@ -28,17 +28,29 @@ export async function confirmAdOrder({
   });
   if (claimed.count === 0) return db.adOrder.findUnique({ where: { id: order.id } });
 
-  if (order.bannerId) {
+  const bannerIds = order.bannerIds.length
+    ? order.bannerIds
+    : order.bannerId
+      ? [order.bannerId]
+      : [];
+
+  if (bannerIds.length) {
     const startsAt = new Date();
 
-    if (order.pricing === "IMPRESSIONS" && order.impressions) {
+    if (order.slot === "WALL") {
+      /** Wall bricks are a one-time buy: they stay until the vendor pulls them. */
+      await db.banner.updateMany({
+        where: { id: { in: bannerIds } },
+        data: { status: "PENDING", startsAt, endsAt: null },
+      });
+    } else if (order.pricing === "IMPRESSIONS" && order.impressions) {
       /** Impression packs run until the views are used up, not to a date. */
       const banner = await db.banner.findUniqueOrThrow({
-        where: { id: order.bannerId },
+        where: { id: bannerIds[0] },
         select: { impressions: true },
       });
       await db.banner.update({
-        where: { id: order.bannerId },
+        where: { id: bannerIds[0] },
         data: {
           status: "PENDING",
           startsAt,
@@ -50,8 +62,8 @@ export async function confirmAdOrder({
       const endsAt = new Date(startsAt);
       endsAt.setMonth(endsAt.getMonth() + order.months);
 
-      await db.banner.update({
-        where: { id: order.bannerId },
+      await db.banner.updateMany({
+        where: { id: { in: bannerIds } },
         data: { status: "PENDING", startsAt, endsAt },
       });
     }

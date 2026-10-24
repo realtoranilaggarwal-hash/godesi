@@ -7,6 +7,7 @@ import { formatMinor } from "@/lib/format";
 import { requestCurrency } from "@/lib/currency";
 import { Alert, Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 import { AdCreativeForm } from "@/components/forms/AdCreativeForm";
+import { WallPromo } from "@/components/WallPromo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My ads" };
@@ -90,6 +91,8 @@ export default async function AdvertiserDashboardPage({
           Payment received. Upload your creative below — we approve ads within a day.
         </Alert>
       ) : null}
+
+      <WallPromo />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat

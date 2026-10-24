@@ -21,6 +21,7 @@ import {
 } from "@/lib/resources";
 import { AdPreview } from "@/components/AdPreview";
 import { AdBookingForm } from "@/components/forms/AdBookingForm";
+import { WallPromo } from "@/components/WallPromo";
 import { DesignHelp } from "@/components/DesignHelp";
 import { Alert, Card, LinkButton } from "@/components/ui";
 
@@ -100,6 +101,8 @@ export default async function AdvertisePage({
       {searchParams.error ? (
         <Alert>{ERRORS[searchParams.error] ?? "Something went wrong."}</Alert>
       ) : null}
+
+      <WallPromo />
 
       <Card id="book">
         <h2 className="text-lg font-bold">
@@ -191,16 +194,26 @@ export default async function AdvertisePage({
                   {formatAdPrice(placement, currency)}
                   <span className="text-sm font-medium text-slate-500">
                     {" "}
-                    / month
+                    {slot === "WALL" ? "/ brick" : "/ month"}
                   </span>
                 </p>
-                <p className="text-xs text-slate-500">
-                  or about {formatCpm(placement, currency)} per 1,000
-                  impressions
-                </p>
+                {slot === "WALL" ? (
+                  <p className="text-xs text-slate-500">
+                    one-time — the brick stays yours
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500">
+                    or about {formatCpm(placement, currency)} per 1,000
+                    impressions
+                  </p>
+                )}
               </div>
 
-              {user ? (
+              {slot === "WALL" ? (
+                <LinkButton href="/walloffame" className="mt-4 w-full">
+                  🧱 Pick your bricks on the wall →
+                </LinkButton>
+              ) : user ? (
                 <AdBookingForm
                   slot={slot}
                   durations={AD_DURATIONS.map((months) => {
