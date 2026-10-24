@@ -19,6 +19,7 @@ const SIZE = 1000;
 const SNAP = 2; // selections snap to 2px — a 2x2 = 4px brick is the $4 minimum
 const FREE_Y = 900; // bottom 100 rows = the free zone
 const FREE_CODE = "godesi.com";
+const BRICK_CODE = "brick"; // giveaway code — one free brick anywhere
 
 const hit = (blocks: Block[], px: number, py: number) =>
   blocks.find(
@@ -234,7 +235,10 @@ export function PixelWall({
   const pxCount = sel ? sel.w * sel.h : 0;
   const bricks = pxCount / 4;
   const inFreeZone = !!sel && sel.y >= FREE_Y;
-  const codeFree = code.trim().toLowerCase() === FREE_CODE;
+  const entered = code.trim().toLowerCase();
+  const codeFree =
+    entered === FREE_CODE || (entered === BRICK_CODE && pxCount <= 4);
+  const brickCodeTooBig = entered === BRICK_CODE && pxCount > 4;
   const free =
     ((inFreeZone && pxCount <= 4) || codeFree) && pxCount > 0 && !hasFreeBlock;
   const creditApplied = free ? 0 : Math.min(creditUsd, pxCount * priceUsd);
@@ -401,6 +405,11 @@ export function PixelWall({
                       {free
                         ? "Code applied — this block is FREE!"
                         : "You've used your free brick — this one is paid."}
+                    </span>
+                  ) : null}
+                  {brickCodeTooBig ? (
+                    <span className="mt-1 block text-xs font-semibold text-amber-700">
+                      BRICK covers one 4px brick — shrink your box.
                     </span>
                   ) : null}
                 </label>
