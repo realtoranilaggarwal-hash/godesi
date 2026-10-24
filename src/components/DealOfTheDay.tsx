@@ -4,6 +4,8 @@ import { cachedDealOfTheDay } from "@/lib/dealOfTheDay";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { CopyButton } from "@/components/CopyButton";
+import { getCurrentUser } from "@/lib/auth";
+import { optionalRead } from "@/lib/resilient";
 
 /** Today's one business deal and one store coupon, changing at midnight New York time. */
 export async function DealOfTheDay() {
@@ -52,6 +54,10 @@ export async function DealOfTheDay() {
 
 /** Home page: today's picks as one slim line, with the ways into deals and shopping. */
 export async function DealOfTheDayBar() {
+  /** Logged-in members get the Wall of Fame CTA in this spot instead. */
+  const user = await optionalRead(() => getCurrentUser(), null);
+  if (user) return null;
+
   const { deal, offer } = await cachedDealOfTheDay();
 
   return (
