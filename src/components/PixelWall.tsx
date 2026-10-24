@@ -17,6 +17,8 @@ type Block = {
 
 const SIZE = 1000;
 const SNAP = 2; // selections snap to 2px — a 2x2 = 4px brick is the $4 minimum
+const FREE_Y = 900; // bottom 100 rows = the free zone
+const FREE_CODE = "godesi.com";
 
 const hit = (blocks: Block[], px: number, py: number) =>
   blocks.find(
@@ -41,6 +43,7 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [code, setCode] = useState("");
 
   const draw = () => {
     const canvas = canvasRef.current;
@@ -58,6 +61,19 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
         ctx.fillRect(xx, yy, 10, 10);
       }
     }
+
+    // free zone: green band across the bottom of the board
+    ctx.fillStyle = "rgba(16, 185, 129, 0.18)";
+    ctx.fillRect(0, FREE_Y, SIZE, SIZE - FREE_Y);
+    ctx.strokeStyle = "#059669";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 6]);
+    ctx.strokeRect(1, FREE_Y + 1, SIZE - 2, SIZE - FREE_Y - 2);
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#047857";
+    ctx.font = "bold 28px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("FREE ZONE — claim a spot for $0", SIZE / 2, FREE_Y + 36);
 
     for (const block of blocks) {
       if (block.status === "ACTIVE") {
@@ -165,7 +181,7 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
     try {
       const result = await startPixelWallCheckoutAction({
         x: sel.x, y: sel.y, w: sel.w, h: sel.h,
-        title, linkUrl, imageUrl,
+        title, linkUrl, imageUrl, code,
       });
       if (result?.error) {
         setError(
@@ -186,7 +202,11 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
   };
 
   const pxCount = sel ? sel.w * sel.h : 0;
-  const cost = pxCount * priceUsd;
+  const bricks = pxCount / 4;
+  const inFreeZone = !!sel && sel.y >= FREE_Y;
+  const codeFree = code.trim().toLowerCase() === FREE_CODE;
+  const free = inFreeZone || codeFree;
+  const cost = free ? 0 : pxCount * priceUsd;
 
   return (
     <div className="space-y-4">
@@ -205,7 +225,7 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
           {tip ??
-            `Drag a box over the open pixels — $${priceUsd} a pixel, 4 pixels ($${priceUsd * 4}) minimum. Indigo = just booked, pictures = live ads (click to visit).`}
+            `Drag a box over the open pixels — 250,000 bricks of 4 px at $${priceUsd * 4} each. The green FREE ZONE at the bottom is $0 (up to 400 px). Indigo = just booked, pictures = live ads (click to visit).`}
         </p>
       </div>
 
@@ -213,8 +233,15 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
         <div className="rounded-3xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-lg font-black text-slate-900">
-              🧱 {sel.w} × {sel.h} px = {pxCount.toLocaleString()} pixels — $
-              {cost.toLocaleString()}
+              🧱 {sel.w} × {sel.h} px = {pxCount.toLocaleString()} px ={" "}
+              {bricks.toLocaleString()} bricks —{" "}
+              {free ? (
+                <span className="text-emerald-600">
+                  FREE{inFreeZone ? " (free zone)" : ""}
+                </span>
+              ) : (
+                `$${cost.toLocaleString()}`
+              )}
               <span className="ml-2 text-xs font-semibold text-slate-500">
                 at ({sel.x}, {sel.y}) — yours for good
               </span>
@@ -291,6 +318,22 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
                   className="h-16 rounded-lg border border-slate-200 object-cover"
                 />
               ) : null}
+              {!inFreeZone ? (
+                <label className="block max-w-xs text-sm font-semibold text-slate-700">
+                  Discount code
+                  <input
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="Have a code? Enter it here"
+                    className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-normal"
+                  />
+                  {codeFree ? (
+                    <span className="mt-1 block text-xs font-black text-emerald-600">
+                      Code applied — this block is FREE!
+                    </span>
+                  ) : null}
+                </label>
+              ) : null}
               {error ? (
                 <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
                   {error}
@@ -303,12 +346,15 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
                 className="w-full rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 px-4 py-3 text-base font-black text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy
-                  ? "Opening checkout…"
-                  : `Pay $${cost.toLocaleString()} — own ${pxCount.toLocaleString()} pixels 🧱`}
+                  ? "Working…"
+                  : free
+                    ? `Claim ${bricks.toLocaleString()} bricks — FREE 🎉`
+                    : `Pay $${cost.toLocaleString()} — own ${pxCount.toLocaleString()} pixels 🧱`}
               </button>
               <p className="text-center text-xs text-slate-500">
-                Card checkout by Stripe. Your pixels light up the moment payment
-                lands and your art stretches across the whole block.
+                {free
+                  ? "Free for now — your block goes live instantly (up to 400 px per free claim)."
+                  : "Card checkout by Stripe. Your pixels light up the moment payment lands and your art stretches across the whole block."}
               </p>
             </div>
           ) : null}

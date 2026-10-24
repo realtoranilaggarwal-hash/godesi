@@ -19,8 +19,8 @@ const PRICE = 1;
 const STEPS = [
   {
     icon: "🧱",
-    title: "Drag & pick your pixels",
-    body: `A million pixels on the board, $${PRICE} each — grab a 4-pixel brick for $4 or drag a whole block and dominate the wall.`,
+    title: "Drag & pick your bricks",
+    body: `250,000 bricks of 4 pixels each at $${PRICE * 4} a brick — drag a whole block and dominate the wall. The green free zone is $0.`,
   },
   {
     icon: "🏆",
@@ -37,7 +37,7 @@ const STEPS = [
 export default async function WallOfFamePage({
   searchParams,
 }: {
-  searchParams: { paid?: string; error?: string };
+  searchParams: { paid?: string; error?: string; free?: string };
 }) {
   const blocks = await pixelWallBlocks();
 
@@ -63,14 +63,17 @@ export default async function WallOfFamePage({
           🏆 The GoDesi Wall of Fame
         </p>
         <h1 className="mt-2 text-3xl font-black sm:text-4xl">
-          1,000,000 pixels. ${PRICE} a pixel. Own your spot 🧱
+          250,000 bricks. ${PRICE * 4} a brick. Own your spot 🧱
         </h1>
         <p className="mt-3 max-w-2xl text-white/90">
           The desi Million Dollar Homepage: drag a box over the board, upload
           your banner and book today —{" "}
-          {taken.toLocaleString()} of {TOTAL_PX.toLocaleString()} pixels taken so
-          far. Early birds get the best spots, and the biggest buyers sit on top
-          of the vendor list.
+          {Math.floor(taken / 4).toLocaleString()} of{" "}
+          {Math.floor(TOTAL_PX / 4).toLocaleString()} bricks taken so far.
+          <span className="font-black"> Free right now</span> — grab a spot in
+          the green free zone or enter the code <b>godesi.com</b> at checkout.
+          Early birds get the best spots, and the biggest buyers sit on top of
+          the vendor list.
         </p>
       </section>
 
@@ -81,6 +84,11 @@ export default async function WallOfFamePage({
       ) : null}
       {searchParams.error === "cancelled" ? (
         <Alert>Checkout was cancelled — your pixels were not booked.</Alert>
+      ) : null}
+      {searchParams.free ? (
+        <Alert tone="success">
+          🎉 Your free block is live on the wall — welcome to the Wall of Fame!
+        </Alert>
       ) : null}
 
       <PixelWall blocks={blocks} priceUsd={PRICE} />
