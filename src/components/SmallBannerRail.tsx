@@ -13,6 +13,9 @@ export type SmallBanner = { id: string; title: string; imageUrl: string };
 /** Rail width plus the gap beside it. */
 const RAIL_SPACE = 320 + 24;
 
+/** Fired when a site-wide rail shows or hides, so the strip can re-check. */
+const RAIL_CHANGED = "godesi:small-banner-rail";
+
 /**
  * Width the page's content really uses. A plain block that only wraps other
  * blocks (e.g. a centred `max-w-3xl` column) is as wide as its widest child,
@@ -72,6 +75,7 @@ export function SmallBannerRail({
   embedded = false,
   start = 0,
   side = "right",
+  strip = false,
   categories = [],
   fill = false,
   phone = false,
@@ -86,6 +90,11 @@ export function SmallBannerRail({
   start?: number;
   /** Which side of the page the site-wide rail sits on. */
   side?: "left" | "right";
+  /**
+   * A row under the page for wide screens where neither the site-wide rail
+   * nor a page's own column shows small banners.
+   */
+  strip?: boolean;
   /** As many banners as fit the height of the box it sits in. */
   fill?: boolean;
   /** Under the page content on phones, where there is no side rail. */
@@ -97,8 +106,44 @@ export function SmallBannerRail({
   const railRef = useRef<HTMLElement>(null);
   const [roomFor, setRoomFor] = useState<string | null>(null);
   const hasRoom = roomFor === pathname;
+  const [columns, setColumns] = useState(4);
   const fillRef = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (embedded || !strip) return;
+
+    const check = () => {
+      const shown = Array.from(
+        document.querySelectorAll("[data-small-banners]"),
+      ).some(
+        (element) =>
+          !railRef.current?.contains(element) &&
+          element.getClientRects().length > 0,
+      );
+      setColumns(window.innerWidth >= 1280 ? 4 : 3);
+      setRoomFor(
+        pathname !== "/" && window.innerWidth >= 1024 && !shown
+          ? pathname
+          : null,
+      );
+    };
+
+    check();
+    const settle = window.setTimeout(check, 700);
+    window.addEventListener("resize", check);
+    window.addEventListener(RAIL_CHANGED, check);
+    return () => {
+      window.clearTimeout(settle);
+      window.removeEventListener("resize", check);
+      window.removeEventListener(RAIL_CHANGED, check);
+    };
+  }, [pathname, embedded, strip]);
+
+  useEffect(() => {
+    if (!embedded && !strip && !phone)
+      window.dispatchEvent(new Event(RAIL_CHANGED));
+  }, [hasRoom, embedded, strip, phone]);
 
   useEffect(() => {
     const box = fillRef.current;
@@ -115,7 +160,7 @@ export function SmallBannerRail({
   }, [fill]);
 
   useEffect(() => {
-    if (embedded || phone) return;
+    if (embedded || strip || phone) return;
     const rail = railRef.current;
     const page =
       side === "left" ? rail?.nextElementSibling : rail?.previousElementSibling;
@@ -148,7 +193,7 @@ export function SmallBannerRail({
       observer.disconnect();
       window.removeEventListener("resize", check);
     };
-  }, [pathname, embedded, phone, side]);
+  }, [pathname, embedded, phone, side, strip]);
 
   useEffect(() => {
     if (pathname === firstPath.current) return;
@@ -165,7 +210,9 @@ export function SmallBannerRail({
 
   const count = fill
     ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length)
-    : show;
+    : strip
+      ? columns
+      : show;
   const visible = Array.from(
     { length: Math.min(count, banners.length) },
     (_, index) => banners[(offset + index) % banners.length],
@@ -175,11 +222,9 @@ export function SmallBannerRail({
     (_, index) => HOUSE_BANNERS[(offset + index) % HOUSE_BANNERS.length],
   );
 
-  const stack = (
-    <div className="space-y-3" aria-label="Sponsored">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {visible.length ? "Sponsored" : "Explore GoDesi"}
-      </p>
+  const label = visible.length ? "Sponsored" : "Explore GoDesi";
+  const tiles = (
+    <>
       {visible.map((banner) => (
         <a
           key={banner.id}
@@ -197,7 +242,7 @@ export function SmallBannerRail({
             width={320}
             height={100}
             loading="lazy"
-            className="h-auto w-full object-cover"
+            className="h-full w-full object-cover"
           />
         </a>
       ))}
@@ -234,6 +279,15 @@ export function SmallBannerRail({
           </span>
         </Link>
       ))}
+    </>
+  );
+
+  const stack = (
+    <div className="space-y-3" aria-label="Sponsored" data-small-banners>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      {tiles}
       <Link
         href="/advertise?slot=MOBILE#book"
         className="flex aspect-[16/5] w-full items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white px-3 text-center text-xs font-semibold text-slate-500 hover:border-indigo-400 hover:text-indigo-600"
@@ -263,6 +317,35 @@ export function SmallBannerRail({
       </div>
     ) : (
       stack
+    );
+  }
+
+  if (strip) {
+    return (
+      <section
+        ref={railRef}
+        aria-label="Sponsored"
+        className={
+          hasRoom ? "mx-auto w-full max-w-screen-2xl px-4 pb-6" : "hidden"
+        }
+      >
+        {hasRoom && (
+          <>
+            <div className="mb-2 flex items-baseline justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                {label}
+              </p>
+              <Link
+                href="/advertise?slot=MOBILE#book"
+                className="text-xs font-semibold text-slate-500 hover:text-indigo-600 hover:underline"
+              >
+                Your 320 × 100 banner here — book this spot
+              </Link>
+            </div>
+            <div className="grid grid-cols-3 gap-3 xl:grid-cols-4">{tiles}</div>
+          </>
+        )}
+      </section>
     );
   }
 

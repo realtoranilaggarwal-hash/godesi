@@ -279,6 +279,7 @@ export async function SmallBanners({
   embedded = false,
   start = 0,
   side,
+  strip = false,
   tree = true,
   fill = false,
 }: {
@@ -290,11 +291,12 @@ export async function SmallBanners({
   tree?: boolean;
   start?: number;
   side?: "left" | "right";
+  strip?: boolean;
 } = {}) {
   if (isPhoneRequest()) return null;
   const [banners, categories] = await Promise.all([
     activeBanners("MOBILE", 20),
-    tree && side !== "left" ? categoryPickerGroups() : [],
+    tree && !strip && side !== "left" ? categoryPickerGroups() : [],
   ]);
   return (
     <SmallBannerRail
@@ -304,6 +306,7 @@ export async function SmallBanners({
       fill={fill}
       start={start}
       side={side}
+      strip={strip}
       banners={banners.map((banner) => ({
         id: banner.id,
         title: banner.title,

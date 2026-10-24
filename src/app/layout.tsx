@@ -206,6 +206,7 @@ export default async function RootLayout({
           </div>
           <SmallBanners />
         </main>
+        <SmallBanners strip start={20} />
         <SiteFooter />
         <QuoraSignupEvent />
         <LiveMediaPlayer signedIn={Boolean(signedInId)} />

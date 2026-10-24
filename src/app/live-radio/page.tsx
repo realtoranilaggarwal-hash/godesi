@@ -6,6 +6,7 @@ import { radioEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
 import { searchStations } from "@/lib/radioBrowser";
 import { RadioBrowserSearch } from "@/components/RadioBrowserSearch";
 import { SponsoredCard } from "@/components/SponsoredCard";
+import { SmallBanners } from "@/components/Banners";
 import { liveVoteCounts } from "@/lib/liveVotes";
 import { liveFavoriteKeys } from "@/lib/liveFavorites";
 import { getCurrentUser } from "@/lib/auth";
@@ -80,7 +81,12 @@ export default async function LiveRadioPage() {
             />
           ))}
         </ul>
-        <SponsoredCard />
+        <div className="space-y-4 self-start">
+          <SponsoredCard />
+          <div className="hidden lg:block">
+            <SmallBanners show={6} embedded />
+          </div>
+        </div>
       </div>
 
       <RadioBrowserSearch initial={browsed} />
