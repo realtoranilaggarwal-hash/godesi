@@ -129,6 +129,39 @@ export function BusinessProfileForm({
           (isMusicSubcategory(subcategory) ||
             !MUSIC_SOCIAL_KEYS.includes(social.key)),
       );
+  /** Generic Starting price field — inline in the pricing row when the trade
+   *  suppresses its own priceFrom question, standalone otherwise. */
+  const startingPriceField = (
+    <Field
+      label="Starting price"
+      hint="Shown as “From …” on marketplace cards. Leave blank to hide."
+    >
+      <div className="flex gap-2">
+        <input
+          name="startingPrice"
+          type="number"
+          min={0}
+          defaultValue={business?.startingPrice ?? ""}
+          className={inputClass}
+        />
+        <select
+          name="priceCurrency"
+          defaultValue={business?.priceCurrency ?? "USD"}
+          aria-label="Price currency"
+          className={inputClass}
+        >
+          <option value="USD">USD</option>
+          <option value="INR">INR</option>
+        </select>
+      </div>
+    </Field>
+  );
+  const inlineStartPrice = Boolean(
+    specialtySet(subcategory)?.pricing?.some(
+      (price) =>
+        price.key === "priceFrom" && /^starting price/i.test(price.label),
+    ),
+  );
   /** Saved certifications split back into checkbox values and free-text extras. */
   const offered = specialtySet(subcategory)?.certifications?.options ?? [];
   const saved = business?.certifications ?? [];
@@ -253,6 +286,7 @@ export function BusinessProfileForm({
       <SpecialtyPicker
         key={subcategory}
         subcategorySlug={subcategory}
+        leadingPricingField={inlineStartPrice ? startingPriceField : undefined}
         defaults={{
           specialties: business?.specialties ?? [],
           featuredSpecialty: business?.featuredSpecialty ?? null,
@@ -284,29 +318,7 @@ export function BusinessProfileForm({
         defaults={vehicle ?? EMPTY_VEHICLE}
       />
 
-      <Field
-        label="Starting price"
-        hint="Shown as “From …” on marketplace cards. Leave blank to hide."
-      >
-        <div className="flex gap-2">
-          <input
-            name="startingPrice"
-            type="number"
-            min={0}
-            defaultValue={business?.startingPrice ?? ""}
-            className={inputClass}
-          />
-          <select
-            name="priceCurrency"
-            defaultValue={business?.priceCurrency ?? "USD"}
-            aria-label="Price currency"
-            className={inputClass}
-          >
-            <option value="USD">USD</option>
-            <option value="INR">INR</option>
-          </select>
-        </div>
-      </Field>
+      {inlineStartPrice ? null : startingPriceField}
 
       <Field label="About your business">
         <textarea
@@ -364,6 +376,7 @@ export function BusinessProfileForm({
           name="logoUrl"
           label="Logo"
           purpose="logo"
+          square
           defaultValue={business?.logoUrl ?? ""}
           hint={
             <>
@@ -388,7 +401,24 @@ export function BusinessProfileForm({
           label="Cover photo (optional)"
           purpose="banner"
           defaultValue={business?.coverUrl ?? ""}
-          hint="A wide photo across the top of your page — your store front, stage setup or best work. It makes your page feel like your own website. No photo? Ask ChatGPT for a “wide banner image” of your trade and upload it here."
+          hint={
+            <>
+              Shows as a wide strip across the top of your page — best at{" "}
+              <strong>1600 × 500 px</strong> (any wide photo works, it is
+              cropped to fit). No photo? Open{" "}
+              <a
+                href="https://chatgpt.com"
+                target="_blank"
+                rel="noopener"
+                className="font-semibold underline"
+              >
+                ChatGPT
+              </a>{" "}
+              and type: &quot;Create a wide 1600x500 banner photo of &lt;your
+              work — e.g. a DJ booth with lights at an Indian wedding&gt;&quot;
+              — download the image it makes and drag it here.
+            </>
+          }
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}

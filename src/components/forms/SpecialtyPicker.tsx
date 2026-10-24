@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { Field, inputClass } from "@/components/ui";
 import {
   customOptionsOf,
@@ -39,10 +39,14 @@ export function SpecialtyPicker({
   canFeature,
   cardSaved,
   pickLimit = Number.POSITIVE_INFINITY,
+  leadingPricingField,
 }: {
   subcategorySlug: string;
   defaults: SpecialtyDefaults;
   canFeature: boolean;
+  /** Rendered first inside the pricing row — the generic Starting price field
+   *  moves here so it sits next to the trade's hourly/fee fields. */
+  leadingPricingField?: ReactNode;
   /** Agent extras live on their own page, which needs a saved card to attach to. */
   cardSaved: boolean;
   /** Most ticks the member's plan allows, per picker. */
@@ -234,6 +238,7 @@ export function SpecialtyPicker({
 
       {set.pricing ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {leadingPricingField}
           {set.pricing.map((price) => {
             // A generic "Starting price" box repeats the Starting price +
             // currency question asked below the video links — keep any saved
