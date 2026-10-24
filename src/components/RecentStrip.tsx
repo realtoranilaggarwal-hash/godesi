@@ -56,8 +56,10 @@ export async function RecentStrip() {
     <section aria-label="Recently joined and posted">
       <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2">
         {showTicker ? (
-          <h2 className="text-sm font-black uppercase tracking-wide text-slate-700">
-            🟢 Just now on GoDesi
+          <h2>
+            <span className="inline-block rounded-full bg-gradient-to-r from-lime-500 to-emerald-600 px-3 py-1 text-sm font-black uppercase tracking-wide text-white shadow-sm">
+              🟢 Just now on GoDesi
+            </span>
           </h2>
         ) : null}
         {user ? null : (
