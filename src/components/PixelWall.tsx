@@ -56,6 +56,8 @@ export function PixelWall({
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [code, setCode] = useState("");
+  /** Sold block under the pointer — drives the big hover preview card. */
+  const [hover, setHover] = useState<{ block: Block; cx: number; cy: number } | null>(null);
 
   const draw = () => {
     const canvas = canvasRef.current;
@@ -103,13 +105,20 @@ export function PixelWall({
     }
 
     if (sel) {
+      // Live preview: paint the uploaded art across the picked spot so the
+      // vendor sees exactly what the block will look like on the wall.
+      const preview = imageUrl ? images.current.get(imageUrl) : undefined;
+      if (preview?.complete && preview.naturalWidth) {
+        ctx.drawImage(preview, sel.x, sel.y, sel.w, sel.h);
+      } else {
+        ctx.fillStyle = "rgba(79, 70, 229, 0.25)";
+        ctx.fillRect(sel.x, sel.y, sel.w, sel.h);
+      }
       ctx.strokeStyle = "#4f46e5";
       ctx.lineWidth = 2;
       ctx.setLineDash([6, 4]);
       ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
       ctx.setLineDash([]);
-      ctx.fillStyle = "rgba(79, 70, 229, 0.25)";
-      ctx.fillRect(sel.x, sel.y, sel.w, sel.h);
     }
   };
 
@@ -123,9 +132,16 @@ export function PixelWall({
         images.current.set(block.imageUrl, img);
       }
     }
+    if (imageUrl && !images.current.has(imageUrl)) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = draw;
+      img.src = imageUrl;
+      images.current.set(imageUrl, img);
+    }
     draw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blocks, sel]);
+  }, [blocks, sel, imageUrl]);
 
   const pos = (e: React.PointerEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -146,8 +162,10 @@ export function PixelWall({
       const over = hit(blocks, px, py);
       canvasRef.current!.style.cursor = over ? "pointer" : "crosshair";
       setTip(over ? `${over.title} — click to visit` : null);
+      setHover(over ? { block: over, cx: px, cy: py } : null);
       return;
     }
+    setHover(null);
     setSel({
       x: Math.min(drag.current.sx, px),
       y: Math.min(drag.current.sy, py),
@@ -226,16 +244,45 @@ export function PixelWall({
     <div className="space-y-4">
       <div className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50 p-3 sm:p-5">
         <div className="overflow-x-auto">
-          <canvas
-            ref={canvasRef}
-            width={SIZE}
-            height={SIZE}
-            onPointerDown={down}
-            onPointerMove={move}
-            onPointerUp={up}
-            className="block w-full min-w-[640px] cursor-crosshair rounded-xl border border-slate-200"
-            style={{ imageRendering: "pixelated", touchAction: "pan-y" }}
-          />
+          <div className="relative min-w-[640px]">
+            <canvas
+              ref={canvasRef}
+              width={SIZE}
+              height={SIZE}
+              onPointerDown={down}
+              onPointerMove={move}
+              onPointerUp={up}
+              onPointerLeave={() => setHover(null)}
+              className="block w-full cursor-crosshair rounded-xl border border-slate-200"
+              style={{ imageRendering: "pixelated", touchAction: "pan-y" }}
+            />
+            {hover ? (
+              <div
+                className="pointer-events-none absolute z-10 w-56 -translate-y-4 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl"
+                style={{
+                  left: `${(hover.cx / SIZE) * 100}%`,
+                  top: `${(hover.cy / SIZE) * 100}%`,
+                  transform:
+                    hover.cx > SIZE / 2
+                      ? "translate(calc(-100% - 12px), -50%)"
+                      : "translate(12px, -50%)",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={hover.block.imageUrl}
+                  alt={hover.block.title}
+                  className="w-full rounded-xl border border-slate-100 object-contain"
+                />
+                <p className="mt-1.5 truncate px-1 text-sm font-bold text-slate-900">
+                  {hover.block.title}
+                </p>
+                <p className="truncate px-1 pb-1 text-xs text-indigo-600">
+                  Click to visit →
+                </p>
+              </div>
+            ) : null}
+          </div>
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
           {tip ??
@@ -328,12 +375,17 @@ export function PixelWall({
                 </label>
               </div>
               {imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageUrl}
-                  alt="Your wall art"
-                  className="h-16 rounded-lg border border-slate-200 object-cover"
-                />
+                <div className="rounded-xl border border-dashed border-indigo-300 bg-indigo-50/50 p-3">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wide text-indigo-600">
+                    Preview — this is how your art stretches over your bricks
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt="Your wall art"
+                    className="max-h-40 w-full rounded-lg border border-slate-200 object-contain"
+                  />
+                </div>
               ) : null}
               {!inFreeZone ? (
                 <label className="block max-w-xs text-sm font-semibold text-slate-700">
