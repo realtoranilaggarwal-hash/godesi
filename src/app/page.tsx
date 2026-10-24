@@ -36,17 +36,26 @@ function SectionHeading({
   title,
   href,
   linkLabel,
+  gradient = "from-indigo-500 to-violet-500",
 }: {
   title: string;
   href: string;
   linkLabel: string;
+  /** Tailwind gradient for the heading + link pills. */
+  gradient?: string;
 }) {
   return (
     <div className="mb-3 flex items-center justify-between gap-3">
-      <h2 className="text-xl font-black">{title}</h2>
+      <h2>
+        <span
+          className={`inline-block rounded-full bg-gradient-to-r ${gradient} px-4 py-1.5 text-xl font-black text-white shadow-sm`}
+        >
+          {title}
+        </span>
+      </h2>
       <Link
         href={href}
-        className="text-sm font-semibold text-indigo-600 hover:underline"
+        className={`rounded-full bg-gradient-to-r ${gradient} px-3.5 py-1 text-sm font-bold text-white shadow-sm transition hover:opacity-90`}
       >
         {linkLabel} →
       </Link>
@@ -224,6 +233,7 @@ export default async function HomePage() {
             title="Newest members 👋"
             href="/people"
             linkLabel="All members"
+            gradient="from-emerald-500 to-teal-500"
           />
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {newMembers.map((member, index) => (
@@ -285,6 +295,7 @@ export default async function HomePage() {
                 title="Desi news 📰"
                 href="/news"
                 linkLabel="All news"
+                gradient="from-sky-500 to-indigo-500"
               />
               <p className="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
                 🗞️ Are you a journalist, or have news to share? Post it and your
@@ -316,6 +327,7 @@ export default async function HomePage() {
             title="Latest businesses"
             href="/search"
             linkLabel="See all"
+            gradient="from-orange-500 to-rose-500"
           />
           {businesses.length ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -375,6 +387,7 @@ export default async function HomePage() {
               title="Upcoming events 🎟️"
               href="/events"
               linkLabel="All events"
+              gradient="from-violet-500 to-fuchsia-500"
             />
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {events.map((event) => (

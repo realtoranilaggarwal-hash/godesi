@@ -103,8 +103,10 @@ export async function CategoryFeatured() {
     <section aria-label="Featured businesses by category" className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h2 className="text-xl font-black text-slate-900">
-            ⭐ Featured in your trade
+          <h2>
+            <span className="inline-block rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-1.5 text-xl font-black text-white shadow-sm">
+              ⭐ Featured in your trade
+            </span>
           </h2>
           <p className="text-xs text-slate-500">
             Up to {PER_CATEGORY} businesses per category on the home page, and
