@@ -50,6 +50,15 @@ export type ListingCardItem = {
   owner: { name: string; username: string | null; avatarUrl: string | null };
 };
 
+/** Section art used when a listing's own category slug has no cover. */
+const KIND_ART: Record<ListingKind, string> = {
+  PROPERTY_SALE: "real-estate",
+  PROPERTY_RENT: "real-estate",
+  ROOM_WANTED: "rooms-roommates",
+  ROOM_OFFERED: "rooms-roommates",
+  MARKETPLACE: "buy-sell",
+};
+
 export function ListingCard({
   listing,
   cityBase = "/real-estate",
@@ -93,6 +102,7 @@ export function ListingCard({
           <img
             src={
               categoryCover(listing.categorySlug) ??
+              categoryCover(KIND_ART[listing.kind]) ??
               "/images/categories/default.jpg"
             }
             alt=""
