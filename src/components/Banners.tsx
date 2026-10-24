@@ -157,12 +157,15 @@ export async function SidebarBanners({
   categorySlug = null,
   parentSlug = null,
   network = true,
+  slim = false,
 }: {
   /** False for pages kept out of the ad network (see thinContent.ts). */
   network?: boolean;
   /** Lets a category page offer its own "how it works" clip. */
   categorySlug?: string | null;
   parentSlug?: string | null;
+  /** Skip the widget stack — sponsored banners only (signup-type pages). */
+  slim?: boolean;
 } = {}) {
   // The rail is hidden below lg, and rendering it for a phone anyway shipped a
   // live map, a chat poll, banner impressions and ad units nobody could see.
@@ -174,7 +177,7 @@ export async function SidebarBanners({
       activeBanners("HALFPAGE", 1),
       activeBanners("SKYSCRAPER", 2),
       slotSoldCount("SIDEBAR"),
-      categoryPickerGroups(),
+      slim ? Promise.resolve([]) : categoryPickerGroups(),
     ]);
 
   return (
@@ -183,19 +186,23 @@ export async function SidebarBanners({
       className="hidden w-[260px] shrink-0 space-y-4 lg:order-last lg:block"
       aria-label="Sponsored"
     >
-      <CategoryTree groups={categories} />
+      {slim ? null : (
+        <>
+          <CategoryTree groups={categories} />
 
-      <SmallBanners embedded tree={false} show={4} />
+          <SmallBanners embedded tree={false} show={4} />
 
-      <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
+          <HelpClipCard categorySlug={categorySlug} parentSlug={parentSlug} />
 
-      <GodesiWikiCard />
+          <GodesiWikiCard />
 
-      <DjsWikiCard />
+          <DjsWikiCard />
 
-      <TelegramJoin compact />
+          <TelegramJoin compact />
 
-      <ActivityWall />
+          <ActivityWall />
+        </>
+      )}
 
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
         Sponsored

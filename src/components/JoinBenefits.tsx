@@ -182,7 +182,8 @@ export async function JoinPerks() {
 export function JoinRail() {
   return (
     <div className="hidden shrink-0 lg:block">
-      <SidebarBanners />
+      {/* Signup pages keep it slim so the rail doesn't outrun the form. */}
+      <SidebarBanners slim />
     </div>
   );
 }
