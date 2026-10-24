@@ -805,7 +805,7 @@ Thank you for the name. Desi Who's Who is for people who have genuinely built so
       {
         title: "Close the loop when they list",
         detail:
-          "When their card is live, paste its /b/… address into 'Their card' and set the status to Listed. That is how your week gets counted.",
+          "When their card is live, paste its /business/… address into 'Their card' and set the status to Listed. That is how your week gets counted.",
       },
       {
         title: "Hand back what you cannot finish",
@@ -902,7 +902,7 @@ If it is easier, send me your timings and three photos and I will set it up with
       "One batch of 20 taken and fully called each morning",
       "40–60 calls a day once you are used to the opening",
       "Every row you touched has a status and a note — no blanks left behind",
-      "5 owners a week with a live card of their own, marked Listed with the /b/ link",
+      "5 owners a week with a live card of their own, marked Listed with the /business/ link",
     ],
   },
 ];

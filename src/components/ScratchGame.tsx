@@ -121,7 +121,7 @@ export function ScratchGame({
           <p className="font-bold">How to collect: {won.gift.claim}.</p>
           {won.gift.address ? <p>📍 {won.gift.address}</p> : null}
           <Link
-            href={`/b/${won.gift.slug}`}
+            href={`/business/${won.gift.slug}`}
             className="font-semibold underline"
           >
             Open {won.gift.business} on GoDesi →

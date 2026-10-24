@@ -28,7 +28,7 @@ export type CardFaceBusiness = {
 /**
  * The Popl-style card face — name, contact lines with the QR on the right,
  * category chips and live deals, like a printed business card. Embedded
- * beside the info on /b/<slug>.
+ * beside the info on /business/<slug>.
  */
 export function DigitalCardFace({
   business,
@@ -180,7 +180,7 @@ export function DigitalCardFace({
             })}
             <p className="flex items-center gap-2 text-xs font-semibold text-rose-700">
               <span aria-hidden>🪪</span>
-              godesi.com/b/{business.slug}
+              godesi.com/business/{business.slug}
             </p>
           </div>
           <div className="shrink-0 text-center">
@@ -239,7 +239,7 @@ export function DigitalCardFace({
             {business.deals.slice(0, 3).map((deal) => (
               <Link
                 key={deal.id}
-                href={`/b/${business.slug}`}
+                href={`/business/${business.slug}`}
                 className="block truncate text-sm font-semibold text-slate-800 hover:text-indigo-700"
               >
                 • {deal.title}

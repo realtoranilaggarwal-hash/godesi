@@ -75,7 +75,7 @@ export async function morningContent(now = new Date()) {
 
   const dealRows = [
     deal
-      ? `<li style="margin:0 0 8px"><a href="${base}/b/${deal.business.slug}" style="color:#4f46e5;font-weight:700;text-decoration:none">${escape(deal.title)}</a><div style="color:#64748b;font-size:13px">${escape(deal.business.name)} · ${escape(deal.business.city)}${deal.code ? ` · code <b>${escape(deal.code)}</b>` : ""}</div></li>`
+      ? `<li style="margin:0 0 8px"><a href="${base}/business/${deal.business.slug}" style="color:#4f46e5;font-weight:700;text-decoration:none">${escape(deal.title)}</a><div style="color:#64748b;font-size:13px">${escape(deal.business.name)} · ${escape(deal.business.city)}${deal.code ? ` · code <b>${escape(deal.code)}</b>` : ""}</div></li>`
       : "",
     offer
       ? `<li style="margin:0 0 8px"><a href="${base}/api/offers/${offer.id}/click" style="color:#4f46e5;font-weight:700;text-decoration:none">${escape(offer.title)}</a><div style="color:#64748b;font-size:13px">${escape(offer.advertiserName)}${offer.code ? ` · code <b>${escape(offer.code)}</b>` : ""} · paid link</div></li>`

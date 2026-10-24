@@ -275,7 +275,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
     ...businesses.map((business) => ({
-      url: `${base}/b/${business.slug}`,
+      url: `${base}/business/${business.slug}`,
       lastModified: new Date(business.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.7,

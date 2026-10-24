@@ -97,7 +97,7 @@ export function eventJson(event: PublicEvent, ref?: string) {
     categorySlug: event.categorySlug,
     categorySlugs: event.categorySlugs,
     organizer: event.business?.name ?? event.organizer?.name ?? null,
-    organizerUrl: event.business ? `${base}/b/${event.business.slug}` : null,
+    organizerUrl: event.business ? `${base}/business/${event.business.slug}` : null,
     speakers: event.speakers,
     sessions: event.sessions,
     tiers: event.tiers.map((tier) => ({

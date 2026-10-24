@@ -75,7 +75,7 @@ export async function GET(request: Request) {
         cell(row.status),
         cell(row.owner?.name ?? null),
         cell(row.note),
-        cell(row.listedSlug ? `/b/${row.listedSlug}` : null),
+        cell(row.listedSlug ? `/business/${row.listedSlug}` : null),
       ].join(","),
     ),
   ].join("\n");

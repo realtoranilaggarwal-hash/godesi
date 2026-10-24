@@ -224,7 +224,7 @@ export function BusinessProfileForm({
           >
             <div className="flex items-center gap-1">
               <span className="shrink-0 text-sm text-slate-500">
-                godesi.com/b/
+                godesi.com/business/
               </span>
               <input
                 name="slug"

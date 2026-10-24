@@ -93,7 +93,7 @@ export default async function ReviewDeskPage() {
               >
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <Link
-                    href={`/b/${dispute.review.business.slug}`}
+                    href={`/business/${dispute.review.business.slug}`}
                     className="font-semibold hover:text-indigo-600"
                   >
                     {dispute.review.business.name}
@@ -169,7 +169,7 @@ export default async function ReviewDeskPage() {
               <div className="min-w-0 flex-1 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/b/${review.business.slug}`}
+                    href={`/business/${review.business.slug}`}
                     className="font-semibold hover:text-indigo-600"
                   >
                     {review.business.name}

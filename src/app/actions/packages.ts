@@ -53,7 +53,7 @@ export async function addPackageAction(
     });
 
     revalidatePath("/dashboard/packages");
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     return { success: "Package added." };
   } catch (error) {
     return fieldError(error);
@@ -74,5 +74,5 @@ export async function deletePackageAction(formData: FormData) {
 
   await db.vendorPackage.delete({ where: { id } });
   revalidatePath("/dashboard/packages");
-  revalidatePath(`/b/${item.business.slug}`);
+  revalidatePath(`/business/${item.business.slug}`);
 }

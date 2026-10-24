@@ -78,7 +78,7 @@ export async function streamRecentChanges(since: Date) {
     ]);
 
   const paths = [
-    ...businesses.map((row) => `/b/${row.slug}`),
+    ...businesses.map((row) => `/business/${row.slug}`),
     ...listings.map((row) => `/listings/${row.slug}`),
     ...events.map((row) => `/events/${row.slug}`),
     ...worship.map((row) => `/religious/${row.slug}`),

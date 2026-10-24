@@ -377,7 +377,7 @@ export default async function EventPage({
     organizer: {
       "@type": "Organization",
       name: event.business?.name ?? event.organizer?.name ?? "Godesi",
-      url: event.business ? `${siteUrl()}/b/${event.business.slug}` : siteUrl(),
+      url: event.business ? `${siteUrl()}/business/${event.business.slug}` : siteUrl(),
     },
     // Imported events are ticketed elsewhere, so no offer is claimed for them.
     ...(imported
@@ -965,7 +965,7 @@ export default async function EventPage({
               />
               <div>
                 <Link
-                  href={`/b/${event.business.slug}`}
+                  href={`/business/${event.business.slug}`}
                   className="font-semibold text-indigo-600 hover:underline"
                 >
                   {event.business.name}

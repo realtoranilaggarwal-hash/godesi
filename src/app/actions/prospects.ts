@@ -88,7 +88,7 @@ export async function publishProspectCardAction(formData: FormData) {
   });
 
   revalidatePath(DESK);
-  revalidatePath(`/b/${outcome.slug}`);
+  revalidatePath(`/business/${outcome.slug}`);
 }
 
 /** Puts a row back in the pool, e.g. when a moderator leaves or is off. */

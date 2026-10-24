@@ -51,7 +51,7 @@ export default async function MyListingsPage() {
             icon={card.profileType === "PROFESSIONAL" ? "🎓" : "🏪"}
             title={card.name}
             sub={`${card.profileType === "PROFESSIONAL" ? "Professional profile" : "Business card"} · ${card.category}`}
-            view={`/b/${card.slug}`}
+            view={`/business/${card.slug}`}
             edit="/dashboard/profile"
           />
         ) : (

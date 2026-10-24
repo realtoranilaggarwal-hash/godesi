@@ -101,7 +101,7 @@ export function CardScan() {
       <div className="rounded-2xl bg-emerald-50 p-4 text-center text-sm text-emerald-900">
         <p className="font-semibold">Saved! Your card is updated.</p>
         <Link
-          href={`/b/${savedSlug}`}
+          href={`/business/${savedSlug}`}
           className="mt-2 inline-block font-bold underline"
         >
           View my card →

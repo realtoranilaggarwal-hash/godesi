@@ -27,7 +27,7 @@ export function OffsiteReviewForm() {
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
           label="Business page"
-          hint="The slug or the full /b/… link"
+          hint="The slug or the full /business/… link"
         >
           <input
             name="businessSlug"

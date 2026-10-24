@@ -32,7 +32,7 @@ export function DealCard({
     <div className="flex h-full flex-col gap-2 rounded-2xl border border-dashed border-rose-300 bg-rose-50/60 p-4">
       {business ? (
         <Link
-          href={`/b/${business.slug}`}
+          href={`/business/${business.slug}`}
           className="flex items-center gap-2 text-sm font-semibold text-slate-800 hover:text-indigo-700"
         >
           <LogoTile

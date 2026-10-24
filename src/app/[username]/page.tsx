@@ -435,7 +435,7 @@ export default async function PublicProfilePage({
             <section className="space-y-2">
               <h2 className="text-lg font-bold">Business</h2>
               <Link
-                href={`/b/${user.business.slug}`}
+                href={`/business/${user.business.slug}`}
                 className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 {user.business.logoUrl ? (
@@ -553,7 +553,7 @@ export default async function PublicProfilePage({
                     <div className="flex items-center gap-2">
                       <Stars rating={review.rating} />
                       <Link
-                        href={`/b/${review.business.slug}`}
+                        href={`/business/${review.business.slug}`}
                         className="text-sm font-semibold text-indigo-700 hover:underline"
                       >
                         {review.business.name}

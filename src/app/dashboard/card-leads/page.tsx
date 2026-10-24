@@ -29,7 +29,7 @@ export default async function CardLeadsPage() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Card leads</h1>
         {business ? (
-          <LinkButton href={`/b/${business.slug}`} variant="secondary">
+          <LinkButton href={`/business/${business.slug}`} variant="secondary">
             View my card
           </LinkButton>
         ) : null}
@@ -96,7 +96,7 @@ export default async function CardLeadsPage() {
             body="Share your card link or print the QR — when someone leaves their details, they show up here."
           />
           <div className="mt-4 text-center">
-            <Link href={`/b/${business.slug}`} className="text-sm font-semibold text-indigo-600 underline">
+            <Link href={`/business/${business.slug}`} className="text-sm font-semibold text-indigo-600 underline">
               Open my card →
             </Link>
           </div>

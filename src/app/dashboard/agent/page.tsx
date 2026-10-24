@@ -76,7 +76,7 @@ export default async function AgentDashboardPage() {
             Brokerage, licence, MLS, languages, awards and closed sales — all
             shown on{" "}
             <Link
-              href={`/b/${business.slug}`}
+              href={`/business/${business.slug}`}
               className="font-semibold text-indigo-600"
             >
               your public card

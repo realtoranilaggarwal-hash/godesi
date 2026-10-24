@@ -119,7 +119,7 @@ export async function saveAgentProfileAction(
     });
 
     revalidatePath("/dashboard/agent");
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     return { success: "Agent profile saved." };
   } catch (error) {
     return fieldError(error);
@@ -156,7 +156,7 @@ export async function addAgentSaleAction(
     });
 
     revalidatePath("/dashboard/agent");
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     return { success: "Sale added." };
   } catch (error) {
     return fieldError(error);
@@ -175,5 +175,5 @@ export async function deleteAgentSaleAction(formData: FormData) {
   });
 
   revalidatePath("/dashboard/agent");
-  revalidatePath(`/b/${business.slug}`);
+  revalidatePath(`/business/${business.slug}`);
 }

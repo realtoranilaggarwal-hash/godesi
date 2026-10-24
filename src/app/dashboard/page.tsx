@@ -207,7 +207,7 @@ export default async function DashboardPage({
                 : "Verify your email and it publishes straight away — no waiting for us to approve it, and nothing to pay."}
             </p>
             <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-emerald-900">
-              <Link href={`/b/${business.slug}`} className="underline">
+              <Link href={`/business/${business.slug}`} className="underline">
                 See my page
               </Link>
               <Link href="/dashboard/media" className="underline">
@@ -376,10 +376,10 @@ export default async function DashboardPage({
               <p className="mt-3 text-sm text-slate-600">
                 Public link:{" "}
                 <Link
-                  href={`/b/${business.slug}`}
+                  href={`/business/${business.slug}`}
                   className="font-semibold text-indigo-600"
                 >
-                  /b/{business.slug}
+                  /business/{business.slug}
                 </Link>
               </p>
 
@@ -417,7 +417,7 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/leads" variant="secondary">
                   Unlocked leads
                 </LinkButton>
-                <LinkButton href={`/b/${business.slug}`} variant="secondary">
+                <LinkButton href={`/business/${business.slug}`} variant="secondary">
                   🪪 My digital card
                 </LinkButton>
                 <LinkButton href="/dashboard/card-leads" variant="secondary">
@@ -451,7 +451,7 @@ export default async function DashboardPage({
               <h2 className="mb-3 text-lg font-bold">Your QR code</h2>
               <QrCard
                 slug={business.slug}
-                shareUrl={`${siteUrl()}/b/${business.slug}`}
+                shareUrl={`${siteUrl()}/business/${business.slug}`}
               />
             </Card>
           </div>

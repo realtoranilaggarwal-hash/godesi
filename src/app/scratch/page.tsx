@@ -86,7 +86,7 @@ export default async function ScratchPage() {
                   {card.gift?.title ?? "Gift"} ·{" "}
                   {card.gift ? (
                     <Link
-                      href={`/b/${card.gift.business.slug}`}
+                      href={`/business/${card.gift.business.slug}`}
                       className="text-indigo-700 underline"
                     >
                       {card.gift.business.name}
@@ -119,7 +119,7 @@ export default async function ScratchPage() {
               >
                 <p className="font-semibold">🎁 {gift.title}</p>
                 <p className="text-xs text-slate-500">
-                  <Link href={`/b/${gift.business.slug}`} className="underline">
+                  <Link href={`/business/${gift.business.slug}`} className="underline">
                     {gift.business.name}
                   </Link>
                   {gift.business.city ? ` · ${gift.business.city}` : ""} ·{" "}

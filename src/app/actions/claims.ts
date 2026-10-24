@@ -57,7 +57,7 @@ export async function claimBusinessAction(
       update: { message: parsed.data.message, status: "PENDING" },
     });
 
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     return { success: "Claim submitted — we'll review it and email you." };
   } catch (error) {
     return fieldError(error);
@@ -99,6 +99,6 @@ export async function reviewClaimAction(formData: FormData) {
   }
 
   revalidatePath("/admin");
-  revalidatePath(`/b/${claim.business.slug}`);
-  if (handedOver) pingIndexNowInBackground(`/b/${claim.business.slug}`);
+  revalidatePath(`/business/${claim.business.slug}`);
+  if (handedOver) pingIndexNowInBackground(`/business/${claim.business.slug}`);
 }

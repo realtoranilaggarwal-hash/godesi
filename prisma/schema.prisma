@@ -743,7 +743,7 @@ model Category {
 model Business {
   id                 String        @id @default(cuid())
   slug               String        @unique
-  /// Earlier page addresses; /b/<old> redirects to the current one so printed QR codes keep working.
+  /// Earlier page addresses; /business/<old> redirects to the current one so printed QR codes keep working.
   previousSlugs      String[]      @default([])
   name               String
   /// A shop/company card versus an individual professional (realtor, attorney…).

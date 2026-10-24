@@ -12,7 +12,7 @@ export type PitchContext = {
   /** The business as it is written on the card. */
   business: string;
   city: string | null;
-  /** Their own card, ready to claim, e.g. https://godesi.com/b/…?claim=1 */
+  /** Their own card, ready to claim, e.g. https://godesi.com/business/…?claim=1 */
   cardUrl: string | null;
   /** The girl's name, so the mail is signed by a person. */
   from: string;

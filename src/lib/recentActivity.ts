@@ -120,7 +120,7 @@ export async function recentActivity(take = 30): Promise<RecentBanner[]> {
     })),
     businesses.map((b) => ({
       key: `b-${b.id}`,
-      href: `/b/${b.slug}`,
+      href: `/business/${b.slug}`,
       imageUrl: b.logoUrl ?? b.media[0]?.url ?? null,
       icon: b.subcategoryRef?.icon || b.categoryRef?.icon || "🏷️",
       title: b.name,

@@ -148,7 +148,7 @@ export default async function RealEstatePage({
                     name: agent.name,
                     place: [agent.city, agent.state].filter(Boolean).join(", "),
                     logoUrl: agent.logoUrl,
-                    href: `/b/${agent.slug}`,
+                    href: `/business/${agent.slug}`,
                     verified: agent.verified,
                     claimed: agent.claimed,
                     featured: agent.featured,

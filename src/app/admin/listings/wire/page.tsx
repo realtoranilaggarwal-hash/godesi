@@ -410,7 +410,7 @@ export default async function Page({
             >
               <div className="min-w-0">
                 <Link
-                  href={`/b/${business.slug}`}
+                  href={`/business/${business.slug}`}
                   className="font-semibold text-indigo-700"
                 >
                   {business.name}

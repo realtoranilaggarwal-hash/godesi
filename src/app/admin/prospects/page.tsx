@@ -339,7 +339,7 @@ export default async function AdminProspectsPage({
           business: row.name,
           city: row.city,
           cardUrl: row.listedSlug
-            ? `${siteUrl()}/b/${row.listedSlug}?claim=1`
+            ? `${siteUrl()}/business/${row.listedSlug}?claim=1`
             : null,
           from: staff.name ?? "the Godesi team",
         };
@@ -423,10 +423,10 @@ export default async function AdminProspectsPage({
                   <p className="text-xs font-semibold text-emerald-700">
                     Card live:{" "}
                     <Link
-                      href={`/b/${row.listedSlug}`}
+                      href={`/business/${row.listedSlug}`}
                       className="text-indigo-600"
                     >
-                      /b/{row.listedSlug}
+                      /business/{row.listedSlug}
                     </Link>{" "}
                     ·{" "}
                     <Link
@@ -530,7 +530,7 @@ export default async function AdminProspectsPage({
               <input
                 name="listedSlug"
                 defaultValue={row.listedSlug ?? ""}
-                placeholder="Their card /b/…"
+                placeholder="Their card /business/…"
                 className={inputClass}
               />
               <button

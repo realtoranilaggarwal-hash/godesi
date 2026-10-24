@@ -236,7 +236,7 @@ export default async function PostPage({
             </p>
             <div className="flex flex-wrap gap-2">
               <LinkButton href="/dashboard/profile">Edit my card</LinkButton>
-              <LinkButton href={`/b/${card.slug}`} variant="secondary">
+              <LinkButton href={`/business/${card.slug}`} variant="secondary">
                 View it
               </LinkButton>
               <LinkButton href="/post" variant="secondary">

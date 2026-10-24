@@ -66,7 +66,7 @@ export async function GET(
     ? `${business.category} · ${business.city}`
     : (member.headline ?? "");
   const path = business
-    ? `godesi.com/b/${business.slug}`
+    ? `godesi.com/business/${business.slug}`
     : `godesi.com/${member.username ?? ""}`;
   const picture = await inlineImage(business?.logoUrl ?? member.avatarUrl);
 

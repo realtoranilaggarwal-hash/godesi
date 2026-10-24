@@ -84,7 +84,7 @@ export async function createReviewAction(
       key: review.id,
     });
 
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     return { success: "Thanks for your review!" };
   } catch (error) {
     return fieldError(error);
@@ -112,7 +112,7 @@ export async function setReviewHiddenAction(formData: FormData) {
   });
 
   revalidatePath("/admin/reviews");
-  revalidatePath(`/b/${review.business.slug}`);
+  revalidatePath(`/business/${review.business.slug}`);
 }
 
 /** Staff: delete a review outright, for spam and abuse that should leave no trace. */
@@ -129,7 +129,7 @@ export async function deleteReviewAction(formData: FormData) {
 
   await db.review.delete({ where: { id } });
   revalidatePath("/admin/reviews");
-  revalidatePath(`/b/${review.business.slug}`);
+  revalidatePath(`/business/${review.business.slug}`);
 }
 
 /**
@@ -147,7 +147,7 @@ export async function startReviewDisputeAction(formData: FormData) {
   });
   if (!review) redirect("/dashboard?error=review_missing");
   if (review.business.ownerId !== user.id) {
-    redirect(`/b/${review.business.slug}?error=not_your_card`);
+    redirect(`/business/${review.business.slug}?error=not_your_card`);
   }
   if (reason.length < 20) {
     redirect(`/dashboard/reviews?error=reason#review-${reviewId}`);
@@ -240,7 +240,7 @@ export async function decideReviewDisputeAction(formData: FormData) {
   }
 
   revalidatePath("/admin/reviews");
-  revalidatePath(`/b/${dispute.review.business.slug}`);
+  revalidatePath(`/business/${dispute.review.business.slug}`);
 }
 
 const offsiteSchema = z.object({
@@ -281,7 +281,7 @@ export async function addOffsiteReviewAction(
 
     const slug = parsed.data.businessSlug.trim().replace(/^.*\/b\//, "");
     const business = await db.business.findUnique({ where: { slug } });
-    if (!business) return { error: `No business page found at /b/${slug}.` };
+    if (!business) return { error: `No business page found at /business/${slug}.` };
 
     if (/\+?\d[\d\s()-]{7,}/.test(parsed.data.comment)) {
       return {
@@ -301,7 +301,7 @@ export async function addOffsiteReviewAction(
       },
     });
 
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     revalidatePath("/admin/reviews");
     return { success: `Added to ${business.name}.` };
   } catch (error) {

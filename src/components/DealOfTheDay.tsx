@@ -83,7 +83,7 @@ export async function DealOfTheDayBar() {
         {deal ? (
           <div className="flex min-w-0 items-center gap-2">
             <Link
-              href={`/b/${deal.business.slug}`}
+              href={`/business/${deal.business.slug}`}
               className="min-w-0 truncate font-semibold text-slate-800 hover:text-indigo-700"
             >
               🏷️ {deal.title}{" "}

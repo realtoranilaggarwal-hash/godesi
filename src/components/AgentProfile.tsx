@@ -244,7 +244,7 @@ export async function SimilarAgents({
       <ul className="mt-2 divide-y divide-slate-100 text-sm">
         {agents.map((agent) => (
           <li key={agent.id} className="py-2">
-            <Link href={`/b/${agent.slug}`} className="font-semibold text-indigo-600">
+            <Link href={`/business/${agent.slug}`} className="font-semibold text-indigo-600">
               {agent.name}
             </Link>
             <p className="text-xs text-slate-500">

@@ -19,7 +19,7 @@ function inviteMessage(name: string, city: string, slug: string) {
     `Namaste ${name} 🙏`,
     "",
     `We list desi businesses in ${city} on Godesi (godesi.com) and your business already has a free page:`,
-    `${siteUrl()}/b/${slug}`,
+    `${siteUrl()}/business/${slug}`,
     "",
     "Claim it free to add your photos, timings, WhatsApp button and offers, and to get enquiries from desi customers near you. The listing costs nothing.",
   ].join("\n");
@@ -163,7 +163,7 @@ export default async function AdminOutreachPage({
                 </p>
                 <p className="text-xs text-slate-500">
                   {row.subcategorySlug ?? row.categorySlug ?? "uncategorised"} ·{" "}
-                  <Link href={`/b/${row.slug}`} className="text-indigo-600">
+                  <Link href={`/business/${row.slug}`} className="text-indigo-600">
                     view page →
                   </Link>
                 </p>

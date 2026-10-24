@@ -38,7 +38,7 @@ export type AgentRow = Prisma.BusinessGetPayload<{
 }>;
 
 /**
- * The public face of an agent card, with the same contact rule as /b/[slug]:
+ * The public face of an agent card, with the same contact rule as /business/[slug]:
  * phone and email only on paid cards whose owner left them on.
  */
 export function agentJson(
@@ -80,6 +80,6 @@ export function agentJson(
     verified: agent.verifiedProvider,
     featured,
     updatedAt: agent.updatedAt.toISOString(),
-    godesiUrl: `${siteUrl()}/b/${agent.slug}${query}`,
+    godesiUrl: `${siteUrl()}/business/${agent.slug}${query}`,
   };
 }

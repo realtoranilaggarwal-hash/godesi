@@ -33,7 +33,7 @@ export async function publishPointsBanner(userId: string) {
 
   const business = user.business;
   const path = business
-    ? `/b/${business.slug}`
+    ? `/business/${business.slug}`
     : user.username
       ? `/${user.username}`
       : null;

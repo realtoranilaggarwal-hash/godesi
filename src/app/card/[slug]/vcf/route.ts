@@ -36,7 +36,7 @@ export async function GET(
     ? effectivePlan(business.owner) !== "FREE" && !business.hideContact
     : false;
 
-  const cardUrl = `${siteUrl()}/b/${business.slug}`;
+  const cardUrl = `${siteUrl()}/business/${business.slug}`;
   const file = vCard({
     name: business.name,
     phone: paidContact ? business.phone : null,

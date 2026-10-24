@@ -61,14 +61,14 @@ export async function setListingStatusAction(formData: FormData) {
         .filter(Boolean)
         .join(" · ")
         .slice(0, 400),
-      path: `/b/${business.slug}`,
+      path: `/business/${business.slug}`,
       imageUrl: business.logoUrl ?? business.media[0]?.url ?? null,
       tags: [business.city, "desibusiness"],
     });
   }
   revalidatePath("/admin");
-  revalidatePath(`/b/${business.slug}`);
-  if (status === "APPROVED") pingIndexNowInBackground(`/b/${business.slug}`);
+  revalidatePath(`/business/${business.slug}`);
+  if (status === "APPROVED") pingIndexNowInBackground(`/business/${business.slug}`);
   invalidateDirectory();
 }
 
@@ -83,7 +83,7 @@ export async function toggleVerifiedProviderAction(formData: FormData) {
     data: { verifiedProvider: !business.verifiedProvider },
   });
   revalidatePath("/admin");
-  revalidatePath(`/b/${business.slug}`);
+  revalidatePath(`/business/${business.slug}`);
   invalidateDirectory();
 }
 
@@ -903,5 +903,5 @@ export async function toggleFeaturedAction(formData: FormData) {
     data: { featured: !business.featured },
   });
   revalidatePath("/admin");
-  revalidatePath(`/b/${business.slug}`);
+  revalidatePath(`/business/${business.slug}`);
 }

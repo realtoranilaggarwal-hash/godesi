@@ -17,7 +17,9 @@ import {
 } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
-import { cityCover } from "@/lib/cityCovers";
+import { listingCover } from "@/lib/cityCovers";
+import { citySlug } from "@/lib/citySlug";
+import { RecentStrip } from "@/components/RecentStrip";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { reviewSourceLabel } from "@/lib/reviewSources";
 import { ReviewForm } from "@/components/ReviewForm";
@@ -125,16 +127,12 @@ export async function generateMetadata({
         reviewCount: business.reviews.length,
       }),
     ),
-    alternates: { canonical: `/b/${params.slug}` },
+    alternates: { canonical: `/business/${params.slug}` },
     openGraph: {
       title,
       description,
-      url: `${siteUrl()}/b/${params.slug}`,
-      images: business.coverUrl
-        ? [business.coverUrl]
-        : business.logoUrl
-          ? [business.logoUrl]
-          : (cityCover(business.city) ?? undefined),
+      url: `${siteUrl()}/business/${params.slug}`,
+      images: [listingCover(business)],
     },
   };
 }
@@ -162,7 +160,7 @@ export default async function BusinessProfilePage({
         (entry): entry is [string, string] => typeof entry[1] === "string",
       ),
     ).toString();
-    permanentRedirect(`/b/${moved.slug}${query ? `?${query}` : ""}`);
+    permanentRedirect(`/business/${moved.slug}${query ? `?${query}` : ""}`);
   }
 
   const extraCategories = business.extraCategorySlugs.length
@@ -262,7 +260,7 @@ export default async function BusinessProfilePage({
     name: business.name,
     description: description ?? undefined,
     image: business.logoUrl ?? undefined,
-    url: `${siteUrl()}/b/${business.slug}`,
+    url: `${siteUrl()}/business/${business.slug}`,
     ...(contactVisible && (business.phone || business.whatsappNumber)
       ? { telephone: business.phone ?? `+${business.whatsappNumber}` }
       : {}),
@@ -303,7 +301,7 @@ export default async function BusinessProfilePage({
           ⬇️ Save contact
         </a>
         <CardShareButton
-          url={`${siteUrl()}/b/${business.slug}`}
+          url={`${siteUrl()}/business/${business.slug}`}
           name={business.name}
           className="flex items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-3 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
         />
@@ -392,6 +390,8 @@ export default async function BusinessProfilePage({
 
         <CardSearchStrip categories={categories} />
 
+        <RecentStrip />
+
         {business.status !== "APPROVED" ? (
           <Alert tone="info">
             This listing is {business.status.toLowerCase()} — it is reachable by
@@ -402,14 +402,12 @@ export default async function BusinessProfilePage({
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="min-w-0 space-y-5">
           <Card>
-            {business.coverUrl || cityCover(business.city) ? (
-              // eslint-disable-next-line @next/next/no-img-element -- member-supplied URL
-              <img
-                src={business.coverUrl ?? cityCover(business.city)!}
-                alt={`${business.name} cover photo`}
-                className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
-              />
-            ) : null}
+            {/* eslint-disable-next-line @next/next/no-img-element -- member-supplied URL */}
+            <img
+              src={listingCover(business)}
+              alt={`${business.name} cover photo`}
+              className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
+            />
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <LogoTile
               name={business.name}
@@ -457,14 +455,32 @@ export default async function BusinessProfilePage({
                   country={business.country}
                 />
               </p>
-              {business.categoryRef ? (
+              {business.categoryRef || business.city || business.state ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  <Link
-                    href={`/categories/${business.categoryRef.slug}`}
-                    className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
-                  >
-                    {business.categoryRef.icon} {business.categoryRef.name}
-                  </Link>
+                  {business.city ? (
+                    <Link
+                      href={`/city/${citySlug(business.city)}`}
+                      className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
+                    >
+                      📍 {business.city}
+                    </Link>
+                  ) : null}
+                  {business.state ? (
+                    <Link
+                      href={`/search?state=${encodeURIComponent(business.state)}`}
+                      className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800"
+                    >
+                      🗺️ {business.state}
+                    </Link>
+                  ) : null}
+                  {business.categoryRef ? (
+                    <>
+                      <Link
+                        href={`/categories/${business.categoryRef.slug}`}
+                        className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
+                      >
+                        {business.categoryRef.icon} {business.categoryRef.name}
+                      </Link>
                   {business.subcategoryRef ? (
                     <Link
                       href={`/categories/${business.subcategoryRef.slug}`}
@@ -482,6 +498,8 @@ export default async function BusinessProfilePage({
                       {extra.name}
                     </Link>
                   ))}
+                    </>
+                  ) : null}
                 </div>
               ) : null}
               <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
@@ -731,7 +749,7 @@ export default async function BusinessProfilePage({
                   <p className="text-sm text-slate-500">Not claimed yet</p>
                 )}
                 <ShareButtons
-                  url={`${siteUrl()}/b/${business.slug}`}
+                  url={`${siteUrl()}/business/${business.slug}`}
                   title={business.name}
                 />
               </div>
@@ -869,7 +887,7 @@ export default async function BusinessProfilePage({
                 open={searchParams.claim === "1"}
               />
             ) : (
-              <LinkButton href={`/login?next=/b/${business.slug}?claim=1`}>
+              <LinkButton href={`/login?next=/business/${business.slug}?claim=1`}>
                 Sign in to claim this business
               </LinkButton>
             )}
@@ -1074,7 +1092,7 @@ export default async function BusinessProfilePage({
                         Reviews run under a real Godesi account, so businesses
                         are not judged by anonymous strangers.
                       </p>
-                      <LinkButton href={`/login?next=/b/${business.slug}`}>
+                      <LinkButton href={`/login?next=/business/${business.slug}`}>
                         Sign in to review
                       </LinkButton>
                     </div>
@@ -1098,7 +1116,7 @@ export default async function BusinessProfilePage({
                   straight to your Godesi page.
                 </p>
                 <div className="mt-3">
-                  <BadgeEmbed listingUrl={`${siteUrl()}/b/${business.slug}`} />
+                  <BadgeEmbed listingUrl={`${siteUrl()}/business/${business.slug}`} />
                 </div>
               </Card>
             ) : null}

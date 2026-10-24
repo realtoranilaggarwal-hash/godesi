@@ -79,7 +79,7 @@ export async function recentActivity(limit = 20): Promise<ActivityItem[]> {
       id: `b-${business.id}`,
       icon: "🏪",
       text: `${business.name} joined Godesi in ${business.city}`,
-      href: `/b/${business.slug}`,
+      href: `/business/${business.slug}`,
       at: business.createdAt.toISOString(),
     })),
     ...listings.map((listing) => ({
@@ -107,7 +107,7 @@ export async function recentActivity(limit = 20): Promise<ActivityItem[]> {
       id: `r-${review.id}`,
       icon: "⭐",
       text: `${firstName(review.author?.name ?? null)} rated ${review.business.name} ${review.rating}/5`,
-      href: `/b/${review.business.slug}`,
+      href: `/business/${review.business.slug}`,
       at: review.createdAt.toISOString(),
     })),
   ];
