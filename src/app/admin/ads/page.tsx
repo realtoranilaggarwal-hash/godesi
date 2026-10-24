@@ -3,7 +3,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { rejectBannerAction } from "@/app/actions/admin";
+import {
+  approveWallBlockAction,
+  rejectBannerAction,
+  rejectWallBlockAction,
+} from "@/app/actions/admin";
 import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { formatMinor } from "@/lib/format";
@@ -19,10 +23,15 @@ export default async function Page() {
   if (user.role !== "ADMIN")
     redirect(deskFallback(user, "Ad orders"));
 
-  const [pendingAds, adOrders] = await Promise.all([
+  const [pendingAds, pendingWall, adOrders] = await Promise.all([
     db.banner.findMany({
       where: { status: "PENDING" },
       orderBy: [{ slot: "asc" }, { position: "asc" }],
+      include: { advertiser: { select: { email: true, name: true } } },
+    }),
+    db.wallBlock.findMany({
+      where: { status: "PENDING" },
+      orderBy: { id: "asc" },
       include: { advertiser: { select: { email: true, name: true } } },
     }),
     db.adOrder.findMany({
@@ -90,6 +99,71 @@ export default async function Page() {
         ) : (
           <p className="text-sm text-slate-500">Nothing waiting for review.</p>
         )}
+
+        <div id="wall" className="mt-6 border-t border-slate-100 pt-4">
+          <h3 className="mb-1 text-base font-bold">
+            🧱 Free wall bricks awaiting approval
+          </h3>
+          <p className="mb-3 text-sm text-slate-500">
+            Free claims stay off the public wall until you approve them.
+          </p>
+          {pendingWall.length ? (
+            <ul className="divide-y divide-slate-100">
+              {pendingWall.map((block) => (
+                <li
+                  key={block.id}
+                  className="flex flex-wrap items-center gap-3 py-3"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={block.imageUrl}
+                    alt={block.title}
+                    className="h-12 w-24 rounded-lg border border-slate-200 object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">
+                      {block.title} · {block.w}×{block.h}px at ({block.x},
+                      {block.y}) ·{" "}
+                      {block.advertiser?.email ?? "unassigned"}
+                    </p>
+                    <a
+                      href={block.linkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-indigo-600"
+                    >
+                      {block.linkUrl}
+                    </a>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <form action={approveWallBlockAction}>
+                      <input type="hidden" name="id" value={block.id} />
+                      <button
+                        type="submit"
+                        className="rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+                      >
+                        approve
+                      </button>
+                    </form>
+                    <form action={rejectWallBlockAction}>
+                      <input type="hidden" name="id" value={block.id} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                      >
+                        reject
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-slate-500">
+              No free bricks waiting.
+            </p>
+          )}
+        </div>
 
         {adOrders.length ? (
           <div className="mt-4 overflow-x-auto">

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { invalidateDirectory } from "@/lib/cache";
 import { z } from "zod";
@@ -359,6 +359,27 @@ export async function rejectBannerAction(formData: FormData) {
   });
   revalidatePath("/admin");
   revalidatePath("/");
+}
+
+/** Free wall-of-fame bricks go live only after the desk approves them. */
+export async function approveWallBlockAction(formData: FormData) {
+  await requireRole("ADMIN");
+  await db.wallBlock.update({
+    where: { id: String(formData.get("id") ?? "") },
+    data: { status: "ACTIVE" },
+  });
+  revalidateTag("wall-blocks");
+  revalidatePath("/admin");
+}
+
+export async function rejectWallBlockAction(formData: FormData) {
+  await requireRole("ADMIN");
+  await db.wallBlock.update({
+    where: { id: String(formData.get("id") ?? "") },
+    data: { status: "REJECTED" },
+  });
+  revalidateTag("wall-blocks");
+  revalidatePath("/admin");
 }
 
 /**

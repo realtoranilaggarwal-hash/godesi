@@ -197,7 +197,9 @@ export async function startPixelWallCheckoutAction(
           title,
           imageUrl,
           linkUrl,
-          status: "ACTIVE",
+          // Free bricks wait for review so the public wall can't be
+          // vandalised with a $0 claim.
+          status: "PENDING",
           advertiserId: user.id,
         },
       });
