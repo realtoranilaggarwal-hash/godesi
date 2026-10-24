@@ -16,6 +16,7 @@ import {
   formatBundleMoney,
 } from "@/lib/bundles";
 import { wallCreditMinor } from "@/lib/adOrders";
+import { formatMinor } from "@/lib/format";
 import { UpgradeCart } from "@/components/UpgradeCart";
 import { Alert, Card } from "@/components/ui";
 
@@ -79,8 +80,13 @@ export default async function UpgradePage({
   searchParams: { error?: string; posted?: string; term?: string; offer?: string };
 }) {
   const user = await getCurrentUser();
-  const creditMinor = user ? await wallCreditMinor(user.id) : 0;
   const currency = requestCurrency();
+  const creditMinor = user ? await wallCreditMinor(user.id, currency) : 0;
+  // ₹85 or $1 per pixel — matches PIXEL_PRICE_* in actions/ads.ts.
+  const creditPixels = Math.floor(
+    creditMinor / (currency === "INR" ? 8500 : 100),
+  );
+  const creditBricks = Math.floor(creditPixels / 4);
   const rate = await inrPerUsd();
   const saving = bundleSaving(currency);
   const flash = await flashOffer(currency, searchParams.offer === "today");
@@ -146,12 +152,13 @@ export default async function UpgradePage({
           <p className="mt-1 text-sm text-amber-900">
             You&apos;ve earned{" "}
             <span className="font-black">
-              ${Math.floor(creditMinor / 100)} of wall credit
-            </span>{" "}
-            = {Math.floor(creditMinor / 100)} pixels{" "}
-            ({Math.floor(creditMinor / 400)} free bricks). Pick your spot on
-            the wall — book just your earned bricks or stretch bigger and pay
-            the difference.
+              {formatMinor(creditMinor, currency)} of wall credit
+            </span>
+            {creditPixels > 0
+              ? ` = ${creditPixels} pixels (${creditBricks} free bricks)`
+              : " — it covers part of a brick"}
+            . Pick your spot on the wall — book just your earned bricks or
+            stretch bigger and pay the difference.
           </p>
         ) : (
           <p className="mt-1 text-sm text-amber-900">

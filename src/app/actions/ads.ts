@@ -232,7 +232,7 @@ export async function startPixelWallCheckoutAction(
 
   // Dollars already spent on other ads (featured spots, side banners) turn
   // into wall credit — every dollar buys the same in bricks.
-  const creditMinor = await wallCreditMinor(user.id);
+  const creditMinor = await wallCreditMinor(user.id, currency);
   const creditApplied = Math.min(creditMinor, chargeMinor);
   const payMinor = chargeMinor - creditApplied;
 

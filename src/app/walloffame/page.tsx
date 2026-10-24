@@ -3,6 +3,7 @@ import Link from "next/link";
 import { pixelWallBlocks } from "@/lib/banners";
 import { getCurrentUser } from "@/lib/auth";
 import { wallCreditMinor } from "@/lib/adOrders";
+import { requestCurrency } from "@/lib/currency";
 import { db } from "@/lib/db";
 import { Alert } from "@/components/ui";
 import { PixelWall } from "@/components/PixelWall";
@@ -50,7 +51,12 @@ export default async function WallOfFamePage({
         select: { id: true },
       }))
     : false;
-  const creditUsd = user ? (await wallCreditMinor(user.id)) / 100 : 0;
+  // Preview credit in "pixel dollars": $1 (or ₹85) of credit covers 1 px.
+  const currency = requestCurrency();
+  const creditUsd = user
+    ? (await wallCreditMinor(user.id, currency)) /
+      (currency === "INR" ? 8500 : 100)
+    : 0;
 
   const taken = blocks.reduce((sum, block) => sum + block.w * block.h, 0);
 
