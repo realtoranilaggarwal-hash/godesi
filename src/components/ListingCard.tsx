@@ -16,6 +16,7 @@ import type {
 } from "@prisma/client";
 import { POSTED_BY_LABELS, propertyTypeLabel, sizeLabel } from "@/lib/property";
 import { thumbImage } from "@/lib/proxyImage";
+import { categoryCover } from "@/lib/cityCovers";
 
 export type ListingCardItem = {
   slug: string;
@@ -88,9 +89,17 @@ export function ListingCard({
             loading="lazy"
           />
         ) : (
-          <div className="flex h-44 items-center justify-center bg-gradient-to-br from-orange-400 via-rose-500 to-fuchsia-600 text-5xl">
-            {listing.kind === "MARKETPLACE" ? "🛍️" : "🏡"}
-          </div>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={
+              categoryCover(listing.categorySlug) ??
+              "/images/categories/default.jpg"
+            }
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="h-44 w-full object-cover"
+          />
         )}
       </Link>
 

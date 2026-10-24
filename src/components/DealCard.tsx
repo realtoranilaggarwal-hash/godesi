@@ -15,6 +15,7 @@ export type DealCardProps = {
     city: string;
     logoUrl: string | null;
     icon?: string | null;
+    categorySlug?: string | null;
     line?: string | null;
   };
 };
@@ -39,6 +40,7 @@ export function DealCard({
             name={business.name}
             icon={business.icon}
             imageUrl={business.logoUrl}
+            categorySlug={business.categorySlug}
             className="h-9 w-9 shrink-0"
             emojiClassName="text-lg"
           />

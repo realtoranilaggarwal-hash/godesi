@@ -4,6 +4,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { whatsappLink } from "@/lib/format";
 import { thumbImage } from "@/lib/proxyImage";
+import { categoryCover } from "@/lib/cityCovers";
 
 /**
  * News-style card for the business grids: thumbnail on the left, write-up
@@ -65,13 +66,16 @@ export function BusinessTile({
               />
             </>
           ) : (
-            <span
-              role="img"
-              aria-label={business.name}
-              className="flex h-full w-full items-center justify-center bg-indigo-50 text-3xl leading-none"
-            >
-              {business.categoryIcon || "🏷️"}
-            </span>
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={
+                categoryCover(business.categorySlug) ??
+                "/images/categories/default.jpg"
+              }
+              alt={business.name}
+              loading="lazy"
+              className="h-full w-full object-cover"
+            />
           )}
           {premium ? (
             <span className="absolute left-1 top-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white shadow">

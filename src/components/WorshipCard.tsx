@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Faith } from "@prisma/client";
 import { Badge } from "@/components/ui";
-import { FAITH_ICONS, FAITH_LABELS } from "@/lib/worship";
+import { FAITH_LABELS } from "@/lib/worship";
 
 export type WorshipCardItem = {
   slug: string;
@@ -29,9 +29,14 @@ export function WorshipCard({ place }: { place: WorshipCardItem }) {
           loading="lazy"
         />
       ) : (
-        <div className="flex h-36 items-center justify-center bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 text-5xl">
-          {FAITH_ICONS[place.faith]}
-        </div>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/images/categories/religious-services.jpg"
+          alt=""
+          aria-hidden
+          loading="lazy"
+          className="h-36 w-full object-cover"
+        />
       )}
       <div className="flex flex-1 flex-col gap-1.5 p-4">
         <Badge tone="amber">{FAITH_LABELS[place.faith]}</Badge>

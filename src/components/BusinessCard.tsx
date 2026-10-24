@@ -42,6 +42,7 @@ export function BusinessCard({
           name={business.name}
           icon={business.categoryIcon}
           imageUrl={business.logoUrl}
+          categorySlug={business.categorySlug}
           className={`${
             premium ? "h-16 w-16" : compact ? "h-10 w-10" : "h-12 w-12"
           } ${gold ? "ring-2 ring-amber-400 ring-offset-2" : ""}`}

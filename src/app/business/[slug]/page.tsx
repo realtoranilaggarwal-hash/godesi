@@ -413,6 +413,7 @@ export default async function BusinessProfilePage({
               name={business.name}
               icon={business.categoryRef?.icon}
               imageUrl={business.logoUrl}
+              categorySlug={business.categorySlug}
               className={`h-20 w-20 ${
                 ownerPlan === "PREMIUM"
                   ? "ring-4 ring-amber-400 ring-offset-2"
