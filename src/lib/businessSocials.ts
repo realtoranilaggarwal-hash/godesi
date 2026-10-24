@@ -36,6 +36,40 @@ export const BUSINESS_SOCIALS = [
   { key: "zillowUrl", label: "Zillow profile", icon: "🏡", placeholder: "https://zillow.com/profile/…" },
   { key: "realtorUrl", label: "Realtor.com profile", icon: "🏘️", placeholder: "https://realtor.com/realestateagents/…" },
   { key: "homesUrl", label: "Homes.com profile", icon: "🏠", placeholder: "https://homes.com/real-estate-agents/…" },
+  // Music platforms — the form only asks these on DJ / band / singer listings.
+  { key: "soundcloudUrl", label: "SoundCloud", icon: "☁️", placeholder: "https://soundcloud.com/yourdjname" },
+  { key: "spotifyUrl", label: "Spotify", icon: "🎧", placeholder: "https://open.spotify.com/artist/…" },
+  { key: "mixcloudUrl", label: "Mixcloud", icon: "🎚️", placeholder: "https://mixcloud.com/yourdjname" },
+  { key: "beatportUrl", label: "Beatport", icon: "🎛️", placeholder: "https://beatport.com/artist/…" },
+  { key: "twitchUrl", label: "Twitch", icon: "📺", placeholder: "https://twitch.tv/yourchannel" },
 ] as const;
 
 export type BusinessSocialKey = (typeof BUSINESS_SOCIALS)[number]["key"];
+
+/** Music-platform link keys — the form only asks these on performer listings. */
+export const MUSIC_SOCIAL_KEYS: readonly BusinessSocialKey[] = [
+  "soundcloudUrl",
+  "spotifyUrl",
+  "mixcloudUrl",
+  "beatportUrl",
+  "twitchUrl",
+];
+
+/**
+ * Subcategories that book performers — the only listings where music links
+ * and a "Book me" prompt make sense. DJ & Sound aliases (Stage & Sound
+ * Rentals, Dhol & Baraat) and the music Anchors & Artists subs are included.
+ */
+export const MUSIC_SUBCATEGORY_SLUGS = [
+  "events-wedding-dj-and-sound",
+  "events-wedding-stage-and-sound-rentals",
+  "events-wedding-dhol-and-baraat",
+  "events-wedding-live-bands",
+  "events-wedding-singers",
+] as const;
+
+export function isMusicSubcategory(slug?: string | null) {
+  return slug
+    ? (MUSIC_SUBCATEGORY_SLUGS as readonly string[]).includes(slug)
+    : false;
+}

@@ -38,7 +38,10 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { LogoTile } from "@/components/LogoTile";
-import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
+import {
+  BUSINESS_SOCIALS,
+  isMusicSubcategory,
+} from "@/lib/businessSocials";
 import {
   disclaimerFor,
   specialtySet,
@@ -99,8 +102,12 @@ export async function generateMetadata({
   const business = await getBusiness(params.slug);
   if (!business) return { title: "Business not found" };
 
-  const title = `${business.name} — ${business.category} in ${business.city}`;
-  const description = metaDescription(
+  const title =
+    business.seoTitle ||
+    `${business.name} — ${business.category} in ${business.city}`;
+  const description =
+    business.seoDescription ||
+    metaDescription(
     business.description ? maskContactDetails(business.description) : null,
     `${business.name} is a ${business.category.toLowerCase()} in ${business.city}.`,
     "Message on WhatsApp, call, see photos, opening hours and reviews, or scan the free QR business card on Godesi.",
@@ -121,7 +128,11 @@ export async function generateMetadata({
       title,
       description,
       url: `${siteUrl()}/b/${params.slug}`,
-      images: business.logoUrl ? [business.logoUrl] : undefined,
+      images: business.coverUrl
+        ? [business.coverUrl]
+        : business.logoUrl
+          ? [business.logoUrl]
+          : undefined,
     },
   };
 }
@@ -230,6 +241,8 @@ export default async function BusinessProfilePage({
   const mediaHidden =
     (business.playlistUrl && !playlistUrl) || (business.albumUrl && !albumUrl);
   const isAgent = isAgentCard(business.subcategorySlug);
+  /** Performer listings pitch bookings, not "share your contact". */
+  const isMusic = isMusicSubcategory(business.subcategorySlug);
   const reviewCount = business.reviews.length;
   const rating = reviewCount
     ? business.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
@@ -318,16 +331,24 @@ export default async function BusinessProfilePage({
         </div>
       ) : null}
 
-      {/* Lead capture */}
+      {/* Lead capture — a booking request on performer listings */}
       <div className="rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50 to-white p-4 shadow-sm">
         <h2 className="text-center text-sm font-bold text-slate-900">
-          Share your card with {business.name}
+          {isMusic
+            ? `📅 Book ${business.name}`
+            : `Share your card with ${business.name}`}
         </h2>
         <p className="mt-1 text-center text-xs text-slate-500">
-          Leave your details and they&apos;ll get in touch.
+          {isMusic
+            ? "Tell them your event date and details — they'll get in touch."
+            : "Leave your details and they'll get in touch."}
         </p>
         <div className="mt-3">
-          <CardLeadForm slug={business.slug} />
+          <CardLeadForm
+            slug={business.slug}
+            submitLabel={isMusic ? "Send booking request" : undefined}
+            pendingLabel={isMusic ? "Sending…" : undefined}
+          />
         </div>
       </div>
     </>
@@ -354,6 +375,14 @@ export default async function BusinessProfilePage({
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="min-w-0 space-y-5">
           <Card>
+            {business.coverUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- member-supplied URL
+              <img
+                src={business.coverUrl}
+                alt={`${business.name} cover photo`}
+                className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
+              />
+            ) : null}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <LogoTile
               name={business.name}

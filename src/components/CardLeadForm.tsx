@@ -12,7 +12,16 @@ import { FormSuccess } from "@/components/forms/FormSuccess";
  * The "share your info" half of the digital card — the visitor's details land
  * in the business owner's dashboard as a lead.
  */
-export function CardLeadForm({ slug }: { slug: string }) {
+export function CardLeadForm({
+  slug,
+  submitLabel = "Share my contact",
+  pendingLabel = "Sharing…",
+}: {
+  slug: string;
+  /** Performer listings say "Send booking request" instead. */
+  submitLabel?: string;
+  pendingLabel?: string;
+}) {
   const [state, formAction] = useFormState(shareCardLeadAction, emptyState);
 
   if (state.success) {
@@ -71,8 +80,8 @@ export function CardLeadForm({ slug }: { slug: string }) {
         />
       </Field>
 
-      <SubmitButton className="w-full" pendingLabel="Sharing…">
-        Share my contact
+      <SubmitButton className="w-full" pendingLabel={pendingLabel}>
+        {submitLabel}
       </SubmitButton>
       <p className="text-center text-xs text-slate-400">
         Your details go straight to the business owner.

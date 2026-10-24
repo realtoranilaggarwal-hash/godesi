@@ -14,7 +14,11 @@ import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { PlaylistField } from "@/components/forms/PlaylistField";
 import { WriteHelper } from "@/components/WriteHelper";
-import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
+import {
+  BUSINESS_SOCIALS,
+  isMusicSubcategory,
+  MUSIC_SOCIAL_KEYS,
+} from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
 import { specialtySet } from "@/lib/specialties";
 import {
@@ -120,8 +124,10 @@ export function BusinessProfileForm({
     ? BUSINESS_SOCIALS.filter((social) => PERSONAL_SOCIALS.includes(social.key))
     : BUSINESS_SOCIALS.filter(
         (social) =>
-          category === "real-estate" ||
-          !REAL_ESTATE_SOCIALS.includes(social.key),
+          (category === "real-estate" ||
+            !REAL_ESTATE_SOCIALS.includes(social.key)) &&
+          (isMusicSubcategory(subcategory) ||
+            !MUSIC_SOCIAL_KEYS.includes(social.key)),
       );
   /** Saved certifications split back into checkbox values and free-text extras. */
   const offered = specialtySet(subcategory)?.certifications?.options ?? [];
@@ -377,6 +383,13 @@ export function BusinessProfileForm({
             </>
           }
         />
+        <ImageField
+          name="coverUrl"
+          label="Cover photo (optional)"
+          purpose="banner"
+          defaultValue={business?.coverUrl ?? ""}
+          hint="A wide photo across the top of your page — your store front, stage setup or best work. It makes your page feel like your own website. No photo? Ask ChatGPT for a “wide banner image” of your trade and upload it here."
+        />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
           hint={
@@ -531,6 +544,43 @@ export function BusinessProfileForm({
             See what you get and send your details →
           </a>
         </p>
+      </details>
+
+      <details className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
+        <summary className="cursor-pointer text-sm font-bold text-slate-900">
+          🔎 How you appear on Google (optional)
+        </summary>
+        <p className="mt-1 text-xs text-slate-500">
+          Google writes the title and snippet for your page automatically —
+          fill these only if you want your own words in search results and in
+          the preview when your page is shared on WhatsApp or Facebook.
+        </p>
+        <div className="mt-3 grid gap-3">
+          <Field
+            label="Search title"
+            hint="Up to ~60 characters — e.g. “DJ East Brunswick | Indian Wedding DJ & Sound”"
+          >
+            <input
+              name="seoTitle"
+              defaultValue={business?.seoTitle ?? ""}
+              maxLength={80}
+              placeholder="Your name — your trade in your city"
+              className={inputClass}
+            />
+          </Field>
+          <Field
+            label="Search description"
+            hint="One or two lines, up to ~160 characters — what you do, where, and why book you."
+          >
+            <textarea
+              name="seoDescription"
+              rows={2}
+              defaultValue={business?.seoDescription ?? ""}
+              maxLength={200}
+              className={inputClass}
+            />
+          </Field>
+        </div>
       </details>
 
       <SubmitButton>
