@@ -347,6 +347,7 @@ model User {
   banners        Banner[]
   wallBlocks     WallBlock[]
   adOrders       AdOrder[]
+  courseEnrollments CourseEnrollment[]
 
   listings     Listing[]
   listingLeads ListingLead[]
@@ -1565,6 +1566,8 @@ model WallBlock {
   title        String
   imageUrl     String
   linkUrl      String
+  /// ~100 words the vendor writes about their site — shown on the vendor list.
+  description  String?
   status       BannerStatus @default(DRAFT)
   clicks       Int          @default(0)
   createdAt    DateTime     @default(now())
@@ -3194,4 +3197,22 @@ model CardLead {
   createdAt  DateTime @default(now())
 
   @@index([businessId, createdAt])
+}
+
+/// A paid seat in a GoDesi course (/course). One row per buyer per course —
+/// PAID unlocks the lessons.
+model CourseEnrollment {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseSlug  String
+  amountMinor Int
+  currency    String        @default("USD")
+  provider    String        @default("stripe")
+  reference   String?       @unique
+  status      AdOrderStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+
+  @@unique([userId, courseSlug])
+  @@index([courseSlug])
 }

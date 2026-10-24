@@ -19,7 +19,8 @@ const SIZE = 1000;
 const SNAP = 2; // selections snap to 2px — a 2x2 = 4px brick is the $4 minimum
 const FREE_Y = 900; // bottom 100 rows = the free zone
 const FREE_CODE = "godesi.com";
-const BRICK_CODE = "brick"; // giveaway code — one free brick anywhere
+/** Giveaway codes — one free 4px brick anywhere (BRICK for promos, TEMPLE for temples & charities). */
+const ONE_BRICK_CODES = new Set(["brick", "temple"]);
 
 const hit = (blocks: Block[], px: number, py: number) =>
   blocks.find(
@@ -52,6 +53,7 @@ export function PixelWall({
   const [booking, setBooking] = useState(false);
   const [title, setTitle] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
+  const [about, setAbout] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +214,7 @@ export function PixelWall({
     try {
       const result = await startPixelWallCheckoutAction({
         x: sel.x, y: sel.y, w: sel.w, h: sel.h,
-        title, linkUrl, imageUrl, code,
+        title, linkUrl, imageUrl, code, description: about,
       });
       if (result?.error) {
         setError(
@@ -237,8 +239,8 @@ export function PixelWall({
   const inFreeZone = !!sel && sel.y >= FREE_Y;
   const entered = code.trim().toLowerCase();
   const codeFree =
-    entered === FREE_CODE || (entered === BRICK_CODE && pxCount <= 4);
-  const brickCodeTooBig = entered === BRICK_CODE && pxCount > 4;
+    entered === FREE_CODE || (ONE_BRICK_CODES.has(entered) && pxCount <= 4);
+  const brickCodeTooBig = ONE_BRICK_CODES.has(entered) && pxCount > 4;
   const free =
     ((inFreeZone && pxCount <= 4) || codeFree) && pxCount > 0 && !hasFreeBlock;
   const creditApplied = free ? 0 : Math.min(creditUsd, pxCount * priceUsd);
@@ -354,6 +356,17 @@ export function PixelWall({
                   />
                 </label>
               </div>
+              <label className="block text-sm font-semibold text-slate-700">
+                About your site or project (~100 words)
+                <textarea
+                  value={about}
+                  onChange={(e) => setAbout(e.target.value)}
+                  rows={3}
+                  maxLength={600}
+                  placeholder="What do you do, who do you help, why should people visit? This shows on the public vendor list under your name."
+                  className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-normal"
+                />
+              </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-sm font-semibold text-slate-700">
                   Upload your logo / banner
@@ -409,7 +422,7 @@ export function PixelWall({
                   ) : null}
                   {brickCodeTooBig ? (
                     <span className="mt-1 block text-xs font-semibold text-amber-700">
-                      BRICK covers one 4px brick — shrink your box.
+                      {entered.toUpperCase()} covers one 4px brick — shrink your box.
                     </span>
                   ) : null}
                 </label>

@@ -12,6 +12,7 @@ import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
 import { confirmGigOrder } from "@/lib/gigs";
 import { confirmWebsitePayment } from "@/lib/websiteProjects";
+import { confirmCourseEnrollment } from "@/app/actions/course";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
       const clubOrderId = session.metadata?.clubOrderId;
       const gigOrderId = session.metadata?.gigOrderId;
       const websiteProjectId = session.metadata?.websiteProjectId;
+      const courseEnrollmentId = session.metadata?.courseEnrollmentId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
 
@@ -123,6 +125,12 @@ export async function POST(request: Request) {
               ? session.subscription
               : (session.subscription?.id ?? null),
           setupMinor: session.amount_total ?? 0,
+        });
+      } else if (session.metadata?.kind === "course" && courseEnrollmentId) {
+        await confirmCourseEnrollment({
+          enrollmentId: courseEnrollmentId,
+          provider: "stripe",
+          reference: session.id,
         });
       } else if (
         session.metadata?.kind === "review-dispute" &&
