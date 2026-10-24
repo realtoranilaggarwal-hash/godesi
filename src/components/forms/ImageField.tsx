@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Field, inputClass } from "@/components/ui";
 import { ImageDropzone, type UploadPurpose } from "@/components/ImageDropzone";
 
@@ -20,7 +20,7 @@ export function ImageField({
   label: string;
   purpose: UploadPurpose;
   defaultValue?: string;
-  hint?: string;
+  hint?: ReactNode;
   previewClassName?: string;
 }) {
   const [url, setUrl] = useState(defaultValue);

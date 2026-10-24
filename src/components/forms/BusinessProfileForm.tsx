@@ -278,6 +278,30 @@ export function BusinessProfileForm({
         defaults={vehicle ?? EMPTY_VEHICLE}
       />
 
+      <Field
+        label="Starting price"
+        hint="Shown as “From …” on marketplace cards. Leave blank to hide."
+      >
+        <div className="flex gap-2">
+          <input
+            name="startingPrice"
+            type="number"
+            min={0}
+            defaultValue={business?.startingPrice ?? ""}
+            className={inputClass}
+          />
+          <select
+            name="priceCurrency"
+            defaultValue={business?.priceCurrency ?? "USD"}
+            aria-label="Price currency"
+            className={inputClass}
+          >
+            <option value="USD">USD</option>
+            <option value="INR">INR</option>
+          </select>
+        </div>
+      </Field>
+
       <Field label="About your business">
         <textarea
           name="description"
@@ -335,7 +359,23 @@ export function BusinessProfileForm({
           label="Logo"
           purpose="logo"
           defaultValue={business?.logoUrl ?? ""}
-          hint='Square logos look best. No logo? Ask ChatGPT: "Create a clean, simple square logo for my <your trade> business named <your business name>" — then upload the image it makes.'
+          hint={
+            <>
+              Square logos look best. No logo? Open{" "}
+              <a
+                href="https://chatgpt.com"
+                target="_blank"
+                rel="noopener"
+                className="font-semibold underline"
+              >
+                ChatGPT
+              </a>{" "}
+              and type: &quot;Create a clean, simple square logo for my &lt;your
+              trade&gt; business named &lt;your business name&gt;, flat design,
+              on a white background&quot; — download the image it makes and
+              upload it here.
+            </>
+          }
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
@@ -377,29 +417,6 @@ export function BusinessProfileForm({
             placeholder="https://www.youtube.com/watch?v=..."
             className={inputClass}
           />
-        </Field>
-        <Field
-          label="Starting price"
-          hint="Shown as “From …” on marketplace cards. Leave blank to hide."
-        >
-          <div className="flex gap-2">
-            <input
-              name="startingPrice"
-              type="number"
-              min={0}
-              defaultValue={business?.startingPrice ?? ""}
-              className={inputClass}
-            />
-            <select
-              name="priceCurrency"
-              defaultValue={business?.priceCurrency ?? "USD"}
-              aria-label="Price currency"
-              className={inputClass}
-            >
-              <option value="USD">USD</option>
-              <option value="INR">INR</option>
-            </select>
-          </div>
         </Field>
         <Field label="Show my phone and email">
           <label className="flex items-center gap-2 text-sm text-slate-700">
