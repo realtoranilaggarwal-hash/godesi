@@ -27,6 +27,45 @@ export function CategoryTiles({
 }) {
   const chips = dense ? 2 : 4;
 
+  if (dense) {
+    // Slim festival-banner tiles: one gradient strip per category.
+    return (
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        {categories.map((category) => (
+          <Link
+            key={category.slug}
+            href={`/categories/${category.slug}`}
+            className={`group flex items-center gap-3 rounded-2xl bg-gradient-to-r ${gradientFor(
+              category.color,
+            )} px-4 py-3 text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md`}
+          >
+            <span className="text-3xl drop-shadow" aria-hidden>
+              {category.icon}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-black leading-tight">
+                {category.name}
+              </span>
+              <span className="block truncate text-[11px] text-white/85">
+                {counts?.get(category.slug) ?? 0} listings
+                {category.children.length
+                  ? ` · ${category.children
+                      .slice(0, 2)
+                      .map((child) => child.name)
+                      .join(", ")}`
+                  : ""}
+              </span>
+            </span>
+            <span className="shrink-0 rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-bold">
+              Browse →
+            </span>
+          </Link>
+        ))}
+        {extra}
+      </div>
+    );
+  }
+
   return (
     <div
       className={`grid items-start sm:grid-cols-2 ${

@@ -6,6 +6,11 @@ import { optionalRead } from "@/lib/resilient";
 import { ageFromBirthYear, canSeeRishtaPhoto } from "@/lib/rishta";
 import { RishtaPhoto } from "@/components/RishtaCard";
 
+function ArtThumb({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt={alt} loading="lazy" className={className} />;
+}
+
 const newestRishtas = cachedQuery("home-rishtas", CONTENT_TTL, () =>
   db.rishtaProfile.findMany({
     where: { status: "APPROVED", visible: true },
@@ -23,106 +28,6 @@ const newestRishtas = cachedQuery("home-rishtas", CONTENT_TTL, () =>
     },
   }),
 );
-
-function MandapScene({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 240 160"
-      preserveAspectRatio="xMidYMid slice"
-      role="img"
-      aria-hidden
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient id="mandap-sky" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fb7185" />
-          <stop offset="1" stopColor="#f59e0b" />
-        </linearGradient>
-      </defs>
-      <rect width="240" height="160" fill="url(#mandap-sky)" />
-      <path d="M40 46 Q120 6 200 46Z" fill="#fde68a" />
-      <rect x="46" y="46" width="8" height="96" fill="#fef3c7" />
-      <rect x="186" y="46" width="8" height="96" fill="#fef3c7" />
-      <path
-        d="M54 50 Q120 74 186 50"
-        stroke="#fef3c7"
-        strokeWidth="3"
-        fill="none"
-        strokeDasharray="2 6"
-        strokeLinecap="round"
-      />
-      <rect x="0" y="138" width="240" height="22" fill="#be123c" />
-      <text x="70" y="132" fontSize="46">
-        🤵
-      </text>
-      <text x="122" y="132" fontSize="46">
-        👰
-      </text>
-      <text x="108" y="70" fontSize="22">
-        💞
-      </text>
-      <text x="16" y="34" fontSize="18">
-        🪔
-      </text>
-      <text x="204" y="34" fontSize="18">
-        🪔
-      </text>
-      <text x="16" y="128" fontSize="18">
-        💐
-      </text>
-      <text x="204" y="128" fontSize="18">
-        💐
-      </text>
-    </svg>
-  );
-}
-
-function MeetupScene({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 240 160"
-      preserveAspectRatio="xMidYMid slice"
-      role="img"
-      aria-hidden
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <linearGradient id="meetup-sky" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#38bdf8" />
-          <stop offset="1" stopColor="#10b981" />
-        </linearGradient>
-      </defs>
-      <rect width="240" height="160" fill="url(#meetup-sky)" />
-      <circle cx="172" cy="26" r="10" fill="#fde68a" />
-      <rect x="0" y="130" width="240" height="30" fill="#065f46" />
-      <rect x="96" y="104" width="48" height="8" rx="3" fill="#92400e" />
-      <rect x="116" y="112" width="8" height="22" fill="#92400e" />
-      <text x="56" y="130" fontSize="38">
-        🧑🏽
-      </text>
-      <text x="142" y="130" fontSize="38">
-        👩🏽
-      </text>
-      <text x="98" y="102" fontSize="18">
-        ☕
-      </text>
-      <text x="122" y="102" fontSize="18">
-        🍵
-      </text>
-      <text x="104" y="66" fontSize="28">
-        🤝
-      </text>
-      <text x="64" y="44" fontSize="18">
-        💬
-      </text>
-      <text x="152" y="62" fontSize="16">
-        📍
-      </text>
-    </svg>
-  );
-}
 
 const CONNECT_CHIPS = [
   { id: "coffee", label: "☕ Coffee" },
@@ -151,7 +56,11 @@ export async function RishtaHomeBox() {
             className="relative block min-h-[96px]"
             aria-label="Open Rishta"
           >
-            <MandapScene className="absolute inset-0 h-full w-full" />
+            <ArtThumb
+              src="/images/categories/rishta.jpg"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           </Link>
           <div className="flex flex-col justify-center gap-2 p-3">
             <h2 className="text-base font-black text-slate-900">
@@ -209,7 +118,11 @@ export async function RishtaHomeBox() {
             className="relative block min-h-[96px]"
             aria-label="Open Connect"
           >
-            <MeetupScene className="absolute inset-0 h-full w-full" />
+            <ArtThumb
+              src="/images/categories/connect.jpg"
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           </Link>
           <div className="flex flex-col justify-center gap-2 p-3">
             <h2 className="text-base font-black text-slate-900">
