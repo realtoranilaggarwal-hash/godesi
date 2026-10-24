@@ -28,6 +28,7 @@ export default async function AdminPage() {
     pendingMeetups,
     pendingWorship,
     openRedemptions,
+    pendingWall,
   ] = await Promise.all([
     db.business.count(),
     db.business.count({ where: { status: "PENDING" } }),
@@ -40,6 +41,7 @@ export default async function AdminPage() {
     db.meetupProfile.count({ where: { status: "PENDING" } }),
     db.worshipPlace.count({ where: { status: "PENDING" } }),
     db.redemption.count({ where: { status: "REQUESTED" } }),
+    db.wallBlock.count({ where: { status: "PENDING" } }),
   ]);
 
   const waiting: { href: string; label: string; count: number }[] = [
@@ -50,6 +52,11 @@ export default async function AdminPage() {
     },
     { href: "/admin/claims", label: "Business claims", count: pendingClaims },
     { href: "/admin/ads", label: "Ads to approve", count: pendingAds },
+    {
+      href: "/admin/ads#wall",
+      label: "Free wall bricks to approve",
+      count: pendingWall,
+    },
     { href: "/admin/upi", label: "UPI payments to check", count: pendingUpi },
     {
       href: "/admin/news#pending",

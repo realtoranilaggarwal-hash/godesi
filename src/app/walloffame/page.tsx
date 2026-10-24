@@ -57,6 +57,7 @@ export default async function WallOfFamePage({
   /** Vendor list: rank by total pixels owned (more paid = higher). */
   const vendors = new Map<string, { name: string; href: string; pixels: number }>();
   for (const block of blocks) {
+    if (block.status !== "ACTIVE") continue;
     const name = block.advertiser?.name ?? block.title;
     const key = `${name}|${block.linkUrl}`;
     const entry = vendors.get(key) ?? { name, href: block.linkUrl, pixels: 0 };
@@ -87,8 +88,9 @@ export default async function WallOfFamePage({
             </p>
             <p className="mt-2 text-sm font-bold text-amber-100">
               Free right now — grab a brick in the green free zone or use the
-              code <b>godesi.com</b>. Every ad dollar you spend also converts to
-              wall credit.
+              code <b>godesi.com</b> (free bricks go live after a quick
+              review). Every ad dollar you spend also converts to wall
+              credit.
             </p>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -110,7 +112,8 @@ export default async function WallOfFamePage({
       ) : null}
       {searchParams.free ? (
         <Alert tone="success">
-          🎉 Your free block is live on the wall — welcome to the Wall of Fame!
+          🎉 Free brick booked — it shows on the wall after a quick review
+          (usually same day). Welcome to the Wall of Fame!
         </Alert>
       ) : null}
 
