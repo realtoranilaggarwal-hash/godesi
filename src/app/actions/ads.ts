@@ -16,8 +16,8 @@ import {
 import { requestCurrency } from "@/lib/currency";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
-import { wallCreditMinor } from "@/lib/adOrders";
-import { checkCoupon, couponMetadata } from "@/lib/coupons";
+import { confirmAdOrder, wallCreditMinor } from "@/lib/adOrders";
+import { checkCoupon, couponMetadata, recordCouponUse } from "@/lib/coupons";
 
 const PLACEHOLDER_CREATIVE =
   "https://placehold.co/300x250/6366f1/ffffff?text=Your+banner+here";
@@ -40,8 +40,6 @@ export async function startAdCheckoutAction(formData: FormData) {
   const amount = impressions
     ? adImpressionPrice(placement, currency, impressions)
     : adPrice(placement, currency, months);
-
-  if (!stripeEnabled()) redirect("/advertise?error=stripe_unavailable");
 
   const code = String(formData.get("couponCode") ?? "").trim();
   const check = code
@@ -82,6 +80,29 @@ export async function startAdCheckoutAction(formData: FormData) {
       currency,
     },
   });
+
+  /** A code that covers the whole price books the spot without Stripe. */
+  if (chargeMinor <= 0) {
+    await confirmAdOrder({
+      adOrderId: order.id,
+      provider: "coupon",
+      reference: `coupon:${code}`,
+      amountMinor: 0,
+      currency,
+    });
+    if (check?.ok) {
+      await recordCouponUse({
+        couponId: check.coupon.id,
+        userId: user.id,
+        amountMinor: discountMinor,
+        currency,
+        reference: order.id,
+      });
+    }
+    redirect("/dashboard/ads?booked=free");
+  }
+
+  if (!stripeEnabled()) redirect("/advertise?error=stripe_unavailable");
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",

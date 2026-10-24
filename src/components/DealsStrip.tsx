@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { dealDetails, cachedLiveDeals } from "@/lib/deals";
-import { DealCard } from "@/components/DealCard";
+import { CopyButton } from "@/components/CopyButton";
+import { LogoTile } from "@/components/LogoTile";
+import { expiryLabel } from "@/lib/dealFormat";
 
 /** The newest business offers, with a way into /deals and to post one. */
 export async function DealsStrip() {
@@ -23,26 +25,53 @@ export async function DealsStrip() {
           </Link>
         </div>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2">
         {deals.map((deal) => (
-          <DealCard
+          <div
             key={deal.id}
-            title={deal.title}
-            details={dealDetails(deal)}
-            code={deal.code}
-            linkUrl={deal.linkUrl}
-            expiresAt={deal.expiresAt}
-            business={{
-              slug: deal.business.slug,
-              name: deal.business.name,
-              city: deal.business.city,
-              logoUrl: deal.business.logoUrl,
-              icon: deal.business.categoryRef?.icon,
-              line:
-                deal.business.subcategoryRef?.name ??
-                deal.business.categoryRef?.name,
-            }}
-          />
+            className="flex items-center gap-3 rounded-xl border border-dashed border-rose-300 bg-rose-50/60 px-3 py-2"
+          >
+            <LogoTile
+              name={deal.business.name}
+              icon={deal.business.categoryRef?.icon}
+              imageUrl={deal.business.logoUrl}
+              className="h-9 w-9 shrink-0"
+              emojiClassName="text-lg"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-rose-900">
+                🏷️ {deal.title}
+              </p>
+              <p className="truncate text-xs text-slate-600">
+                <Link
+                  href={`/business/${deal.business.slug}`}
+                  className="font-semibold hover:text-indigo-700"
+                >
+                  {deal.business.name}
+                </Link>
+                {dealDetails(deal) ? ` · ${dealDetails(deal)}` : ""}
+                {deal.expiresAt ? ` · ${expiryLabel(deal.expiresAt)}` : ""}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2 text-xs font-semibold">
+              {deal.code ? (
+                <span className="hidden items-center gap-1 rounded-md border border-rose-300 bg-white px-2 py-0.5 font-mono font-bold tracking-wider text-rose-800 sm:inline-flex">
+                  {deal.code}
+                  <CopyButton value={deal.code} />
+                </span>
+              ) : null}
+              {deal.linkUrl ? (
+                <a
+                  href={deal.linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="text-indigo-700 hover:underline"
+                >
+                  Claim →
+                </a>
+              ) : null}
+            </div>
+          </div>
         ))}
       </div>
     </section>
