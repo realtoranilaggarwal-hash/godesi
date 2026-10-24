@@ -455,9 +455,26 @@ export default async function BusinessProfilePage({
                   country={business.country}
                 />
               </p>
-              {business.categoryRef || business.city || business.state ? (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {business.city ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {(() => {
+                  // "#VendorName" → /trending shows every mention of the business.
+                  const tag = business.name
+                    .replace(/[^a-zA-Z0-9 ]/g, "")
+                    .split(" ")
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .join("")
+                    .slice(0, 24);
+                  return tag ? (
+                    <Link
+                      href={`/trending?tag=${encodeURIComponent(`#${tag}`)}`}
+                      className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-800"
+                    >
+                      🏷️ #{tag}
+                    </Link>
+                  ) : null;
+                })()}
+                {business.city ? (
                     <Link
                       href={`/city/${citySlug(business.city)}`}
                       className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
@@ -500,8 +517,7 @@ export default async function BusinessProfilePage({
                   ))}
                     </>
                   ) : null}
-                </div>
-              ) : null}
+              </div>
               <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
                 <Stars rating={rating} />
                 <span>
