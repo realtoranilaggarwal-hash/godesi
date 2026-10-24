@@ -107,29 +107,40 @@ export default async function RishtaPage({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl bg-gradient-to-r from-rose-600 to-amber-500 p-6 text-white">
-        <h1 className="text-3xl font-black">💍 Rishta</h1>
-        <p className="mt-1 max-w-2xl text-rose-50">
-          Marriage-minded desi profiles, posted by the person or their parents,
-          brother, sister or relatives. Add a rashi and nakshatra to see the
-          36-guna kundli match with every profile.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <LinkButton href="/rishta/new" variant="secondary">
-            {mine ? "Edit my Rishta profile" : "Post a Rishta profile"}
-          </LinkButton>
-          <Link
-            href="/astrology/kundli-matching-for-marriage"
-            className="rounded-xl border border-white/60 px-4 py-2 text-sm font-semibold hover:bg-white/10"
-          >
-            How guna milan works
-          </Link>
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-rose-600 to-amber-500 text-white">
+        <div className="flex items-center gap-6 p-6">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-3xl font-black">💍 Rishta</h1>
+            <p className="mt-1 max-w-2xl text-rose-50">
+              Marriage-minded desi profiles, posted by the person or their
+              parents, brother, sister or relatives. Add a rashi and nakshatra
+              to see the 36-guna kundli match with every profile.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <LinkButton href="/rishta/new" variant="secondary">
+                {mine ? "Edit my Rishta profile" : "Post a Rishta profile"}
+              </LinkButton>
+              <Link
+                href="/astrology/kundli-matching-for-marriage"
+                className="rounded-xl border border-white/60 px-4 py-2 text-sm font-semibold hover:bg-white/10"
+              >
+                How guna milan works
+              </Link>
+            </div>
+            <ul className="mt-4 grid gap-1 text-xs text-rose-50 sm:grid-cols-2">
+              {SAFETY.map((line) => (
+                <li key={line}>✓ {line}</li>
+              ))}
+            </ul>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/categories/rishta.jpg"
+            alt=""
+            aria-hidden
+            className="hidden w-64 shrink-0 self-stretch rounded-2xl object-cover shadow-xl sm:block lg:w-80"
+          />
         </div>
-        <ul className="mt-4 grid gap-1 text-xs text-rose-50 sm:grid-cols-2">
-          {SAFETY.map((line) => (
-            <li key={line}>✓ {line}</li>
-          ))}
-        </ul>
       </section>
 
       {mine?.status === "PENDING" ? (
@@ -152,7 +163,7 @@ export default async function RishtaPage({
         </Alert>
       ) : null}
 
-      <form className="grid gap-2 rounded-2xl border border-slate-200 bg-white p-3 sm:grid-cols-4 lg:grid-cols-7">
+      <form className="grid gap-2 rounded-2xl border border-rose-200 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 p-3 sm:grid-cols-4 lg:grid-cols-7">
         <select
           name="seeking"
           defaultValue={seeking ?? ""}

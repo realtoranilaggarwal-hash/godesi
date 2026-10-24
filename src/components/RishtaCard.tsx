@@ -61,7 +61,7 @@ export function RishtaCard({
   return (
     <Link
       href={`/rishta/${profile.id}`}
-      className="block rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:border-rose-300 hover:shadow"
+      className="block rounded-2xl border border-rose-100 bg-gradient-to-b from-white to-rose-50/40 p-3 shadow-sm transition hover:border-rose-300 hover:shadow"
     >
       <RishtaPhoto profile={profile} canSee={canSeePhoto} />
       <p className="mt-2 font-bold text-slate-900">{profile.displayName}</p>
