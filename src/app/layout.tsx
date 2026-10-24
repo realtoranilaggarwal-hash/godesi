@@ -27,15 +27,15 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "GoDesi — Desi businesses, events, tickets & news near you",
+    default: "GoDesi.com — Desi business directory, events, deals & community",
     template: "%s | GoDesi",
   },
   description:
-    "Godesi is a multi-category desi directory: business listings with QR cards and WhatsApp chat, buyer requirements, community events with online tickets and daily news.",
+    "GoDesi.com is the desi community platform: business directory with QR cards and WhatsApp chat, buyer requirements, events with tickets, deals, courses, news and the Wall of Fame.",
   alternates: { types: { "application/rss+xml": "/feed.xml" } },
   openGraph: {
     type: "website",
-    siteName: "Godesi",
+    siteName: "GoDesi.com",
     images: [{ url: "/og-godesi.jpg", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },
