@@ -264,10 +264,33 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       { label: "News", href: "/news" },
     ],
   },
+  WALL: {
+    slot: "WALL",
+    name: "GoDesi Wall tile",
+    size: { width: 160, height: 100 },
+    slots: 96,
+    blurb:
+      "Your logo on the GoDesi Wall — one tile per spot, and every tile you book also rotates into the small-banner rail on every page. More spots, more of you all over GoDesi.",
+    priceInr: 499,
+    priceUsd: 9,
+    cpmInr: 40,
+    cpmUsd: 0.5,
+    highlights: [
+      "Book one tile — or a block and dominate the wall",
+      "Each tile also rotates into the banner rail on every page",
+      "Cheapest way to be seen everywhere at once",
+    ],
+    region: "phone",
+    where: [
+      { label: "The GoDesi Wall", href: "/wall" },
+      { label: "Every page (banner rail)", href: "/" },
+    ],
+  },
 };
 
 /** Placements on sale. HERO has no spot on any page, so it isn't offered. */
 export const AD_SLOT_ORDER: BannerSlot[] = [
+  "WALL",
   "BILLBOARD",
   "HEADER",
   "LEADERBOARD",

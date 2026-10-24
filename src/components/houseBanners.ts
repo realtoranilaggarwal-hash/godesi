@@ -11,6 +11,14 @@ export type HouseBanner = {
 
 export const HOUSE_BANNERS: HouseBanner[] = [
   {
+    slug: "wall",
+    href: "/wall",
+    emoji: "🧱",
+    title: "The GoDesi Wall",
+    line: "Own a square — your logo on every page",
+    colors: "from-amber-500 to-rose-600",
+  },
+  {
     slug: "rishta",
     href: "/rishta",
     emoji: "💍",

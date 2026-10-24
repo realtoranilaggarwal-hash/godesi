@@ -66,16 +66,16 @@ export async function RecentStrip() {
           <div className="order-last flex min-w-full flex-1 gap-2 sm:order-none sm:min-w-0">
             <Link
               href="/signup"
-              className="flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-red-600 px-3 py-2 text-center text-sm min-[360px]:text-base font-semibold text-white shadow-md shadow-red-600/30 ring-2 ring-red-300 transition hover:bg-red-700 sm:px-5 sm:text-base"
+              className="flex min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 px-3 py-2 text-center text-sm min-[360px]:text-base font-black tracking-wide text-white shadow-lg shadow-rose-200 ring-2 ring-rose-300 transition hover:from-amber-400 hover:via-rose-400 hover:to-indigo-500 sm:px-5 sm:text-base"
             >
-              <span className="sm:hidden">📝 Register free →</span>
+              <span className="sm:hidden">🎉 Register free →</span>
               <span className="hidden sm:inline">
-                📝 Register now — it&apos;s free →
+                🎉 Register now — it&apos;s free →
               </span>
             </Link>
             <Link
               href="/login"
-              className="flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl border-2 border-red-600 bg-white px-3 py-2 text-center text-sm min-[360px]:text-base font-semibold text-red-600 shadow-md shadow-red-600/20 transition hover:bg-red-50 sm:px-4 sm:text-base"
+              className="flex shrink-0 items-center justify-center gap-1 whitespace-nowrap rounded-xl border-2 border-rose-400 bg-white px-3 py-2 text-center text-sm min-[360px]:text-base font-semibold text-rose-600 shadow-md shadow-rose-200/40 transition hover:bg-rose-50 sm:px-4 sm:text-base"
             >
               🔑 Log in
             </Link>

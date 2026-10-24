@@ -101,6 +101,7 @@ enum BannerSlot {
   HALFPAGE
   MOBILE
   FULLBANNER
+  WALL
 }
 
 enum BannerStatus {

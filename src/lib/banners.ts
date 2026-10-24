@@ -153,6 +153,14 @@ export async function slotSoldCount(slot: BannerSlot) {
 }
 
 /**
+ * Every live GoDesi Wall tile — the wall shows them all in booking order
+ * (inventory is already ordered by position), no rotation.
+ */
+export async function wallBanners() {
+  return (await inventory()).filter((banner) => banner.slot === "WALL");
+}
+
+/**
  * Counts one view and retires an impression-pack banner as soon as its quota is
  * used up, so a sold pack stops serving without an admin step.
  */
