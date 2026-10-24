@@ -48,7 +48,7 @@ function Stat({
 export default async function AdvertiserDashboardPage({
   searchParams,
 }: {
-  searchParams: { paid?: string };
+  searchParams: { paid?: string; booked?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/dashboard/ads");
@@ -86,9 +86,11 @@ export default async function AdvertiserDashboardPage({
         <LinkButton href="/advertise">Book another slot</LinkButton>
       </div>
 
-      {searchParams.paid ? (
+      {searchParams.paid || searchParams.booked ? (
         <Alert tone="success">
-          Payment received. Upload your creative below — we approve ads within a day.
+          {searchParams.paid
+            ? "Payment received. Upload your creative below — we approve ads within a day."
+            : "Spot booked — the code covered it in full. Upload your creative below."}
         </Alert>
       ) : null}
 
