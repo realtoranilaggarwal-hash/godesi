@@ -9,6 +9,7 @@ import { siteUrl } from "@/lib/format";
 import { Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { resultsAreThin, robotsFor } from "@/lib/thinContent";
+import { cityCover } from "@/lib/cityCovers";
 
 export const dynamic = "force-dynamic";
 
@@ -33,8 +34,8 @@ async function loadCity(slug: string) {
     }),
     db.business.findMany({
       where: { status: "APPROVED", ...where },
-      orderBy: { createdAt: "desc" },
-      take: 12,
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+      take: 60,
       select: { slug: true, name: true, category: true },
     }),
     db.event.findMany({
@@ -163,6 +164,14 @@ export default async function CityPage({
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-4">
         <Card className="bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white">
+          {cityCover(name) ? (
+            // eslint-disable-next-line @next/next/no-img-element -- local stock banner
+            <img
+              src={cityCover(name)!}
+              alt={`${name} street view`}
+              className="-mx-5 -mt-5 mb-4 h-32 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-44"
+            />
+          ) : null}
           <h1 className="text-2xl font-black">📍 Everything desi in {name}</h1>
           <p className="mt-1 text-sm text-white/90">
             Community news, businesses, events, property and temples — all
@@ -216,16 +225,32 @@ export default async function CityPage({
 
         {businesses.length ? (
           <Section title="🏪 Businesses and professionals" href="/businesses">
-            <ul className="divide-y divide-slate-100">
-              {businesses.map((business) => (
-                <Row
-                  key={business.slug}
-                  href={`/b/${business.slug}`}
-                  title={business.name}
-                  meta={business.category}
-                />
-              ))}
-            </ul>
+            {Object.entries(
+              businesses.reduce<Record<string, typeof businesses>>(
+                (groups, business) => {
+                  (groups[business.category] ??= []).push(business);
+                  return groups;
+                },
+                {},
+              ),
+            ).map(([category, group]) => (
+              <div key={category} className="py-2 first:pt-0 last:pb-0">
+                <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {category}
+                  <span className="ml-1 font-normal">({group.length})</span>
+                </h3>
+                <ul className="divide-y divide-slate-100">
+                  {group.map((business) => (
+                    <Row
+                      key={business.slug}
+                      href={`/b/${business.slug}`}
+                      title={business.name}
+                      meta={category}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ))}
           </Section>
         ) : null}
 

@@ -17,6 +17,7 @@ import {
 } from "@/lib/plans";
 import { maskContactDetails } from "@/lib/moderation";
 import { softFor } from "@/lib/categories";
+import { cityCover } from "@/lib/cityCovers";
 import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { reviewSourceLabel } from "@/lib/reviewSources";
 import { ReviewForm } from "@/components/ReviewForm";
@@ -132,7 +133,7 @@ export async function generateMetadata({
         ? [business.coverUrl]
         : business.logoUrl
           ? [business.logoUrl]
-          : undefined,
+          : (cityCover(business.city) ?? undefined),
     },
   };
 }
@@ -375,10 +376,10 @@ export default async function BusinessProfilePage({
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="min-w-0 space-y-5">
           <Card>
-            {business.coverUrl ? (
+            {business.coverUrl || cityCover(business.city) ? (
               // eslint-disable-next-line @next/next/no-img-element -- member-supplied URL
               <img
-                src={business.coverUrl}
+                src={business.coverUrl ?? cityCover(business.city)!}
                 alt={`${business.name} cover photo`}
                 className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
               />

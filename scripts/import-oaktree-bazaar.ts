@@ -61,10 +61,29 @@ async function main() {
           },
         ],
       },
-      select: { id: true },
+      select: { id: true, ownerId: true, sourceUrl: true },
     });
     if (duplicate) {
-      skipped.push(`${row.name} — already exists`);
+      // Repair rows we imported earlier: refresh facts on ownerless cards.
+      if (apply && !duplicate.ownerId && duplicate.sourceUrl === sourceUrl) {
+        await db.business.update({
+          where: { id: duplicate.id },
+          data: {
+            city: row.city,
+            state: row.state || null,
+            categorySlug: category.slug,
+            subcategorySlug: subcategory?.slug ?? null,
+            category: subcategory?.name ?? category.name,
+            phone: row.phone || null,
+            websiteUrl: row.websiteUrl || null,
+            address: row.address || null,
+            country: "USA",
+          },
+        });
+        console.log(`updated ${row.name}`);
+      } else {
+        skipped.push(`${row.name} — already exists`);
+      }
       continue;
     }
 
@@ -90,6 +109,7 @@ async function main() {
         address: row.address || null,
         description: row.description || null,
         profileType: row.profileType === "PROFESSIONAL" ? "PROFESSIONAL" : "BUSINESS",
+        country: "USA",
         status: "APPROVED",
         source: "oaktreeroadbazaar",
         sourceUrl,
