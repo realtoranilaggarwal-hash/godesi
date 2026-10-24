@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -121,8 +121,8 @@ const PIXEL_PRICE_INR = 85; // ₹85 a pixel ≈ $1
 const PIXEL_PRICE_USD = 1; // $1 a pixel
 /** Bottom 100 rows of the board are the free zone — book there for $0. */
 const WALL_FREE_Y = 900;
-/** Free bookings (free zone or promo code) are capped at 400 px = 100 bricks. */
-const WALL_FREE_MAX_PX = 400;
+/** Free bookings (free zone or promo code) are one brick: 4 px, worth $4. */
+const WALL_FREE_MAX_PX = 4;
 /** Promo code that makes any wall block free while the wall launches. */
 const WALL_FREE_CODE = "godesi.com";
 
@@ -162,7 +162,19 @@ export async function startPixelWallCheckoutAction(
   const inFreeZone = y >= WALL_FREE_Y;
   const codeFree =
     (parsed.data.code ?? "").toLowerCase() === WALL_FREE_CODE;
-  const free = inFreeZone || codeFree;
+  // Free zone grants a single 4px brick; the promo code frees any block.
+  const wantsFree = (inFreeZone && pixels <= WALL_FREE_MAX_PX) || codeFree;
+
+  // A free claim is only free while the member hasn't used their one free
+  // brick — after that (or past the one-brick cap) the same spot is paid.
+  let free = false;
+  if (wantsFree) {
+    const alreadyFree = await db.adOrder.findFirst({
+      where: { userId: user.id, wallBlockId: { not: null }, amountMinor: 0 },
+      select: { id: true },
+    });
+    free = !alreadyFree;
+  }
 
   if (!free && !stripeEnabled()) return { error: "stripe_unavailable" };
 
@@ -179,46 +191,35 @@ export async function startPixelWallCheckoutAction(
   }
 
   if (free) {
-    if (pixels > WALL_FREE_MAX_PX) {
-      return {
-        error:
-          "Free blocks are capped at 400 pixels (100 bricks) — drag a smaller box or pay for a bigger one.",
-      };
-    }
-    const alreadyFree = await db.wallBlock.findFirst({
-      where: {
-        advertiserId: user.id,
-        status: { in: ["DRAFT", "PENDING", "ACTIVE"] },
-        orders: { some: { amountMinor: 0 } },
-      },
-      select: { id: true },
-    });
-    if (alreadyFree) {
+    try {
+      const block = await db.wallBlock.create({
+        data: {
+          x, y, w, h,
+          title,
+          imageUrl,
+          linkUrl,
+          status: "ACTIVE",
+          advertiserId: user.id,
+        },
+      });
+      await db.adOrder.create({
+        data: {
+          userId: user.id,
+          wallBlockId: block.id,
+          slot: "WALL",
+          pricing: "MONTHLY",
+          months: 1,
+          amountMinor: 0,
+          currency: requestCurrency(),
+          status: "PAID",
+        },
+      });
+    } catch {
+      // unique index on one free order per user — a second simultaneous
+      // free claim lands here.
       return { error: "You've already claimed a free block — the next one is paid." };
     }
-
-    const block = await db.wallBlock.create({
-      data: {
-        x, y, w, h,
-        title,
-        imageUrl,
-        linkUrl,
-        status: "ACTIVE",
-        advertiserId: user.id,
-      },
-    });
-    await db.adOrder.create({
-      data: {
-        userId: user.id,
-        wallBlockId: block.id,
-        slot: "WALL",
-        pricing: "MONTHLY",
-        months: 1,
-        amountMinor: 0,
-        currency: requestCurrency(),
-        status: "PAID",
-      },
-    });
+    revalidateTag("wall-blocks");
     revalidatePath("/walloffame");
     redirect("/walloffame?free=1");
   }

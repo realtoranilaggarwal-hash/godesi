@@ -173,12 +173,12 @@ export default async function PricingPage({
           New — the Wall of Fame
         </p>
         <p className="text-2xl font-black">
-          🧱 $1 a brick. Drag, pick, book — your spot stays yours
+          🧱 $4 gets you in the Wall of Fame
         </p>
         <p className="mt-1 text-sm text-white/90">
-          Can&apos;t stretch to a full ad? Start with one brick and get listed on
-          the board — every brick also rotates into the banner rail site-wide.
-          Early birds get the best spots →
+          Drag, pick, book — every $4 brick pushes you higher on the board.
+          The more you pay, the higher you go. First brick is free in the
+          launch zone →
         </p>
       </Link>
 
