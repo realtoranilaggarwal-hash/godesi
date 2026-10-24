@@ -21,6 +21,30 @@ export const metadata: Metadata = {
   alternates: { canonical: "/festivals" },
 };
 
+/** Faith-tinted card styles — saffron temples, emerald mosques, sky gurudwaras. */
+const FAITH_TINTS: Record<string, { card: string; date: string }> = {
+  HINDU_TEMPLE: {
+    card: "border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 hover:border-amber-400",
+    date: "text-orange-700",
+  },
+  MOSQUE: {
+    card: "border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 hover:border-emerald-400",
+    date: "text-emerald-700",
+  },
+  GURUDWARA: {
+    card: "border-sky-300 bg-gradient-to-br from-sky-50 to-blue-50 hover:border-sky-400",
+    date: "text-sky-700",
+  },
+  CHURCH: {
+    card: "border-violet-300 bg-gradient-to-br from-violet-50 to-purple-50 hover:border-violet-400",
+    date: "text-violet-700",
+  },
+  JAIN_TEMPLE: {
+    card: "border-rose-300 bg-gradient-to-br from-rose-50 to-pink-50 hover:border-rose-400",
+    date: "text-rose-700",
+  },
+};
+
 const MONTH = new Intl.DateTimeFormat("en-US", {
   month: "long",
   year: "numeric",
@@ -38,11 +62,20 @@ export default function FestivalsPage() {
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
-        <section className="rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-5 py-8 text-white sm:px-8">
+        <section className="relative overflow-hidden rounded-3xl text-white shadow-xl">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/categories/festivals.jpg"
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-950/85 via-fuchsia-900/60 to-amber-900/30" />
+          <div className="relative px-5 py-10 sm:px-8 sm:py-12">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
             Festival calendar
           </p>
-          <h1 className="mt-2 text-3xl font-black sm:text-4xl">
+          <h1 className="mt-2 text-3xl font-black drop-shadow sm:text-4xl">
             Every desi festival, and what is on near you 🪔
           </h1>
           <p className="mt-3 max-w-2xl text-white/90">
@@ -59,6 +92,7 @@ export default function FestivalsPage() {
               Temples & gurudwaras near you
             </LinkButton>
           </div>
+          </div>
         </section>
 
         <FestivalShop
@@ -68,19 +102,26 @@ export default function FestivalsPage() {
 
         {Array.from(byMonth.entries()).map(([month, festivals]) => (
           <Card key={month}>
-            <h2 className="mb-3 font-bold">{month}</h2>
+            <h2 className="mb-3">
+              <span className="inline-block rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-3 py-1 text-sm font-black text-white shadow-sm">
+                {month}
+              </span>
+            </h2>
             <div className="grid gap-3 sm:grid-cols-2">
-              {festivals.map((festival) => (
+              {festivals.map((festival) => {
+                const tint =
+                  FAITH_TINTS[festival.faith] ?? FAITH_TINTS.HINDU_TEMPLE;
+                return (
                 <Link
                   key={festival.name}
                   href={`/festivals/${festivalSlug(festival)}`}
-                  className="rounded-2xl border border-amber-200 bg-gradient-to-br from-white to-amber-50 p-3 transition hover:border-amber-400 hover:shadow-sm"
+                  className={`rounded-2xl border p-3 transition hover:shadow-sm ${tint.card}`}
                 >
                   <p className="font-bold">
                     {festival.emoji} {festival.name}{" "}
                     {festival.date.getUTCFullYear()}
                   </p>
-                  <p className="text-sm font-semibold text-amber-700">
+                  <p className={`text-sm font-semibold ${tint.date}`}>
                     {formatFestivalDate(festival.date)}
                     {festival.daysAway === 0
                       ? " · today"
@@ -93,7 +134,8 @@ export default function FestivalsPage() {
                     {FAITH_LABELS[festival.faith]}
                   </p>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </Card>
         ))}

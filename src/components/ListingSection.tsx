@@ -182,7 +182,7 @@ export async function ListingSectionPage({
         <TradingTips compact />
         <NeedHelpBox />
         <SidebarBanners />
-        <SmallBanners show={6} embedded />
+        <SmallBanners show={6} embedded tree={false} />
       </aside>
     </div>
   );
