@@ -282,7 +282,7 @@ export async function startPixelWallCheckoutAction(
           currency: currency.toLowerCase(),
           unit_amount: payMinor,
           product_data: {
-            name: `GoDesi Wall of Fame — ${pixels.toLocaleString()} pixels`,
+            name: `GoDesi Wall of Fame — ${Math.floor(pixels / 4).toLocaleString()} desi bricks`,
             description: `${w}×${h}px block at (${x}, ${y}) — permanent spot on godesi.com/walloffame`,
           },
         },

@@ -11,9 +11,9 @@ import { PixelWall } from "@/components/PixelWall";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GoDesi Wall of Fame — a million pixels, $1 a pixel",
+  title: "GoDesi Wall of Fame — 250,000 desi bricks, $4 a brick",
   description:
-    "The desi Million Dollar Homepage: drag a box over a million pixels, upload your banner and own the spot forever — $1 a pixel, 4 pixels minimum. The more you buy, the higher you rank.",
+    "The desi Million Dollar Homepage: drag a box over the wall, upload your banner and own the spot forever — $4 a desi brick. The more you buy, the higher you rank.",
   alternates: { canonical: "/walloffame" },
 };
 
@@ -24,17 +24,17 @@ const STEPS = [
   {
     icon: "🧱",
     title: "Drag & pick your bricks",
-    body: `250,000 bricks of 4 pixels each at $${PRICE * 4} a brick — drag a whole block and dominate the wall. The green free zone is $0.`,
+    body: `250,000 desi bricks at $${PRICE * 4} a brick — drag a whole block and dominate the wall. The green free zone is $0.`,
   },
   {
     icon: "🏆",
     title: "Early birds sit higher",
-    body: "Spots are first come, best placed — and the vendor list ranks by pixels owned, so the bigger your buy the higher you sit.",
+    body: "Spots are first come, best placed — and the vendor list ranks by desi bricks owned, so the bigger your buy the higher you sit.",
   },
   {
     icon: "📣",
     title: "Get seen everywhere",
-    body: "Your art stretches over every pixel you bought, clickable by every visitor — the desi million-dollar homepage.",
+    body: "Your art stretches over every desi brick you bought, clickable by every visitor — the desi million-dollar homepage.",
   },
 ];
 
@@ -110,11 +110,13 @@ export default async function WallOfFamePage({
 
       {searchParams.paid ? (
         <Alert tone="success">
-          🎉 Payment received — your pixels are live on the wall!
+          🎉 Payment received — your desi bricks are live on the wall!
         </Alert>
       ) : null}
       {searchParams.error === "cancelled" ? (
-        <Alert>Checkout was cancelled — your pixels were not booked.</Alert>
+        <Alert>
+          Checkout was cancelled — your desi bricks were not booked.
+        </Alert>
       ) : null}
       {searchParams.free ? (
         <Alert tone="success">
@@ -136,7 +138,7 @@ export default async function WallOfFamePage({
             🏅 The Wall of Fame — vendor list
           </h2>
           <p className="mt-0.5 text-xs text-slate-500">
-            Ranked by pixels owned — buy more, climb higher.
+            Ranked by desi bricks owned — buy more, climb higher.
           </p>
           <ol className="mt-3 divide-y divide-slate-100">
             {board.map((vendor, index) => (
@@ -154,7 +156,7 @@ export default async function WallOfFamePage({
                     {vendor.name}
                   </span>
                   <span className="shrink-0 rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
-                    {vendor.pixels.toLocaleString()} px
+                    {Math.floor(vendor.pixels / 4).toLocaleString()} bricks
                   </span>
                   <span className="shrink-0 text-sm font-semibold text-indigo-600">
                     Visit →

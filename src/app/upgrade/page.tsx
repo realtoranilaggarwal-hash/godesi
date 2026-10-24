@@ -155,7 +155,7 @@ export default async function UpgradePage({
               {formatMinor(creditMinor, currency)} of wall credit
             </span>
             {creditPixels > 0
-              ? ` = ${creditPixels} pixels (${creditBricks} free bricks)`
+              ? ` = ${creditBricks} free desi bricks`
               : " — it covers part of a brick"}
             . Pick your spot on the wall — book just your earned bricks or
             stretch bigger and pay the difference.
