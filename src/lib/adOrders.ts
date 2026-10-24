@@ -4,17 +4,22 @@ import { db } from "@/lib/db";
 /**
  * Dollars a member already paid for non-wall ads (featured spots, side
  * banners) become wall credit: every ad dollar buys the same in wall bricks.
- * Credit used is tracked on each wall order's wallCreditMinor.
+ * Credit used is tracked on each wall order's wallCreditMinor. Amounts are
+ * minor units, so credit is counted per currency — paise never cover a USD
+ * charge or vice versa.
  */
-export async function wallCreditMinor(userId: string): Promise<number> {
+export async function wallCreditMinor(
+  userId: string,
+  currency: string,
+): Promise<number> {
   const [spent, used] = await Promise.all([
     db.adOrder.aggregate({
       _sum: { amountMinor: true },
-      where: { userId, status: "PAID", wallBlockId: null },
+      where: { userId, status: "PAID", wallBlockId: null, currency },
     }),
     db.adOrder.aggregate({
       _sum: { wallCreditMinor: true },
-      where: { userId, wallBlockId: { not: null } },
+      where: { userId, wallBlockId: { not: null }, currency },
     }),
   ]);
   return Math.max(
