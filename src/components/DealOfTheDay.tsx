@@ -55,9 +55,44 @@ export async function DealOfTheDay() {
 
 /** Home page: today's picks as one slim line, with the ways into deals and shopping. */
 export async function DealOfTheDayBar() {
-  /** Logged-in members get the Wall of Fame CTA in this spot instead. */
+  /** Logged-in members get the Wall of Fame + course pitch in this slot instead —
+   *  an empty cell next to the panchang card reads as a broken box. */
   const user = await optionalRead(() => getCurrentUser(), null);
-  if (user) return null;
+  if (user) {
+    return (
+      <section className="flex items-center gap-2.5 rounded-2xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-amber-50 px-2.5 py-1.5 text-sm">
+        <span
+          aria-hidden
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-fuchsia-200 text-2xl"
+        >
+          🧱
+        </span>
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <p className="flex flex-wrap items-baseline gap-x-2 text-xs">
+            <span className="text-sm font-bold text-fuchsia-900">
+              Wall of Fame
+            </span>
+            <Link
+              href="/walloffame"
+              className="font-semibold text-indigo-700 hover:underline"
+            >
+              Book your bricks →
+            </Link>
+            <Link
+              href="/course"
+              className="font-semibold text-fuchsia-800 hover:underline"
+            >
+              🎓 $9.99 course →
+            </Link>
+          </p>
+          <p className="truncate text-xs text-slate-600">
+            $4 gets you one desi brick, yours for life — and learn online
+            earning in the GoDesi course.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   const { deal, offer } = await cachedDealOfTheDay();
 
