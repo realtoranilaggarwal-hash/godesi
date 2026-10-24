@@ -58,6 +58,13 @@ export function ClaimBusinessForm({
       </Field>
 
       <SubmitButton pendingLabel="Sending...">Submit claim</SubmitButton>
+      <p className="text-xs text-amber-800">
+        🧱 While you&apos;re here — claim a free brick on the{" "}
+        <a href="/walloffame" className="font-bold underline">
+          Wall of Fame
+        </a>{" "}
+        and get seen in Google and Bing.
+      </p>
     </form>
   );
 }

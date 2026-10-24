@@ -16,6 +16,7 @@ import {
 import { requestCurrency } from "@/lib/currency";
 import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
+import { wallCreditMinor } from "@/lib/adOrders";
 import { checkCoupon, couponMetadata } from "@/lib/coupons";
 
 const PLACEHOLDER_CREATIVE =
@@ -170,13 +171,11 @@ export async function startPixelWallCheckoutAction(
   let free = false;
   if (wantsFree) {
     const alreadyFree = await db.adOrder.findFirst({
-      where: { userId: user.id, wallBlockId: { not: null }, amountMinor: 0 },
+      where: { userId: user.id, wallBlockId: { not: null }, provider: "free" },
       select: { id: true },
     });
     free = !alreadyFree;
   }
-
-  if (!free && !stripeEnabled()) return { error: "stripe_unavailable" };
 
   const existing = await db.wallBlock.findMany({
     where: { status: { in: ["DRAFT", "PENDING", "ACTIVE"] } },
@@ -211,6 +210,7 @@ export async function startPixelWallCheckoutAction(
           months: 1,
           amountMinor: 0,
           currency: requestCurrency(),
+          provider: "free",
           status: "PAID",
         },
       });
@@ -228,13 +228,21 @@ export async function startPixelWallCheckoutAction(
   const pxPrice = currency === "INR" ? PIXEL_PRICE_INR : PIXEL_PRICE_USD;
   const chargeMinor = toMinor(pixels * pxPrice);
 
+  // Dollars already spent on other ads (featured spots, side banners) turn
+  // into wall credit — every dollar buys the same in bricks.
+  const creditMinor = await wallCreditMinor(user.id);
+  const creditApplied = Math.min(creditMinor, chargeMinor);
+  const payMinor = chargeMinor - creditApplied;
+
+  if (payMinor > 0 && !stripeEnabled()) return { error: "stripe_unavailable" };
+
   const block = await db.wallBlock.create({
     data: {
       x, y, w, h,
       title,
       imageUrl,
       linkUrl,
-      status: "DRAFT",
+      status: payMinor === 0 ? "ACTIVE" : "DRAFT",
       advertiserId: user.id,
     },
   });
@@ -246,10 +254,19 @@ export async function startPixelWallCheckoutAction(
       slot: "WALL",
       pricing: "MONTHLY",
       months: 1,
-      amountMinor: chargeMinor,
+      amountMinor: payMinor,
+      wallCreditMinor: creditApplied,
       currency,
+      provider: payMinor === 0 ? "wall-credit" : "stripe",
+      ...(payMinor === 0 ? { status: "PAID" } : {}),
     },
   });
+
+  if (payMinor === 0) {
+    revalidateTag("wall-blocks");
+    revalidatePath("/walloffame");
+    redirect("/walloffame?paid=1");
+  }
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
@@ -261,7 +278,7 @@ export async function startPixelWallCheckoutAction(
         quantity: 1,
         price_data: {
           currency: currency.toLowerCase(),
-          unit_amount: chargeMinor,
+          unit_amount: payMinor,
           product_data: {
             name: `GoDesi Wall of Fame — ${pixels.toLocaleString()} pixels`,
             description: `${w}×${h}px block at (${x}, ${y}) — permanent spot on godesi.com/walloffame`,

@@ -34,11 +34,14 @@ export function PixelWall({
   blocks,
   priceUsd,
   hasFreeBlock,
+  creditUsd,
 }: {
   blocks: Block[];
   priceUsd: number;
   /** True when the signed-in member already used their one free claim. */
   hasFreeBlock: boolean;
+  /** Dollars of ad spend convertible to wall bricks. */
+  creditUsd: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const images = useRef(new Map<string, HTMLImageElement>());
@@ -216,7 +219,8 @@ export function PixelWall({
   const codeFree = code.trim().toLowerCase() === FREE_CODE;
   const free =
     ((inFreeZone && pxCount <= 4) || codeFree) && pxCount > 0 && !hasFreeBlock;
-  const cost = free ? 0 : pxCount * priceUsd;
+  const creditApplied = free ? 0 : Math.min(creditUsd, pxCount * priceUsd);
+  const cost = free ? 0 : pxCount * priceUsd - creditApplied;
 
   return (
     <div className="space-y-4">
@@ -235,7 +239,7 @@ export function PixelWall({
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
           {tip ??
-            `Drag a box over the open pixels — 250,000 bricks of 4 px at $${priceUsd * 4} each. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`
+            `Drag a box over the open pixels — 250,000 bricks of 4 px at $${priceUsd * 4} each. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`}
         </p>
       </div>
 
@@ -253,7 +257,10 @@ export function PixelWall({
                 `$${cost.toLocaleString()}`
               )}
               <span className="ml-2 text-xs font-semibold text-slate-500">
-                at ({sel.x}, {sel.y}) — yours for good
+                at ({sel.x}, {sel.y}) — one payment, yours for life
+                {creditApplied > 0
+                  ? ` · $${creditApplied.toLocaleString()} covered by your ad credit`
+                  : ""}
               </span>
             </p>
             <div className="flex gap-2">

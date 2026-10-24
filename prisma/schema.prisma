@@ -1537,6 +1537,8 @@ model AdOrder {
   /// Pixel-wall purchase: the block this order paid for.
   wallBlockId String?
   wallBlock   WallBlock?    @relation(fields: [wallBlockId], references: [id], onDelete: SetNull)
+  /// How much of this wall order was covered by the member's ad-spend credit.
+  wallCreditMinor Int       @default(0)
   slot        BannerSlot
   pricing     AdPricing     @default(MONTHLY)
   months      Int           @default(1)

@@ -2,6 +2,28 @@ import { revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 
 /**
+ * Dollars a member already paid for non-wall ads (featured spots, side
+ * banners) become wall credit: every ad dollar buys the same in wall bricks.
+ * Credit used is tracked on each wall order's wallCreditMinor.
+ */
+export async function wallCreditMinor(userId: string): Promise<number> {
+  const [spent, used] = await Promise.all([
+    db.adOrder.aggregate({
+      _sum: { amountMinor: true },
+      where: { userId, status: "PAID", wallBlockId: null },
+    }),
+    db.adOrder.aggregate({
+      _sum: { wallCreditMinor: true },
+      where: { userId, wallBlockId: { not: null } },
+    }),
+  ]);
+  return Math.max(
+    0,
+    (spent._sum.amountMinor ?? 0) - (used._sum.wallCreditMinor ?? 0),
+  );
+}
+
+/**
  * Marks a booking paid and opens its run window. Idempotent: the status guard
  * means the webhook and the success redirect can both call this safely.
  */
