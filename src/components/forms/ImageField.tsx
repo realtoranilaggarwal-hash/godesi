@@ -15,6 +15,7 @@ export function ImageField({
   defaultValue = "",
   hint,
   previewClassName = "h-24 w-24 rounded-xl object-cover",
+  square = false,
 }: {
   name: string;
   label: string;
@@ -22,6 +23,8 @@ export function ImageField({
   defaultValue?: string;
   hint?: ReactNode;
   previewClassName?: string;
+  /** Square drop box — signals the image itself should be square (logos). */
+  square?: boolean;
 }) {
   const [url, setUrl] = useState(defaultValue);
 
@@ -46,7 +49,7 @@ export function ImageField({
               </button>
             </div>
           ) : null}
-          <ImageDropzone purpose={purpose} onUploaded={setUrl} />
+          <ImageDropzone purpose={purpose} square={square} onUploaded={setUrl} />
           <input
             value={url}
             onChange={(event) => setUrl(event.target.value)}
