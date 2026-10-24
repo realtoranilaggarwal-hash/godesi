@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { pixelWallBlocks } from "@/lib/banners";
+import { getCurrentUser } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { Alert } from "@/components/ui";
 import { PixelWall } from "@/components/PixelWall";
 
@@ -40,6 +42,13 @@ export default async function WallOfFamePage({
   searchParams: { paid?: string; error?: string; free?: string };
 }) {
   const blocks = await pixelWallBlocks();
+  const user = await getCurrentUser();
+  const hasFreeBlock = user
+    ? !!(await db.adOrder.findFirst({
+        where: { userId: user.id, wallBlockId: { not: null }, amountMinor: 0 },
+        select: { id: true },
+      }))
+    : false;
 
   const taken = blocks.reduce((sum, block) => sum + block.w * block.h, 0);
 
@@ -91,7 +100,7 @@ export default async function WallOfFamePage({
         </Alert>
       ) : null}
 
-      <PixelWall blocks={blocks} priceUsd={PRICE} />
+      <PixelWall blocks={blocks} priceUsd={PRICE} hasFreeBlock={hasFreeBlock} />
 
       {board.length ? (
         <section className="rounded-3xl border border-amber-200 bg-white p-4 sm:p-5">

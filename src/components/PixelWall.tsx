@@ -30,7 +30,16 @@ const hit = (blocks: Block[], px: number, py: number) =>
  * checkerboard, sold blocks paint their banner across their whole rectangle,
  * and visitors drag a box to buy ($1/px, 4px min) or click a sold block.
  */
-export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: number }) {
+export function PixelWall({
+  blocks,
+  priceUsd,
+  hasFreeBlock,
+}: {
+  blocks: Block[];
+  priceUsd: number;
+  /** True when the signed-in member already used their one free claim. */
+  hasFreeBlock: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const images = useRef(new Map<string, HTMLImageElement>());
   const [sel, setSel] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
@@ -73,7 +82,7 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
     ctx.fillStyle = "#047857";
     ctx.font = "bold 28px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("FREE ZONE — claim a spot for $0", SIZE / 2, FREE_Y + 36);
+    ctx.fillText("FREE ZONE — one free brick per member", SIZE / 2, FREE_Y + 36);
 
     for (const block of blocks) {
       if (block.status === "ACTIVE") {
@@ -205,7 +214,8 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
   const bricks = pxCount / 4;
   const inFreeZone = !!sel && sel.y >= FREE_Y;
   const codeFree = code.trim().toLowerCase() === FREE_CODE;
-  const free = inFreeZone || codeFree;
+  const free =
+    ((inFreeZone && pxCount <= 4) || codeFree) && pxCount > 0 && !hasFreeBlock;
   const cost = free ? 0 : pxCount * priceUsd;
 
   return (
@@ -225,7 +235,7 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
           {tip ??
-            `Drag a box over the open pixels — 250,000 bricks of 4 px at $${priceUsd * 4} each. The green FREE ZONE at the bottom is $0 (up to 400 px). Indigo = just booked, pictures = live ads (click to visit).`}
+            `Drag a box over the open pixels — 250,000 bricks of 4 px at $${priceUsd * 4} each. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`
         </p>
       </div>
 
@@ -329,7 +339,9 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
                   />
                   {codeFree ? (
                     <span className="mt-1 block text-xs font-black text-emerald-600">
-                      Code applied — this block is FREE!
+                      {free
+                        ? "Code applied — this block is FREE!"
+                        : "You've used your free brick — this one is paid."}
                     </span>
                   ) : null}
                 </label>
@@ -353,7 +365,7 @@ export function PixelWall({ blocks, priceUsd }: { blocks: Block[]; priceUsd: num
               </button>
               <p className="text-center text-xs text-slate-500">
                 {free
-                  ? "Free for now — your block goes live instantly (up to 400 px per free claim)."
+                  ? "Free for now — your brick goes live instantly (one free brick per member)."
                   : "Card checkout by Stripe. Your pixels light up the moment payment lands and your art stretches across the whole block."}
               </p>
             </div>

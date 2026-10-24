@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 
 /**
@@ -40,6 +41,7 @@ export async function confirmAdOrder({
       where: { id: order.wallBlockId },
       data: { status: "ACTIVE" },
     });
+    revalidateTag("wall-blocks");
   }
 
   if (bannerIds.length) {
