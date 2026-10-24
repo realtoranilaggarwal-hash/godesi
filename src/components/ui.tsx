@@ -48,7 +48,8 @@ const buttonBase =
 
 const variants = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700",
-  secondary: "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50",
+  secondary:
+    "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50",
   whatsapp: "bg-[#25D366] text-white hover:bg-[#1eb457]",
   danger: "bg-red-600 text-white hover:bg-red-700",
   ghost: "text-slate-600 hover:text-slate-900",
@@ -62,7 +63,10 @@ export function Button({
   ...props
 }: ComponentProps<"button"> & { variant?: ButtonVariant }) {
   return (
-    <button {...props} className={`${buttonBase} ${variants[variant]} ${className}`} />
+    <button
+      {...props}
+      className={`${buttonBase} ${variants[variant]} ${className}`}
+    />
   );
 }
 
@@ -71,7 +75,12 @@ export function LinkButton({
   className = "",
   ...props
 }: ComponentProps<typeof Link> & { variant?: ButtonVariant }) {
-  return <Link {...props} className={`${buttonBase} ${variants[variant]} ${className}`} />;
+  return (
+    <Link
+      {...props}
+      className={`${buttonBase} ${variants[variant]} ${className}`}
+    />
+  );
 }
 
 export function Field({
@@ -82,7 +91,7 @@ export function Field({
   children,
 }: {
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   required?: boolean;
   className?: string;
   children: ReactNode;
@@ -98,7 +107,9 @@ export function Field({
         ) : null}
       </span>
       {children}
-      {hint ? <span className="mt-1 block text-xs text-slate-500">{hint}</span> : null}
+      {hint ? (
+        <span className="mt-1 block text-xs text-slate-500">{hint}</span>
+      ) : null}
     </label>
   );
 }
@@ -119,11 +130,19 @@ export function Alert({
     info: "border-indigo-200 bg-indigo-50 text-indigo-700",
   };
   return (
-    <div className={`rounded-xl border px-3 py-2 text-sm ${tones[tone]}`}>{children}</div>
+    <div className={`rounded-xl border px-3 py-2 text-sm ${tones[tone]}`}>
+      {children}
+    </div>
   );
 }
 
-export function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
+export function Stars({
+  rating,
+  size = 16,
+}: {
+  rating: number;
+  size?: number;
+}) {
   const rounded = Math.round(rating);
   return (
     <span
