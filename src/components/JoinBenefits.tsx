@@ -3,6 +3,7 @@ import { SidebarBanners } from "@/components/Banners";
 import { isPhoneRequest } from "@/lib/device";
 import { db } from "@/lib/db";
 import { cachedQuery, CONTENT_TTL } from "@/lib/cache";
+import { citySlug } from "@/lib/citySlug";
 
 const PERKS = [
   {
@@ -63,7 +64,10 @@ const joinStats = cachedQuery("join-stats", CONTENT_TTL, async () => {
   ]);
   return {
     businesses,
-    cities: cities.filter((row) => row.city).length,
+    // groupBy counts raw spellings ("Iselin", "Iselin NJ"); slug them first.
+    cities: new Set(
+      cities.map((row) => (row.city ? citySlug(row.city) : "")).filter(Boolean),
+    ).size,
     members,
   };
 });
