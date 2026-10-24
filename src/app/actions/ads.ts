@@ -147,6 +147,8 @@ const WALL_FREE_Y = 900;
 const WALL_FREE_MAX_PX = 4;
 /** Promo code that makes any wall block free while the wall launches. */
 const WALL_FREE_CODE = "godesi.com";
+/** Giveaway code (said aloud on TikTok etc.): one 4px brick free, once per member. */
+const WALL_BRICK_CODE = "brick";
 
 const pixelSchema = z.object({
   x: z.number().int().min(0),
@@ -182,10 +184,18 @@ export async function startPixelWallCheckoutAction(
   }
 
   const inFreeZone = y >= WALL_FREE_Y;
-  const codeFree =
-    (parsed.data.code ?? "").toLowerCase() === WALL_FREE_CODE;
-  // Free zone grants a single 4px brick; the promo code frees any block.
-  const wantsFree = (inFreeZone && pixels <= WALL_FREE_MAX_PX) || codeFree;
+  const enteredCode = (parsed.data.code ?? "").toLowerCase();
+  const codeFree = enteredCode === WALL_FREE_CODE;
+  const brickCode = enteredCode === WALL_BRICK_CODE;
+  if (brickCode && pixels > WALL_FREE_MAX_PX) {
+    return {
+      error: `Code ${WALL_BRICK_CODE.toUpperCase()} covers one 4px brick — shrink your box to 4 pixels or drop the code.`,
+    };
+  }
+  // Free zone grants a single 4px brick; godesi.com frees any block; the
+  // giveaway code frees one brick anywhere on the board.
+  const wantsFree =
+    (inFreeZone && pixels <= WALL_FREE_MAX_PX) || codeFree || brickCode;
 
   // A free claim is only free while the member hasn't used their one free
   // brick — after that (or past the one-brick cap) the same spot is paid.
