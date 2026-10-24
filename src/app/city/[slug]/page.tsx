@@ -35,7 +35,9 @@ async function loadCity(slug: string) {
     db.business.findMany({
       where: { status: "APPROVED", ...where },
       orderBy: [{ category: "asc" }, { name: "asc" }],
-      take: 60,
+      // Grouped by category below; the cap is a safety bound, not a design —
+      // it must stay well above a city's real count or whole categories vanish.
+      take: 1000,
       select: { slug: true, name: true, category: true },
     }),
     db.event.findMany({

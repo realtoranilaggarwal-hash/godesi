@@ -59,6 +59,7 @@ import { DealCard } from "@/components/DealCard";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { GodesiMark } from "@/components/GodesiMark";
 import { CardSearchStrip } from "@/components/CardSearchStrip";
+import { MapEmbed } from "@/components/MapEmbed";
 import { getCategoryTree } from "@/lib/directory";
 
 export const dynamic = "force-dynamic";
@@ -354,6 +355,31 @@ export default async function BusinessProfilePage({
       </div>
     </>
   );
+
+  /** Address + free OpenStreetMap — rendered in both rails' positions. */
+  const locationCard =
+    business.address || business.mapsUrl ? (
+      <Card>
+        <h2 className="mb-2 text-lg font-bold">Location</h2>
+        {business.address ? (
+          <p className="mb-3 text-sm text-slate-700">{business.address}</p>
+        ) : null}
+        <MapEmbed
+          parts={[business.address, business.city, business.state]}
+          title={business.name}
+        />
+        {business.mapsUrl ? (
+          <a
+            href={business.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-block text-sm font-semibold text-indigo-600"
+          >
+            Open in Google Maps
+          </a>
+        ) : null}
+      </Card>
+    ) : null;
 
   return (
     <div className="flex gap-6">
@@ -756,7 +782,10 @@ export default async function BusinessProfilePage({
           </Card>
 
           {/* Card face + tools under the info on phones */}
-          <div className="space-y-4 lg:hidden">{cardColumn}</div>
+          <div className="space-y-4 lg:hidden">
+            {cardColumn}
+            {locationCard}
+          </div>
 
         {business.deals.length || isOwner ? (
           <Card id="deals">
@@ -1059,25 +1088,7 @@ export default async function BusinessProfilePage({
           {/* Desktop right rail — the digital card and all its tools */}
           <div className="hidden space-y-4 lg:block">
             {cardColumn}
-
-            {business.address || business.mapsUrl ? (
-              <Card>
-                <h2 className="mb-2 text-lg font-bold">Location</h2>
-                {business.address ? (
-                  <p className="text-sm text-slate-700">{business.address}</p>
-                ) : null}
-                {business.mapsUrl ? (
-                  <a
-                    href={business.mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-block text-sm font-semibold text-indigo-600"
-                  >
-                    Open in Google Maps
-                  </a>
-                ) : null}
-              </Card>
-            ) : null}
+            {locationCard}
 
             {isOwner ? (
               <Card>
