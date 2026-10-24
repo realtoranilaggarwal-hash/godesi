@@ -239,7 +239,7 @@ export function PixelWall({
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
           {tip ??
-            `Drag a box over the open pixels — 250,000 bricks of 4 px at $${priceUsd * 4} each. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`}
+            `Drag a box over the open bricks — 250,000 desi bricks at $${priceUsd * 4} each. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`}
         </p>
       </div>
 
@@ -247,8 +247,8 @@ export function PixelWall({
         <div className="rounded-3xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-lg font-black text-slate-900">
-              🧱 {sel.w} × {sel.h} px = {pxCount.toLocaleString()} px ={" "}
-              {bricks.toLocaleString()} bricks —{" "}
+              🧱 {bricks.toLocaleString()} desi bricks ({pxCount.toLocaleString()}{" "}
+              px) —{" "}
               {free ? (
                 <span className="text-emerald-600">
                   FREE{inFreeZone ? " (free zone)" : ""}
@@ -367,13 +367,13 @@ export function PixelWall({
                 {busy
                   ? "Working…"
                   : free
-                    ? `Claim ${bricks.toLocaleString()} bricks — FREE 🎉`
-                    : `Pay $${cost.toLocaleString()} — own ${pxCount.toLocaleString()} pixels 🧱`}
+                    ? `Claim ${bricks.toLocaleString()} desi bricks — FREE 🎉`
+                    : `Pay $${cost.toLocaleString()} — own ${bricks.toLocaleString()} desi bricks 🧱`}
               </button>
               <p className="text-center text-xs text-slate-500">
                 {free
-                  ? "Free for now — your brick goes live instantly (one free brick per member)."
-                  : "Card checkout by Stripe. Your pixels light up the moment payment lands and your art stretches across the whole block."}
+                  ? "Free for now — your desi brick shows after a quick review (one free brick per member)."
+                  : "Card checkout by Stripe. Your desi bricks light up the moment payment lands and your art stretches across the whole block."}
               </p>
             </div>
           ) : null}
