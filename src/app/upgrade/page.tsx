@@ -162,10 +162,11 @@ export default async function UpgradePage({
           </p>
         ) : (
           <p className="mt-1 text-sm text-amber-900">
-            Every dollar you spend on GoDesi ads earns the same in wall bricks
-            — $1 = 1 pixel. Book a block once and it stays on the wall for
-            life; pick only your earned bricks or stretch to as much as you
-            want to pay.
+            Every dollar you spend on GoDesi ads earns the same in wall
+            bricks — <span className="font-black">$4 gets you one desi brick
+            for life</span>. Book a block once and it stays on the wall
+            forever; pick only your earned bricks or stretch to as much as
+            you want to pay.
           </p>
         )}
         <Link
