@@ -1,74 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { wallAvailability } from "@/lib/banners";
-import { AD_PLACEMENTS } from "@/lib/ads";
+import { pixelWallBlocks } from "@/lib/banners";
 import { Alert } from "@/components/ui";
-import { WallBoard } from "@/components/WallBoard";
+import { PixelWall } from "@/components/PixelWall";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GoDesi Wall of Fame — $1 a brick, book your spot today",
+  title: "GoDesi Wall of Fame — a million pixels, $1 a pixel",
   description:
-    "Drag and pick your bricks on the GoDesi Wall of Fame — $1 a brick, yours for good. Every brick also rotates into the banner rail on every page. Early birds get the best spots.",
+    "The desi Million Dollar Homepage: drag a box over a million pixels, upload your banner and own the spot forever — $1 a pixel, 4 pixels minimum. The more you buy, the higher you rank.",
   alternates: { canonical: "/walloffame" },
 };
 
-const TOTAL = AD_PLACEMENTS.WALL.slots;
-const PRICE = AD_PLACEMENTS.WALL.priceUsd;
-const COLS = 32;
-
-type Slice = { cols: number; rows: number; col: number; row: number };
-
-/**
- * Bricks bought in one checkout share image+link+buyer — treat them as one
- * block and give each brick its slice of the bounding box, so a vendor's
- * banner stretches over their whole bought area like a real pixel wall.
- */
-function buildSlices(banners: { position: number | null; imageUrl: string; linkUrl: string; advertiserId: string | null }[]) {
-  const groups = new Map<string, { imageUrl: string; linkUrl: string; cells: number[] }>();
-  for (const banner of banners) {
-    if (!banner.position) continue;
-    const key = `${banner.advertiserId ?? "?"}|${banner.imageUrl}|${banner.linkUrl}`;
-    const group = groups.get(key) ?? { imageUrl: banner.imageUrl, linkUrl: banner.linkUrl, cells: [] };
-    group.cells.push(banner.position);
-    groups.set(key, group);
-  }
-  const slices = new Map<number, Slice>();
-  for (const group of groups.values()) {
-    const cols = group.cells.map((cell) => (cell - 1) % COLS);
-    const rows = group.cells.map((cell) => Math.floor((cell - 1) / COLS));
-    const minCol = Math.min(...cols);
-    const minRow = Math.min(...rows);
-    const spanCols = Math.max(...cols) - minCol + 1;
-    const spanRows = Math.max(...rows) - minRow + 1;
-    for (const cell of group.cells) {
-      slices.set(cell, {
-        cols: spanCols,
-        rows: spanRows,
-        col: ((cell - 1) % COLS) - minCol,
-        row: Math.floor((cell - 1) / COLS) - minRow,
-      });
-    }
-  }
-  return slices;
-}
+const TOTAL_PX = 1_000_000;
+const PRICE = 1;
 
 const STEPS = [
   {
     icon: "🧱",
-    title: "Drag & pick your bricks",
-    body: `Every brick is $${PRICE} — grab one to be listed, or drag a whole block and dominate the wall.`,
+    title: "Drag & pick your pixels",
+    body: `A million pixels on the board, $${PRICE} each — grab a 4-pixel brick for $4 or drag a whole block and dominate the wall.`,
   },
   {
     icon: "🏆",
     title: "Early birds sit higher",
-    body: "Bricks are booked in pick order and the vendor list ranks by bricks owned — the more you buy, the higher you sit.",
+    body: "Spots are first come, best placed — and the vendor list ranks by pixels owned, so the bigger your buy the higher you sit.",
   },
   {
     icon: "📣",
     title: "Get seen everywhere",
-    body: "Every brick you own also rotates into the small-banner rail on every page of GoDesi. More bricks = more of you all over.",
+    body: "Your art stretches over every pixel you bought, clickable by every visitor — the desi million-dollar homepage.",
   },
 ];
 
@@ -77,39 +39,22 @@ export default async function WallOfFamePage({
 }: {
   searchParams: { paid?: string; error?: string };
 }) {
-  const banners = await wallAvailability();
-  const byPosition = new Map(banners.map((b) => [b.position, b]));
-  const slices = buildSlices(banners);
+  const blocks = await pixelWallBlocks();
 
-  const bricks = Array.from({ length: TOTAL }, (_, i) => {
-    const n = i + 1;
-    const banner = byPosition.get(n);
-    if (!banner) return { n, state: "free" as const };
-    return {
-      n,
-      state: banner.status === "ACTIVE" ? ("live" as const) : ("reserved" as const),
-      title: banner.title,
-      imageUrl: banner.imageUrl,
-      linkUrl: banner.linkUrl,
-      bannerId: banner.id,
-      slice: slices.get(n),
-    };
-  });
+  const taken = blocks.reduce((sum, block) => sum + block.w * block.h, 0);
 
-  const taken = bricks.filter((brick) => brick.state !== "free").length;
-
-  /** Vendor leaderboard: rank by bricks owned (more paid = higher). */
-  const vendors = new Map<string, { name: string; href: string; count: number }>();
-  for (const banner of banners) {
-    const name = banner.advertiser?.name ?? banner.title;
-    const key = `${name}|${banner.linkUrl}`;
-    const entry = vendors.get(key) ?? { name, href: banner.linkUrl, count: 0 };
-    entry.count += 1;
+  /** Vendor list: rank by total pixels owned (more paid = higher). */
+  const vendors = new Map<string, { name: string; href: string; pixels: number }>();
+  for (const block of blocks) {
+    const name = block.advertiser?.name ?? block.title;
+    const key = `${name}|${block.linkUrl}`;
+    const entry = vendors.get(key) ?? { name, href: block.linkUrl, pixels: 0 };
+    entry.pixels += block.w * block.h;
     vendors.set(key, entry);
   }
   const board = Array.from(vendors.values())
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 20);
+    .sort((a, b) => b.pixels - a.pixels)
+    .slice(0, 50);
 
   return (
     <div className="space-y-6">
@@ -118,60 +63,69 @@ export default async function WallOfFamePage({
           🏆 The GoDesi Wall of Fame
         </p>
         <h1 className="mt-2 text-3xl font-black sm:text-4xl">
-          $1 a brick. Drag, pick, book — your spot is yours 🧱
+          1,000,000 pixels. ${PRICE} a pixel. Own your spot 🧱
         </h1>
         <p className="mt-3 max-w-2xl text-white/90">
-          Desi-style million-dollar wall: drag across the free bricks below,
-          upload your banner and book today.{" "}
-          {taken} of {TOTAL} bricks already taken — early birds get the best
-          spots, and every brick also shows in the banner rail across GoDesi.
+          The desi Million Dollar Homepage: drag a box over the board, upload
+          your banner and book today —{" "}
+          {taken.toLocaleString()} of {TOTAL_PX.toLocaleString()} pixels taken so
+          far. Early birds get the best spots, and the biggest buyers sit on top
+          of the vendor list.
         </p>
       </section>
 
       {searchParams.paid ? (
         <Alert tone="success">
-          🎉 Payment received — your bricks are booked! They go live on the wall
-          as soon as we approve the artwork (usually same day).
+          🎉 Payment received — your pixels are live on the wall!
         </Alert>
       ) : null}
       {searchParams.error === "cancelled" ? (
-        <Alert>Checkout was cancelled — your bricks were not booked.</Alert>
+        <Alert>Checkout was cancelled — your pixels were not booked.</Alert>
       ) : null}
 
-      <WallBoard bricks={bricks} priceUsd={PRICE} />
+      <PixelWall blocks={blocks} priceUsd={PRICE} />
 
       {board.length ? (
         <section className="rounded-3xl border border-amber-200 bg-white p-4 sm:p-5">
           <h2 className="text-lg font-black text-slate-900">
-            🏅 Wall of Fame — the vendors on the board
+            🏅 The Wall of Fame — vendor list
           </h2>
           <p className="mt-0.5 text-xs text-slate-500">
-            Ranked by bricks owned — buy more, climb higher.
+            Ranked by pixels owned — buy more, climb higher.
           </p>
-          <ol className="mt-3 grid gap-2 sm:grid-cols-2">
+          <ol className="mt-3 divide-y divide-slate-100">
             {board.map((vendor, index) => (
               <li key={`${vendor.name}-${vendor.href}`}>
                 <a
                   href={vendor.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-gradient-to-r from-amber-50 to-rose-50 px-3 py-2 transition hover:-translate-y-0.5 hover:shadow-sm"
+                  className="flex items-center gap-3 px-2 py-2.5 transition hover:bg-amber-50"
                 >
-                  <span className="text-lg font-black text-slate-400">
-                    {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                  <span className="w-8 text-lg font-black text-slate-400">
+                    {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
                   </span>
                   <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
                     {vendor.name}
                   </span>
-                  <span className="shrink-0 rounded-full bg-amber-200/70 px-2 py-0.5 text-xs font-black text-amber-800">
-                    {vendor.count} 🧱
+                  <span className="shrink-0 rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
+                    {vendor.pixels.toLocaleString()} px
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold text-indigo-600">
+                    Visit →
                   </span>
                 </a>
               </li>
             ))}
           </ol>
         </section>
-      ) : null}
+      ) : (
+        <section className="rounded-3xl border border-dashed border-amber-300 bg-amber-50/50 p-5 text-center">
+          <p className="text-sm font-semibold text-amber-800">
+            🥇 No vendors yet — be the first name on the Wall of Fame list.
+          </p>
+        </section>
+      )}
 
       <section className="grid gap-3 sm:grid-cols-3">
         {STEPS.map((step) => (

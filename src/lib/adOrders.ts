@@ -34,6 +34,14 @@ export async function confirmAdOrder({
       ? [order.bannerId]
       : [];
 
+  /** A pixel-wall block goes live the moment it's paid for. */
+  if (order.wallBlockId) {
+    await db.wallBlock.update({
+      where: { id: order.wallBlockId },
+      data: { status: "ACTIVE" },
+    });
+  }
+
   if (bannerIds.length) {
     const startsAt = new Date();
 
