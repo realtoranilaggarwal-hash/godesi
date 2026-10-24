@@ -224,9 +224,11 @@ export default async function DashboardPage({
             </div>
           </Card>
         ) : null}
-        {searchParams.business && business ? <BusinessNextSteps /> : null}
         {searchParams.saved ? (
           <Alert tone="success">Profile saved.</Alert>
+        ) : null}
+        {business && (searchParams.business || searchParams.saved) ? (
+          <BusinessNextSteps showOffer={Boolean(searchParams.business)} />
         ) : null}
         {searchParams.posted ? (
           <Alert tone="success">Requirement posted.</Alert>
