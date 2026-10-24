@@ -48,8 +48,13 @@ async function packageCode() {
  * Shown once, right after a business saves its card: add an offer now, offer a
  * scratch gift, and a today-only price on the 5-year package.
  */
-export async function BusinessNextSteps() {
-  const offer = await packageCode();
+export async function BusinessNextSteps({
+  showOffer = true,
+}: {
+  /** "Today only" package pitch — once per brand-new listing, not on re-saves. */
+  showOffer?: boolean;
+}) {
+  const offer = showOffer ? await packageCode() : null;
   return (
     <Card className="space-y-4 border-indigo-200">
       <h2 className="text-lg font-black">

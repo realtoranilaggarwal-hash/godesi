@@ -426,43 +426,6 @@ export function BusinessProfileForm({
           />
         </Field>
 
-        {/* Deals & gifts nudge — cards that offer something get picked more */}
-        <div className="grid gap-3 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-4 sm:col-span-2 sm:grid-cols-2">
-          <a
-            href="/dashboard/deals"
-            className="group flex items-start gap-3 rounded-xl bg-white/80 p-3 ring-1 ring-amber-200 transition hover:ring-amber-400"
-          >
-            <span className="text-2xl" aria-hidden>
-              🏷️
-            </span>
-            <span>
-              <span className="block text-sm font-extrabold text-slate-900 group-hover:text-amber-800">
-                Post a deal — free
-              </span>
-              <span className="mt-0.5 block text-xs text-slate-600">
-                A discount or special offer shows on your card, the deals page
-                and your printable shop poster.
-              </span>
-            </span>
-          </a>
-          <a
-            href="/dashboard/gifts"
-            className="group flex items-start gap-3 rounded-xl bg-white/80 p-3 ring-1 ring-amber-200 transition hover:ring-amber-400"
-          >
-            <span className="text-2xl" aria-hidden>
-              🎁
-            </span>
-            <span>
-              <span className="block text-sm font-extrabold text-slate-900 group-hover:text-amber-800">
-                Add a scratch &amp; win gift
-              </span>
-              <span className="mt-0.5 block text-xs text-slate-600">
-                Give customers a free prize on GoDesi Scratch — they play, you
-                get the visit and the lead.
-              </span>
-            </span>
-          </a>
-        </div>
         <Field label="Custom quotes">
           <label className="flex items-center gap-2 text-sm text-slate-700">
             <input
