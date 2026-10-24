@@ -190,7 +190,7 @@ export default async function PricingPage({
           New — learn online earning
         </p>
         <p className="text-2xl font-black">
-          🎓 GoDesi.com Course of Marketing — $9.99
+          🎓 GoDesi.com Course of Marketing — $9 (was $99)
         </p>
         <p className="mt-1 text-sm text-white/90">
           UGC, affiliate income, digital products, the TikTok playbook and

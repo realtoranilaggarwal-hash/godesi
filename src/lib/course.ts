@@ -1,7 +1,9 @@
-/** The GoDesi Course of Marketing — lessons unlocked by a $9.99 purchase. */
+/** The GoDesi Course of Marketing — lessons unlocked by a $9 launch deal
+ *  (list price $99). */
 
 export const COURSE_SLUG = "marketing";
-export const COURSE_PRICE_MINOR = 999;
+export const COURSE_PRICE_MINOR = 900;
+export const COURSE_LIST_PRICE_MINOR = 9_900;
 export const COURSE_TITLE = "GoDesi.com Course of Marketing";
 export const COURSE_TAGLINE =
   "How everyday people make money online — UGC, affiliate income, selling digital products — and how to grow it from pocket money into an asset you own.";
@@ -56,11 +58,11 @@ export const LESSONS: Lesson[] = [
     ],
   },
   {
-    title: "Selling digital products — the $9.99 course you're in right now",
+    title: "Selling digital products — the $9 course you're in right now",
     minutes: 7,
     paragraphs: [
-      "You're inside a live example: this course is a digital product. It was written once and sells over and over at $9.99 with no inventory, no shipping, no rent. That's the model — package what you know (or learn) into a guide, template pack, mini-course or checklist and sell it on repeat.",
-      "$9.99 is a sweet spot: cheap enough to buy on impulse from a TikTok video, high enough that 100 sales a month is real money.",
+      "You're inside a live example: this course is a digital product. It was written once and sells over and over at a $9 launch deal with no inventory, no shipping, no rent. That's the model — package what you know (or learn) into a guide, template pack, mini-course or checklist and sell it on repeat.",
+      "Under $10 is a sweet spot: cheap enough to buy on impulse from a TikTok video, high enough that 100 sales a month is real money.",
     ],
     bullets: [
       "Solve ONE specific problem ('make your first UGC sale', 'write listings that sell').",
@@ -86,13 +88,13 @@ export const LESSONS: Lesson[] = [
     title: "Offers & pricing — why people actually click buy",
     minutes: 6,
     paragraphs: [
-      "People don't buy products, they buy outcomes: 'make your first $100 online' beats '10 video lessons'. Price follows the outcome — a course that helps someone earn $500 is cheap at $9.99 or $49.",
+      "People don't buy products, they buy outcomes: 'make your first $100 online' beats '10 video lessons'. Price follows the outcome — a course that helps someone earn $500 is cheap at $9 or $49.",
       "Simple pricing rules: cheap entry products ($5–$25) to turn strangers into buyers, mid offers ($50–$200) for people who got results, and premium offers (your time, done-for-you) for the few who want speed.",
     ],
     bullets: [
       "Name the outcome in the title — 'Course of Marketing' sells what it does.",
       "One-time payment beats subscriptions for beginners — zero pressure, instant yes.",
-      "Anchor: show the $200 version next to the $9.99 version and the cheap one flies.",
+      "Anchor: show the $99 list price next to the $9 deal and the cheap one flies — this page does exactly that.",
     ],
   },
   {
@@ -125,7 +127,7 @@ export const LESSONS: Lesson[] = [
     title: "Simple funnels — the path from stranger to customer",
     minutes: 6,
     paragraphs: [
-      "A funnel is just the journey: See video → click link → read page → buy → get emails → buy again. Every business online is this, from a $9.99 course to a car dealership. Draw yours on one line and fix the weakest step.",
+      "A funnel is just the journey: See video → click link → read page → buy → get emails → buy again. Every business online is this, from a $9 course to a car dealership. Draw yours on one line and fix the weakest step.",
       "If nobody clicks, the hook is weak. If they click but don't buy, the offer or price is wrong. If they buy once and vanish, you have no follow-up — that's where the owned list comes back in.",
     ],
     bullets: [

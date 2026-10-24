@@ -69,7 +69,10 @@ export default async function CoursePage({
                 type="submit"
                 className="rounded-2xl bg-white px-6 py-3 text-base font-black text-fuchsia-700 shadow-lg transition hover:scale-105"
               >
-                Buy the course — $9.99
+                Buy the course — $9{" "}
+                <span className="text-sm font-bold text-fuchsia-400 line-through">
+                  $99
+                </span>
               </button>
             </form>
           ) : (
@@ -77,9 +80,15 @@ export default async function CoursePage({
               href="/login?next=/course"
               className="rounded-2xl bg-white px-6 py-3 text-base font-black text-fuchsia-700 shadow-lg transition hover:scale-105"
             >
-              Buy the course — $9.99
+              Buy the course — $9{" "}
+              <span className="text-sm font-bold text-fuchsia-400 line-through">
+                $99
+              </span>
             </Link>
           )}
+          <span className="rounded-full bg-amber-300 px-2.5 py-1 text-xs font-black text-amber-950">
+            LAUNCH DEAL · was $99
+          </span>
           <span className="text-xs text-white/80">
             One payment · lifetime access · {LESSONS.length} lessons
           </span>
@@ -130,9 +139,9 @@ export default async function CoursePage({
       </Card>
 
       <Alert tone="info">
-        <strong>Why $9.99?</strong> Cheap enough to buy on impulse, real enough
-        to take seriously — exactly the pricing tactic lesson 6 teaches. One
-        payment, the lessons stay yours forever.
+        <strong>Why $9 (was $99)?</strong> Cheap enough to buy on impulse,
+        real enough to take seriously — exactly the anchor-pricing tactic
+        lesson 6 teaches. One payment, the lessons stay yours forever.
       </Alert>
     </div>
   );

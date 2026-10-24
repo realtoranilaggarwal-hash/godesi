@@ -82,7 +82,7 @@ export async function DealOfTheDayBar() {
               href="/course"
               className="font-semibold text-fuchsia-800 hover:underline"
             >
-              🎓 $9.99 course →
+              🎓 $9 course →
             </Link>
           </p>
           <p className="truncate text-xs text-slate-600">
