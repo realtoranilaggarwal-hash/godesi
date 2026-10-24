@@ -6,7 +6,6 @@ import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
-import { OfferChips } from "@/components/OfferChips";
 import { JoinGoalChips } from "@/components/JoinGoalChips";
 
 export function SignupForm({
@@ -65,14 +64,6 @@ export function SignupForm({
         </legend>
         <JoinGoalChips />
       </fieldset>
-      <details open className="rounded-xl border border-indigo-100 bg-indigo-50/50 p-3">
-        <summary className="cursor-pointer text-sm font-bold text-indigo-900">
-          🎁 Unlock Your GoDesi Member Benefits — tick all that apply, earn points
-        </summary>
-        <div className="mt-3">
-          <OfferChips />
-        </div>
-      </details>
       <SubmitButton pendingLabel="Creating account..." className="w-full">
         Create account
       </SubmitButton>
