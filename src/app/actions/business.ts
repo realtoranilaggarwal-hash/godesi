@@ -410,6 +410,18 @@ export async function saveBusinessProfileAction(
     const detail = (field: string) =>
       String(formData.get(field) ?? "").trim() || null;
 
+    // Price boxes submit an amount plus a <key>Currency pick; store them as
+    // one "USD 90"-style string so profiles keep showing a single value.
+    const price = (key: "priceFrom" | "priceHourly" | "priceExtra") => {
+      const raw = detail(key);
+      if (!raw) return null;
+      const currency = (detail(`${key}Currency`) ?? "").toUpperCase();
+      if (!/^[A-Z]{3}$/.test(currency)) return raw;
+      const amount = raw.replace(/^(USD|INR)\s+/i, "").trim();
+      if (/^[$₹€£]/.test(amount)) return raw;
+      return `${currency} ${amount}`;
+    };
+
     const licenseNumber = set
       ? String(formData.get("licenseNumber") ?? "").trim()
       : "";
@@ -456,9 +468,9 @@ export async function saveBusinessProfileAction(
         ? String(formData.get("carriers") ?? "").trim() || null
         : null,
       serviceOptions,
-      priceFrom: set?.pricing ? detail("priceFrom") : null,
-      priceHourly: set?.pricing ? detail("priceHourly") : null,
-      priceExtra: set?.pricing ? detail("priceExtra") : null,
+      priceFrom: set?.pricing ? price("priceFrom") : null,
+      priceHourly: set?.pricing ? price("priceHourly") : null,
+      priceExtra: set?.pricing ? price("priceExtra") : null,
       availability: set?.availability ? detail("availability") : null,
       licenseDocUrl: set?.licenseDoc ? detail("licenseDocUrl") : null,
       yearsExperience,
@@ -528,11 +540,15 @@ export async function saveBusinessProfileAction(
       const typedSlug = String(formData.get("slug") ?? "").trim();
       const wantedSlug = slugify(typedSlug);
       if (typedSlug && !wantedSlug)
-        return { error: "The page address needs at least 3 letters or numbers." };
+        return {
+          error: "The page address needs at least 3 letters or numbers.",
+        };
       const newSlug =
         wantedSlug && wantedSlug !== existing.slug ? wantedSlug : null;
       if (newSlug && newSlug.length < 3)
-        return { error: "The page address needs at least 3 letters or numbers." };
+        return {
+          error: "The page address needs at least 3 letters or numbers.",
+        };
       if (newSlug && (await slugTaken(newSlug, existing.id)))
         return {
           error: `godesi.com/b/${newSlug} is already taken — try adding your city, e.g. ${newSlug}-${slugify(data.city) || "usa"}.`,

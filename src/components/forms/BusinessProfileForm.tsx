@@ -6,7 +6,10 @@ import { saveBusinessProfileAction } from "@/app/actions/business";
 import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
-import { CategorySelect, type CategoryOption } from "@/components/forms/CategorySelect";
+import {
+  CategorySelect,
+  type CategoryOption,
+} from "@/components/forms/CategorySelect";
 import { ImageField } from "@/components/forms/ImageField";
 import { PhotoAlbumField } from "@/components/forms/PhotoAlbumField";
 import { PlaylistField } from "@/components/forms/PlaylistField";
@@ -14,7 +17,10 @@ import { WriteHelper } from "@/components/WriteHelper";
 import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { SpecialtyPicker } from "@/components/forms/SpecialtyPicker";
 import { specialtySet } from "@/lib/specialties";
-import { VehicleFields, type VehicleDefaults } from "@/components/forms/VehicleFields";
+import {
+  VehicleFields,
+  type VehicleDefaults,
+} from "@/components/forms/VehicleFields";
 import { useState } from "react";
 import { COUNTRIES } from "@/lib/countries";
 import { FormError } from "@/components/forms/FormError";
@@ -48,6 +54,8 @@ const TRUSTINDEX_AFFILIATE =
   "https://www.trustindex.io/ti-redirect.php?a=anilaggarw&c=my_campaign";
 
 const PERSONAL_SOCIALS = ["websiteUrl", "instagramUrl", "facebookUrl"];
+/** Agent-only profile links — pointless questions for DJs, caterers, etc. */
+const REAL_ESTATE_SOCIALS = ["zillowUrl", "realtorUrl", "homesUrl"];
 
 export function BusinessProfileForm({
   business,
@@ -92,7 +100,10 @@ export function BusinessProfileForm({
   /** Ticks allowed per service picker; staff edits leave it unset. */
   servicePickLimit?: number;
 }) {
-  const [state, formAction] = useFormState(saveBusinessProfileAction, emptyState);
+  const [state, formAction] = useFormState(
+    saveBusinessProfileAction,
+    emptyState,
+  );
   const [subcategory, setSubcategory] = useState(
     business?.subcategorySlug ?? defaultSubcategory ?? "",
   );
@@ -103,10 +114,15 @@ export function BusinessProfileForm({
     business?.profileType ?? defaultProfileType,
   );
   /** A private seller does not need 16 social buttons on a used-car ad. */
-  const personalSeller = category === "buy-sell" && profileType === "PROFESSIONAL";
+  const personalSeller =
+    category === "buy-sell" && profileType === "PROFESSIONAL";
   const socials = personalSeller
     ? BUSINESS_SOCIALS.filter((social) => PERSONAL_SOCIALS.includes(social.key))
-    : BUSINESS_SOCIALS;
+    : BUSINESS_SOCIALS.filter(
+        (social) =>
+          category === "real-estate" ||
+          !REAL_ESTATE_SOCIALS.includes(social.key),
+      );
   /** Saved certifications split back into checkbox values and free-text extras. */
   const offered = specialtySet(subcategory)?.certifications?.options ?? [];
   const saved = business?.certifications ?? [];
@@ -155,7 +171,12 @@ export function BusinessProfileForm({
           </select>
         </Field>
         <Field label="Business or professional name" required>
-          <input name="name" required defaultValue={business?.name ?? ""} className={inputClass} />
+          <input
+            name="name"
+            required
+            defaultValue={business?.name ?? ""}
+            className={inputClass}
+          />
         </Field>
         {business ? (
           <Field
@@ -163,7 +184,9 @@ export function BusinessProfileForm({
             hint="Letters, numbers and dashes. Old links and printed QR codes keep working."
           >
             <div className="flex items-center gap-1">
-              <span className="shrink-0 text-sm text-slate-500">godesi.com/b/</span>
+              <span className="shrink-0 text-sm text-slate-500">
+                godesi.com/b/
+              </span>
               <input
                 name="slug"
                 defaultValue={business.slug}
@@ -190,10 +213,19 @@ export function BusinessProfileForm({
           hint="Work online or serve many areas? Type “Online”, “Anywhere” or your main base."
           required
         >
-          <input name="city" required defaultValue={business?.city ?? ""} className={inputClass} />
+          <input
+            name="city"
+            required
+            defaultValue={business?.city ?? ""}
+            className={inputClass}
+          />
         </Field>
         <Field label="State">
-          <input name="state" defaultValue={business?.state ?? ""} className={inputClass} />
+          <input
+            name="state"
+            defaultValue={business?.state ?? ""}
+            className={inputClass}
+          />
         </Field>
         <Field label="Country" required>
           <input
@@ -224,7 +256,8 @@ export function BusinessProfileForm({
           feeStructure: business?.feeStructure ?? "",
           carriers: business?.carriers ?? "",
           yearsExperience:
-            business?.yearsExperience === null || business?.yearsExperience === undefined
+            business?.yearsExperience === null ||
+            business?.yearsExperience === undefined
               ? ""
               : String(business.yearsExperience),
           serviceOptions: business?.serviceOptions ?? [],
@@ -268,7 +301,11 @@ export function BusinessProfileForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
           label="WhatsApp number"
-          hint={starterCard ? "Only what the owner tells you to show." : DIAL_CODE_HINT}
+          hint={
+            starterCard
+              ? "Only what the owner tells you to show."
+              : DIAL_CODE_HINT
+          }
           required={!starterCard}
         >
           <PhoneInput
@@ -298,7 +335,7 @@ export function BusinessProfileForm({
           label="Logo"
           purpose="logo"
           defaultValue={business?.logoUrl ?? ""}
-          hint="Square logos look best."
+          hint='Square logos look best. No logo? Ask ChatGPT: "Create a clean, simple square logo for my <your trade> business named <your business name>" — then upload the image it makes.'
         />
         <PhotoAlbumField
           defaultValue={business?.albumUrl ?? ""}
@@ -395,7 +432,9 @@ export function BusinessProfileForm({
             href="/dashboard/deals"
             className="group flex items-start gap-3 rounded-xl bg-white/80 p-3 ring-1 ring-amber-200 transition hover:ring-amber-400"
           >
-            <span className="text-2xl" aria-hidden>🏷️</span>
+            <span className="text-2xl" aria-hidden>
+              🏷️
+            </span>
             <span>
               <span className="block text-sm font-extrabold text-slate-900 group-hover:text-amber-800">
                 Post a deal — free
@@ -410,7 +449,9 @@ export function BusinessProfileForm({
             href="/dashboard/gifts"
             className="group flex items-start gap-3 rounded-xl bg-white/80 p-3 ring-1 ring-amber-200 transition hover:ring-amber-400"
           >
-            <span className="text-2xl" aria-hidden>🎁</span>
+            <span className="text-2xl" aria-hidden>
+              🎁
+            </span>
             <span>
               <span className="block text-sm font-extrabold text-slate-900 group-hover:text-amber-800">
                 Add a scratch &amp; win gift
@@ -434,12 +475,18 @@ export function BusinessProfileForm({
           </label>
         </Field>
         <Field label="Address">
-          <input name="address" defaultValue={business?.address ?? ""} className={inputClass} />
+          <input
+            name="address"
+            defaultValue={business?.address ?? ""}
+            className={inputClass}
+          />
         </Field>
       </div>
 
-
-      <details className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4" open>
+      <details
+        className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4"
+        open
+      >
         <summary className="cursor-pointer text-sm font-bold text-slate-900">
           Social &amp; profile links
         </summary>
@@ -465,8 +512,8 @@ export function BusinessProfileForm({
           <strong>Want more Google reviews?</strong> Paste your Google
           &quot;write a review&quot; link above and a ✍️ Review us on Google
           button shows on your card. Add a public reviews page too and visitors
-          get a ⭐ Read our reviews button. Tools like Trustindex give you
-          both, plus a QR code and a reviews widget for your website.{" "}
+          get a ⭐ Read our reviews button. Tools like Trustindex give you both,
+          plus a QR code and a reviews widget for your website.{" "}
           <a
             href={TRUSTINDEX_AFFILIATE}
             target="_blank"
@@ -478,20 +525,19 @@ export function BusinessProfileForm({
           <span className="text-amber-700">(affiliate link)</span>
         </p>
         <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
-          <strong>No website yet?</strong> Godesi builds you a {WEBSITE_OFFER.pages}-page
-          mobile-friendly site for ${WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}
+          <strong>No website yet?</strong> Godesi builds you a{" "}
+          {WEBSITE_OFFER.pages}-page mobile-friendly site for $
+          {WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}
           /month with domain and hosting included.{" "}
-          <a
-            href="/website"
-            target="_blank"
-            className="font-bold underline"
-          >
+          <a href="/website" target="_blank" className="font-bold underline">
             See what you get and send your details →
           </a>
         </p>
       </details>
 
-      <SubmitButton>{business ? "Save changes" : "Create my card"}</SubmitButton>
+      <SubmitButton>
+        {business ? "Save changes" : "Create my card"}
+      </SubmitButton>
     </form>
   );
 }
