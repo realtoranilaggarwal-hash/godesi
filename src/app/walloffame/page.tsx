@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { pixelWallBlocks } from "@/lib/banners";
 import { getCurrentUser } from "@/lib/auth";
+import { wallCreditMinor } from "@/lib/adOrders";
 import { db } from "@/lib/db";
 import { Alert } from "@/components/ui";
 import { PixelWall } from "@/components/PixelWall";
@@ -45,10 +46,11 @@ export default async function WallOfFamePage({
   const user = await getCurrentUser();
   const hasFreeBlock = user
     ? !!(await db.adOrder.findFirst({
-        where: { userId: user.id, wallBlockId: { not: null }, amountMinor: 0 },
+        where: { userId: user.id, wallBlockId: { not: null }, provider: "free" },
         select: { id: true },
       }))
     : false;
+  const creditUsd = user ? (await wallCreditMinor(user.id)) / 100 : 0;
 
   const taken = blocks.reduce((sum, block) => sum + block.w * block.h, 0);
 
@@ -68,22 +70,34 @@ export default async function WallOfFamePage({
   return (
     <div className="space-y-6">
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-rose-500 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-          🏆 The GoDesi Wall of Fame
-        </p>
-        <h1 className="mt-2 text-3xl font-black sm:text-4xl">
-          250,000 bricks. ${PRICE * 4} a brick. Own your spot 🧱
-        </h1>
-        <p className="mt-3 max-w-2xl text-white/90">
-          The desi Million Dollar Homepage: drag a box over the board, upload
-          your banner and book today —{" "}
-          {Math.floor(taken / 4).toLocaleString()} of{" "}
-          {Math.floor(TOTAL_PX / 4).toLocaleString()} bricks taken so far.
-          <span className="font-black"> Free right now</span> — grab a spot in
-          the green free zone or enter the code <b>godesi.com</b> at checkout.
-          Early birds get the best spots, and the biggest buyers sit on top of
-          the vendor list.
-        </p>
+        <div className="grid items-center gap-6 sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
+              🏆 The GoDesi Wall of Fame
+            </p>
+            <h1 className="mt-2 text-3xl font-black sm:text-4xl">
+              250,000 bricks. ${PRICE * 4} a brick. Yours for life 🧱
+            </h1>
+            <p className="mt-3 text-white/90">
+              The desi Million Dollar Homepage: one payment and your brick stays
+              on the wall for life — no renewals, ever. Drag a box over the
+              board, upload your banner and book today —{" "}
+              {Math.floor(taken / 4).toLocaleString()} of{" "}
+              {Math.floor(TOTAL_PX / 4).toLocaleString()} bricks taken so far.
+            </p>
+            <p className="mt-2 text-sm font-bold text-amber-100">
+              Free right now — grab a brick in the green free zone or use the
+              code <b>godesi.com</b>. Every ad dollar you spend also converts to
+              wall credit.
+            </p>
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/wall-hero.jpg"
+            alt="Desi community building the GoDesi.com wall, brick by brick"
+            className="w-full rounded-2xl border-4 border-white/30 shadow-2xl"
+          />
+        </div>
       </section>
 
       {searchParams.paid ? (
@@ -100,7 +114,12 @@ export default async function WallOfFamePage({
         </Alert>
       ) : null}
 
-      <PixelWall blocks={blocks} priceUsd={PRICE} hasFreeBlock={hasFreeBlock} />
+      <PixelWall
+        blocks={blocks}
+        priceUsd={PRICE}
+        hasFreeBlock={hasFreeBlock}
+        creditUsd={creditUsd}
+      />
 
       {board.length ? (
         <section className="rounded-3xl border border-amber-200 bg-white p-4 sm:p-5">
