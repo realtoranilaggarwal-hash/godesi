@@ -198,6 +198,17 @@ export async function startPixelWallCheckoutAction(
     free = !alreadyFree;
   }
 
+  // Card checkouts abandoned mid-flow leave DRAFT blocks holding their spot —
+  // release any still unpaid after half an hour.
+  await db.wallBlock.updateMany({
+    where: {
+      status: "DRAFT",
+      createdAt: { lt: new Date(Date.now() - 30 * 60 * 1000) },
+      orders: { every: { status: "PENDING" } },
+    },
+    data: { status: "EXPIRED" },
+  });
+
   const existing = await db.wallBlock.findMany({
     where: { status: { in: ["DRAFT", "PENDING", "ACTIVE"] } },
     select: { x: true, y: true, w: true, h: true },
