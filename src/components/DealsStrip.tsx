@@ -74,6 +74,21 @@ export async function DealsStrip() {
             </div>
           </div>
         ))}
+        {Array.from({ length: Math.max(0, 4 - deals.length) }).map((_, i) => (
+          <Link
+            key={`fill-${i}`}
+            href="/dashboard/deals"
+            className="flex items-center gap-3 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-indigo-300 hover:text-indigo-600"
+          >
+            <span
+              aria-hidden
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-lg"
+            >
+              🏷️
+            </span>
+            Your deal here — post it free →
+          </Link>
+        ))}
       </div>
     </section>
   );
