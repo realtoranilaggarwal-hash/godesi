@@ -15,6 +15,7 @@ import {
   bundleSaving,
   formatBundleMoney,
 } from "@/lib/bundles";
+import { wallCreditMinor } from "@/lib/adOrders";
 import { UpgradeCart } from "@/components/UpgradeCart";
 import { Alert, Card } from "@/components/ui";
 
@@ -78,6 +79,7 @@ export default async function UpgradePage({
   searchParams: { error?: string; posted?: string; term?: string; offer?: string };
 }) {
   const user = await getCurrentUser();
+  const creditMinor = user ? await wallCreditMinor(user.id) : 0;
   const currency = requestCurrency();
   const rate = await inrPerUsd();
   const saving = bundleSaving(currency);
@@ -134,6 +136,39 @@ export default async function UpgradePage({
         </p>
       </div>
 
+      {/* Ad spend converts to lifetime wall bricks — surface the balance so
+        * the credit is obvious instead of a hidden checkout discount. */}
+      <Card className="border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+        <h3 className="text-lg font-bold">
+          🧱 Wall of Fame — bricks that stay for life
+        </h3>
+        {user && creditMinor > 0 ? (
+          <p className="mt-1 text-sm text-amber-900">
+            You&apos;ve earned{" "}
+            <span className="font-black">
+              ${Math.floor(creditMinor / 100)} of wall credit
+            </span>{" "}
+            = {Math.floor(creditMinor / 100)} pixels{" "}
+            ({Math.floor(creditMinor / 400)} free bricks). Pick your spot on
+            the wall — book just your earned bricks or stretch bigger and pay
+            the difference.
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-amber-900">
+            Every dollar you spend on GoDesi ads earns the same in wall bricks
+            — $1 = 1 pixel. Book a block once and it stays on the wall for
+            life; pick only your earned bricks or stretch to as much as you
+            want to pay.
+          </p>
+        )}
+        <Link
+          href="/walloffame"
+          className="mt-3 inline-block rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 px-4 py-2 text-sm font-black text-white shadow hover:opacity-90"
+        >
+          🧱 Pick my bricks →
+        </Link>
+      </Card>
+
       <UpgradeCart
         currency={currency}
         signedIn={Boolean(user)}
@@ -158,6 +193,13 @@ export default async function UpgradePage({
             — Pro {formatPlanPrice(PLANS.PRO, currency, rate)} or Featured{" "}
             {formatPlanPrice(PLANS.PREMIUM, currency, rate)} a month, or a year and
             five-year terms
+          </li>
+          <li>
+            <Link href="/walloffame" className="font-semibold text-indigo-600">
+              Wall of Fame only
+            </Link>{" "}
+            — $4 a brick on the million-pixel wall; one payment keeps the
+            spot for life, and ad spend converts to free bricks
           </li>
           <li>
             <Link href="/advertise" className="font-semibold text-indigo-600">
