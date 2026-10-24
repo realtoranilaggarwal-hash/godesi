@@ -44,6 +44,8 @@ const CATEGORY_COVERS: Record<string, string> = {
   "religious-services": "/images/categories/religious-services.jpg",
   "financial-services": "/images/categories/financial-services.jpg",
   "shops-retail": "/images/categories/shops-retail.jpg",
+  "shops-retail-jewellery-stores":
+    "/images/categories/shops-retail-jewellery-stores.jpg",
   "real-estate": "/images/categories/real-estate.jpg",
   "health-medical": "/images/categories/health-medical.jpg",
 };

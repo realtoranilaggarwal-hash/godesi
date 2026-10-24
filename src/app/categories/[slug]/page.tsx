@@ -1,4 +1,5 @@
 import { CategoryArt } from "@/components/CategoryArt";
+import { categoryCover } from "@/lib/cityCovers";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -288,11 +289,25 @@ export default async function CategoryPage({
               ) : null}
             </div>
           </div>
-          <CategoryArt
-            slug={category.parent?.slug ?? category.slug}
-            icon={category.icon}
-            className="hidden w-72 shrink-0 drop-shadow-xl md:block"
-          />
+          {(() => {
+            const cover =
+              categoryCover(category.slug) ??
+              (category.parent ? categoryCover(category.parent.slug) : null);
+            return cover ? (
+              <img
+                src={cover}
+                alt=""
+                aria-hidden
+                className="hidden w-72 shrink-0 rounded-2xl object-cover shadow-xl md:block"
+              />
+            ) : (
+              <CategoryArt
+                slug={category.parent?.slug ?? category.slug}
+                icon={category.icon}
+                className="hidden w-72 shrink-0 drop-shadow-xl md:block"
+              />
+            );
+          })()}
         </section>
 
         {DJ_CATEGORY_SLUGS.includes(category.slug) ? <DjsWikiBanner /> : null}
