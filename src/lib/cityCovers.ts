@@ -73,7 +73,16 @@ export function categoryCover(
   categorySlug: string | null | undefined,
 ): string | null {
   if (!categorySlug) return null;
-  return CATEGORY_COVERS[categorySlug] ?? null;
+  /** Child slugs ("buy-sell-furniture") fall back to their parent's art. */
+  let slug = categorySlug;
+  while (slug) {
+    const cover = CATEGORY_COVERS[slug];
+    if (cover) return cover;
+    const cut = slug.lastIndexOf("-");
+    if (cut < 0) return null;
+    slug = slug.slice(0, cut);
+  }
+  return null;
 }
 
 /**

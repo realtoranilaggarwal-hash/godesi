@@ -61,6 +61,7 @@ async function resultFor(spin: {
             city: deal.business.city,
             logoUrl: deal.business.logoUrl,
             icon: deal.business.categoryRef?.icon,
+            categorySlug: deal.business.categorySlug,
             line:
               deal.business.subcategoryRef?.name ??
               deal.business.categoryRef?.name,

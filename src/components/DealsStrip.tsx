@@ -35,6 +35,7 @@ export async function DealsStrip() {
               name={deal.business.name}
               icon={deal.business.categoryRef?.icon}
               imageUrl={deal.business.logoUrl}
+              categorySlug={deal.business.categorySlug}
               className="h-9 w-9 shrink-0"
               emojiClassName="text-lg"
             />

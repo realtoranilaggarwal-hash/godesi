@@ -4,6 +4,7 @@ import { Badge, Stars } from "@/components/ui";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { formatMoney, whatsappLink } from "@/lib/format";
+import { categoryCover } from "@/lib/cityCovers";
 
 function priceLabel(vendor: BusinessListItem) {
   if (vendor.startingPrice !== null) {
@@ -31,9 +32,17 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
             className="h-44 w-full object-cover"
           />
         ) : (
-          <div className="flex h-44 w-full items-center justify-center bg-gradient-to-br from-rose-100 via-pink-100 to-amber-100 text-4xl">
-            💐
-          </div>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={
+              categoryCover(vendor.categorySlug) ??
+              "/images/categories/default.jpg"
+            }
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="h-44 w-full object-cover"
+          />
         )}
         {vendor.plan !== "FREE" || vendor.featured ? (
           <span className="absolute left-2 top-2 rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white">
