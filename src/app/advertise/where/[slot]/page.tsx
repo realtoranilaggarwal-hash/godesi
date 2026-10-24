@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { BannerSlot } from "@prisma/client";
 import {
   AD_PLACEMENTS,
@@ -44,6 +44,8 @@ export default async function PlacementPage({
 }) {
   const slot: BannerSlot | null = placementOf(params.slot.toUpperCase());
   if (!slot) notFound();
+  /** Wall bricks are picked on the board itself, not the generic checkout. */
+  if (slot === "WALL") redirect("/walloffame");
 
   const placement = AD_PLACEMENTS[slot];
   const [user, currency, running, live] = await Promise.all([

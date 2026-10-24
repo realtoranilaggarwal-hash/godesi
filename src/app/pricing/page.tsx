@@ -165,6 +165,23 @@ export default async function PricingPage({
         </p>
       </Link>
 
+      <Link
+        href="/walloffame"
+        className="block -rotate-1 rounded-3xl bg-gradient-to-r from-amber-500 via-rose-500 to-fuchsia-600 p-5 text-white shadow-lg transition hover:rotate-0 hover:opacity-95"
+      >
+        <p className="text-xs font-bold uppercase tracking-widest text-white/80">
+          New — the Wall of Fame
+        </p>
+        <p className="text-2xl font-black">
+          🧱 $1 a brick. Drag, pick, book — your spot stays yours
+        </p>
+        <p className="mt-1 text-sm text-white/90">
+          Can&apos;t stretch to a full ad? Start with one brick and get listed on
+          the board — every brick also rotates into the banner rail site-wide.
+          Early birds get the best spots →
+        </p>
+      </Link>
+
       {searchParams.reason === "leads" ? (
         <Alert tone="info">
           Unlocking lead contact details requires the Featured plan.

@@ -12,7 +12,7 @@ export type HouseBanner = {
 export const HOUSE_BANNERS: HouseBanner[] = [
   {
     slug: "wall",
-    href: "/wall",
+    href: "/walloffame",
     emoji: "🧱",
     title: "The GoDesi Wall",
     line: "Own a square — your logo on every page",

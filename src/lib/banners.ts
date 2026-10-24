@@ -160,6 +160,30 @@ export async function wallBanners() {
   return (await inventory()).filter((banner) => banner.slot === "WALL");
 }
 
+const wallAll = cachedQuery("banners-wall-all", 30, async () =>
+  db.banner.findMany({
+    where: { slot: "WALL", status: { in: ["DRAFT", "PENDING", "ACTIVE"] } },
+    select: {
+      id: true,
+      position: true,
+      title: true,
+      imageUrl: true,
+      linkUrl: true,
+      status: true,
+      advertiser: { select: { name: true } },
+    },
+  }),
+);
+
+/**
+ * Every wall brick — live, reserved (paid, awaiting creative approval) and
+ * drafts awaiting payment — so the board can mark booked cells and rank the
+ * vendor list, not just show the live ones.
+ */
+export async function wallAvailability() {
+  return optionalRead(() => wallAll(), []);
+}
+
 /**
  * Counts one view and retires an impression-pack banner as soon as its quota is
  * used up, so a sold pack stops serving without an admin step.

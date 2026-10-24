@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import {
+  AD_PLACEMENTS,
   adImpressionPrice,
   adPrice,
   durationOrThrow,
@@ -113,6 +114,131 @@ export async function startAdCheckoutAction(formData: FormData) {
   });
 
   if (!session.url) redirect("/advertise?error=stripe_session");
+  redirect(session.url);
+}
+
+const WALL_BRICKS = AD_PLACEMENTS.WALL.slots;
+
+const wallSchema = z.object({
+  cells: z
+    .array(z.number().int().min(1).max(WALL_BRICKS))
+    .min(1, "Pick at least one brick")
+    .max(WALL_BRICKS)
+    .transform((cells) => Array.from(new Set(cells))),
+  title: z.string().trim().min(2, "Give your wall tile a title").max(80),
+  linkUrl: z.string().trim().url("Enter a valid destination URL"),
+  imageUrl: z.string().trim().url("Enter a valid image URL").or(z.literal("")),
+});
+
+export type WallCheckoutResult = { error?: string };
+
+/**
+ * Wall-of-Fame booking: one Stripe checkout buys every brick the vendor dragged
+ * over — a draft banner per brick under a single order. Paid bricks turn
+ * PENDING in confirmAdOrder and go live on admin approval.
+ */
+export async function startWallCheckoutAction(
+  input: unknown,
+): Promise<WallCheckoutResult> {
+  const user = await requireUser();
+
+  const parsed = wallSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+  const { cells, title, linkUrl } = parsed.data;
+  const imageUrl = parsed.data.imageUrl || PLACEHOLDER_CREATIVE;
+
+  if (!stripeEnabled()) return { error: "stripe_unavailable" };
+
+  const taken = await db.banner.findMany({
+    where: {
+      slot: "WALL",
+      position: { in: cells },
+      status: { in: ["DRAFT", "PENDING", "ACTIVE"] },
+    },
+    select: { position: true },
+  });
+  if (taken.length) {
+    return {
+      error: `Brick${taken.length > 1 ? "s" : ""} ${taken
+        .map((brick) => brick.position)
+        .sort((a, b) => (a ?? 0) - (b ?? 0))
+        .slice(0, 8)
+        .join(", ")} just got booked — pick different ones.`,
+    };
+  }
+
+  const currency = requestCurrency();
+  const unit =
+    currency === "INR" ? AD_PLACEMENTS.WALL.priceInr : AD_PLACEMENTS.WALL.priceUsd;
+  const chargeMinor = toMinor(unit * cells.length);
+
+  let banners;
+  try {
+    banners = await Promise.all(
+      cells.map((position) =>
+        db.banner.create({
+          data: {
+            slot: "WALL",
+            position,
+            title,
+            imageUrl,
+            linkUrl,
+            status: "DRAFT",
+            active: false,
+            advertiserId: user.id,
+          },
+        }),
+      ),
+    );
+  } catch {
+    return { error: "One of those bricks just got booked — pick different ones." };
+  }
+
+  const order = await db.adOrder.create({
+    data: {
+      userId: user.id,
+      bannerId: banners[0].id,
+      bannerIds: banners.map((banner) => banner.id),
+      slot: "WALL",
+      pricing: "MONTHLY",
+      months: 1,
+      amountMinor: chargeMinor,
+      currency,
+    },
+  });
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    client_reference_id: user.id,
+    metadata: {
+      kind: "ad",
+      adOrderId: order.id,
+      bannerId: banners[0].id,
+      userId: user.id,
+    },
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: currency.toLowerCase(),
+          unit_amount: chargeMinor,
+          product_data: {
+            name: `GoDesi Wall of Fame — ${cells.length} brick${cells.length > 1 ? "s" : ""}`,
+            description: `Brick${cells.length > 1 ? "s" : ""} ${cells
+              .slice(0, 12)
+              .join(", ")}${cells.length > 12 ? "…" : ""} — permanent spot on godesi.com/walloffame`,
+          },
+        },
+      },
+    ],
+    success_url: `${siteUrl()}/walloffame?paid=1`,
+    cancel_url: `${siteUrl()}/walloffame?error=cancelled`,
+  });
+
+  if (!session.url) return { error: "stripe_session" };
   redirect(session.url);
 }
 
