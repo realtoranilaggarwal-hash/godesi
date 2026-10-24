@@ -3,7 +3,7 @@
  * place so the price and contact details are identical on every surface.
  */
 export const WEBSITE_OFFER = {
-  priceUsd: 299,
+  priceUsd: 99,
   /** Monthly charge that keeps the domain and hosting running. */
   monthlyUsd: 10,
   pages: 5,
