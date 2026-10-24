@@ -148,6 +148,11 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-8">
+      {/* Brand H1 for search engines — the page leads with widgets, so the
+          site's real name lives in this screen-reader heading. */}
+      <h1 className="sr-only">
+        GoDesi.com — Desi business directory, events, deals &amp; community
+      </h1>
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-3">
           <RecentStrip />
@@ -157,9 +162,9 @@ export default async function HomePage() {
           <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-baseline gap-3">
-                <h1 className="text-sm font-medium text-slate-600">
+                <h2 className="text-sm font-medium text-slate-600">
                   📈 Markets today · live
-                </h1>
+                </h2>
                 <Link
                   href="/markets"
                   className="text-xs font-medium text-indigo-600 underline hover:text-indigo-800"
