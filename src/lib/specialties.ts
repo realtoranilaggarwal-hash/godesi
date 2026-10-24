@@ -153,7 +153,12 @@ const IT_COURSE_TABS: OptionTab[] = [
   },
   {
     title: "Emerging Tech",
-    options: ["Blockchain", "Internet of Things (IoT)", "AR / VR", "Robotics"],
+    options: [
+      "Blockchain",
+      "Internet of Things (IoT)",
+      "AR / VR",
+      "Robotics",
+    ],
   },
 ];
 
@@ -581,11 +586,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
       ],
     },
     pricing: [
-      {
-        key: "priceFrom",
-        label: "Starting price",
-        hint: "e.g. $5 eyebrow threading",
-      },
+      { key: "priceFrom", label: "Starting price", hint: "e.g. $5 eyebrow threading" },
       { key: "priceExtra", label: "Bridal package from", hint: "Optional" },
     ],
     availability: {
@@ -667,21 +668,9 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
       hint: "Kept private for review — needed for the ✅ Verified provider badge",
     },
     pricing: [
-      {
-        key: "priceFrom",
-        label: "Starting price",
-        hint: "e.g. $60 for 30 minutes",
-      },
-      {
-        key: "priceHourly",
-        label: "Price per hour",
-        hint: "e.g. $90 per hour",
-      },
-      {
-        key: "priceExtra",
-        label: "Home visit extra fee",
-        hint: "Optional, e.g. +$20",
-      },
+      { key: "priceFrom", label: "Starting price", hint: "e.g. $60 for 30 minutes" },
+      { key: "priceHourly", label: "Price per hour", hint: "e.g. $90 per hour" },
+      { key: "priceExtra", label: "Home visit extra fee", hint: "Optional, e.g. +$20" },
     ],
     availability: {
       label: "Availability",
@@ -717,10 +706,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
       hint: "State bar number — shown on your public card",
       required: false,
     },
-    fee: {
-      label: "Consultation fee",
-      hint: "e.g. Free first consult, $150/hour",
-    },
+    fee: { label: "Consultation fee", hint: "e.g. Free first consult, $150/hour" },
     experience: true,
   },
 
@@ -821,10 +807,7 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
         "Astrology diploma / degree",
       ],
     },
-    fee: {
-      label: "Consultation fee",
-      hint: "e.g. $51 per reading, first 10 minutes free",
-    },
+    fee: { label: "Consultation fee", hint: "e.g. $51 per reading, first 10 minutes free" },
     experience: true,
   },
 
@@ -1054,11 +1037,7 @@ SPECIALTY_SETS["real-estate-photography"] = {
     },
   ],
   pricing: [
-    {
-      key: "priceFrom",
-      label: "Starting price per shoot",
-      hint: "E.g. photos for a home under 2,000 sq ft",
-    },
+    { key: "priceFrom", label: "Starting price per shoot", hint: "E.g. photos for a home under 2,000 sq ft" },
     { key: "priceExtra", label: "Drone or 3D tour add-on", hint: "Optional" },
   ],
   availability: {
@@ -1067,11 +1046,7 @@ SPECIALTY_SETS["real-estate-photography"] = {
   },
   certifications: {
     title: "Licences & insurance",
-    options: [
-      "FAA Part 107 drone licence",
-      "Liability insurance",
-      "Matterport Service Partner",
-    ],
+    options: ["FAA Part 107 drone licence", "Liability insurance", "Matterport Service Partner"],
   },
   experience: true,
 };
@@ -1097,12 +1072,7 @@ function businessSet({
         key: "mode",
         title: "How do you work?",
         clientTitle: "How do you want to work with them?",
-        options: [
-          "Remote / online",
-          "At your office",
-          "At our office",
-          "Hybrid",
-        ],
+        options: ["Remote / online", "At your office", "At our office", "Hybrid"],
         mode: "multi",
       },
       {
@@ -1121,17 +1091,10 @@ function businessSet({
       },
     ],
     pricing: [
-      {
-        key: "priceFrom",
-        label: "Starting price",
-        hint: "Smallest job you take on",
-      },
+      { key: "priceFrom", label: "Starting price", hint: "Smallest job you take on" },
       { key: "priceHourly", label: "Hourly rate", hint: "Optional" },
     ],
-    availability: {
-      label: "Working hours",
-      hint: "e.g. Mon–Sat 9am–7pm, same-day replies",
-    },
+    availability: { label: "Working hours", hint: "e.g. Mon–Sat 9am–7pm, same-day replies" },
     experience: true,
   };
 }
@@ -1159,14 +1122,7 @@ SPECIALTY_SETS["business-services-chartered-accountants"] = businessSet({
       key: "software",
       title: "Software you work in",
       clientTitle: "Software you use",
-      options: [
-        "QuickBooks",
-        "Xero",
-        "Tally",
-        "Zoho Books",
-        "Sage",
-        "NetSuite",
-      ],
+      options: ["QuickBooks", "Xero", "Tally", "Zoho Books", "Sage", "NetSuite"],
       mode: "multi",
     },
   ],
@@ -1228,12 +1184,7 @@ SPECIALTY_SETS["business-services-web-and-app-development"] = businessSet({
       key: "engagement",
       title: "Engagement type",
       clientTitle: "How you want to hire",
-      options: [
-        "Fixed price project",
-        "Hourly",
-        "Monthly retainer",
-        "Dedicated team",
-      ],
+      options: ["Fixed price project", "Hourly", "Monthly retainer", "Dedicated team"],
       mode: "multi",
     },
   ],
@@ -1391,11 +1342,7 @@ function weddingSet({
       },
     ],
     pricing: [
-      {
-        key: "priceFrom",
-        label: priceLabel,
-        hint: "Smallest booking you take",
-      },
+      { key: "priceFrom", label: priceLabel, hint: "Smallest booking you take" },
       { key: "priceHourly", label: "Hourly rate", hint: "Optional" },
     ],
     availability: {
@@ -2534,8 +2481,7 @@ for (const [name, set] of Object.entries(WEDDING_SETS)) {
 }
 
 for (const [name, source] of Object.entries(WEDDING_ALIASES)) {
-  SPECIALTY_SETS[subcategorySlug("events-wedding", name)] =
-    WEDDING_SETS[source];
+  SPECIALTY_SETS[subcategorySlug("events-wedding", name)] = WEDDING_SETS[source];
 }
 
 /** A wedding astrologer answers the same questions as one in Professionals. */
@@ -3044,9 +2990,7 @@ SPECIALTY_SETS[subcategorySlug("beauty-lifestyle", "Bridal Makeup")] =
 SPECIALTY_SETS[subcategorySlug("beauty-lifestyle", "Mehndi Artists")] =
   WEDDING_SETS["Mehndi Artists"];
 
-export function specialtySet(
-  subcategorySlug?: string | null,
-): SpecialtySet | null {
+export function specialtySet(subcategorySlug?: string | null): SpecialtySet | null {
   if (!subcategorySlug) return null;
   return SPECIALTY_SETS[subcategorySlug] ?? null;
 }
@@ -3165,8 +3109,7 @@ export function missingChoiceGroups(
   return groups
     .filter(
       (group) =>
-        group.required &&
-        !group.options.some((option) => values.includes(option)),
+        group.required && !group.options.some((option) => values.includes(option)),
     )
     .map((group) => group.title);
 }
@@ -3183,9 +3126,7 @@ export function cleanCertifications(
 ): string[] {
   const set = specialtySet(subcategorySlug);
   if (!set?.certifications) return [];
-  const known = set.certifications.options.filter((option) =>
-    values.includes(option),
-  );
+  const known = set.certifications.options.filter((option) => values.includes(option));
   const extras = other
     .split(",")
     .map((item) => item.trim())
