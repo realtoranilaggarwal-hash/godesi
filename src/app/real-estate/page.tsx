@@ -272,7 +272,7 @@ export default async function RealEstatePage({
         <TradingTips compact />
         <NeedHelpBox />
         <SidebarBanners />
-        <SmallBanners show={6} embedded />
+        <SmallBanners show={6} embedded tree={false} />
       </aside>
     </div>
   );
