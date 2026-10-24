@@ -16,6 +16,43 @@ export const metadata: Metadata = {
 
 const TOTAL = AD_PLACEMENTS.WALL.slots;
 const PRICE = AD_PLACEMENTS.WALL.priceUsd;
+const COLS = 32;
+
+type Slice = { cols: number; rows: number; col: number; row: number };
+
+/**
+ * Bricks bought in one checkout share image+link+buyer — treat them as one
+ * block and give each brick its slice of the bounding box, so a vendor's
+ * banner stretches over their whole bought area like a real pixel wall.
+ */
+function buildSlices(banners: { position: number | null; imageUrl: string; linkUrl: string; advertiserId: string | null }[]) {
+  const groups = new Map<string, { imageUrl: string; linkUrl: string; cells: number[] }>();
+  for (const banner of banners) {
+    if (!banner.position) continue;
+    const key = `${banner.advertiserId ?? "?"}|${banner.imageUrl}|${banner.linkUrl}`;
+    const group = groups.get(key) ?? { imageUrl: banner.imageUrl, linkUrl: banner.linkUrl, cells: [] };
+    group.cells.push(banner.position);
+    groups.set(key, group);
+  }
+  const slices = new Map<number, Slice>();
+  for (const group of groups.values()) {
+    const cols = group.cells.map((cell) => (cell - 1) % COLS);
+    const rows = group.cells.map((cell) => Math.floor((cell - 1) / COLS));
+    const minCol = Math.min(...cols);
+    const minRow = Math.min(...rows);
+    const spanCols = Math.max(...cols) - minCol + 1;
+    const spanRows = Math.max(...rows) - minRow + 1;
+    for (const cell of group.cells) {
+      slices.set(cell, {
+        cols: spanCols,
+        rows: spanRows,
+        col: ((cell - 1) % COLS) - minCol,
+        row: Math.floor((cell - 1) / COLS) - minRow,
+      });
+    }
+  }
+  return slices;
+}
 
 const STEPS = [
   {
@@ -42,6 +79,7 @@ export default async function WallOfFamePage({
 }) {
   const banners = await wallAvailability();
   const byPosition = new Map(banners.map((b) => [b.position, b]));
+  const slices = buildSlices(banners);
 
   const bricks = Array.from({ length: TOTAL }, (_, i) => {
     const n = i + 1;
@@ -54,6 +92,7 @@ export default async function WallOfFamePage({
       imageUrl: banner.imageUrl,
       linkUrl: banner.linkUrl,
       bannerId: banner.id,
+      slice: slices.get(n),
     };
   });
 

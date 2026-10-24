@@ -170,6 +170,7 @@ const wallAll = cachedQuery("banners-wall-all", 30, async () =>
       imageUrl: true,
       linkUrl: true,
       status: true,
+      advertiserId: true,
       advertiser: { select: { name: true } },
     },
   }),
