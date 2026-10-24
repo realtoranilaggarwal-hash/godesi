@@ -15,7 +15,7 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     href: "/walloffame",
     emoji: "🧱",
     title: "The GoDesi Wall",
-    line: "Every $1 of ads earns a lifetime brick",
+    line: "$4 = one desi brick, yours for life",
     colors: "from-amber-500 to-rose-600",
   },
   {
