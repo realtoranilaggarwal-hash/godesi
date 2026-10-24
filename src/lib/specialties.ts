@@ -17,6 +17,8 @@ export type ChoiceGroup = {
   mode: "multi" | "single";
   /** Single-choice groups can be made mandatory, like spa service location. */
   required?: boolean;
+  /** Helper links under the group, e.g. sign-up referrals — open in a new tab. */
+  links?: { label: string; href: string }[];
 };
 
 /** The three price boxes a service profession may ask for. */
@@ -2102,11 +2104,7 @@ const WEDDING_SETS: Record<string, SpecialtySet> = {
           key: "payments",
           title: "Payments you accept",
           options: [
-            "Cash",
-            "Zelle",
             "Venmo",
-            "PayPal",
-            "Cash App",
             "Check",
             "Bank transfer",
             "Visa / Mastercard",
@@ -2114,6 +2112,16 @@ const WEDDING_SETS: Record<string, SpecialtySet> = {
             "UPI",
             "Deposit to hold the date",
             "Instalments",
+          ],
+          links: [
+            {
+              label: "Need Venmo? Get it free →",
+              href: "https://get.venmo.com/k8utowpXt7b",
+            },
+            {
+              label: "Need a business card? Amex offer →",
+              href: "https://americanexpress.com/en-us/referral/hilton-honors?ref=ANILafGHD&xl=cp01",
+            },
           ],
           mode: "multi",
         },

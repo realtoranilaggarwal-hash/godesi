@@ -477,7 +477,25 @@ export function BusinessProfileForm({
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {socials.map((social) => (
-            <Field key={social.key} label={`${social.icon} ${social.label}`}>
+            <Field
+              key={social.key}
+              label={`${social.icon} ${social.label}`}
+              hint={
+                social.key === "websiteUrl" ? (
+                  <>
+                    No website?{" "}
+                    <a
+                      href="/website"
+                      target="_blank"
+                      rel="noopener"
+                      className="font-semibold text-indigo-700 underline"
+                    >
+                      AI builds you one — preview free →
+                    </a>
+                  </>
+                ) : undefined
+              }
+            >
               <input
                 name={social.key}
                 type="url"

@@ -214,6 +214,21 @@ export function SpecialtyPicker({
               </label>
             ))}
           </div>
+          {group.links?.length ? (
+            <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+              {group.links.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener sponsored"
+                  className="font-semibold text-indigo-700 underline"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </p>
+          ) : null}
         </div>
       ))}
 
