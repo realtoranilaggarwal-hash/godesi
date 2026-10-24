@@ -38,7 +38,13 @@ async function loadCity(slug: string) {
       // Grouped by category below; the cap is a safety bound, not a design —
       // it must stay well above a city's real count or whole categories vanish.
       take: 1000,
-      select: { slug: true, name: true, category: true },
+      select: {
+        slug: true,
+        name: true,
+        category: true,
+        categorySlug: true,
+        subcategorySlug: true,
+      },
     }),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: new Date() }, ...where },
@@ -233,24 +239,38 @@ export default async function CityPage({
                 },
                 {},
               ),
-            ).map(([category, group]) => (
-              <div key={category} className="py-2 first:pt-0 last:pb-0">
-                <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                  {category}
-                  <span className="ml-1 font-normal">({group.length})</span>
-                </h3>
-                <ul className="divide-y divide-slate-100">
-                  {group.map((business) => (
-                    <Row
-                      key={business.slug}
-                      href={`/business/${business.slug}`}
-                      title={business.name}
-                      meta={category}
-                    />
-                  ))}
-                </ul>
-              </div>
-            ))}
+            ).map(([category, group]) => {
+              const first = group[0];
+              const filter = first.subcategorySlug
+                ? `sub=${first.subcategorySlug}`
+                : `category=${first.categorySlug}`;
+              return (
+                <div key={category} className="py-2 first:pt-0 last:pb-0">
+                  <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                    <Link
+                      href={`/search?city=${encodeURIComponent(name)}&${filter}`}
+                      className="hover:text-indigo-600 hover:underline"
+                    >
+                      {category}
+                    </Link>
+                    <span className="ml-1 font-normal">({group.length})</span>
+                  </h3>
+                  <ul className="mt-1.5 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                    {group.map((business) => (
+                      <li key={business.slug}>
+                        <Link
+                          href={`/business/${business.slug}`}
+                          title={business.name}
+                          className="block truncate rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-300 hover:text-indigo-700"
+                        >
+                          {business.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </Section>
         ) : null}
 
