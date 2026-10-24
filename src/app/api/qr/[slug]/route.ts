@@ -20,8 +20,8 @@ export async function GET(
   if (!business) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const url = new URL(request.url);
-  // The card now lives on the profile — both targets open /b/<slug>.
-  const target = `${siteUrl()}/b/${business.slug}?src=qr`;
+  // The card now lives on the profile — both targets open /business/<slug>.
+  const target = `${siteUrl()}/business/${business.slug}?src=qr`;
 
   return brandedQr({
     target,

@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 const SAMPLE = {
   business: "[business name]",
   city: "[town]",
-  cardUrl: "https://godesi.com/b/[their-card]?claim=1",
+  cardUrl: "https://godesi.com/business/[their-card]?claim=1",
   from: "[your name]",
 };
 

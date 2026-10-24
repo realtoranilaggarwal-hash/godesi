@@ -60,7 +60,7 @@ export default async function Page() {
               >
                 <div className="min-w-0">
                   <Link
-                    href={`/b/${claim.business.slug}`}
+                    href={`/business/${claim.business.slug}`}
                     className="font-medium text-indigo-600"
                   >
                     {claim.business.name}

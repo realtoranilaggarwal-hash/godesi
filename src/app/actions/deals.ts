@@ -39,7 +39,7 @@ const schema = z.object({
 function refresh(slug: string) {
   revalidatePath("/dashboard/deals");
   revalidatePath("/deals");
-  revalidatePath(`/b/${slug}`);
+  revalidatePath(`/business/${slug}`);
   revalidatePath("/");
 }
 

@@ -280,7 +280,7 @@ export async function siteSearch(
 
   const results: SiteSearchResults = {
     businesses: businesses.map((row) => ({
-      href: `/b/${row.slug}`,
+      href: `/business/${row.slug}`,
       title: row.name,
       subtitle: [row.category, row.city, row.specialties.slice(0, 3).join(", ")]
         .filter(Boolean)

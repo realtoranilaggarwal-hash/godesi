@@ -99,7 +99,7 @@ export default async function GuidePage({
         "@type": "ListItem",
         position: index + 1,
         name: row.name,
-        url: `${base}/b/${row.slug}`,
+        url: `${base}/business/${row.slug}`,
       })),
     },
   ];

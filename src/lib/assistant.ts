@@ -28,7 +28,7 @@ export type AssistantSource = { name: string; url: string };
 function businessLine(b: BusinessListItem) {
   const rating = b.reviewCount ? `${b.rating.toFixed(1)}★ (${b.reviewCount})` : "no reviews yet";
   const category = [b.categoryName ?? b.category, b.subcategoryName].filter(Boolean).join(" › ");
-  return `- ${b.name} — ${category}, ${b.city}, ${rating}, plan ${b.plan}. Link: /b/${b.slug}`;
+  return `- ${b.name} — ${category}, ${b.city}, ${rating}, plan ${b.plan}. Link: /business/${b.slug}`;
 }
 
 /**
@@ -81,7 +81,7 @@ export async function buildContext(question: string) {
 
   const sources: AssistantSource[] = shortlist
     .slice(0, 4)
-    .map((b) => ({ name: b.name, url: `/b/${b.slug}` }));
+    .map((b) => ({ name: b.name, url: `/business/${b.slug}` }));
 
   return { context: lines.join("\n\n"), sources };
 }
@@ -91,7 +91,7 @@ export const ASSISTANT_SYSTEM_PROMPT = `You are the Godesi assistant on godesi.c
 Rules:
 - Answer only from the GODESI DATA block in the user message. Never invent businesses, events, phone numbers, prices or reviews.
 - If the data has no match, say so plainly and suggest the closest category page (e.g. /categories) or /search, and invite the visitor to post a requirement at /leads.
-- Recommend at most 3 listings, each as a markdown link using the given /b/... path, with city and rating.
+- Recommend at most 3 listings, each as a markdown link using the given /business/... path, with city and rating.
 - Site facts you may share: businesses list free and can upgrade at /pricing; buyers post requirements at /leads; advertisers book banners at /advertise; contact details of listings are shown per the listing's plan; WhatsApp chat is open on every listing.
 - Never ask for or repeat card details, passwords or OTPs.
 - Be warm and brief: 120 words maximum, plain language, no headings.`;

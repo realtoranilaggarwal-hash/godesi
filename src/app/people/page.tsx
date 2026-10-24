@@ -3,6 +3,8 @@ import Link from "next/link";
 import { memberPage } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
 import { Card } from "@/components/ui";
+import { db } from "@/lib/db";
+import { softFor } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +26,14 @@ export default async function PeoplePage({
 }) {
   const asked = Number(searchParams.page ?? "1");
   const page = Number.isFinite(asked) && asked > 1 ? Math.floor(asked) : 1;
-  const { members, total, pages } = await memberPage(page, PER_PAGE);
+  const [{ members, total, pages }, categories] = await Promise.all([
+    memberPage(page, PER_PAGE),
+    db.category.findMany({
+      where: { parentSlug: null },
+      orderBy: { sortOrder: "asc" },
+      select: { slug: true, name: true, icon: true, color: true },
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -43,6 +52,23 @@ export default async function PeoplePage({
           .
         </p>
       </header>
+
+      <nav aria-label="Browse businesses by category">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+          {categories.map((category) => (
+            <Link
+              key={category.slug}
+              href={`/categories/${category.slug}`}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${softFor(category.color)}`}
+            >
+              <span className="text-lg leading-none">{category.icon}</span>
+              <span className="min-w-0 flex-1 leading-tight">
+                {category.name}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </nav>
 
       {members.length ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">

@@ -56,7 +56,7 @@ export default async function StaffBusinessEditPage({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Staff edit — {business.name}</h1>
         <Link
-          href={`/b/${business.slug}`}
+          href={`/business/${business.slug}`}
           className="text-sm font-semibold text-indigo-600 hover:underline"
         >
           View card →

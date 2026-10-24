@@ -381,7 +381,7 @@ export async function GET(request: Request) {
         verified: item.verifiedProvider,
         claimed: Boolean(item.ownerId),
         featured: item.featured,
-        url: `${base}/b/${item.slug}`,
+        url: `${base}/business/${item.slug}`,
       })),
     },
     { headers },

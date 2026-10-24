@@ -224,7 +224,7 @@ export default async function VisaBulletinPage() {
               {helpers.map((business) => (
                 <li key={business.slug}>
                   <Link
-                    href={`/b/${business.slug}`}
+                    href={`/business/${business.slug}`}
                     className={`flex items-center gap-3 rounded-xl border p-3 hover:border-indigo-300 hover:bg-indigo-50/40 ${business.featured ? "border-amber-300 bg-amber-50/40" : "border-slate-200"}`}
                   >
                     {business.logoUrl ? (

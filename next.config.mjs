@@ -70,6 +70,13 @@ const nextConfig = {
         permanent: false,
       },
       {
+        // Profiles moved from /b/<slug> to the friendlier /business/<slug>;
+        // every old link and QR keeps working.
+        source: "/b/:slug",
+        destination: "/business/:slug",
+        permanent: true,
+      },
+      {
         // The live visitor map and global chat were retired; live TV replaces
         // the page anyone reaching /live was looking for.
         source: "/live",

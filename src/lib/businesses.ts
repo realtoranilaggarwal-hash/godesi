@@ -63,6 +63,7 @@ export type SearchFilters = {
   /** Matches the taxonomy: a top-level slug also matches its subcategories. */
   categorySlugs?: string[];
   city?: string;
+  state?: string;
   country?: string;
   minRating?: number;
   premiumOnly?: boolean;
@@ -120,6 +121,7 @@ async function runSearchBusinesses(
     category,
     categorySlugs,
     city,
+    state,
     country,
     minRating = 0,
     premiumOnly = false,
@@ -149,6 +151,7 @@ async function runSearchBusinesses(
         ? { category: { equals: category, mode: "insensitive" } }
         : {}),
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
+      ...(state ? { state: { equals: state, mode: "insensitive" } } : {}),
       ...(country ? { country: { equals: country, mode: "insensitive" } } : {}),
       ...(premiumOnly ? { owner: { plan: { in: ["PRO", "PREMIUM"] } } } : {}),
       ...(claimedOnly ? { ownerId: { not: null } } : {}),

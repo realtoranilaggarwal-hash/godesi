@@ -74,7 +74,7 @@ export default async function Page() {
                 <tr key={business.id}>
                   <td className="py-2">
                     <Link
-                      href={`/b/${business.slug}`}
+                      href={`/business/${business.slug}`}
                       className="font-medium text-indigo-600"
                     >
                       {business.name}

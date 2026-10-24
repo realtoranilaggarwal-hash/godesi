@@ -100,7 +100,7 @@ export async function digestContent() {
       businesses.map((row) => ({
         title: row.name,
         meta: row.city,
-        url: `${base}/b/${row.slug}`,
+        url: `${base}/business/${row.slug}`,
       })),
     ) +
     section(

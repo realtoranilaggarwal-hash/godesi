@@ -159,7 +159,7 @@ export default async function MemberPage({
             value={
               member.business ? (
                 <Link
-                  href={`/b/${member.business.slug}`}
+                  href={`/business/${member.business.slug}`}
                   className="text-indigo-700"
                 >
                   {member.business.name} · {member.business.status}

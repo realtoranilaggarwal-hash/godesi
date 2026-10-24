@@ -119,7 +119,7 @@ async function build() {
     })),
     ...businesses.map((business) => ({
       title: business.name,
-      link: `/b/${business.slug}`,
+      link: `/business/${business.slug}`,
       description: [
         [business.city, business.state].filter(Boolean).join(", "),
         business.description ?? "",

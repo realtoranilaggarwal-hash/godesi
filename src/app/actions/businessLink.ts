@@ -163,7 +163,7 @@ export async function saveLinkedBusinessAction(formData: FormData) {
     select: { slug: true, name: true },
   });
   if (already) {
-    reject(`“${already.name}” is already listed as /b/${already.slug}`);
+    reject(`“${already.name}” is already listed as /business/${already.slug}`);
   }
 
   const city = titleCase(parsed.data.city);

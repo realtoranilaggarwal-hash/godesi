@@ -25,8 +25,8 @@ export default async function BadgePage() {
     : null;
 
   const listingUrl = business
-    ? `${siteUrl()}/b/${business.slug}`
-    : `${siteUrl()}/b/your-business`;
+    ? `${siteUrl()}/business/${business.slug}`
+    : `${siteUrl()}/business/your-business`;
 
   return (
     <div className="flex gap-6">
@@ -48,7 +48,7 @@ export default async function BadgePage() {
             <p className="mt-1 text-sm text-slate-600">
               The snippet below points at{" "}
               <code className="rounded bg-slate-100 px-1">
-                /b/your-business
+                /business/your-business
               </code>{" "}
               — claim or create your free listing and it fills in automatically.
             </p>

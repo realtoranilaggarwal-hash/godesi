@@ -302,7 +302,7 @@ export async function payloadForSubject(
         .filter(Boolean)
         .join(" · ")
         .slice(0, 400),
-      path: `/b/${business.slug}`,
+      path: `/business/${business.slug}`,
       imageUrl: business.logoUrl ?? business.media[0]?.url ?? null,
       tags: [business.city, "desibusiness"],
     };

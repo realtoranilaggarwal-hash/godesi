@@ -28,6 +28,7 @@ type SearchParams = {
   category?: string;
   sub?: string;
   city?: string;
+  state?: string;
   country?: string;
   minRating?: string;
   premium?: string;
@@ -72,6 +73,7 @@ export default async function SearchPage({
       nameStartsWith: letter || undefined,
       categorySlugs,
       city: searchParams.city || undefined,
+      state: searchParams.state || undefined,
       country: searchParams.country || undefined,
       minRating,
       premiumOnly,

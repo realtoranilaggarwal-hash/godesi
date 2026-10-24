@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/format";
 import { Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { resultsAreThin, robotsFor } from "@/lib/thinContent";
-import { cityCover } from "@/lib/cityCovers";
+import { cityCover, CITY_DEFAULT_COVER } from "@/lib/cityCovers";
 
 export const dynamic = "force-dynamic";
 
@@ -166,14 +166,12 @@ export default async function CityPage({
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-4">
         <Card className="bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white">
-          {cityCover(name) ? (
-            // eslint-disable-next-line @next/next/no-img-element -- local stock banner
-            <img
-              src={cityCover(name)!}
-              alt={`${name} street view`}
-              className="-mx-5 -mt-5 mb-4 h-32 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-44"
-            />
-          ) : null}
+          {/* eslint-disable-next-line @next/next/no-img-element -- local stock banner */}
+          <img
+            src={cityCover(name) ?? CITY_DEFAULT_COVER}
+            alt={`${name} street view`}
+            className="-mx-5 -mt-5 mb-4 h-32 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-44"
+          />
           <h1 className="text-2xl font-black">📍 Everything desi in {name}</h1>
           <p className="mt-1 text-sm text-white/90">
             Community news, businesses, events, property and temples — all
@@ -245,7 +243,7 @@ export default async function CityPage({
                   {group.map((business) => (
                     <Row
                       key={business.slug}
-                      href={`/b/${business.slug}`}
+                      href={`/business/${business.slug}`}
                       title={business.name}
                       meta={category}
                     />

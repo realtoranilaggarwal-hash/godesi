@@ -575,7 +575,7 @@ export async function saveBusinessProfileAction(
         };
       if (newSlug && (await slugTaken(newSlug, existing.id)))
         return {
-          error: `godesi.com/b/${newSlug} is already taken — try adding your city, e.g. ${newSlug}-${slugify(data.city) || "usa"}.`,
+          error: `godesi.com/business/${newSlug} is already taken — try adding your city, e.g. ${newSlug}-${slugify(data.city) || "usa"}.`,
         };
       const updated = await db.business.update({
         where: { id: existing.id },
@@ -627,11 +627,11 @@ export async function saveBusinessProfileAction(
     return fieldError(error);
   }
   revalidatePath("/dashboard");
-  revalidatePath(`/b/${slug}`);
-  if (movedFrom) revalidatePath(`/b/${movedFrom}`);
-  pingIndexNowInBackground(`/b/${slug}`);
+  revalidatePath(`/business/${slug}`);
+  if (movedFrom) revalidatePath(`/business/${movedFrom}`);
+  pingIndexNowInBackground(`/business/${slug}`);
   invalidateDirectory();
-  if (staffEdit) redirect(`/b/${slug}?saved=1`);
+  if (staffEdit) redirect(`/business/${slug}?saved=1`);
   // A first listing lands on a free confirmation, not on the price list.
   redirect(isNew ? "/dashboard?business=new" : "/dashboard?saved=1");
 }
@@ -673,7 +673,7 @@ export async function addMediaAction(
       },
     });
     revalidatePath("/dashboard/media");
-    revalidatePath(`/b/${business.slug}`);
+    revalidatePath(`/business/${business.slug}`);
     return { success: "Media added." };
   } catch (error) {
     return fieldError(error);
@@ -691,5 +691,5 @@ export async function deleteMediaAction(formData: FormData) {
     throw new Error("FORBIDDEN");
   await db.media.delete({ where: { id } });
   revalidatePath("/dashboard/media");
-  revalidatePath(`/b/${media.business.slug}`);
+  revalidatePath(`/business/${media.business.slug}`);
 }

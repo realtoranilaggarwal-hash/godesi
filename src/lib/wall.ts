@@ -169,7 +169,7 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
       icon: "🏪",
       title: business.name,
       text: `new ${business.category} card in ${business.city}`,
-      href: `/b/${business.slug}`,
+      href: `/business/${business.slug}`,
       external: false,
       imageUrl: null,
       avatarUrl: business.logoUrl,
