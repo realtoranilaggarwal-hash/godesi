@@ -15,6 +15,22 @@ function initials(name: string) {
   );
 }
 
+/** Rotating desi-pastel tints so the member strip reads as a bazaar, not a spreadsheet. */
+const MEMBER_TINTS = [
+  "border-rose-200 bg-gradient-to-br from-rose-50 to-orange-50",
+  "border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50",
+  "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50",
+  "border-sky-200 bg-gradient-to-br from-sky-50 to-indigo-50",
+  "border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50",
+  "border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-pink-50",
+];
+
+function tintFor(id: string) {
+  let hash = 0;
+  for (const ch of id) hash = (hash + ch.charCodeAt(0)) % 997;
+  return MEMBER_TINTS[hash % MEMBER_TINTS.length];
+}
+
 /** Photo, name and one line — the card used in the rows of members. */
 export function MemberTile({
   member,
@@ -26,7 +42,7 @@ export function MemberTile({
 }) {
   const line = member.headline ?? member.location;
   const shell = compact
-    ? "flex h-14 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 shadow-sm"
+    ? `flex h-14 items-center gap-2 rounded-xl border px-2 shadow-sm ${tintFor(member.id)}`
     : "flex h-full flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-center shadow-sm";
   // A member who has not picked a handle has no page to open yet.
   const Shell = ({ children }: { children: ReactNode }) =>

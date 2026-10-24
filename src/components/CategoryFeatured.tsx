@@ -3,6 +3,7 @@ import { searchBusinesses, type BusinessListItem } from "@/lib/businesses";
 import { BusinessTile } from "@/components/BusinessTile";
 import { CategoryArt } from "@/components/CategoryArt";
 import { PLANS, planRank } from "@/lib/plans";
+import { softFor } from "@/lib/categories";
 
 /** One full row per trade, so no single category can take over the page. */
 const PER_CATEGORY = 4;
@@ -19,6 +20,7 @@ type Group = {
   slug: string | null;
   name: string;
   icon: string | null;
+  color: string;
   members: BusinessListItem[];
   paid: number;
 };
@@ -63,6 +65,7 @@ export async function CategoryFeatured() {
       slug: row.categorySlug,
       name,
       icon: row.categoryIcon,
+      color: row.categoryColor ?? "indigo",
       members: [],
       paid: 0,
     };
@@ -139,16 +142,21 @@ export async function CategoryFeatured() {
           <div key={group.slug ?? group.name}>
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="text-base font-black text-slate-900">
-                {group.icon ? `${group.icon} ` : ""}
                 {group.slug ? (
                   <Link
                     href={`/categories/${group.slug}`}
-                    className="hover:underline"
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition hover:shadow-sm ${softFor(group.color)}`}
                   >
+                    {group.icon ? `${group.icon} ` : ""}
                     {group.name}
                   </Link>
                 ) : (
-                  group.name
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 ${softFor(group.color)}`}
+                  >
+                    {group.icon ? `${group.icon} ` : ""}
+                    {group.name}
+                  </span>
                 )}
               </h3>
               {waiting ? (
