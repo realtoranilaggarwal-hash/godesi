@@ -11,5 +11,8 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     .update({ where: { id: banner.id }, data: { clicks: { increment: 1 } } })
     .catch(() => null);
 
-  return NextResponse.redirect(banner.linkUrl, { status: 302 });
+  // linkUrl can be site-relative (/city/iselin) — resolve to absolute,
+  // NextResponse.redirect throws on a relative URL otherwise.
+  const target = new URL(banner.linkUrl, siteUrl());
+  return NextResponse.redirect(target, { status: 302 });
 }

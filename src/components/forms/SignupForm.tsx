@@ -64,8 +64,11 @@ export function SignupForm({
         </legend>
         <JoinGoalChips />
       </fieldset>
-      <SubmitButton pendingLabel="Creating account..." className="w-full">
-        Create account
+      <SubmitButton
+        pendingLabel="Creating account..."
+        className="w-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 py-3.5 text-lg font-black tracking-wide text-white shadow-lg shadow-rose-200 transition hover:from-amber-400 hover:via-rose-400 hover:to-indigo-500 hover:shadow-xl hover:shadow-rose-300"
+      >
+        🎉 Create free account
       </SubmitButton>
     </form>
   );
