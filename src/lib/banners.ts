@@ -197,6 +197,7 @@ const pixelWall = cachedQuery("wall-blocks", 30, async () =>
       title: true,
       imageUrl: true,
       linkUrl: true,
+      description: true,
       status: true,
       advertiserId: true,
       advertiser: { select: { name: true } },

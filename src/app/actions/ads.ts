@@ -147,8 +147,9 @@ const WALL_FREE_Y = 900;
 const WALL_FREE_MAX_PX = 4;
 /** Promo code that makes any wall block free while the wall launches. */
 const WALL_FREE_CODE = "godesi.com";
-/** Giveaway code (said aloud on TikTok etc.): one 4px brick free, once per member. */
-const WALL_BRICK_CODE = "brick";
+/** Giveaway codes (said aloud on TikTok, to temples/charities): one 4px brick
+ *  free, once per member, still pending admin approval. */
+const WALL_ONE_BRICK_CODES = new Set(["brick", "temple"]);
 
 const pixelSchema = z.object({
   x: z.number().int().min(0),
@@ -159,6 +160,8 @@ const pixelSchema = z.object({
   linkUrl: z.string().trim().url("Enter a valid destination URL"),
   imageUrl: z.string().trim().url("Enter a valid image URL").or(z.literal("")),
   code: z.string().trim().max(40).optional(),
+  /** ~100 words about the vendor's site — shown on the vendor list. */
+  description: z.string().trim().max(600).optional(),
 });
 
 export type WallCheckoutResult = { error?: string };
@@ -175,7 +178,7 @@ export async function startPixelWallCheckoutAction(
 
   const parsed = pixelSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
-  const { x, y, w, h, title, linkUrl } = parsed.data;
+  const { x, y, w, h, title, linkUrl, description } = parsed.data;
   const imageUrl = parsed.data.imageUrl || PLACEHOLDER_CREATIVE;
   const pixels = w * h;
 
@@ -186,10 +189,10 @@ export async function startPixelWallCheckoutAction(
   const inFreeZone = y >= WALL_FREE_Y;
   const enteredCode = (parsed.data.code ?? "").toLowerCase();
   const codeFree = enteredCode === WALL_FREE_CODE;
-  const brickCode = enteredCode === WALL_BRICK_CODE;
+  const brickCode = WALL_ONE_BRICK_CODES.has(enteredCode);
   if (brickCode && pixels > WALL_FREE_MAX_PX) {
     return {
-      error: `Code ${WALL_BRICK_CODE.toUpperCase()} covers one 4px brick — shrink your box to 4 pixels or drop the code.`,
+      error: `Code ${enteredCode.toUpperCase()} covers one 4px brick — shrink your box to 4 pixels or drop the code.`,
     };
   }
   // Free zone grants a single 4px brick; godesi.com frees any block; the
@@ -239,6 +242,7 @@ export async function startPixelWallCheckoutAction(
           title,
           imageUrl,
           linkUrl,
+          description: description || null,
           // Free bricks wait for review so the public wall can't be
           // vandalised with a $0 claim.
           status: "PENDING",
@@ -286,6 +290,7 @@ export async function startPixelWallCheckoutAction(
       title,
       imageUrl,
       linkUrl,
+      description: description || null,
       status: payMinor === 0 ? "ACTIVE" : "DRAFT",
       advertiserId: user.id,
     },

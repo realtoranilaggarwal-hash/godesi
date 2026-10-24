@@ -60,14 +60,20 @@ export default async function WallOfFamePage({
 
   const taken = blocks.reduce((sum, block) => sum + block.w * block.h, 0);
 
-  /** Vendor list: rank by total pixels owned (more paid = higher). */
-  const vendors = new Map<string, { name: string; href: string; pixels: number }>();
+  /** Vendor list: rank by total pixels owned (more paid = higher). Each row
+   * shows the vendor's own ~100-word blurb from their first block that has one. */
+  const vendors = new Map<
+    string,
+    { name: string; href: string; pixels: number; desc: string | null }
+  >();
   for (const block of blocks) {
     if (block.status !== "ACTIVE") continue;
     const name = block.advertiser?.name ?? block.title;
     const key = `${name}|${block.linkUrl}`;
-    const entry = vendors.get(key) ?? { name, href: block.linkUrl, pixels: 0 };
+    const entry =
+      vendors.get(key) ?? { name, href: block.linkUrl, pixels: 0, desc: null };
     entry.pixels += block.w * block.h;
+    if (!entry.desc && block.description) entry.desc = block.description;
     vendors.set(key, entry);
   }
   const board = Array.from(vendors.values())
@@ -152,8 +158,15 @@ export default async function WallOfFamePage({
                   <span className="w-8 text-lg font-black text-slate-400">
                     {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
                   </span>
-                  <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
-                    {vendor.name}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-bold text-slate-900">
+                      {vendor.name}
+                    </span>
+                    {vendor.desc ? (
+                      <span className="mt-0.5 line-clamp-2 block text-xs font-normal text-slate-500">
+                        {vendor.desc}
+                      </span>
+                    ) : null}
                   </span>
                   <span className="shrink-0 rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
                     {Math.floor(vendor.pixels / 4).toLocaleString()} bricks
