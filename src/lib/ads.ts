@@ -268,9 +268,9 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     slot: "WALL",
     name: "Wall of Fame brick",
     size: { width: 160, height: 100 },
-    slots: 96,
+    slots: 1024,
     blurb:
-      "$1 a brick on the Wall of Fame — drag and pick as many bricks as you want, book them for good, and every brick also rotates into the banner rail on every page. Early birds get the best spots.",
+      "$1 a brick on the Wall of Fame — drag and pick as many bricks as you want out of 1,024, book them for good, and every brick also rotates into the banner rail on every page. Early birds get the best spots.",
     priceInr: 85,
     priceUsd: 1,
     cpmInr: 40,

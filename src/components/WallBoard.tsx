@@ -10,9 +10,11 @@ type Brick = {
   imageUrl?: string;
   linkUrl?: string;
   bannerId?: string;
+  /** This brick's slice of its buyer's bounding box (image spans the block). */
+  slice?: { cols: number; rows: number; col: number; row: number };
 };
 
-const COLS = 12;
+const COLS = 32;
 
 const TINTS = [
   "border-amber-300 bg-amber-50 text-amber-700",
@@ -147,13 +149,17 @@ export function WallBoard({
       <div
         onPointerUp={up}
         onPointerLeave={up}
-        className="select-none rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50 p-3 sm:p-5"
+        className="select-none overflow-x-auto rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50 p-3 sm:p-5"
         style={{ touchAction: "pan-y" }}
       >
-        <div className="grid grid-cols-12 gap-1 sm:gap-1.5">
+        <div
+          className="grid min-w-[720px] gap-[2px]"
+          style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))` }}
+        >
           {bricks.map((brick) => {
             const picked = selected.has(brick.n);
             if (brick.state === "live") {
+              const slice = brick.slice ?? { cols: 1, rows: 1, col: 0, row: 0 };
               return (
                 <a
                   key={brick.n}
@@ -161,16 +167,14 @@ export function WallBoard({
                   target="_blank"
                   rel="noreferrer sponsored"
                   title={brick.title}
-                  className="relative aspect-square overflow-hidden rounded-md border-2 border-amber-300 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={brick.imageUrl}
-                    alt={brick.title ?? `Brick ${brick.n}`}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
-                  />
-                </a>
+                  className="block aspect-square border border-amber-300/60 bg-white transition hover:brightness-110"
+                  style={{
+                    backgroundImage: `url(${brick.imageUrl})`,
+                    backgroundSize: `${slice.cols * 100}% ${slice.rows * 100}%`,
+                    backgroundPosition: `${slice.cols > 1 ? (slice.col / (slice.cols - 1)) * 100 : 0}% ${slice.rows > 1 ? (slice.row / (slice.rows - 1)) * 100 : 0}%`,
+                    backgroundRepeat: "no-repeat",
+                  }}
+                />
               );
             }
             if (brick.state === "reserved") {
@@ -178,10 +182,8 @@ export function WallBoard({
                 <div
                   key={brick.n}
                   title={`Brick ${brick.n} — just booked`}
-                  className="flex aspect-square items-center justify-center rounded-md border-2 border-indigo-300 bg-indigo-100 text-[8px] font-black uppercase text-indigo-500"
-                >
-                  {brick.n}
-                </div>
+                  className="aspect-square rounded-[3px] border border-indigo-300 bg-indigo-400"
+                />
               );
             }
             return (
@@ -191,20 +193,20 @@ export function WallBoard({
                 onPointerDown={() => down(brick.n)}
                 onPointerEnter={() => enter(brick.n)}
                 title={`Brick ${brick.n} — $${priceUsd}`}
-                className={`flex aspect-square items-center justify-center rounded-md border-2 text-[9px] font-black transition ${
+                aria-label={`Pick brick ${brick.n}`}
+                className={`aspect-square rounded-[3px] border transition ${
                   picked
-                    ? "border-indigo-500 bg-indigo-500 text-white shadow-md"
-                    : `border-dashed opacity-70 hover:opacity-100 ${TINTS[brick.n % TINTS.length]}`
+                    ? "border-indigo-600 bg-indigo-500"
+                    : `opacity-60 hover:opacity-100 ${TINTS[brick.n % TINTS.length]}`
                 }`}
-              >
-                {brick.n}
-              </button>
+              />
             );
           })}
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
-          Drag across the free bricks to pick your spot — every brick is $
-          {priceUsd}. Colored numbers are open, indigo blocks are just booked.
+          Drag across the free colored bricks to pick your block — every brick
+          is ${priceUsd}, tap bricks one by one on your phone. Indigo bricks are
+          just booked; pictures are live ads.
         </p>
       </div>
 
