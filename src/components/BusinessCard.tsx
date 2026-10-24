@@ -199,14 +199,7 @@ export function BusinessCard({
             label="WhatsApp"
             className="flex-1"
           />
-        ) : (
-          <Link
-            href={`/business/${business.slug}?claim=1`}
-            className="flex-1 rounded-xl bg-amber-500 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-amber-600"
-          >
-            Claim
-          </Link>
-        )}
+        ) : null}
       </div>
     </Card>
   );

@@ -293,7 +293,7 @@ export async function SmallBanners({
 } = {}) {
   if (isPhoneRequest()) return null;
   const [banners, categories] = await Promise.all([
-    activeBanners("MOBILE", 20),
+    activeBanners(["MOBILE", "WALL"], 20),
     tree && side !== "left" ? categoryPickerGroups() : [],
   ]);
   return (
@@ -316,7 +316,7 @@ export async function SmallBanners({
 /** Two small banners under the page content, for phones only. */
 export async function PhoneSmallBanners() {
   if (!isPhoneRequest()) return null;
-  const banners = await activeBanners("MOBILE", 20);
+  const banners = await activeBanners(["MOBILE", "WALL"], 20);
   return (
     <SmallBannerRail
       phone
@@ -385,7 +385,7 @@ export async function InContentBanner({
 
   const [wide, phone] = await Promise.all([
     activeBanners(sharedSlots, 1),
-    activeBanners("MOBILE", 1),
+    activeBanners(["MOBILE", "WALL"], 1),
   ]);
 
   const wideSlot = wide[0]?.slot ?? desktopSlot;
