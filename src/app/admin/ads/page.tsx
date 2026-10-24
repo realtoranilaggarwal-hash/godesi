@@ -3,11 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  approveWallBlockAction,
-  rejectBannerAction,
-  rejectWallBlockAction,
-} from "@/app/actions/admin";
+import { rejectBannerAction } from "@/app/actions/admin";
+import { WallBlockApproval } from "@/components/admin/WallBlockApproval";
 import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { formatMinor } from "@/lib/format";
@@ -135,26 +132,7 @@ export default async function Page() {
                       {block.linkUrl}
                     </a>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <form action={approveWallBlockAction}>
-                      <input type="hidden" name="id" value={block.id} />
-                      <button
-                        type="submit"
-                        className="rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
-                      >
-                        approve
-                      </button>
-                    </form>
-                    <form action={rejectWallBlockAction}>
-                      <input type="hidden" name="id" value={block.id} />
-                      <button
-                        type="submit"
-                        className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
-                      >
-                        reject
-                      </button>
-                    </form>
-                  </div>
+                  <WallBlockApproval id={block.id} />
                 </li>
               ))}
             </ul>
