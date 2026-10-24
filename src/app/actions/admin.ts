@@ -382,6 +382,31 @@ export async function rejectWallBlockAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
+/** Bulk: the desk ticks the rows it checked, then approves/rejects in one go. */
+export async function approveWallBlocksAction(ids: string[]) {
+  await requireRole("ADMIN");
+  const clean = ids.filter((id) => typeof id === "string" && id.length > 0);
+  if (!clean.length) return;
+  await db.wallBlock.updateMany({
+    where: { id: { in: clean }, status: "PENDING" },
+    data: { status: "ACTIVE" },
+  });
+  revalidateTag("wall-blocks");
+  revalidatePath("/admin");
+}
+
+export async function rejectWallBlocksAction(ids: string[]) {
+  await requireRole("ADMIN");
+  const clean = ids.filter((id) => typeof id === "string" && id.length > 0);
+  if (!clean.length) return;
+  await db.wallBlock.updateMany({
+    where: { id: { in: clean }, status: "PENDING" },
+    data: { status: "REJECTED" },
+  });
+  revalidateTag("wall-blocks");
+  revalidatePath("/admin");
+}
+
 /**
  * Lets the desk fix a headline or re-paste a story with its paragraphs. The
  * body is stored as text and rendered as text, so markup never runs.

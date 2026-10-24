@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { rejectBannerAction } from "@/app/actions/admin";
-import { WallBlockApproval } from "@/components/admin/WallBlockApproval";
+import { WallBlocksApprovalList } from "@/components/admin/WallBlocksApprovalList";
 import { ApproveAdForm } from "@/components/forms/ApproveAdForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { formatMinor } from "@/lib/format";
@@ -29,7 +29,14 @@ export default async function Page() {
     db.wallBlock.findMany({
       where: { status: "PENDING" },
       orderBy: { id: "asc" },
-      include: { advertiser: { select: { email: true, name: true } } },
+      include: {
+        advertiser: { select: { email: true, name: true } },
+        orders: {
+          select: { status: true, amountMinor: true, provider: true, currency: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
     }),
     db.adOrder.findMany({
       orderBy: { createdAt: "desc" },
@@ -105,37 +112,24 @@ export default async function Page() {
             Free claims stay off the public wall until you approve them.
           </p>
           {pendingWall.length ? (
-            <ul className="divide-y divide-slate-100">
-              {pendingWall.map((block) => (
-                <li
-                  key={block.id}
-                  className="flex flex-wrap items-center gap-3 py-3"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={block.imageUrl}
-                    alt={block.title}
-                    className="h-12 w-24 rounded-lg border border-slate-200 object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">
-                      {block.title} · {block.w}×{block.h}px at ({block.x},
-                      {block.y}) ·{" "}
-                      {block.advertiser?.email ?? "unassigned"}
-                    </p>
-                    <a
-                      href={block.linkUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-indigo-600"
-                    >
-                      {block.linkUrl}
-                    </a>
-                  </div>
-                  <WallBlockApproval id={block.id} />
-                </li>
-              ))}
-            </ul>
+            <WallBlocksApprovalList
+              rows={pendingWall.map((block) => ({
+                id: block.id,
+                title: block.title,
+                imageUrl: block.imageUrl,
+                linkUrl: block.linkUrl,
+                w: block.w,
+                h: block.h,
+                x: block.x,
+                y: block.y,
+                email: block.advertiser?.email ?? "unassigned",
+                payment: block.orders[0]
+                  ? block.orders[0].amountMinor > 0
+                    ? `${block.orders[0].provider} ${formatMinor(block.orders[0].amountMinor, block.orders[0].currency)} · ${block.orders[0].status.toLowerCase()}`
+                    : `${block.orders[0].provider} · ${block.orders[0].status.toLowerCase()}`
+                  : "no order",
+              }))}
+            />
           ) : (
             <p className="text-sm text-slate-500">
               No free bricks waiting.
