@@ -182,6 +182,22 @@ export default async function PricingPage({
         </p>
       </Link>
 
+      <Link
+        href="/course"
+        className="block rotate-1 rounded-3xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-amber-500 p-5 text-white shadow-lg transition hover:rotate-0 hover:opacity-95"
+      >
+        <p className="text-xs font-bold uppercase tracking-widest text-white/80">
+          New — learn online earning
+        </p>
+        <p className="text-2xl font-black">
+          🎓 GoDesi.com Course of Marketing — $9.99
+        </p>
+        <p className="mt-1 text-sm text-white/90">
+          UGC, affiliate income, digital products, the TikTok playbook and
+          scaling from renting to owning — 11 short lessons →
+        </p>
+      </Link>
+
       {searchParams.reason === "leads" ? (
         <Alert tone="info">
           Unlocking lead contact details requires the Featured plan.
