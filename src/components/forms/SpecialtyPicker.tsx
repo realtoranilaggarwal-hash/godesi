@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useRef, useState, type ChangeEvent } from "react";
 import { Field, inputClass } from "@/components/ui";
-import { customOptionsOf, disclaimerFor, specialtySet } from "@/lib/specialties";
+import {
+  customOptionsOf,
+  disclaimerFor,
+  specialtySet,
+} from "@/lib/specialties";
 import { OptionSearchPicker } from "@/components/forms/OptionSearchPicker";
 import { ImageField } from "@/components/forms/ImageField";
 import { isAgentCard } from "@/lib/agents";
@@ -91,7 +95,8 @@ export function SpecialtyPicker({
       className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-4 [&_summary::-webkit-details-marker]:hidden"
     >
       <summary className="cursor-pointer list-none text-sm font-bold text-cyan-900">
-        {set.title} <span className="font-normal text-cyan-900/70">(tap to expand)</span>
+        {set.title}{" "}
+        <span className="font-normal text-cyan-900/70">(tap to expand)</span>
       </summary>
 
       <p className="mt-1 text-xs text-cyan-900/80">{set.hint}</p>
@@ -115,7 +120,10 @@ export function SpecialtyPicker({
       ) : (
         <div className="mt-3 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
           {set.options.map((option) => (
-            <label key={option} className="flex items-start gap-2 text-sm text-slate-700">
+            <label
+              key={option}
+              className="flex items-start gap-2 text-sm text-slate-700"
+            >
               <input
                 type="checkbox"
                 name="specialties"
@@ -192,7 +200,11 @@ export function SpecialtyPicker({
               >
                 <input
                   type={group.mode === "single" ? "radio" : "checkbox"}
-                  name={group.mode === "single" ? `choice-${group.key}` : "serviceOptions"}
+                  name={
+                    group.mode === "single"
+                      ? `choice-${group.key}`
+                      : "serviceOptions"
+                  }
                   value={option}
                   data-group={group.key}
                   defaultChecked={defaults.serviceOptions.includes(option)}
@@ -207,15 +219,48 @@ export function SpecialtyPicker({
 
       {set.pricing ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {set.pricing.map((price) => (
-            <Field key={price.key} label={price.label} hint={price.hint}>
-              <input
-                name={price.key}
-                defaultValue={defaults[price.key]}
-                className={inputClass}
-              />
-            </Field>
-          ))}
+          {set.pricing.map((price) => {
+            // A generic "Starting price" box repeats the Starting price +
+            // currency question asked below the video links — keep any saved
+            // value but do not ask twice.
+            if (
+              price.key === "priceFrom" &&
+              /^starting price/i.test(price.label)
+            ) {
+              return (
+                <input
+                  key={price.key}
+                  type="hidden"
+                  name={price.key}
+                  defaultValue={defaults[price.key]}
+                />
+              );
+            }
+            const stored = defaults[price.key] ?? "";
+            const savedCurrency = stored.match(/^(USD|INR)\s+(.+)$/i);
+            return (
+              <Field key={price.key} label={price.label} hint={price.hint}>
+                <div className="flex gap-2">
+                  <input
+                    name={price.key}
+                    defaultValue={savedCurrency ? savedCurrency[2] : stored}
+                    className={inputClass}
+                  />
+                  <select
+                    name={`${price.key}Currency`}
+                    defaultValue={
+                      savedCurrency ? savedCurrency[1].toUpperCase() : "USD"
+                    }
+                    aria-label={`${price.label} currency`}
+                    className={inputClass}
+                  >
+                    <option value="USD">USD</option>
+                    <option value="INR">INR</option>
+                  </select>
+                </div>
+              </Field>
+            );
+          })}
         </div>
       ) : null}
 
@@ -245,10 +290,15 @@ export function SpecialtyPicker({
 
       {set.certifications ? (
         <div className="mt-4">
-          <p className="text-sm font-bold text-cyan-900">{set.certifications.title}</p>
+          <p className="text-sm font-bold text-cyan-900">
+            {set.certifications.title}
+          </p>
           <div className="mt-2 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
             {set.certifications.options.map((option) => (
-              <label key={option} className="flex items-start gap-2 text-sm text-slate-700">
+              <label
+                key={option}
+                className="flex items-start gap-2 text-sm text-slate-700"
+              >
                 <input
                   type="checkbox"
                   name="certifications"
@@ -324,7 +374,11 @@ export function SpecialtyPicker({
 
         {set.carriers ? (
           <Field label={set.carriers.label} hint={set.carriers.hint}>
-            <input name="carriers" defaultValue={defaults.carriers} className={inputClass} />
+            <input
+              name="carriers"
+              defaultValue={defaults.carriers}
+              className={inputClass}
+            />
           </Field>
         ) : null}
       </div>
