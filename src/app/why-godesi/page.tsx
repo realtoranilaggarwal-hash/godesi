@@ -175,7 +175,7 @@ const GROUPS: { heading: string; blurb: string; items: Item[] }[] = [
       },
       {
         title: "A website of your own",
-        body: "Paid: we build you a proper website from $299 if the free page is not enough.",
+        body: "Paid: we build you a proper website from $99 if the free page is not enough.",
         href: "/website",
         free: false,
       },
