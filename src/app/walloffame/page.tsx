@@ -144,7 +144,7 @@ export default async function WallOfFamePage({
           </li>
           <li className="rounded-xl bg-white/80 px-3 py-2">
             <b>2 · Code FREE4</b> — one free brick anywhere on the board.
-            Share it — it's public.
+            Share it — it&apos;s public.
           </li>
           <li className="rounded-xl bg-white/80 px-3 py-2">
             <b>3 · 100 points</b> — members trade 100 points for a brick
@@ -154,7 +154,7 @@ export default async function WallOfFamePage({
         </ol>
         {user && !hasFreeBlock ? (
           <p className="mt-2 text-xs font-bold text-emerald-800">
-            You haven't claimed your free brick yet — drag a box on the board
+            You haven&apos;t claimed your free brick yet — drag a box on the board
             and pick any of the three ways above.
           </p>
         ) : null}
