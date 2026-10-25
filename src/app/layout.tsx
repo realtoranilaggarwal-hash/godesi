@@ -69,11 +69,13 @@ export default async function RootLayout({
     <html lang="en" className="overflow-x-hidden">
       <head>
           {adsenseClient ? (
-            <Script
+            /* Plain script tag so AdSense's site verifier finds it in the
+               raw HTML (next/script injects after hydration). */
+            /* eslint-disable-next-line @next/next/no-sync-scripts */
+            <script
               async
               crossOrigin="anonymous"
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-              strategy="afterInteractive"
             />
           ) : null}
           {umamiId ? (
