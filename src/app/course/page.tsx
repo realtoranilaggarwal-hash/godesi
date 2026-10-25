@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { AUTHOR_NAME, AUTHOR_PHOTO, COURSES } from "@/lib/courses";
+import {
+  AUTHOR_NAME,
+  AUTHOR_PHOTO,
+  AUTHOR_PROFILE_HREF,
+  COURSES,
+} from "@/lib/courses";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -54,12 +59,14 @@ export default async function CourseCatalogPage() {
               </span>
             </div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={AUTHOR_PHOTO}
-            alt={AUTHOR_NAME}
-            className="h-28 w-28 shrink-0 rounded-2xl border-4 border-white/40 object-cover shadow-lg sm:h-36 sm:w-36"
-          />
+          <Link href={AUTHOR_PROFILE_HREF} className="group shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={AUTHOR_PHOTO}
+              alt={AUTHOR_NAME}
+              className="h-28 w-28 rounded-2xl border-4 border-white/40 object-cover shadow-lg transition group-hover:border-amber-300 sm:h-36 sm:w-36"
+            />
+          </Link>
         </div>
       </section>
 

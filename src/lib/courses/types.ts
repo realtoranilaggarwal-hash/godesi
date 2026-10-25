@@ -27,6 +27,7 @@ export type Course = {
 
 export const AUTHOR_NAME = "Anil Aggarwal, Realtor";
 export const AUTHOR_PHOTO = "/images/courses/anil-aggarwal.jpg";
+export const AUTHOR_PROFILE_HREF = "/b/broker-anil-aggarwal-iselin";
 
 export const LAUNCH_PRICE_MINOR = 900;
 export const LAUNCH_LIST_PRICE_MINOR = 9_900;
