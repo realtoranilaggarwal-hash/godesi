@@ -354,14 +354,20 @@ export default async function BusinessProfilePage({
     </>
   );
 
-  /** Address + free OpenStreetMap — sits inside the header card, right side. */
+  /** Address + free OpenStreetMap — sits inside the header card, right side.
+   *  No street address? The town still gets a map pin. */
   const locationBlock =
-    business.address || business.mapsUrl ? (
+    business.address || business.mapsUrl || business.city ? (
       <div className="min-w-0">
         <h2 className="mb-2 text-sm font-bold text-slate-700">📍 Location</h2>
         {business.address ? (
           <p className="mb-2 text-xs text-slate-600">{business.address}</p>
-        ) : null}
+        ) : (
+          <p className="mb-2 text-xs text-slate-600">
+            {business.city}
+            {business.state ? `, ${business.state}` : ""}
+          </p>
+        )}
         <MapEmbed
           parts={[business.address, business.city, business.state]}
           title={business.name}
@@ -408,7 +414,11 @@ export default async function BusinessProfilePage({
               alt={`${business.name} cover photo`}
               className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
             />
-            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div
+              className={`grid items-start gap-5 ${
+                locationBlock ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
+              }`}
+            >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <LogoTile
               name={business.name}
