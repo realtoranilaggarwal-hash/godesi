@@ -18,6 +18,9 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  /* `clip` (unlike `hidden`) is not a scroll container, so sticky headers keep
+     working while stray wide content can no longer widen the page on iOS. */
+  overflow-x: clip;
 }
 
 /* User-generated text can contain unbroken strings (pasted URLs, spam); never let it widen the page. */

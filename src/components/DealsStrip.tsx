@@ -29,7 +29,7 @@ export async function DealsStrip() {
         {deals.map((deal) => (
           <div
             key={deal.id}
-            className="flex items-center gap-3 rounded-xl border border-dashed border-rose-300 bg-rose-50/60 px-3 py-2"
+            className="flex min-w-0 items-center gap-3 overflow-hidden rounded-xl border border-dashed border-rose-300 bg-rose-50/60 px-3 py-2"
           >
             <LogoTile
               name={deal.business.name}
@@ -78,7 +78,7 @@ export async function DealsStrip() {
           <Link
             key={`fill-${i}`}
             href="/dashboard/deals"
-            className="flex items-center gap-3 rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-indigo-300 hover:text-indigo-600"
+            className="flex min-w-0 items-center gap-3 overflow-hidden rounded-xl border border-dashed border-slate-300 px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-indigo-300 hover:text-indigo-600"
           >
             <span
               aria-hidden
