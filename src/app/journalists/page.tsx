@@ -18,6 +18,7 @@ import { JournalistJoinForm } from "@/components/forms/JournalistJoinForm";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { leaveJournalistAction } from "@/app/actions/journalist";
 import { SidebarBanners } from "@/components/Banners";
+import { NewsMediaStrip } from "@/components/NewsMediaStrip";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 
@@ -49,6 +50,8 @@ export default async function JournalistsPage() {
             your profile, and your photo and name run with the story.
           </p>
         </section>
+
+        <NewsMediaStrip />
 
         <Card>
           <h2 className="text-lg font-bold">Your desk</h2>
