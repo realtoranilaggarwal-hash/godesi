@@ -1,4 +1,14 @@
 import { LESSONS as MARKETING_LESSONS } from "../course";
+import { AFFILIATE_FUNDAMENTALS_LESSONS } from "./affiliateFundamentals";
+import { AFFILIATE_SIX_FIGURES_LESSONS } from "./affiliateSixFigures";
+import { INSTAGRAM_MONETIZATION_LESSONS } from "./instagramMonetization";
+import { FIRST_BLOG_LESSONS } from "./firstBlog";
+import { CONTENT_CONVERTS_LESSONS } from "./contentConverts";
+import { B2B_SAAS_LESSONS } from "./b2bSaas";
+import { SEO_AFFILIATE_LESSONS } from "./seoAffiliate";
+import { TIKTOK_SHOP_LESSONS } from "./tiktokShop";
+import { EMAIL_LIST_LESSONS } from "./emailList";
+import { YOUTUBE_MONETIZATION_LESSONS } from "./youtubeMonetization";
 import { LIFE_INSURANCE_LESSONS } from "./lifeInsurance";
 import { REALTOR_LESSONS } from "./realtor";
 import { FLIPPING_LESSONS } from "./flipping";
@@ -377,6 +387,196 @@ export const COURSES: Course[] = [
       },
     ],
     lessons: PRESENCE_LESSONS,
+  },
+  {
+    slug: "affiliate-fundamentals",
+    title: "Affiliate Marketing Fundamentals",
+    shortTitle: "Affiliate Fundamentals",
+    tagline:
+      "Share links, earn commissions — the beginner's complete path from first program to first $100.",
+    pitch: "Earn a cut of other people's sales — from your first link to your first $100.",
+    emoji: "🔗",
+    cover: "/images/courses/affiliate-fundamentals.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🎯", title: "Pick a niche", body: "Specific audience + products that pay — the foundation." },
+      { icon: "💰", title: "Programs that pay", body: "Commission %, cookies, recurring vs one-time." },
+      { icon: "✍️", title: "Content that clicks", body: "'Best X for Y' and 'X vs Y' — the posts buyers read." },
+      { icon: "📅", title: "30-day plan", body: "Niche to first sales in a month." },
+    ],
+    lessons: AFFILIATE_FUNDAMENTALS_LESSONS,
+  },
+  {
+    slug: "affiliate-six-figures",
+    title: "Scaling to Six Figures with Affiliate Marketing",
+    shortTitle: "Six-Figure Affiliate",
+    tagline:
+      "From hobby commissions to a system: funnels, SEO, email and recurring revenue.",
+    pitch: "The math and systems behind $100K/year affiliate businesses.",
+    emoji: "📈",
+    cover: "/images/courses/affiliate-six-figures.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🧮", title: "The math", body: "Traffic × conversion × commission — pick your lever." },
+      { icon: "🔄", title: "Recurring revenue", body: "Programs that pay you every month." },
+      { icon: "📧", title: "Email multiplier", body: "The channel no algorithm can take." },
+      { icon: "🗺️", title: "12-month roadmap", body: "Build → optimize → scale, quarter by quarter." },
+    ],
+    lessons: AFFILIATE_SIX_FIGURES_LESSONS,
+  },
+  {
+    slug: "instagram-monetization",
+    title: "Instagram & Social Media Monetization",
+    shortTitle: "Instagram Income",
+    tagline:
+      "Sponsors, affiliates and your own offers — turn a growing account into a paycheck.",
+    pitch: "Your followers can pay — sponsors, affiliates and offers that convert.",
+    emoji: "📸",
+    cover: "/images/courses/instagram-monetization.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🎬", title: "Reels engine", body: "The format that reaches strangers for free." },
+      { icon: "💬", title: "DM sales", body: "Where real conversions actually happen." },
+      { icon: "🤝", title: "First sponsor", body: "Pitch, rate card, deliver, repeat." },
+      { icon: "📊", title: "Growth loop", body: "Shares and saves — the metrics that grow you." },
+    ],
+    lessons: INSTAGRAM_MONETIZATION_LESSONS,
+  },
+  {
+    slug: "first-blog",
+    title: "Building Your First Blog",
+    shortTitle: "First Blog",
+    tagline:
+      "A website you own that earns while you sleep — niche, posts, traffic, monetization.",
+    pitch: "Own a piece of the internet that pays you back for years.",
+    emoji: "📝",
+    cover: "/images/courses/first-blog.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🎯", title: "Niche & name", body: "Narrow enough to win, named for the reader." },
+      { icon: "✍️", title: "First 10 posts", body: "Specific answers Google learns to trust." },
+      { icon: "🔍", title: "Free traffic", body: "Search + communities + repurposing." },
+      { icon: "💵", title: "Three incomes", body: "Affiliates first, ads later, products last." },
+    ],
+    lessons: FIRST_BLOG_LESSONS,
+  },
+  {
+    slug: "content-that-converts",
+    title: "Content Creation That Converts",
+    shortTitle: "Content That Converts",
+    tagline:
+      "Hooks, structure, CTAs and repurposing — posts that sell, not just fill feeds.",
+    pitch: "Make content that moves readers to action — not just applause.",
+    emoji: "🧲",
+    cover: "/images/courses/content-that-converts.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🪝", title: "Hooks", body: "The first 3 seconds decide everything." },
+      { icon: "🏗️", title: "Structure", body: "Payoff first, proof second, steps third." },
+      { icon: "🔁", title: "Repurposing", body: "One idea, ten pieces, every platform." },
+      { icon: "📐", title: "Measure", body: "Track conversions, not likes." },
+    ],
+    lessons: CONTENT_CONVERTS_LESSONS,
+  },
+  {
+    slug: "b2b-saas-affiliate",
+    title: "B2B SaaS Affiliate Strategies",
+    shortTitle: "B2B SaaS Affiliate",
+    tagline:
+      "The highest-paying affiliate niche — recurring commissions from business software.",
+    pitch: "One business referral can pay you every month for years.",
+    emoji: "💼",
+    cover: "/images/courses/b2b-saas-affiliate.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🔄", title: "Recurring pay", body: "20–40% monthly commissions are normal." },
+      { icon: "⚖️", title: "Comparison content", body: "'X vs Y' pages that convert buyers." },
+      { icon: "🤝", title: "Partner status", body: "From affiliate link to real partnership." },
+      { icon: "📈", title: "Compounding", body: "Last year's referrals still pay this year." },
+    ],
+    lessons: B2B_SAAS_LESSONS,
+  },
+  {
+    slug: "seo-affiliate",
+    title: "SEO for Affiliate Marketers",
+    shortTitle: "SEO for Affiliates",
+    tagline:
+      "Rank pages for buyer-intent searches — traffic that shops, every day, for free.",
+    pitch: "Get Google to send you shoppers — the compounding affiliate engine.",
+    emoji: "🔍",
+    cover: "/images/courses/seo-affiliate.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🎯", title: "Buyer keywords", body: "'Best X for Y' searches = money searches." },
+      { icon: "📄", title: "Money pages", body: "Review structure that ranks and sells." },
+      { icon: "🕸️", title: "Content hubs", body: "Pillar + spokes = topical authority." },
+      { icon: "⏱️", title: "90-day sprint", body: "One cluster to first rankings." },
+    ],
+    lessons: SEO_AFFILIATE_LESSONS,
+  },
+  {
+    slug: "tiktok-shop",
+    title: "TikTok Shop & Social Commerce",
+    shortTitle: "TikTok Shop",
+    tagline:
+      "Earn commission tagging products in videos — no store, no inventory needed.",
+    pitch: "Get paid to post demos — the closest thing to paid-per-video income.",
+    emoji: "🛍️",
+    cover: "/images/courses/tiktok-shop.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🏷️", title: "Tag & earn", body: "Commission per tagged-product sale." },
+      { icon: "🎬", title: "Demo formula", body: "Hook → demo → reaction → tag." },
+      { icon: "🔴", title: "Live selling", body: "Lives out-earn weeks of posts." },
+      { icon: "📱", title: "Repost everywhere", body: "One video → TikTok + Reels + Shorts." },
+    ],
+    lessons: TIKTOK_SHOP_LESSONS,
+  },
+  {
+    slug: "email-list-building",
+    title: "Email List Building for Creators",
+    shortTitle: "Email List",
+    tagline:
+      "The one audience you own — lead magnets, welcome sequences and list income.",
+    pitch: "Build the audience no algorithm can take away — and earn from it weekly.",
+    emoji: "📧",
+    cover: "/images/courses/email-list-building.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "🧲", title: "Lead magnets", body: "The free thing that gets the signup." },
+      { icon: "👋", title: "Welcome sequence", body: "First 5 emails that earn opens." },
+      { icon: "📅", title: "Weekly rhythm", body: "80% help, 20% offer." },
+      { icon: "💵", title: "List income", body: "Affiliates, products, sponsors, services." },
+    ],
+    lessons: EMAIL_LIST_LESSONS,
+  },
+  {
+    slug: "youtube-monetization",
+    title: "YouTube Monetization Mastery",
+    shortTitle: "YouTube Money",
+    tagline:
+      "Ads, affiliates, sponsors — the income stack behind every full-time channel.",
+    pitch: "The full income stack: earn from affiliates long before ad revenue starts.",
+    emoji: "▶️",
+    cover: "/images/courses/youtube-monetization.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      { icon: "📚", title: "Income stack", body: "Ads + affiliates + sponsors + products." },
+      { icon: "🖱️", title: "CTR & watch time", body: "The two numbers YouTube rewards." },
+      { icon: "🔗", title: "Day-one affiliates", body: "Links in descriptions convert from video one." },
+      { icon: "📆", title: "12-month plan", body: "Weekly uploads → sponsor income." },
+    ],
+    lessons: YOUTUBE_MONETIZATION_LESSONS,
   },
 ];
 

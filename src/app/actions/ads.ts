@@ -18,6 +18,7 @@ import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { confirmAdOrder, wallCreditMinor } from "@/lib/adOrders";
 import { checkCoupon, couponMetadata, recordCouponUse } from "@/lib/coupons";
+import { spendPoints } from "@/lib/rewardsQueries";
 
 const PLACEHOLDER_CREATIVE =
   "https://placehold.co/300x250/6366f1/ffffff?text=Your+banner+here";
@@ -147,9 +148,12 @@ const WALL_FREE_Y = 900;
 const WALL_FREE_MAX_PX = 4;
 /** Promo code that makes any wall block free while the wall launches. */
 const WALL_FREE_CODE = "godesi.com";
-/** Giveaway codes (said aloud on TikTok, to temples/charities): one 4px brick
- *  free, once per member, still pending admin approval. */
-const WALL_ONE_BRICK_CODES = new Set(["brick", "temple"]);
+/** Giveaway codes (said aloud on TikTok, to temples/charities, or published
+ *  on the site — FREE4 is the public one): one 4px brick free, once per
+ *  member, still pending admin approval. */
+const WALL_ONE_BRICK_CODES = new Set(["brick", "temple", "free4"]);
+/** Member points buy one 4px brick anywhere on the board. */
+const WALL_BRICK_POINTS = 100;
 
 const pixelSchema = z.object({
   x: z.number().int().min(0),
@@ -162,6 +166,8 @@ const pixelSchema = z.object({
   code: z.string().trim().max(40).optional(),
   /** ~100 words about the vendor's site — shown on the vendor list. */
   description: z.string().trim().max(600).optional(),
+  /** True when the member redeems points for a 4px brick. */
+  usePoints: z.boolean().optional(),
 });
 
 export type WallCheckoutResult = { error?: string };
@@ -232,6 +238,47 @@ export async function startPixelWallCheckoutAction(
   );
   if (clash) {
     return { error: "Part of that spot is already taken — drag somewhere free." };
+  }
+
+  // Points redemption: 100 points buys a 4px brick anywhere — separate from
+  // the one-per-member free claim, still reviewed before it lights up.
+  if (parsed.data.usePoints && pixels <= WALL_FREE_MAX_PX) {
+    const spent = await spendPoints({
+      userId: user.id,
+      points: WALL_BRICK_POINTS,
+      note: `Wall of Fame brick at (${x}, ${y})`,
+      uniqueKey: `wall-points:${user.id}:${x}:${y}`,
+    });
+    if (!spent) {
+      return { error: `Not enough points — a brick costs ${WALL_BRICK_POINTS} points.` };
+    }
+    const block = await db.wallBlock.create({
+      data: {
+        x, y, w, h,
+        title,
+        imageUrl,
+        linkUrl,
+        description: description || null,
+        status: "PENDING",
+        advertiserId: user.id,
+      },
+    });
+    await db.adOrder.create({
+      data: {
+        userId: user.id,
+        wallBlockId: block.id,
+        slot: "WALL",
+        pricing: "MONTHLY",
+        months: 1,
+        amountMinor: 0,
+        currency: requestCurrency(),
+        provider: "points",
+        status: "PAID",
+      },
+    });
+    revalidateTag("wall-blocks");
+    revalidatePath("/walloffame");
+    redirect("/walloffame?free=1");
   }
 
   if (free) {

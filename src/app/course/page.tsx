@@ -35,10 +35,10 @@ export default async function CourseCatalogPage() {
 
   return (
     <div className="space-y-8">
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-fuchsia-600 to-amber-500 p-8 text-white shadow-xl sm:p-10">
+      <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-8 text-white shadow-xl sm:p-10">
         <div className="flex flex-wrap items-center gap-6">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold uppercase tracking-widest text-amber-200">
+            <p className="text-sm font-bold uppercase tracking-widest text-amber-400">
               GoDesi Courses
             </p>
             <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">
@@ -51,10 +51,10 @@ export default async function CourseCatalogPage() {
               for life.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-bold">
-              <span className="rounded-full bg-amber-300 px-3 py-1 text-amber-950">
+              <span className="rounded-full bg-amber-400 px-3 py-1 text-slate-950">
                 LAUNCH DEAL · $9 each · was $99
               </span>
-              <span className="text-white/80">
+              <span className="text-slate-400">
                 {COURSES.length} courses · more added as the catalog grows
               </span>
             </div>
@@ -64,7 +64,7 @@ export default async function CourseCatalogPage() {
             <img
               src={AUTHOR_PHOTO}
               alt={AUTHOR_NAME}
-              className="h-28 w-28 rounded-2xl border-4 border-white/40 object-cover shadow-lg transition group-hover:border-amber-300 sm:h-36 sm:w-36"
+              className="h-28 w-28 rounded-2xl border-2 border-amber-400/60 object-cover shadow-lg transition group-hover:border-amber-400 sm:h-36 sm:w-36"
             />
           </Link>
         </div>
@@ -93,7 +93,7 @@ export default async function CourseCatalogPage() {
                       OWNED ✓
                     </span>
                   ) : (
-                    <span className="absolute right-2 top-2 rounded-full bg-amber-300 px-2.5 py-1 text-xs font-black text-amber-950 shadow">
+                    <span className="absolute right-2 top-2 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-black text-slate-950 shadow">
                       $9 · was $99
                     </span>
                   )}

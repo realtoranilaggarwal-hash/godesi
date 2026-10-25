@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { pixelWallBlocks } from "@/lib/banners";
 import { getCurrentUser } from "@/lib/auth";
+import { wallet } from "@/lib/rewardsQueries";
 import { wallCreditMinor } from "@/lib/adOrders";
 import { requestCurrency } from "@/lib/currency";
 import { db } from "@/lib/db";
@@ -51,6 +52,7 @@ export default async function WallOfFamePage({
         select: { id: true },
       }))
     : false;
+  const pointsBalance = user ? (await wallet(user.id)).balance : 0;
   // Preview credit in "pixel dollars": $1 (or ₹85) of credit covers 1 px.
   const currency = requestCurrency();
   const creditUsd = user
@@ -100,9 +102,9 @@ export default async function WallOfFamePage({
             </p>
             <p className="mt-2 text-sm font-bold text-amber-100">
               Free right now — grab a brick in the green free zone or use the
-              code <b>godesi.com</b> (free bricks go live after a quick
-              review). Every ad dollar you spend also converts to wall
-              credit.
+              code <b>FREE4</b> for one brick anywhere (free bricks go live
+              after a quick review). Members can also spend 100 points for a
+              brick, and every ad dollar converts to wall credit.
             </p>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -131,11 +133,39 @@ export default async function WallOfFamePage({
         </Alert>
       ) : null}
 
+      <section className="rounded-3xl border border-emerald-200 bg-emerald-50/70 p-4 sm:p-5">
+        <h2 className="text-base font-black text-slate-900">
+          🎁 Three ways to get a free brick
+        </h2>
+        <ol className="mt-2 grid gap-2 text-sm text-slate-700 sm:grid-cols-3">
+          <li className="rounded-xl bg-white/80 px-3 py-2">
+            <b>1 · Free zone</b> — one free 4px brick per member in the green
+            band at the bottom of the board.
+          </li>
+          <li className="rounded-xl bg-white/80 px-3 py-2">
+            <b>2 · Code FREE4</b> — one free brick anywhere on the board.
+            Share it — it's public.
+          </li>
+          <li className="rounded-xl bg-white/80 px-3 py-2">
+            <b>3 · 100 points</b> — members trade 100 points for a brick
+            anywhere{user ? ` (you have ${pointsBalance.toLocaleString()} pts)` : ""}.
+            New members start with 50 — earn more by posting, reviewing, referring.
+          </li>
+        </ol>
+        {user && !hasFreeBlock ? (
+          <p className="mt-2 text-xs font-bold text-emerald-800">
+            You haven't claimed your free brick yet — drag a box on the board
+            and pick any of the three ways above.
+          </p>
+        ) : null}
+      </section>
+
       <PixelWall
         blocks={blocks}
         priceUsd={PRICE}
         hasFreeBlock={hasFreeBlock}
         creditUsd={creditUsd}
+        pointsBalance={pointsBalance}
       />
 
       {board.length ? (

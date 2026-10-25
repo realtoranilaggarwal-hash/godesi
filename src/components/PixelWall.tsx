@@ -19,8 +19,11 @@ const SIZE = 1000;
 const SNAP = 2; // selections snap to 2px — a 2x2 = 4px brick is the $4 minimum
 const FREE_Y = 900; // bottom 100 rows = the free zone
 const FREE_CODE = "godesi.com";
-/** Giveaway codes — one free 4px brick anywhere (BRICK for promos, TEMPLE for temples & charities). */
-const ONE_BRICK_CODES = new Set(["brick", "temple"]);
+/** Giveaway codes — one free 4px brick anywhere (BRICK/TEMPLE for promos,
+ *  FREE4 is the public code published on the site). */
+const ONE_BRICK_CODES = new Set(["brick", "temple", "free4"]);
+/** Member points buy one 4px brick anywhere on the board. */
+const BRICK_POINTS = 100;
 
 const hit = (blocks: Block[], px: number, py: number) =>
   blocks.find(
@@ -37,6 +40,7 @@ export function PixelWall({
   priceUsd,
   hasFreeBlock,
   creditUsd,
+  pointsBalance,
 }: {
   blocks: Block[];
   priceUsd: number;
@@ -44,6 +48,8 @@ export function PixelWall({
   hasFreeBlock: boolean;
   /** Dollars of ad spend convertible to wall bricks. */
   creditUsd: number;
+  /** Member's current points balance (0 when signed out). */
+  pointsBalance: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const images = useRef(new Map<string, HTMLImageElement>());
@@ -59,6 +65,7 @@ export function PixelWall({
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [code, setCode] = useState("");
+  const [usePoints, setUsePoints] = useState(false);
   /** Sold block under the pointer — drives the big hover preview card. */
   const [hover, setHover] = useState<{ block: Block; cx: number; cy: number } | null>(null);
 
@@ -214,7 +221,7 @@ export function PixelWall({
     try {
       const result = await startPixelWallCheckoutAction({
         x: sel.x, y: sel.y, w: sel.w, h: sel.h,
-        title, linkUrl, imageUrl, code, description: about,
+        title, linkUrl, imageUrl, code, description: about, usePoints,
       });
       if (result?.error) {
         setError(
@@ -243,8 +250,14 @@ export function PixelWall({
   const brickCodeTooBig = ONE_BRICK_CODES.has(entered) && pxCount > 4;
   const free =
     ((inFreeZone && pxCount <= 4) || codeFree) && pxCount > 0 && !hasFreeBlock;
-  const creditApplied = free ? 0 : Math.min(creditUsd, pxCount * priceUsd);
-  const cost = free ? 0 : pxCount * priceUsd - creditApplied;
+  /** Points redemption: 100 points buys one 4px brick anywhere — a second
+   *  option alongside the one-per-member free claim. */
+  const canUsePoints = !free && pxCount === 4 && pointsBalance >= BRICK_POINTS;
+  const payingByPoints = canUsePoints && usePoints;
+  const creditApplied = free || payingByPoints
+    ? 0
+    : Math.min(creditUsd, pxCount * priceUsd);
+  const cost = free || payingByPoints ? 0 : pxCount * priceUsd - creditApplied;
 
   return (
     <div className="space-y-4">
@@ -427,6 +440,18 @@ export function PixelWall({
                   ) : null}
                 </label>
               ) : null}
+              {canUsePoints ? (
+                <label className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800">
+                  <input
+                    type="checkbox"
+                    checked={usePoints}
+                    onChange={(e) => setUsePoints(e.target.checked)}
+                    className="h-4 w-4 accent-emerald-600"
+                  />
+                  Use {BRICK_POINTS} points for this brick — free (you have{" "}
+                  {pointsBalance.toLocaleString()} pts)
+                </label>
+              ) : null}
               {error ? (
                 <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
                   {error}
@@ -442,12 +467,16 @@ export function PixelWall({
                   ? "Working…"
                   : free
                     ? `Claim ${bricks.toLocaleString()} desi bricks — FREE 🎉`
-                    : `Pay $${cost.toLocaleString()} — own ${bricks.toLocaleString()} desi bricks 🧱`}
+                    : payingByPoints
+                      ? `Claim this desi brick — ${BRICK_POINTS} points 🎉`
+                      : `Pay $${cost.toLocaleString()} — own ${bricks.toLocaleString()} desi bricks 🧱`}
               </button>
               <p className="text-center text-xs text-slate-500">
                 {free
                   ? "Free for now — your desi brick shows after a quick review (one free brick per member)."
-                  : "Card checkout by Stripe. Your desi bricks light up the moment payment lands and your art stretches across the whole block."}
+                  : payingByPoints
+                    ? `${BRICK_POINTS} points are spent when you claim — the brick shows after a quick review.`
+                    : "Card checkout by Stripe. Your desi bricks light up the moment payment lands and your art stretches across the whole block."}
               </p>
             </div>
           ) : null}
