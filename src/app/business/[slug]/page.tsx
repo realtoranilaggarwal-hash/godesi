@@ -37,7 +37,7 @@ import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
-import { InlineBanner, SidebarBanners } from "@/components/Banners";
+import { InlineBanner, SidebarBanners, SmallBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { LogoTile } from "@/components/LogoTile";
@@ -1163,6 +1163,10 @@ export default async function BusinessProfilePage({
                 </Link>
               </Card>
             ) : null}
+
+            {/* Rotating 320x100 sponsors fill the rail's empty stretch;
+                start=5 picks a different slice than the left rail's set. */}
+            <SmallBanners embedded tree={false} show={5} start={5} />
           </div>
         </div>
 
