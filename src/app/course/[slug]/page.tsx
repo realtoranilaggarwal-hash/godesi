@@ -48,7 +48,7 @@ export default async function CourseSalesPage({
   const buyButton = (
     <>
       Buy the course — ${price}{" "}
-      <span className="text-sm font-bold text-fuchsia-400 line-through">
+      <span className="text-sm font-bold text-amber-500 line-through">
         ${listPrice}
       </span>
     </>
@@ -56,10 +56,10 @@ export default async function CourseSalesPage({
 
   return (
     <div className="space-y-8">
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-fuchsia-600 to-amber-500 p-8 text-white shadow-xl sm:p-12">
+      <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-8 text-white shadow-xl sm:p-12">
         <div className="flex flex-wrap items-center gap-6">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold uppercase tracking-widest text-amber-200">
+            <p className="text-sm font-bold uppercase tracking-widest text-amber-400">
               {course.title}
             </p>
             <h1 className="mt-2 max-w-2xl text-3xl font-black leading-tight sm:text-4xl">
@@ -74,7 +74,7 @@ export default async function CourseSalesPage({
                   <input type="hidden" name="course" value={course.slug} />
                   <button
                     type="submit"
-                    className="rounded-2xl bg-white px-6 py-3 text-base font-black text-fuchsia-700 shadow-lg transition hover:scale-105"
+                    className="rounded-2xl bg-white px-6 py-3 text-base font-black text-slate-900 shadow-lg transition hover:scale-105"
                   >
                     {buyButton}
                   </button>
@@ -82,15 +82,15 @@ export default async function CourseSalesPage({
               ) : (
                 <Link
                   href={`/login?next=/course/${course.slug}`}
-                  className="rounded-2xl bg-white px-6 py-3 text-base font-black text-fuchsia-700 shadow-lg transition hover:scale-105"
+                  className="rounded-2xl bg-white px-6 py-3 text-base font-black text-slate-900 shadow-lg transition hover:scale-105"
                 >
                   {buyButton}
                 </Link>
               )}
-              <span className="rounded-full bg-amber-300 px-2.5 py-1 text-xs font-black text-amber-950">
+              <span className="rounded-full bg-amber-400 px-2.5 py-1 text-xs font-black text-slate-950">
                 LAUNCH DEAL · was ${listPrice}
               </span>
-              <span className="text-xs text-white/80">
+              <span className="text-xs text-slate-400">
                 One payment · lifetime access · {course.lessons.length} lessons
               </span>
             </div>
@@ -110,7 +110,7 @@ export default async function CourseSalesPage({
           <img
             src={course.cover}
             alt={`${course.title} cover`}
-            className="w-full max-w-[240px] shrink-0 rounded-2xl border-4 border-white/30 object-cover shadow-lg sm:max-w-[300px]"
+            className="w-full max-w-[240px] shrink-0 rounded-2xl border-2 border-amber-400/50 object-cover shadow-lg sm:max-w-[300px]"
           />
         </div>
       </section>
@@ -133,7 +133,7 @@ export default async function CourseSalesPage({
         <ol className="divide-y divide-slate-100">
           {course.lessons.map((lesson, i) => (
             <li key={lesson.title} className="flex items-center gap-3 py-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-100 text-xs font-black text-violet-700">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-700">
                 {i + 1}
               </span>
               <span className="flex-1 text-sm font-semibold">
@@ -148,7 +148,7 @@ export default async function CourseSalesPage({
       </Card>
 
       <Link href={AUTHOR_PROFILE_HREF} className="group block">
-        <Card className="flex flex-wrap items-center gap-4 p-5 transition group-hover:border-amber-400">
+        <Card className="flex flex-wrap items-center gap-4 p-5 transition group-hover:border-slate-400">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={AUTHOR_PHOTO}
@@ -158,7 +158,7 @@ export default async function CourseSalesPage({
           <div className="text-sm">
             <p className="font-bold">
               Taught by {AUTHOR_NAME}{" "}
-              <span className="font-semibold text-amber-600 group-hover:underline">
+              <span className="font-semibold text-slate-600 group-hover:underline">
                 View profile →
               </span>
             </p>
