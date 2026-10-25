@@ -538,6 +538,13 @@ export default async function BusinessProfilePage({
                     : "No reviews yet"}
                 </span>
               </div>
+            </div>
+            </div>
+            {locationBlock}
+            {/* Everything past the name row spans the full card width — the
+                two-column split is only for the header + map, otherwise the
+                map column leaves a tall empty strip beside the text. */}
+            <div className="min-w-0 lg:col-span-full">
               {description ? (
                 <p className="mt-3 whitespace-pre-line text-slate-700">
                   {description}
@@ -824,8 +831,6 @@ export default async function BusinessProfilePage({
                 )}
               </div>
             </div>
-            </div>
-            {locationBlock}
             </div>
           </Card>
 
