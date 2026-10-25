@@ -147,12 +147,14 @@ export default async function HomePage() {
     .slice(0, 6);
 
   return (
-    <div className="space-y-8">
+    <>
       {/* Brand H1 for search engines — the page leads with widgets, so the
-          site's real name lives in this screen-reader heading. */}
+          site's real name lives in this screen-reader heading. Kept outside
+          space-y-* stacks so it can't push a ghost gap onto the page. */}
       <h1 className="sr-only">
         GoDesi.com — Desi business directory, events, deals &amp; community
       </h1>
+      <div className="space-y-8">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-3">
           <RecentStrip />
@@ -409,6 +411,7 @@ export default async function HomePage() {
 
         <AboutGodesi />
       </div>
-    </div>
+      </div>
+    </>
   );
 }
