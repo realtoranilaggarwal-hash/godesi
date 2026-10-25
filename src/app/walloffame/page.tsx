@@ -166,6 +166,7 @@ export default async function WallOfFamePage({
         hasFreeBlock={hasFreeBlock}
         creditUsd={creditUsd}
         pointsBalance={pointsBalance}
+        signedIn={!!user}
       />
 
       {board.length ? (
