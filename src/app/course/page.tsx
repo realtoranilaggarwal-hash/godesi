@@ -37,7 +37,7 @@ export default async function CourseCatalogPage() {
     <div className="space-y-8">
       <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-8 text-white shadow-xl sm:p-10">
         <div className="flex flex-wrap items-center gap-6">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-full sm:basis-0">
             <p className="text-sm font-bold uppercase tracking-widest text-amber-400">
               GoDesi Courses
             </p>

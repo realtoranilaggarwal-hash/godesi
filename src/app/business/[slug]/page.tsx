@@ -546,7 +546,7 @@ export default async function BusinessProfilePage({
                 map column leaves a tall empty strip beside the text. */}
             <div className="min-w-0 lg:col-span-full">
               {description ? (
-                <p className="mt-3 whitespace-pre-line text-slate-700">
+                <p className="mt-3 whitespace-pre-line break-words text-slate-700">
                   {description}
                 </p>
               ) : null}

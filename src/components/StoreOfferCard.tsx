@@ -5,7 +5,7 @@ import type { PublicStoreOffer } from "@/lib/storeOffers";
 export function StoreOfferCard({ offer }: { offer: PublicStoreOffer }) {
   const ends = expiryLabel(offer.endsAt);
   return (
-    <div className="flex h-full flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="flex h-full min-w-0 flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4">
       <p className="flex items-center justify-between gap-2 text-xs">
         <span className="truncate font-semibold text-slate-700">
           🛒 {offer.advertiserName}
@@ -14,9 +14,9 @@ export function StoreOfferCard({ offer }: { offer: PublicStoreOffer }) {
           Paid link
         </span>
       </p>
-      <p className="font-bold text-slate-900">{offer.title}</p>
+      <p className="break-words font-bold text-slate-900">{offer.title}</p>
       {offer.description ? (
-        <p className="line-clamp-3 text-sm text-slate-600">
+        <p className="line-clamp-3 break-words text-sm text-slate-600">
           {offer.description}
         </p>
       ) : null}

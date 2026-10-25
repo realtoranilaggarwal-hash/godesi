@@ -30,7 +30,7 @@ export function DealCard({
 }: DealCardProps) {
   const ends = expiryLabel(expiresAt);
   return (
-    <div className="flex h-full flex-col gap-2 rounded-2xl border border-dashed border-rose-300 bg-rose-50/60 p-4">
+    <div className="flex h-full min-w-0 flex-col gap-2 overflow-hidden rounded-2xl border border-dashed border-rose-300 bg-rose-50/60 p-4">
       {business ? (
         <Link
           href={`/business/${business.slug}`}
@@ -52,16 +52,16 @@ export function DealCard({
           </span>
         </Link>
       ) : null}
-      <p className="font-bold text-rose-900">🏷️ {title}</p>
+      <p className="break-words font-bold text-rose-900">🏷️ {title}</p>
       {details ? (
-        <p className="line-clamp-4 whitespace-pre-line text-sm text-slate-700">
+        <p className="line-clamp-4 whitespace-pre-line break-words text-sm text-slate-700">
           {details}
         </p>
       ) : null}
       <div className="mt-auto flex flex-wrap items-center gap-2 pt-1 text-xs">
         {code ? (
           <span className="inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-white px-2 py-1">
-            <span className="font-mono font-bold tracking-wider text-rose-800">
+            <span className="break-all font-mono font-bold tracking-wider text-rose-800">
               {code}
             </span>
             <CopyButton value={code} />
