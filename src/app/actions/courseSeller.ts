@@ -36,6 +36,18 @@ export async function submitCourseSellerAction(formData: FormData) {
     return { ok: false as const, error: parsed.error.issues[0].message };
   }
   const d = parsed.data;
+  // One application per person per day — silently accept repeats so bots get
+  // no signal, but don't pile up leads or send another email.
+  const recent = await db.partnerLead.count({
+    where: {
+      site: "godesi.com",
+      intent: "sell",
+      category: "course",
+      createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      OR: [{ email: d.email }, { phone: d.phone }],
+    },
+  });
+  if (recent > 0) return { ok: true as const };
   await db.partnerLead.create({
     data: {
       site: "godesi.com",
