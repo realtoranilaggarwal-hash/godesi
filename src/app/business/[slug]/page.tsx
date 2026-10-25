@@ -63,6 +63,7 @@ import { GodesiMark } from "@/components/GodesiMark";
 import { CardSearchStrip } from "@/components/CardSearchStrip";
 import { MapEmbed } from "@/components/MapEmbed";
 import { getCategoryTree } from "@/lib/directory";
+import { AUTHOR_PROFILE_HREF } from "@/lib/courses/types";
 
 export const dynamic = "force-dynamic";
 
@@ -329,6 +330,28 @@ export default async function BusinessProfilePage({
             Show this card or mention GoDesi at {business.name} to redeem
           </p>
         </div>
+      ) : null}
+
+      {/* Anil's profile promotes his GoDesi course catalog */}
+      {`/b/${business.slug}` === AUTHOR_PROFILE_HREF ? (
+        <Link
+          href="/course"
+          className="group mt-6 block rounded-2xl border border-slate-800 bg-slate-900 p-4 text-white shadow transition hover:shadow-lg"
+        >
+          <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">
+            GoDesi Courses
+          </p>
+          <p className="mt-1 text-sm font-black leading-tight">
+            📚 {business.name.split(" ")[0]}&apos;s courses — online income,
+            real estate, insurance &amp; more
+          </p>
+          <p className="mt-1 text-xs text-slate-300">
+            20 short courses · $9 each · taught by {business.name}
+          </p>
+          <p className="mt-2 text-xs font-bold text-amber-400 group-hover:underline">
+            Browse the catalog →
+          </p>
+        </Link>
       ) : null}
 
       {/* Lead capture — a booking request on performer listings */}

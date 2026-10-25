@@ -119,6 +119,23 @@ export default async function CourseCatalogPage() {
           );
         })}
       </div>
+
+      <Link
+        href="/sell-courses"
+        className="group block rounded-3xl border-2 border-dashed border-slate-300 bg-white p-6 text-center transition hover:border-slate-500"
+      >
+        <p className="text-lg font-black text-slate-900">
+          💼 Have a skill or ebook to sell? List your course on GoDesi —{" "}
+          <span className="text-amber-600">you keep 90%</span>
+        </p>
+        <p className="mt-1 text-sm text-slate-500">
+          We build the page, take payments, deliver it and market it across our
+          sites.{" "}
+          <span className="font-semibold text-slate-700 group-hover:underline">
+            Apply to sell →
+          </span>
+        </p>
+      </Link>
     </div>
   );
 }
