@@ -141,19 +141,17 @@ export default async function RootLayout({
           />
           {/* Google Reader Revenue Manager (swg-basic): enables the GoDesi
               publication's newsletter/reader CTAs and is required for Google
-              News Publisher Center review. */}
-          <Script
-            id="swg-basic"
+              News Publisher Center review. Plain script tags (not next/script)
+              so Google's verifier sees them in the raw HTML. */}
+          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+          <script
             async
             type="application/javascript"
             src="https://news.google.com/swg/js/v1/swg-basic.js"
-            strategy="afterInteractive"
           />
-          <Script
-            id="swg-basic-init"
-            strategy="afterInteractive"
+          <script
             dangerouslySetInnerHTML={{
-              __html: `(self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => { basicSubscriptions.init({ type: "NewsArticle", isPartOfType: ["Product"], isPartOfProductId: "CAownJDiCw:openaccess", clientOptions: { theme: "light", lang: "en" } }); });`,
+              __html: `(self.SWG_BASIC = self.SWG_BASIC || []).push(function(basicSubscriptions){ basicSubscriptions.init({ type: "NewsArticle", isPartOfType: ["Product"], isPartOfProductId: "CAownJDiCw:openaccess", clientOptions: { theme: "light", lang: "en" } }); });`,
             }}
           />
         </head>
