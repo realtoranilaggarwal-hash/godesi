@@ -156,6 +156,41 @@ export default async function TrafficPage() {
         </Card>
       )}
 
+      <section className="grid gap-4 md:grid-cols-2">
+        <Card className="min-w-0 overflow-hidden">
+          <h2 className="text-lg font-semibold text-slate-900">
+            🗺️ Visitors on the map, live
+          </h2>
+          <div className="mt-3">
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <script
+              type="text/javascript"
+              src="//cdn.livetrafficfeed.com/static/mapjs/live.js?ro=1&rat=60&typ=1&mv=a814544e2ee74d56"
+            ></script>
+            <noscript>
+              <a href="https://livetrafficfeed.com/live-maps-visitor">
+                Live Maps Visitor
+              </a>
+            </noscript>
+          </div>
+        </Card>
+        <Card className="min-w-0 overflow-hidden">
+          <h2 className="text-lg font-semibold text-slate-900">
+            🟢 Live traffic stats
+          </h2>
+          <div className="mt-3">
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <script
+              type="text/javascript"
+              src="//cdn.livetrafficfeed.com/static/widgets/live.js?bc=ffffff&tc=000000&brd1=2853a8&lnk=135d9e&hc=ffffff&hfc=2853a8&nc=19ff19&vv=240&tft=10&ro=0&res=0&mv=a814544e2ee74d56"
+            ></script>
+            <noscript>
+              <a href="https://livetrafficfeed.com">Live Traffic Stats</a>
+            </noscript>
+          </div>
+        </Card>
+      </section>
+
       <Card className="bg-slate-50">
         <h2 className="text-lg font-semibold text-slate-900">
           Want this audience to see you?
