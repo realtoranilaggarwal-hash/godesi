@@ -67,8 +67,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="overflow-x-hidden">
-      {adsenseClient || umamiId || gaId || clarityId || quoraPixel ? (
-        <head>
+      <head>
           {adsenseClient ? (
             <Script
               async
@@ -140,8 +139,24 @@ export default async function RootLayout({
             src="https://emrldco.com/NTg3NTE5.js?t=587519"
             data-cmp-ab="2"
           />
+          {/* Google Reader Revenue Manager (swg-basic): enables the GoDesi
+              publication's newsletter/reader CTAs and is required for Google
+              News Publisher Center review. */}
+          <Script
+            id="swg-basic"
+            async
+            type="application/javascript"
+            src="https://news.google.com/swg/js/v1/swg-basic.js"
+            strategy="afterInteractive"
+          />
+          <Script
+            id="swg-basic-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `(self.SWG_BASIC = self.SWG_BASIC || []).push(basicSubscriptions => { basicSubscriptions.init({ type: "NewsArticle", isPartOfType: ["Product"], isPartOfProductId: "CAownJDiCw:openaccess", clientOptions: { theme: "light", lang: "en" } }); });`,
+            }}
+          />
         </head>
-      ) : null}
       <body
         className={`${inter.className} min-h-screen bg-slate-50 pb-20 text-slate-900 sm:pb-0`}
       >
