@@ -354,13 +354,13 @@ export default async function BusinessProfilePage({
     </>
   );
 
-  /** Address + free OpenStreetMap — rendered in both rails' positions. */
-  const locationCard =
+  /** Address + free OpenStreetMap — sits inside the header card, right side. */
+  const locationBlock =
     business.address || business.mapsUrl ? (
-      <Card>
-        <h2 className="mb-2 text-lg font-bold">Location</h2>
+      <div className="min-w-0">
+        <h2 className="mb-2 text-sm font-bold text-slate-700">📍 Location</h2>
         {business.address ? (
-          <p className="mb-3 text-sm text-slate-700">{business.address}</p>
+          <p className="mb-2 text-xs text-slate-600">{business.address}</p>
         ) : null}
         <MapEmbed
           parts={[business.address, business.city, business.state]}
@@ -371,12 +371,12 @@ export default async function BusinessProfilePage({
             href={business.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm font-semibold text-indigo-600"
+            className="mt-1.5 inline-block text-xs font-semibold text-indigo-600"
           >
             Open in Google Maps
           </a>
         ) : null}
-      </Card>
+      </div>
     ) : null;
 
   return (
@@ -408,6 +408,7 @@ export default async function BusinessProfilePage({
               alt={`${business.name} cover photo`}
               className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
             />
+            <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <LogoTile
               name={business.name}
@@ -814,13 +815,12 @@ export default async function BusinessProfilePage({
               </div>
             </div>
             </div>
+            {locationBlock}
+            </div>
           </Card>
 
           {/* Card face + tools under the info on phones */}
-          <div className="space-y-4 lg:hidden">
-            {cardColumn}
-            {locationCard}
-          </div>
+          <div className="space-y-4 lg:hidden">{cardColumn}</div>
 
         {business.deals.length || isOwner ? (
           <Card id="deals">
@@ -1123,7 +1123,6 @@ export default async function BusinessProfilePage({
           {/* Desktop right rail — the digital card and all its tools */}
           <div className="hidden space-y-4 lg:block">
             {cardColumn}
-            {locationCard}
 
             {isOwner ? (
               <Card>
