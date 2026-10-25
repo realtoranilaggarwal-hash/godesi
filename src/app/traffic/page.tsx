@@ -168,7 +168,7 @@ export default async function TrafficPage() {
           </h2>
           <iframe
             title="Live visitor map"
-            sandbox="allow-scripts allow-popups allow-top-navigation-by-user-activation"
+            sandbox="allow-scripts allow-popups"
             srcDoc={
               '<!doctype html><html><head><style>body{margin:0}</style></head><body><script type="text/javascript" src="//cdn.livetrafficfeed.com/static/mapjs/live.js?ro=1&rat=60&typ=1&mv=a814544e2ee74d56"></script><noscript><a href="https://livetrafficfeed.com/live-maps-visitor">Live Maps Visitor</a></noscript></body></html>'
             }
@@ -181,7 +181,7 @@ export default async function TrafficPage() {
           </h2>
           <iframe
             title="Live traffic stats"
-            sandbox="allow-scripts allow-popups allow-top-navigation-by-user-activation"
+            sandbox="allow-scripts allow-popups"
             srcDoc={
               '<!doctype html><html><head><style>body{margin:0}</style></head><body><script type="text/javascript" src="//cdn.livetrafficfeed.com/static/widgets/live.js?bc=ffffff&tc=000000&brd1=2853a8&lnk=135d9e&hc=ffffff&hfc=2853a8&nc=19ff19&vv=240&tft=10&ro=0&res=0&mv=a814544e2ee74d56"></script><noscript><a href="https://livetrafficfeed.com">Live Traffic Stats</a></noscript></body></html>'
             }

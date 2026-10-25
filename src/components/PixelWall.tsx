@@ -41,6 +41,7 @@ export function PixelWall({
   hasFreeBlock,
   creditUsd,
   pointsBalance,
+  signedIn,
 }: {
   blocks: Block[];
   priceUsd: number;
@@ -50,6 +51,8 @@ export function PixelWall({
   creditUsd: number;
   /** Member's current points balance (0 when signed out). */
   pointsBalance: number;
+  /** Signed-out visitors can explore the wall but hit the sign-in gate at booking. */
+  signedIn: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const images = useRef(new Map<string, HTMLImageElement>());
@@ -342,12 +345,37 @@ export function PixelWall({
                 onClick={() => setBooking(true)}
                 className="rounded-xl bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-2 text-sm font-black text-white shadow hover:opacity-90"
               >
-                Book this spot →
+                {signedIn ? "Book this spot →" : "Sign in to book →"}
               </button>
             </div>
           </div>
 
-          {booking ? (
+          {booking && !signedIn ? (
+            <div className="mt-4 rounded-2xl bg-white/80 p-4 text-center">
+              <p className="text-lg font-black text-slate-900">
+                🔒 Almost there — sign in to book this spot
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                Bricks are booked to your GoDesi account so they stay yours for
+                life. Sign in (or join free — it takes 30 seconds, and every
+                member gets one free brick), then come right back here.
+              </p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                <a
+                  href="/login?next=/walloffame"
+                  className="rounded-xl bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-4 py-2 text-sm font-black text-white shadow hover:opacity-90"
+                >
+                  Sign in →
+                </a>
+                <a
+                  href="/signup?next=/walloffame"
+                  className="rounded-xl border border-indigo-300 bg-white px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50"
+                >
+                  Join GoDesi free →
+                </a>
+              </div>
+            </div>
+          ) : booking ? (
             <div className="mt-4 space-y-3 rounded-2xl bg-white/80 p-4">
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-sm font-semibold text-slate-700">
