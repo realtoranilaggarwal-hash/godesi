@@ -3,7 +3,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { buyCourseAction, hasCourseAccess } from "@/app/actions/course";
-import { AUTHOR_NAME, AUTHOR_PHOTO, courseBySlug } from "@/lib/courses";
+import {
+  AUTHOR_NAME,
+  AUTHOR_PHOTO,
+  AUTHOR_PROFILE_HREF,
+  courseBySlug,
+} from "@/lib/courses";
 import { Alert, Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -142,21 +147,28 @@ export default async function CourseSalesPage({
         </ol>
       </Card>
 
-      <Card className="flex flex-wrap items-center gap-4 p-5">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={AUTHOR_PHOTO}
-          alt={AUTHOR_NAME}
-          className="h-16 w-16 rounded-2xl object-cover"
-        />
-        <div className="text-sm">
-          <p className="font-bold">Taught by {AUTHOR_NAME}</p>
-          <p className="mt-0.5 text-slate-500">
-            New Jersey realtor, insurance professional and investor — teaching
-            the part-time income paths he uses himself.
-          </p>
-        </div>
-      </Card>
+      <Link href={AUTHOR_PROFILE_HREF} className="group block">
+        <Card className="flex flex-wrap items-center gap-4 p-5 transition group-hover:border-amber-400">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={AUTHOR_PHOTO}
+            alt={AUTHOR_NAME}
+            className="h-16 w-16 rounded-2xl object-cover"
+          />
+          <div className="text-sm">
+            <p className="font-bold">
+              Taught by {AUTHOR_NAME}{" "}
+              <span className="font-semibold text-amber-600 group-hover:underline">
+                View profile →
+              </span>
+            </p>
+            <p className="mt-0.5 text-slate-500">
+              New Jersey realtor, insurance professional and investor — teaching
+              the part-time income paths he uses himself.
+            </p>
+          </div>
+        </Card>
+      </Link>
 
       <Alert tone="info">
         <strong>Why ${price} (was ${listPrice})?</strong> Cheap enough to buy
