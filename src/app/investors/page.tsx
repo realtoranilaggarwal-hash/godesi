@@ -120,7 +120,6 @@ export default function InvestorsPage() {
   const classifiedY1 = STREAMS[0].year1;
   const bannerY1 = STREAMS[1].year1;
   const otherY1 = STREAMS.slice(2).reduce((s, x) => s + x.year1, 0);
-  const grossY1 = classifiedY1 + bannerY1 + otherY1;
 
   const rows = Array.from({ length: YEARS }, (_, i) => {
     const factor = Math.pow(GROWTH, i);
