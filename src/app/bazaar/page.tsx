@@ -282,8 +282,10 @@ export default async function BazaarPage() {
                   ))}
                   {group.length > shown.length ? (
                     <li>
+                      {/* Overflow must open the whole category, not just the
+                          first row's subcategory — siblings would vanish. */}
                       <Link
-                        href={`/search?city=Iselin&${filter}`}
+                        href={`/search?city=Iselin&category=${first.categorySlug}`}
                         className="block rounded-lg border border-dashed border-slate-300 px-2.5 py-1.5 text-sm font-semibold text-indigo-600 hover:border-indigo-400"
                       >
                         +{group.length - shown.length} more

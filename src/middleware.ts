@@ -23,8 +23,16 @@ export function middleware(req: NextRequest) {
   if (path === "/robots.txt")
     return NextResponse.rewrite(new URL("/bazaar-robots.txt", req.url));
 
-  // Bundled assets, icons, images and widgets must load for the rewritten page.
-  if (path.startsWith("/_next") || path.includes("."))
+  // Bundled assets and real files must load for the rewritten page. The
+  // extension list — not any dot — is what marks a file, so app routes like
+  // /feed.xml and /news/rss.xml still redirect instead of mirroring GoDesi
+  // feeds on this domain.
+  if (
+    path.startsWith("/_next") ||
+    /\.(ico|png|jpe?g|gif|webp|avif|svg|woff2?|ttf|otf|css|m?js|map|txt|webmanifest|mp3|mp4|webm|pdf|html?|json)$/i.test(
+      path,
+    )
+  )
     return NextResponse.next();
 
   return NextResponse.redirect(
