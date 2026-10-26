@@ -157,10 +157,11 @@ export default async function TrafficPage() {
       )}
 
       {/* The livetrafficfeed widgets render in-place via document.write, so
-          each sits in its own sandboxed iframe: the frame gets a real document
-          (scripts run even on client-side navigation, which plain script tags
-          don't), and the sandbox keeps third-party code out of godesi's
-          origin. */}
+          each sits in its own sandboxed iframe pointed at a static page on
+          this domain (public/widgets/livetraffic-*.html): the frame gets a
+          real godesi.com document — scripts run even on client-side
+          navigation and livetrafficfeed can verify the domain — while the
+          sandbox keeps their code out of godesi's origin. */}
       <section className="grid gap-4 md:grid-cols-2">
         <Card className="min-w-0 overflow-hidden">
           <h2 className="text-lg font-semibold text-slate-900">
@@ -169,9 +170,7 @@ export default async function TrafficPage() {
           <iframe
             title="Live visitor map"
             sandbox="allow-scripts allow-popups"
-            srcDoc={
-              '<!doctype html><html><head><style>body{margin:0}</style></head><body><script type="text/javascript" src="//cdn.livetrafficfeed.com/static/mapjs/live.js?ro=1&rat=60&typ=1&mv=a814544e2ee74d56"></script><noscript><a href="https://livetrafficfeed.com/live-maps-visitor">Live Maps Visitor</a></noscript></body></html>'
-            }
+            src="/widgets/livetraffic-map.html"
             className="mt-3 h-[360px] w-full border-0"
           />
         </Card>
@@ -182,9 +181,7 @@ export default async function TrafficPage() {
           <iframe
             title="Live traffic stats"
             sandbox="allow-scripts allow-popups"
-            srcDoc={
-              '<!doctype html><html><head><style>body{margin:0}</style></head><body><script type="text/javascript" src="//cdn.livetrafficfeed.com/static/widgets/live.js?bc=ffffff&tc=000000&brd1=2853a8&lnk=135d9e&hc=ffffff&hfc=2853a8&nc=19ff19&vv=240&tft=10&ro=0&res=0&mv=a814544e2ee74d56"></script><noscript><a href="https://livetrafficfeed.com">Live Traffic Stats</a></noscript></body></html>'
-            }
+            src="/widgets/livetraffic-stats.html"
             className="mt-3 h-[320px] w-full border-0"
           />
         </Card>
