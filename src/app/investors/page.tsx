@@ -317,6 +317,78 @@ export default function InvestorsPage() {
         </p>
       </Card>
 
+      {/* valuation */}
+      <Card className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-black">🏷️ What GoDesi is worth today</h2>
+          <p className="text-xs font-semibold text-slate-500">
+            Replacement value of what&apos;s already built — not a formal
+            appraisal
+          </p>
+        </div>
+        <ul className="grid gap-1.5 text-sm text-slate-700 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            "Business directory + claim flow (15,000+ listings)",
+            "Digital business cards, QR & posters",
+            "Lead capture & paid lead unlocks",
+            "Deals & Deal-of-the-Day engine",
+            "Events & paid ticketing",
+            "Wall of Fame pixel wall",
+            "Courses platform (own + 90/10 sellers)",
+            "Astrology, panchang & morning emails",
+            "Members-only free tools directory",
+            "News, radio & TV hub",
+            "Community: Chatter, Rishta, social wall",
+            "Admin desk: outreach, approvals, ad orders",
+            "Stripe payments & ad orders",
+            "Live visitor map & analytics",
+            "SEO engine: sitemaps, news feeds, doorway sites",
+            "Memberships & founding offers",
+            "City pages + bulk import pipeline",
+            "Accounts, verification & notifications",
+          ].map((f) => (
+            <li key={f} className="flex items-baseline gap-2">
+              <span className="text-emerald-600">✓</span>
+              <span>
+                {f} <b className="text-slate-500">~$10K</b>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Platform build (18 × $10K)
+            </p>
+            <p className="text-lg font-black text-slate-900">$180,000</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Domain portfolio (15+)
+            </p>
+            <p className="text-lg font-black text-slate-900">$30,000</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Trademark & brand
+            </p>
+            <p className="text-lg font-black text-slate-900">$20,000</p>
+          </div>
+          <div className="rounded-xl border-2 border-indigo-300 bg-indigo-50 p-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">
+              Pre-money valuation
+            </p>
+            <p className="text-lg font-black text-indigo-700">≈$230,000</p>
+          </div>
+        </div>
+        <p className="text-sm text-slate-600">
+          With the $50,000 raise, <b>post-money ≈ $280,000</b> — so a $5,000
+          share is <b>≈1.8% of GoDesi</b>, $10,000 ≈3.6%, and the full $50,000
+          round ≈18%. Each investor&rsquo;s percentage = their amount ÷
+          $280,000.
+        </p>
+      </Card>
+
       {/* interactive playground */}
       <Card className="space-y-3">
         <div>
