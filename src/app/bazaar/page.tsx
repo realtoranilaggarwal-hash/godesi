@@ -97,6 +97,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "iselin desi",
     ],
     alternates: { canonical },
+    // Search Console ownership check for oaktreebazaar.com (this page is its
+    // homepage via the middleware rewrite).
+    verification: {
+      google: "fZSiKxMGxySpt25Ql9DU3yaAYnaovzW488oWFbfoMFY",
+    },
   };
 }
 
