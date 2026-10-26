@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Card, inputClass } from "@/components/ui";
+import { CopyTextButton } from "@/components/CopyTextButton";
 import { whatsappLink, siteUrl } from "@/lib/format";
 import { markOutreachAction } from "@/app/actions/outreach";
 
@@ -108,10 +109,11 @@ export default async function AdminOutreachPage({
         <h1 className="text-xl font-black">📣 Owner outreach</h1>
         <p className="mt-1 text-sm text-slate-600">
           Unclaimed starter listings whose owner publishes a phone, email or
-          website. Send the claim invite on WhatsApp or email, then mark it here
-          so nobody gets contacted twice. Contact details come from what the
-          business publishes about itself — nothing is scraped from another
-          directory.
+          website. Send the claim invite by text, WhatsApp or email — tap the
+          phone number to open your messaging app with the invite pre-filled,
+          or copy the text to paste anywhere — then mark it here so nobody
+          gets contacted twice. Contact details come from what the business
+          publishes about itself — nothing is scraped from another directory.
         </p>
         <p className="mt-2 text-sm font-semibold">
           {total} to contact · {contactedCount} already invited
@@ -181,7 +183,18 @@ export default async function AdminOutreachPage({
                   </p>
                 ) : null}
                 <p className="text-xs text-slate-600">
-                  {row.phone ?? "no phone"} · {row.publicEmail ?? "no email"}
+                  {row.phone ? (
+                    <a
+                      href={`sms:${row.phone}?&body=${encodeURIComponent(message)}`}
+                      className="font-semibold text-indigo-600"
+                      title="Tap to open your messaging app with the invite pre-filled"
+                    >
+                      {row.phone} 📱
+                    </a>
+                  ) : (
+                    "no phone"
+                  )}{" "}
+                  · {row.publicEmail ?? "no email"}
                   {row.websiteUrl ? (
                     <>
                       {" · "}
@@ -227,6 +240,20 @@ export default async function AdminOutreachPage({
                 ) : null}
                 {row.phone ? (
                   <a
+                    href={`sms:${row.phone}?&body=${encodeURIComponent(message)}`}
+                    className="rounded-lg bg-sky-600 px-3 py-1.5 text-white"
+                  >
+                    Text invite
+                  </a>
+                ) : null}
+                <CopyTextButton
+                  text={message}
+                  className="rounded-lg border border-indigo-300 px-3 py-1.5 text-indigo-700"
+                >
+                  Copy invite text
+                </CopyTextButton>
+                {row.phone ? (
+                  <a
                     href={`tel:${row.phone}`}
                     className="rounded-lg border border-slate-300 px-3 py-1.5 text-slate-700"
                   >
@@ -247,6 +274,7 @@ export default async function AdminOutreachPage({
                 className={inputClass}
               >
                 <option value="whatsapp">WhatsApp sent</option>
+                <option value="sms">Text sent</option>
                 <option value="email">Email sent</option>
                 <option value="phone">Called</option>
                 <option value="declined">Not interested</option>
