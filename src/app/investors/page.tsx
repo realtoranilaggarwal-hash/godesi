@@ -81,13 +81,6 @@ const ASSUMPTIONS = [
   "Other income (memberships, websites, bricks, courses, leads, events, affiliates) grows 10%/yr",
 ];
 
-const COSTS = [
-  { name: "Vercel hosting (Pro plan)", today: "$20/month", note: "All 15+ sites run on one plan" },
-  { name: "Neon Postgres database", today: "$0 (free tier)", note: "Free until ~10 GB storage / heavier compute" },
-  { name: "Resend email", today: "$0 (free tier)", note: "100 emails/day — covers morning emails now" },
-  { name: "Domains (~15 sites)", today: "≈$15/yr each", note: "≈$225/year total renewals" },
-];
-
 /** Annual infra allowance used in the projection, growing as traffic scales. */
 const INFRA = [525, 900, 1600, 2800, 4500];
 
@@ -291,29 +284,6 @@ export default function InvestorsPage() {
           Net = gross minus server/domain/email costs only. Sales-team pay
           (usually 10–20% commission) and card-processing fees (~3%) are not
           deducted here — deduct them on top.
-        </p>
-      </Card>
-
-      {/* real costs */}
-      <Card className="space-y-2">
-        <h2 className="text-lg font-black">🖥️ What the platform costs today</h2>
-        <ul className="grid gap-2 sm:grid-cols-2">
-          {COSTS.map((c) => (
-            <li
-              key={c.name}
-              className="rounded-xl border border-slate-200 bg-slate-50 p-3"
-            >
-              <p className="text-sm font-bold text-slate-900">{c.name}</p>
-              <p className="text-sm font-black text-indigo-700">{c.today}</p>
-              <p className="mt-0.5 text-xs text-slate-500">{c.note}</p>
-            </li>
-          ))}
-        </ul>
-        <p className="text-sm text-slate-600">
-          Current real spend: <b>≈$300–350/year</b>. The projection reserves a
-          growing allowance ({usd(INFRA[0])} in Year 1 rising to{" "}
-          {usd(INFRA[YEARS - 1])} by Year {YEARS}) so costs are never
-          understated as traffic and email volume grow.
         </p>
       </Card>
 
