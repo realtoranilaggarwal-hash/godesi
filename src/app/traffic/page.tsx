@@ -156,37 +156,6 @@ export default async function TrafficPage() {
         </Card>
       )}
 
-      {/* The livetrafficfeed widgets render in-place via document.write, so
-          each sits in its own sandboxed iframe pointed at a static page on
-          this domain (public/widgets/livetraffic-*.html): the frame gets a
-          real godesi.com document — scripts run even on client-side
-          navigation and livetrafficfeed can verify the domain — while the
-          sandbox keeps their code out of godesi's origin. */}
-      <section className="grid gap-4 md:grid-cols-2">
-        <Card className="min-w-0 overflow-hidden">
-          <h2 className="text-lg font-semibold text-slate-900">
-            🗺️ Visitors on the map, live
-          </h2>
-          <iframe
-            title="Live visitor map"
-            sandbox="allow-scripts allow-popups"
-            src="/widgets/livetraffic-map.html"
-            className="mt-3 h-[360px] w-full border-0"
-          />
-        </Card>
-        <Card className="min-w-0 overflow-hidden">
-          <h2 className="text-lg font-semibold text-slate-900">
-            🟢 Live traffic stats
-          </h2>
-          <iframe
-            title="Live traffic stats"
-            sandbox="allow-scripts allow-popups"
-            src="/widgets/livetraffic-stats.html"
-            className="mt-3 h-[320px] w-full border-0"
-          />
-        </Card>
-      </section>
-
       <Card className="bg-slate-50">
         <h2 className="text-lg font-semibold text-slate-900">
           Want this audience to see you?
