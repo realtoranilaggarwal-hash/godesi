@@ -7,6 +7,7 @@ import { Card } from "@/components/ui";
 import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 import { FoundingOffer } from "@/components/FoundingOffer";
+import { NewsMediaStrip } from "@/components/NewsMediaStrip";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -34,6 +35,14 @@ export default async function SignupPage({
 
       <div className="w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
+        <NewsMediaStrip />
+        <Link
+          href="/tools"
+          className="block rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-900 transition hover:bg-teal-100"
+        >
+          🧰 Members unlock 50+ free creator tools — SEO, design, video, email
+          &amp; automation →
+        </Link>
         <FoundingOffer showCta={false} />
         <Card>
           <SocialSignIn next={searchParams.next} verb="Sign up" />
