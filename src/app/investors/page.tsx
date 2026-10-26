@@ -12,24 +12,12 @@ export const metadata: Metadata = {
 
 const usd = (n: number) =>
   "$" + Math.round(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+const num = (n: number, digits = 1) =>
+  n.toLocaleString("en-US", { maximumFractionDigits: digits });
 
-/* ---------------- revenue streams ---------------- */
+/* ---------------- revenue streams beyond rep ad sales ---------------- */
 
 const STREAMS = [
-  {
-    icon: "📇",
-    name: "Classified & vendor upgrades — $100/year",
-    detail:
-      "Businesses pay $100/yr to upgrade their free listing to a promoted classified: top-of-search placement, deal publishing and enquiry leads.",
-    year1: 120000,
-  },
-  {
-    icon: "🖼️",
-    name: "Sidebar & banner advertising",
-    detail:
-      "Self-serve banner slots across the site (header, sidebar, billboards) booked directly through /advertise — modelled at an average $25/month per sold slot.",
-    year1: 7200,
-  },
   {
     icon: "⭐",
     name: "Pro & Premium memberships",
@@ -48,7 +36,7 @@ const STREAMS = [
     icon: "🧱",
     name: "Wall of Fame bricks",
     detail:
-      "$4 one-time per brick on the 250,000-brick community wall — funded-like merchandise with near-zero cost.",
+      "$4 one-time per brick on the 250,000-brick community wall — near-zero cost.",
     year1: 1200,
   },
   {
@@ -76,12 +64,19 @@ const STREAMS = [
 
 /* ---------------- the model ---------------- */
 
+const REPS_Y1 = 10; // sales reps in year 1
+const ADS_PER_REP_Y1 = 10; // ads booked per rep per month in year 1
+const AD_PRICE = [100, 150, 200, 250, 300]; // $/ad per year 1–5
+const VOLUME_GROWTH = 1.1; // ads-per-rep AND rep count both +10%/yr
+const OTHER_GROWTH = 1.1;
+const YEARS = 5;
+
 const ASSUMPTIONS = [
-  "10 sales reps (“the girls”), each closing 10 classified upgrades per month → 1,200 sales/yr",
-  "Each classified upgrade = $100/year subscription",
-  "24 banner slots sold on average at $25/month",
-  "Other streams (memberships, websites, bricks, courses, leads, events, affiliates) from current pricing",
-  "All revenue grows 10% each year as reps get better and the directory fills in",
+  `Year 1: ${REPS_Y1} sales reps (“the girls”), each booking ${ADS_PER_REP_Y1} ads per month at $${AD_PRICE[0]}/ad`,
+  `Price per ad rises each year: ${AD_PRICE.map((p, i) => `Y${i + 1} $${p}`).join(" · ")}`,
+  `Each rep's bookings grow 10%/yr (10 → ${num(ADS_PER_REP_Y1 * Math.pow(VOLUME_GROWTH, YEARS - 1))} ads/month by Year ${YEARS})`,
+  `Rep headcount grows with volume — ${REPS_Y1} → ≈${num(REPS_Y1 * Math.pow(VOLUME_GROWTH, YEARS - 1))} reps by Year ${YEARS}`,
+  "Other income (memberships, websites, bricks, courses, leads, events, affiliates) grows 10%/yr",
 ];
 
 const COSTS = [
@@ -94,8 +89,17 @@ const COSTS = [
 /** Annual infra allowance used in the projection, growing as traffic scales. */
 const INFRA = [525, 900, 1600, 2800, 4500];
 
-const GROWTH = 1.1;
-const YEARS = 5;
+function StatTile({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="rounded-2xl border border-white/15 bg-white/5 p-4 backdrop-blur">
+      <p className="text-2xl font-black text-white sm:text-3xl">{value}</p>
+      <p className="mt-1 text-[11px] font-bold uppercase tracking-widest text-emerald-300">
+        {label}
+      </p>
+      {hint ? <p className="mt-1 text-[11px] text-white/60">{hint}</p> : null}
+    </div>
+  );
+}
 
 export default function InvestorsPage() {
   if (!investorUnlocked()) {
@@ -117,44 +121,98 @@ export default function InvestorsPage() {
     );
   }
 
-  const classifiedY1 = STREAMS[0].year1;
-  const bannerY1 = STREAMS[1].year1;
-  const otherY1 = STREAMS.slice(2).reduce((s, x) => s + x.year1, 0);
+  const otherY1 = STREAMS.reduce((s, x) => s + x.year1, 0);
 
   const rows = Array.from({ length: YEARS }, (_, i) => {
-    const factor = Math.pow(GROWTH, i);
-    const classified = classifiedY1 * factor;
-    const banners = bannerY1 * factor;
-    const other = otherY1 * factor;
-    const gross = classified + banners + other;
+    const factor = Math.pow(VOLUME_GROWTH, i);
+    const reps = REPS_Y1 * factor;
+    const adsPerRep = ADS_PER_REP_Y1 * factor;
+    const price = AD_PRICE[i];
+    const adSales = reps * adsPerRep * 12 * price;
+    const other = otherY1 * Math.pow(OTHER_GROWTH, i);
+    const gross = adSales + other;
     const infra = INFRA[i];
-    return { year: i + 1, classified, banners, other, gross, infra, net: gross - infra };
+    return {
+      year: i + 1,
+      reps,
+      adsPerRep,
+      price,
+      adSales,
+      other,
+      gross,
+      infra,
+      net: gross - infra,
+    };
   });
 
-  return (
-    <div className="mx-auto max-w-4xl space-y-5">
-      <Card className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
-        <p className="text-xs font-bold uppercase tracking-widest text-amber-300">
-          Confidential · For invited investors only
-        </p>
-        <h1 className="mt-1 text-3xl font-black">
-          GoDesi — investor revenue kit
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-white/85">
-          GoDesi.com is a live desi business directory + community platform:
-          free listings, digital business cards, events, deals, courses and a
-          pixel wall — monetized through subscriptions, advertising and services.
-          Below is the projected income model.
-        </p>
-      </Card>
+  const totalGross = rows.reduce((s, r) => s + r.gross, 0);
+  const totalNet = rows.reduce((s, r) => s + r.net, 0);
 
+  return (
+    <div className="mx-auto max-w-5xl space-y-6">
+      {/* SaaS-style hero */}
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-indigo-950 to-emerald-950 p-6 text-white sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-300">
+          Confidential · Investor kit · 2026
+        </p>
+        <h1 className="mt-2 text-3xl font-black sm:text-4xl">
+          GoDesi — ad-sales growth engine
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-white/80">
+          A live desi business directory + community platform — listings, digital
+          cards, events, deals, courses, pixel wall — monetized by a rep-driven
+          ad sales model on top of subscription and service revenue.
+        </p>
+        <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile
+            label="Year-1 gross"
+            value={usd(rows[0].gross)}
+            hint={`${usd(rows[0].adSales)} from rep ad sales`}
+          />
+          <StatTile
+            label={`Year-${YEARS} gross`}
+            value={usd(rows[YEARS - 1].gross)}
+            hint={`${usd(rows[YEARS - 1].adSales)} from rep ad sales`}
+          />
+          <StatTile
+            label={`${YEARS}-yr total gross`}
+            value={usd(totalGross)}
+          />
+          <StatTile
+            label={`${YEARS}-yr net after servers`}
+            value={usd(totalNet)}
+            hint="Before sales-team pay & card fees"
+          />
+        </div>
+      </div>
+
+      {/* revenue streams */}
       <Card className="space-y-3">
-        <h2 className="text-lg font-black">💰 Every way GoDesi makes money</h2>
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-black">💰 Every way GoDesi makes money</h2>
+          <p className="text-xs font-semibold text-slate-500">
+            Core engine: rep-booked ads · everything below stacks on top
+          </p>
+        </div>
+        <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4">
+          <p className="text-sm font-bold text-emerald-900">
+            📇 Rep-booked ads — classifieds, banners &amp; featured placements
+          </p>
+          <p className="mt-1 text-xs leading-snug text-emerald-800">
+            The growth engine: each rep books {ADS_PER_REP_Y1} ads/month in Year
+            1 — banner slots, promoted classifieds and featured placements sold
+            to the 15,000+ desi businesses already listed.
+          </p>
+          <p className="mt-1 text-xs font-black text-emerald-700">
+            Year-1: {usd(rows[0].adSales)} → Year-{YEARS}:{" "}
+            {usd(rows[YEARS - 1].adSales)}
+          </p>
+        </div>
+        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {STREAMS.map((s) => (
             <li
               key={s.name}
-              className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+              className="rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:border-indigo-200 hover:shadow-sm"
             >
               <p className="text-sm font-bold text-slate-900">
                 {s.icon} {s.name}
@@ -163,13 +221,14 @@ export default function InvestorsPage() {
                 {s.detail}
               </p>
               <p className="mt-1 text-xs font-black text-emerald-700">
-                Year-1 estimate: {usd(s.year1)}
+                Year-1: {usd(s.year1)}
               </p>
             </li>
           ))}
         </ul>
       </Card>
 
+      {/* assumptions */}
       <Card className="space-y-2">
         <h2 className="text-lg font-black">📐 The sales model</h2>
         <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
@@ -178,36 +237,40 @@ export default function InvestorsPage() {
           ))}
         </ul>
         <p className="text-xs text-slate-500">
-          Conservative check: if reps sell 10 per <em>year</em> each instead of
-          10/month, Year-1 classified income is $12,000 instead of $120,000 —
-          the table below uses the monthly rate.
+          Ads are annual bookings — each rep&rsquo;s book renews every year, so sales
+          compound on top of retained accounts.
         </p>
       </Card>
 
+      {/* projection table */}
       <Card className="space-y-3 overflow-x-auto">
         <h2 className="text-lg font-black">
-          📈 5-year projection (10% growth per year)
+          📈 {YEARS}-year projection — volume × price × headcount
         </h2>
-        <table className="w-full min-w-[560px] text-sm">
+        <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
               <th className="py-2 pr-3">Year</th>
-              <th className="py-2 pr-3 text-right">Classifieds</th>
-              <th className="py-2 pr-3 text-right">Banners</th>
-              <th className="py-2 pr-3 text-right">Other streams</th>
+              <th className="py-2 pr-3 text-right">Reps</th>
+              <th className="py-2 pr-3 text-right">Ads/mo each</th>
+              <th className="py-2 pr-3 text-right">$ per ad</th>
+              <th className="py-2 pr-3 text-right">Ad sales</th>
+              <th className="py-2 pr-3 text-right">Other income</th>
               <th className="py-2 pr-3 text-right">Gross</th>
-              <th className="py-2 pr-3 text-right">Server costs</th>
-              <th className="py-2 text-right font-black text-slate-900">
-                Net income
-              </th>
+              <th className="py-2 pr-3 text-right">Servers</th>
+              <th className="py-2 text-right font-black text-slate-900">Net</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.year} className="border-b border-slate-100">
-                <td className="py-2 pr-3 font-bold">Year {r.year}</td>
-                <td className="py-2 pr-3 text-right">{usd(r.classified)}</td>
-                <td className="py-2 pr-3 text-right">{usd(r.banners)}</td>
+                <td className="py-2 pr-3 font-bold">Y{r.year}</td>
+                <td className="py-2 pr-3 text-right">{num(r.reps)}</td>
+                <td className="py-2 pr-3 text-right">{num(r.adsPerRep)}</td>
+                <td className="py-2 pr-3 text-right">{usd(r.price)}</td>
+                <td className="py-2 pr-3 text-right font-semibold text-indigo-700">
+                  {usd(r.adSales)}
+                </td>
                 <td className="py-2 pr-3 text-right">{usd(r.other)}</td>
                 <td className="py-2 pr-3 text-right font-semibold">
                   {usd(r.gross)}
@@ -229,6 +292,7 @@ export default function InvestorsPage() {
         </p>
       </Card>
 
+      {/* real costs */}
       <Card className="space-y-2">
         <h2 className="text-lg font-black">🖥️ What the platform costs today</h2>
         <ul className="grid gap-2 sm:grid-cols-2">
