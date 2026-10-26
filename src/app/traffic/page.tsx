@@ -2,8 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, LinkButton } from "@/components/ui";
-import { gaActiveNow, gaConfigured, gaReport, type GaRank } from "@/lib/ga";
+import {
+  gaActiveByCountry,
+  gaActiveNow,
+  gaConfigured,
+  gaReport,
+  type GaRank,
+} from "@/lib/ga";
 import { siteTraffic } from "@/lib/traffic";
+import { VisitorMap } from "@/components/VisitorMap";
 
 export const dynamic = "force-dynamic";
 
@@ -33,11 +40,23 @@ const TIME = new Intl.DateTimeFormat("en-US", {
 export default async function TrafficPage() {
   if (!gaConfigured()) notFound();
 
-  const [active, report, totals] = await Promise.all([
+  const [active, report, totals, activeByCountry] = await Promise.all([
     gaActiveNow(),
     gaReport(),
     siteTraffic(),
+    gaActiveByCountry(),
   ]);
+
+  // One row per country seen in the last 30 days, with the live count merged
+  // in — the map skips places Google hasn't placed geographically.
+  const liveByCountry = new Map(
+    (activeByCountry ?? []).map((c) => [c.label, c.value]),
+  );
+  const mapCountries = (report?.countries ?? []).map((c) => ({
+    name: c.label,
+    visitors: c.value,
+    active: liveByCountry.get(c.label) ?? 0,
+  }));
 
   const days = report?.days ?? [];
   const peak = Math.max(1, ...days.map((d) => d.views));
@@ -124,6 +143,22 @@ export default async function TrafficPage() {
               each day within about 24 hours
             </span>
             <span>{DAY.format(new Date(days[days.length - 1].date))}</span>
+          </div>
+        </Card>
+      ) : null}
+
+      {mapCountries.length ? (
+        <Card className="min-w-0 overflow-hidden">
+          <h2 className="text-lg font-semibold text-slate-900">
+            🗺️ Where visitors are — live map
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Amber dots show the last 30 days of visitors; pulsing green dots
+            are people on the site right now. Drag to explore, tap a dot for
+            numbers.
+          </p>
+          <div className="mt-3">
+            <VisitorMap countries={mapCountries} />
           </div>
         </Card>
       ) : null}

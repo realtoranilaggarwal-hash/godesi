@@ -126,6 +126,22 @@ export async function gaActiveNow(): Promise<number | null> {
   return num(rows[0], 0);
 }
 
+/** Active users right now, split by country — drives the live map dots. */
+export async function gaActiveByCountry(): Promise<GaRank[] | null> {
+  const rows = await run(
+    "runRealtimeReport",
+    {
+      dimensions: [{ name: "country" }],
+      metrics: [{ name: "activeUsers" }],
+      orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }],
+      limit: 100,
+    },
+    120,
+  );
+  if (!rows) return null;
+  return ranks(rows, (r) => dim(r, 0));
+}
+
 export type GaDay = { date: string; views: number; visitors: number };
 export type GaRank = { label: string; value: number };
 export type GaReport = {
