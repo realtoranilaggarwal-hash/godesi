@@ -18,19 +18,21 @@ export const metadata: Metadata = {
   openGraph: { title: TITLE, description: DESCRIPTION },
 };
 
-const itemList = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "Free tools for content creators and marketers",
-  itemListElement: TOOL_CATEGORIES.flatMap((cat, ci) =>
-    cat.tools.map((tool, ti) => ({
-      "@type": "ListItem",
-      position: ci * 10 + ti + 1,
-      name: tool.name,
-      url: tool.url,
-    })),
-  ),
-};
+function itemList(withUrls: boolean) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Free tools for content creators and marketers",
+    itemListElement: TOOL_CATEGORIES.flatMap((cat, ci) =>
+      cat.tools.map((tool, ti) => ({
+        "@type": "ListItem",
+        position: ci * 10 + ti + 1,
+        name: tool.name,
+        ...(withUrls ? { url: tool.url } : {}),
+      })),
+    ),
+  };
+}
 
 function Hero({ total }: { total: number }) {
   return (
@@ -126,7 +128,7 @@ export default async function ToolsPage() {
       <div className="mx-auto max-w-5xl space-y-4">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList(false)) }}
         />
         <Hero total={total} />
         <GuestTeaser total={total} />
@@ -139,7 +141,7 @@ export default async function ToolsPage() {
     <div className="mx-auto max-w-5xl space-y-4">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList(true)) }}
       />
       <Hero total={total} />
 
