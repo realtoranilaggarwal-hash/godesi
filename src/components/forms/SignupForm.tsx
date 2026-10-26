@@ -64,6 +64,23 @@ export function SignupForm({
         </legend>
         <JoinGoalChips />
       </fieldset>
+      <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
+        <input
+          type="checkbox"
+          name="morningEmail"
+          defaultChecked
+          className="mt-0.5 h-4 w-4 accent-amber-600"
+        />
+        <span>
+          <span className="font-bold text-amber-900">
+            ☀️ Email me my daily horoscope &amp; panchang
+          </span>
+          <span className="block text-amber-800">
+            Free, every morning — today&apos;s rashi, tithi, Rahu Kaal, the deal
+            of the day and events. Stop it any time.
+          </span>
+        </span>
+      </label>
       <SubmitButton
         pendingLabel="Creating account..."
         className="w-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 py-3.5 text-lg font-black tracking-wide text-white shadow-lg shadow-rose-200 transition hover:from-amber-400 hover:via-rose-400 hover:to-indigo-500 hover:shadow-xl hover:shadow-rose-300"

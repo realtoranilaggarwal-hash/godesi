@@ -109,6 +109,8 @@ export async function signupAction(
       offerContactAt: offerContactOk ? new Date() : null,
       joinGoals,
       joinGoalsAt: joinGoals.length ? new Date() : null,
+      morningEmailAt:
+        formData.get("morningEmail") === "on" ? new Date() : null,
     };
 
     // The name may be gone between the check and the insert. Losing that race
