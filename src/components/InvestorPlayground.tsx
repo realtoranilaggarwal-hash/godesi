@@ -8,6 +8,8 @@ const OTHER_GROWTH = 1.1;
 const INFRA = [525, 900, 1600, 2800, 4500];
 const PRICE_RAMP = [1, 1.5, 2, 2.5, 3]; // Y1 price × ramp = $100→$300 shape
 const RAISE = 50000;
+const PRE_MONEY = 230000; // build value + domains + trademark (see valuation card)
+const POST_MONEY = PRE_MONEY + RAISE;
 
 const usd = (n: number) =>
   "$" + Math.round(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -193,12 +195,11 @@ export function InvestorPlayground() {
           ))}
         </div>
         <p className="mt-3 text-sm text-emerald-900">
-          That&apos;s <b>{num(sharePct, 0)}% of the $50,000 raise</b> — funds{" "}
-          <b>{num((invest / RAISE) * 10)} rep-seats</b> of the first sales team.
-          At the model&apos;s Year-1 gross of {usd(rows[0].gross)}, a {" "}
-          profit-share structure returns the full {usd(invest)} inside the
-          first growth years; exact terms are agreed per investor and put in
-          writing with a lawyer.
+          That&apos;s <b>{num(sharePct, 0)}% of the $50,000 raise</b> —{" "}
+          <b>≈{num((invest / POST_MONEY) * 100)}% of GoDesi</b> at the{" "}
+          {usd(POST_MONEY)} post-money valuation. Exact structure (equity,
+          profit-share or loan) is agreed per investor and put in writing with
+          a lawyer.
         </p>
       </div>
     </div>

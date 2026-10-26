@@ -5,7 +5,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { ActionState } from "@/lib/actions";
-import { INVESTOR_COOKIE, investorCookie } from "@/lib/investor";
+import {
+  INVESTOR_COOKIE,
+  investorCookie,
+  investorUnlocked,
+} from "@/lib/investor";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { sendEmail, shell } from "@/lib/email";
 import { SITE } from "@/lib/site";
@@ -52,6 +57,10 @@ function escapeHtml(value: string) {
 
 /** Someone on the investor kit wants to talk about investing. */
 export async function submitInvestorLeadAction(formData: FormData) {
+  // The form only renders behind the password gate — enforce the same gate
+  // here so an unauthenticated caller can't create leads or staff emails.
+  // Silently "succeed" so the check gives no signal.
+  if (!investorUnlocked()) return { ok: true as const };
   const parsed = leadSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -64,29 +73,44 @@ export async function submitInvestorLeadAction(formData: FormData) {
   }
   const d = parsed.data;
   // One lead per person per day — silently accept repeats so bots get no
-  // signal, but don't pile up leads or send another email.
-  const recent = await db.partnerLead.count({
-    where: {
-      site: "godesi.com",
-      intent: "invest",
-      category: "investor",
-      createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-      OR: [{ email: d.email }, { phone: d.phone }],
-    },
-  });
-  if (recent > 0) return { ok: true as const };
-  await db.partnerLead.create({
-    data: {
-      site: "godesi.com",
-      intent: "invest",
-      category: "investor",
-      city: "Investor kit",
-      name: d.name,
-      phone: d.phone,
-      email: d.email,
-      message: `Considering: ${d.amount}\n\n${d.message ?? ""}`.trim(),
-    },
-  });
+  // signal, but don't pile up leads or send another email. Dedupe requires
+  // BOTH email and phone to match so two real investors who happen to share
+  // one of them aren't dropped.
+  try {
+    const created = await db.$transaction(
+      async (tx) => {
+        const recent = await tx.partnerLead.count({
+          where: {
+            site: "godesi.com",
+            intent: "invest",
+            category: "investor",
+            createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+            AND: [{ email: d.email }, { phone: d.phone }],
+          },
+        });
+        if (recent > 0) return false;
+        await tx.partnerLead.create({
+          data: {
+            site: "godesi.com",
+            intent: "invest",
+            category: "investor",
+            city: "Investor kit",
+            name: d.name,
+            phone: d.phone,
+            email: d.email,
+            message: `Considering: ${d.amount}\n\n${d.message ?? ""}`.trim(),
+          },
+        });
+        return true;
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
+    if (!created) return { ok: true as const };
+  } catch {
+    // Serialization conflict on a racing duplicate or a DB hiccup — accept
+    // silently rather than lose the visitor to an error page.
+    return { ok: true as const };
+  }
   const rows = [
     ["Name", d.name],
     ["Email", d.email],
