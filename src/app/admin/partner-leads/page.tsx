@@ -39,7 +39,7 @@ export default async function PartnerLeadsPage() {
             >
               <div className="min-w-0 text-sm">
                 <p className="font-bold">
-                  {lead.category === "course" ? "📚 Course" : lead.intent === "sell" ? "🏷️ Selling" : "🏡 Buying"} ·{" "}
+                  {lead.category === "investor" ? "💼 Investor" : lead.category === "course" ? "📚 Course" : lead.intent === "sell" ? "🏷️ Selling" : "🏡 Buying"} ·{" "}
                   {lead.city}{" "}
                   <Badge tone={lead.handledAt ? "green" : "amber"}>
                     {lead.handledAt ? "Done" : "Open"}
