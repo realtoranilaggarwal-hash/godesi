@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { investorUnlocked } from "@/lib/investor";
 import { InvestorGate } from "./InvestorGate";
+import { InvestorLeadForm } from "@/components/InvestorLeadForm";
+import { InvestorPlayground } from "@/components/InvestorPlayground";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -313,6 +315,103 @@ export default function InvestorsPage() {
           {usd(INFRA[YEARS - 1])} by Year {YEARS}) so costs are never
           understated as traffic and email volume grow.
         </p>
+      </Card>
+
+      {/* interactive playground */}
+      <Card className="space-y-3">
+        <div>
+          <h2 className="text-lg font-black">
+            🎛️ Play with the model yourself
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Drag the sliders — change the team size, ads per rep, the price
+            ramp or the growth rate and watch the 5-year income redraw live.
+            Then slide your investment amount to see your share of the raise.
+          </p>
+        </div>
+        <InvestorPlayground />
+        <p className="text-xs text-slate-500">
+          Price follows the same ramp as the table (Year-1 price × 1 · 1.5 · 2
+          · 2.5 · 3). Other income and server costs follow the fixed
+          assumptions above.
+        </p>
+      </Card>
+
+      {/* the ask */}
+      <Card className="space-y-3 border-emerald-200 bg-gradient-to-br from-emerald-50 to-white">
+        <h2 className="text-lg font-black">🤝 The ask</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl bg-emerald-600 p-4 text-white">
+            <p className="text-2xl font-black">$50,000</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-100">
+              Total raise
+            </p>
+          </div>
+          <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+            <p className="text-2xl font-black text-slate-900">10 × $5,000</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+              Shares available
+            </p>
+          </div>
+          <div className="rounded-2xl border border-emerald-200 bg-white p-4">
+            <p className="text-2xl font-black text-slate-900">Open now</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+              First come, first served
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <p className="text-sm font-bold text-slate-900">
+              Where the money goes
+            </p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              <li>Hire &amp; train the first 10-ad-sales team</li>
+              <li>Marketing push: events, flyers, Wall of Fame launch</li>
+              <li>12 months of tools + hosting runway</li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-slate-900">
+              What an investor gets
+            </p>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              <li>
+                Structure agreed per investor — e.g. a share of profits until
+                2× the investment is returned, or an agreed equity %
+              </li>
+              <li>Quarterly updates: sales booked, revenue, traffic</li>
+              <li>
+                Paperwork drawn up with a lawyer before any money moves
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className="rounded-xl border border-dashed border-emerald-300 bg-white/60 p-3 text-xs text-slate-600">
+          <b>How to open the conversation</b> — say it simply:{" "}
+          <i>
+            &ldquo;I&rsquo;m raising $50,000 for GoDesi.com — my desi business
+            directory with 15,000+ listings already live. It funds a sales team
+            booking ads; the model projects $131K gross in year 1 growing to
+            $789K by year 5. Shares are $5,000 each — want to see the
+            numbers?&rdquo;
+          </i>{" "}
+          Then send them this page.
+        </div>
+      </Card>
+
+      {/* investor lead form */}
+      <Card className="space-y-3">
+        <div>
+          <h2 className="text-lg font-black">
+            💼 Interested? Leave your details
+          </h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Tell us how much you&apos;re considering and we&apos;ll call you to
+            walk through the plan, answer questions and share the paperwork.
+          </p>
+        </div>
+        <InvestorLeadForm />
       </Card>
 
       <Card className="border-amber-200 bg-amber-50 text-sm text-amber-900">
