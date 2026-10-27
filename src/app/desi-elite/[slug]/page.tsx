@@ -10,6 +10,7 @@ import { StaffEditLink } from "@/components/StaffEditLink";
 import { ELITE_BADGES, showsContact } from "@/lib/elite";
 import { videoEmbedUrl } from "@/lib/video";
 import { whatsappLink } from "@/lib/format";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +29,11 @@ export async function generateMetadata({
   const entry = await getEntry(params.slug);
   if (!entry) return { title: "GoDesi Elite — Godesi" };
   return {
-    title: `${entry.fullName} — GoDesi Elite | Godesi`,
-    description: entry.shortBio.slice(0, 300),
+    title: pageTitle(`${entry.fullName} — GoDesi Elite | Godesi`),
+    description: metaDescription(
+      entry.shortBio,
+      `${entry.fullName} is a GoDesi Elite member — a recognised desi professional profile with interview, badges and contact details on GoDesi.`,
+    ),
     openGraph: entry.photoUrl ? { images: [entry.photoUrl] } : undefined,
   };
 }

@@ -6,6 +6,7 @@ import { findVenue, venuePath } from "@/lib/venues";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { MapEmbed } from "@/components/MapEmbed";
 import { EventCard } from "@/components/EventCard";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,13 @@ export async function generateMetadata({
   const venue = await findVenue(params.key);
   if (!venue) return { title: "Venue not found | Godesi" };
   return {
-    title: `${venue.name}, ${venue.city} — events & tickets | Godesi`,
-    description: `Upcoming desi events at ${venue.name}, ${venue.city}${
-      venue.address ? ` (${venue.address})` : ""
-    } — halls, website, map and tickets.`,
+    title: pageTitle(`${venue.name}, ${venue.city} — events & tickets | Godesi`),
+    description: metaDescription(
+      `Upcoming desi events at ${venue.name}, ${venue.city}${
+        venue.address ? ` (${venue.address})` : ""
+      } — halls, website, map and tickets.`,
+      `Photos, capacity and contact details for ${venue.name} on GoDesi, plus every desi event booked there.`,
+    ),
   };
 }
 

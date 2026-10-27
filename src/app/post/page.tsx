@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Post your business or service",
   description:
-    "Add a business, a professional profile, an event, a property or a requirement.",
+    "Add a business, a professional profile, an event, a property or a requirement on GoDesi — free to post, live in minutes and visible to the whole desi community.",
 };
 
 const PROFESSIONALS_SLUG = "professionals";

@@ -10,6 +10,7 @@ import {
 } from "@/lib/complaints";
 import { FOOD_SAFETY_STATES } from "@/lib/foodSafetyStates";
 import { siteUrl } from "@/lib/format";
+import { metaDescription, pageTitle } from "@/lib/seo";
 import { StatePicker } from "@/components/StatePicker";
 import { SidebarBanners } from "@/components/Banners";
 import { CopyButton } from "@/components/CopyButton";
@@ -27,8 +28,11 @@ export function generateMetadata({
   const guide = complaintGuide(params.slug);
   if (!guide) return { title: "Guide not found" };
   return {
-    title: `${guide.title} — how to complain (US & Canada)`,
-    description: guide.intro,
+    title: pageTitle(`${guide.title} — how to complain (US & Canada)`),
+    description: metaDescription(
+      guide.intro,
+      "Step-by-step complaint guide for the desi community: who to contact, what evidence to gather and the exact wording to use, on GoDesi.",
+    ),
     alternates: { canonical: `${siteUrl()}/complaints/${guide.slug}` },
   };
 }

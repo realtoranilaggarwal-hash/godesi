@@ -9,6 +9,7 @@ import { Badge, Card } from "@/components/ui";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +28,14 @@ export async function generateMetadata({
   const place = await getPlace(params.slug);
   if (!place) return { title: "Place not found" };
 
-  const description =
-    place.description?.slice(0, 155) ??
-    `${FAITH_LABELS[place.faith]} in ${place.city}, ${place.country}.`;
+  const description = metaDescription(
+    place.description,
+    `${FAITH_LABELS[place.faith]} in ${place.city}, ${place.country}.`,
+    "Timings, address, contact details, photos and upcoming events on GoDesi.",
+  );
 
   return {
-    title: `${place.name} — ${place.city}`,
+    title: pageTitle(`${place.name} — ${place.city}`),
     description,
     alternates: { canonical: `${siteUrl()}/religious/${place.slug}` },
     openGraph: {

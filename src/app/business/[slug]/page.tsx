@@ -54,7 +54,7 @@ import { AgentDetails, SimilarAgents } from "@/components/AgentProfile";
 import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
-import { metaDescription } from "@/lib/seo";
+import { metaDescription, pageTitle } from "@/lib/seo";
 import { businessIsThin, robotsFor } from "@/lib/thinContent";
 import { liveDealWhere } from "@/lib/deals";
 import { DealCard } from "@/components/DealCard";
@@ -107,12 +107,12 @@ export async function generateMetadata({
   const business = await getBusiness(params.slug);
   if (!business) return { title: "Business not found" };
 
-  const title =
+  const title = pageTitle(
     business.seoTitle ||
-    `${business.name} — ${business.category} in ${business.city}`;
-  const description =
-    business.seoDescription ||
-    metaDescription(
+      `${business.name} — ${business.category} in ${business.city}`,
+  );
+  const description = metaDescription(
+    business.seoDescription,
     business.description ? maskContactDetails(business.description) : null,
     `${business.name} is a ${business.category.toLowerCase()} in ${business.city}.`,
     "Message on WhatsApp, call, see photos, opening hours and reviews, or scan the free QR business card on Godesi.",

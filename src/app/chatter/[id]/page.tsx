@@ -16,6 +16,7 @@ import { ChatterComposer } from "@/components/chatter/ChatterComposer";
 import { ChatterPostCard } from "@/components/chatter/ChatterPostCard";
 import { WallPromo } from "@/components/WallPromo";
 import { Card } from "@/components/ui";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +30,13 @@ export async function generateMetadata({
   const { post } = thread;
   const name = properName(post.author.name);
   const url = `${siteUrl()}${chatterPath(post.id)}`;
-  const title = `${name} on GoDesi Chatter: “${chatterExcerpt(post.body, 60)}”`;
-  const description = chatterExcerpt(post.body, 160);
+  const title = pageTitle(
+    `${name} on GoDesi Chatter: “${chatterExcerpt(post.body, 60)}”`,
+  );
+  const description = metaDescription(
+    chatterExcerpt(post.body, 160),
+    `${name}'s post on GoDesi Chatter — short posts, questions and stories from the desi community.`,
+  );
   return {
     title,
     description,

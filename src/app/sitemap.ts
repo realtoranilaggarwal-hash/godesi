@@ -5,7 +5,11 @@ import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
 import { popularCities } from "@/lib/cities";
-import { businessIsThin, eventIsThin } from "@/lib/thinContent";
+import {
+  MIN_INDEXABLE_RESULTS,
+  businessIsThin,
+  eventIsThin,
+} from "@/lib/thinContent";
 import { professionalCount } from "@/lib/professionalsQueries";
 import { PROFESSIONALS_INDEX_FROM } from "@/lib/professionals";
 import { GUIDES } from "@/lib/guides";
@@ -40,12 +44,15 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
           address: true,
           specialties: true,
           ownerId: true,
+          categorySlug: true,
+          subcategorySlug: true,
+          extraCategorySlugs: true,
           _count: { select: { media: true, reviews: true } },
         },
       }),
       db.category.findMany({
         where: { parentSlug: null },
-        select: { slug: true },
+        select: { slug: true, children: { select: { slug: true } } },
       }),
       db.event.findMany({
         where: { status: "APPROVED" },
@@ -92,6 +99,23 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
     take: 2000,
     select: { id: true, createdAt: true, editedAt: true },
   });
+  // Category hubs under the indexable floor are noindexed (same rule the
+  // page applies), so they stay out of the sitemap too. The count mirrors
+  // searchBusinesses: primary, subcategory or extra-category match.
+  const catScopes = categories.map((category) => [
+    category.slug,
+    ...category.children.map((child) => child.slug),
+  ]);
+  const catCounts = catScopes.map(
+    (scope) =>
+      businesses.filter(
+        (row) =>
+          (row.categorySlug && scope.includes(row.categorySlug)) ||
+          (row.subcategorySlug && scope.includes(row.subcategorySlug)) ||
+          row.extraCategorySlugs.some((slug) => scope.includes(slug)),
+      ).length,
+  );
+
   return {
     businesses: businesses
       .filter(
@@ -106,7 +130,9 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
         slug: row.slug,
         updatedAt: row.updatedAt.toISOString(),
       })),
-    categories: categories.map((row) => row.slug),
+    categories: categories
+      .filter((_, index) => catCounts[index] >= MIN_INDEXABLE_RESULTS)
+      .map((row) => row.slug),
     events: events
       .filter((row) => !eventIsThin(row))
       .map((row) => ({
@@ -300,11 +326,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.4,
     })),
-    ...cities.map((city) => ({
-      url: `${base}/city/${city.slug}`,
-      changeFrequency: "daily" as const,
-      priority: 0.7,
-    })),
+    // City hubs under the indexable-results floor are noindexed; submitting
+    // them anyway is the sitemap/robots contradiction crawlers flag.
+    ...cities
+      .filter((city) => city.count >= MIN_INDEXABLE_RESULTS)
+      .map((city) => ({
+        url: `${base}/city/${city.slug}`,
+        changeFrequency: "daily" as const,
+        priority: 0.7,
+      })),
     ...reports.map((report) => ({
       url: `${base}${report.path}`,
       lastModified: new Date(report.publishedAt),

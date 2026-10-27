@@ -20,6 +20,7 @@ import { proxyImage } from "@/lib/proxyImage";
 import { siteUrl } from "@/lib/format";
 import { isOriginalReport, newsIdFromParam, newsPath } from "@/lib/newsLinks";
 import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -47,8 +48,11 @@ export async function generateMetadata({
   const original = isOriginalReport(report);
 
   return {
-    title: report.title,
-    description: report.summary,
+    title: pageTitle(report.title),
+    description: metaDescription(
+      report.summary,
+      `Reported by ${report.submittedById ? report.source : `GoDesi Editor via ${report.source}`} on GoDesi — the desi community news wire.`,
+    ),
     alternates: original ? { canonical: newsPath(report) } : undefined,
     robots: original ? undefined : { index: false, follow: true },
     openGraph: { images: report.imageUrl ? [report.imageUrl] : [] },

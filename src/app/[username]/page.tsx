@@ -36,6 +36,7 @@ import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
 import { thumbImage } from "@/lib/proxyImage";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -54,10 +55,12 @@ export async function generateMetadata({
   if (!profile) return { title: "Profile not found" };
   const { user } = profile;
   return {
-    title: `${properName(user.name)} on Godesi`,
-    description:
-      user.bio ??
+    title: pageTitle(`${properName(user.name)} on Godesi`),
+    description: metaDescription(
+      user.bio,
       `${properName(user.name)}${user.location ? ` from ${user.location}` : ""} on Godesi — businesses, events and requirements.`,
+      "Member profile on GoDesi — the free desi business and community network.",
+    ),
     alternates: { canonical: `/${user.username}` },
   };
 }
