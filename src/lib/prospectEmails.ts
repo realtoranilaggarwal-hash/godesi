@@ -636,6 +636,7 @@ export const PROSPECT_PITCHES: ProspectPitch[] = [
         `1. Referral partnership — when your advertisers want a web listing beyond the ad, send them to GoDesi; we credit you a referral fee on any paid plan they take.`,
         `2. Bundled advertising — your print classifieds can pair with a free GoDesi business listing, so the ad keeps working after the issue date. We can also print your QR code into the bundle so readers scan straight to the listing.`,
         `In return we promote ${c.business} on GoDesi's media page and news wire, which is read by the same audience you write for.`,
+        `One small ask either way: you're listed in our Indian-American newspapers directory (godesi.com/newspapers). If you can add our small "Featured on GoDesi" badge — the code is at the bottom of that page — it points your readers to your listing and tells Google we're connected.`,
         `Worth a short call this week? I can share the revenue numbers behind our investor deck too.`,
         `Thanks,\n${c.from}\nGoDesi.com`,
       ].join("\n\n"),
