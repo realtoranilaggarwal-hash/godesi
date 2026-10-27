@@ -420,6 +420,9 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/leads" variant="secondary">
                   Unlocked leads
                 </LinkButton>
+                <LinkButton href="/dashboard/bookings" variant="secondary">
+                  📅 Bookings
+                </LinkButton>
                 <LinkButton href={`/business/${business.slug}`} variant="secondary">
                   🪪 My digital card
                 </LinkButton>

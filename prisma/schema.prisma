@@ -334,19 +334,19 @@ model User {
   /// Published on purpose by the member, unlike the private account phone.
   whatsappNumber String?
 
-  business       Business?
-  claims         BusinessClaim[]
-  leads          Lead[]
-  unlocks        LeadUnlock[]
-  payments       Payment[]
-  reviews        Review[]
-  reviewDisputes ReviewDispute[]
-  events         Event[]
-  tickets        Ticket[]
-  news           NewsItem[]
-  banners        Banner[]
-  wallBlocks     WallBlock[]
-  adOrders       AdOrder[]
+  business          Business?
+  claims            BusinessClaim[]
+  leads             Lead[]
+  unlocks           LeadUnlock[]
+  payments          Payment[]
+  reviews           Review[]
+  reviewDisputes    ReviewDispute[]
+  events            Event[]
+  tickets           Ticket[]
+  news              NewsItem[]
+  banners           Banner[]
+  wallBlocks        WallBlock[]
+  adOrders          AdOrder[]
   courseEnrollments CourseEnrollment[]
 
   listings     Listing[]
@@ -874,6 +874,14 @@ model Business {
   /// Extra subcategory slugs the card also appears under; a paid (or founding) perk.
   extraCategorySlugs String[]  @default([])
 
+  /// Bookable service (DJs, venues…): customers pay a deposit, Godesi keeps a
+  /// fee, the owner accepts or declines. Off until the owner opts in + prices it.
+  bookingsEnabled   Boolean @default(false)
+  /// The business's advertised booking price, in minor units of `country`'s currency.
+  bookingPriceMinor Int     @default(0)
+  /// Share of the price taken as the deposit at booking time.
+  bookingDepositPct Int     @default(20)
+
   agentProfile  AgentProfile?
   vehicle       VehicleDetails?
   media         Media[]
@@ -885,6 +893,7 @@ model Business {
   deals         Deal[]
   scratchGifts  ScratchGift[]
   cardLeads     CardLead[]
+  bookings      Booking[]
 
   @@index([category])
   @@index([city])
@@ -1528,52 +1537,52 @@ model Banner {
 
 /// A paid advertising booking for one banner placement.
 model AdOrder {
-  id          String        @id @default(cuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bannerId    String?
-  banner      Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bannerId        String?
+  banner          Banner?       @relation(fields: [bannerId], references: [id], onDelete: SetNull)
   /// All banners booked under this order (wall bricks book several at once).
-  bannerIds   String[]      @default([])
+  bannerIds       String[]      @default([])
   /// Pixel-wall purchase: the block this order paid for.
-  wallBlockId String?
-  wallBlock   WallBlock?    @relation(fields: [wallBlockId], references: [id], onDelete: SetNull)
+  wallBlockId     String?
+  wallBlock       WallBlock?    @relation(fields: [wallBlockId], references: [id], onDelete: SetNull)
   /// How much of this wall order was covered by the member's ad-spend credit.
-  wallCreditMinor Int       @default(0)
-  slot        BannerSlot
-  pricing     AdPricing     @default(MONTHLY)
-  months      Int           @default(1)
+  wallCreditMinor Int           @default(0)
+  slot            BannerSlot
+  pricing         AdPricing     @default(MONTHLY)
+  months          Int           @default(1)
   /// Impressions bought for an IMPRESSIONS booking.
-  impressions Int?
-  amountMinor Int
-  currency    String        @default("INR")
-  provider    String        @default("stripe")
-  reference   String?       @unique
-  status      AdOrderStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
+  impressions     Int?
+  amountMinor     Int
+  currency        String        @default("INR")
+  provider        String        @default("stripe")
+  reference       String?       @unique
+  status          AdOrderStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
 
   @@index([userId, status])
 }
 
 /// One purchased rectangle on the million-pixel Wall of Fame.
 model WallBlock {
-  id           String       @id @default(cuid())
+  id          String       @id @default(cuid())
   /// Placement on the 1000x1000 pixel board (pixels).
-  x            Int
-  y            Int
-  w            Int
-  h            Int
-  title        String
-  imageUrl     String
-  linkUrl      String
+  x           Int
+  y           Int
+  w           Int
+  h           Int
+  title       String
+  imageUrl    String
+  linkUrl     String
   /// ~100 words the vendor writes about their site — shown on the vendor list.
-  description  String?
-  status       BannerStatus @default(DRAFT)
-  clicks       Int          @default(0)
-  createdAt    DateTime     @default(now())
+  description String?
+  status      BannerStatus @default(DRAFT)
+  clicks      Int          @default(0)
+  createdAt   DateTime     @default(now())
 
   advertiserId String?
-  advertiser   User?        @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
+  advertiser   User?     @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
   orders       AdOrder[]
 
   @@index([status])
@@ -3215,4 +3224,66 @@ model CourseEnrollment {
 
   @@unique([userId, courseSlug])
   @@index([courseSlug])
+}
+
+enum BookingStatus {
+  /// Created but the customer has not finished checkout.
+  AWAITING_PAYMENT
+  /// Deposit paid; waiting for the business to accept or decline.
+  PENDING
+  /// Business accepted; deposit released to them minus the platform fee.
+  CONFIRMED
+  /// Business declined; deposit refunded.
+  DECLINED
+  /// Nobody answered in time; deposit refunded.
+  EXPIRED
+  /// Booker or business cancelled a confirmed booking.
+  CANCELLED
+}
+
+/// A paid booking of a bookable business card (DJs, venues…). The customer pays
+/// a deposit up front; it sits with Godesi until the business accepts, then the
+/// business's share (deposit minus the platform fee on the full price) is
+/// released to their connected Stripe account, or settled by hand like event
+/// payouts. Decline or silence refunds the deposit.
+model Booking {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  /// Contact details the booker typed — bookings work for guests too.
+  bookerName  String
+  bookerEmail String
+  bookerPhone String
+  eventDate   DateTime
+  eventType   String?
+  guestCount  Int?
+  notes       String?
+
+  /// Quoted price of the whole booking (minor units of `currency`).
+  priceMinor   Int
+  /// Deposit charged now — `bookingDepositPct` of the price.
+  depositMinor Int
+  /// Godesi's fee — a share of the full price, taken out of the deposit.
+  feeMinor     Int
+  /// depositMinor - feeMinor; what the business gets on acceptance.
+  payoutMinor  Int
+  currency     String @default("USD")
+
+  status                BookingStatus @default(AWAITING_PAYMENT)
+  stripeSessionId       String?       @unique
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+  stripeRefundId        String?
+
+  /// Business must answer before this or the deposit auto-refunds.
+  expiresAt     DateTime
+  paidAt        DateTime?
+  respondedAt   DateTime?
+  declineReason String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([businessId, status])
+  @@index([status, expiresAt])
 }

@@ -55,6 +55,12 @@ import { isAgentCard } from "@/lib/agents";
 import { priceLabel } from "@/lib/listings";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { metaDescription, pageTitle } from "@/lib/seo";
+import {
+  businessIsBookable,
+  bookingSplits,
+  bookingCurrency,
+  formatBookingMoney,
+} from "@/lib/bookings";
 import { businessIsThin, robotsFor } from "@/lib/thinContent";
 import { liveDealWhere } from "@/lib/deals";
 import { DealCard } from "@/components/DealCard";
@@ -312,6 +318,14 @@ export default async function BusinessProfilePage({
         >
           🖨️ Print shop poster
         </Link>
+        {businessIsBookable(business) ? (
+          <Link
+            href={`/book/${business.slug}`}
+            className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 px-3 py-3 text-sm font-bold text-white shadow-sm hover:from-rose-700 hover:to-pink-700"
+          >
+            📅 Book now — {formatBookingMoney(bookingSplits(business.bookingPriceMinor, business.bookingDepositPct).depositMinor, bookingCurrency(business))} deposit
+          </Link>
+        ) : null}
       </div>
 
       {/* Vendor's referral offer — scissors-style coupon to clip */}
