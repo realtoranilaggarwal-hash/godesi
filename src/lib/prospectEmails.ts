@@ -622,6 +622,45 @@ export const PROSPECT_PITCHES: ProspectPitch[] = [
       ...DEFAULT_PITCH.objections.slice(1),
     ],
   },
+  {
+    slug: "media-partner",
+    label: "Newspapers & media partners",
+    icon: "📰",
+    hook: "Not selling an ad — offering a partnership that pays them too.",
+    subject: (c) => `${c.business} × GoDesi — a partnership idea`,
+    email: (c) =>
+      [
+        `Hello,`,
+        `I'm ${c.from} from GoDesi.com — the desi community platform with a free business directory, events, a digital business card for every member, and our own news wire that already carries ${c.business}.`,
+        `Two ways we could work together:`,
+        `1. Referral partnership — when your advertisers want a web listing beyond the ad, send them to GoDesi; we credit you a referral fee on any paid plan they take.`,
+        `2. Bundled advertising — your print classifieds can pair with a free GoDesi business listing, so the ad keeps working after the issue date. We can also print your QR code into the bundle so readers scan straight to the listing.`,
+        `In return we promote ${c.business} on GoDesi's media page and news wire, which is read by the same audience you write for.`,
+        `Worth a short call this week? I can share the revenue numbers behind our investor deck too.`,
+        `Thanks,\n${c.from}\nGoDesi.com`,
+      ].join("\n\n"),
+    call: (c) =>
+      [
+        `Namaste 🙏 Am I speaking with ${c.business}?`,
+        ``,
+        `I'm from GoDesi.com — the desi directory and community platform. We're not selling an ad; I wanted to ask about a partnership where your advertisers get a GoDesi listing alongside their print ad, and you earn a referral fee on any paid plan.`,
+        ``,
+        `We already carry your paper on our news wire, so your readers are reaching us anyway. Who handles advertising partnerships there?`,
+      ].join("\n"),
+    objections: [
+      {
+        question: "Why would we send advertisers to another site?",
+        answer:
+          "Because the listing extends the print ad's life — the advertiser keeps getting leads after the issue date, and you earn a referral fee on paid plans. It makes your ad packages more valuable, not less.",
+      },
+      {
+        question: "What does it cost the paper?",
+        answer:
+          "Nothing — the listing is free for the advertiser. You only earn, on referrals that take a paid plan.",
+      },
+      ...DEFAULT_PITCH.objections.slice(1),
+    ],
+  },
 ];
 
 export function pitchFor(categorySlug: string | null): ProspectPitch {

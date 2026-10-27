@@ -84,6 +84,33 @@ const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
     url: "https://indiawest.com/feed/",
     topic: "nri",
   },
+  {
+    name: "The Indian Panorama",
+    url: "https://www.theindianpanorama.news/feed/",
+    topic: "nri",
+  },
+  { name: "Khabar", url: "https://www.khabar.com/feed/", topic: "nri" },
+  {
+    name: "Desh-Videsh",
+    url: "https://www.deshvidesh.com/feed/",
+    topic: "nri",
+  },
+  { name: "India Post", url: "https://www.indiapost.com/feed/", topic: "nri" },
+  {
+    name: "The Asian Era",
+    url: "https://www.asianeraonline.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "Indus Business Journal",
+    url: "https://www.indusbusinessjournal.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "India Life and Style",
+    url: "https://www.indianlifeandstyle.com/feed/",
+    topic: "nri",
+  },
 ];
 
 export async function ensureDefaultFeeds() {
