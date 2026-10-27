@@ -11,6 +11,7 @@ import { confirmClubOrder } from "@/lib/clubOrders";
 import { recordCouponFromMetadata } from "@/lib/coupons";
 import { confirmReviewDispute } from "@/lib/reviewDisputes";
 import { confirmGigOrder } from "@/lib/gigs";
+import { confirmBooking } from "@/lib/bookings";
 import { confirmWebsitePayment } from "@/lib/websiteProjects";
 import { confirmCourseEnrollment } from "@/app/actions/course";
 import { db } from "@/lib/db";
@@ -51,6 +52,7 @@ export async function POST(request: Request) {
       const liveChannelOrderId = session.metadata?.liveChannelOrderId;
       const clubOrderId = session.metadata?.clubOrderId;
       const gigOrderId = session.metadata?.gigOrderId;
+      const bookingId = session.metadata?.bookingId;
       const websiteProjectId = session.metadata?.websiteProjectId;
       const courseEnrollmentId = session.metadata?.courseEnrollmentId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
@@ -110,6 +112,15 @@ export async function POST(request: Request) {
       } else if (session.metadata?.kind === "gig" && gigOrderId) {
         await confirmGigOrder({
           orderId: gigOrderId,
+          sessionId: session.id,
+          paymentIntentId:
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : (session.payment_intent?.id ?? null),
+        });
+      } else if (session.metadata?.kind === "booking" && bookingId) {
+        await confirmBooking({
+          bookingId,
           sessionId: session.id,
           paymentIntentId:
             typeof session.payment_intent === "string"
