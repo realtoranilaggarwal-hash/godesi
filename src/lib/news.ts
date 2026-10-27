@@ -48,6 +48,42 @@ const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
     url: "https://www.speakingtree.in/rss/articles.cms",
     topic: "faith",
   },
+  /* ------- NRI & diaspora wires ------- */
+  {
+    name: "Times of India — NRI",
+    url: "https://timesofindia.indiatimes.com/rssfeeds/7098551.cms",
+    topic: "nri",
+  },
+  {
+    name: "The American Bazaar",
+    url: "https://americanbazaaronline.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "India New England News",
+    url: "https://indianewengland.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "India Currents",
+    url: "https://indiacurrents.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "NRI News 24x7",
+    url: "https://nrinews24x7.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "News India Times",
+    url: "https://newsindiatimes.com/feed/",
+    topic: "nri",
+  },
+  {
+    name: "India West",
+    url: "https://indiawest.com/feed/",
+    topic: "nri",
+  },
 ];
 
 export async function ensureDefaultFeeds() {

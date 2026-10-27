@@ -11,6 +11,7 @@ export const NEWS_TOPICS: NewsTopic[] = [
   { slug: "politics", label: "Politics & civic", emoji: "🏛️" },
   { slug: "business", label: "Business & money", emoji: "💼" },
   { slug: "immigration", label: "Immigration & visas", emoji: "🛂" },
+  { slug: "nri", label: "NRI & diaspora", emoji: "🌏" },
   { slug: "crime", label: "Crime & safety", emoji: "🚨" },
   { slug: "consumer", label: "Consumer alerts", emoji: "⚠️" },
   { slug: "events", label: "Events & festivals", emoji: "🎉" },

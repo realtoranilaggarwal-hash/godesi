@@ -179,7 +179,10 @@ export default async function ReportPage({
 
           <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
             <span>
-              {report.source} · {when(report.publishedAt)}
+              {report.submittedById
+                ? report.source
+                : `GoDesi Editor · via ${report.source}`}{" "}
+              · {when(report.publishedAt)}
             </span>
             {(isAuthor || isStaff) && report.submittedById ? (
               <Link
