@@ -4,8 +4,117 @@ import { Card } from "@/components/ui";
 import { TOOL_CATEGORIES } from "@/lib/tools";
 import { siteUrl } from "@/lib/format";
 import { getCurrentUser } from "@/lib/auth";
+import { HOROSCOPE_ZONE } from "@/lib/horoscope";
+import { todayIn } from "@/lib/panchang";
 
 export const dynamic = "force-dynamic";
+
+/** One spotlight tool per GoDesi day — same pick for everyone all day. */
+function toolOfTheDay() {
+  const all = TOOL_CATEGORIES.flatMap((cat) =>
+    cat.tools.map((tool) => ({ ...tool, icon: cat.icon })),
+  );
+  const day = todayIn(HOROSCOPE_ZONE);
+  return all[Math.floor(Date.parse(`${day}T00:00:00Z`) / 86_400_000) % all.length];
+}
+
+const EFAX_URL = "https://www.efax.com/lp/affiliate-five?VID=36258";
+
+function SponsorStrip() {
+  return (
+    <a
+      href={EFAX_URL}
+      target="_blank"
+      rel="noopener sponsored"
+      className="block rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-3 shadow-sm transition hover:border-amber-400"
+    >
+      <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-900">
+          🤝 Partner deal
+        </span>
+        <span className="font-black text-slate-900">
+          Need to fax? eFax sends faxes by email — no machine needed.
+        </span>
+        <span className="text-xs font-bold text-amber-800">
+          Sign-up discounts via GoDesi →
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function ToolOfDay({ member }: { member: boolean }) {
+  const tool = toolOfTheDay();
+  return (
+    <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50">
+      <p className="text-xs font-black uppercase tracking-wide text-indigo-600">
+        🎯 Tool of the day
+      </p>
+      <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl font-black text-slate-900">
+            {tool.icon} {tool.name}
+            {tool.partner ? (
+              <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 align-middle text-[10px] font-black text-amber-800">
+                🤝 Partner
+              </span>
+            ) : null}
+          </h2>
+          <p className="mt-1 text-sm text-slate-700">{tool.blurb}</p>
+        </div>
+        {member ? (
+          <a
+            href={tool.url}
+            target="_blank"
+            rel={tool.partner ? "noopener sponsored" : "noopener noreferrer"}
+            className="shrink-0 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-black text-white transition hover:bg-indigo-500"
+          >
+            Try it now →
+          </a>
+        ) : (
+          <Link
+            href="/signup?next=/tools"
+            className="shrink-0 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-black text-white transition hover:bg-indigo-500"
+          >
+            Join free to use it →
+          </Link>
+        )}
+      </div>
+      <p className="mt-2 text-xs text-slate-500">
+        A new spotlight every day — come back tomorrow for the next one.
+      </p>
+    </Card>
+  );
+}
+
+function EfaxCard() {
+  return (
+    <a
+      href={EFAX_URL}
+      target="_blank"
+      rel="noopener sponsored"
+      className="block"
+    >
+      <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 transition hover:border-amber-400">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-black text-slate-900">
+              📠 eFax — fax straight from your email
+            </h2>
+            <p className="mt-1 max-w-xl text-sm text-slate-700">
+              Contracts, forms and signed docs without a fax machine — send and
+              receive faxes from any inbox. Sign-up discounts through
+              GoDesi&apos;s partner link.
+            </p>
+          </div>
+          <span className="rounded-full bg-amber-500 px-5 py-2.5 text-sm font-black text-white transition hover:bg-amber-400">
+            Get the deal →
+          </span>
+        </div>
+      </Card>
+    </a>
+  );
+}
 
 const TITLE = "50+ free tools for creators & marketers — SEO, design, video, email";
 const DESCRIPTION =
@@ -131,8 +240,11 @@ export default async function ToolsPage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList(false)) }}
         />
         <Hero total={total} />
+        <ToolOfDay member={false} />
+        <SponsorStrip />
         <GuestTeaser total={total} />
         <CoursesCard />
+        <EfaxCard />
       </div>
     );
   }
@@ -144,6 +256,8 @@ export default async function ToolsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList(true)) }}
       />
       <Hero total={total} />
+      <ToolOfDay member />
+      <SponsorStrip />
 
       {TOOL_CATEGORIES.map((cat) => (
         <Card key={cat.name} className="space-y-3">
@@ -198,6 +312,7 @@ export default async function ToolsPage() {
       ))}
 
       <CoursesCard />
+      <EfaxCard />
 
       <Card className="text-sm text-slate-600">
         <p>
