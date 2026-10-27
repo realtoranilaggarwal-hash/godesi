@@ -116,4 +116,13 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
       { name: "n8n", url: "https://n8n.io", blurb: "Open-source workflow automation you can self-host free — AI-ready with LLM nodes.", pricing: "Freemium" },
     ],
   },
+  {
+    name: "Office & paperwork",
+    icon: "🗂️",
+    tools: [
+      { name: "eFax", url: "https://www.efax.com/lp/affiliate-five?VID=36258", blurb: "Send and receive faxes by email — no fax machine needed; signup discounts via GoDesi's partner link.", pricing: "Paid", partner: true },
+      { name: "DocHub", url: "https://dochub.com", blurb: "Fill, sign and edit PDFs in the browser — contracts and forms without printing.", pricing: "Freemium" },
+      { name: "PDF24", url: "https://tools.pdf24.org", blurb: "Free PDF toolkit — merge, compress, convert, sign and OCR, no account needed.", pricing: "Free" },
+    ],
+  },
 ];
