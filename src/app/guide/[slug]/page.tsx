@@ -8,6 +8,7 @@ import { getCategory } from "@/lib/directory";
 import { citySlug } from "@/lib/citySlug";
 import { siteUrl } from "@/lib/format";
 import { resultsAreThin, robotsFor } from "@/lib/thinContent";
+import { metaDescription, pageTitle } from "@/lib/seo";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Card } from "@/components/ui";
 import { SmallBanners } from "@/components/Banners";
@@ -61,8 +62,11 @@ export async function generateMetadata({
   if (!data) return { title: "Guide not found" };
   const { guide, businesses } = data;
   return {
-    title: `${guide.title} — ${businesses.length} listed`,
-    description: guide.description,
+    title: pageTitle(`${guide.title} — ${businesses.length} listed`),
+    description: metaDescription(
+      guide.description,
+      `${businesses.length} listed on GoDesi — free cards with WhatsApp, photos, menus and reviews. Owners can claim and update theirs.`,
+    ),
     robots: robotsFor(resultsAreThin(businesses.length)),
     alternates: { canonical: `${siteUrl()}/guide/${guide.slug}` },
   };

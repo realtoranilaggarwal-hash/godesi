@@ -21,3 +21,15 @@ export function metaDescription(...parts: (string | null | undefined)[]) {
   const lastSpace = cut.lastIndexOf(" ");
   return `${cut.slice(0, lastSpace > MIN ? lastSpace : MAX).replace(/[,;:.\s]+$/, "")}…`;
 }
+
+/** Search engines flag titles over ~60-65 characters as too long. */
+const TITLE_MAX = 60;
+
+/** Cuts an over-long page title cleanly on a word boundary. */
+export function pageTitle(title: string) {
+  const clean = title.replace(/\s+/g, " ").trim();
+  if (clean.length <= TITLE_MAX) return clean;
+  const cut = clean.slice(0, TITLE_MAX - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${cut.slice(0, lastSpace > 30 ? lastSpace : TITLE_MAX - 1).replace(/[,;:.\s—–-]+$/, "")}…`;
+}

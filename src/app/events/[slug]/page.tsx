@@ -39,7 +39,7 @@ import {
 } from "@/lib/eventCategories";
 import { FreeRibbon } from "@/components/FreeRibbon";
 import { StaffEditLink } from "@/components/StaffEditLink";
-import { metaDescription } from "@/lib/seo";
+import { metaDescription, pageTitle } from "@/lib/seo";
 import { platformFeePercent } from "@/lib/connect";
 import { eventIsThin, robotsFor } from "@/lib/thinContent";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
@@ -239,7 +239,7 @@ export async function generateMetadata({
   const event = await loadEvent(params.slug);
   if (!event) return { title: "Event not found" };
   return {
-    title: `${event.title} — ${event.city} tickets`,
+    title: pageTitle(`${event.title} — ${event.city} tickets`),
     description: metaDescription(
       `${formatEventDate(event.startsAt, event.timeZone)} at ${event.venue}, ${event.city}. Buy tickets online and get a QR code for entry.`,
       event.description,

@@ -18,6 +18,7 @@ import {
   moderateMemberAction,
 } from "@/app/actions/clubs";
 import { thumbImage } from "@/lib/proxyImage";
+import { metaDescription, pageTitle } from "@/lib/seo";
 import { properName } from "@/lib/names";
 import { SmallBanners } from "@/components/Banners";
 
@@ -73,14 +74,18 @@ export async function generateMetadata({
     select: { name: true, description: true, city: true, imageUrl: true },
   });
   if (!club) return { title: "Club not found" };
-  const title = `${club.name}${club.city ? ` — ${club.city}` : ""} | GoDesi Clubs`;
+  const title = pageTitle(`${club.name}${club.city ? ` — ${club.city}` : ""} | GoDesi Clubs`);
+  const description = metaDescription(
+    club.description,
+    `${club.name}${club.city ? ` in ${club.city}` : ""} — a GoDesi club. Meetings, members and how to join free.`,
+  );
   return {
     title,
-    description: club.description.slice(0, 160),
+    description,
     alternates: { canonical: `/clubs/${params.slug}` },
     openGraph: {
       title,
-      description: club.description.slice(0, 160),
+      description,
       images: club.imageUrl ? [club.imageUrl] : undefined,
     },
   };

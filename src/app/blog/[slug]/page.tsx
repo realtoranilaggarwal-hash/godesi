@@ -10,6 +10,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { siteUrl } from "@/lib/format";
+import { metaDescription, pageTitle } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -27,13 +28,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const post = await loadPost(params.slug);
   if (!post) return { title: "Post not found" };
+  const title = pageTitle(post.title);
+  const description = metaDescription(
+    blogSummary(post),
+    "From the GoDesi blog — guides and explainers for the desi community in the USA and Canada.",
+  );
   return {
-    title: post.title,
-    description: blogSummary(post),
+    title,
+    description,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
-      title: post.title,
-      description: blogSummary(post),
+      title,
+      description,
       images: post.coverUrl ? [post.coverUrl] : undefined,
       type: "article",
     },
