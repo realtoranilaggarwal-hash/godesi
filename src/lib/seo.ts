@@ -22,8 +22,11 @@ export function metaDescription(...parts: (string | null | undefined)[]) {
   return `${cut.slice(0, lastSpace > MIN ? lastSpace : MAX).replace(/[,;:.\s]+$/, "")}…`;
 }
 
-/** Search engines flag titles over ~60-65 characters as too long. */
-const TITLE_MAX = 60;
+/**
+ * Search engines flag rendered titles over ~60-65 characters as too long, and
+ * the root layout appends " | GoDesi" (9 chars) — so the page segment caps at 52.
+ */
+const TITLE_MAX = 52;
 
 /** Cuts an over-long page title cleanly on a word boundary. */
 export function pageTitle(title: string) {

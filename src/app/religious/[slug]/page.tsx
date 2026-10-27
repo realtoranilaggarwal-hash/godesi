@@ -31,7 +31,7 @@ export async function generateMetadata({
   const description = metaDescription(
     place.description,
     `${FAITH_LABELS[place.faith]} in ${place.city}, ${place.country}.`,
-    "Timings, address, contact details, photos and upcoming events on GoDesi.",
+    "Timings, address, contact details, photos and upcoming events on GoDesi — the free desi community directory.",
   );
 
   return {
