@@ -51,7 +51,7 @@ export function safePartnerUrl(raw: string | undefined): string | null {
   if (!raw) return null;
   try {
     const url = new URL(raw);
-    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    if (url.protocol !== "https:") return null;
     return ALLOWED_HOSTS.has(url.hostname.replace(/^www\./, ""))
       ? url.toString()
       : null;
