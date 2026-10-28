@@ -94,7 +94,7 @@ export function ListingCard({
           <img
             src={thumbImage(listing.images[0].url, 640)}
             alt={listing.title}
-            className="h-44 w-full object-cover"
+            className="h-44 w-full object-cover object-top"
             loading="lazy"
           />
         ) : (
@@ -108,7 +108,7 @@ export function ListingCard({
             alt=""
             aria-hidden
             loading="lazy"
-            className="h-44 w-full object-cover"
+            className="h-44 w-full object-cover object-top"
           />
         )}
       </Link>

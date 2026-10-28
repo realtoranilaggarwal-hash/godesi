@@ -29,12 +29,18 @@ import { PropertySpec } from "@/components/PropertySpec";
 import { PropertyContact } from "@/components/PropertyContact";
 import { WhatsAppLead } from "@/components/WhatsAppLead";
 import { ListingCard } from "@/components/ListingCard";
+import { Gallery } from "@/components/gigs/GigPagePieces";
 import { can, getCurrentUser } from "@/lib/auth";
 import { PROPERTY_GROUP_LABELS } from "@/lib/property";
 import Link from "next/link";
-import { GodesiMark } from "@/components/GodesiMark";
 
 export const dynamic = "force-dynamic";
+
+const DELIVERY_LABELS: Record<string, string> = {
+  pickup: "Pick up at the seller's location",
+  ship: "Seller ships it to you",
+  either: "Pick up or shipping — your choice",
+};
 
 async function getListing(slug: string) {
   return db.listing.findFirst({
@@ -122,22 +128,43 @@ export default async function ListingPage({
       ? ["Furnishing", FURNISHING_LABELS[listing.furnishing]]
       : null,
     listing.genderPref ? ["Flatmate", GENDER_LABELS[listing.genderPref]] : null,
+    isItem && listing.deliveryOption
+      ? ["Handover", DELIVERY_LABELS[listing.deliveryOption]]
+      : null,
   ].filter((row): row is [string, string] => Boolean(row));
+
+  const photoUrls = listing.images.map((image) => image.url);
 
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
-        <Card className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="indigo">{KIND_LABELS[listing.kind]}</Badge>
-            {listing.featured ? <Badge tone="amber">Featured</Badge> : null}
-          </div>
-          <div>
-            <h1 className="text-2xl font-black sm:text-3xl">{listing.title}</h1>
-            <p className="text-sm text-slate-600">
-              📍 {listing.area ? `${listing.area}, ` : ""}
-              <PlaceLink city={listing.city} base={sectionHref} />
-            </p>
+        <div
+          className={
+            photoUrls.length
+              ? "grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]"
+              : ""
+          }
+        >
+          {photoUrls.length ? (
+            <Gallery
+              images={photoUrls}
+              title={listing.title}
+              imgClass="aspect-[16/10] w-full rounded-2xl border border-slate-200 bg-slate-100 object-cover object-top"
+            />
+          ) : null}
+          <Card className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="indigo">{KIND_LABELS[listing.kind]}</Badge>
+              {listing.featured ? <Badge tone="amber">Featured</Badge> : null}
+            </div>
+            <div>
+              <h1 className="text-2xl font-black sm:text-3xl">
+                {listing.title}
+              </h1>
+              <p className="text-sm text-slate-600">
+                📍 {listing.area ? `${listing.area}, ` : ""}
+                <PlaceLink city={listing.city} base={sectionHref} />
+              </p>
           </div>
           <p className="text-2xl font-black text-emerald-700">
             {priceLabel(listing)}
@@ -181,24 +208,8 @@ export default async function ListingPage({
               signedIn={Boolean(viewer)}
             />
           ) : null}
-        </Card>
-
-        {listing.images.length ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {listing.images.map((image) => (
-              <div key={image.id} className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={image.url}
-                  alt={listing.title}
-                  className="h-56 w-full rounded-2xl border border-slate-200 object-cover"
-                  loading="lazy"
-                />
-                <GodesiMark />
-              </div>
-            ))}
-          </div>
-        ) : null}
+          </Card>
+        </div>
 
         {listing.videoUrl ? (
           <VideoEmbed url={listing.videoUrl} title={listing.title} />
