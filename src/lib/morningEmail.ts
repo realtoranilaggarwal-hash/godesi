@@ -4,6 +4,7 @@ import { dealOfTheDay } from "@/lib/dealOfTheDay";
 import { emailEnabled, sendEmail, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { dailySky } from "@/lib/horoscope";
+import { newsPath } from "@/lib/newsLinks";
 import { RASHIS } from "@/lib/kundliSigns";
 import {
   DEFAULT_PANCHANG_CITY,
@@ -46,7 +47,8 @@ export async function morningContent(now = new Date()) {
   const city = DEFAULT_PANCHANG_CITY;
   const sky = dailySky(now);
   const panchang = computePanchang(city, sky.date);
-  const [{ deal, offer }, events] = await Promise.all([
+  const yesterday = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  const [{ deal, offer }, events, joiners, fresh] = await Promise.all([
     dealOfTheDay(now),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: now } },
@@ -54,7 +56,42 @@ export async function morningContent(now = new Date()) {
       take: 3,
       select: { slug: true, title: true, city: true, startsAt: true },
     }),
+    db.user.findMany({
+      where: { createdAt: { gte: yesterday }, bannedAt: null },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      select: {
+        name: true,
+        username: true,
+        business: { select: { slug: true } },
+      },
+    }),
+    Promise.all([
+      db.newsItem.findMany({
+        where: {
+          status: "PUBLISHED",
+          submittedById: { not: null },
+          publishedAt: { gte: yesterday },
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+        select: { id: true, title: true, city: true },
+      }),
+      db.business.findMany({
+        where: { status: "APPROVED", createdAt: { gte: yesterday } },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: { slug: true, name: true, city: true },
+      }),
+      db.listing.findMany({
+        where: { status: "APPROVED", createdAt: { gte: yesterday } },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: { slug: true, title: true, city: true },
+      }),
+    ]),
   ]);
+  const [freshNews, freshCards, freshListings] = fresh;
 
   const tz = city.timeZone;
   const panchangHtml = panchang
@@ -94,10 +131,53 @@ export async function morningContent(now = new Date()) {
         .join("")}</ul>`
     : "";
 
+  const joinerRows = joiners
+    .map((member) => {
+      const href = member.username
+        ? `${base}/${member.username}`
+        : member.business
+          ? `${base}/business/${member.business.slug}`
+          : null;
+      if (!href) return "";
+      return `<li style="margin:0 0 8px"><a href="${href}" style="color:#4f46e5;font-weight:700;text-decoration:none">${escape(member.name)}</a><div style="color:#64748b;font-size:13px">founding member — say namaste 👋</div></li>`;
+    })
+    .filter(Boolean)
+    .join("");
+  const joinerHtml = joinerRows
+    ? `<h2 style="margin:16px 0 6px;font-size:16px">👋 New on GoDesi — welcome them</h2><ul style="margin:0;padding-left:18px">${joinerRows}</ul>`
+    : "";
+
+  const freshRows = [
+    ...freshNews.map((n) => ({
+      title: n.title,
+      meta: `📰 news${n.city ? ` · ${n.city}` : ""}`,
+      url: `${base}${newsPath(n)}`,
+    })),
+    ...freshCards.map((b) => ({
+      title: b.name,
+      meta: `🏪 new card${b.city ? ` · ${b.city}` : ""}`,
+      url: `${base}/business/${b.slug}`,
+    })),
+    ...freshListings.map((l) => ({
+      title: l.title,
+      meta: `🏠 listing${l.city ? ` · ${l.city}` : ""}`,
+      url: `${base}/listings/${l.slug}`,
+    })),
+  ]
+    .slice(0, 6)
+    .map(
+      (item) =>
+        `<li style="margin:0 0 8px"><a href="${item.url}" style="color:#4f46e5;font-weight:700;text-decoration:none">${escape(item.title)}</a><div style="color:#64748b;font-size:13px">${escape(item.meta)}</div></li>`,
+    )
+    .join("");
+  const freshHtml = freshRows
+    ? `<h2 style="margin:16px 0 6px;font-size:16px">🆕 Posted by members</h2><ul style="margin:0;padding-left:18px">${freshRows}</ul>`
+    : "";
+
   return {
     day: sky.date,
     subject: `${sky.dateLabel.split(",").slice(0, 2).join(",")}: panchang, horoscope & deal of the day`,
-    body: panchangHtml + skyHtml + dealHtml + eventHtml,
+    body: panchangHtml + skyHtml + dealHtml + eventHtml + joinerHtml + freshHtml,
   };
 }
 
