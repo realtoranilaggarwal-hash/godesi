@@ -609,7 +609,7 @@ export async function bookTicketAction(
     if (totalQuantity > 10) return { error: "Maximum 10 tickets per booking." };
 
     const eventLeft = seatsLeft(event);
-    if (!event.tiers.length && eventLeft < totalQuantity)
+    if (!event.tiers.length && event.sourceId === null && eventLeft < totalQuantity)
       return { error: `Only ${eventLeft} seat(s) left for this event.` };
     for (const line of lines) {
       if (line.tier && seatsLeft(line.tier) < line.quantity)
