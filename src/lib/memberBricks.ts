@@ -4,6 +4,15 @@ import { requestCurrency } from "@/lib/currency";
 const BOARD = 1000;
 const BRICK = 2; // member bricks are the standard 4px (2x2) brick
 
+/** $0 free order — currency is cosmetic; requestCurrency throws off-request. */
+function orderCurrency() {
+  try {
+    return requestCurrency();
+  } catch {
+    return "INR" as const;
+  }
+}
+
 /**
  * Founding bricks fill the board from the TOP-RIGHT corner, moving left, then
  * row by row down — the reverse reading order of the paid market, so the
@@ -77,7 +86,7 @@ export async function assignMemberBrick(userId: string) {
         pricing: "MONTHLY",
         months: 1,
         amountMinor: 0,
-        currency: requestCurrency(),
+        currency: orderCurrency(),
         provider: "free",
         status: "PAID",
       },
