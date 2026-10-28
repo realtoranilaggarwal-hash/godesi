@@ -250,6 +250,21 @@ export const FESTIVALS: Festival[] = [
     dates: ["2026-10-20", "2027-10-09", "2028-09-28"],
   },
   {
+    name: "Karwa Chauth",
+    shop: [
+      { label: "Henna & mehndi kits", query: "henna mehndi cone kit" },
+      { label: "Karwa Chauth thali & sieve", query: "karwa chauth thali channi" },
+      { label: "Karwa Chauth saree & solah shringar", query: "karwa chauth saree solah shringar" },
+    ],
+    genre: "festival-mela",
+    keywords: ["karwa chauth", "karva chauth", "karwa", "chauth"],
+    faith: "HINDU_TEMPLE",
+    emoji: "🌙",
+    blurb:
+      "Married women fast sunrise to moonrise for their husbands' long life — mehndi, sargi, the channi (sieve) ritual and the evening Katha.",
+    dates: ["2026-10-30", "2027-10-19", "2028-11-07"],
+  },
+  {
     name: "Diwali",
     shop: [
       { label: "Diyas & string lights", query: "diwali diya lights" },
