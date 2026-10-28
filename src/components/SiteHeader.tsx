@@ -103,6 +103,7 @@ const PROMO_LINKS = [
 const STRIP_LINKS = [
   { href: "/trending", label: "Trending hashtags", icon: "🔥" },
   { href: "/festivals", label: "Festival calendar", icon: "🪔" },
+  { href: "/pooja", label: "Video pooja", icon: "🙏" },
   { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
   { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
   { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
@@ -217,6 +218,7 @@ export async function SiteHeader() {
     { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/shop", label: "Shop", icon: "🛍️" },
     { href: "/festivals", label: "Festival calendar", icon: "🪔" },
+  { href: "/pooja", label: "Video pooja", icon: "🙏" },
     { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
     { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
   { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },

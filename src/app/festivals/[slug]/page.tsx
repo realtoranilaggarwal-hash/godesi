@@ -197,9 +197,9 @@ export default async function FestivalPage({
           <Card className="border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50">
             <h2 className="font-bold">🙏 Book a {festival.name} pooja on video</h2>
             <p className="mt-1 text-sm text-slate-600">
-              A Vedic pandit performs the {festival.name} puja live on video in
-              your name &amp; gotra — Ganesh, Satyanarayan, Lakshmi, havans and
-              more, wherever you are in the world.
+              GoDesi assigns a trusted pandit in India who performs the{" "}
+              {festival.name} puja at a real temple, live on video, in your
+              name &amp; gotra — wherever you are in the world.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <LinkButton href="/pooja">See pooja packages</LinkButton>

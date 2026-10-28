@@ -63,7 +63,7 @@ export function PoojaBookingForm({ pkg }: { pkg: string }) {
         />
       </label>
       <label className="block text-sm font-semibold text-slate-700 sm:col-span-2">
-        Anything else — occasion, language, address for prasad
+        Occasion, your hometown/city in India, language, prasad address
         <textarea name="notes" rows={2} className={input} />
       </label>
       <Submit />
