@@ -215,7 +215,13 @@ export async function publicProfile(username: string) {
 
   const [events, leads, reviews, listings, gigs, clubs] = await Promise.all([
     db.event.findMany({
-      where: { organizerId: user.id, status: "APPROVED" },
+      where: {
+        status: "APPROVED",
+        OR: [
+          { organizerId: user.id },
+          { speakers: { some: { userId: user.id } } },
+        ],
+      },
       orderBy: { startsAt: "desc" },
       take: 6,
       select: {

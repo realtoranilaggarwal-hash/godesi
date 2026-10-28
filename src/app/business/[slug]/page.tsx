@@ -24,6 +24,7 @@ import { Alert, Badge, Card, LinkButton, Stars } from "@/components/ui";
 import { reviewSourceLabel } from "@/lib/reviewSources";
 import { ReviewForm } from "@/components/ReviewForm";
 import { DigitalCardFace } from "@/components/DigitalCardFace";
+import { EventCard } from "@/components/EventCard";
 import { CardLeadForm } from "@/components/CardLeadForm";
 import { CardShareButton } from "@/components/CardShareButton";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -177,6 +178,36 @@ export default async function BusinessProfilePage({
         orderBy: { name: "asc" },
       })
     : [];
+
+  // Every event tied to this card: at the venue, posted by the owner, or with
+  // the owner on the bill — upcoming first, then recent past ones.
+  const now = new Date();
+  const linkedEvents = await db.event.findMany({
+    where: {
+      status: "APPROVED",
+      OR: [
+        { businessId: business.id },
+        ...(business.ownerId
+          ? [
+              { organizerId: business.ownerId },
+              { speakers: { some: { userId: business.ownerId } } },
+            ]
+          : []),
+      ],
+    },
+    orderBy: { startsAt: "desc" },
+    take: 24,
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
+    },
+  });
+  const upcomingEvents = linkedEvents
+    .filter((event) => event.startsAt >= now)
+    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+  const pastEvents = linkedEvents
+    .filter((event) => event.startsAt < now)
+    .slice(0, 6);
 
   const agentListings =
     business.ownerId && isAgentCard(business.subcategorySlug)
@@ -873,6 +904,25 @@ export default async function BusinessProfilePage({
 
           {/* Card face + tools under the info on phones */}
           <div className="space-y-4 lg:hidden">{cardColumn}</div>
+
+        {linkedEvents.length ? (
+          <Card id="events">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-bold">🎟️ Events &amp; activities</h2>
+              <Link
+                href={`/events?venue=${encodeURIComponent(business.name)}`}
+                className="text-sm font-semibold text-indigo-700 hover:underline"
+              >
+                All events →
+              </Link>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[...upcomingEvents, ...pastEvents].map((event) => (
+                <EventCard key={event.id} event={event} variant="compact" />
+              ))}
+            </div>
+          </Card>
+        ) : null}
 
         {business.deals.length || isOwner ? (
           <Card id="deals">
