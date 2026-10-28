@@ -12,9 +12,21 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
+const EXPLORE: { href: string; label: string; blurb: string }[] = [
+  { href: "/tools", label: "🧰 52 free tools", blurb: "Marketing, design, video & SEO tools" },
+  { href: "/games", label: "🎮 Games", blurb: "Quick desi games & brain breaks" },
+  { href: "/astrology", label: "🔮 Astrology", blurb: "Daily rashi & panchang" },
+  { href: "/markets", label: "📈 Markets", blurb: "Stocks & indices at a glance" },
+  { href: "/crypto-fear-greed", label: "🪙 Crypto fear & greed", blurb: "Today’s market mood" },
+  { href: "/news", label: "📰 Desi news", blurb: "Headlines from the community" },
+  { href: "/events", label: "🎉 Events", blurb: "Melas, garbas & meetups near you" },
+  { href: "/walloffame", label: "🧱 Wall of Fame", blurb: "250,000 desi bricks — find yours" },
+];
+
 /**
  * Where brand-new members land: every kind of post in one view, so an organiser
- * picks "Event" instead of a sell-listing, a freelancer picks "Gig", etc.
+ * picks "Event" instead of a sell-listing, a freelancer picks "Gig", etc. Also
+ * a mini-map of the whole site and the founding-brick explainer.
  */
 export default async function StartPage() {
   const user = await getCurrentUser();
@@ -26,6 +38,12 @@ export default async function StartPage() {
       select: { id: true },
     }),
   );
+
+  const brick = await db.wallBlock.findFirst({
+    where: { advertiserId: user.id },
+    select: { x: true, y: true },
+    orderBy: { createdAt: "asc" },
+  });
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
@@ -40,10 +58,53 @@ export default async function StartPage() {
         </p>
       </div>
 
+      <Card className="flex flex-wrap items-center justify-between gap-3 bg-amber-50">
+        <div className="text-sm text-slate-700">
+          <p className="font-bold">🧱 Your founding brick is on the Wall of Fame</p>
+          <p className="mt-0.5">
+            Every member gets one free desi brick — hover it to see your
+            profile, and it stays for life as a founding member.
+            {brick ? (
+              <>
+                {" "}
+                Yours is placed at row {brick.y / 2 + 1}, column{" "}
+                {(1000 - brick.x) / 2} from the right.
+              </>
+            ) : null}{" "}
+            100 points = 1 more brick — keep posting, referring and reviewing to
+            buy bricks anywhere on the wall.
+          </p>
+        </div>
+        <Link
+          href="/walloffame"
+          className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white hover:bg-amber-600"
+        >
+          See the wall →
+        </Link>
+      </Card>
+
       <PostAnything
         title="Everything you can post on GoDesi"
         hasCard={hasCard}
       />
+
+      <Card>
+        <p className="text-sm font-bold text-slate-700">
+          A quick tour — everything else on GoDesi
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {EXPLORE.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-xl border border-slate-200 p-3 transition hover:border-indigo-300 hover:bg-indigo-50"
+            >
+              <p className="text-sm font-bold text-slate-800">{item.label}</p>
+              <p className="text-xs text-slate-500">{item.blurb}</p>
+            </Link>
+          ))}
+        </div>
+      </Card>
 
       <Card className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-600">
