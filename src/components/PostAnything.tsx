@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { joinGoal } from "@/lib/joinGoals";
 
 type PostOption = { href: string; icon: string; label: string };
@@ -84,12 +85,15 @@ export function PostAnything({
   title,
   hasCard = false,
   goals = [],
+  children,
 }: {
   title: string;
   /** The member already has their one business/professional card. */
   hasCard?: boolean;
   /** Goals ticked at signup — shown as "your next steps" on top. */
   goals?: string[];
+  /** Extra block at the bottom (e.g. the member's profiles). */
+  children?: ReactNode;
 }) {
   const picked = goals.flatMap((id) => {
     const goal = joinGoal(id);
@@ -152,6 +156,7 @@ export function PostAnything({
           </div>
         ))}
       </div>
+      {children ? <div className="mt-4 border-t pt-4">{children}</div> : null}
     </section>
   );
 }
