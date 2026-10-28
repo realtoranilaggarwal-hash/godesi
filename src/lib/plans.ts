@@ -275,7 +275,7 @@ const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
 };
 
 const SERVICE_PICK_LIMITS: Record<Plan, number> = {
-  FREE: 3,
+  FREE: 2,
   PRO: 6,
   PREMIUM: 10,
 };

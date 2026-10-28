@@ -58,6 +58,7 @@ const schema = z.object({
   furnishing: z.enum(["FURNISHED", "SEMI_FURNISHED", "UNFURNISHED"]).optional(),
   genderPref: z.enum(["ANY", "MALE", "FEMALE"]).optional(),
   categorySlug: z.string().trim().optional(),
+  deliveryOption: z.enum(["pickup", "ship", "either"]).optional(),
   whatsapp: z.string().min(10, "Add a WhatsApp number so people can reach you"),
   videoUrl: z
     .string()
@@ -195,6 +196,7 @@ export async function saveListingAction(
       furnishing: formData.get("furnishing") || undefined,
       genderPref: formData.get("genderPref") || undefined,
       categorySlug: formData.get("categorySlug") || undefined,
+      deliveryOption: formData.get("deliveryOption") || undefined,
       whatsapp: formData.get("whatsapp"),
       videoUrl: formData.get("videoUrl") || undefined,
       albumUrl: formData.get("albumUrl") || undefined,
@@ -375,6 +377,7 @@ export async function saveListingAction(
       furnishing: parsed.data.furnishing ?? null,
       genderPref: parsed.data.genderPref ?? null,
       categorySlug,
+      deliveryOption: parsed.data.deliveryOption ?? null,
       whatsapp: normalizeWhatsApp(parsed.data.whatsapp),
       videoUrl: parsed.data.videoUrl ?? null,
       albumUrl: parsed.data.albumUrl ?? null,

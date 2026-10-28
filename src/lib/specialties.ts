@@ -570,6 +570,12 @@ export const SPECIALTY_SETS: Record<string, SpecialtySet> = {
           "UPI",
           "Deposit for bridal bookings",
         ],
+        links: [
+          { label: "Open a free Venmo business profile ↗", href: "https://venmo.com/signup" },
+          { label: "Set up Zelle with your bank ↗", href: "https://www.zellepay.com/get-started" },
+          { label: "Cash App for business ↗", href: "https://cash.app/business" },
+          { label: "PayPal business account ↗", href: "https://www.paypal.com/business/open-account" },
+        ],
       },
     ],
     certifications: {
@@ -1303,6 +1309,11 @@ function weddingSet({
           "Corporate & community event",
         ],
         mode: "multi",
+        links: [
+          { label: "Mehndi (henna) kits on Amazon ↗", href: "https://www.amazon.com/s?k=mehndi+henna+cone+kit" },
+          { label: "Sangeet sound gear on Amazon ↗", href: "https://www.amazon.com/s?k=portable+pa+speaker+party" },
+          { label: "Haldi & pithi decor on Amazon ↗", href: "https://www.amazon.com/s?k=haldi+ceremony+decoration" },
+        ],
       },
       {
         key: "travel",

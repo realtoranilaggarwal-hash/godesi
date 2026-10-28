@@ -77,6 +77,13 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Prakash Parmar's staff-compiled elite page was merged into his own
+        // claimed card; keep shared links landing on the real profile.
+        source: "/desi-elite/prakash-parmar-singer",
+        destination: "/prakash-parmar",
+        permanent: true,
+      },
+      {
         // The live visitor map and global chat were retired; live TV replaces
         // the page anyone reaching /live was looking for.
         source: "/live",

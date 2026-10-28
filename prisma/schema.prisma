@@ -572,6 +572,9 @@ model Listing {
   contactEmail      String?
   /// Buy & sell items pick a subcategory of "buy-sell" (jewellery, furniture…).
   categorySlug      String?
+  /// Marketplace items: how the buyer gets the item — "pickup" (collect at the
+  /// seller's location), "ship" (seller ships it) or "either".
+  deliveryOption    String?
   whatsapp          String
   /// Walkthrough video pasted from YouTube or Vimeo.
   videoUrl          String?

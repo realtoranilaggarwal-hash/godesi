@@ -18,18 +18,23 @@ export type PackageView = {
 };
 
 /** Seller's own pictures: one large, the rest as thumbnails to switch. */
-export function Gallery({ images, title }: { images: string[]; title: string }) {
+export function Gallery({
+  images,
+  title,
+  imgClass =
+    "aspect-[16/10] w-full rounded-2xl border border-slate-200 bg-slate-100 object-cover",
+}: {
+  images: string[];
+  title: string;
+  imgClass?: string;
+}) {
   const [active, setActive] = useState(0);
   if (!images.length) return null;
   const current = images[Math.min(active, images.length - 1)];
   return (
     <div className="space-y-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={current}
-        alt={title}
-        className="aspect-[16/10] w-full rounded-2xl border border-slate-200 bg-slate-100 object-cover"
-      />
+      <img src={current} alt={title} className={imgClass} />
       {images.length > 1 ? (
         <div className="flex gap-2 overflow-x-auto pb-1">
           {images.map((url, i) => (

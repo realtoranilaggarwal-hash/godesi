@@ -217,6 +217,23 @@ export function ListingForm({
           />
         </Field>
         <CurrencySelect defaultValue={listing?.currency ?? defaultCurrency} />
+        {isItem ? (
+          <Field
+            label="How does the buyer get it?"
+            hint="Shown on the listing so buyers know before they message you"
+            required
+          >
+            <select
+              name="deliveryOption"
+              defaultValue={listing?.deliveryOption ?? "pickup"}
+              className={inputClass}
+            >
+              <option value="pickup">📍 Pick up at my location</option>
+              <option value="ship">📦 I can ship it to them</option>
+              <option value="either">🤝 Pick up or ship — buyer&apos;s choice</option>
+            </select>
+          </Field>
+        ) : null}
         <Field
           label="Video link (YouTube or Vimeo)"
           hint={`Optional ${isItem ? "clip of the item" : "walkthrough"} — paste a link like https://youtu.be/abc123.`}
