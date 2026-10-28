@@ -57,3 +57,46 @@ export async function reportIssueAction(
       "Thanks — our team has your report and will review it. We may contact you for more detail.",
   };
 }
+
+const askSchema = z.object({
+  name: z.string().trim().min(2, "Tell us your name"),
+  email: z.string().trim().email("Enter an email we can reply to"),
+  question: z
+    .string()
+    .trim()
+    .min(10, "Tell us a little more so we can answer (10+ characters)"),
+});
+
+/** FAQ "ask us" box — lands in the same support inbox as issue reports. */
+export async function askQuestionAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = askSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Please check the form" };
+  }
+
+  const { name, email, question } = parsed.data;
+  const sent = await sendEmail({
+    to: SITE.supportEmail,
+    subject: `[FAQ question] ${name}`,
+    html: shell(
+      "New FAQ question",
+      `<p><strong>${escape(name)}</strong> &lt;${escape(email)}&gt; asks:</p>
+       <p style="white-space:pre-wrap">${escape(question)}</p>`,
+    ),
+  });
+
+  if (!sent) {
+    return {
+      error:
+        "We could not send that right now. Please try again, or email " +
+        SITE.supportEmail,
+    };
+  }
+
+  return {
+    success: "Question sent — we'll email you an answer, usually within a day.",
+  };
+}

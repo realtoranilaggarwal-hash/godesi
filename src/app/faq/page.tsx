@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 import { SidebarBanners } from "@/components/Banners";
 import { ShareAnchor } from "@/components/ShareAnchor";
+import { FaqAsk, FaqSearch } from "@/components/FaqSearch";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
@@ -83,6 +84,41 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
         <p>
           Think of Godesi as your digital identity + marketplace + community
           network, built for desis worldwide.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "📸 How do I add lots of photos? (Google Photos album)",
+    id: "google-photos-album",
+    a: (
+      <>
+        <p>
+          The easiest way — no uploading limits:
+        </p>
+        <ul>
+          <li>
+            1. Open <strong>photos.google.com</strong> on your phone or computer
+            and sign in with any free Google account.
+          </li>
+          <li>
+            2. Tap <strong>+ → Album</strong>, name it (e.g. &quot;My
+            shop&quot;), and add your photos.
+          </li>
+          <li>
+            3. Tap <strong>Share → Create link</strong> and copy the link — it
+            looks like <em>photos.app.goo.gl/…</em>
+          </li>
+          <li>
+            4. On your Godesi listing or business card, paste it into the{" "}
+            <strong>Photo album link</strong> box and save.
+          </li>
+        </ul>
+        <p>
+          Your album then shows as a gallery on your Godesi page — Google hosts
+          the photos free, so you can add as many as you like. Add or remove
+          photos any time in Google Photos; your Godesi page stays in sync
+          automatically.
         </p>
       </>
     ),
@@ -833,14 +869,15 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
 ];
 
 export default function FaqPage() {
+  const faqItems = FAQS.map((faq) => ({
+    q: faq.q,
+    anchor: faq.id ?? slugify(faq.q),
+  }));
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1">
         <LegalPage title="Godesi FAQ — everything you need to know">
-          <p>
-            Still stuck? Write to{" "}
-            <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
-          </p>
+          <FaqSearch items={faqItems} />
 
           <h2>⚡ Do it now — direct links</h2>
           <div className="not-prose grid gap-2 sm:grid-cols-2">
@@ -878,6 +915,14 @@ export default function FaqPage() {
               </details>
             );
           })}
+
+          <h2>❓ Can&apos;t find your answer? Ask us</h2>
+          <p>
+            Drop your question below — we&apos;ll email you a personal answer.
+            Or write to{" "}
+            <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+          </p>
+          <FaqAsk />
 
           <h2>🚀 Final thought</h2>
           <p>
