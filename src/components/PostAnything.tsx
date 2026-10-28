@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { joinGoal } from "@/lib/joinGoals";
 
 type PostOption = { href: string; icon: string; label: string };
 
@@ -69,6 +70,11 @@ const SECTIONS: { title: string; options: PostOption[] }[] = [
         label: "Temple / place of worship",
       },
       { href: "/news/report", icon: "📰", label: "News / report" },
+      {
+        href: "/rishta/new",
+        icon: "💍",
+        label: "Matrimonial (Rishta) profile",
+      },
     ],
   },
 ];
@@ -77,11 +83,18 @@ const SECTIONS: { title: string; options: PostOption[] }[] = [
 export function PostAnything({
   title,
   hasCard = false,
+  goals = [],
 }: {
   title: string;
   /** The member already has their one business/professional card. */
   hasCard?: boolean;
+  /** Goals ticked at signup — shown as "your next steps" on top. */
+  goals?: string[];
 }) {
+  const picked = goals.flatMap((id) => {
+    const goal = joinGoal(id);
+    return goal ? [goal] : [];
+  });
   const sections = hasCard
     ? SECTIONS.map((section) => ({
         ...section,
@@ -97,6 +110,26 @@ export function PostAnything({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
       <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+      {picked.length ? (
+        <div className="mt-3">
+          <p className="mb-1.5 text-sm font-bold text-emerald-800">
+            ✅ Your next steps
+          </p>
+          <ul className="grid gap-1 sm:grid-cols-2">
+            {picked.map((goal) => (
+              <li key={goal.id}>
+                <Link
+                  href={goal.href}
+                  className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+                >
+                  <span aria-hidden>{goal.icon}</span>
+                  {goal.next} →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {sections.map((section) => (
           <div key={section.title}>

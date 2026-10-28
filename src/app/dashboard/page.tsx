@@ -26,7 +26,7 @@ import { EarnStrip } from "@/components/EarnStrip";
 import { pointValues, wallet } from "@/lib/rewardsQueries";
 import { offerInterest } from "@/lib/offerInterests";
 import { formatEventDate } from "@/lib/events";
-import { JoinGoalSteps } from "@/components/JoinGoalSteps";
+import { PostAnything } from "@/components/PostAnything";
 import { BusinessNextSteps } from "@/components/BusinessNextSteps";
 import { MorningEmailSignup } from "@/components/MorningEmailSignup";
 
@@ -288,7 +288,88 @@ export default async function DashboardPage({
           />
         ) : null}
 
-        <JoinGoalSteps goals={user.joinGoals} />
+        <Card className="space-y-2">
+          <h2 className="text-lg font-bold">My profiles</h2>
+          {business ? (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+              <span aria-hidden className="text-2xl">
+                {business.profileType === "PROFESSIONAL" ? "🎓" : "🏪"}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">{business.name}</p>
+                <p className="text-xs text-slate-500">
+                  {business.profileType === "PROFESSIONAL"
+                    ? "Professional profile"
+                    : "Business card"}{" "}
+                  · {business.category}
+                </p>
+              </div>
+              <Link
+                href={`/business/${business.slug}`}
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                View
+              </Link>
+              <Link
+                href="/dashboard/profile"
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                Edit
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+              <span aria-hidden className="text-2xl">
+                🏪
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">
+                  Business card or professional profile
+                </p>
+                <p className="text-xs text-slate-500">
+                  Not made yet — free, takes 2 minutes
+                </p>
+              </div>
+              <Link
+                href="/post?type=business"
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                Create
+              </Link>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+            <span aria-hidden className="text-2xl">
+              🙋
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">Personal profile</p>
+              <p className="text-xs text-slate-500">
+                {user.username ? `godesi.com/${user.username}` : "Pick your name"}
+              </p>
+            </div>
+            {user.username ? (
+              <Link
+                href={`/${user.username}`}
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                View
+              </Link>
+            ) : null}
+            <Link
+              href="/dashboard/me"
+              className="text-xs font-semibold text-indigo-600 hover:underline"
+            >
+              Edit
+            </Link>
+          </div>
+        </Card>
+
+        <PostAnything
+          title="What would you like to do on GoDesi?"
+          hasCard={Boolean(business)}
+          goals={user.joinGoals}
+        />
 
         {user.morningEmailAt ? null : <MorningEmailSignup />}
 
