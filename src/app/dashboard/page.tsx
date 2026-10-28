@@ -197,9 +197,14 @@ export default async function DashboardPage({
           />
         ) : null}
 
-        <Card className="space-y-2">
-          <h2 className="text-lg font-bold">My profiles</h2>
-          {business ? (
+        <PostAnything
+          title="What would you like to do on GoDesi?"
+          hasCard={Boolean(business)}
+          goals={user.joinGoals}
+        >
+          <div className="space-y-2">
+            <p className="text-sm font-bold text-slate-900">My profiles</p>
+            {business ? (
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
               <span aria-hidden className="text-2xl">
                 {business.profileType === "PROFESSIONAL" ? "🎓" : "🏪"}
@@ -272,13 +277,8 @@ export default async function DashboardPage({
               Edit
             </Link>
           </div>
-        </Card>
-
-        <PostAnything
-          title="What would you like to do on GoDesi?"
-          hasCard={Boolean(business)}
-          goals={user.joinGoals}
-        />
+        </div>
+        </PostAnything>
 
         {user.morningEmailAt ? null : <MorningEmailSignup />}
 
