@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 const STEPS = [
-  { icon: "🙏", text: "Pick a package & book below" },
-  { icon: "📞", text: "Our team calls to fix the muhurat" },
-  { icon: "📹", text: "Pandit performs your pooja live on video" },
-  { icon: "🌺", text: "Sankalp in your name & gotra — prasad options available" },
+  { icon: "🙏", text: "Pick a package & tell us your concern" },
+  { icon: "🛕", text: "We assign a trusted pandit at a temple in India" },
+  { icon: "📹", text: "Your pooja happens live on video call" },
+  { icon: "🌺", text: "Sankalp in your name & gotra — chadhava/prasad options" },
 ];
 
 export default function PoojaPage({
@@ -30,11 +30,13 @@ export default function PoojaPage({
     <div className="mx-auto max-w-4xl space-y-5">
       <section className="rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 px-5 py-8 text-white sm:px-8">
         <h1 className="text-3xl font-black sm:text-4xl">
-          🪔 Book a video pooja
+          🪔 Book a pooja — live from India
         </h1>
         <p className="mt-2 max-w-2xl text-white/90">
-          A Vedic pandit performs the ritual live on video in your name and
-          gotra — at your home&apos;s altar, wherever you are in the world.
+          Tell us your need and your hometown — GoDesi assigns a trusted pandit
+          from our India network who performs the ritual at a real temple, in
+          your name and gotra, and you join live on video. We vouch for every
+          pandit, so your offering is never at risk.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-4">
           {STEPS.map((step) => (
@@ -91,8 +93,9 @@ export default function PoojaPage({
           🙏 Book {selected ? `— ${selected.name}` : "your pooja"}
         </h2>
         <p className="mb-3 mt-1 text-sm text-slate-600">
-          Fill this in and our pandit team confirms your muhurat on call or
-          WhatsApp within a day.
+          Fill this in — GoDesi&apos;s team matches a pandit to your concern and
+          hometown, then confirms the muhurat and video link on call or
+          WhatsApp.
         </p>
         <PoojaBookingForm pkg={selected?.slug ?? POOJA_PACKAGES[0].slug} />
       </Card>
