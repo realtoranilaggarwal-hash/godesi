@@ -1295,6 +1295,10 @@ model EventSource {
   lastRunAt     DateTime?
   /// Human-readable outcome of the last run, including the failure if it failed.
   lastStatus    String?
+  /// Organiser inbox for automated "claim your listings" invites.
+  contactEmail  String?
+  /// When the last claim invite went out — re-sent at most monthly.
+  claimInviteSentAt DateTime?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 
