@@ -348,6 +348,7 @@ export function SpeakerRow({
         }
         purpose="avatar"
         defaultValue={defaultPhotoUrl}
+        square
         previewClassName="h-16 w-16 rounded-full object-cover"
       />
     </div>
