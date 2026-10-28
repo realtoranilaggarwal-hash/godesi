@@ -331,6 +331,13 @@ export function upcomingFestivals(limit = 6, now = new Date()): UpcomingFestival
     .slice(0, limit);
 }
 
+/** Festivals falling today (daysAway === 0) or tomorrow, for the homepage greeting. */
+export function todaysFestivals(now = new Date()): UpcomingFestival[] {
+  return upcomingFestivals(FESTIVALS.length, now).filter(
+    (festival) => festival.daysAway <= 1,
+  );
+}
+
 export function formatFestivalDate(date: Date) {
   return new Intl.DateTimeFormat("en-IN", {
     weekday: "short",
