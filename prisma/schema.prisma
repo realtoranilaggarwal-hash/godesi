@@ -3294,3 +3294,29 @@ model Booking {
   @@index([businessId, status])
   @@index([status, expiresAt])
 }
+
+/// A paid video-pooja request: devotee picks a package on /pooja, staff assigns
+/// a pandit who performs it on a video call (prasad shipped where offered).
+model PoojaBooking {
+  id        String   @id @default(cuid())
+  /// Package slug from src/lib/poojaPackages.ts (e.g. "satyanarayan").
+  package   String
+  priceUsd  Int
+
+  name    String
+  email   String
+  phone   String
+  /// Name + gotra the pandit chants the sankalp for.
+  sankalp String?
+  /// Preferred date for the video pooja (devotee's pick — staff confirms).
+  preferredDate DateTime?
+  /// Where to ship prasad, when the package includes it.
+  address String?
+  notes   String?
+
+  status    String   @default("NEW") // NEW | CONFIRMED | DONE | CANCELLED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}

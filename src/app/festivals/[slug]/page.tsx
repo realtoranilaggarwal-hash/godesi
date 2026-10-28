@@ -82,6 +82,25 @@ export default async function FestivalPage({
 
   const storeOffers = await optionalRead(() => liveStoreOffers(3), []);
 
+  const temples = await optionalRead(
+    () =>
+      db.worshipPlace.findMany({
+        where: { status: "APPROVED", faith: festival.faith },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+        select: {
+          slug: true,
+          name: true,
+          city: true,
+          state: true,
+          address: true,
+          phone: true,
+          whatsapp: true,
+        },
+      }),
+    [],
+  );
+
   const faq = [
     ...(next
       ? [
@@ -173,6 +192,54 @@ export default async function FestivalPage({
             </Link>
           ) : null}
         </Card>
+
+        {festival.faith === "HINDU_TEMPLE" ? (
+          <Card className="border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50">
+            <h2 className="font-bold">🙏 Book a {festival.name} pooja on video</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              A Vedic pandit performs the {festival.name} puja live on video in
+              your name &amp; gotra — Ganesh, Satyanarayan, Lakshmi, havans and
+              more, wherever you are in the world.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <LinkButton href="/pooja">See pooja packages</LinkButton>
+              <LinkButton href="/pooja?package=custom" variant="secondary">
+                Ask for a custom {festival.name} puja
+              </LinkButton>
+            </div>
+          </Card>
+        ) : null}
+
+        {temples.length ? (
+          <Card>
+            <h2 className="font-bold">
+              {FAITH_LABELS[festival.faith]} celebrating {festival.name}
+            </h2>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {temples.map((temple) => (
+                <li key={temple.slug}>
+                  <Link
+                    href={`/religious/${temple.slug}`}
+                    className="block rounded-xl border border-slate-200 p-3 hover:border-amber-400"
+                  >
+                    <p className="text-sm font-bold">{temple.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {temple.address ? `${temple.address}, ` : ""}
+                      {temple.city}
+                      {temple.state ? `, ${temple.state}` : ""}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={`/religious?faith=${festival.faith}`}
+              className="mt-3 inline-block text-sm font-bold text-indigo-600 hover:underline"
+            >
+              All {FAITH_LABELS[festival.faith].toLowerCase()} →
+            </Link>
+          </Card>
+        ) : null}
 
         <FestivalShop
           festivals={[festival]}

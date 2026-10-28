@@ -29,6 +29,7 @@ import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
 import { RishtaHomeBox } from "@/components/RishtaHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
+import { todaysFestivals, festivalSlug } from "@/lib/festivals";
 
 export const dynamic = "force-dynamic";
 
@@ -140,6 +141,7 @@ export default async function HomePage() {
   }));
   const pickerGroups = await categoryPickerGroups();
   const today = visitorPanchang();
+  const todayFests = todaysFestivals();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
   const events = [...upcoming]
@@ -206,6 +208,19 @@ export default async function HomePage() {
             <div className="rounded-xl border border-slate-200 bg-white p-1">
               <MarketTape />
             </div>
+            {todayFests.length ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {todayFests.map((f) => (
+                  <Link
+                    key={f.name}
+                    href={`/festivals/${festivalSlug(f)}`}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-1.5 text-sm font-black text-white shadow-sm hover:opacity-90"
+                  >
+                    {f.emoji} {f.daysAway === 0 ? `Happy ${f.name}!` : `${f.name} tomorrow`}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
             {today.panchang ? (
               <div className="mt-3">
                 <DailyStars
