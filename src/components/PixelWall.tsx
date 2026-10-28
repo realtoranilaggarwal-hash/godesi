@@ -283,19 +283,23 @@ export function PixelWall({
                 className="pointer-events-none absolute z-10 w-56 -translate-y-4 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl"
                 style={{
                   left: `${(hover.cx / SIZE) * 100}%`,
-                  top: `${(hover.cy / SIZE) * 100}%`,
+                  // Keep the card fully on the board: clamp its center so a
+                  // brick on the top/bottom edge doesn't cut it in half.
+                  top: `${(Math.min(Math.max(hover.cy, 170), SIZE - 170) / SIZE) * 100}%`,
                   transform:
                     hover.cx > SIZE / 2
                       ? "translate(calc(-100% - 12px), -50%)"
                       : "translate(12px, -50%)",
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={hover.block.imageUrl}
-                  alt={hover.block.title}
-                  className="w-full rounded-xl border border-slate-100 object-contain"
-                />
+                {hover.block.imageUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={hover.block.imageUrl}
+                    alt={hover.block.title}
+                    className="max-h-56 w-full rounded-xl border border-slate-100 object-contain"
+                  />
+                ) : null}
                 <p className="mt-1.5 truncate px-1 text-sm font-bold text-slate-900">
                   {hover.block.title}
                 </p>
