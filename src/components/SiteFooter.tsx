@@ -91,6 +91,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/leaderboard", label: "🏅 Top contributors" },
         { href: "/trending", label: "🔥 Trending hashtags" },
         { href: "/festivals", label: "🪔 Festival calendar" },
+        { href: "/pooja", label: "🙏 Book a video pooja" },
         { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
         { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
         { href: "/crypto-fear-greed", label: "😱 Crypto Fear & Greed" },
