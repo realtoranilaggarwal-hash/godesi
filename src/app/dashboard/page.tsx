@@ -19,7 +19,6 @@ import {
 import { QrCard } from "@/components/QrCard";
 import { siteUrl } from "@/lib/format";
 import { closeLeadAction } from "@/app/actions/leads";
-import { emailEnabled } from "@/lib/email";
 import { SidebarBanners } from "@/components/Banners";
 import { SignOutButton } from "@/components/SignOutButton";
 import { EarnStrip } from "@/components/EarnStrip";
@@ -32,33 +31,6 @@ import { MorningEmailSignup } from "@/components/MorningEmailSignup";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
-
-function Stat({
-  label,
-  value,
-  icon,
-  tone,
-  hint,
-}: {
-  label: string;
-  value: number | string;
-  icon: string;
-  tone: string;
-  hint?: string;
-}) {
-  return (
-    <div className={`rounded-2xl p-4 ${tone}`}>
-      <p className="text-lg" aria-hidden>
-        {icon}
-      </p>
-      <p className="text-2xl font-black">{value}</p>
-      <p className="text-[11px] font-semibold uppercase tracking-wide opacity-80">
-        {label}
-      </p>
-      {hint ? <p className="mt-1 text-[11px] opacity-70">{hint}</p> : null}
-    </div>
-  );
-}
 
 export default async function DashboardPage({
   searchParams,
@@ -91,24 +63,7 @@ export default async function DashboardPage({
     pointValues(),
   ]);
 
-  const [views, qrScans, whatsappClicks, unlocks, myLeads, adStats, myEvents] =
-    await Promise.all([
-      business
-        ? db.analyticsEvent.count({
-            where: { businessId: business.id, type: "PROFILE_VIEW" },
-          })
-        : 0,
-      business
-        ? db.analyticsEvent.count({
-            where: { businessId: business.id, type: "QR_SCAN" },
-          })
-        : 0,
-      business
-        ? db.analyticsEvent.count({
-            where: { businessId: business.id, type: "WHATSAPP_CLICK" },
-          })
-        : 0,
-      db.leadUnlock.count({ where: { userId: user.id } }),
+  const [myLeads, adStats, myEvents] = await Promise.all([
       db.lead.findMany({
         where: { clientId: user.id },
         orderBy: { createdAt: "desc" },
@@ -186,15 +141,6 @@ export default async function DashboardPage({
         {searchParams.password === "reset" ? (
           <Alert tone="success">New password saved — you are signed in.</Alert>
         ) : null}
-        {!user.emailVerifiedAt && emailEnabled() ? (
-          <Alert tone="info">
-            Your email is not verified yet.{" "}
-            <Link href="/verify-email" className="font-semibold underline">
-              Verify {user.email}
-            </Link>{" "}
-            to secure your account and earn referral rewards.
-          </Alert>
-        ) : null}
         {searchParams.business && business ? (
           <Card className="border-emerald-200 bg-emerald-50">
             <h2 className="text-lg font-black text-emerald-900">
@@ -239,43 +185,6 @@ export default async function DashboardPage({
             You are now on the {searchParams.upgraded} plan.
           </Alert>
         ) : null}
-
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <Stat
-            label="Profile views"
-            value={views}
-            icon="👁️"
-            tone="bg-indigo-50 text-indigo-700"
-          />
-          <Stat
-            label="QR scans"
-            value={qrScans}
-            icon="📱"
-            tone="bg-sky-50 text-sky-700"
-          />
-          <Stat
-            label="Enquiries"
-            value={whatsappClicks}
-            icon="💬"
-            tone="bg-emerald-50 text-emerald-700"
-            hint="WhatsApp chats started"
-          />
-          <Stat
-            label="Reviews"
-            value={reviewCount}
-            icon="⭐"
-            tone="bg-amber-50 text-amber-700"
-            hint={
-              reviewCount ? `${rating.toFixed(1)} average` : "No ratings yet"
-            }
-          />
-          <Stat
-            label="Leads unlocked"
-            value={unlocks}
-            icon="🔓"
-            tone="bg-fuchsia-50 text-fuchsia-700"
-          />
-        </div>
 
         {user.foundingNumber !== null ? (
           <FoundingFeatureOffer
