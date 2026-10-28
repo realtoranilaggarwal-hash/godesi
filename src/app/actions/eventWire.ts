@@ -35,6 +35,12 @@ const sourceSchema = z.object({
   websiteUrl: z.string().trim().url("The website must be a full link.").max(300).optional(),
   categorySlugs: z.string().trim().max(200).optional(),
   tags: z.string().trim().max(200).optional(),
+  contactEmail: z
+    .string()
+    .trim()
+    .email("Check the organiser email address")
+    .max(160)
+    .optional(),
 });
 
 function list(value?: string) {
@@ -108,6 +114,7 @@ export async function saveEventSourceAction(formData: FormData) {
     websiteUrl: formData.get("websiteUrl") || undefined,
     categorySlugs: formData.get("categorySlugs") || undefined,
     tags: formData.get("tags") || undefined,
+    contactEmail: formData.get("contactEmail") || undefined,
   });
   if (!parsed.success) {
     reject(parsed.error.issues.map((issue) => issue.message).join(" "));
@@ -122,6 +129,7 @@ export async function saveEventSourceAction(formData: FormData) {
     websiteUrl: parsed.data.websiteUrl ?? null,
     categorySlugs: list(parsed.data.categorySlugs),
     tags: list(parsed.data.tags),
+    contactEmail: parsed.data.contactEmail ?? null,
   };
 
   const id = String(formData.get("id") ?? "");
@@ -135,6 +143,21 @@ export async function saveEventSourceAction(formData: FormData) {
 
   if (id) await db.eventSource.update({ where: { id }, data });
   else await db.eventSource.create({ data });
+  refresh();
+}
+
+/** Sets (or clears) the organiser inbox that claim invites go to. */
+export async function setEventSourceContactAction(formData: FormData) {
+  await requirePermission("events");
+  const id = String(formData.get("id") ?? "");
+  const email = String(formData.get("contactEmail") ?? "").trim();
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    reject("Check the organiser email address.");
+  }
+  await db.eventSource.update({
+    where: { id },
+    data: { contactEmail: email || null, claimInviteSentAt: null },
+  });
   refresh();
 }
 

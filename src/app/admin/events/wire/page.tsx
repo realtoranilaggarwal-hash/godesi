@@ -13,6 +13,7 @@ import {
   runEventSourceAction,
   saveEventSourceAction,
   saveLinkedEventAction,
+  setEventSourceContactAction,
   toggleEventSourceAction,
 } from "@/app/actions/eventWire";
 import { cleanEventCategories, cleanEventLanguages } from "@/lib/eventCategories";
@@ -390,6 +391,17 @@ export default async function Page({
           <Field label="Tags" hint="Optional, comma separated">
             <input name="tags" placeholder="temple, aarti" className={inputClass} />
           </Field>
+          <Field
+            label="Organiser email"
+            hint="Optional — we auto-send a monthly claim invite"
+          >
+            <input
+              name="contactEmail"
+              type="email"
+              placeholder="office@theirtemple.org"
+              className={inputClass}
+            />
+          </Field>
           <button className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white sm:col-span-2">
             Add calendar
           </button>
@@ -417,6 +429,28 @@ export default async function Page({
                     ? `Last run ${source.lastRunAt.toISOString().slice(0, 16).replace("T", " ")} — ${source.lastStatus ?? ""}`
                     : "Not run yet."}
                 </p>
+                <form
+                  action={setEventSourceContactAction}
+                  className="flex flex-wrap items-center gap-2"
+                >
+                  <input type="hidden" name="id" value={source.id} />
+                  <input
+                    name="contactEmail"
+                    type="email"
+                    defaultValue={source.contactEmail ?? ""}
+                    placeholder="organiser email for claim invites"
+                    className="w-56 rounded-lg border border-slate-300 px-2 py-1 text-xs"
+                  />
+                  <button className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50">
+                    save email
+                  </button>
+                  {source.claimInviteSentAt ? (
+                    <span className="text-xs text-emerald-700">
+                      invite sent{" "}
+                      {source.claimInviteSentAt.toISOString().slice(0, 10)}
+                    </span>
+                  ) : null}
+                </form>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <form action={runEventSourceAction}>
                     <input type="hidden" name="id" value={source.id} />
