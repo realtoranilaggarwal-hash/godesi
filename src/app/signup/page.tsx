@@ -8,6 +8,7 @@ import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 import { FoundingOffer } from "@/components/FoundingOffer";
 import { NewsMediaStrip } from "@/components/NewsMediaStrip";
+import { PostAnything } from "@/components/PostAnything";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -66,13 +67,7 @@ export default async function SignupPage({
             🏅 Become a local GoDesi Ambassador — represent your city &amp;
             earn →
           </Link>
-          <Link
-            href="/post"
-            className="block rounded-xl border border-indigo-200 bg-white px-4 py-2.5 text-sm font-bold text-indigo-700 hover:bg-indigo-50"
-          >
-            ✨ See everything you can post — business, event, item to sell,
-            news… →
-          </Link>
+          <PostAnything title="Or jump straight to what you want to do" />
         </Card>
         <p className="text-sm text-slate-600">
           Already have an account?{" "}
