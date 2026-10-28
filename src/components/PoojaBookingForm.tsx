@@ -1,14 +1,26 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { bookPoojaAction } from "@/app/actions/pooja";
+import { emptyState } from "@/lib/actions";
 
 const input =
   "mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-normal";
 
+function Submit() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      disabled={pending}
+      className="rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-2.5 text-sm font-black text-white hover:opacity-90 disabled:opacity-50 sm:col-span-2"
+    >
+      {pending ? "Booking…" : "Book this pooja 🙏"}
+    </button>
+  );
+}
+
 export function PoojaBookingForm({ pkg }: { pkg: string }) {
-  const [pack, setPack] = useState(pkg);
-  const [state, action, pending] = useActionState(bookPoojaAction, {});
+  const [state, action] = useFormState(bookPoojaAction, emptyState);
 
   if (state.success) {
     return (
@@ -20,7 +32,7 @@ export function PoojaBookingForm({ pkg }: { pkg: string }) {
 
   return (
     <form action={action} className="grid gap-3 sm:grid-cols-2">
-      <input type="hidden" name="package" value={pack} />
+      <input type="hidden" name="package" value={pkg} />
       {state.error ? (
         <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 sm:col-span-2">
           {state.error}
@@ -54,12 +66,7 @@ export function PoojaBookingForm({ pkg }: { pkg: string }) {
         Anything else — occasion, language, address for prasad
         <textarea name="notes" rows={2} className={input} />
       </label>
-      <button
-        disabled={pending}
-        className="rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-2.5 text-sm font-black text-white hover:opacity-90 disabled:opacity-50 sm:col-span-2"
-      >
-        {pending ? "Booking…" : "Book this pooja 🙏"}
-      </button>
+      <Submit />
     </form>
   );
 }
