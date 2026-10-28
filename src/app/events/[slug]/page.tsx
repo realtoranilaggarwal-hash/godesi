@@ -675,6 +675,23 @@ export default async function EventPage({
                 </p>
               )}
             </div>
+            {imported && !past ? (
+              <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-3">
+                <p className="text-sm font-bold text-indigo-900">
+                  🎟️ Free RSVP on GoDesi
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  Reserve your spot — we share the guest list with the
+                  organiser.
+                </p>
+                <a
+                  href="#tickets"
+                  className="mt-3 inline-block rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700"
+                >
+                  🎟️ RSVP free
+                </a>
+              </div>
+            ) : null}
             {!imported && !past && left > 0 && (event.tiers.length || event.price) ? (
               <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-3">
                 <p className="text-sm font-bold text-indigo-900">🎟️ Tickets</p>
@@ -820,20 +837,57 @@ export default async function EventPage({
         </div>
 
         {imported ? (
-          <Card>
-            <h2 className="font-bold">Tickets and details</h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Godesi listed this event from the organiser&apos;s public listing
-              and does not sell tickets for it. Check times and entry with the
-              organiser before travelling.
-            </p>
-            {event.websiteUrl ? (
-              <div className="mt-3">
-                <LinkButton href={event.websiteUrl} target="_blank">
-                  Open the organiser&apos;s page
-                </LinkButton>
-              </div>
-            ) : null}
+          <Card id="tickets">
+            {past ? (
+              <>
+                <h2 className="font-bold">Tickets and details</h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  Godesi listed this event from the organiser&apos;s public
+                  listing.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="font-bold">🎟️ Free RSVP on GoDesi</h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  GoDesi listed this event from the organiser&apos;s public
+                  calendar. RSVP free here — we share the guest list with the
+                  organiser. Please still confirm times and entry with them
+                  before travelling.
+                </p>
+                {!user ? (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-sm text-slate-600">
+                      Sign in (or join free) to RSVP. Your pass is saved in your
+                      account and emailed to you.
+                    </p>
+                    <LinkButton href={`/login?next=/events/${event.slug}`}>
+                      Sign in to RSVP free
+                    </LinkButton>
+                  </div>
+                ) : (
+                  <div className="mt-3">
+                    <TicketForm
+                      eventId={event.id}
+                      price={0}
+                      currency={event.currency}
+                      seatsLeft={99}
+                      maxPerBooking={10}
+                      tiers={[]}
+                      defaultName={user.name}
+                      defaultEmail={user.email}
+                    />
+                  </div>
+                )}
+                {event.websiteUrl ? (
+                  <div className="mt-3">
+                    <LinkButton href={event.websiteUrl} target="_blank" variant="secondary">
+                      Organiser&apos;s page ↗
+                    </LinkButton>
+                  </div>
+                ) : null}
+              </>
+            )}
             <p className="mt-3 text-sm text-emerald-800">
               <span className="font-bold">Is this your event?</span> Claim it
               free and sell these seats here instead — {platformFeePercent()}%
@@ -1064,7 +1118,7 @@ export default async function EventPage({
           />
         ) : null}
 
-        {isOwnerOrDesk && !imported ? (
+        {isOwnerOrDesk ? (
           <EventAttendees
             eventId={event.id}
             slug={event.slug}
