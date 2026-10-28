@@ -62,23 +62,64 @@ export default async function WallOfFamePage({
 
   const taken = blocks.reduce((sum, block) => sum + block.w * block.h, 0);
 
-  /** Vendor list: rank by total pixels owned (more paid = higher). Each row
-   * shows the vendor's own ~100-word blurb from their first block that has one. */
+  /** Vendor list: one row per member — all their blocks merged, ranked by
+   * total desi bricks. Category + points come from their card and wallet. */
   const vendors = new Map<
     string,
-    { name: string; href: string; pixels: number; desc: string | null }
+    {
+      userId: string | null;
+      name: string;
+      href: string;
+      pixels: number;
+      desc: string | null;
+    }
   >();
   for (const block of blocks) {
     if (block.status !== "ACTIVE") continue;
     const name = block.advertiser?.name ?? block.title;
-    const key = `${name}|${block.linkUrl}`;
+    const key = block.advertiserId ?? `${name}|${block.linkUrl}`;
     const entry =
-      vendors.get(key) ?? { name, href: block.linkUrl, pixels: 0, desc: null };
+      vendors.get(key) ?? {
+        userId: block.advertiserId,
+        name,
+        href: block.linkUrl,
+        pixels: 0,
+        desc: null,
+      };
     entry.pixels += block.w * block.h;
     if (!entry.desc && block.description) entry.desc = block.description;
     vendors.set(key, entry);
   }
+
+  const vendorIds = Array.from(vendors.values())
+    .map((v) => v.userId)
+    .filter((id): id is string => !!id);
+  const [cards, pointsByUser] = await Promise.all([
+    db.business.findMany({
+      where: { ownerId: { in: vendorIds } },
+      select: { ownerId: true, category: true },
+    }),
+    db.pointsEntry.groupBy({
+      by: ["userId"],
+      where: { userId: { in: vendorIds } },
+      _sum: { points: true },
+    }),
+  ]);
+  const categoryByUser = new Map(
+    cards.map((card) => [card.ownerId, card.category]),
+  );
+  const walletByUser = new Map(
+    pointsByUser.map((row) => [row.userId, row._sum.points ?? 0]),
+  );
+
   const board = Array.from(vendors.values())
+    .map((vendor) => ({
+      ...vendor,
+      category: vendor.userId
+        ? (categoryByUser.get(vendor.userId) ?? "Founding member")
+        : null,
+      points: vendor.userId ? (walletByUser.get(vendor.userId) ?? 0) : null,
+    }))
     .sort((a, b) => b.pixels - a.pixels)
     .slice(0, 50);
 
@@ -190,8 +231,15 @@ export default async function WallOfFamePage({
                     {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-bold text-slate-900">
-                      {vendor.name}
+                    <span className="flex items-center gap-2">
+                      <span className="truncate font-bold text-slate-900">
+                        {vendor.name}
+                      </span>
+                      {vendor.category ? (
+                        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          {vendor.category}
+                        </span>
+                      ) : null}
                     </span>
                     {vendor.desc ? (
                       <span className="mt-0.5 line-clamp-2 block text-xs font-normal text-slate-500">
@@ -199,8 +247,15 @@ export default async function WallOfFamePage({
                       </span>
                     ) : null}
                   </span>
-                  <span className="shrink-0 rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
-                    {Math.floor(vendor.pixels / 4).toLocaleString()} bricks
+                  <span className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
+                      {Math.floor(vendor.pixels / 4).toLocaleString()} bricks
+                    </span>
+                    {vendor.points !== null ? (
+                      <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-black text-indigo-700">
+                        {vendor.points.toLocaleString()} pts
+                      </span>
+                    ) : null}
                   </span>
                   <span className="shrink-0 text-sm font-semibold text-indigo-600">
                     Visit →
