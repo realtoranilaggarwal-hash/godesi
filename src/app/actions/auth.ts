@@ -19,6 +19,7 @@ import { welcomeFoundingMember } from "@/lib/founding";
 import { awardOfferPickPoints } from "@/lib/rewardsQueries";
 import { canonicalEmail, screenSignup } from "@/lib/signupGuard";
 import { normalizeUsername, usernameError } from "@/lib/profiles";
+import { assignMemberBrick } from "@/lib/memberBricks";
 import {
   cleanOfferPhone,
   parseOfferContact,
@@ -128,6 +129,7 @@ export async function signupAction(
       user = await db.user.create({ data: { ...account, username: null } });
     }
     await createSession(user.id);
+    await assignMemberBrick(user.id);
     cookies().set("godesi_joined", "1", {
       path: "/",
       maxAge: 300,
