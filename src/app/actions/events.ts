@@ -88,6 +88,17 @@ const optionalUrl = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
+/** Same as optionalUrl but also accepts site-relative paths (/events/x.jpg). */
+const optionalImageUrl = z
+  .string()
+  .trim()
+  .refine(
+    (value) => !value || value.startsWith("/") || /^https?:\/\//i.test(value),
+    "Enter a valid image URL",
+  )
+  .optional()
+  .or(z.literal("").transform(() => undefined));
+
 type SessionInput = {
   title: string;
   stage: string | null;
@@ -166,7 +177,7 @@ const eventSchema = z.object({
   price: z.coerce.number().int().min(0, "Price cannot be negative"),
   currency: z.enum(["INR", "USD"]).optional(),
   seatsTotal: z.coerce.number().int().min(1, "At least 1 seat is required"),
-  imageUrl: optionalUrl,
+  imageUrl: optionalImageUrl,
   videoUrl: optionalUrl.refine(
     (value) => !value || isSupportedVideoUrl(value),
     "Paste a YouTube or Vimeo video link",
