@@ -143,11 +143,7 @@ export async function signupAction(
     } else {
       const home = username
         ? "/dashboard/me"
-        : parsed.data.role === "CLIENT"
-          ? "/leads/new"
-          : parsed.data.role === "PROFESSIONAL"
-            ? "/dashboard/profile?type=professional"
-            : "/dashboard/profile";
+        : "/start";
       target = safeNext(formData.get("next")) ?? home;
     }
   } catch (error) {

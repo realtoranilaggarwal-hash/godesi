@@ -17,7 +17,7 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* One font for the whole site — Inter is set on <body> in layout.tsx. */
   /* `clip` (unlike `hidden`) is not a scroll container, so sticky headers keep
      working while stray wide content can no longer widen the page on iOS. */
   overflow-x: clip;
