@@ -646,7 +646,10 @@ const adminEventSchema = z.object({
   imageUrl: z
     .string()
     .trim()
-    .url("Enter a valid image URL")
+    .refine(
+      (value) => !value || value.startsWith("/") || /^https?:\/\//i.test(value),
+      "Enter a valid image URL",
+    )
     .optional()
     .or(z.literal("").transform(() => undefined)),
   videoUrl: z
