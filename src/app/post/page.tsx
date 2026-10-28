@@ -335,7 +335,13 @@ export default async function PostPage({
               </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {categories.map((category) => (
+                {(type === "business"
+                  ? // "Buy & Sell Marketplace" is the marketplace listing type
+                    // from step 1 — showing it here makes people make a card
+                    // when they meant to sell an item.
+                    categories.filter((category) => category.slug !== "buy-sell")
+                  : categories
+                ).map((category) => (
                   <Tile
                     key={category.slug}
                     href={
