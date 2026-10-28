@@ -68,6 +68,32 @@ export default async function LoginPage({
             Create an account
           </Link>
         </p>
+
+        <Card>
+          <p className="text-sm font-bold text-slate-700">
+            While you&apos;re here — what&apos;s on GoDesi
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {[
+              { href: "/events", label: "🎉 Events & melas" },
+              { href: "/tools", label: "🧰 52 free tools" },
+              { href: "/games", label: "🎮 Games" },
+              { href: "/astrology", label: "🔮 Astrology" },
+              { href: "/markets", label: "📈 Markets" },
+              { href: "/news", label: "📰 Desi news" },
+              { href: "/walloffame", label: "🧱 Wall of Fame" },
+              { href: "/deals", label: "🏷️ Deals & offers" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </Card>
       </div>
 
       <JoinRail />
