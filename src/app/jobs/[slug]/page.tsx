@@ -13,6 +13,7 @@ import {
   workTypeLabel,
 } from "@/lib/jobs";
 import { setApplicationStatusAction, toggleJobAction } from "@/app/actions/jobs";
+import { ShareRow } from "@/components/ShareRow";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
 import { JobApplyForm } from "@/components/forms/JobApplyForm";
 
@@ -100,6 +101,13 @@ export default async function JobPage({
             </ul>
           </div>
         ) : null}
+        <div className="mt-4 border-t border-slate-100 pt-3">
+          <ShareRow
+            path={`/jobs/${job.slug}`}
+            title={job.title}
+            text={`${payLabel(job)} · GoDesi jobs`}
+          />
+        </div>
         {manages ? (
           <div className="mt-4 flex flex-wrap gap-2">
             <LinkButton href={`/jobs/${job.slug}/edit`} variant="secondary">

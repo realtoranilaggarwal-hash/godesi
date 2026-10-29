@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { JOB_CATEGORIES, jobCategory, locationLabel, payLabel, workTypeLabel } from "@/lib/jobs";
+import { ShareRow } from "@/components/ShareRow";
 import { CareerjetSearchBox } from "@/components/CareerjetSearchBox";
 import { Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
@@ -137,25 +138,34 @@ export default async function JobsPage({
           {jobs.length ? (
             <div className="space-y-3">
               {jobs.map((job) => (
-                <Link key={job.id} href={`/jobs/${job.slug}`} className="block">
-                  <Card className="transition hover:border-indigo-300">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <h2 className="text-lg font-bold text-slate-900">{job.title}</h2>
-                      <span className="font-bold text-emerald-700">{payLabel(job)}</span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-2 text-xs">
-                      <Badge tone="amber">
-                        {jobCategory(job.category).icon} {jobCategory(job.category).label}
-                      </Badge>
-                      <Badge tone="indigo">{workTypeLabel(job.workType)}</Badge>
-                      <Badge>{locationLabel(job)}</Badge>
-          {job.openings > 1 ? <Badge>👥 {job.openings} openings</Badge> : null}
-          {job.hoursPerWeek ? <Badge>🕒 {job.hoursPerWeek} hrs/week</Badge> : null}
-                      <span className="text-slate-500">by {job.poster.name}</span>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm text-slate-600">{job.description}</p>
-                  </Card>
-                </Link>
+                <div key={job.id}>
+                  <Link href={`/jobs/${job.slug}`} className="block">
+                    <Card className="transition hover:border-indigo-300">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <h2 className="text-lg font-bold text-slate-900">{job.title}</h2>
+                        <span className="font-bold text-emerald-700">{payLabel(job)}</span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                        <Badge tone="amber">
+                          {jobCategory(job.category).icon} {jobCategory(job.category).label}
+                        </Badge>
+                        <Badge tone="indigo">{workTypeLabel(job.workType)}</Badge>
+                        <Badge>{locationLabel(job)}</Badge>
+                        {job.openings > 1 ? <Badge>👥 {job.openings} openings</Badge> : null}
+                        {job.hoursPerWeek ? <Badge>🕒 {job.hoursPerWeek} hrs/week</Badge> : null}
+                        <span className="text-slate-500">by {job.poster.name}</span>
+                      </div>
+                      <p className="mt-2 line-clamp-2 text-sm text-slate-600">{job.description}</p>
+                    </Card>
+                  </Link>
+                  <div className="mt-1 pl-1">
+                    <ShareRow
+                      path={`/jobs/${job.slug}`}
+                      title={job.title}
+                      text={`${payLabel(job)} · GoDesi jobs`}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
           ) : (

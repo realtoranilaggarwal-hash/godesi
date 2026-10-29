@@ -159,6 +159,20 @@ export default async function HomePage() {
       <div className="space-y-8">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-3">
+          {todayFests.length ? (
+            <div className="flex flex-wrap gap-2">
+              {todayFests.map((f) => (
+                <Link
+                  key={f.name}
+                  href={`/festivals/${festivalSlug(f)}`}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-1.5 text-sm font-black text-white shadow-sm hover:opacity-90"
+                >
+                  {f.emoji} {f.daysAway === 0 ? `Happy ${f.name}!` : `${f.name} tomorrow`}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
           <RecentStrip />
 
           <ChatterHomeBox />
@@ -208,19 +222,6 @@ export default async function HomePage() {
             <div className="rounded-xl border border-slate-200 bg-white p-1">
               <MarketTape />
             </div>
-            {todayFests.length ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {todayFests.map((f) => (
-                  <Link
-                    key={f.name}
-                    href={`/festivals/${festivalSlug(f)}`}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-1.5 text-sm font-black text-white shadow-sm hover:opacity-90"
-                  >
-                    {f.emoji} {f.daysAway === 0 ? `Happy ${f.name}!` : `${f.name} tomorrow`}
-                  </Link>
-                ))}
-              </div>
-            ) : null}
             {today.panchang ? (
               <div className="mt-3">
                 <DailyStars
