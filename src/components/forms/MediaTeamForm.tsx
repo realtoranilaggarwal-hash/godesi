@@ -113,6 +113,13 @@ export function MediaTeamForm({
         <input name="availability" className={inputClass} />
       </Field>
 
+      <div className="hidden" aria-hidden="true">
+        <label>
+          Website
+          <input name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
       <SubmitButton pendingLabel="Sending…">Send my application</SubmitButton>
     </form>
   );
