@@ -28,7 +28,7 @@ export default async function VerifyEmailPage() {
         )}
       </Card>
       <p className="text-center text-sm text-slate-500">
-        <Link href="/dashboard" className="font-semibold text-indigo-600 hover:underline">
+        <Link href="/start" className="font-semibold text-indigo-600 hover:underline">
           Skip for now
         </Link>
       </p>
