@@ -65,7 +65,7 @@ export async function RecentStrip() {
         {user ? (
           <Link
             href="/walloffame"
-            className="order-last flex min-w-full flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 px-3 py-2 text-center text-sm min-[360px]:text-base font-black tracking-wide text-white shadow-lg shadow-amber-200 ring-2 ring-amber-300 transition hover:brightness-110 sm:order-none sm:min-w-0 sm:px-5"
+            className="order-last flex min-w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 px-3 py-2 text-center text-sm min-[360px]:text-base font-black tracking-wide text-white shadow-lg shadow-amber-200 ring-2 ring-amber-300 transition hover:brightness-110 sm:order-none sm:min-w-0 sm:px-5"
           >
             <span className="sm:hidden">
               🧱 Wall of Fame — $4 a brick, for life →
