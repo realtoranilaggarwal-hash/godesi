@@ -8,6 +8,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { MEDIA_ROLES } from "@/lib/media";
+import { CaptchaField } from "@/components/forms/CaptchaField";
+import { RECAPTCHA_SITE_KEY } from "@/lib/recaptcha";
 
 export function MediaTeamForm({
   defaultName = "",
@@ -112,6 +114,8 @@ export function MediaTeamForm({
       >
         <input name="availability" className={inputClass} />
       </Field>
+
+      <CaptchaField siteKey={RECAPTCHA_SITE_KEY} />
 
       <div className="hidden" aria-hidden="true">
         <label>

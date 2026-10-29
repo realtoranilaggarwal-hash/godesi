@@ -10,6 +10,8 @@ import { FormError } from "@/components/forms/FormError";
 import { PhoneInput } from "@/components/forms/PhoneInput";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 import { FormSuccess } from "@/components/forms/FormSuccess";
+import { CaptchaField } from "@/components/forms/CaptchaField";
+import { RECAPTCHA_SITE_KEY } from "@/lib/recaptcha";
 
 export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
   const [state, formAction] = useFormState(
@@ -61,6 +63,7 @@ export function ContactForm({ defaultTopic }: { defaultTopic?: string }) {
         />
       </Field>
 
+      <CaptchaField siteKey={RECAPTCHA_SITE_KEY} />
       <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Sending...">Send message</SubmitButton>
     </form>

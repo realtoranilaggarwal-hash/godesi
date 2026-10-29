@@ -5,6 +5,8 @@ import { signupAction } from "@/app/actions/auth";
 import { emptyState } from "@/lib/actions";
 import { Field, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/SubmitButton";
+import { CaptchaField } from "@/components/forms/CaptchaField";
+import { RECAPTCHA_SITE_KEY } from "@/lib/recaptcha";
 import { FormError } from "@/components/forms/FormError";
 import { JoinGoalChips } from "@/components/JoinGoalChips";
 
@@ -81,6 +83,7 @@ export function SignupForm({
           </span>
         </span>
       </label>
+      <CaptchaField siteKey={RECAPTCHA_SITE_KEY} />
       <SubmitButton
         pendingLabel="Creating account..."
         className="w-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 py-3.5 text-lg font-black tracking-wide text-white shadow-lg shadow-rose-200 transition hover:from-amber-400 hover:via-rose-400 hover:to-indigo-500 hover:shadow-xl hover:shadow-rose-300"

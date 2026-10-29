@@ -9,6 +9,7 @@ import { sendEmail, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { SITE } from "@/lib/site";
 import { MEDIA_APPLICATION_STATUSES, MEDIA_ROLE_IDS } from "@/lib/media";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Your name is required").max(120),
@@ -46,6 +47,8 @@ export async function applyToMediaTeamAction(
     if (String(formData.get("website") ?? "").trim()) {
       return { success: "Thanks — we got your application and will be in touch." };
     }
+    if (!(await verifyRecaptcha(String(formData.get("g-recaptcha-response") ?? ""))))
+      return { error: "Please tick the I'm-not-a-robot box." };
 
     const roles = formData
       .getAll("roles")
