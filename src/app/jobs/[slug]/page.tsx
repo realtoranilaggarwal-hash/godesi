@@ -192,6 +192,21 @@ export default async function JobPage({
                 {applicationStatus(mine.status).label}
               </Badge>
             </p>
+          ) : job.applyUrl ? (
+            <div className="space-y-2">
+              <a
+                href={job.applyUrl}
+                target="_blank"
+                rel="noreferrer nofollow"
+                className="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-500"
+              >
+                Apply on the employer&apos;s site ↗
+              </a>
+              <p className="text-xs text-slate-500">
+                External listing — applications happen on the company&apos;s own
+                page, not inside GoDesi.
+              </p>
+            </div>
           ) : job.status === "OPEN" ? (
             <JobApplyForm jobId={job.id} />
           ) : (
