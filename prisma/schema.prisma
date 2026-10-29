@@ -3183,6 +3183,8 @@ model Job {
   commissionPct Int?
   /// Slugs from JOB_PAY_METHODS, e.g. "cash", "zelle".
   payMethods    String[]         @default([])
+  /// External listings (Adzuna/job feeds): Apply links out to the employer's site.
+  applyUrl      String?
   status        JobStatus        @default(OPEN)
   applications  JobApplication[]
   createdAt     DateTime         @default(now())
