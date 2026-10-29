@@ -83,7 +83,7 @@ export default function TravelPage() {
             rel="noopener noreferrer nofollow sponsored"
             className="text-sm font-semibold text-sky-900 underline decoration-sky-300 hover:text-indigo-700"
           >
-            Flight deals you'll want on your radar
+            Flight deals you&rsquo;ll want on your radar
           </a>
           <a
             href="https://www.dpbolvw.net/click-100712969-15746170"
