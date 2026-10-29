@@ -3127,6 +3127,7 @@ enum JobWorkType {
   FULL_TIME
   ONE_OFF
   CONTRACT
+  INTERNSHIP
 }
 
 enum JobPayType {
@@ -3166,10 +3167,18 @@ model Job {
   category      String           @default("other")
   workType      JobWorkType      @default(PART_TIME)
   remote        Boolean          @default(false)
+  /// Some days on-site, some at home — shown as "Hybrid" with the city.
+  hybrid        Boolean          @default(false)
   city          String?
+  /// How many people the employer wants to hire.
+  openings      Int              @default(1)
+  /// Expected hours a week; null when it varies.
+  hoursPerWeek  Int?
   payType       JobPayType
   /// Amount per `payType` (base pay for BASE_PLUS_COMMISSION) in cents; null when agreed on the call.
   payMinor      Int?
+  /// Top of a pay range in cents; when set with payMinor shows "$X–$Y a month".
+  payMaxMinor   Int?
   currency      String           @default("USD")
   commissionPct Int?
   /// Slugs from JOB_PAY_METHODS, e.g. "cash", "zelle".

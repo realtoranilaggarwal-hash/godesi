@@ -7,6 +7,7 @@ import {
   JOB_APPLICATION_STATUSES,
   applicationStatus,
   jobCategory,
+  locationLabel,
   payLabel,
   payMethodLabels,
   workTypeLabel,
@@ -64,7 +65,9 @@ export default async function JobPage({
             {jobCategory(job.category).icon} {jobCategory(job.category).label}
           </Badge>
           <Badge tone="indigo">{workTypeLabel(job.workType)}</Badge>
-          <Badge>{job.remote ? "🏠 Work from home" : `📍 ${job.city}`}</Badge>
+          <Badge>{locationLabel(job)}</Badge>
+          {job.openings > 1 ? <Badge>👥 {job.openings} openings</Badge> : null}
+          {job.hoursPerWeek ? <Badge>🕒 {job.hoursPerWeek} hrs/week</Badge> : null}
           <span className="text-slate-500">
             Posted by{" "}
             {job.poster.username ? (

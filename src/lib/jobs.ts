@@ -27,7 +27,15 @@ export const JOB_WORK_TYPES: { value: JobWorkType; label: string }[] = [
   { value: "FULL_TIME", label: "Full-time" },
   { value: "ONE_OFF", label: "Mini job / one-off" },
   { value: "CONTRACT", label: "Freelance / contractor" },
+  { value: "INTERNSHIP", label: "Internship" },
 ];
+
+/** "🏠 Work from home", "🔀 Hybrid", or "📍 Edison, NJ". */
+export function locationLabel(job: { remote: boolean; hybrid?: boolean; city: string | null }) {
+  if (job.remote) return "🏠 Work from home";
+  if (job.hybrid) return `🔀 Hybrid${job.city ? ` — ${job.city}` : ""}`;
+  return `📍 ${job.city ?? "On-site"}`;
+}
 
 export const JOB_PAY_TYPES: { value: JobPayType; label: string; unit: string }[] = [
   { value: "HOURLY", label: "Hourly", unit: "an hour" },
@@ -84,12 +92,19 @@ function dollars(minor: number) {
 export function payLabel(job: {
   payType: JobPayType;
   payMinor: number | null;
+  payMaxMinor?: number | null;
   commissionPct: number | null;
 }) {
   const type = JOB_PAY_TYPES.find((option) => option.value === job.payType);
+  const range =
+    job.payMinor && job.payMaxMinor && job.payMaxMinor > job.payMinor
+      ? `${dollars(job.payMinor)}–${dollars(job.payMaxMinor)}`
+      : job.payMinor
+        ? dollars(job.payMinor)
+        : "";
   const amount =
-    job.payType !== "COMMISSION" && job.payMinor
-      ? `${dollars(job.payMinor)}${type?.unit ? ` ${type.unit}` : ""}`
+    job.payType !== "COMMISSION" && range
+      ? `${range}${type?.unit ? ` ${type.unit}` : ""}`
       : "";
   const commission = job.commissionPct ? `${job.commissionPct}% commission` : "";
   const label = [amount, commission].filter(Boolean).join(" + ");
