@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 import { dealOfTheDay } from "@/lib/dealOfTheDay";
-import { emailEnabled, sendEmail, shell } from "@/lib/email";
+import { emailEnabled, sendEmail, sendPaced, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { dailySky } from "@/lib/horoscope";
 import { newsPath } from "@/lib/newsLinks";
@@ -11,8 +11,6 @@ import {
   computePanchang,
   panchangTime,
 } from "@/lib/panchang";
-
-const BATCH = 20;
 
 /**
  * Most a single morning sends. Resend's free plan allows about 100 emails a
@@ -216,35 +214,29 @@ export async function sendMorningEmails({ dryRun = false } = {}) {
   if (dryRun) return { sent: 0, wouldSend: members.length, day };
 
   let sent = 0;
-  for (let start = 0; start < members.length; start += BATCH) {
-    const batch = members.slice(start, start + BATCH);
-    // eslint-disable-next-line no-await-in-loop
-    await Promise.all(
-      batch.map(async (member) => {
-        // Claim the member for today first, so an overlapping run skips them.
-        const claimed = await db.user.updateMany({
-          where: {
-            id: member.id,
-            OR: [{ morningSentDay: null }, { morningSentDay: { not: day } }],
-          },
-          data: { morningSentDay: day },
-        });
-        if (!claimed.count) return;
-        const ok = await sendEmail({
-          to: member.email,
-          subject,
-          html: emailFor(member.id, member.name, body),
-        });
-        if (ok) {
-          sent += 1;
-          return;
-        }
-        await db.user.updateMany({
-          where: { id: member.id, morningSentDay: day },
-          data: { morningSentDay: member.morningSentDay },
-        });
-      }),
-    );
-  }
+  await sendPaced(members, async (member) => {
+    // Claim the member for today first, so an overlapping run skips them.
+    const claimed = await db.user.updateMany({
+      where: {
+        id: member.id,
+        OR: [{ morningSentDay: null }, { morningSentDay: { not: day } }],
+      },
+      data: { morningSentDay: day },
+    });
+    if (!claimed.count) return;
+    const ok = await sendEmail({
+      to: member.email,
+      subject,
+      html: emailFor(member.id, member.name, body),
+    });
+    if (ok) {
+      sent += 1;
+      return;
+    }
+    await db.user.updateMany({
+      where: { id: member.id, morningSentDay: day },
+      data: { morningSentDay: member.morningSentDay },
+    });
+  });
   return { sent, recipients: members.length, day };
 }
