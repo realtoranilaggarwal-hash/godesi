@@ -56,5 +56,5 @@ export async function verifyEmailOtpAction(
 
   revalidatePath("/dashboard");
   invalidateDirectory();
-  redirect("/dashboard?verified=1");
+  redirect("/start?verified=1");
 }
