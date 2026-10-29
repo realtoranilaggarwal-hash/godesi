@@ -42,6 +42,11 @@ export async function applyToMediaTeamAction(
     if (!parsed.success) return { error: parsed.error.issues[0].message };
     const data = parsed.data;
 
+    // Honeypot: bots fill the hidden "website" field; pretend success and drop it.
+    if (String(formData.get("website") ?? "").trim()) {
+      return { success: "Thanks — we got your application and will be in touch." };
+    }
+
     const roles = formData
       .getAll("roles")
       .map(String)
