@@ -3,6 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 import { db } from "@/lib/db";
 import {
   createSession,
@@ -76,6 +77,12 @@ export async function signupAction(
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
     }
+    if (
+      !(await verifyRecaptcha(
+        String(formData.get("g-recaptcha-response") ?? ""),
+      ))
+    )
+      return { error: "Please tick the I'm-not-a-robot box." };
     const email = parsed.data.email.toLowerCase();
     const ip = clientIp();
     const verdict = await screenSignup({

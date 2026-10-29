@@ -5,6 +5,7 @@ import { SITE } from "@/lib/site";
 import { sendEmail, shell } from "@/lib/email";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { CONTACT_TOPICS, SALES_TOPICS } from "@/lib/contact";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Tell us your name"),
@@ -30,6 +31,13 @@ export async function sendContactMessageAction(
       error: parsed.error.issues[0]?.message ?? "Please check the form",
     };
   }
+
+  if (
+    !(await verifyRecaptcha(
+      String(formData.get("g-recaptcha-response") ?? ""),
+    ))
+  )
+    return { error: "Please tick the I'm-not-a-robot box." };
 
   const { name, email, phone, topic, message } = parsed.data;
   const to = SALES_TOPICS.includes(topic) ? SITE.salesEmail : SITE.supportEmail;
