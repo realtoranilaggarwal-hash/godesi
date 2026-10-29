@@ -72,6 +72,48 @@ export default function TravelPage() {
         <TravelWidget variant="map" />
       </Card>
 
+      <Card className="space-y-2 border-sky-200 bg-sky-50/60 p-4 sm:p-5">
+        <h2 className="text-base font-bold text-slate-900">
+          ✈️ Partner flight offers
+        </h2>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <a
+            href="https://www.dpbolvw.net/click-100712969-15754452"
+            target="_top"
+            rel="noopener noreferrer nofollow sponsored"
+            className="text-sm font-semibold text-sky-900 underline decoration-sky-300 hover:text-indigo-700"
+          >
+            Flight deals you'll want on your radar
+          </a>
+          <a
+            href="https://www.dpbolvw.net/click-100712969-15746170"
+            target="_top"
+            rel="noopener noreferrer nofollow sponsored"
+            className="text-sm font-semibold text-sky-900 underline decoration-sky-300 hover:text-indigo-700"
+          >
+            Sale ends Jan 31: Book now for huge savings
+          </a>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://www.tqlkg.com/image-100712969-15754452"
+          width="1"
+          height="1"
+          alt=""
+          aria-hidden
+          className="inline-block h-px w-px"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://www.ftjcfx.com/image-100712969-15746170"
+          width="1"
+          height="1"
+          alt=""
+          aria-hidden
+          className="inline-block h-px w-px"
+        />
+      </Card>
+
       <section className="space-y-5">
         <div className="text-center">
           <h2 className="text-xl font-black text-slate-900">
