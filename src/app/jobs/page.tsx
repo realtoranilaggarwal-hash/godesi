@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { JOB_CATEGORIES, jobCategory, payLabel, workTypeLabel } from "@/lib/jobs";
+import { JOB_CATEGORIES, jobCategory, locationLabel, payLabel, workTypeLabel } from "@/lib/jobs";
 import { CareerjetSearchBox } from "@/components/CareerjetSearchBox";
 import { Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
@@ -148,7 +148,9 @@ export default async function JobsPage({
                         {jobCategory(job.category).icon} {jobCategory(job.category).label}
                       </Badge>
                       <Badge tone="indigo">{workTypeLabel(job.workType)}</Badge>
-                      <Badge>{job.remote ? "🏠 Work from home" : `📍 ${job.city}`}</Badge>
+                      <Badge>{locationLabel(job)}</Badge>
+          {job.openings > 1 ? <Badge>👥 {job.openings} openings</Badge> : null}
+          {job.hoursPerWeek ? <Badge>🕒 {job.hoursPerWeek} hrs/week</Badge> : null}
                       <span className="text-slate-500">by {job.poster.name}</span>
                     </div>
                     <p className="mt-2 line-clamp-2 text-sm text-slate-600">{job.description}</p>

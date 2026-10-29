@@ -52,9 +52,23 @@ const jobSchema = z
     }),
     workType: z.nativeEnum(JobWorkType),
     remote: z.boolean(),
+    hybrid: z.boolean(),
     city: z.string().trim().max(80).optional(),
+    openings: z.coerce
+      .number()
+      .int("Whole numbers only")
+      .min(1, "Hiring at least 1 person")
+      .max(500, "That's a lot — enter a smaller number")
+      .default(1),
+    hoursPerWeek: z.coerce
+      .number()
+      .int("Whole hours only")
+      .min(1)
+      .max(80)
+      .optional(),
     payType: z.nativeEnum(JobPayType),
     payUsd: z.coerce.number().min(0, "Pay can't be negative").max(1_000_000).optional(),
+    payMaxUsd: z.coerce.number().min(0).max(1_000_000).optional(),
     commissionPct: z.coerce
       .number()
       .int("Whole percent only")
@@ -66,6 +80,10 @@ const jobSchema = z
   .superRefine((data, ctx) => {
     if (!data.remote && !data.city)
       ctx.addIssue({ code: "custom", message: "Add the city, or tick \"Work from home\"" });
+    if (data.remote && data.hybrid)
+      ctx.addIssue({ code: "custom", message: "Pick remote OR hybrid, not both" });
+    if (data.payUsd && data.payMaxUsd && data.payMaxUsd < data.payUsd)
+      ctx.addIssue({ code: "custom", message: "Top of pay range is below the minimum" });
     if (payHasCommission(data.payType) && !data.commissionPct)
       ctx.addIssue({ code: "custom", message: "Enter the commission percent" });
   });
@@ -78,9 +96,13 @@ function readJobForm(formData: FormData) {
     category: formData.get("category"),
     workType: formData.get("workType"),
     remote: formData.get("remote") === "on",
+    hybrid: formData.get("hybrid") === "on",
     city: formData.get("city") || undefined,
+    openings: formData.get("openings") ?? "1",
+    hoursPerWeek: optionalNumber(formData, "hoursPerWeek"),
     payType: formData.get("payType"),
     payUsd: optionalNumber(formData, "payUsd"),
+    payMaxUsd: optionalNumber(formData, "payMaxUsd"),
     commissionPct: optionalNumber(formData, "commissionPct"),
     payMethods: formData.getAll("payMethods").map(String),
   });
@@ -94,10 +116,17 @@ function jobColumns(data: z.infer<typeof jobSchema>) {
     category: data.category,
     workType: data.workType,
     remote: data.remote,
+    hybrid: data.hybrid,
     city: data.city || null,
+    openings: data.openings,
+    hoursPerWeek: data.hoursPerWeek ?? null,
     payType: data.payType,
     payMinor:
       data.payType === "COMMISSION" || !data.payUsd ? null : Math.round(data.payUsd * 100),
+    payMaxMinor:
+      data.payType === "COMMISSION" || !data.payUsd || !data.payMaxUsd
+        ? null
+        : Math.round(data.payMaxUsd * 100),
     commissionPct: data.commissionPct ?? null,
     payMethods: data.payMethods,
   };

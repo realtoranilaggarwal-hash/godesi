@@ -107,6 +107,16 @@ export function JobForm({ job }: { job?: Job }) {
             />
             Work from home / remote
           </label>
+          {!remote ? (
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+              <input
+                type="checkbox"
+                name="hybrid"
+                defaultChecked={job?.hybrid ?? false}
+              />
+              Hybrid — some days on-site, some at home
+            </label>
+          ) : null}
           <Field label={remote ? "City (optional)" : "City"} required={!remote}>
             <input
               name="city"
@@ -118,6 +128,30 @@ export function JobForm({ job }: { job?: Job }) {
             />
           </Field>
         </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="How many people are you hiring?" required>
+          <input
+            name="openings"
+            type="number"
+            min={1}
+            max={500}
+            required
+            defaultValue={job?.openings ?? 1}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Hours a week" hint="Leave blank if it varies">
+          <input
+            name="hoursPerWeek"
+            type="number"
+            min={1}
+            max={80}
+            defaultValue={job?.hoursPerWeek ?? ""}
+            className={inputClass}
+          />
+        </Field>
       </div>
 
       <fieldset className="space-y-3 rounded-xl border border-slate-200 p-3">
@@ -148,6 +182,18 @@ export function JobForm({ job }: { job?: Job }) {
                 min={0}
                 step="0.01"
                 defaultValue={job?.payMinor ? job.payMinor / 100 : ""}
+                className={inputClass}
+              />
+            </Field>
+          ) : null}
+          {payType !== "COMMISSION" ? (
+            <Field label={`Up to ($ ${unit})`} hint="Optional top of the range">
+              <input
+                name="payMaxUsd"
+                type="number"
+                min={0}
+                step="0.01"
+                defaultValue={job?.payMaxMinor ? job.payMaxMinor / 100 : ""}
                 className={inputClass}
               />
             </Field>
