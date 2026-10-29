@@ -8,7 +8,6 @@ import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 import { FoundingOffer } from "@/components/FoundingOffer";
 import { NewsMediaStrip } from "@/components/NewsMediaStrip";
-import { PostAnything } from "@/components/PostAnything";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -58,8 +57,15 @@ export default async function SignupPage({
         </Card>
         <Card className="space-y-2 border-indigo-200 bg-indigo-50/60">
           <h2 className="font-bold text-slate-900">
-            What would you like to do on GoDesi?
+            Free bonuses you get the day you join 🎁
           </h2>
+          <ul className="space-y-1.5 text-sm text-slate-700">
+            <li>🧱 <b>A founding brick on the Wall of Fame</b> — yours for life, shows your profile on hover</li>
+            <li>📲 <b>Your QR code card for life</b> — one scan opens your page, free forever</li>
+            <li>🔮 <b>Daily horoscope &amp; panchang</b> — every morning in your email</li>
+            <li>🏷️ <b>Member deals &amp; coupons</b> — community discounts and the Deal of the Day</li>
+            <li>🧰 <b>50+ free tools</b> — design, video, SEO and automation</li>
+          </ul>
           <Link
             href="/ambassador"
             className="block rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-2.5 text-sm font-black text-white hover:opacity-90"
@@ -67,7 +73,6 @@ export default async function SignupPage({
             🏅 Become a local GoDesi Ambassador — represent your city &amp;
             earn →
           </Link>
-          <PostAnything title="Or jump straight to what you want to do" />
         </Card>
         <p className="text-sm text-slate-600">
           Already have an account?{" "}
