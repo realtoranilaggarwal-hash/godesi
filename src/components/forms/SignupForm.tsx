@@ -8,7 +8,6 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { CaptchaField } from "@/components/forms/CaptchaField";
 import { RECAPTCHA_SITE_KEY } from "@/lib/recaptcha";
 import { FormError } from "@/components/forms/FormError";
-import { JoinGoalChips } from "@/components/JoinGoalChips";
 
 export function SignupForm({
   defaultRole = "BUSINESS",
@@ -60,12 +59,6 @@ export function SignupForm({
       <Field label="Password" hint="At least 8 characters">
         <input name="password" type="password" required minLength={8} className={inputClass} />
       </Field>
-      <fieldset className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-3">
-        <legend className="px-1 text-sm font-bold text-emerald-900">
-          ✅ What would you like to do on GoDesi? (tick all that apply)
-        </legend>
-        <JoinGoalChips />
-      </fieldset>
       <label className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
         <input
           type="checkbox"
