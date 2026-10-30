@@ -125,6 +125,17 @@ export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
       <div className="mx-auto w-full max-w-screen-2xl px-4 pt-6">
+        <Link
+          href="/journalists"
+          className="mb-4 block text-center text-xs font-semibold text-slate-600 hover:text-indigo-700"
+        >
+          📡 Post on Godesi — your story is syndicated to{" "}
+          <span className="text-violet-700">Yahoo News</span> ·{" "}
+          <span className="text-emerald-600">Feedly</span> ·{" "}
+          <span className="text-sky-600">Inoreader</span> ·{" "}
+          <span className="text-red-600">Flipboard</span> &amp; every RSS
+          reader
+        </Link>
         <FooterBanner />
       </div>
       <div className="mx-auto grid max-w-screen-2xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-6">
