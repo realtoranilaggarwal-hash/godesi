@@ -46,7 +46,7 @@ export default async function Page({
     await db.user
       .update({
         where: { id: morningId },
-        data: { morningEmailAt: null },
+        data: { morningEmailAt: null, morningOptOutAt: new Date() },
       })
       .catch(() => null);
   } else if (digest) {
@@ -67,7 +67,7 @@ export default async function Page({
         {invite
           ? "Done — nobody on Godesi can send an invitation to that address again. We keep only the address itself, so we can honour this."
           : morning
-            ? "No more morning emails. The panchang and deal of the day are still on GoDesi whenever you want them, and you can switch the email back on under Notifications."
+            ? "No more morning emails. The panchang and deal of the day are still on GoDesi whenever you want them, and you can switch the email back on under Notifications on your dashboard."
             : ok
               ? "No more weekly digests. Your account, business card and listings are untouched, and you'll still get emails about things you do — bookings, payments and replies."
               : "The link may have been cut in half by your email app. Copy the whole link, or email us and we'll take you off the list."}

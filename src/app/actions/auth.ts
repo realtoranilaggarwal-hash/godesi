@@ -119,6 +119,9 @@ export async function signupAction(
       joinGoalsAt: joinGoals.length ? new Date() : null,
       morningEmailAt:
         formData.get("morningEmail") === "on" ? new Date() : null,
+      // Everyone gets the morning email by default; unticking is an opt-out.
+      morningOptOutAt:
+        formData.get("morningEmail") === "on" ? null : new Date(),
     };
 
     // The name may be gone between the check and the insert. Losing that race
