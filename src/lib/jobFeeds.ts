@@ -15,19 +15,34 @@ type FeedJob = {
   category: string;
 };
 
-function stripHtml(html: string) {
-  return html
-    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|li|h[1-6]|ul|ol)>/gi, "\n")
-    .replace(/<li[^>]*>/gi, "• ")
-    .replace(/<[^>]+>/g, "")
+function decodeEntities(s: string) {
+  return s
+    .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&rsquo;/g, "'")
-    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;|&ldquo;|&rdquo;/g, '"')
+    .replace(/&#39;|&rsquo;|&lsquo;|&apos;/g, "'")
+    .replace(/&mdash;|&ndash;/g, "—")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
+}
+
+export function stripHtml(html: string) {
+  // Feeds double-encode: decode first so &lt;p&gt; becomes a real tag, strip it,
+  // then repeat for deeper nesting (up to 3 rounds).
+  let text = html;
+  for (let i = 0; i < 3; i++) {
+    const next = decodeEntities(text)
+      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|li|h[1-6]|ul|ol|tr|td|table|blockquote|section|article)>/gi, "\n")
+      .replace(/<li[^>]*>/gi, "• ")
+      .replace(/<[^>]+>/g, "");
+    if (next === text) break;
+    text = next;
+  }
+  return text
+    .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
