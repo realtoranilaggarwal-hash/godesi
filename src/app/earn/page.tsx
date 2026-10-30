@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { TOOL_CATEGORIES } from "@/lib/tools";
 import { CopyButton } from "@/components/CopyButton";
 import { LinkButton } from "@/components/ui";
 
@@ -138,6 +139,7 @@ const EARN_HERE = [
 export default async function EarnPage() {
   const me = await getCurrentUser();
   const locked = !me;
+  const toolCount = TOOL_CATEGORIES.flatMap((cat) => cat.tools).length;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -228,6 +230,26 @@ export default async function EarnPage() {
           ))}
         </ul>
       </section>
+
+      <Link
+        href="/tools"
+        className="block rounded-3xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-5 py-4 transition hover:border-indigo-400"
+      >
+        <span className="flex flex-wrap items-center justify-between gap-2">
+          <span>
+            <span className="block text-sm font-black text-slate-900">
+              🧰 Free business tools — {toolCount} of them
+            </span>
+            <span className="mt-0.5 block text-sm text-slate-600">
+              SEO checkers, QR makers, invoices, calculators and more — every
+              tool free for members.
+            </span>
+          </span>
+          <span className="rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white">
+            Open /tools →
+          </span>
+        </span>
+      </Link>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
         <h2 className="text-lg font-black text-slate-900">

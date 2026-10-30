@@ -100,6 +100,24 @@ export function DailyPredictions({
           to play — new markets every day.
         </p>
       ) : null}
+      <p className="mt-1.5 text-[11px] text-slate-500">
+        Quiz idea by{" "}
+        <a
+          href="https://401kexposed.com"
+          target="_blank"
+          rel="noreferrer"
+          className="font-bold text-emerald-700 underline"
+        >
+          401kExposed.com
+        </a>{" "}
+        ·{" "}
+        <Link
+          href="/news/call-it-daily-gold-s-p-500-and-bitcoin-godesi-s-new-prediction-game-pays-points--cmvv87c5l0000voz6tnxbimog"
+          className="font-bold text-emerald-700 underline"
+        >
+          read the story
+        </Link>
+      </p>
     </section>
   );
 }
