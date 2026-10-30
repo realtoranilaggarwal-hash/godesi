@@ -240,6 +240,8 @@ model User {
   digestSentAt    DateTime?
   /// Set while the member wants the morning panchang + deal email; null = off.
   morningEmailAt  DateTime?
+  /// Member stopped the morning email; null = subscribed (the default for every member).
+  morningOptOutAt DateTime?
   /// GoDesi day (YYYY-MM-DD, New York) of the last morning email, so a retry never double-sends.
   morningSentDay  String?
 
@@ -2772,6 +2774,8 @@ model Prospect {
   calledAt   DateTime?
   /// Slug of the card they created, once they list.
   listedSlug String?
+  /// Last "post your events free" invite we mailed them — at most one ever.
+  invitedAt  DateTime?
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 

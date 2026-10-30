@@ -156,13 +156,16 @@ export async function setDigestAction(formData: FormData) {
   revalidatePath("/dashboard/notifications");
 }
 
-/** Morning panchang + deal email on or off. */
+/** Morning panchang + deal email on or off (on by default; off = opted out). */
 export async function setMorningEmailAction(formData: FormData) {
   const user = await requireUser();
   const on = formData.get("on") === "yes";
   await db.user.update({
     where: { id: user.id },
-    data: { morningEmailAt: on ? new Date() : null },
+    data: {
+      morningOptOutAt: on ? null : new Date(),
+      morningEmailAt: on ? new Date() : null,
+    },
   });
   revalidatePath("/dashboard/notifications");
   revalidatePath("/astrology/panchang");

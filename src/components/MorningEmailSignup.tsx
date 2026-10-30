@@ -9,10 +9,10 @@ export async function MorningEmailSignup() {
   const member = userId
     ? await db.user.findUnique({
         where: { id: userId },
-        select: { morningEmailAt: true },
+        select: { morningOptOutAt: true },
       })
     : null;
-  const on = Boolean(member?.morningEmailAt);
+  const on = Boolean(member && !member.morningOptOutAt);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm">

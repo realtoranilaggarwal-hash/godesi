@@ -188,18 +188,18 @@ function emailFor(userId: string, name: string, body: string) {
     "Good morning from GoDesi ☀️",
     `<p style="margin:0 0 4px">Hi ${escape(name.split(" ")[0] ?? "")},</p>
      ${body}
-     <p style="margin:18px 0 0;font-size:12px;color:#94a3b8">You asked for this morning email on GoDesi. <a href="${unsubscribe}" style="color:#94a3b8">Stop the morning email</a>.</p>`,
+     <p style="margin:18px 0 0;font-size:12px;color:#94a3b8">GoDesi sends every member one morning email. <a href="${unsubscribe}" style="color:#94a3b8">Stop the morning email</a>.</p>`,
   );
 }
 
-/** Sends today's morning email to members who switched it on, once per day each. */
+/** Sends today's morning email to every member who hasn't opted out, once per day each. */
 export async function sendMorningEmails({ dryRun = false } = {}) {
   if (!emailEnabled()) return { sent: 0, skipped: "email not configured" };
 
   const { day, subject, body } = await morningContent();
   const members = await db.user.findMany({
     where: {
-      morningEmailAt: { not: null },
+      morningOptOutAt: null,
       bannedAt: null,
       emailVerifiedAt: { not: null },
       OR: [{ morningSentDay: null }, { morningSentDay: { not: day } }],
@@ -207,7 +207,7 @@ export async function sendMorningEmails({ dryRun = false } = {}) {
     // Whoever waited longest goes first, so a cap never starves later sign-ups.
     orderBy: [
       { morningSentDay: { sort: "asc", nulls: "first" } },
-      { morningEmailAt: "asc" },
+      { createdAt: "asc" },
     ],
     take: dailyCap(),
     select: { id: true, email: true, name: true, morningSentDay: true },

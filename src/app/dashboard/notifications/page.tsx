@@ -25,11 +25,11 @@ export default async function NotificationsPage() {
     }),
     db.user.findUnique({
       where: { id: user.id },
-      select: { digestOptOutAt: true, morningEmailAt: true },
+      select: { digestOptOutAt: true, morningOptOutAt: true },
     }),
   ]);
   const digestOn = !member?.digestOptOutAt;
-  const morningOn = Boolean(member?.morningEmailAt);
+  const morningOn = !member?.morningOptOutAt;
   const unread = notifications.filter((item) => !item.readAt).length;
 
   return (
