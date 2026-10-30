@@ -5,15 +5,15 @@ import { properName } from "@/lib/names";
 import { optionalRead } from "@/lib/resilient";
 import { ChatterQuickPost } from "@/components/chatter/ChatterQuickPost";
 
-/** Signed-in members only: slim one-line Chatter strip; rendered once per page load, never polled. */
+/** Slim one-line Chatter strip; members post inline, guests see the latest post and a join CTA. */
 export async function ChatterHomeBox() {
   const user = await optionalRead(() => cachedCurrentUser(), null);
-  if (!user) return null;
   const feed = await optionalRead(() => chatterFeed({}), {
     posts: [],
     nextBefore: null,
   });
   const latest = feed.posts[0];
+  if (!user && !latest) return null;
 
   return (
     <section className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 to-rose-50 px-3 py-2">
@@ -32,7 +32,16 @@ export async function ChatterHomeBox() {
           Be a Gapodi, talk your heart out! 💬
         </span>
       </Link>
-      <ChatterQuickPost />
+      {user ? (
+        <ChatterQuickPost />
+      ) : (
+        <Link
+          href="/signup?next=/chatter"
+          className="rounded-full bg-orange-600 px-3 py-1 text-xs font-bold text-white hover:bg-orange-500"
+        >
+          Join free to post →
+        </Link>
+      )}
       {latest ? (
         <Link
           href={chatterPath(latest.id)}

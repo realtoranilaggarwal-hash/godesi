@@ -68,6 +68,7 @@ import { DealCard } from "@/components/DealCard";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { GodesiMark } from "@/components/GodesiMark";
 import { CardSearchStrip } from "@/components/CardSearchStrip";
+import { CardCompleteness } from "@/components/CardCompleteness";
 import { MapEmbed } from "@/components/MapEmbed";
 import { getCategoryTree } from "@/lib/directory";
 import { AUTHOR_PROFILE_HREF } from "@/lib/courses/types";
@@ -465,6 +466,8 @@ export default async function BusinessProfilePage({
         <CardSearchStrip categories={categories} />
 
         <RecentStrip />
+
+        {isOwner ? <CardCompleteness business={business} /> : null}
 
         {business.status !== "APPROVED" ? (
           <Alert tone="info">
