@@ -29,6 +29,8 @@ import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
 import { DailyPoll } from "@/components/DailyPoll";
 import { pollState } from "@/lib/poll";
+import { predictionsState } from "@/lib/predictions";
+import { DailyPredictions } from "@/components/DailyPredictions";
 import { cachedCurrentUser } from "@/lib/auth";
 import { RishtaHomeBox } from "@/components/RishtaHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
@@ -120,7 +122,7 @@ const cryptoFearGreed = cachedQuery("crypto-fng", 1800, async () => {
 
 export default async function HomePage() {
   const me = await cachedCurrentUser();
-  const [businesses, eventRows, newsRows, spaCount, memberRows, fng, poll] =
+  const [businesses, eventRows, newsRows, spaCount, memberRows, fng, poll, markets] =
     await Promise.all([
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
@@ -129,6 +131,7 @@ export default async function HomePage() {
       homeMembers(),
       cryptoFearGreed(),
       pollState(me?.id ?? null),
+      predictionsState(me?.id ?? null),
     ]);
   // Cached rows come back JSON-serialised, so dates are strings again.
   const upcoming = eventRows.map((event) => ({
@@ -183,6 +186,8 @@ export default async function HomePage() {
           <ChatterHomeBox />
 
           <DailyPoll initial={poll} signedIn={Boolean(me)} />
+
+          <DailyPredictions initial={markets} signedIn={Boolean(me)} />
 
           <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">

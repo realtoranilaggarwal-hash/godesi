@@ -202,6 +202,9 @@ enum PointsReason {
   SCRATCH_WIN
   /// Voted in today's question on the homepage.
   DAILY_POLL
+  /// Daily prediction game: called a market's direction right / wrong.
+  PREDICT_WIN
+  PREDICT_LOSS
   REDEMPTION
   ADJUSTMENT
 }
@@ -407,6 +410,7 @@ model User {
   blogPosts         BlogPost[]
   newsVotes         NewsVote[]
   pollVotes         PollVote[]
+  predictionPicks   PredictionPick[]
   newsVerifications NewsVerification[]
 
   /// Stripe Connect account tickets are paid into, so organisers get the money direct.
@@ -687,6 +691,42 @@ model PollVote {
   createdAt  DateTime     @default(now())
 
   @@unique([questionId, userId])
+}
+
+/// A daily up-or-down call on a market (gold, S&P 500, bitcoin).
+model PredictionMarket {
+  id        String            @id @default(cuid())
+  /// Stable market id, e.g. "gold", "sp500", "btc".
+  slug      String
+  question  String
+  options   String[]
+  /// UTC midnight of the day the call is about.
+  day       DateTime
+  /// Previous close — the level each pick is judged against.
+  baseline  Float?
+  /// Close for that day once the feed reports it.
+  final     Float?
+  /// Winning option index; null while open (and stays null if the day had no trading).
+  outcome   Int?
+  resolvedAt DateTime?
+  picks     PredictionPick[]
+  createdAt DateTime          @default(now())
+
+  @@unique([slug, day])
+}
+
+/// One pick per member per market per day.
+model PredictionPick {
+  id        String           @id @default(cuid())
+  market    PredictionMarket @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  marketId  String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  /// Index into the market's options (0 = up, 1 = down).
+  choice    Int
+  createdAt DateTime         @default(now())
+
+  @@unique([marketId, userId])
 }
 
 model Redemption {

@@ -27,6 +27,10 @@ export const POINTS: Record<EarnReason, number> = {
   FOUNDING_BONUS: 0,
   OFFER_PICK: 5,
   DAILY_POLL: 5,
+  /// Prediction game pays fixed win/loss amounts, not these — these are only
+  /// so the Record is complete.
+  PREDICT_WIN: 10,
+  PREDICT_LOSS: -5,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {
@@ -49,6 +53,8 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   PAYMENT_SPEND: "Points for money spent with Godesi",
   OFFER_PICK: "You ticked member-benefit topics",
   DAILY_POLL: "You voted in today's question 🗳️",
+  PREDICT_WIN: "You called the market right 🎯",
+  PREDICT_LOSS: "Wrong call in the daily prediction",
   REDEMPTION: "Points redeemed",
   ADJUSTMENT: "Adjusted by the Godesi team",
 };
