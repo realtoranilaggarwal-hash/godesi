@@ -73,6 +73,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/journalists", label: "Become a local journalist" },
         { href: "/rewards", label: "Refer & earn rewards" },
         { href: "/ambassador", label: "🤝 Become an ambassador" },
+        { href: "/earn", label: "💸 Make money online" },
       ],
     },
     {
