@@ -27,8 +27,8 @@ export function NewsMediaStrip() {
   ));
 
   return (
-    <section className="overflow-hidden rounded-3xl bg-slate-900 py-5 text-white">
-      <p className="px-5 text-center text-xs font-bold uppercase tracking-widest text-amber-300 sm:text-sm">
+    <section className="overflow-hidden rounded-3xl border border-amber-200 bg-amber-50/60 py-5 text-slate-800">
+      <p className="px-5 text-center text-xs font-bold uppercase tracking-widest text-amber-700 sm:text-sm">
         📡 Post on Godesi — your story is syndicated to news readers everywhere
       </p>
       <div className="ticker-window mt-4">
@@ -39,7 +39,7 @@ export function NewsMediaStrip() {
           </div>
         </div>
       </div>
-      <p className="mt-3 px-5 text-center text-[11px] text-slate-400">
+      <p className="mt-3 px-5 text-center text-[11px] text-slate-500">
         Approved stories ship in the Google News sitemap and the public RSS
         feed — the exact files news apps and search engines subscribe to.
       </p>
