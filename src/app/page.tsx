@@ -178,9 +178,10 @@ export default async function HomePage() {
 
           <ChatterHomeBox />
 
-          <DailyPoll initial={poll} signedIn={Boolean(me)} />
-
-          <DailyPredictions initial={markets} signedIn={Boolean(me)} />
+          <div className="space-y-3 xl:hidden">
+            <DailyPoll initial={poll} signedIn={Boolean(me)} />
+            <DailyPredictions initial={markets} signedIn={Boolean(me)} />
+          </div>
 
           <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
@@ -249,7 +250,9 @@ export default async function HomePage() {
           </div>
         </div>
         <aside className="relative hidden xl:block">
-          <div className="absolute inset-0 overflow-y-auto">
+          <div className="absolute inset-0 space-y-3 overflow-y-auto">
+            <DailyPoll initial={poll} signedIn={Boolean(me)} />
+            <DailyPredictions initial={markets} signedIn={Boolean(me)} />
             <CategoryTree groups={pickerGroups} />
           </div>
         </aside>
