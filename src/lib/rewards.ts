@@ -1,9 +1,15 @@
 import type { Plan, PointsReason } from "@prisma/client";
 
-/** Wheel prizes are set by the wheel's own odds, not the admin points table. */
+/** Wheel prizes and prediction payouts are fixed by the games' own rules,
+ * not the admin points table. */
 export type EarnReason = Exclude<
   PointsReason,
-  "REDEMPTION" | "ADJUSTMENT" | "DAILY_SPIN" | "SCRATCH_WIN"
+  | "REDEMPTION"
+  | "ADJUSTMENT"
+  | "DAILY_SPIN"
+  | "SCRATCH_WIN"
+  | "PREDICT_WIN"
+  | "PREDICT_LOSS"
 >;
 
 /** Published reward table — admins can override any value in `RewardSetting`. */
@@ -27,10 +33,6 @@ export const POINTS: Record<EarnReason, number> = {
   FOUNDING_BONUS: 0,
   OFFER_PICK: 5,
   DAILY_POLL: 5,
-  /// Prediction game pays fixed win/loss amounts, not these — these are only
-  /// so the Record is complete.
-  PREDICT_WIN: 10,
-  PREDICT_LOSS: -5,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {

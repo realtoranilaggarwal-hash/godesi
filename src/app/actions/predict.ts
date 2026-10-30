@@ -22,7 +22,18 @@ export async function pickPredictionAction(
   const market = await db.predictionMarket.findUnique({
     where: { id: marketId },
   });
-  if (!market || market.resolvedAt || choice < 0 || choice >= market.options.length) {
+  // Picks are only valid on the market's own UTC day — after midnight the
+  // close is knowable, so an unresolved past market must stay closed.
+  const todayStart = new Date(
+    Math.floor(Date.now() / (24 * 60 * 60 * 1000)) * (24 * 60 * 60 * 1000),
+  );
+  if (
+    !market ||
+    market.resolvedAt ||
+    market.day < todayStart ||
+    choice < 0 ||
+    choice >= market.options.length
+  ) {
     return { ok: false, error: "That market is closed" };
   }
 

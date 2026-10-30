@@ -23,8 +23,10 @@ function utcDayStart(now = new Date()) {
 }
 
 /** Daily closes from Yahoo's public chart API, bucketed by UTC date. */
-async function closesFor(symbol: string, _from: Date, _to: Date) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=14d&interval=1d`;
+async function closesFor(symbol: string, from: Date, to: Date) {
+  const p1 = Math.floor(from.getTime() / 1000);
+  const p2 = Math.floor(to.getTime() / 1000);
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?period1=${p1}&period2=${p2}&interval=1d`;
   const res = await fetch(url, {
     cache: "no-store",
     headers: { "user-agent": "Mozilla/5.0 (X11; Linux x86_64)" },
@@ -135,6 +137,7 @@ export async function settlePredictions() {
     } catch {
       continue; // feed hiccup — try again next run
     }
+    if (!rows.length) continue; // feed gave nothing — retry, never cancel
     const dayIso = market.day.toISOString().slice(0, 10);
     const index = rows.findIndex((row) => row.date === dayIso);
 
@@ -150,17 +153,17 @@ export async function settlePredictions() {
     const baseline = rows[index - 1].close;
     const final = rows[index].close;
     const outcome = final > baseline ? 0 : final < baseline ? 1 : null;
-    await db.predictionMarket.update({
-      where: { id: market.id },
-      data: { baseline, final, outcome, resolvedAt: new Date() },
-    });
-    settled += 1;
-    if (outcome == null) continue; // flat close — nobody wins or loses
 
-    const picks = await db.predictionPick.findMany({
-      where: { marketId: market.id },
-      select: { userId: true, choice: true },
-    });
+    // Pay picks BEFORE marking resolved: awardPoints is idempotent on its
+    // `pred:<marketId>` key, so a mid-loop failure re-runs safely next cron;
+    // marking first would strand the unpaid picks forever.
+    const picks =
+      outcome == null
+        ? []
+        : await db.predictionPick.findMany({
+            where: { marketId: market.id },
+            select: { userId: true, choice: true },
+          });
     for (const pick of picks) {
       if (pick.choice === outcome) {
         await awardPoints({
@@ -185,6 +188,12 @@ export async function settlePredictions() {
         }
       }
     }
+
+    await db.predictionMarket.update({
+      where: { id: market.id },
+      data: { baseline, final, outcome, resolvedAt: new Date() },
+    });
+    settled += 1;
   }
   return { settled, open: open.length };
 }

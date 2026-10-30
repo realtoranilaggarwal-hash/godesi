@@ -45,7 +45,11 @@ function Banner({ banner }: { banner: RecentBanner }) {
  * right across the page. Anyone who just listed, posted or joined can find
  * themselves here; hovering pauses it.
  */
-export async function RecentStrip() {
+export async function RecentStrip({
+  festivals = [],
+}: {
+  festivals?: { emoji: string; name: string; href: string }[];
+}) {
   const [banners, user] = await Promise.all([
     recentActivity(30),
     optionalRead(() => getCurrentUser(), null),
@@ -99,6 +103,15 @@ export async function RecentStrip() {
             All members →
           </Link>
         ) : null}
+        {festivals.map((f) => (
+          <Link
+            key={f.name}
+            href={f.href}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-4 py-1.5 text-sm font-black text-white shadow-sm hover:opacity-90"
+          >
+            {f.emoji} {f.name}
+          </Link>
+        ))}
       </div>
       {showTicker ? (
         <div className="ticker-window -mx-4 px-4 py-1 sm:mx-0 sm:px-0">
