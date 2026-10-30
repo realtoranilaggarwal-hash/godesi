@@ -111,6 +111,32 @@ const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
     url: "https://www.indianlifeandstyle.com/feed/",
     topic: "nri",
   },
+  /* ------- Films, entertainment & food ------- */
+  {
+    name: "Times of India — Entertainment",
+    url: "https://timesofindia.indiatimes.com/rssfeeds/1081479906.cms",
+    topic: "entertainment",
+  },
+  {
+    name: "NDTV — Movies",
+    url: "https://feeds.feedburner.com/ndtvmovies-latest",
+    topic: "entertainment",
+  },
+  {
+    name: "Indian Express — Entertainment",
+    url: "https://indianexpress.com/section/entertainment/feed/",
+    topic: "entertainment",
+  },
+  {
+    name: "Bollywood Hungama",
+    url: "https://www.bollywoodhungama.com/rss/news.xml",
+    topic: "entertainment",
+  },
+  {
+    name: "NDTV — Food",
+    url: "https://feeds.feedburner.com/ndtvfood-latest",
+    topic: "food",
+  },
 ];
 
 export async function ensureDefaultFeeds() {
