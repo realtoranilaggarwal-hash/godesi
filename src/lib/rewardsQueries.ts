@@ -193,7 +193,7 @@ export async function awardPoints({
 
   await notify({
     userId,
-    title: `+${value} points`,
+    title: `${value > 0 ? "+" : ""}${value} points`,
     body: note ?? REASON_LABELS[reason],
     href: "/dashboard/rewards",
   });
@@ -219,6 +219,8 @@ async function creditFoundingBonus({
   if (reason === "REDEMPTION" || reason === "ADJUSTMENT") return;
   // The wheel publishes its odds; doubling them for some members would not match.
   if (reason === "DAILY_SPIN") return;
+  // Losing a game must not double the loss.
+  if (points <= 0) return;
 
   const member = await db.user.findUnique({
     where: { id: userId },
