@@ -6,47 +6,78 @@ import { LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
-// Partner guides library — swap for the owner's affiliate URL when it arrives.
-const PARTNER_GUIDES = "https://monetizehub.net/articles";
-
 export const metadata: Metadata = {
   title: "Make money online — free tools, guides & AI prompts",
   description:
-    "Free member toolkit: guides to earning online, ready-to-use AI prompts for automating your business, and ways to earn on GoDesi itself. Sign in free to unlock.",
+    "Free member toolkit: plain-English guides to earning online, ready-to-use AI prompts for automating your business, and ways to earn on GoDesi itself. Sign in free to unlock.",
 };
 
 const GUIDES = [
   {
     name: "Affiliate marketing for beginners",
-    blurb: "How affiliate links, referrals and commissions work — with a first-content example you can copy.",
+    blurb: "How earning commissions by recommending products actually works.",
+    steps: [
+      "Pick one product you already use and genuinely like — trust is the whole game.",
+      "Join the seller's affiliate program (most are free) and get your tracking link.",
+      "Write or film one honest piece: what it does, who it's for, one limitation.",
+      "Put your link where the reader naturally looks for it, with a clear “this is a partner link” note.",
+      "Check what earned clicks after two weeks; make more of whatever worked.",
+    ],
   },
   {
-    name: "Compare affiliate programs before joining",
-    blurb: "A checklist for picking offers: commission math, permitted promotion and payment terms.",
+    name: "Choosing an affiliate program",
+    blurb: "How to compare offers before you spend time promoting them.",
+    steps: [
+      "Match the product to your audience first — a great commission on a product nobody needs earns nothing.",
+      "Check the commission math: percentage, cookie window, and what counts as a qualifying sale.",
+      "Read the rules on where you may promote — some programs ban paid ads or coupon sites.",
+      "Confirm how and when you get paid (threshold, method, holding period).",
+      "Start with one or two programs; five half-promoted links earn less than two good ones.",
+    ],
   },
   {
-    name: "Write product reviews that help readers choose",
-    blurb: "Honest-review structure: early verdict, real evidence, limitations and a comparison.",
+    name: "Reviews that make people buy",
+    blurb: "A review structure readers trust — and act on.",
+    steps: [
+      "Open with your verdict in one line — readers decide in seconds whether to keep reading.",
+      "Show real evidence: photos, your own use, numbers — not spec-sheet copy.",
+      "Name one or two honest limitations; a review with no downside reads like an ad.",
+      "Compare with one alternative so the reader can choose, not just agree.",
+      "End with who should buy it and who should skip it — the skip list builds trust.",
+    ],
   },
   {
-    name: "Affiliate email marketing",
-    blurb: "Recommendations subscribers actually want — one decision, one offer, clear disclosure.",
+    name: "Earning from short videos",
+    blurb: "TikTok, Reels and Shorts as an income channel.",
+    steps: [
+      "Pick one niche you can talk about weekly — money tips, local deals, how-tos.",
+      "Hook in the first 2 seconds: a question, a number, or a bold claim you then prove.",
+      "Post consistently — 3–5 short videos a week beats one polished video a month.",
+      "Point viewers to one place: your page, your link, your WhatsApp — not five destinations.",
+      "Once you have viewers, add income: affiliate links, sponsored shoutouts, your own service or digital product.",
+    ],
   },
   {
-    name: "SEO for affiliate sites",
-    blurb: "Pages that help readers choose and stay crawlable — includes a completed content brief.",
+    name: "Email that sells without spamming",
+    blurb: "Turn a small email list into repeat income.",
+    steps: [
+      "Collect emails with one clear promise — a weekly deal, a tip, a free checklist.",
+      "Send one useful thing per email: a decision, a deal, or a how-to — not a newsletter of everything.",
+      "Make one offer per email, tied to the useful content, and label partner links honestly.",
+      "Keep the same send day and time so readers expect you.",
+      "Watch which emails get replies and clicks; that tells you what your list wants to buy.",
+    ],
   },
   {
-    name: "YouTube monetization beyond ads",
-    blurb: "Affiliate links, sponsorships, memberships and services — pick what fits your viewers.",
-  },
-  {
-    name: "TikTok Shop affiliate demo",
-    blurb: "Plan a useful product demonstration — eligibility, seller terms and product fit.",
-  },
-  {
-    name: "How to disclose affiliate links",
-    blurb: "Blog, email and video examples that keep your recommendations clear and compliant.",
+    name: "Local services as online income",
+    blurb: "The fastest honest dollar for most people — sell a service online.",
+    steps: [
+      "List what you already do well: tutoring, design, repairs, cooking, tax prep, translation.",
+      "Package it as a fixed-price gig — “logo in 48 hours for $40” sells better than “design services”.",
+      "Post it on GoDesi gigs and share the card on WhatsApp groups you already belong to.",
+      "Deliver the first jobs fast and collect reviews — early ratings do your marketing.",
+      "Raise the price after five reviews; add a second gig that upsells the first.",
+    ],
   },
 ];
 
@@ -112,7 +143,7 @@ export default async function EarnPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <section className="rounded-3xl bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-500 px-5 py-8 text-white sm:px-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-white/80">
-          Members' money toolkit
+          Members&apos; money toolkit
         </p>
         <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
           Make money online 💸
@@ -140,40 +171,33 @@ export default async function EarnPage() {
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
         <h2 className="text-lg font-black text-slate-900">
-          📚 Step-by-step guides — learn how online earning works
+          📚 Step-by-step guides — how online earning actually works
         </h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Plain-English guides on affiliate marketing, SEO, reviews and
-          creator income from our partner library.
-        </p>
-        <ul className="mt-3 divide-y divide-slate-100">
+        <ul className="mt-3 space-y-4">
           {GUIDES.map((guide) => (
-            <li key={guide.name} className="flex items-start justify-between gap-3 py-2.5">
-              <div className="min-w-0">
-                {locked ? (
-                  <span className="text-sm font-semibold text-slate-800">
-                    🔒 {guide.name}
-                  </span>
-                ) : (
-                  <a
-                    href={PARTNER_GUIDES}
-                    target="_blank"
-                    rel="noreferrer sponsored nofollow"
-                    className="text-sm font-semibold text-indigo-700 hover:underline"
-                  >
-                    {guide.name} ↗
-                  </a>
-                )}
-                <p className="text-sm text-slate-600">{guide.blurb}</p>
-              </div>
+            <li
+              key={guide.name}
+              className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+            >
+              <p className="text-sm font-bold text-slate-800">
+                {locked ? "🔒 " : ""}
+                {guide.name}
+              </p>
+              <p className="mt-0.5 text-sm text-slate-600">{guide.blurb}</p>
+              {locked ? (
+                <p className="mt-2 text-xs font-semibold text-indigo-700">
+                  Sign in free to read the steps.
+                </p>
+              ) : (
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-slate-700">
+                  {guide.steps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+              )}
             </li>
           ))}
         </ul>
-        {locked ? (
-          <p className="mt-2 text-xs text-slate-500">
-            Sign in free to open the guides.
-          </p>
-        ) : null}
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
@@ -227,9 +251,9 @@ export default async function EarnPage() {
       </section>
 
       <p className="px-1 text-xs text-slate-500">
-        Some links are partner links — we may earn a commission at no cost to
-        you. Guides are educational, not income promises: results depend on
-        your effort and market.
+        Guides are educational, not income promises — results depend on your
+        effort and market. If we ever add partner links, they&apos;ll be
+        labelled.
       </p>
     </div>
   );
