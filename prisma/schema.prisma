@@ -200,6 +200,8 @@ enum PointsReason {
   DAILY_SPIN
   /// Points won on a scratch card.
   SCRATCH_WIN
+  /// Voted in today's question on the homepage.
+  DAILY_POLL
   REDEMPTION
   ADJUSTMENT
 }
@@ -404,6 +406,7 @@ model User {
 
   blogPosts         BlogPost[]
   newsVotes         NewsVote[]
+  pollVotes         PollVote[]
   newsVerifications NewsVerification[]
 
   /// Stripe Connect account tickets are paid into, so organisers get the money direct.
@@ -660,6 +663,30 @@ model PointsEntry {
 
   @@index([userId])
   @@index([referralId])
+}
+
+/// The one question a day on the homepage; created lazily for each UTC day.
+model PollQuestion {
+  id        String     @id @default(cuid())
+  text      String
+  options   String[]
+  /// UTC midnight of the day this poll runs.
+  day       DateTime   @unique
+  votes     PollVote[]
+  createdAt DateTime   @default(now())
+}
+
+/// One vote per member per poll.
+model PollVote {
+  id         String       @id @default(cuid())
+  question   PollQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  choice     Int
+  createdAt  DateTime     @default(now())
+
+  @@unique([questionId, userId])
 }
 
 model Redemption {

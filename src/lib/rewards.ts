@@ -26,6 +26,7 @@ export const POINTS: Record<EarnReason, number> = {
   /// Paid as a copy of whatever the member just earned, so it has no fixed value.
   FOUNDING_BONUS: 0,
   OFFER_PICK: 5,
+  DAILY_POLL: 5,
 };
 
 export const REASON_LABELS: Record<PointsReason, string> = {
@@ -47,6 +48,7 @@ export const REASON_LABELS: Record<PointsReason, string> = {
   REVIEW_POSTED: "You reviewed a business",
   PAYMENT_SPEND: "Points for money spent with Godesi",
   OFFER_PICK: "You ticked member-benefit topics",
+  DAILY_POLL: "You voted in today's question 🗳️",
   REDEMPTION: "Points redeemed",
   ADJUSTMENT: "Adjusted by the Godesi team",
 };

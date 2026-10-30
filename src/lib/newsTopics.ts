@@ -22,6 +22,7 @@ export const NEWS_TOPICS: NewsTopic[] = [
   { slug: "housing", label: "Housing & real estate", emoji: "🏠" },
   { slug: "sports", label: "Sports", emoji: "🏏" },
   { slug: "entertainment", label: "Films & entertainment", emoji: "🎬" },
+  { slug: "food", label: "Food & recipes", emoji: "🍛" },
   { slug: "weather", label: "Weather & traffic", emoji: "🌧️" },
   { slug: "india", label: "India & back home", emoji: "🇮🇳" },
   { slug: "general", label: "General", emoji: "📰" },
