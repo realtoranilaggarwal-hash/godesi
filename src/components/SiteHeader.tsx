@@ -95,6 +95,8 @@ const PROMO_LINKS = [
   { href: "/shop", label: "Shop", icon: "🛍️" },
   { href: "/gigs", label: "Gigs", icon: "🛠️" },
   { href: "/jobs", label: "Jobs", icon: "💼" },
+  { href: "/tools", label: "Tools", icon: "🧰" },
+  { href: "/earn", label: "Earn", icon: "💸" },
   { href: "/resources", label: "Links", icon: "🔗" },
   { href: "/advertise", label: "Advertise", icon: "📢" },
 ];
@@ -226,6 +228,8 @@ export async function SiteHeader() {
     { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
+    { href: "/tools", label: "Free business tools", icon: "🧰" },
+    { href: "/earn", label: "Make money online", icon: "💸" },
     { href: "/rewards", label: "Refer & earn", icon: "🎁" },
   ];
 
