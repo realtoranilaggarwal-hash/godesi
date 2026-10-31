@@ -27,8 +27,6 @@ import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
-import { DailyPoll } from "@/components/DailyPoll";
-import { pollState } from "@/lib/poll";
 import { predictionsState } from "@/lib/predictions";
 import { DailyPredictions } from "@/components/DailyPredictions";
 import { cachedCurrentUser } from "@/lib/auth";
@@ -122,7 +120,7 @@ const cryptoFearGreed = cachedQuery("crypto-fng", 1800, async () => {
 
 export default async function HomePage() {
   const me = await cachedCurrentUser();
-  const [businesses, eventRows, newsRows, spaCount, memberRows, fng, poll, markets] =
+  const [businesses, eventRows, newsRows, spaCount, memberRows, fng, markets] =
     await Promise.all([
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
@@ -130,7 +128,6 @@ export default async function HomePage() {
       homeSpaCount(),
       homeMembers(),
       cryptoFearGreed(),
-      pollState(me?.id ?? null),
       predictionsState(me?.id ?? null),
     ]);
   // Cached rows come back JSON-serialised, so dates are strings again.
@@ -179,7 +176,6 @@ export default async function HomePage() {
           <ChatterHomeBox />
 
           <div className="space-y-3 xl:hidden">
-            <DailyPoll initial={poll} signedIn={Boolean(me)} />
             <DailyPredictions initial={markets} signedIn={Boolean(me)} />
           </div>
 
@@ -251,7 +247,6 @@ export default async function HomePage() {
         </div>
         <aside className="relative hidden xl:block">
           <div className="absolute inset-0 space-y-3 overflow-y-auto">
-            <DailyPoll initial={poll} signedIn={Boolean(me)} />
             <DailyPredictions initial={markets} signedIn={Boolean(me)} />
             <CategoryTree groups={pickerGroups} />
           </div>
