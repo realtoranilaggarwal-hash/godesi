@@ -2,6 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { MarketTape } from "@/components/MarketTape";
 import { TvWidget } from "@/components/tradingview/TvWidget";
+import { DailyPredictions } from "@/components/DailyPredictions";
+import { predictionsState } from "@/lib/predictions";
+import { cachedCurrentUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Markets today — stocks, USD to INR, crypto, live charts",
@@ -24,7 +29,9 @@ function Card({
   );
 }
 
-export default function MarketsPage() {
+export default async function MarketsPage() {
+  const me = await cachedCurrentUser();
+  const markets = await predictionsState(me?.id ?? null);
   return (
     <div className="space-y-4">
       <div>
@@ -35,6 +42,10 @@ export default function MarketsPage() {
           Live prices for US and India markets, remittance currencies and
           crypto — free quotes by TradingView.
         </p>
+      </div>
+
+      <div id="predict">
+        <DailyPredictions initial={markets} signedIn={Boolean(me)} />
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-1 shadow-sm">

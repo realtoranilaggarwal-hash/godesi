@@ -27,9 +27,7 @@ import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
-import { predictionsState } from "@/lib/predictions";
-import { DailyPredictions } from "@/components/DailyPredictions";
-import { cachedCurrentUser } from "@/lib/auth";
+
 import { RishtaHomeBox } from "@/components/RishtaHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
 import { todaysFestivals, festivalSlug } from "@/lib/festivals";
@@ -119,8 +117,7 @@ const cryptoFearGreed = cachedQuery("crypto-fng", 1800, async () => {
 });
 
 export default async function HomePage() {
-  const me = await cachedCurrentUser();
-  const [businesses, eventRows, newsRows, spaCount, memberRows, fng, markets] =
+  const [businesses, eventRows, newsRows, spaCount, memberRows, fng] =
     await Promise.all([
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
@@ -128,7 +125,6 @@ export default async function HomePage() {
       homeSpaCount(),
       homeMembers(),
       cryptoFearGreed(),
-      predictionsState(me?.id ?? null),
     ]);
   // Cached rows come back JSON-serialised, so dates are strings again.
   const upcoming = eventRows.map((event) => ({
@@ -176,7 +172,15 @@ export default async function HomePage() {
           <ChatterHomeBox />
 
           <div className="space-y-3 xl:hidden">
-            <DailyPredictions initial={markets} signedIn={Boolean(me)} />
+            <Link
+              href="/markets#predict"
+              className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
+            >
+              🎯 Daily prediction — call it right, win 10 points{" "}
+              <span className="font-normal text-indigo-600">
+                → play on the markets page
+              </span>
+            </Link>
           </div>
 
           <section className="overflow-hidden rounded-3xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 via-white to-amber-50 px-4 py-4 text-slate-900 shadow-sm sm:px-5">
@@ -247,7 +251,15 @@ export default async function HomePage() {
         </div>
         <aside className="relative hidden xl:block">
           <div className="absolute inset-0 space-y-3 overflow-y-auto">
-            <DailyPredictions initial={markets} signedIn={Boolean(me)} />
+            <Link
+              href="/markets#predict"
+              className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
+            >
+              🎯 Daily prediction — call it right, win 10 points{" "}
+              <span className="font-normal text-indigo-600">
+                → play on the markets page
+              </span>
+            </Link>
             <CategoryTree groups={pickerGroups} />
           </div>
         </aside>
