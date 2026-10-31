@@ -16,13 +16,13 @@ type Block = {
 };
 
 const SIZE = 1000;
-const SNAP = 2; // selections snap to 2px — a 2x2 = 4px brick is the $4 minimum
+const SNAP = 10; // selections snap to 10px — a 10x10 = 100px tile is the $10 brick
 const FREE_Y = 900; // bottom 100 rows = the free zone
 const FREE_CODE = "godesi.com";
-/** Giveaway codes — one free 4px brick anywhere (BRICK/TEMPLE for promos,
+/** Giveaway codes — one free 10x10 brick anywhere (BRICK/TEMPLE for promos,
  *  FREE4 is the public code published on the site). */
 const ONE_BRICK_CODES = new Set(["brick", "temple", "free4"]);
-/** Member points buy one 4px brick anywhere on the board. */
+/** Member points buy one 10x10 brick anywhere on the board. */
 const BRICK_POINTS = 100;
 
 const hit = (blocks: Block[], px: number, py: number) =>
@@ -33,7 +33,7 @@ const hit = (blocks: Block[], px: number, py: number) =>
 /**
  * The million-dollar wall: a 1000x1000 canvas. Free pixels get a festive
  * checkerboard, sold blocks paint their banner across their whole rectangle,
- * and visitors drag a box to buy ($1/px, 4px min) or click a sold block.
+ * and visitors drag a box to buy ($10 per 10x10 tile) or click a sold block.
  */
 export function PixelWall({
   blocks,
@@ -245,17 +245,17 @@ export function PixelWall({
   };
 
   const pxCount = sel ? sel.w * sel.h : 0;
-  const bricks = pxCount / 4;
+  const bricks = pxCount / 100;
   const inFreeZone = !!sel && sel.y >= FREE_Y;
   const entered = code.trim().toLowerCase();
   const codeFree =
-    entered === FREE_CODE || (ONE_BRICK_CODES.has(entered) && pxCount <= 4);
-  const brickCodeTooBig = ONE_BRICK_CODES.has(entered) && pxCount > 4;
+    entered === FREE_CODE || (ONE_BRICK_CODES.has(entered) && pxCount <= 100);
+  const brickCodeTooBig = ONE_BRICK_CODES.has(entered) && pxCount > 100;
   const free =
-    ((inFreeZone && pxCount <= 4) || codeFree) && pxCount > 0 && !hasFreeBlock;
+    ((inFreeZone && pxCount <= 100) || codeFree) && pxCount > 0 && !hasFreeBlock;
   /** Points redemption: 100 points buys one 4px brick anywhere — a second
    *  option alongside the one-per-member free claim. */
-  const canUsePoints = !free && pxCount === 4 && pointsBalance >= BRICK_POINTS;
+  const canUsePoints = !free && pxCount === 100 && pointsBalance >= BRICK_POINTS;
   const payingByPoints = canUsePoints && usePoints;
   const creditApplied = free || payingByPoints
     ? 0
@@ -312,7 +312,7 @@ export function PixelWall({
         </div>
         <p className="mt-3 text-center text-xs font-semibold text-slate-500">
           {tip ??
-            `Drag a box over the open bricks — 250,000 desi bricks at $${priceUsd * 4} each. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`}
+            `Drag a box over the open bricks — 10,000 desi bricks at $${priceUsd * 100} each, each a 10x10 mini banner. The green FREE ZONE at the bottom gives every member one free brick. Indigo = just booked, pictures = live ads (click to visit).`}
         </p>
       </div>
 
@@ -467,7 +467,7 @@ export function PixelWall({
                   ) : null}
                   {brickCodeTooBig ? (
                     <span className="mt-1 block text-xs font-semibold text-amber-700">
-                      {entered.toUpperCase()} covers one 4px brick — shrink your box.
+                      {entered.toUpperCase()} covers one 10x10 brick — shrink your box.
                     </span>
                   ) : null}
                 </label>
@@ -492,7 +492,7 @@ export function PixelWall({
               <button
                 type="button"
                 onClick={() => void book()}
-                disabled={busy || uploading || !title.trim() || !linkUrl.trim() || pxCount < 4}
+                disabled={busy || uploading || !title.trim() || !linkUrl.trim() || pxCount < 100}
                 className="w-full rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 px-4 py-3 text-base font-black text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy

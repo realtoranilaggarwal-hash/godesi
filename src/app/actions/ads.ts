@@ -140,19 +140,19 @@ export async function startAdCheckoutAction(formData: FormData) {
 }
 
 const PIXEL_BOARD = 1000; // the wall is 1000 x 1000 pixels = 1,000,000
-const PIXEL_PRICE_INR = 85; // ₹85 a pixel ≈ $1
-const PIXEL_PRICE_USD = 1; // $1 a pixel
+const PIXEL_PRICE_INR = 8.5; // ₹8.5 a pixel — ₹850 per 10x10 brick
+const PIXEL_PRICE_USD = 0.1; // $0.10 a pixel — $10 per 10x10 brick
 /** Bottom 100 rows of the board are the free zone — book there for $0. */
 const WALL_FREE_Y = 900;
-/** Free bookings (free zone or promo code) are one brick: 4 px, worth $4. */
-const WALL_FREE_MAX_PX = 4;
+/** Free bookings (free zone or promo code) are one brick: 100 px, worth $10. */
+const WALL_FREE_MAX_PX = 100;
 /** Promo code that makes any wall block free while the wall launches. */
 const WALL_FREE_CODE = "godesi.com";
 /** Giveaway codes (said aloud on TikTok, to temples/charities, or published
- *  on the site — FREE4 is the public one): one 4px brick free, once per
+ *  on the site — FREE4 is the public one): one 10x10 brick free, once per
  *  member, still pending admin approval. */
 const WALL_ONE_BRICK_CODES = new Set(["brick", "temple", "free4"]);
-/** Member points buy one 4px brick anywhere on the board. */
+/** Member points buy one 10x10 brick anywhere on the board. */
 const WALL_BRICK_POINTS = 100;
 
 const pixelSchema = z.object({
@@ -174,7 +174,7 @@ export type WallCheckoutResult = { error?: string };
 
 /**
  * Million-pixel wall checkout: the vendor dragged a rectangle on the board —
- * price is $1 per pixel (min 4px = $4). One WallBlock + one AdOrder, then
+ * price is $10 per 10x10 brick (one tile minimum). One WallBlock + one AdOrder, then
  * Stripe; confirmAdOrder lights the block up once payment lands.
  */
 export async function startPixelWallCheckoutAction(
@@ -188,8 +188,14 @@ export async function startPixelWallCheckoutAction(
   const imageUrl = parsed.data.imageUrl || PLACEHOLDER_CREATIVE;
   const pixels = w * h;
 
-  if (x + w > PIXEL_BOARD || y + h > PIXEL_BOARD || pixels < 4) {
-    return { error: "That spot doesn't fit on the board — drag a rectangle inside it." };
+  if (
+    x + w > PIXEL_BOARD ||
+    y + h > PIXEL_BOARD ||
+    w % 10 !== 0 ||
+    h % 10 !== 0 ||
+    pixels < 100
+  ) {
+    return { error: "That spot doesn't fit — drag a rectangle inside the board in 10px steps (one brick is 10x10)." };
   }
 
   const inFreeZone = y >= WALL_FREE_Y;
@@ -198,10 +204,10 @@ export async function startPixelWallCheckoutAction(
   const brickCode = WALL_ONE_BRICK_CODES.has(enteredCode);
   if (brickCode && pixels > WALL_FREE_MAX_PX) {
     return {
-      error: `Code ${enteredCode.toUpperCase()} covers one 4px brick — shrink your box to 4 pixels or drop the code.`,
+      error: `Code ${enteredCode.toUpperCase()} covers one 10x10 brick — shrink your box to one tile or drop the code.`,
     };
   }
-  // Free zone grants a single 4px brick; godesi.com frees any block; the
+  // Free zone grants a single 10x10 brick; godesi.com frees any block; the
   // giveaway code frees one brick anywhere on the board.
   const wantsFree =
     (inFreeZone && pixels <= WALL_FREE_MAX_PX) || codeFree || brickCode;
@@ -240,7 +246,7 @@ export async function startPixelWallCheckoutAction(
     return { error: "Part of that spot is already taken — drag somewhere free." };
   }
 
-  // Points redemption: 100 points buys a 4px brick anywhere — separate from
+  // Points redemption: 100 points buys a 10x10 brick anywhere — separate from
   // the one-per-member free claim, still reviewed before it lights up.
   if (parsed.data.usePoints && pixels <= WALL_FREE_MAX_PX) {
     const spent = await spendPoints({
@@ -376,7 +382,7 @@ export async function startPixelWallCheckoutAction(
           currency: currency.toLowerCase(),
           unit_amount: payMinor,
           product_data: {
-            name: `GoDesi Wall of Fame — ${Math.floor(pixels / 4).toLocaleString()} desi bricks`,
+            name: `GoDesi Wall of Fame — ${Math.floor(pixels / 100).toLocaleString()} desi bricks`,
             description: `${w}×${h}px block at (${x}, ${y}) — permanent spot on godesi.com/walloffame`,
           },
         },

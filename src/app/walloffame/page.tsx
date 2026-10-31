@@ -12,20 +12,21 @@ import { PixelWall } from "@/components/PixelWall";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GoDesi Wall of Fame — 250,000 desi bricks, $4 a brick",
+  title: "GoDesi Wall of Fame — 10,000 desi bricks, $10 a brick",
   description:
-    "The desi Million Dollar Homepage: drag a box over the wall, upload your banner and own the spot forever — $4 a desi brick. The more you buy, the higher you rank.",
+    "The desi Million Dollar Homepage: drag a box over the wall, upload your banner and own the spot forever — $10 a desi brick, each a visible 10x10 mini banner. The more you buy, the higher you rank.",
   alternates: { canonical: "/walloffame" },
 };
 
 const TOTAL_PX = 1_000_000;
-const PRICE = 1;
+const PRICE = 0.1; // $0.10 a pixel — $10 per 10x10 brick
+const BRICK_USD = 10;
 
 const STEPS = [
   {
     icon: "🧱",
     title: "Drag & pick your bricks",
-    body: `250,000 desi bricks at $${PRICE * 4} a brick — drag a whole block and dominate the wall. The green free zone is $0.`,
+    body: `10,000 desi bricks at $${BRICK_USD} a brick — each a crisp 10x10 mini banner you can actually see. Drag a whole block and dominate the wall. The green free zone is $0.`,
   },
   {
     icon: "🏆",
@@ -53,7 +54,7 @@ export default async function WallOfFamePage({
       }))
     : false;
   const pointsBalance = user ? (await wallet(user.id)).balance : 0;
-  // Preview credit in "pixel dollars": $1 (or ₹85) of credit covers 1 px.
+  // Preview credit in dollars (or ₹): each dollar covers 10 px of the wall.
   const currency = requestCurrency();
   const creditUsd = user
     ? (await wallCreditMinor(user.id, currency)) /
@@ -132,14 +133,14 @@ export default async function WallOfFamePage({
               🏆 The GoDesi Wall of Fame
             </p>
             <h1 className="mt-2 text-3xl font-black sm:text-4xl">
-              250,000 bricks. ${PRICE * 4} a brick. Yours for life 🧱
+              10,000 bricks. $10 a brick. Yours for life 🧱
             </h1>
             <p className="mt-3 text-white/90">
               The desi Million Dollar Homepage: one payment and your brick stays
               on the wall for life — no renewals, ever. Drag a box over the
               board, upload your banner and book today —{" "}
-              {Math.floor(taken / 4).toLocaleString()} of{" "}
-              {Math.floor(TOTAL_PX / 4).toLocaleString()} bricks taken so far.
+              {Math.floor(taken / 100).toLocaleString()} of{" "}
+              {Math.floor(TOTAL_PX / 100).toLocaleString()} bricks taken so far.
             </p>
             <p className="mt-2 text-sm font-bold text-amber-100">
               Free right now — grab a brick in the green free zone or use the
@@ -180,7 +181,7 @@ export default async function WallOfFamePage({
         </h2>
         <ol className="mt-2 grid gap-2 text-sm text-slate-700 sm:grid-cols-3">
           <li className="rounded-xl bg-white/80 px-3 py-2">
-            <b>1 · Free zone</b> — one free 4px brick per member in the green
+            <b>1 · Free zone</b> — one free 10x10 brick per member in the green
             band at the bottom of the board.
           </li>
           <li className="rounded-xl bg-white/80 px-3 py-2">
@@ -249,7 +250,7 @@ export default async function WallOfFamePage({
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
                     <span className="rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
-                      {Math.floor(vendor.pixels / 4).toLocaleString()} bricks
+                      {Math.floor(vendor.pixels / 100).toLocaleString()} bricks
                     </span>
                     {vendor.points !== null ? (
                       <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-black text-indigo-700">

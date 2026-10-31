@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { requestCurrency } from "@/lib/currency";
 
 const BOARD = 1000;
-const BRICK = 2; // member bricks are the standard 4px (2x2) brick
+const BRICK = 10; // member bricks are the standard 10x10 (100px) $10 tile
 
 /** $0 free order — currency is cosmetic; requestCurrency throws off-request. */
 function orderCurrency() {

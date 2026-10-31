@@ -20,7 +20,7 @@ const EXPLORE: { href: string; label: string; blurb: string }[] = [
   { href: "/crypto-fear-greed", label: "🪙 Crypto fear & greed", blurb: "Today’s market mood" },
   { href: "/news", label: "📰 Desi news", blurb: "Headlines from the community" },
   { href: "/events", label: "🎉 Events", blurb: "Melas, garbas & meetups near you" },
-  { href: "/walloffame", label: "🧱 Wall of Fame", blurb: "250,000 desi bricks — find yours" },
+  { href: "/walloffame", label: "🧱 Wall of Fame", blurb: "10,000 desi bricks — find yours" },
 ];
 
 /**
@@ -67,8 +67,8 @@ export default async function StartPage() {
             {brick ? (
               <>
                 {" "}
-                Yours is placed at row {brick.y / 2 + 1}, column{" "}
-                {(1000 - brick.x) / 2} from the right.
+                Yours is placed at row {brick.y / 10 + 1}, column{" "}
+                {(1000 - brick.x) / 10} from the right.
               </>
             ) : null}{" "}
             100 points = 1 more brick — keep posting, referring and reviewing to
