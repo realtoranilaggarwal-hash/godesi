@@ -47,11 +47,11 @@ export async function GET(
             borderRadius: 999,
             background: "#ffffff",
             color: "#be123c",
-            fontSize: 150,
-            fontWeight: 900,
           }}
         >
-          ✓
+          <svg width="150" height="150" viewBox="0 0 24 24">
+            <path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#be123c" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
         <div style={{ display: "flex", marginTop: 50, fontSize: 70, fontWeight: 900 }}>
           GoDesi Verified

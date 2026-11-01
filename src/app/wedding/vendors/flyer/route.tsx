@@ -59,8 +59,11 @@ export async function GET(request: Request) {
         </div>
         <div style={{ display: "flex", flexDirection: "column", marginTop: 44, gap: 16 }}>
           {points.map((point) => (
-            <div key={point} style={{ display: "flex", fontSize: 38, fontWeight: 700 }}>
-              ✓ {point}
+            <div key={point} style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 38, fontWeight: 700 }}>
+              <svg width="40" height="40" viewBox="0 0 24 24">
+                <path d="M4 12.5l5 5L20 6.5" fill="none" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {point}
             </div>
           ))}
         </div>
