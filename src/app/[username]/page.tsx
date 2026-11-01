@@ -20,6 +20,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { Badge, Card, Stars } from "@/components/ui";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { PERSONAL_SOCIALS } from "@/lib/personalProfile";
 import { JournalistBadge } from "@/components/JournalistBadge";
 import { PressCard } from "@/components/PressCard";
@@ -411,6 +412,20 @@ export default async function PublicProfilePage({
             >
               🔒 Your YouTube playlist is saved but hidden on the Free plan. Go
               Pro to show it to everyone →
+            </Link>
+          ) : null}
+
+          {user.albumUrl && showsAlbumAndPlaylist(user) ? (
+            <Card>
+              <PhotoAlbumGallery url={user.albumUrl} heading="Photos" />
+            </Card>
+          ) : isOwner && user.albumUrl ? (
+            <Link
+              href="/pricing"
+              className="block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+            >
+              🔒 Your Google Photos album is saved but hidden on the Free plan.
+              Go Pro to show it to everyone →
             </Link>
           ) : null}
 

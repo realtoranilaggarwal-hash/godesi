@@ -179,6 +179,7 @@ export async function publicProfile(username: string) {
       languages: true,
       videoUrls: true,
       playlistUrl: true,
+      albumUrl: true,
       keptPlaylistUrl: true,
       openToWork: true,
       profileFacts: true,
