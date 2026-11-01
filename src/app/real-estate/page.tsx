@@ -14,6 +14,7 @@ import {
   hasPropertyFilters,
   propertySearchWhere,
 } from "@/lib/property";
+import RentalEbooks from "@/components/RentalEbooks";
 import {
   AGENT_SELECT,
   REAL_ESTATE_AGENT_WHERE,
@@ -218,6 +219,8 @@ export default async function RealEstatePage({
             </div>
           </section>
         ) : null}
+
+        <RentalEbooks heading="Free real estate ebooks" />
 
         <Card className="bg-amber-50">
           <h2 className="font-bold">Selling faster on Godesi</h2>
