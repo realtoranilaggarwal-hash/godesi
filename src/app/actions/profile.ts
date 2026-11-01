@@ -15,6 +15,7 @@ import {
 import { isSupportedVideoUrl } from "@/lib/video";
 import { channelToPlaylistLink, isPlaylistLink } from "@/lib/youtubePlaylist";
 import { institutionSlug, MIN_YEAR } from "@/lib/alumni";
+import { PROFILE_QUESTIONS } from "@/lib/profileQuiz";
 
 const optionalUrl = z
   .string()
@@ -243,4 +244,26 @@ export async function claimHandleAction(
   } catch (error) {
     return fieldError(error);
   }
+}
+
+/**
+ * The get-to-know-me quiz: saves {question key → answer} onto
+ * User.profileFacts so the public profile shows a friendly Q&A card.
+ * Only known question keys and non-empty answers are kept.
+ */
+export async function saveProfileQuizAction(input: Record<string, string>) {
+  const user = await requireUser();
+  const clean: Record<string, string> = {};
+  for (const question of PROFILE_QUESTIONS) {
+    const value = (input?.[question.key] ?? "").trim().slice(0, 200);
+    if (value) clean[question.key] = value;
+  }
+  await db.user.update({
+    where: { id: user.id },
+    data: { profileFacts: clean },
+  });
+  revalidatePath("/start");
+  revalidatePath("/dashboard/me");
+  if (user.username) revalidatePath(`/${user.username}`);
+  return { saved: Object.keys(clean).length };
 }

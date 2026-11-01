@@ -316,6 +316,8 @@ model User {
   education       String?
   /// Work history, projects and achievements, one per line.
   experience      String?
+  /// Fun get-to-know-me answers: {question key → answer} shown on the profile.
+  profileFacts    Json?
   skills          String[] @default([])
   languages       String[] @default([])
   /// YouTube/Vimeo links embedded on the profile.

@@ -181,6 +181,7 @@ export async function publicProfile(username: string) {
       playlistUrl: true,
       keptPlaylistUrl: true,
       openToWork: true,
+      profileFacts: true,
       whatsappNumber: true,
       websiteUrl: true,
       instagramUrl: true,

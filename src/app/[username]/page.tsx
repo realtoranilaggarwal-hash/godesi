@@ -35,6 +35,12 @@ import { RailRectangles, SmallBanners } from "@/components/Banners";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
+import { PixelWall } from "@/components/PixelWall";
+import { pixelWallBlocks } from "@/lib/banners";
+import { wallCreditMinor } from "@/lib/adOrders";
+import { requestCurrency } from "@/lib/currency";
+import { db } from "@/lib/db";
+import { profileFactsList } from "@/lib/profileQuiz";
 import { thumbImage } from "@/lib/proxyImage";
 import { metaDescription, pageTitle } from "@/lib/seo";
 
@@ -79,6 +85,40 @@ export default async function PublicProfilePage({
     wallet(user.id),
     cachedCurrentUser(),
   ]);
+  const [bricks, wallBlocks] = await Promise.all([
+    db.wallBlock.findMany({
+      where: { advertiserId: user.id, status: "ACTIVE" },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        x: true,
+        y: true,
+        w: true,
+        h: true,
+        title: true,
+        linkUrl: true,
+        clicks: true,
+      },
+    }),
+    pixelWallBlocks(),
+  ]);
+  const facts = profileFactsList(user.profileFacts);
+  const viewerFreeBlock = viewer
+    ? !!(await db.adOrder.findFirst({
+        where: { userId: viewer.id, wallBlockId: { not: null }, provider: "free" },
+        select: { id: true },
+      }))
+    : false;
+  const viewerWallet =
+    viewer && viewer.id !== user.id ? await wallet(viewer.id) : null;
+  const viewerPoints = viewer
+    ? (viewerWallet ?? points).balance
+    : 0;
+  const currency = requestCurrency();
+  const viewerCreditUsd = viewer
+    ? (await wallCreditMinor(viewer.id, currency)) /
+      (currency === "INR" ? 8500 : 100)
+    : 0;
   const isOwner = viewer?.id === user.id;
   const plan = effectivePlan(user);
   const playlistUrl = visibleMediaLink(
@@ -244,6 +284,67 @@ export default async function PublicProfilePage({
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          {facts.length ? (
+            <Card>
+              <h2 className="text-lg font-bold">
+                Get to know {properName(user.name).split(" ")[0]} ✨
+              </h2>
+              <dl className="mt-3 space-y-2.5">
+                {facts.map((fact) => (
+                  <div
+                    key={fact.question}
+                    className="rounded-2xl bg-slate-50 px-3 py-2"
+                  >
+                    <dt className="text-xs font-semibold text-slate-500">
+                      {fact.emoji} {fact.question}
+                    </dt>
+                    <dd className="mt-0.5 text-sm font-semibold text-slate-800">
+                      {fact.answer}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </Card>
+          ) : null}
+
+          {bricks.length ? (
+            <Card className="bg-gradient-to-r from-amber-50 to-rose-50">
+              <h2 className="text-lg font-bold">
+                🧱 Wall of Fame — owns{" "}
+                {bricks
+                  .reduce((sum, b) => sum + (b.w * b.h) / 100, 0)
+                  .toLocaleString()}{" "}
+                desi {bricks.reduce((sum, b) => sum + b.w * b.h, 0) / 100 === 1
+                  ? "brick"
+                  : "bricks"}
+              </h2>
+              <ul className="mt-2 space-y-2 text-sm">
+                {bricks.map((block) => (
+                  <li key={block.id} className="flex flex-wrap items-center gap-2">
+                    <a
+                      href={block.linkUrl}
+                      target="_blank"
+                      rel="noreferrer nofollow"
+                      className="font-semibold text-indigo-700 underline"
+                    >
+                      {block.title}
+                    </a>
+                    <span className="text-xs text-slate-500">
+                      row {block.y / 10 + 1} · col {(1000 - block.x) / 10} from the
+                      right · {block.clicks.toLocaleString()} clicks
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                href="/walloffame"
+                className="mt-3 inline-block text-sm font-bold text-amber-700 underline"
+              >
+                See them on the wall →
+              </Link>
+            </Card>
+          ) : null}
+
           {user.lookingFor ? (
             <Card className="bg-gradient-to-r from-amber-50 to-rose-50">
               <h2 className="text-lg font-bold">What I am looking for</h2>
@@ -632,6 +733,35 @@ export default async function PublicProfilePage({
           <SmallBanners show={6} embedded />
         </aside>
       </div>
+
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-bold">
+            🏆 The GoDesi Wall of Fame
+          </h2>
+          <Link
+            href="/walloffame"
+            className="text-sm font-semibold text-indigo-700 underline"
+          >
+            What is the wall? →
+          </Link>
+        </div>
+        <p className="text-sm text-slate-600">
+          10,000 desi bricks at $10 each — every brick a mini banner.
+          {bricks.length
+            ? ` ${properName(user.name).split(" ")[0]} owns the spots listed above.`
+            : ""}{" "}
+          Hover a brick to meet the member behind it — drag a box to book yours.
+        </p>
+        <PixelWall
+          blocks={wallBlocks}
+          priceUsd={0.1}
+          hasFreeBlock={viewerFreeBlock}
+          creditUsd={viewerCreditUsd}
+          pointsBalance={viewerPoints}
+          signedIn={!!viewer}
+        />
+      </section>
     </div>
   );
 }
