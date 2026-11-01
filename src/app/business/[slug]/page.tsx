@@ -1276,6 +1276,8 @@ export default async function BusinessProfilePage({
           categorySlug={business.categoryRef?.slug ?? null}
           categoryName={business.categoryRef?.name ?? null}
           city={business.city}
+          state={business.state}
+          country={business.country}
           excludeBusinessId={business.id}
         />
 
