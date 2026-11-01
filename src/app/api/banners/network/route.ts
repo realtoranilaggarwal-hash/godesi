@@ -20,7 +20,12 @@ export async function GET() {
   const base = siteUrl();
   const placement = AD_PLACEMENTS.MOBILE;
   const banners = (await activeBanners("MOBILE", 50)).flatMap((banner) => {
-    const image = new URL(banner.imageUrl, base);
+    let image: URL;
+    try {
+      image = new URL(banner.imageUrl, base);
+    } catch {
+      return [];
+    }
     if (image.protocol !== "https:" && image.protocol !== "http:") return [];
     return [
       {
