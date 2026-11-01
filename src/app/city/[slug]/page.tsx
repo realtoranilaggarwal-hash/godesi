@@ -8,6 +8,8 @@ import { newsPath } from "@/lib/newsLinks";
 import { siteUrl } from "@/lib/format";
 import { Card, EmptyState } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
+import { RecommendedLinks } from "@/components/RecommendedLinks";
+import { hotelResultsUrl } from "@/lib/travel";
 import { resultsAreThin, robotsFor } from "@/lib/thinContent";
 import { cityCover, CITY_DEFAULT_COVER } from "@/lib/cityCovers";
 
@@ -321,6 +323,34 @@ export default async function CityPage({
             </ul>
           </Section>
         ) : null}
+
+        {thin ? null : (
+          <>
+            <Card>
+              <h2 className="text-base font-bold">✈️ Visiting {name}?</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Compare hotels and flights on GoDesi Travel.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold">
+                <a
+                  href={hotelResultsUrl({ destination: name, adults: 2 })}
+                  target="_blank"
+                  rel="noreferrer sponsored nofollow"
+                  className="rounded-xl bg-indigo-600 px-3 py-2 text-white hover:bg-indigo-700"
+                >
+                  Hotels in {name}
+                </a>
+                <Link
+                  href="/travel"
+                  className="rounded-xl border border-indigo-200 px-3 py-2 text-indigo-700 hover:bg-indigo-50"
+                >
+                  Flights and travel deals
+                </Link>
+              </div>
+            </Card>
+            <RecommendedLinks title={`Picks for ${name}`} />
+          </>
+        )}
       </div>
 
       {thin ? null : <SidebarBanners />}
