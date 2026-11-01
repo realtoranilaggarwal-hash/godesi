@@ -432,7 +432,7 @@ export default async function ReportPage({
               Desi events near you
             </Link>
             <Link
-              href="/businesses"
+              href="/search"
               className="rounded-xl border border-slate-200 px-3 py-2 text-slate-700 hover:bg-slate-50"
             >
               Find a desi business

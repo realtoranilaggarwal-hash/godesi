@@ -52,6 +52,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // The business directory lives at /search; /businesses was linked once and 404'd.
+        source: "/businesses",
+        destination: "/search",
+        permanent: true,
+      },
+      {
         // Feed readers guess these paths; the real feed is /feed.xml.
         source: "/:path(feed|rss|rss.xml|atom.xml)",
         destination: "/feed.xml",

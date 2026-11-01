@@ -232,7 +232,7 @@ export default async function CityPage({
         ) : null}
 
         {businesses.length ? (
-          <Section title="🏪 Businesses and professionals" href="/businesses">
+          <Section title="🏪 Businesses and professionals" href={`/search?city=${encodeURIComponent(name)}`}>
             {Object.entries(
               businesses.reduce<Record<string, typeof businesses>>(
                 (groups, business) => {
