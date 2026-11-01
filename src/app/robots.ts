@@ -25,6 +25,21 @@ const AI_CRAWLERS = [
   "MJ12bot",
   "DotBot",
   "DataForSeoBot",
+  "GoogleOther",
+  "GoogleOther-Image",
+  "GoogleOther-Video",
+  "Google-Extended",
+  "Google-CloudVertexBot",
+  "Applebot-Extended",
+  "PerplexityBot",
+  "YouBot",
+  "ExaSearchBot",
+  "Reflectionbot",
+  "Diffbot",
+  "Timpibot",
+  "ImagesiftBot",
+  "cohere-ai",
+  "omgili",
 ];
 
 export default function robots(): MetadataRoute.Robots {
