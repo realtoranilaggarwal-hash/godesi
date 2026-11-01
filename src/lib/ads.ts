@@ -247,7 +247,7 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     size: { width: 320, height: 100 },
     slots: 10,
     blurb:
-      "Standard 320x100, stacked ten high down the right side of every page on computers and shown between cards on phones.",
+      "Standard 320x100, stacked ten high down the right side of every page on computers and shown between cards on phones. Also shown free on our other websites, such as vdorental.com, anilsellsnj.com and refiyourloans.com.",
     priceInr: 1999,
     priceUsd: 24,
     cpmInr: 150,
@@ -255,6 +255,7 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     highlights: [
       "Ten on the right side of every page, rotating",
       "Also shown between cards on phones",
+      "Included free on 25+ of our other websites",
       "Cheapest way to start",
     ],
     region: "phone",
