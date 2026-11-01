@@ -135,7 +135,7 @@ export async function CategoryFeatured() {
         const openSlots = PER_CATEGORY - picks.length;
         const promoSpan =
           openSlots >= 3
-            ? "sm:col-span-3"
+            ? "xl:col-span-3"
             : openSlots === 2
               ? "sm:col-span-2"
               : "";
@@ -176,7 +176,7 @@ export async function CategoryFeatured() {
               )}
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
               {openSlots > 0 ? (
                 <Link
                   href={
