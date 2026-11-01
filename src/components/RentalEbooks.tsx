@@ -16,14 +16,8 @@ export default function RentalEbooks({ heading = "Free ebooks for NJ property ow
       <div className="grid gap-4 sm:grid-cols-3">
         {BOOKS.map((b) => (
           <a key={b.slug} href={`${BASE}/ebooks/${b.slug}`} className="group block">
-            <div className="flex aspect-[3/4] flex-col justify-between rounded-lg p-5 text-white shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-xl" style={{ background: `linear-gradient(160deg, ${b.color}, #0f172a)` }}>
-              <p className="text-xs font-semibold uppercase tracking-wider opacity-80">Free guide · {b.audience}</p>
-              <div>
-                <p className="text-xl font-bold leading-tight">{b.title}</p>
-                <p className="mt-2 text-xs opacity-80">{b.subtitle}</p>
-              </div>
-              <p className="text-xs opacity-80">VDO Rental · by Anil Aggarwal, Vylla Home</p>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/covers/${b.slug}.svg`} alt={`${b.title} ebook cover`} width={600} height={800} className="aspect-[3/4] w-full rounded-lg shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-xl" />
             <p className="mt-2 text-sm font-semibold text-indigo-700 group-hover:underline">Read free →</p>
           </a>
         ))}
