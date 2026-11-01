@@ -243,6 +243,8 @@ model User {
   digestOptOutAt  DateTime?
   /// Last weekly digest we sent them, so a retry never double-sends.
   digestSentAt    DateTime?
+  /// Last onboarding note sent: 0 none, 1 welcome, 2 day-2, 3 day-5, 4 day-14.
+  onboardingStep  Int       @default(0)
   /// Set while the member wants the morning panchang + deal email; null = off.
   morningEmailAt  DateTime?
   /// Member stopped the morning email; null = subscribed (the default for every member).
@@ -445,6 +447,7 @@ model User {
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
+  @@index([onboardingStep, createdAt])
 }
 
 enum ReferralStatus {
