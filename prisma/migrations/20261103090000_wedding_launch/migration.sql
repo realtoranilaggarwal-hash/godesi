@@ -1,0 +1,2 @@
+ALTER TABLE "User" ADD COLUMN "weddingLaunchAt" TIMESTAMP(3);
+ALTER TABLE "User" ADD COLUMN "weddingReferralRewards" INTEGER NOT NULL DEFAULT 0;

@@ -5,6 +5,8 @@ import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { invalidateDirectory } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { WEDDING_SLUG } from "@/lib/wedding";
+import { weddingVendorJoined } from "@/lib/weddingLaunch";
 import { db } from "@/lib/db";
 import { isStaff, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
@@ -613,6 +615,9 @@ export async function saveBusinessProfileAction(
         once: true,
       });
     }
+
+    if (category.slug === WEDDING_SLUG && !(staffEdit && target && !target.ownerId))
+      await weddingVendorJoined(existing?.ownerId ?? user.id);
 
     if (vehicle && "data" in vehicle) {
       await db.vehicleDetails.upsert({

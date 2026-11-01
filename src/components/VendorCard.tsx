@@ -66,6 +66,11 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
             <Badge tone="indigo">{vendor.plan}</Badge>
           ) : null}
         </div>
+        {vendor.verifiedProvider ? (
+          <p className="text-[11px] font-bold text-emerald-700">
+            ✅ GoDesi Verified Wedding Vendor
+          </p>
+        ) : null}
 
         <p className="text-xs font-semibold text-slate-500">
           {vendor.subcategoryName ?? vendor.category} · 📍{" "}

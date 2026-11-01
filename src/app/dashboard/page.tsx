@@ -5,6 +5,9 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { ElitePrompt } from "@/components/ElitePrompt";
 import { FoundingFeatureOffer } from "@/components/FoundingFeatureOffer";
+import { WeddingVendorPerks } from "@/components/WeddingVendorPerks";
+import { WEDDING_SLUG } from "@/lib/wedding";
+import { weddingLaunchSpotsLeft } from "@/lib/weddingLaunch";
 import { FOUNDING_FEATURE_DAYS, foundingFeatureActive } from "@/lib/founding";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { effectivePlan, PLANS } from "@/lib/plans";
@@ -39,6 +42,7 @@ export default async function DashboardPage({
     saved?: string;
     business?: string;
     posted?: string;
+    wedding?: string;
     upgraded?: string;
     verified?: string;
     password?: string;
@@ -62,6 +66,20 @@ export default async function DashboardPage({
     wallet(user.id),
     pointValues(),
   ]);
+
+  const weddingVendor = business?.categorySlug === WEDDING_SLUG;
+  const [weddingSpots, weddingReferrals] = weddingVendor
+    ? await Promise.all([
+        weddingLaunchSpotsLeft(),
+        db.referral.count({
+          where: {
+            referrerId: user.id,
+            status: "APPROVED",
+            user: { business: { categorySlug: WEDDING_SLUG } },
+          },
+        }),
+      ])
+    : [0, 0];
 
   const [myLeads, adStats, myEvents] = await Promise.all([
       db.lead.findMany({
@@ -194,6 +212,22 @@ export default async function DashboardPage({
                 ? user.foundingFeatureUntil.toDateString()
                 : null
             }
+          />
+        ) : null}
+
+        {weddingVendor && business ? (
+          <WeddingVendorPerks
+            launchUntil={
+              user.weddingLaunchAt && user.planExpiresAt
+                ? user.planExpiresAt.toDateString()
+                : null
+            }
+            spotsLeft={weddingSpots}
+            referralLink={user.username ? `${siteUrl()}/ref/${user.username}` : null}
+            referredVendors={weddingReferrals}
+            verified={business.verifiedProvider}
+            slug={business.slug}
+            notice={searchParams.wedding}
           />
         ) : null}
 
