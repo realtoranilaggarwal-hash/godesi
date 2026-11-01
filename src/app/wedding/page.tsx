@@ -105,6 +105,12 @@ export default async function WeddingPage({
               Add your wedding business
             </Link>
           </div>
+          <Link
+            href="/wedding/vendors"
+            className="mt-3 inline-block text-sm font-bold text-white underline"
+          >
+            Wedding vendor? List free — first 50 get Premium free for 6 months →
+          </Link>
         </section>
 
         {/* Say what you need, get quotes back — the shortest route for a couple

@@ -7,6 +7,7 @@ import { requireRole, requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { type ActionState, fieldError } from "@/lib/actions";
+import { weddingVendorJoined } from "@/lib/weddingLaunch";
 
 const claimSchema = z.object({
   businessId: z.string().min(1),
@@ -96,6 +97,7 @@ export async function reviewClaimAction(formData: FormData) {
       }),
     ]);
     handedOver = true;
+    await weddingVendorJoined(claim.userId);
   }
 
   revalidatePath("/admin");

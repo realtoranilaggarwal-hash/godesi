@@ -16,6 +16,7 @@ import {
 import { UNLOCK_LEAD_POINTS } from "@/lib/rewards";
 import { spendPoints } from "@/lib/rewardsQueries";
 import { budgetCurrencyOf } from "@/lib/budget";
+import { alertWeddingVendors, isWeddingLead } from "@/lib/weddingLeadAlerts";
 
 const leadSchema = z.object({
   title: z.string().trim().min(5, "Give your requirement a clear title"),
@@ -83,7 +84,7 @@ export async function createLeadAction(
       return { error: "Maximum budget must be greater than minimum budget." };
     }
 
-    await db.lead.create({
+    const lead = await db.lead.create({
       data: {
         clientId: user.id,
         title: parsed.data.title,
@@ -101,6 +102,13 @@ export async function createLeadAction(
         contactEmail: parsed.data.contactEmail ?? null,
       },
     });
+    if (isWeddingLead(lead)) {
+      try {
+        await alertWeddingVendors(lead);
+      } catch (error) {
+        console.error("wedding vendor alerts failed", error);
+      }
+    }
   } catch (error) {
     return fieldError(error);
   }

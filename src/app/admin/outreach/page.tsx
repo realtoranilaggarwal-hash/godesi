@@ -8,6 +8,11 @@ import { Card, inputClass } from "@/components/ui";
 import { CopyTextButton } from "@/components/CopyTextButton";
 import { whatsappLink, siteUrl } from "@/lib/format";
 import { markOutreachAction } from "@/app/actions/outreach";
+import { WEDDING_SLUG } from "@/lib/wedding";
+import {
+  WEDDING_LAUNCH_LIMIT,
+  WEDDING_LAUNCH_MONTHS,
+} from "@/lib/weddingLaunch";
 
 export const metadata: Metadata = { title: "Owner outreach | Godesi admin" };
 export const dynamic = "force-dynamic";
@@ -26,6 +31,32 @@ function inviteMessage(name: string, city: string, slug: string) {
   ].join("\n");
 }
 
+/** Wedding vendors hear about wedding requests and the launch offer instead. */
+function weddingInviteMessage(name: string, city: string, slug: string) {
+  return [
+    `Namaste ${name} 🙏`,
+    "",
+    `Desi families in ${city} plan their weddings on GoDesi (godesi.com), and your business already has a free page:`,
+    `${siteUrl()}/business/${slug}`,
+    "",
+    `Claim it free to add your photos and packages and get wedding requests on WhatsApp. The first ${WEDDING_LAUNCH_LIMIT} wedding vendors get Premium free for ${WEDDING_LAUNCH_MONTHS} months.`,
+  ].join("\n");
+}
+
+/** Short enough for an Instagram DM. */
+function instagramMessage(name: string, slug: string) {
+  return `Hi ${name}! Love your work 💐 Your business is already listed on GoDesi.com, where desi families find wedding vendors. Claim it free to add your photos and get wedding requests: ${siteUrl()}/business/${slug} (first ${WEDDING_LAUNCH_LIMIT} wedding vendors get ${WEDDING_LAUNCH_MONTHS} months of Premium free)`;
+}
+
+/** Asking a banquet hall or temple office for the vendors they recommend. */
+const VENUE_ASK = [
+  "Namaste 🙏 I run GoDesi.com, the free directory desi families use to plan weddings and events.",
+  "",
+  "Could you share your preferred vendor list (decorators, caterers, DJs, photographers, mehndi, pandits)? We list them free so families booking your hall can find them, and we can feature your venue on our wedding page too.",
+  "",
+  `Vendors can also sign up themselves here: ${siteUrl()}/wedding/vendors`,
+].join("\n");
+
 export default async function AdminOutreachPage({
   searchParams,
 }: {
@@ -34,6 +65,7 @@ export default async function AdminOutreachPage({
     state?: string;
     status?: string;
     page?: string;
+    trade?: string;
   };
 }) {
   const staff = await getCurrentUser();
@@ -42,6 +74,8 @@ export default async function AdminOutreachPage({
 
   const status = searchParams.status === "contacted" ? "contacted" : "todo";
   const page = Math.max(1, Number(searchParams.page ?? "1") || 1);
+  const wedding = searchParams.trade === "wedding";
+  const tradeQs = wedding ? "&trade=wedding" : "";
 
   const where: Prisma.BusinessWhereInput = {
     ownerId: null,
@@ -49,6 +83,7 @@ export default async function AdminOutreachPage({
     source: { not: null },
     ...(searchParams.city ? { city: searchParams.city } : {}),
     ...(searchParams.state ? { state: searchParams.state } : {}),
+    ...(wedding ? { categorySlug: WEDDING_SLUG } : {}),
     ...(status === "contacted"
       ? { NOT: { invitedAt: null } }
       : { invitedAt: null }),
@@ -120,23 +155,29 @@ export default async function AdminOutreachPage({
         </p>
         <div className="mt-2 flex flex-wrap gap-2 text-sm">
           <Link
-            href="/admin/outreach"
+            href={`/admin/outreach${wedding ? "?trade=wedding" : ""}`}
             className={`rounded-full px-3 py-1 font-bold ${status === "todo" ? "bg-slate-900 text-white" : "border border-slate-300"}`}
           >
             To contact
           </Link>
           <Link
-            href="/admin/outreach?status=contacted"
+            href={`/admin/outreach?status=contacted${tradeQs}`}
             className={`rounded-full px-3 py-1 font-bold ${status === "contacted" ? "bg-slate-900 text-white" : "border border-slate-300"}`}
           >
             Already invited
+          </Link>
+          <Link
+            href={wedding ? "/admin/outreach" : "/admin/outreach?trade=wedding"}
+            className={`rounded-full px-3 py-1 font-bold ${wedding ? "bg-rose-600 text-white" : "border border-rose-300 text-rose-700"}`}
+          >
+            💍 Wedding vendors only
           </Link>
         </div>
         <div className="mt-2 flex flex-wrap gap-1 text-xs">
           {cities.map((row) => (
             <Link
               key={`${row.city}-${row.state ?? ""}`}
-              href={`/admin/outreach?city=${encodeURIComponent(row.city)}${status === "contacted" ? "&status=contacted" : ""}`}
+              href={`/admin/outreach?city=${encodeURIComponent(row.city)}${status === "contacted" ? "&status=contacted" : ""}${tradeQs}`}
               className={`rounded-full border px-2 py-0.5 font-semibold ${
                 searchParams.city === row.city
                   ? "border-indigo-500 bg-indigo-50 text-indigo-700"
@@ -150,8 +191,48 @@ export default async function AdminOutreachPage({
         </div>
       </Card>
 
+      {wedding ? (
+        <Card className="space-y-2 border-rose-200 bg-rose-50">
+          <h2 className="font-black">💍 Wedding outreach kit</h2>
+          <p className="text-sm text-slate-700">
+            Wedding vendors answer WhatsApp and Instagram, not email. Each row
+            below has a wedding invite and an Instagram DM ready to send.
+          </p>
+          <div className="flex flex-wrap gap-2 text-xs font-bold">
+            <a
+              href="/wedding/vendors/flyer"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-lg bg-rose-600 px-3 py-1.5 text-white"
+            >
+              Expo QR flyer (print)
+            </a>
+            <Link
+              href="/wedding/vendors"
+              className="rounded-lg border border-rose-300 px-3 py-1.5 text-rose-700"
+            >
+              Vendor sign-up page
+            </Link>
+            <CopyTextButton
+              text={VENUE_ASK}
+              className="rounded-lg border border-rose-300 px-3 py-1.5 text-rose-700"
+            >
+              Copy banquet hall / temple ask
+            </CopyTextButton>
+            <Link
+              href={`/admin/prospects?category=${WEDDING_SLUG}`}
+              className="rounded-lg border border-rose-300 px-3 py-1.5 text-rose-700"
+            >
+              Wedding call list
+            </Link>
+          </div>
+        </Card>
+      ) : null}
+
       {rows.map((row) => {
-        const message = inviteMessage(row.name, row.city, row.slug);
+        const message = (
+          row.categorySlug === WEDDING_SLUG ? weddingInviteMessage : inviteMessage
+        )(row.name, row.city, row.slug);
         return (
           <Card key={row.id} className="space-y-2">
             <div className="flex flex-wrap items-start justify-between gap-2">
@@ -252,6 +333,14 @@ export default async function AdminOutreachPage({
                 >
                   Copy invite text
                 </CopyTextButton>
+                {row.categorySlug === WEDDING_SLUG ? (
+                  <CopyTextButton
+                    text={instagramMessage(row.name, row.slug)}
+                    className="rounded-lg border border-fuchsia-300 px-3 py-1.5 text-fuchsia-700"
+                  >
+                    Copy Instagram DM
+                  </CopyTextButton>
+                ) : null}
                 {row.phone ? (
                   <a
                     href={`tel:${row.phone}`}
@@ -317,7 +406,7 @@ export default async function AdminOutreachPage({
           <div className="flex gap-3">
             {page > 1 ? (
               <Link
-                href={`/admin/outreach?page=${page - 1}${searchParams.city ? `&city=${encodeURIComponent(searchParams.city)}` : ""}${status === "contacted" ? "&status=contacted" : ""}`}
+                href={`/admin/outreach?page=${page - 1}${searchParams.city ? `&city=${encodeURIComponent(searchParams.city)}` : ""}${status === "contacted" ? "&status=contacted" : ""}${tradeQs}`}
                 className="text-indigo-600"
               >
                 ← Previous
@@ -325,7 +414,7 @@ export default async function AdminOutreachPage({
             ) : null}
             {page < pages ? (
               <Link
-                href={`/admin/outreach?page=${page + 1}${searchParams.city ? `&city=${encodeURIComponent(searchParams.city)}` : ""}${status === "contacted" ? "&status=contacted" : ""}`}
+                href={`/admin/outreach?page=${page + 1}${searchParams.city ? `&city=${encodeURIComponent(searchParams.city)}` : ""}${status === "contacted" ? "&status=contacted" : ""}${tradeQs}`}
                 className="text-indigo-600"
               >
                 Next →
