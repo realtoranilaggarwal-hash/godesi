@@ -33,6 +33,30 @@ export function shell(title: string, body: string) {
   </div></body></html>`;
 }
 
+/**
+ * Resend allows 10 requests a second for the whole account. Bulk mail stays
+ * at half that, so sign-in codes sent at the same moment still get through.
+ */
+const BULK_PER_SECOND = 5;
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Runs `send` for each item, at most BULK_PER_SECOND of them per second. */
+export async function sendPaced<T>(
+  items: T[],
+  send: (item: T) => Promise<void>,
+) {
+  for (let start = 0; start < items.length; start += BULK_PER_SECOND) {
+    const began = Date.now();
+    // eslint-disable-next-line no-await-in-loop
+    await Promise.all(items.slice(start, start + BULK_PER_SECOND).map(send));
+    if (start + BULK_PER_SECOND < items.length) {
+      // eslint-disable-next-line no-await-in-loop
+      await pause(Math.max(0, 1000 - (Date.now() - began)));
+    }
+  }
+}
+
 export async function sendEmail({
   to,
   subject,
@@ -47,14 +71,23 @@ export async function sendEmail({
   if (!key || !from) return false;
 
   try {
-    const response = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from, to: [to], subject, html }),
-    });
+    const post = () =>
+      fetch(ENDPOINT, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ from, to: [to], subject, html }),
+      });
+    let response = await post();
+    // Over the per-second limit: wait for the next second and try again.
+    for (let retry = 0; response.status === 429 && retry < 2; retry += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await pause(1000 + retry * 1000);
+      // eslint-disable-next-line no-await-in-loop
+      response = await post();
+    }
     if (!response.ok) {
       console.error(
         "Resend send failed",
