@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PostAnything } from "@/components/PostAnything";
+import { ProfileQuiz } from "@/components/ProfileQuiz";
 import { Card } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -87,6 +88,12 @@ export default async function StartPage() {
         title="Everything you can post on GoDesi"
         hasCard={hasCard}
       />
+
+      <Card>
+        <ProfileQuiz
+          initial={(user.profileFacts as Record<string, string>) ?? {}}
+        />
+      </Card>
 
       <Card>
         <p className="text-sm font-bold text-slate-700">
