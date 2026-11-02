@@ -50,6 +50,12 @@ export async function GET(request: Request) {
     await creditReferral(user.id);
     await welcomeFoundingMember(user.id);
   }
+  if (existing && !existing.avatarUrl && profile.picture) {
+    await db.user.update({
+      where: { id: existing.id },
+      data: { avatarUrl: profile.picture },
+    });
+  }
   if (existing && profile.emailVerified && !existing.emailVerifiedAt) {
     await db.user.update({
       where: { id: existing.id },

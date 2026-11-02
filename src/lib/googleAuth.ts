@@ -66,7 +66,8 @@ export async function fetchGoogleProfile(code: string): Promise<GoogleProfile | 
   return {
     email,
     name: typeof row.name === "string" ? row.name : null,
-    picture: typeof row.picture === "string" ? row.picture : null,
+    // Google hands out a 96px thumbnail ("=s96-c"); ask for a sharper 400px copy.
+    picture: typeof row.picture === "string" ? row.picture.replace(/=s\d+-c$/, "=s400-c") : null,
     emailVerified: row.email_verified === true,
   };
 }

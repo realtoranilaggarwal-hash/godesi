@@ -80,10 +80,10 @@ export function PersonalProfileForm({
           ) : null}
         </div>
         <div className="min-w-0 flex-1 space-y-2">
-          <div className="max-w-xs">
+          <div className="w-44">
             <ImageDropzone
               purpose="avatar"
-              compact
+              square
               label="Upload a square photo or logo"
               hint="Same width and height, e.g. 500 × 500"
               onUploaded={setAvatarUrl}
