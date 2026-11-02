@@ -69,7 +69,7 @@ export default async function BlogPostPage({
               alt={post.title}
               width={1200}
               height={630}
-              className="mb-4 h-56 w-full rounded-2xl object-cover"
+              className="mb-4 h-auto w-full rounded-2xl"
             />
           ) : null}
           {post.kind === "UPDATE" ? (
