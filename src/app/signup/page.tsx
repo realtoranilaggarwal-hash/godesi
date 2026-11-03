@@ -6,8 +6,8 @@ import { SignupForm } from "@/components/forms/SignupForm";
 import { Card } from "@/components/ui";
 import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
-import { FoundingOffer } from "@/components/FoundingOffer";
 import { NewsMediaStrip } from "@/components/NewsMediaStrip";
+import { SmallBanners } from "@/components/Banners";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -30,10 +30,13 @@ export default async function SignupPage({
   }
 
   return (
-    <div className="flex justify-center gap-6 py-6">
-      <JoinPerks />
+    <div className="mx-auto flex w-fit max-w-full gap-6 py-6">
+      <div className="hidden w-[280px] shrink-0 space-y-4 xl:block">
+        <JoinPerks />
+        <SmallBanners embedded tree={false} show={4} />
+      </div>
 
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-[28rem] max-w-full space-y-4">
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
         <NewsMediaStrip />
         <Link
@@ -43,7 +46,6 @@ export default async function SignupPage({
           🧰 Members unlock 50+ free creator tools — SEO, design, video, email
           &amp; automation →
         </Link>
-        <FoundingOffer showCta={false} />
         <Card>
           <SocialSignIn next={searchParams.next} verb="Sign up" />
           <SignupForm
@@ -89,7 +91,10 @@ export default async function SignupPage({
         </p>
       </div>
 
-      <JoinRail />
+      <div className="hidden w-[260px] shrink-0 space-y-4 lg:block">
+        <JoinRail />
+        <SmallBanners embedded tree={false} show={4} start={4} />
+      </div>
     </div>
   );
 }
