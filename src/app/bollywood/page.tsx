@@ -39,33 +39,53 @@ const bollywoodStories = cachedQuery("bollywood-news", 600, async () =>
 );
 
 function ago(date: Date) {
-  const hours = Math.max(1, Math.round((Date.now() - new Date(date).getTime()) / 3_600_000));
+  const hours = Math.max(
+    1,
+    Math.round((Date.now() - new Date(date).getTime()) / 3_600_000),
+  );
   return hours < 24 ? `${hours}h ago` : `${Math.round(hours / 24)}d ago`;
 }
 
 export default async function BollywoodPage() {
   const rows = await optionalRead(() => bollywoodStories(), []);
   // Picture stories first so the grid looks like a magazine, newest within each.
-  const stories = [...rows.filter((row) => row.imageUrl), ...rows.filter((row) => !row.imageUrl)].slice(0, 48);
+  const stories = [
+    ...rows.filter((row) => row.imageUrl),
+    ...rows.filter((row) => !row.imageUrl),
+  ].slice(0, 48);
   const [lead, ...rest] = stories;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-6">
       <header className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wide text-fuchsia-600">🎬 GoDesi Entertainment</p>
-        <h1 className="text-3xl font-black text-slate-900">Bollywood news today</h1>
+        <p className="text-xs font-bold uppercase tracking-wide text-fuchsia-600">
+          🎬 GoDesi Entertainment
+        </p>
+        <h1 className="text-3xl font-black text-slate-900">
+          Bollywood news today
+        </h1>
         <p className="max-w-3xl text-slate-600">
-          The latest Bollywood and desi entertainment headlines: films, box office, OTT releases, music and stars.
-          Updated automatically every day from India&apos;s entertainment newsrooms.
+          The latest Bollywood and desi entertainment headlines: films, box
+          office, OTT releases, music and stars. Updated automatically every day
+          from India&apos;s entertainment newsrooms.
         </p>
         <div className="flex flex-wrap gap-2 text-sm font-semibold">
-          <Link href="/news" className="rounded-full border border-slate-200 px-3 py-1 text-slate-700 hover:bg-slate-50">
+          <Link
+            href="/news"
+            className="rounded-full border border-slate-200 px-3 py-1 text-slate-700 hover:bg-slate-50"
+          >
             📰 All desi news
           </Link>
-          <Link href="/events" className="rounded-full border border-slate-200 px-3 py-1 text-slate-700 hover:bg-slate-50">
+          <Link
+            href="/events"
+            className="rounded-full border border-slate-200 px-3 py-1 text-slate-700 hover:bg-slate-50"
+          >
             🎟️ Desi events near you
           </Link>
-          <Link href="/dj" className="rounded-full border border-slate-200 px-3 py-1 text-slate-700 hover:bg-slate-50">
+          <Link
+            href="/dj"
+            className="rounded-full border border-slate-200 px-3 py-1 text-slate-700 hover:bg-slate-50"
+          >
             🎧 Desi DJs
           </Link>
         </div>
@@ -102,7 +122,12 @@ export default async function BollywoodPage() {
 
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rest.map((story, index) => (
-              <li key={story.id} className={index === 8 ? "sm:col-span-2 lg:col-span-3" : undefined}>
+              <li
+                key={story.id}
+                className={
+                  index === 8 ? "sm:col-span-2 lg:col-span-3" : undefined
+                }
+              >
                 {index === 8 ? <InContentBanner /> : null}
                 <Link
                   href={newsPath(story)}
@@ -124,7 +149,11 @@ export default async function BollywoodPage() {
                     <h3 className="font-bold leading-snug text-slate-900 group-hover:text-fuchsia-700">
                       {story.title}
                     </h3>
-                    {story.imageUrl ? null : <p className="line-clamp-3 text-sm text-slate-600">{story.summary}</p>}
+                    {story.imageUrl ? null : (
+                      <p className="line-clamp-3 text-sm text-slate-600">
+                        {story.summary}
+                      </p>
+                    )}
                   </div>
                 </Link>
               </li>
@@ -134,7 +163,8 @@ export default async function BollywoodPage() {
       )}
 
       <p className="text-xs text-slate-500">
-        Headlines and short summaries link to the full story on each publisher&apos;s site.
+        Headlines and short summaries link to the full story on each
+        publisher&apos;s site.
       </p>
     </div>
   );
