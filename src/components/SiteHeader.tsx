@@ -32,6 +32,7 @@ const NAV = [
   { href: "/real-estate", label: "Real Estate", icon: "🏢" },
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
   { href: "/marketplace", label: "Buy & Sell", icon: "🛍️" },
+  { href: "/classifieds", label: "Classifieds", icon: "📣" },
   { href: "/wedding", label: "Wedding Services", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
@@ -86,6 +87,7 @@ const STRIP_SECTION_OF: Record<string, string> = {
 /** Promoted pages beside the search box; any that don't fit stay under "More". */
 const PROMO_LINKS = [
   { href: "/search", label: "Cards", icon: "🪪" },
+  { href: "/classifieds", label: "Free classifieds", icon: "📣" },
   { href: "/leads", label: "Leads", icon: "📋" },
   { href: "/events", label: "Events", icon: "🎟️" },
   { href: "/chatter", label: "Chatter", icon: "💬" },

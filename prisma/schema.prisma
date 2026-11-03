@@ -3430,3 +3430,15 @@ model SearchMiss {
   @@unique([query, city, page])
   @@index([lastAt])
 }
+
+/// One "useful" vote per visitor per site on /desi-websites; voterHash is a
+/// salted hash of IP + user agent, never the raw values.
+model SiteVote {
+  id        String   @id @default(cuid())
+  siteKey   String
+  voterHash String
+  createdAt DateTime @default(now())
+
+  @@unique([siteKey, voterHash])
+  @@index([siteKey])
+}

@@ -17,6 +17,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       links: [
         { href: "/categories", label: "Categories" },
         { href: "/search", label: "Cards" },
+        { href: "/classifieds", label: "📣 Free desi classifieds" },
         { href: "/leads", label: "Leads" },
         { href: "/events", label: "Events" },
         { href: "/clubs", label: "Clubs" },
@@ -47,6 +48,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         },
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
         { href: "/advertise", label: "Advertise on Godesi" },
+        { href: "/listings/new?kind=MARKETPLACE", label: "Post a free classified ad" },
         { href: "/events/new", label: "Post an event" },
         { href: "/clubs/new", label: "Start a club" },
         { href: "/dashboard/deals", label: "Post a deal" },
