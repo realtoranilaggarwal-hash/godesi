@@ -3,6 +3,8 @@ import Link from "next/link";
 import { siteSearch, type SiteSearchHit } from "@/lib/siteSearch";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
+import { GoogleWebResults } from "@/components/GoogleWebResults";
+import { recordSearchMiss, WEB_RESULTS_BELOW } from "@/lib/searchMiss";
 import { gradientFor } from "@/lib/categories";
 import { siteUrl } from "@/lib/format";
 
@@ -58,6 +60,15 @@ export default async function FindPage({
 }) {
   const q = searchParams.q?.trim() ?? "";
   const results = await siteSearch(q, searchParams.city);
+  const showWeb = q.length >= 2 && results.total < WEB_RESULTS_BELOW;
+  if (showWeb) {
+    await recordSearchMiss({
+      query: q,
+      city: searchParams.city,
+      page: "find",
+      results: results.total,
+    });
+  }
 
   return (
     <div className="flex gap-6">
@@ -113,7 +124,7 @@ export default async function FindPage({
         ) : results.total === 0 ? (
           <EmptyState
             title={`Nothing found for “${q}”.`}
-            body="Try a shorter word, drop the city, or browse the categories."
+            body="See what Google found below, try a shorter word, or browse the categories."
           />
         ) : (
           <>
@@ -131,6 +142,11 @@ export default async function FindPage({
             <Group title="Recommended links" hits={results.resources} />
           </>
         )}
+        {showWeb ? (
+          <GoogleWebResults
+            query={[q, searchParams.city].filter(Boolean).join(" ")}
+          />
+        ) : null}
       </div>
 
       <aside className="hidden w-[260px] shrink-0 space-y-4 lg:order-first lg:block">

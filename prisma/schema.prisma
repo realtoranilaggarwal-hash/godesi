@@ -3409,3 +3409,24 @@ model PoojaBooking {
 
   @@index([status, createdAt])
 }
+
+/// A search on /search or /find that GoDesi answered with fewer than three
+/// results. Staff work this list into the call list; Google's results shown
+/// beside the search are never stored (Programmable Search terms).
+model SearchMiss {
+  id          String   @id @default(cuid())
+  /// Lowercased, trimmed, single-spaced search words.
+  query       String
+  /// "" when no city filter was used (Postgres treats NULLs as distinct in unique keys).
+  city        String   @default("")
+  /// "search" (business cards) or "find" (search everything).
+  page        String
+  count       Int      @default(1)
+  /// How many GoDesi results the most recent search returned (0–2).
+  lastResults Int      @default(0)
+  firstAt     DateTime @default(now())
+  lastAt      DateTime @default(now())
+
+  @@unique([query, city, page])
+  @@index([lastAt])
+}
