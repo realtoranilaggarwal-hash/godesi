@@ -37,6 +37,8 @@ const ERRORS: Record<string, string> = {
   stripe_unavailable: "Card payments are not configured yet. Please email us.",
   stripe_session: "We could not start the checkout. Please try again.",
   coupon: "That coupon code is not valid for advertising.",
+  coupon_slot:
+    "That code is only for the Small banner (320 x 100), paid monthly for 1 month. Choose that and try again.",
 };
 
 export default async function AdvertisePage({

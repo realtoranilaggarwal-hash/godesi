@@ -53,6 +53,14 @@ export async function startAdCheckoutAction(formData: FormData) {
       })
     : null;
   if (check && !check.ok) redirect("/advertise?error=coupon");
+  if (
+    check?.ok &&
+    ((check.coupon.bannerSlot && check.coupon.bannerSlot !== placement.slot) ||
+      (check.coupon.adMonths !== null &&
+        (byImpressions || months > check.coupon.adMonths)))
+  ) {
+    redirect("/advertise?error=coupon_slot");
+  }
 
   const discountMinor = check?.ok ? check.discountMinor : 0;
   const chargeMinor = Math.max(0, toMinor(amount) - discountMinor);

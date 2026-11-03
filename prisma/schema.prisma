@@ -1964,6 +1964,10 @@ model Coupon {
   maxRedemptions Int?
   timesRedeemed  Int          @default(0)
   expiresAt      DateTime?
+  /// Restricts an ADS code to one placement (e.g. Fiverr small-banner codes).
+  bannerSlot     BannerSlot?
+  /// Longest booking, in months, an ADS code may be used on.
+  adMonths       Int?
   active         Boolean      @default(true)
   createdAt      DateTime     @default(now())
 

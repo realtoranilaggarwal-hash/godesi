@@ -60,7 +60,7 @@ function usedWidth(element: Element, depth = 0): number {
 }
 
 /** Sections where the page needs the full width and ads would be in the way. */
-const HIDDEN_ON = ["/admin", "/login", "/signup", "/forgot-password"];
+const HIDDEN_ON = ["/admin", "/login", "/forgot-password"];
 
 /**
  * A stack of 320x100 banners. The root layout stays mounted between pages, so
@@ -128,11 +128,15 @@ export function SmallBannerRail({
         main.clientWidth -
         parseFloat(mainStyle.paddingLeft) -
         parseFloat(mainStyle.paddingRight);
+      // A page with its own sponsored column keeps the left rail only.
+      const ownRail = !!page.querySelector("[data-right-rail]");
       setRoomFor(
         pathname !== "/" &&
           window.innerWidth >= 1280 &&
-          !page.querySelector("[data-right-rail]") &&
-          usedWidth(page) + RAIL_SPACE * (side === "left" ? 2 : 1) < inner - 2
+          !(ownRail && side === "right") &&
+          usedWidth(page) +
+            RAIL_SPACE * (side === "left" && !ownRail ? 2 : 1) <
+            inner - 2
           ? pathname
           : null,
       );
@@ -153,8 +157,16 @@ export function SmallBannerRail({
   useEffect(() => {
     if (pathname === firstPath.current) return;
     firstPath.current = pathname;
-    setOffset((value) => value + show);
-  }, [pathname, show]);
+    // A step that is a multiple of the inventory would bring back the same order.
+    let step = show;
+    while (
+      (banners.length > 1 && step % banners.length === 0) ||
+      (HOUSE_BANNERS.length > 1 && step % HOUSE_BANNERS.length === 0)
+    ) {
+      step += 1;
+    }
+    setOffset((value) => value + step);
+  }, [pathname, show, banners.length]);
 
   if (
     (!embedded || phone) &&
