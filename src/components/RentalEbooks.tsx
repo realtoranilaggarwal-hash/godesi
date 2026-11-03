@@ -6,22 +6,23 @@ const BOOKS = [
 
 const BASE = "https://www.vdorental.com";
 
-export default function RentalEbooks({ heading = "Free ebooks for NJ property owners" }: { heading?: string }) {
+export default function RentalEbooks({ heading = "Ebooks for NJ property owners" }: { heading?: string }) {
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-bold">{heading}</h2>
-        <a href={`${BASE}/ebooks`} className="text-sm font-semibold text-indigo-600 hover:underline">See all free ebooks →</a>
+        <a href={`${BASE}/ebooks`} className="text-sm font-semibold text-indigo-600 hover:underline">See all ebooks →</a>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         {BOOKS.map((b) => (
           <a key={b.slug} href={`${BASE}/ebooks/${b.slug}`} className="group block">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`/covers/${b.slug}.svg`} alt={`${b.title} ebook cover`} width={600} height={800} className="aspect-[3/4] w-full rounded-lg shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-xl" />
-            <p className="mt-2 text-sm font-semibold text-indigo-700 group-hover:underline">Read free →</p>
+            <p className="mt-2 text-sm font-semibold text-indigo-700 group-hover:underline">Read on VDO Rental →</p>
           </a>
         ))}
       </div>
+      <p className="rounded-lg bg-violet-50 px-3 py-2 text-sm text-violet-900">📘 GoDesi members get one ebook free: your code is on your <a href="/dashboard" className="font-semibold underline">dashboard</a>.</p>
       <p className="text-xs text-slate-500">Written by Anil Aggarwal, Broker Manager &amp; Realtor® with Vylla Home (NJ Lic #1753579). Education only, not legal or tax advice.</p>
     </section>
   );

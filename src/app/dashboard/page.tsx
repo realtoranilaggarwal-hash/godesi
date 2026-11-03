@@ -31,6 +31,7 @@ import { formatEventDate } from "@/lib/events";
 import { PostAnything } from "@/components/PostAnything";
 import { BusinessNextSteps } from "@/components/BusinessNextSteps";
 import { MorningEmailSignup } from "@/components/MorningEmailSignup";
+import { VdoEbookOffer } from "@/components/VdoEbookOffer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -315,6 +316,8 @@ export default async function DashboardPage({
         </PostAnything>
 
         {user.morningEmailAt ? null : <MorningEmailSignup />}
+
+        <VdoEbookOffer userId={user.id} />
 
         {user.offerInterests.length ? (
           <p className="rounded-xl bg-indigo-50 px-4 py-3 text-sm text-indigo-900">

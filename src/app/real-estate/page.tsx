@@ -220,7 +220,7 @@ export default async function RealEstatePage({
           </section>
         ) : null}
 
-        <RentalEbooks heading="Free real estate ebooks" />
+        <RentalEbooks heading="Real estate ebooks" />
 
         <Card className="bg-amber-50">
           <h2 className="font-bold">Selling faster on Godesi</h2>
