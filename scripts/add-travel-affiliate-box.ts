@@ -1,6 +1,6 @@
 /**
  * Appends a short "Travelling to India?" box with Travelpayouts partner links
- * (Yesim eSIM, Klook, KKday) to the India-travel guides. Re-runnable: a post
+ * (Yesim eSIM, Klook, KKday, Tiqets) to the India-travel guides. Re-runnable: a post
  * that already has the box is left alone.
  *
  *   DATABASE_URL=... npx tsx scripts/add-travel-affiliate-box.ts
@@ -20,7 +20,7 @@ ${NOTE}`;
 
 const NYC_DAY = `Making a day of it?
 - Visiting family from India? A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) gets them US phone data the moment they land.
-- Add New York sights and tours to the trip with [Klook](https://klook.tpo.li/Jkdu68C6).
+- Add New York sights and tours to the trip with [Klook](https://klook.tpo.li/Jkdu68C6), or skip the ticket lines at museums and attractions with [Tiqets](https://tiqets.tpo.li/stbzuORH).
 
 ${NOTE}`;
 
