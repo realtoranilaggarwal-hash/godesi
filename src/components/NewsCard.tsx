@@ -164,6 +164,7 @@ export function NewsCard({
   canVote = false,
   canFeature = false,
   posterLevel = null,
+  openOnGodesi = false,
 }: {
   item: NewsListItem;
   /** This member's vote: 1, -1 or 0. */
@@ -172,6 +173,8 @@ export function NewsCard({
   canFeature?: boolean;
   /** Star level of the member who submitted the story. */
   posterLevel?: JournalistLevel | null;
+  /** Open feed articles on their GoDesi page instead of at the publisher. */
+  openOnGodesi?: boolean;
 }) {
   return (
     <div
@@ -181,7 +184,11 @@ export function NewsCard({
           : "border-slate-200"
       }`}
     >
-      <Story link={item.link.startsWith("/") ? newsPath(item) : item.link}>
+      <Story
+        link={
+          openOnGodesi || item.link.startsWith("/") ? newsPath(item) : item.link
+        }
+      >
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
