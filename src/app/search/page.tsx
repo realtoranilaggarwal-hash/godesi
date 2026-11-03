@@ -4,6 +4,8 @@ import { searchBusinesses, listCities, listCountries } from "@/lib/businesses";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessCard } from "@/components/BusinessCard";
+import { GoogleWebResults } from "@/components/GoogleWebResults";
+import { recordSearchMiss, WEB_RESULTS_BELOW } from "@/lib/searchMiss";
 import {
   InContentBanner,
   InlineBanner,
@@ -81,6 +83,17 @@ export default async function SearchPage({
     listCities(),
     listCountries(),
   ]);
+
+  const q = searchParams.q?.trim() ?? "";
+  const showWeb = q.length >= 2 && results.length < WEB_RESULTS_BELOW;
+  if (showWeb) {
+    await recordSearchMiss({
+      query: q,
+      city: searchParams.city,
+      page: "search",
+      results: results.length,
+    });
+  }
 
   return (
     <div className="flex gap-6">
@@ -248,9 +261,18 @@ export default async function SearchPage({
         ) : (
           <EmptyState
             title="No businesses match your filters"
-            body="Try a broader search or clear the filters."
+            body={
+              showWeb
+                ? "See what Google found below, or try a broader search."
+                : "Try a broader search or clear the filters."
+            }
           />
         )}
+        {showWeb ? (
+          <GoogleWebResults
+            query={[q, searchParams.city].filter(Boolean).join(" ")}
+          />
+        ) : null}
         <InlineBanner />
       </div>
 

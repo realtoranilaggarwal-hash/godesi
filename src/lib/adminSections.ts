@@ -98,6 +98,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { href: "/admin/outreach", label: "Outreach", icon: "📣", need: "staff" },
   { href: "/admin/prospects", label: "Call list", icon: "☎️", need: "staff" },
   {
+    href: "/admin/missed-searches",
+    label: "Missed searches",
+    icon: "🔎",
+    need: "staff",
+  },
+  {
     href: "/admin/real-estate",
     label: "Real estate",
     icon: "🏡",
