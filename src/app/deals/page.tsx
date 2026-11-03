@@ -4,6 +4,7 @@ import { siteUrl } from "@/lib/format";
 import { dealDetails, cachedLiveDeals } from "@/lib/deals";
 import { cachedLiveStoreOffers } from "@/lib/storeOffers";
 import { DealOfTheDay } from "@/components/DealOfTheDay";
+import { FeaturedOfferBar } from "@/components/FeaturedOfferBar";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { EmptyState, LinkButton } from "@/components/ui";
@@ -62,6 +63,11 @@ export default async function DealsPage({
           Post a deal for your business
         </LinkButton>
       </div>
+
+      <section id="special" className="scroll-mt-40 space-y-2">
+        <h2 className="text-xl font-bold">🔥 This month&apos;s special</h2>
+        <FeaturedOfferBar className="rounded-2xl py-3 shadow-sm" />
+      </section>
 
       {active ? null : <DealOfTheDay />}
 

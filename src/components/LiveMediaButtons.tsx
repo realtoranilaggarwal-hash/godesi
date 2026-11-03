@@ -71,13 +71,17 @@ export function LiveMediaChips({ className = "" }: { className?: string }) {
 export function LiveMediaLinks({
   className = "",
   buttonClass = "",
+  compact = false,
 }: {
   className?: string;
   buttonClass?: string;
+  /** Header use: one-word labels and no Links chip on phones, to leave room for Register/Log in. */
+  compact?: boolean;
 }) {
   const base =
     buttonClass ||
-    "rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/25";
+    "whitespace-nowrap rounded-full bg-white/15 px-2.5 py-1 text-xs font-bold text-white hover:bg-white/25";
+  const live = compact ? <span className="max-sm:hidden">Live </span> : "Live ";
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -88,16 +92,19 @@ export function LiveMediaLinks({
         }
         className={base}
       >
-        🎧 Live Radio
+        🎧 {live}Radio
       </button>
       <button
         type="button"
         onClick={() => openLiveMedia({ kind: "tv", id: TV_CHANNELS[0].id })}
         className={base}
       >
-        📺 Live TV
+        📺 {live}TV
       </button>
-      <Link href="/resources" className={base}>
+      <Link
+        href="/resources"
+        className={`${base} ${compact ? "max-sm:hidden" : ""}`}
+      >
         🔗 Links
       </Link>
       <Link

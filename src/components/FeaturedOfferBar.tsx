@@ -9,7 +9,11 @@ import { OfferCountdown } from "@/components/OfferCountdown";
  * against what five years of monthly payments would cost, with the time left
  * before the code stops working. Opens the five-year plan with the code filled in.
  */
-export async function FeaturedOfferBar() {
+export async function FeaturedOfferBar({
+  className = "",
+}: {
+  className?: string;
+}) {
   const currency = requestCurrency();
   const [rate, offer] = await Promise.all([inrPerUsd(), monthlyOffer()]);
   const monthly = planTermPrice(PLANS.PREMIUM, "MONTH", currency, rate);
@@ -25,7 +29,7 @@ export async function FeaturedOfferBar() {
   return (
     <Link
       href={`/pricing?term=FIVE_YEAR&coupon=${offer.code}#plan-PREMIUM`}
-      className="block bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-4 py-1.5 text-center text-xs font-semibold text-white hover:brightness-110 sm:text-sm"
+      className={`block bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 px-4 py-1.5 text-center text-xs font-semibold text-white hover:brightness-110 sm:text-sm ${className}`}
     >
       <span className="sm:hidden">
         🔥 5 years Featured: {money(half)} with {offer.code}
