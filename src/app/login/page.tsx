@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Sign in to Godesi",
   description:
-    "Sign in to manage your Godesi business card, listings, events, leads, coupons and reward points.",
+    "Sign in to manage your Godesi business card, listings, events, leads, coupons and reward points. Free for the whole desi community on GoDesi.com.",
   alternates: { canonical: "/login" },
   robots: { index: false },
 };

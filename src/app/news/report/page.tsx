@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Report local news",
   description:
-    "Saw something in your desi neighbourhood? File a report for the Godesi news desk.",
+    "Saw something in your desi neighbourhood? File a report for the Godesi news desk. Free for the whole desi community on GoDesi.com.",
 };
 
 export default async function ReportNewsPage({

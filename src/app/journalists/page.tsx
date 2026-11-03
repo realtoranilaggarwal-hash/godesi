@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Become a local journalist",
   description:
-    "Cover your desi neighbourhood on Godesi: post local news, earn stars and reward points.",
+    "Cover your desi neighbourhood on Godesi: post local news, earn stars and reward points. Free for the whole desi community on GoDesi.com.",
 };
 
 export default async function JournalistsPage() {

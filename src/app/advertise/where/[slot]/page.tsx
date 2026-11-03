@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { BannerSlot } from "@prisma/client";
@@ -33,7 +34,7 @@ export function generateMetadata({
   const placement = AD_PLACEMENTS[slot];
   return {
     title: `Where the ${placement.name.toLowerCase()} shows on Godesi`,
-    description: placement.blurb,
+    description: metaDescription(placement.blurb, "See where this GoDesi banner shows, its size and price, and book the spot online in a few minutes."),
   };
 }
 

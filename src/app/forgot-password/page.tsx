@@ -11,7 +11,7 @@ import { Alert, Card } from "@/components/ui";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Forgot your password? — Godesi",
-  description: "Get a code by email and set a new Godesi password.",
+  description: "Get a code by email and set a new Godesi password. GoDesi.com is the free desi community: businesses, events, jobs, rooms and news.",
   robots: { index: false },
 };
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
@@ -38,7 +39,7 @@ export async function generateMetadata({
   if (!gig) return { title: "Gig not found" };
   return {
     title: `${gig.title} — from ${usd(gig.priceMinor)} by ${properName(gig.seller.name)}`,
-    description: gig.description.slice(0, 160),
+    description: metaDescription(gig.description, "Fixed-price gig on GoDesi: pay safely through GoDesi and the money is released only when you are happy."),
     alternates: { canonical: `/gigs/${gig.slug}` },
     robots: gig.status === "ACTIVE" ? undefined : { index: false },
     openGraph: gig.images[0] ? { images: [gig.images[0]] } : undefined,

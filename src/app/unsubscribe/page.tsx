@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Unsubscribe from the Godesi weekly digest",
   description:
-    "Stop the weekly Godesi community email. Your account, listings and business cards stay exactly as they are.",
+    "Stop the weekly Godesi community email. Your account, listings and business cards stay exactly as they are. Free for the whole desi community on GoDesi.com.",
   robots: { index: false, follow: false },
 };
 

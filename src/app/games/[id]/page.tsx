@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { metaDescription } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { feedGame } from "@/lib/gamesFeed";
@@ -11,7 +12,7 @@ export async function generateMetadata({
   const { id } = await params;
   const game = await feedGame(id);
   return game
-    ? { title: `${game.title} — free game`, description: game.description }
+    ? { title: `${game.title} — free game`, description: metaDescription(game.description, "Play it free on GoDesi with no download; it works on your phone. More free desi games, puzzles and quizzes on GoDesi.com.") }
     : { title: "Game" };
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
@@ -26,7 +27,7 @@ export function generateMetadata({
   if (!course) return {};
   return {
     title: `${course.title} — by ${AUTHOR_NAME}`,
-    description: course.tagline,
+    description: metaDescription(course.tagline, "A course on GoDesi taught by a desi expert: see the lessons, price and reviews, then learn at your own pace on your phone."),
     alternates: { canonical: `/course/${course.slug}` },
   };
 }

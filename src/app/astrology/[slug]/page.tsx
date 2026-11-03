@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -35,7 +36,7 @@ export function generateMetadata({
   if (!guide) return { title: "Guide not found" };
   return {
     title: guide.title,
-    description: guide.description,
+    description: metaDescription(guide.description, "Free Vedic astrology guide on GoDesi, with daily horoscopes, panchang, kundli and festival dates for desi families."),
     alternates: { canonical: `${siteUrl()}/astrology/${guide.slug}` },
   };
 }

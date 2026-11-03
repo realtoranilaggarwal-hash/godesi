@@ -13,7 +13,7 @@ const PER_PAGE = 48;
 export const metadata: Metadata = {
   title: "People on GoDesi",
   description:
-    "Members of the GoDesi community — business owners, professionals and neighbours, newest first.",
+    "Members of the GoDesi community — business owners, professionals and neighbours, newest first. Free for the whole desi community on GoDesi.com.",
   alternates: { canonical: "/people" },
   // Faces and handles, no written content: useful to visitors, not to search.
   robots: { index: false, follow: true },

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Top contributors | Godesi",
   description:
-    "The members who add the most to the Godesi community — referrals, listings, reviews and news.",
+    "The members who add the most to the Godesi community — referrals, listings, reviews and news. Free for the whole desi community on GoDesi.com.",
   alternates: { canonical: "/leaderboard" },
 };
 
