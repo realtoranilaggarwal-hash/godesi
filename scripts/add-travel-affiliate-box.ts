@@ -14,7 +14,7 @@ const NOTE =
 
 const INDIA_TRIP = `${MARK}
 - Phone data: skip the airport SIM queue. A [Yesim](https://yesim.tpo.li/F5AhylOr) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM works on most newer phones as soon as you land.
-- Tours and day trips: book temple visits, city tours and airport transfers in India on [Klook](https://klook.tpo.li/Jkdu68C6) or [KKday](https://kkday.tpo.li/l8T8GeM4).
+- Tours and day trips: book temple visits, city tours and airport transfers in India on [Klook](https://klook.tpo.li/Jkdu68C6) or [KKday](https://kkday.tpo.li/pkRIrFFW).
 - Rental car: compare car hire at Indian airports on [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o).
 
 ${NOTE}`;
