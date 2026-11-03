@@ -133,6 +133,16 @@ const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
     topic: "entertainment",
   },
   {
+    name: "Hindustan Times — Bollywood",
+    url: "https://www.hindustantimes.com/feeds/rss/entertainment/bollywood/rssfeed.xml",
+    topic: "entertainment",
+  },
+  {
+    name: "Pinkvilla",
+    url: "https://www.pinkvilla.com/rss.xml",
+    topic: "entertainment",
+  },
+  {
     name: "NDTV — Food",
     url: "https://feeds.feedburner.com/ndtvfood-latest",
     topic: "food",
@@ -160,6 +170,10 @@ function decode(value: string) {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;|&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) =>
+      String.fromCodePoint(parseInt(hex, 16)),
+    )
     .replace(/\s+/g, " ")
     .trim();
 }

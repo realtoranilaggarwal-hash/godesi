@@ -205,7 +205,7 @@ export default async function NewsPage({
           {NEWS_TOPICS.map((row) => (
             <Link
               key={row.slug}
-              href={`/news?topic=${row.slug}`}
+              href={row.slug === "entertainment" ? "/bollywood" : `/news?topic=${row.slug}`}
               className={`rounded-full px-3 py-1 ${
                 topic === row.slug
                   ? "bg-slate-900 text-white"

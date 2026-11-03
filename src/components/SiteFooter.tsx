@@ -29,6 +29,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/venues", label: "Venues" },
         { href: "/resources", label: "Links" },
         { href: "/news", label: "News" },
+        { href: "/bollywood", label: "Bollywood news" },
         { href: "/blog", label: "Blog" },
         { href: "/guide", label: "City guides" },
         { href: "/find", label: "Search everything" },
