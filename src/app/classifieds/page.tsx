@@ -161,6 +161,20 @@ export default async function ClassifiedsPage() {
         />
       </div>
 
+      <section className="flex flex-col items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-black text-slate-900">📣 Post your classified ad free</h2>
+          <p className="text-sm text-slate-700">
+            Selling something, renting a room or hiring? Post it in 2 minutes. Buyers message you on WhatsApp.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <LinkButton href="/listings/new?kind=MARKETPLACE">Sell an item</LinkButton>
+          <LinkButton href="/listings/new?kind=ROOM_OFFERED" variant="secondary">Rent a room</LinkButton>
+          <LinkButton href="/jobs/new" variant="secondary">Post a job</LinkButton>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
         <h2 className="text-lg font-black text-slate-900">More free desi listings</h2>
         <ul className="mt-2 grid gap-2 sm:grid-cols-2">
