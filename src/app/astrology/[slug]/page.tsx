@@ -10,7 +10,7 @@ import {
 } from "@/lib/astrology";
 import { searchBusinesses } from "@/lib/businesses";
 import { siteUrl } from "@/lib/format";
-import { SidebarBanners } from "@/components/Banners";
+import { AstrologerBanners, SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { AstrologerList } from "@/components/AstrologerList";
 import { AstrologyShop } from "@/components/AstrologyShop";
@@ -89,6 +89,7 @@ export default async function AstrologyGuidePage({
 
   return (
     <div className="flex justify-center gap-6">
+      <AstrologerBanners />
       <div className="min-w-0 max-w-3xl flex-1 space-y-5">
         <script
           type="application/ld+json"

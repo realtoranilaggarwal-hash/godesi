@@ -7,7 +7,7 @@ import {
 } from "@/lib/astrology";
 import { searchBusinesses } from "@/lib/businesses";
 import { AstrologerList } from "@/components/AstrologerList";
-import { SidebarBanners } from "@/components/Banners";
+import { AstrologerBanners, SidebarBanners } from "@/components/Banners";
 
 export const revalidate = 3600;
 
@@ -26,6 +26,7 @@ export default async function AstrologyPage() {
 
   return (
     <div className="flex justify-center gap-6">
+      <AstrologerBanners />
       <div className="min-w-0 max-w-3xl flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-indigo-700 via-violet-600 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/80">

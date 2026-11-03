@@ -562,3 +562,42 @@ export async function RailRectangles() {
     </div>
   );
 }
+
+/**
+ * Left column of the astrology pages: small banners sold to astrologers only,
+ * with open spots shown so an astrologer can book one.
+ */
+export async function AstrologerBanners() {
+  if (isPhoneRequest()) return null;
+  const placement = AD_PLACEMENTS.ASTRO;
+  const banners = await activeBanners("ASTRO", placement.slots);
+  const open = Math.max(placement.slots - banners.length, 0);
+  return (
+    <aside
+      className="hidden w-[200px] shrink-0 space-y-3 xl:block"
+      aria-label="Astrologers"
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide text-violet-500">
+        🔮 Astrologers
+      </p>
+      {banners.map((banner) => (
+        <BannerLink
+          key={banner.id}
+          banner={banner}
+          width={placement.size.width}
+          height={placement.size.height}
+        />
+      ))}
+      {Array.from({ length: Math.min(open, 3) }).map((_, index) => (
+        <Link
+          key={`astro-open-${index}`}
+          href="/advertise?slot=ASTRO#book"
+          className="flex aspect-[16/5] w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-violet-300 bg-violet-50 px-2 text-center text-[11px] font-semibold leading-tight text-violet-700 hover:border-violet-500 hover:bg-violet-100"
+        >
+          <span>Astrologers: your banner here</span>
+          <span className="text-violet-500">Book this spot →</span>
+        </Link>
+      ))}
+    </aside>
+  );
+}
