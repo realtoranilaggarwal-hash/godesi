@@ -1,6 +1,7 @@
 /**
  * Updates the partner links in guides that already carry the travel box from
- * add-travel-affiliate-box.ts: adds Saily next to Yesim and points Yesim, KKday and
+ * add-travel-affiliate-box.ts: adds Saily next to Yesim, Localrent next to
+ * EconomyBookings, and points Yesim, KKday and
  * Klook (India boxes only) at their India pages. Re-runnable.
  *
  *   DATABASE_URL=... npx tsx scripts/update-travel-partner-links.ts
@@ -9,6 +10,10 @@ import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();
 const SWAPS: [string, string][] = [
+  [
+    "compare car hire at Indian airports on [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o)",
+    "compare car hire at Indian airports on [Localrent](https://localrent.tpo.li/AQQouusf) or [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o)",
+  ],
   [
     "A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) works",
     "A [Yesim](https://yesim.tpo.li/HzlXXcYH) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM works",
