@@ -21,13 +21,10 @@ import { AstroToday } from "@/components/AstroToday";
 import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
-import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
-import { DealOfTheDayBar } from "@/components/DealOfTheDay";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
 
-import { RishtaHomeBox } from "@/components/RishtaHomeBox";
 import { visitorPanchang } from "@/lib/panchangGeo";
 import { todaysFestivals, festivalSlug } from "@/lib/festivals";
 
@@ -159,14 +156,20 @@ export default async function HomePage() {
       <div className="space-y-8">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-3">
-          <RecentStrip
-            festivals={todayFests.map((f) => ({
-              emoji: f.emoji,
-              name:
-                f.daysAway === 0 ? `Happy ${f.name}!` : `${f.name} tomorrow`,
-              href: `/festivals/${festivalSlug(f)}`,
-            }))}
-          />
+          {todayFests.length ? (
+            <div className="flex flex-wrap gap-2">
+              {todayFests.map((f) => (
+                <Link
+                  key={f.name}
+                  href={`/festivals/${festivalSlug(f)}`}
+                  className="rounded-full bg-gradient-to-r from-amber-400 to-rose-500 px-3 py-1 text-sm font-bold text-white shadow-sm hover:opacity-90"
+                >
+                  {f.emoji}{" "}
+                  {f.daysAway === 0 ? `Happy ${f.name}!` : `${f.name} tomorrow`}
+                </Link>
+              ))}
+            </div>
+          ) : null}
 
           <ChatterHomeBox />
 
@@ -230,7 +233,6 @@ export default async function HomePage() {
           </section>
 
           <div className="grid gap-3 [&>*]:min-w-0">
-            <DealOfTheDayBar />
             {today.panchang ? (
               <AstroToday panchang={today.panchang} place={today.label} />
             ) : null}
@@ -272,8 +274,6 @@ export default async function HomePage() {
           </div>
         </section>
       ) : null}
-
-      <RishtaHomeBox />
 
       <DealsStrip />
 

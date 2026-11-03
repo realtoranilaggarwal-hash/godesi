@@ -14,7 +14,6 @@ import type { StripGroup } from "@/components/CategoryStrip";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
 import { LiveMediaChips } from "@/components/LiveMediaButtons";
-import { PromoLinks } from "@/components/PromoLinks";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
@@ -49,17 +48,101 @@ const NAV = [
   { href: "/leaderboard", label: "Top contributors", icon: "🏅" },
 ];
 
-/** Chips beside the search box, for pages the main nav has no room for. */
-/** Header strip sections; directory categories not listed here land in "More". */
+/**
+ * Header menu, one short word per section so most fit on one line. Sections
+ * with pages open a list; ones without are plain links. Directory categories
+ * not placed by `STRIP_SECTION_OF` land in "More".
+ */
 const STRIP_GROUPS: StripGroup[] = [
   { id: "explore", label: "Explore", icon: "✨" },
-  { id: "astrology", label: "Astrology & Panchang", icon: "🔮" },
-  { id: "home", label: "Home & family", icon: "🏠" },
-  { id: "business", label: "Business & money", icon: "💼" },
-  { id: "lifestyle", label: "Events, food & travel", icon: "🎉" },
-  { id: "community", label: "Shopping & community", icon: "🛍️" },
+  { id: "astrology", label: "Astrology", icon: "🔮", href: "/astrology" },
+  { id: "community", label: "Community", icon: "👥", href: "/people" },
+  { id: "cards", label: "Cards", icon: "🪪", href: "/search" },
+  {
+    id: "classifieds",
+    label: "Classifieds",
+    icon: "📣",
+    href: "/classifieds",
+  },
+  { id: "events", label: "Events", icon: "🎟️", href: "/events" },
+  { id: "chatter", label: "Chatter", icon: "💬", href: "/chatter" },
+  { id: "clubs", label: "Clubs", icon: "🎤", href: "/clubs" },
+  { id: "wedding", label: "Wedding", icon: "💐", href: "/wedding" },
+  { id: "deals", label: "Deals", icon: "🏷️", href: "/deals" },
+  { id: "shop", label: "Shop", icon: "🛍️", href: "/shop" },
+  { id: "gigs", label: "Gigs", icon: "🛠️", href: "/gigs" },
+  { id: "jobs", label: "Jobs", icon: "💼", href: "/jobs" },
+  { id: "travel", label: "Travel", icon: "✈️", href: "/travel" },
+  { id: "home", label: "Home", icon: "🏠", href: "/" },
+  { id: "property", label: "Property", icon: "🏢", href: "/real-estate" },
+  {
+    id: "marketplace",
+    label: "Marketplace",
+    icon: "🛒",
+    href: "/marketplace",
+  },
+  {
+    id: "professionals",
+    label: "Professionals",
+    icon: "👔",
+    href: "/professionals",
+  },
+  { id: "news", label: "News", icon: "📰", href: "/news" },
+  { id: "business", label: "Business", icon: "📈" },
+  { id: "household", label: "Household", icon: "🧰" },
+  { id: "lifestyle", label: "Lifestyle", icon: "💄" },
   { id: "more", label: "More", icon: "➕" },
 ];
+
+/** Pages listed under each header section, before its directory categories. */
+const SECTION_LINKS: Record<string, { href: string; label: string; icon: string }[]> = {
+  explore: [
+    { href: "/live-radio", label: "Live Radio", icon: "🎧" },
+    { href: "/live-tv", label: "Live TV", icon: "📺" },
+    { href: "/resources", label: "Links", icon: "🔗" },
+    { href: "/search", label: "Cards", icon: "🪪" },
+    { href: "/tools", label: "Tools", icon: "🧰" },
+    { href: "/earn", label: "Earn", icon: "💸" },
+    { href: "/trending", label: "Trending hashtags", icon: "🔥" },
+    { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
+    { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
+    { href: "/buzz", label: "#godesi social wall", icon: "🌍" },
+  ],
+  community: [
+    { href: "/religious", label: "Temples", icon: "🛕" },
+    { href: "/festivals", label: "Festival calendar", icon: "🪔" },
+    { href: "/pooja", label: "Video pooja", icon: "🙏" },
+    { href: "/complaints", label: "File a complaint", icon: "⚠️" },
+    { href: "/guide", label: "City guides", icon: "🗺️" },
+  ],
+  classifieds: [
+    { href: "/leads", label: "Leads", icon: "📋" },
+    { href: "/marketplace", label: "Buy & Sell", icon: "🛒" },
+    { href: "/shop", label: "Shop", icon: "🛍️" },
+    { href: "/deals", label: "Deals", icon: "🏷️" },
+  ],
+  wedding: [
+    { href: "/connect", label: "Connect", icon: "🤝" },
+    { href: "/chatter", label: "Chatter — are you a Gapodi?", icon: "💬" },
+    { href: "/rishta", label: "Rishta", icon: "💍" },
+  ],
+  travel: [
+    { href: "/guide", label: "City guides", icon: "🗺️" },
+    { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
+  ],
+  home: [
+    { href: "/blog", label: "Blog", icon: "✍️" },
+    { href: "/tools", label: "Free business tools", icon: "🧰" },
+    { href: "/pricing", label: "Pricing", icon: "⭐" },
+    { href: "/advertise", label: "Advertise", icon: "📢" },
+    { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
+  ],
+  property: [{ href: "/rooms", label: "Rooms", icon: "🛋️" }],
+  professionals: [
+    { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
+  ],
+  news: [{ href: "/bollywood", label: "Bollywood", icon: "🎬" }],
+};
 
 const ASTROLOGY_LINKS = [
   { href: "/astrology/horoscope", label: "Today's horoscope", icon: "🔮" },
@@ -96,65 +179,29 @@ const ASTROLOGY_LINKS = [
 ];
 
 const STRIP_SECTION_OF: Record<string, string> = {
-  "home-services": "home",
-  "care-services": "home",
-  "real-estate": "home",
-  "rooms-roommates": "home",
-  "health-medical": "home",
-  "auto-services": "home",
-  construction: "home",
+  "home-services": "household",
+  "care-services": "household",
+  "health-medical": "household",
+  "auto-services": "household",
+  construction: "household",
+  "real-estate": "property",
+  "rooms-roommates": "property",
   "business-services": "business",
-  professionals: "business",
   "financial-services": "business",
-  jobs: "business",
   "trade-sourcing": "business",
   "it-training": "business",
   education: "business",
-  "events-wedding": "lifestyle",
+  professionals: "professionals",
+  jobs: "jobs",
+  "events-wedding": "wedding",
+  travel: "travel",
   "food-catering": "lifestyle",
   "beauty-lifestyle": "lifestyle",
-  travel: "lifestyle",
-  "shops-retail": "community",
-  "buy-sell": "community",
+  "shops-retail": "shop",
+  "buy-sell": "marketplace",
   "religious-services": "community",
   "community-orgs": "community",
 };
-
-/** Promoted pages beside the search box; any that don't fit stay under "More". */
-const PROMO_LINKS = [
-  { href: "/search", label: "Cards", icon: "🪪" },
-  { href: "/classifieds", label: "Free classifieds", icon: "📣" },
-  { href: "/leads", label: "Leads", icon: "📋" },
-  { href: "/events", label: "Events", icon: "🎟️" },
-  { href: "/chatter", label: "Chatter", icon: "💬" },
-  { href: "/clubs", label: "Clubs", icon: "🎤" },
-  { href: "/rishta", label: "Rishta", icon: "💍" },
-  { href: "/deals", label: "Deals", icon: "🏷️" },
-  { href: "/shop", label: "Shop", icon: "🛍️" },
-  { href: "/gigs", label: "Gigs", icon: "🛠️" },
-  { href: "/jobs", label: "Jobs", icon: "💼" },
-  { href: "/tools", label: "Tools", icon: "🧰" },
-  { href: "/earn", label: "Earn", icon: "💸" },
-  { href: "/resources", label: "Links", icon: "🔗" },
-  { href: "/advertise", label: "Advertise", icon: "📢" },
-];
-
-/** Everyday pages at the end of the category line. */
-const STRIP_LINKS = [
-  { href: "/trending", label: "Trending hashtags", icon: "🔥" },
-  { href: "/festivals", label: "Festival calendar", icon: "🪔" },
-  { href: "/pooja", label: "Video pooja", icon: "🙏" },
-  { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
-  { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
-  { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
-  { href: "/blog", label: "Blog", icon: "✍️" },
-  { href: "/guide", label: "City guides", icon: "🗺️" },
-  { href: "/people", label: "Community", icon: "👥" },
-  { href: "/connect", label: "Connect", icon: "🤝" },
-  { href: "/chatter", label: "Chatter — are you a Gapodi?", icon: "💬" },
-  { href: "/rishta", label: "Rishta — marriage profiles", icon: "💍" },
-  { href: "/buzz", label: "#godesi social wall", icon: "🌍" },
-];
 
 /** Admins land on the full panel, moderators on the content desk. */
 function staffHome(user: { role: Role }) {
@@ -183,61 +230,13 @@ export async function SiteHeader() {
   const firstName = user ? (user.name || user.email).split(/[\s@]/)[0] : null;
 
   const categoryItems = [
-    {
-      href: "/categories",
-      label: "All categories",
-      icon: "🧭",
-      className:
-        "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50",
-    },
-    {
-      href: "/events",
-      group: "explore",
-      label: "Events",
-      icon: "🎟️",
-      className:
-        "bg-gradient-to-r from-rose-600 to-pink-500 text-white hover:opacity-90",
-    },
-    {
-      href: "/clubs",
-      group: "explore",
-      label: "Clubs",
-      icon: "🎤",
-      className:
-        "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-90",
-    },
-    {
-      href: "/gigs",
-      group: "explore",
-      label: "Gigs",
-      icon: "🛠️",
-      className:
-        "bg-gradient-to-r from-emerald-600 to-teal-500 text-white hover:opacity-90",
-    },
-    {
-      href: "/jobs",
-      group: "explore",
-      label: "Jobs",
-      icon: "💼",
-      className:
-        "bg-gradient-to-r from-sky-600 to-cyan-500 text-white hover:opacity-90",
-    },
-    {
-      href: "/blog",
-      group: "explore",
-      label: "Blog",
-      icon: "✍️",
-      className:
-        "bg-gradient-to-r from-slate-900 to-indigo-800 text-white hover:opacity-90",
-    },
-    {
-      href: "/desi-elite",
-      group: "explore",
-      label: "Desi Elite",
-      icon: "🏆",
-      className:
-        "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 hover:opacity-90",
-    },
+    ...Object.entries(SECTION_LINKS).flatMap(([group, links]) =>
+      links.map((link) => ({
+        ...link,
+        group,
+        className: "bg-slate-100 text-slate-700 hover:bg-slate-200",
+      })),
+    ),
     ...ASTROLOGY_LINKS.map((link) => ({
       ...link,
       group: "astrology",
@@ -294,19 +293,36 @@ export async function SiteHeader() {
       <HeaderShell
         items={categoryItems}
         groups={STRIP_GROUPS}
-        links={STRIP_LINKS}
         topRight={
           <>
+            {user ? null : (
+              <span className="flex items-center gap-2 sm:hidden">
+                <Link
+                  href="/signup"
+                  className="whitespace-nowrap rounded-full bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 px-2.5 py-1 text-xs font-black text-white"
+                >
+                  🎉 Register
+                </Link>
+                <Link
+                  href="/login"
+                  className="whitespace-nowrap text-xs font-semibold text-white underline"
+                >
+                  Log in
+                </Link>
+              </span>
+            )}
             {firstName ? (
               <span className="truncate text-xs font-semibold text-white/85">
                 {greetingFor(geo.timezone)}, {firstName} 👋
               </span>
             ) : null}
-            <LocalWeather />
+            <span className={user ? "" : "max-sm:hidden"}>
+              <LocalWeather />
+            </span>
           </>
         }
         bar={
-          <div className="relative mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4">
+          <div className="relative mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4 lg:pr-16">
             <Link href="/" className="shrink-0" aria-label="Godesi home">
               <Image
                 src="/logo-godesi.png"
@@ -342,8 +358,6 @@ export async function SiteHeader() {
             </form>
 
             <LiveMediaChips className="hidden lg:flex" />
-
-            <PromoLinks links={PROMO_LINKS} more={STRIP_LINKS} />
 
             <div className="ml-auto flex shrink-0 items-center gap-1 text-sm font-medium sm:gap-2">
               <Link
@@ -461,15 +475,15 @@ export async function SiteHeader() {
                 <div className="hidden items-center gap-2 sm:flex">
                   <Link
                     href="/login"
-                    className="rounded-lg px-2 py-1 hover:text-slate-900"
+                    className="whitespace-nowrap rounded-xl border-2 border-rose-400 bg-white px-3 py-1 font-semibold text-rose-600 hover:bg-rose-50"
                   >
-                    Sign in
+                    🔑 Log in
                   </Link>
                   <Link
                     href="/signup"
-                    className="rounded-xl bg-gradient-to-r from-orange-500 to-rose-500 px-3 py-1.5 font-semibold text-white hover:opacity-90"
+                    className="whitespace-nowrap rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 px-3 py-1.5 font-black text-white shadow-sm hover:opacity-90"
                   >
-                    List free
+                    🎉 Register free
                   </Link>
                 </div>
               )}

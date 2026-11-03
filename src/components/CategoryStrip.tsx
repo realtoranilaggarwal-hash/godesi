@@ -14,7 +14,13 @@ export type StripItem = {
   children?: { href: string; label: string }[];
 };
 
-export type StripGroup = { id: string; label: string; icon: string };
+export type StripGroup = {
+  id: string;
+  label: string;
+  icon: string;
+  /** Page the section opens from; a section with no items is a plain link to it. */
+  href?: string;
+};
 
 export type StripLink = { href: string; label: string; icon: string };
 
@@ -59,7 +65,7 @@ export function CategoryStrip({
       ...group,
       items: items.filter((item) => item.group === group.id),
     }))
-    .filter((section) => section.items.length);
+    .filter((section) => section.items.length || section.href);
   const current = sections.find((section) => section.id === open);
 
   return (
@@ -76,6 +82,17 @@ export function CategoryStrip({
         ))}
         {sections.map((section) => {
           const active = section.id === open;
+          if (!section.items.length && section.href) {
+            return (
+              <Link
+                key={section.id}
+                href={section.href}
+                className="shrink-0 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-slate-800 hover:bg-slate-50 sm:px-3 sm:py-1.5"
+              >
+                {section.icon} {section.label}
+              </Link>
+            );
+          }
           return (
             <button
               key={section.id}
@@ -112,6 +129,15 @@ export function CategoryStrip({
           id="category-strip-panel"
           className="mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-sm sm:text-sm"
         >
+          {current.href ? (
+            <Link
+              href={current.href}
+              onClick={() => setOpen(null)}
+              className="mb-3 inline-block rounded-full bg-slate-900 px-3 py-1 font-bold text-white hover:bg-slate-700"
+            >
+              {current.icon} Open {current.label} →
+            </Link>
+          ) : null}
           <div className="columns-2 gap-4 sm:columns-3 lg:columns-5">
             {current.items.map((item) => (
               <div key={item.href} className="mb-3 min-w-0 break-inside-avoid">

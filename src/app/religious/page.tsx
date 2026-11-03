@@ -275,7 +275,7 @@ export default async function ReligiousPage({
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {news.map((item) => (
-                <NewsCard key={item.id} item={item} />
+                <NewsCard key={item.id} item={item} openOnGodesi />
               ))}
             </div>
           </div>

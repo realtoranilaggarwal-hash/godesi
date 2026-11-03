@@ -14,7 +14,8 @@ import { EventCard } from "@/components/EventCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { DJ_CATEGORY_SLUGS, DjsWikiBanner } from "@/components/DjsWikiPromo";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
-import { CategoryNewsRail } from "@/components/CategoryNewsRail";
+import { CategoryActivityRail } from "@/components/CategoryActivityRail";
+import { GoogleWebResults } from "@/components/GoogleWebResults";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { siteUrl } from "@/lib/format";
 import { metaDescription } from "@/lib/seo";
@@ -485,10 +486,22 @@ export default async function CategoryPage({
               ))}
             </div>
           ) : (
-            <EmptyState
-              title="No listings here yet"
-              body="Be the first business in this category — creating a card is free."
-            />
+            <div className="space-y-4">
+              <EmptyState
+                title="No listings here yet"
+                body="Be the first business in this category — creating a card is free."
+              />
+              <GoogleWebResults
+                withBox
+                query={[
+                  searchParams.q || category.name,
+                  "Indian",
+                  searchParams.city ? `in ${searchParams.city}` : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              />
+            </div>
           )}
         </section>
 
@@ -651,14 +664,9 @@ export default async function CategoryPage({
         ) : null}
         <RecommendedLinks categorySlug={category.slug} />
 
-        <CategoryNewsRail
+        <CategoryActivityRail
           categorySlug={category.slug}
           categoryName={category.name}
-          topic={
-            (category.parent?.slug ?? category.slug) === "religious-services"
-              ? "faith"
-              : "general"
-          }
         />
 
         {thin ? null : <InlineBanner />}

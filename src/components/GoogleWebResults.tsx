@@ -28,7 +28,14 @@ const cseWindow = () => window as unknown as CseWindow;
  * Google's results for a search GoDesi has (almost) nothing for, shown on the
  * GoDesi page. Display only: Programmable Search results may not be stored.
  */
-export function GoogleWebResults({ query }: { query: string }) {
+export function GoogleWebResults({
+  query,
+  withBox = false,
+}: {
+  query: string;
+  /** Show Google's search box above the results so visitors can search again. */
+  withBox?: boolean;
+}) {
   const divRef = useRef<HTMLDivElement>(null);
   /** Fresh per mount: a remount gets a new div, so it needs a new Google element. */
   const gnameRef = useRef("");
@@ -59,7 +66,7 @@ export function GoogleWebResults({ query }: { query: string }) {
       gnameRef.current = `godesi-web-${Math.random().toString(36).slice(2)}`;
       element.render({
         div: divRef.current,
-        tag: "searchresults-only",
+        tag: withBox ? "search" : "searchresults-only",
         gname: gnameRef.current,
         attributes: {
           linkTarget: "_blank",
@@ -69,7 +76,7 @@ export function GoogleWebResults({ query }: { query: string }) {
       });
     }
     element.getElement(gnameRef.current)?.execute(query);
-  }, [ready, query]);
+  }, [ready, query, withBox]);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -85,7 +92,8 @@ export function GoogleWebResults({ query }: { query: string }) {
         </Link>
       </div>
       <p className="mt-1 text-xs text-slate-500">
-        Web results for “{query}”. These are not GoDesi listings.
+        Web results for “{query}”. These are not GoDesi listings; they open in
+        a new tab, so GoDesi stays open here.
       </p>
       <div ref={divRef} className="godesi-gcse mt-2 min-h-[120px]" />
     </section>

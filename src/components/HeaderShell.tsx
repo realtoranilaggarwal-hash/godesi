@@ -48,8 +48,8 @@ export function HeaderShell({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="bg-gradient-to-r from-slate-900 to-indigo-900">
-        <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-1 sm:px-4">
-          <LiveMediaLinks />
+        <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2 py-1 pl-3 pr-14 sm:pl-4 lg:pr-28">
+          <LiveMediaLinks compact />
           <div className="flex items-center gap-3">
             {topRight}
             <Link
@@ -73,7 +73,7 @@ export function HeaderShell({
               aria-expanded={open}
               className="py-1 text-xs font-bold text-indigo-600 hover:text-indigo-700"
             >
-              🧭 Categories {open ? "▴" : "▾"}
+              ☰ Menu {open ? "▴" : "▾"}
             </button>
           </div>
           {open ? (
