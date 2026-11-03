@@ -10,6 +10,7 @@ import { ReportVerdicts } from "@/components/ReportVerdicts";
 import { ShareButtons } from "@/components/ShareButtons";
 import { StoryBody } from "@/components/StoryBody";
 import { ListenButton } from "@/components/ListenButton";
+import { GujaratiButton } from "@/components/GujaratiButton";
 import { SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
@@ -180,6 +181,8 @@ export default async function ReportPage({
           <h1 className="text-2xl font-black leading-tight">{report.title}</h1>
 
           <ListenButton title={report.title} text={report.summary} />
+
+          <GujaratiButton />
 
           <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
             <span>

@@ -3,6 +3,9 @@ import { ASTROLOGY_DISCLAIMER } from "@/lib/astrology";
 import { PANCHANG_CITIES, type Panchang } from "@/lib/panchang";
 import { PanchangCard } from "@/components/PanchangCard";
 import { MorningEmailSignup } from "@/components/MorningEmailSignup";
+import { GujaratiButton } from "@/components/GujaratiButton";
+import { ShareButtons } from "@/components/ShareButtons";
+import { siteUrl } from "@/lib/format";
 
 /** Shared body of /astrology/panchang and its per-city pages. */
 export function PanchangPage({
@@ -33,6 +36,8 @@ export function PanchangPage({
         </p>
       </section>
 
+      <GujaratiButton />
+
       {panchang ? (
         <PanchangCard panchang={panchang} place={place} />
       ) : (
@@ -40,6 +45,20 @@ export function PanchangPage({
           The sun doesn&apos;t rise here today, so there is no sunrise panchang.
         </p>
       )}
+
+      <ShareButtons
+        url={`${siteUrl()}/astrology/panchang${currentSlug ? `/${currentSlug}` : ""}`}
+        title={`🪔 Today's Panchang for ${place} — free on GoDesi`}
+      />
+
+      <p className="text-sm">
+        <Link
+          href="/blog/what-is-panchang-tithi-nakshatra-rahu-kaal-explained"
+          className="font-semibold text-orange-700 hover:underline"
+        >
+          New to Panchang? Tithi, Nakshatra and Rahu Kaal explained →
+        </Link>
+      </p>
 
       <MorningEmailSignup />
 

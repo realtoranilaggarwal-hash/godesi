@@ -25,14 +25,14 @@ const LANGUAGES = [
 
 const TRANSLATE_COOKIE = "googtrans";
 
-function readLanguage() {
+export function readLanguage() {
   const match = document.cookie.match(/(?:^|;\s*)googtrans=([^;]+)/);
   if (!match) return "en";
   const value = decodeURIComponent(match[1]).split("/");
   return value[2] || "en";
 }
 
-function writeLanguage(code: string) {
+export function writeLanguage(code: string) {
   const domain = window.location.hostname.replace(/^www\./, "");
   const value = code === "en" ? "" : `/en/${code}`;
   const expiry = code === "en" ? "Thu, 01 Jan 1970 00:00:00 GMT" : "";

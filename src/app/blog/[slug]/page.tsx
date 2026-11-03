@@ -7,6 +7,7 @@ import { blogBlocks, blogSummary } from "@/lib/blog";
 import { Card } from "@/components/ui";
 import { InArticleAd } from "@/components/InArticleAd";
 import { ShareButtons } from "@/components/ShareButtons";
+import { GujaratiButton } from "@/components/GujaratiButton";
 import { SidebarBanners } from "@/components/Banners";
 import { LinkifiedText } from "@/components/LinkifiedText";
 import { siteUrl } from "@/lib/format";
@@ -86,6 +87,7 @@ export default async function BlogPostPage({
             })}
             {post.author?.name ? ` · ${post.author.name}` : ""}
           </p>
+          <GujaratiButton className="mt-3" />
 
           <div className="mt-5 space-y-4 text-[15px] leading-7 text-slate-700">
             {blocks.map((block, index) =>
