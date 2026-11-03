@@ -1,6 +1,6 @@
 /**
  * Appends a short "Travelling to India?" box with Travelpayouts partner links
- * (Yesim eSIM, Klook, KKday, Tiqets) to the India-travel guides. Re-runnable: a post
+ * (Yesim eSIM, Klook, KKday, Tiqets, EconomyBookings) to the India-travel guides. Re-runnable: a post
  * that already has the box is left alone.
  *
  *   DATABASE_URL=... npx tsx scripts/add-travel-affiliate-box.ts
@@ -15,10 +15,12 @@ const NOTE =
 const INDIA_TRIP = `${MARK}
 - Phone data: skip the airport SIM queue. A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) works on most newer phones as soon as you land.
 - Tours and day trips: book temple visits, city tours and airport transfers in India on [Klook](https://klook.tpo.li/Jkdu68C6) or [KKday](https://kkday.tpo.li/l8T8GeM4).
+- Rental car: compare car hire at Indian airports on [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o).
 
 ${NOTE}`;
 
 const NYC_DAY = `Making a day of it?
+- Driving in from out of town? Compare rental cars on [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o).
 - Visiting family from India? A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) gets them US phone data the moment they land.
 - Add New York sights and tours to the trip with [Klook](https://klook.tpo.li/Jkdu68C6), or skip the ticket lines at museums and attractions with [Tiqets](https://tiqets.tpo.li/stbzuORH).
 
