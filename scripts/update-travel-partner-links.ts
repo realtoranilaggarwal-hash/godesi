@@ -1,7 +1,7 @@
 /**
  * Updates the partner links in guides that already carry the travel box from
- * add-travel-affiliate-box.ts: adds Saily next to Yesim and points KKday and Klook
- * (India boxes only) at their India pages. Re-runnable.
+ * add-travel-affiliate-box.ts: adds Saily next to Yesim and points Yesim, KKday and
+ * Klook (India boxes only) at their India pages. Re-runnable.
  *
  *   DATABASE_URL=... npx tsx scripts/update-travel-partner-links.ts
  */
@@ -9,6 +9,10 @@ import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();
 const SWAPS: [string, string][] = [
+  [
+    "A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) works",
+    "A [Yesim](https://yesim.tpo.li/HzlXXcYH) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM works",
+  ],
   [
     "A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr)",
     "A [Yesim](https://yesim.tpo.li/F5AhylOr) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM",
