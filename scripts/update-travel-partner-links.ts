@@ -1,7 +1,7 @@
 /**
  * Updates the partner links in guides that already carry the travel box from
- * add-travel-affiliate-box.ts: adds Saily next to Yesim and points KKday at its
- * India tours page. Re-runnable.
+ * add-travel-affiliate-box.ts: adds Saily next to Yesim and points KKday and Klook
+ * (India boxes only) at their India pages. Re-runnable.
  *
  *   DATABASE_URL=... npx tsx scripts/update-travel-partner-links.ts
  */
@@ -14,6 +14,10 @@ const SWAPS: [string, string][] = [
     "A [Yesim](https://yesim.tpo.li/F5AhylOr) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM",
   ],
   ["https://kkday.tpo.li/l8T8GeM4", "https://kkday.tpo.li/pkRIrFFW"],
+  [
+    "India on [Klook](https://klook.tpo.li/Jkdu68C6)",
+    "India on [Klook](https://klook.tpo.li/voOMXIKP)",
+  ],
 ];
 
 async function main() {
