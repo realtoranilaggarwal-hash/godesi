@@ -7,7 +7,7 @@ import { Card } from "@/components/ui";
 export const metadata: Metadata = {
   title: "Banner sizes, design prompts and upload",
   description:
-    "Every GoDesi banner size with a ready-made design prompt, plus where to upload your banner.",
+    "Every GoDesi banner size with a ready-made design prompt, plus where to upload your banner. Free for the whole desi community on GoDesi.com.",
 };
 
 export default function BannerDesignPage() {

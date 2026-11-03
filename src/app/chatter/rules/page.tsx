@@ -8,7 +8,7 @@ import {
 
 export const metadata: Metadata = {
   title: "GoDesi Chatter rules",
-  description: "How GoDesi Chatter works and what isn't allowed.",
+  description: "How GoDesi Chatter works and what isn't allowed. GoDesi.com is the free desi community: businesses, events, jobs, rooms and news.",
 };
 
 const RULES = [

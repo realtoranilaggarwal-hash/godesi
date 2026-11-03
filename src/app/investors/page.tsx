@@ -8,7 +8,7 @@ import { Card } from "@/components/ui";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "GoDesi investor kit",
-  description: "Confidential investor overview for GoDesi.com.",
+  description: "Confidential investor overview for GoDesi.com. GoDesi.com is the free desi community: businesses, events, jobs, rooms and news.",
   robots: { index: false, follow: false },
 };
 

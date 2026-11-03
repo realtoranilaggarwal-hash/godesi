@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
 /**
  * The standalone card page is gone — the digital card now sits beside the
@@ -10,5 +10,5 @@ export default function CardPageRedirect({
 }: {
   params: { slug: string };
 }) {
-  redirect(`/business/${params.slug}`);
+  permanentRedirect(`/business/${params.slug}`);
 }

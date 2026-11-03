@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { metaDescription } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { siteUrl, whatsappLink } from "@/lib/format";
@@ -59,7 +60,7 @@ export async function generateMetadata({
 
   return {
     title: `${listing.title} — ${listing.city}`,
-    description: listing.description.slice(0, 155),
+    description: metaDescription(listing.description, "Posted on GoDesi, the free desi classifieds for buy and sell, rooms and rentals. Message the poster directly on WhatsApp."),
     alternates: { canonical: `${siteUrl()}/listings/${listing.slug}` },
     openGraph: {
       title: listing.title,

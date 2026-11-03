@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Listed on Godesi badge",
   description:
-    "Add the free “Listed on Godesi” badge to your website and send customers straight to your listing.",
+    "Add the free “Listed on Godesi” badge to your website and send customers straight to your listing. Free for the whole desi community on GoDesi.com.",
 };
 
 export default async function BadgePage() {

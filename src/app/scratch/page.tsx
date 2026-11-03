@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Scratch & win",
   description:
-    "Trade your GoDesi points for a scratch card and win free gifts from local desi businesses or bonus points.",
+    "Trade your GoDesi points for a scratch card and win free gifts from local desi businesses or bonus points. Free for the whole desi community on GoDesi.com.",
 };
 
 export default async function ScratchPage() {

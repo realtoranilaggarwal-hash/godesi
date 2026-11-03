@@ -31,7 +31,7 @@ export function generateMetadata({
       ? `${tag} — live news and posts | Godesi`
       : "Trending hashtags — live desi news and posts | Godesi",
     description:
-      "Type any hashtag or keyword and see live headlines and public posts about it, from Google News and Mastodon.",
+      "Type any hashtag or keyword and see live headlines and public posts about it, from Google News and Mastodon. Free for the whole desi community on GoDesi.com.",
     alternates: { canonical: `${siteUrl()}/trending` },
     robots: tag ? { index: false, follow: true } : undefined,
   };

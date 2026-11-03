@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui";
@@ -19,7 +20,7 @@ export function generateMetadata({
   if (!guide) return {};
   return {
     title: `${guide.title} — GoDesi Travel`,
-    description: guide.description,
+    description: metaDescription(guide.description, "A GoDesi travel guide for desi families flying between the USA and India: fares, timing, eSIMs and airport transfers."),
     alternates: { canonical: `/travel/guides/${guide.slug}` },
   };
 }
