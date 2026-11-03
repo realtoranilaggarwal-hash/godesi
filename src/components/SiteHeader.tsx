@@ -53,11 +53,46 @@ const NAV = [
 /** Header strip sections; directory categories not listed here land in "More". */
 const STRIP_GROUPS: StripGroup[] = [
   { id: "explore", label: "Explore", icon: "✨" },
+  { id: "astrology", label: "Astrology & Panchang", icon: "🔮" },
   { id: "home", label: "Home & family", icon: "🏠" },
   { id: "business", label: "Business & money", icon: "💼" },
   { id: "lifestyle", label: "Events, food & travel", icon: "🎉" },
   { id: "community", label: "Shopping & community", icon: "🛍️" },
   { id: "more", label: "More", icon: "➕" },
+];
+
+const ASTROLOGY_LINKS = [
+  { href: "/astrology/horoscope", label: "Today's horoscope", icon: "🔮" },
+  { href: "/astrology/panchang", label: "Daily Panchang", icon: "🪔" },
+  { href: "/astrology/kundli-calculator", label: "Free Kundli", icon: "📜" },
+  {
+    href: "/astrology/kundli-matching-for-marriage",
+    label: "Kundli matching for marriage",
+    icon: "💞",
+  },
+  {
+    href: "/categories/religious-services-astrologers",
+    label: "Find an astrologer",
+    icon: "🧑‍🏫",
+  },
+  {
+    href: "/astrology/muhurat-for-weddings-and-griha-pravesh",
+    label: "Wedding & Griha Pravesh muhurat",
+    icon: "🕉️",
+  },
+  {
+    href: "/astrology/rahu-kaal-explained",
+    label: "Rahu Kaal explained",
+    icon: "⛔",
+  },
+  { href: "/festivals", label: "Festival calendar", icon: "🎉" },
+  { href: "/pooja", label: "Book a video pooja", icon: "🙏" },
+  {
+    href: "/blog/what-is-panchang-tithi-nakshatra-rahu-kaal-explained",
+    label: "What is Panchang?",
+    icon: "📖",
+  },
+  { href: "/astrology", label: "All astrology guides", icon: "✨" },
 ];
 
 const STRIP_SECTION_OF: Record<string, string> = {
@@ -180,6 +215,14 @@ export async function SiteHeader() {
         "bg-gradient-to-r from-emerald-600 to-teal-500 text-white hover:opacity-90",
     },
     {
+      href: "/jobs",
+      group: "explore",
+      label: "Jobs",
+      icon: "💼",
+      className:
+        "bg-gradient-to-r from-sky-600 to-cyan-500 text-white hover:opacity-90",
+    },
+    {
       href: "/blog",
       group: "explore",
       label: "Blog",
@@ -195,11 +238,21 @@ export async function SiteHeader() {
       className:
         "bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-900 hover:opacity-90",
     },
+    ...ASTROLOGY_LINKS.map((link) => ({
+      ...link,
+      group: "astrology",
+      className:
+        "bg-gradient-to-r from-orange-500 to-amber-400 text-white hover:opacity-90",
+    })),
     ...categories.map((category) => ({
       group: STRIP_SECTION_OF[category.slug] ?? "more",
       href: `/categories/${category.slug}`,
       label: category.name,
       icon: category.icon,
+      children: category.children.map((child) => ({
+        href: `/categories/${child.slug}`,
+        label: child.name,
+      })),
       className: `bg-gradient-to-r ${gradientFor(category.color)} text-white opacity-90 hover:opacity-100`,
     })),
   ];
@@ -223,10 +276,10 @@ export async function SiteHeader() {
     { href: "/deals", label: "Deals", icon: "🏷️" },
     { href: "/shop", label: "Shop", icon: "🛍️" },
     { href: "/festivals", label: "Festival calendar", icon: "🪔" },
-  { href: "/pooja", label: "Video pooja", icon: "🙏" },
+    { href: "/pooja", label: "Video pooja", icon: "🙏" },
     { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
     { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
-  { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
+    { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
     { href: "/guide", label: "City guides", icon: "🗺️" },
     { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
     { href: "/advertise", label: "Advertise", icon: "📢" },

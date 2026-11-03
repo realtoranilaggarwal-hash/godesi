@@ -10,6 +10,8 @@ export type StripItem = {
   className: string;
   /** Id of the `StripGroup` dropdown this chip sits in; ungrouped chips show on the bar. */
   group?: string;
+  /** Sub-pages listed under this chip when its section is open. */
+  children?: { href: string; label: string }[];
 };
 
 export type StripGroup = { id: string; label: string; icon: string };
@@ -18,7 +20,7 @@ export type StripLink = { href: string; label: string; icon: string };
 
 /**
  * One line of section buttons that swipes sideways on phones. Each section opens
- * a panel of its category chips under the line, so the header stays one row tall.
+ * a panel under the line listing its pages, each with its sub-pages beneath it.
  */
 export function CategoryStrip({
   items,
@@ -108,18 +110,37 @@ export function CategoryStrip({
       {current ? (
         <div
           id="category-strip-panel"
-          className="mt-2 flex flex-wrap gap-1.5 rounded-2xl border border-slate-200 bg-white p-2 text-[11px] font-semibold shadow-sm sm:text-xs"
+          className="mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 text-xs shadow-sm sm:text-sm"
         >
-          {current.items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(null)}
-              className={`whitespace-nowrap rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5 ${item.className}`}
-            >
-              {item.icon} {item.label}
-            </Link>
-          ))}
+          <div className="columns-2 gap-4 sm:columns-3 lg:columns-5">
+            {current.items.map((item) => (
+              <div key={item.href} className="mb-3 min-w-0 break-inside-avoid">
+                <Link
+                  href={item.href}
+                  onClick={() => setOpen(null)}
+                  className="flex items-start gap-1 break-words font-bold text-slate-900 hover:text-indigo-700"
+                >
+                  <span aria-hidden>{item.icon}</span>
+                  <span className="min-w-0">{item.label}</span>
+                </Link>
+                {item.children?.length ? (
+                  <ul className="mt-1 space-y-0.5 border-l-2 border-slate-100 pl-2">
+                    {item.children.map((child) => (
+                      <li key={child.href}>
+                        <Link
+                          href={child.href}
+                          onClick={() => setOpen(null)}
+                          className="block break-words text-slate-600 hover:text-indigo-700"
+                        >
+                          {child.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>

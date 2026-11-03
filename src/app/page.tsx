@@ -17,7 +17,7 @@ import { WebsiteOfferTile } from "@/components/WebsiteOfferTile";
 import { ActivityWall } from "@/components/ActivityWall";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { MarketTape } from "@/components/MarketTape";
-import { DailyStars } from "@/components/DailyStars";
+import { AstroToday } from "@/components/AstroToday";
 import { planRank } from "@/lib/plans";
 import { newestMembers } from "@/lib/membersQueries";
 import { MemberTile } from "@/components/MemberTile";
@@ -25,7 +25,6 @@ import { RecentStrip } from "@/components/RecentStrip";
 import { DealsStrip } from "@/components/DealsStrip";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { DealOfTheDayBar } from "@/components/DealOfTheDay";
-import { PanchangCard } from "@/components/PanchangCard";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
 
 import { RishtaHomeBox } from "@/components/RishtaHomeBox";
@@ -228,24 +227,12 @@ export default async function HomePage() {
             <div className="rounded-xl border border-slate-200 bg-white p-1">
               <MarketTape />
             </div>
-            {today.panchang ? (
-              <div className="mt-3">
-                <DailyStars
-                  panchang={today.panchang}
-                  place={today.label}
-                />
-              </div>
-            ) : null}
           </section>
 
-          <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+          <div className="grid gap-3 [&>*]:min-w-0">
             <DealOfTheDayBar />
             {today.panchang ? (
-              <PanchangCard
-                panchang={today.panchang}
-                place={today.label}
-                compact
-              />
+              <AstroToday panchang={today.panchang} place={today.label} />
             ) : null}
           </div>
         </div>
