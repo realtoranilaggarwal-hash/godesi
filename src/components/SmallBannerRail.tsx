@@ -157,8 +157,16 @@ export function SmallBannerRail({
   useEffect(() => {
     if (pathname === firstPath.current) return;
     firstPath.current = pathname;
-    setOffset((value) => value + show);
-  }, [pathname, show]);
+    // A step that is a multiple of the inventory would bring back the same order.
+    let step = show;
+    while (
+      (banners.length > 1 && step % banners.length === 0) ||
+      (HOUSE_BANNERS.length > 1 && step % HOUSE_BANNERS.length === 0)
+    ) {
+      step += 1;
+    }
+    setOffset((value) => value + step);
+  }, [pathname, show, banners.length]);
 
   if (
     (!embedded || phone) &&
