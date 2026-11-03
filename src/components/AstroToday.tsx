@@ -114,7 +114,7 @@ export function AstroToday({
             </Link>
             <span className="text-slate-500">{panchang.vaar}</span>
           </p>
-          <p className="truncate">
+          <p className="sm:truncate">
             {panchang.observances.length ? (
               <span className="font-semibold text-orange-800">
                 🙏 {panchang.observances.join(" · ")} ·{" "}
@@ -126,7 +126,7 @@ export function AstroToday({
             {panchang.nakshatra.name} · 🌅 {panchangTime(panchang.sunrise, tz)}{" "}
             / {panchangTime(panchang.sunset, tz)}
           </p>
-          <p className="truncate">
+          <p className="sm:truncate">
             <span className="font-semibold text-rose-700">⛔ Rahu Kaal:</span>{" "}
             {span(panchang.rahuKaal, tz)}
             {panchang.abhijit ? (
@@ -140,7 +140,7 @@ export function AstroToday({
               </>
             ) : null}
           </p>
-          <p className="truncate">
+          <p className="sm:truncate">
             <span className="font-semibold text-violet-700">Godesi sees:</span>{" "}
             <span className="italic">{mood}</span> ·{" "}
             <span className="font-semibold">Lucky:</span> {luckyNumber} ·{" "}
