@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 /** GoDesi's Programmable Search Engine (whole web, SafeSearch on). Public by design. */
-const CSE_ID = process.env.NEXT_PUBLIC_GOOGLE_CSE_ID || "30fca71c8e87a480d";
+const CSE_ID = process.env.NEXT_PUBLIC_GOOGLE_CSE_ID || "83d743f7653d64553";
 const SCRIPT_ID = "google-cse-js";
 
 type CseElement = {

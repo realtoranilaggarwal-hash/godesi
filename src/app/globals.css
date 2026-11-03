@@ -175,3 +175,8 @@ html.consent-open {
     animation-duration: 240s;
   }
 }
+
+/* Google Programmable Search: hide the "Structured data" debug toggle under each result. */
+.godesi-gcse .gs-richsnippet-box {
+  display: none !important;
+}
