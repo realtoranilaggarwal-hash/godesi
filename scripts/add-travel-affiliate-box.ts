@@ -13,7 +13,7 @@ const NOTE =
   "Some links above are partner links: GoDesi may earn a small commission if you buy, at no extra cost to you.";
 
 const INDIA_TRIP = `${MARK}
-- Phone data: skip the airport SIM queue. A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) works on most newer phones as soon as you land.
+- Phone data: skip the airport SIM queue. A [Yesim](https://yesim.tpo.li/F5AhylOr) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM works on most newer phones as soon as you land.
 - Tours and day trips: book temple visits, city tours and airport transfers in India on [Klook](https://klook.tpo.li/Jkdu68C6) or [KKday](https://kkday.tpo.li/l8T8GeM4).
 - Rental car: compare car hire at Indian airports on [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o).
 
@@ -21,7 +21,7 @@ ${NOTE}`;
 
 const NYC_DAY = `Making a day of it?
 - Driving in from out of town? Compare rental cars on [EconomyBookings](https://economybookings.tpo.li/TbDdQi6o).
-- Visiting family from India? A [Yesim travel eSIM](https://yesim.tpo.li/F5AhylOr) gets them US phone data the moment they land.
+- Visiting family from India? A [Yesim](https://yesim.tpo.li/F5AhylOr) or [Saily](https://saily.tpo.li/8ve5z4Sy) travel eSIM gets them US phone data the moment they land.
 - Add New York sights and tours to the trip with [Klook](https://klook.tpo.li/Jkdu68C6), or skip the ticket lines at museums and attractions with [Tiqets](https://tiqets.tpo.li/stbzuORH).
 
 ${NOTE}`;
