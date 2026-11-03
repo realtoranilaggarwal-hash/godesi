@@ -42,6 +42,7 @@ const NAV = [
   { href: "/people", label: "People", icon: "👥" },
   { href: "/professionals", label: "Professionals", icon: "👔" },
   { href: "/news", label: "News", icon: "📰" },
+  { href: "/bollywood", label: "Bollywood", icon: "🎬" },
   { href: "/complaints", label: "File a complaint", icon: "⚠️" },
   { href: "/trending", label: "Trending", icon: "🔥" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },

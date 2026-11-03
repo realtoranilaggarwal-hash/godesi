@@ -133,6 +133,16 @@ const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
     topic: "entertainment",
   },
   {
+    name: "Hindustan Times — Bollywood",
+    url: "https://www.hindustantimes.com/feeds/rss/entertainment/bollywood/rssfeed.xml",
+    topic: "entertainment",
+  },
+  {
+    name: "Pinkvilla",
+    url: "https://www.pinkvilla.com/rss.xml",
+    topic: "entertainment",
+  },
+  {
     name: "NDTV — Food",
     url: "https://feeds.feedburner.com/ndtvfood-latest",
     topic: "food",
