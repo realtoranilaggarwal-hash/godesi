@@ -54,6 +54,7 @@ const NAV = [
  * not placed by `STRIP_SECTION_OF` land in "More".
  */
 const STRIP_GROUPS: StripGroup[] = [
+  { id: "home", label: "Home", icon: "🏠", href: "/" },
   { id: "explore", label: "Explore", icon: "✨" },
   { id: "astrology", label: "Astrology", icon: "🔮", href: "/astrology" },
   { id: "community", label: "Community", icon: "👥", href: "/people" },
@@ -65,16 +66,19 @@ const STRIP_GROUPS: StripGroup[] = [
     href: "/classifieds",
   },
   { id: "events", label: "Events", icon: "🎟️", href: "/events" },
-  { id: "chatter", label: "Chatter", icon: "💬", href: "/chatter" },
+  { id: "it", label: "IT", icon: "💻", href: "/categories/it-training" },
   { id: "clubs", label: "Clubs", icon: "🎤", href: "/clubs" },
   { id: "wedding", label: "Wedding", icon: "💐", href: "/wedding" },
   { id: "deals", label: "Deals", icon: "🏷️", href: "/deals" },
   { id: "shop", label: "Shop", icon: "🛍️", href: "/shop" },
-  { id: "gigs", label: "Gigs", icon: "🛠️", href: "/gigs" },
+  {
+    id: "property",
+    label: "Real Estate",
+    icon: "🏢",
+    href: "/real-estate",
+  },
   { id: "jobs", label: "Jobs", icon: "💼", href: "/jobs" },
   { id: "travel", label: "Travel", icon: "✈️", href: "/travel" },
-  { id: "home", label: "Home", icon: "🏠", href: "/" },
-  { id: "property", label: "Property", icon: "🏢", href: "/real-estate" },
   {
     id: "marketplace",
     label: "Marketplace",
@@ -114,6 +118,7 @@ const SECTION_LINKS: Record<string, { href: string; label: string; icon: string 
     { href: "/pooja", label: "Video pooja", icon: "🙏" },
     { href: "/complaints", label: "File a complaint", icon: "⚠️" },
     { href: "/guide", label: "City guides", icon: "🗺️" },
+    { href: "/chatter", label: "Chatter", icon: "💬" },
   ],
   classifieds: [
     { href: "/leads", label: "Leads", icon: "📋" },
@@ -137,7 +142,17 @@ const SECTION_LINKS: Record<string, { href: string; label: string; icon: string 
     { href: "/advertise", label: "Advertise", icon: "📢" },
     { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
   ],
+  it: [
+    {
+      href: "/categories/business-services-software-companies",
+      label: "Software companies",
+      icon: "🖥️",
+    },
+    { href: "/desi-websites", label: "Desi websites", icon: "🌐" },
+    { href: "/marketing", label: "Free marketing & SEO", icon: "📈" },
+  ],
   property: [{ href: "/rooms", label: "Rooms", icon: "🛋️" }],
+  jobs: [{ href: "/gigs", label: "Gigs", icon: "🛠️" }],
   professionals: [
     { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
   ],
@@ -189,7 +204,7 @@ const STRIP_SECTION_OF: Record<string, string> = {
   "business-services": "business",
   "financial-services": "business",
   "trade-sourcing": "business",
-  "it-training": "business",
+  "it-training": "it",
   education: "business",
   professionals: "professionals",
   jobs: "jobs",

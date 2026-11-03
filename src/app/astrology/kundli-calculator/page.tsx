@@ -4,7 +4,7 @@ import { ASTROLOGY_DISCLAIMER } from "@/lib/astrology";
 import { AstrologyShop } from "@/components/AstrologyShop";
 import { astroShopItemsById } from "@/lib/astrologyShop";
 import { siteUrl } from "@/lib/format";
-import { SidebarBanners } from "@/components/Banners";
+import { AstrologerBanners, SidebarBanners } from "@/components/Banners";
 import { Card } from "@/components/ui";
 import { KundliCalculator } from "@/components/KundliCalculator";
 
@@ -53,6 +53,7 @@ export default function KundliCalculatorPage() {
 
   return (
     <div className="flex justify-center gap-6">
+      <AstrologerBanners />
       <div className="min-w-0 max-w-3xl flex-1 space-y-5">
         <script
           type="application/ld+json"

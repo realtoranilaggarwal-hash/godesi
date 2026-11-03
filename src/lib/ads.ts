@@ -287,6 +287,29 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       { label: "Every page (banner rail)", href: "/" },
     ],
   },
+  ASTRO: {
+    slot: "ASTRO",
+    name: "Astrologer banner",
+    size: { width: 320, height: 100 },
+    slots: 6,
+    blurb:
+      "For astrologers, pandits and jyotish services only: a 320x100 banner in the left column of every GoDesi astrology page (horoscope, Panchang, Kundli, Kundli matching and the astrology guides), seen by people already looking for an astrologer.",
+    priceInr: 1199,
+    priceUsd: 15,
+    cpmInr: 120,
+    cpmUsd: 1.5,
+    highlights: [
+      "Only astrologers, pandits and jyotish services",
+      "Left column of every astrology page",
+      "Six spots, rotating",
+    ],
+    region: "rail",
+    where: [
+      { label: "Astrology", href: "/astrology" },
+      { label: "Today's horoscope", href: "/astrology/horoscope" },
+      { label: "Daily Panchang", href: "/astrology/panchang" },
+    ],
+  },
 };
 
 /** Placements on sale. HERO has no spot on any page, so it isn't offered. */
@@ -301,6 +324,7 @@ export const AD_SLOT_ORDER: BannerSlot[] = [
   "HALFPAGE",
   "SKYSCRAPER",
   "MOBILE",
+  "ASTRO",
 ];
 
 export const AD_DURATIONS = [1, 3, 6, 12] as const;

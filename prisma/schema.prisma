@@ -102,6 +102,8 @@ enum BannerSlot {
   MOBILE
   FULLBANNER
   WALL
+  /// Small banners on the left of the astrology pages, sold to astrologers only.
+  ASTRO
 }
 
 enum BannerStatus {
