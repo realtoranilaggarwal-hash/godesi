@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { aiEnabled, askGemini, type ChatTurn } from "@/lib/ai";
 import { ASSISTANT_SYSTEM_PROMPT, buildContext } from "@/lib/assistant";
+import { recordSearchMiss } from "@/lib/searchMiss";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,9 @@ export async function POST(request: Request) {
   const turns = parsed.data.messages as ChatTurn[];
   const question = [...turns].reverse().find((turn) => turn.role === "user")?.content ?? "";
   const { context, sources } = await buildContext(question);
+  /** Nothing on GoDesi matched: the chat offers a Google search of the same words. */
+  const webQuery = sources.length ? null : question.trim().slice(0, 80);
+  if (webQuery) await recordSearchMiss({ query: webQuery, page: "ask", results: 0 });
 
   const grounded: ChatTurn[] = turns.map((turn, index) =>
     index === turns.length - 1 && turn.role === "user"
@@ -67,7 +71,7 @@ export async function POST(request: Request) {
         { status: 502 },
       );
     }
-    return NextResponse.json({ reply, sources });
+    return NextResponse.json({ reply, sources, webQuery });
   } catch (error) {
     console.error("assistant failed", error);
     // Gemini's own quota rejection reads as a wait, not a broken feature.

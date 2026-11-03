@@ -13,7 +13,7 @@ const BOT_UA = /bot|crawl|spider|slurp|preview|fetch|curl|wget|python|headless/i
 export async function recordSearchMiss(input: {
   query: string;
   city?: string;
-  page: "search" | "find";
+  page: "search" | "find" | "ask";
   results: number;
 }): Promise<void> {
   const query = input.query.trim().toLowerCase().replace(/\s+/g, " ");
