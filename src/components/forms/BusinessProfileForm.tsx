@@ -187,6 +187,17 @@ export function BusinessProfileForm({
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
+      {staffEdit ? null : (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          📇 <strong>This is your business card</strong> — a page for your
+          business or the service you offer. Use your business name, logo and
+          work photos here. Your own photo and bio go on your{" "}
+          <a href="/dashboard/me" className="font-semibold underline">
+            personal profile
+          </a>
+          , which is separate.
+        </p>
+      )}
       {staffEdit && business ? (
         <>
           <input type="hidden" name="businessId" value={business.id} />
@@ -247,6 +258,16 @@ export function BusinessProfileForm({
           defaultExtras={business?.extraCategorySlugs ?? []}
           foundingMember={foundingMember}
         />
+        <Field
+          label="Street address"
+          hint="Optional — your shop or office, e.g. 1234 Oak Tree Rd. Leave blank if you work from home."
+        >
+          <input
+            name="address"
+            defaultValue={business?.address ?? ""}
+            className={inputClass}
+          />
+        </Field>
         <Field
           label="City"
           hint="Work online or serve many areas? Type “Online”, “Anywhere” or your main base."
@@ -380,7 +401,8 @@ export function BusinessProfileForm({
           defaultValue={business?.logoUrl ?? ""}
           hint={
             <>
-              Square logos look best. No logo? Open{" "}
+              Your business logo or a photo of your shop or work, not a personal
+              photo. Square logos look best. No logo? Open{" "}
               <a
                 href="https://chatgpt.com"
                 target="_blank"
@@ -497,13 +519,6 @@ export function BusinessProfileForm({
             I price every job individually — invite enquiries for a quote
           </label>
         </Field>
-        <Field label="Address">
-          <input
-            name="address"
-            defaultValue={business?.address ?? ""}
-            className={inputClass}
-          />
-        </Field>
       </div>
 
       <details
@@ -581,9 +596,9 @@ export function BusinessProfileForm({
           🔎 How you appear on Google (optional)
         </summary>
         <p className="mt-1 text-xs text-slate-500">
-          Google writes the title and snippet for your page automatically —
-          fill these only if you want your own words in search results and in
-          the preview when your page is shared on WhatsApp or Facebook.
+          Google writes the title and snippet for your page automatically — fill
+          these only if you want your own words in search results and in the
+          preview when your page is shared on WhatsApp or Facebook.
         </p>
         <div className="mt-3 grid gap-3">
           <Field
