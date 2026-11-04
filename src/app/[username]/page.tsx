@@ -34,6 +34,7 @@ import { PostIdeasBanner } from "@/components/PostIdeasBanner";
 import { RailRectangles } from "@/components/Banners";
 import { categoryPickerGroups } from "@/components/CategoryNav";
 import { CategoryTree } from "@/components/CategoryTree";
+import { isPhoneRequest } from "@/lib/device";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
@@ -738,7 +739,9 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
           <RailRectangles />
-          <CategoryTree groups={await categoryPickerGroups()} />
+          {isPhoneRequest() ? null : (
+            <CategoryTree groups={await categoryPickerGroups()} />
+          )}
         </aside>
       </div>
 
