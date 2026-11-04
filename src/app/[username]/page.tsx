@@ -31,7 +31,10 @@ import { alumniFor } from "@/lib/alumniQueries";
 import { wallet } from "@/lib/rewardsQueries";
 import { ContributionScore } from "@/components/ContributionScore";
 import { PostIdeasBanner } from "@/components/PostIdeasBanner";
-import { RailRectangles, SmallBanners } from "@/components/Banners";
+import { RailRectangles } from "@/components/Banners";
+import { categoryPickerGroups } from "@/components/CategoryNav";
+import { CategoryTree } from "@/components/CategoryTree";
+import { isPhoneRequest } from "@/lib/device";
 import { MoreOnGodesi } from "@/components/MoreOnGodesi";
 import { cachedCurrentUser } from "@/lib/auth";
 import { clubCategory } from "@/lib/clubs";
@@ -105,15 +108,17 @@ export default async function PublicProfilePage({
   const facts = profileFactsList(user.profileFacts);
   const viewerFreeBlock = viewer
     ? !!(await db.adOrder.findFirst({
-        where: { userId: viewer.id, wallBlockId: { not: null }, provider: "free" },
+        where: {
+          userId: viewer.id,
+          wallBlockId: { not: null },
+          provider: "free",
+        },
         select: { id: true },
       }))
     : false;
   const viewerWallet =
     viewer && viewer.id !== user.id ? await wallet(viewer.id) : null;
-  const viewerPoints = viewer
-    ? (viewerWallet ?? points).balance
-    : 0;
+  const viewerPoints = viewer ? (viewerWallet ?? points).balance : 0;
   const currency = requestCurrency();
   const viewerCreditUsd = viewer
     ? (await wallCreditMinor(viewer.id, currency)) /
@@ -314,13 +319,17 @@ export default async function PublicProfilePage({
                 {bricks
                   .reduce((sum, b) => sum + (b.w * b.h) / 100, 0)
                   .toLocaleString()}{" "}
-                desi {bricks.reduce((sum, b) => sum + b.w * b.h, 0) / 100 === 1
+                desi{" "}
+                {bricks.reduce((sum, b) => sum + b.w * b.h, 0) / 100 === 1
                   ? "brick"
                   : "bricks"}
               </h2>
               <ul className="mt-2 space-y-2 text-sm">
                 {bricks.map((block) => (
-                  <li key={block.id} className="flex flex-wrap items-center gap-2">
+                  <li
+                    key={block.id}
+                    className="flex flex-wrap items-center gap-2"
+                  >
                     <a
                       href={block.linkUrl}
                       target="_blank"
@@ -330,8 +339,8 @@ export default async function PublicProfilePage({
                       {block.title}
                     </a>
                     <span className="text-xs text-slate-500">
-                      row {block.y / 10 + 1} · col {(1000 - block.x) / 10} from the
-                      right · {block.clicks.toLocaleString()} clicks
+                      row {block.y / 10 + 1} · col {(1000 - block.x) / 10} from
+                      the right · {block.clicks.toLocaleString()} clicks
                     </span>
                   </li>
                 ))}
@@ -730,15 +739,15 @@ export default async function PublicProfilePage({
             </Card>
           ) : null}
           <RailRectangles />
-          <SmallBanners show={6} embedded />
+          {isPhoneRequest() ? null : (
+            <CategoryTree groups={await categoryPickerGroups()} />
+          )}
         </aside>
       </div>
 
       <section className="space-y-2">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-bold">
-            🏆 The GoDesi Wall of Fame
-          </h2>
+          <h2 className="text-lg font-bold">🏆 The GoDesi Wall of Fame</h2>
           <Link
             href="/walloffame"
             className="text-sm font-semibold text-indigo-700 underline"
