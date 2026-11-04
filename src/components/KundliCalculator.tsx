@@ -110,6 +110,7 @@ export function KundliCalculator() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [needsSignup, setNeedsSignup] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -126,7 +127,10 @@ export function KundliCalculator() {
         }),
       });
       const data = (await res.json()) as Result & { error?: string };
-      if (!res.ok) {
+      if (res.status === 401) {
+        setResult(null);
+        setNeedsSignup(true);
+      } else if (!res.ok) {
         setResult(null);
         setError(data.error ?? "Something went wrong. Please try again.");
       } else {
@@ -204,6 +208,31 @@ export function KundliCalculator() {
               saved.
             </p>
           </div>
+          {needsSignup ? (
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 sm:col-span-2">
+              <p className="font-bold">
+                🔮 Join GoDesi free to see your kundli
+              </p>
+              <p className="mt-1">
+                The kundli calculator is free for GoDesi members. Sign up in a
+                minute, then make your chart.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a
+                  href="/signup?next=/astrology/kundli-calculator"
+                  className="rounded-full bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+                >
+                  Join free
+                </a>
+                <a
+                  href="/login?next=/astrology/kundli-calculator"
+                  className="rounded-full border border-indigo-300 bg-white px-4 py-2 font-semibold text-indigo-700 hover:bg-indigo-50"
+                >
+                  Log in
+                </a>
+              </div>
+            </div>
+          ) : null}
           {error ? (
             <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 sm:col-span-2">
               {error}

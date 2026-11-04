@@ -48,12 +48,24 @@ export function PersonalProfileForm({
   /** Free plan: the playlist link is saved but not shown. */
   playlistLocked?: boolean;
 }) {
-  const [state, formAction] = useFormState(savePersonalProfileAction, emptyState);
+  const [state, formAction] = useFormState(
+    savePersonalProfileAction,
+    emptyState,
+  );
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl ?? "");
 
   return (
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
+      <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        🙋 <strong>This is your personal profile</strong> — a page about you as
+        a person. Use your own name and photo here. Have a shop, business or
+        service? Make a separate{" "}
+        <a href="/dashboard/profile" className="font-semibold underline">
+          free business card
+        </a>{" "}
+        for it.
+      </p>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex flex-col items-center gap-2">
@@ -85,7 +97,7 @@ export function PersonalProfileForm({
               purpose="avatar"
               square
               label="Upload a square photo or logo"
-              hint="Same width and height, e.g. 500 × 500"
+              hint="A photo of you; your business logo goes on your business card. Square, e.g. 500 × 500"
               onUploaded={setAvatarUrl}
             />
           </div>
@@ -96,9 +108,17 @@ export function PersonalProfileForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Your name">
-          <input name="name" defaultValue={profile.name} required className={inputClass} />
+          <input
+            name="name"
+            defaultValue={profile.name}
+            required
+            className={inputClass}
+          />
         </Field>
-        <Field label="Username" hint="Your profile lives at godesi.com/username">
+        <Field
+          label="Username"
+          hint="Your profile lives at godesi.com/username"
+        >
           <input
             name="username"
             defaultValue={profile.username || suggestedUsername}
@@ -128,7 +148,10 @@ export function PersonalProfileForm({
         />
       </Field>
 
-      <Field label="About me" hint="A couple of lines about you — max 500 characters">
+      <Field
+        label="About me"
+        hint="A couple of lines about you — max 500 characters"
+      >
         <textarea
           name="bio"
           rows={4}

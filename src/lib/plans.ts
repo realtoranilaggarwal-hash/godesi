@@ -163,7 +163,9 @@ export function isPlanActive(user: Pick<User, "plan" | "planExpiresAt">) {
   return user.planExpiresAt.getTime() > Date.now();
 }
 
-export function effectivePlan(user: Pick<User, "plan" | "planExpiresAt">): Plan {
+export function effectivePlan(
+  user: Pick<User, "plan" | "planExpiresAt">,
+): Plan {
   return isPlanActive(user) ? user.plan : "FREE";
 }
 
@@ -181,7 +183,9 @@ export function mediaLimit(user: Pick<User, "plan" | "planExpiresAt">) {
  * storage and lets a seller show a whole house.
  */
 export function listingImageLimit(user: Pick<User, "plan" | "planExpiresAt">) {
-  return effectivePlan(user) === "FREE" ? 1 : PLANS[effectivePlan(user)].mediaLimit;
+  return effectivePlan(user) === "FREE"
+    ? 1
+    : PLANS[effectivePlan(user)].mediaLimit;
 }
 
 const VIDEO_LIMITS: Record<Plan, number> = { FREE: 1, PRO: 2, PREMIUM: 3 };
@@ -201,7 +205,11 @@ export function videoLimit(
   return VIDEO_LIMITS[effectivePlan(user)];
 }
 
-const ALBUM_PHOTO_LIMITS: Record<Plan, number> = { FREE: 6, PRO: 15, PREMIUM: 30 };
+const ALBUM_PHOTO_LIMITS: Record<Plan, number> = {
+  FREE: 6,
+  PRO: 15,
+  PREMIUM: 30,
+};
 
 /**
  * Thumbnails shown from a member's public Google Photos album. Google hosts the
@@ -253,7 +261,9 @@ export function newsPostsPerWeek(
 }
 
 /** Direct Stripe payouts are the top-tier perk; everyone else is settled by Godesi. */
-export function canReceiveDirectPayouts(user: Pick<User, "plan" | "planExpiresAt">) {
+export function canReceiveDirectPayouts(
+  user: Pick<User, "plan" | "planExpiresAt">,
+) {
   return effectivePlan(user) === "PREMIUM";
 }
 
@@ -275,7 +285,7 @@ const EXTRA_CATEGORY_LIMITS: Record<Plan, number> = {
 };
 
 const SERVICE_PICK_LIMITS: Record<Plan, number> = {
-  FREE: 2,
+  FREE: 3,
   PRO: 6,
   PREMIUM: 10,
 };

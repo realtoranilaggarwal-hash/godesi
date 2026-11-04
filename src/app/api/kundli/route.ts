@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import tzlookup from "tz-lookup";
 import { z } from "zod";
+import { getCurrentUser } from "@/lib/auth";
 import {
   computeKundli,
   localToUtc,
@@ -62,6 +63,12 @@ async function geocode(place: string) {
 
 /** Birth details are used for this one calculation and never stored. */
 export async function POST(request: Request) {
+  if (!(await getCurrentUser())) {
+    return NextResponse.json(
+      { error: "Join GoDesi free to see your kundli." },
+      { status: 401 },
+    );
+  }
   const ip =
     request.headers.get("x-real-ip") ??
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
