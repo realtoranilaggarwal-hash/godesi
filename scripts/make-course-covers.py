@@ -41,6 +41,7 @@ STYLE = {  # slug: (icon, color, audience)
     "marketing": ("megaphone", "#db2777", "Online income"),
     "life-insurance": ("shield", "#0d9488", "Insurance"),
     "realtor-income": ("key", "#2563eb", "Real estate"),
+    "become-nj-real-estate-agent": ("card", "#b45309", "Real estate career"),
     "flipping": ("hammer", "#ea580c", "Real estate investing"),
     "rentals": ("house", "#4f46e5", "Real estate investing"),
     "multifamily": ("building", "#7c3aed", "Real estate investing"),
