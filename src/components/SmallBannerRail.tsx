@@ -99,10 +99,12 @@ export function SmallBannerRail({
   const hasRoom = roomFor === pathname;
   const fillRef = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState<number | null>(null);
+  // The left rail runs the full height of the page beside it.
+  const fills = fill || (!embedded && !phone && side === "left");
 
   useEffect(() => {
     const box = fillRef.current;
-    if (!fill || !box) return;
+    if (!fills || !box) return;
     const measure = () => {
       const { width, height } = box.getBoundingClientRect();
       // Label row on top and the "book this spot" tile at the end.
@@ -112,7 +114,7 @@ export function SmallBannerRail({
     const observer = new ResizeObserver(measure);
     observer.observe(box);
     return () => observer.disconnect();
-  }, [fill]);
+  }, [fills, hasRoom]);
 
   useEffect(() => {
     if (embedded || phone) return;
@@ -134,8 +136,7 @@ export function SmallBannerRail({
         pathname !== "/" &&
           window.innerWidth >= 1280 &&
           !(ownRail && side === "right") &&
-          usedWidth(page) +
-            RAIL_SPACE * (side === "left" && !ownRail ? 2 : 1) <
+          usedWidth(page) + RAIL_SPACE * (side === "left" && !ownRail ? 2 : 1) <
             inner - 2
           ? pathname
           : null,
@@ -175,7 +176,7 @@ export function SmallBannerRail({
     return null;
   }
 
-  const count = fill
+  const count = fills
     ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length)
     : show;
   const visible = Array.from(
@@ -218,7 +219,9 @@ export function SmallBannerRail({
           key={banner.slug}
           href={banner.href}
           target={banner.href.startsWith("http") ? "_blank" : undefined}
-          rel={banner.href.startsWith("http") ? "noopener noreferrer" : undefined}
+          rel={
+            banner.href.startsWith("http") ? "noopener noreferrer" : undefined
+          }
           data-house-banner={banner.slug}
           className={`relative flex aspect-[3/1] w-full items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-br px-4 text-white shadow-sm transition hover:shadow-md ${banner.colors}`}
         >
@@ -284,7 +287,11 @@ export function SmallBannerRail({
       data-site-rail={side}
       className={hasRoom ? "w-[320px] shrink-0" : "hidden"}
     >
-      {hasRoom ? (
+      {hasRoom && fills ? (
+        <div ref={fillRef} className="relative h-full">
+          <div className="absolute inset-0 overflow-hidden">{stack}</div>
+        </div>
+      ) : hasRoom ? (
         <div className="space-y-4">
           {categories.length ? <CategoryTree groups={categories} /> : null}
           {stack}
