@@ -16,7 +16,6 @@ import { PhoneInput } from "@/components/forms/PhoneInput";
 import { PlaylistField } from "@/components/forms/PlaylistField";
 import { DIAL_CODE_HINT } from "@/lib/dialCodes";
 import { FormSuccess } from "@/components/forms/FormSuccess";
-import { LogoHelp } from "@/components/forms/LogoHelp";
 
 export type PersonalProfileValues = {
   name: string;
@@ -96,12 +95,11 @@ export function PersonalProfileForm({
             <ImageDropzone
               purpose="avatar"
               square
-              label="Upload a square photo or logo"
+              label="Upload a square photo of you"
               hint="A photo of you; your business logo goes on your business card. Square, e.g. 500 × 500"
               onUploaded={setAvatarUrl}
             />
           </div>
-          <LogoHelp name={profile.name} />
         </div>
       </div>
       <input type="hidden" name="avatarUrl" value={avatarUrl} />
