@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { Card } from "@/components/ui";
 import { EFAX_AFFILIATE_URL, EFAX_TRACKING_PIXEL } from "@/lib/shop";
 
@@ -68,6 +69,12 @@ export default function MarketingPage() {
   return (
     <div className="space-y-8">
       <GodesiWikiBanner />
+
+      <PlaylistGallery
+        url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
+        owner="Godesi"
+        heading="Watch: free marketing on Godesi"
+      />
 
       <section className="space-y-3">
         <h2 className="text-xl font-black">How it works</h2>
