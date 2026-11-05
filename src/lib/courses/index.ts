@@ -11,6 +11,7 @@ import { EMAIL_LIST_LESSONS } from "./emailList";
 import { YOUTUBE_MONETIZATION_LESSONS } from "./youtubeMonetization";
 import { LIFE_INSURANCE_LESSONS } from "./lifeInsurance";
 import { REALTOR_LESSONS } from "./realtor";
+import { BECOME_AGENT_LESSONS } from "./becomeAgent";
 import { FLIPPING_LESSONS } from "./flipping";
 import { RENTALS_LESSONS } from "./rentals";
 import { MULTIFAMILY_LESSONS } from "./multifamily";
@@ -135,6 +136,42 @@ export const COURSES: Course[] = [
       },
     ],
     lessons: REALTOR_LESSONS,
+  },
+  {
+    slug: "become-nj-real-estate-agent",
+    title: "Become a NJ Real Estate Agent + Add a Life Insurance License",
+    shortTitle: "Become a NJ Real Estate Agent",
+    tagline:
+      "Every step, fee and timeline to a NJ real estate license, all 126 state-licensed schools, and a second income from a life insurance license.",
+    pitch:
+      "The 2026 step-by-step guide, checked against the NJ Real Estate Commission, DOBI and PSI.",
+    emoji: "🪪",
+    cover: "/images/courses/become-nj-real-estate-agent.jpg",
+    priceMinor: LAUNCH_PRICE_MINOR,
+    listPriceMinor: LAUNCH_LIST_PRICE_MINOR,
+    highlights: [
+      {
+        icon: "🧭",
+        title: "Every step",
+        body: "75-hour course, school final, PSI exam, fingerprints, broker — with real 2026 fees.",
+      },
+      {
+        icon: "🏫",
+        title: "All 126 schools",
+        body: "The full NJREC-licensed school list with city, phone and website.",
+      },
+      {
+        icon: "🛡️",
+        title: "Second license",
+        body: "The exact NJ life insurance licensing steps, plus 54 approved course providers.",
+      },
+      {
+        icon: "🤝",
+        title: "Pick a broker",
+        body: "The questions to ask every broker, and your first 90 days as a new agent.",
+      },
+    ],
+    lessons: BECOME_AGENT_LESSONS,
   },
   {
     slug: "flipping",
