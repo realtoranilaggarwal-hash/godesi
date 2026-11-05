@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { SITE } from "@/lib/site";
 import { publicTeam } from "@/lib/team";
 import { properName } from "@/lib/names";
@@ -72,6 +73,15 @@ export default async function AboutPage() {
         <li>Every enquiry goes straight to you on WhatsApp — we do not sit in between.</li>
         <li>Earn points for inviting others and spend them on ads and upgrades.</li>
       </ul>
+
+      <h2>Marketing — watch how Godesi promotes you</h2>
+      <div className="not-prose">
+        <PlaylistGallery
+          url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
+          owner="Godesi"
+          heading="Godesi marketing videos"
+        />
+      </div>
 
       <h2>How our data works</h2>
       <p>
