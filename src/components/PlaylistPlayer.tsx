@@ -17,7 +17,10 @@ export function PlaylistPlayer({
   videos: PlaylistVideo[];
   owner: string;
 }) {
-  const [current, setCurrent] = useState<PlaylistVideo | null>(null);
+  const [picked, setPicked] = useState<PlaylistVideo | null>(null);
+  // Start on the newest public video: the bare playlist embed shows "Video
+  // unavailable" when the playlist's first entry is private or removed.
+  const current = picked ?? videos[0] ?? null;
 
   const src = current
     ? `https://www.youtube-nocookie.com/embed/${current.id}?list=${playlistId}`
@@ -44,7 +47,7 @@ export function PlaylistPlayer({
             <button
               key={video.id}
               type="button"
-              onClick={() => setCurrent(video)}
+              onClick={() => setPicked(video)}
               title={video.title}
               className={`overflow-hidden rounded-xl border-2 bg-slate-100 text-left transition hover:-translate-y-0.5 ${
                 video.id === current?.id
