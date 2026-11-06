@@ -9,6 +9,7 @@ import {
   toggleEventFeaturedAction,
 } from "@/app/actions/admin";
 import { formatEventDate } from "@/lib/events";
+import { formatMinor } from "@/lib/format";
 import { Badge, Card, inputClass } from "@/components/ui";
 import { deskFallback } from "@/lib/adminSections";
 
@@ -30,6 +31,18 @@ export default async function Page() {
       _count: { select: { tickets: true } },
     },
   });
+  /** Paid sales per event, so staff can see where buyers' money is at stake. */
+  const sales = await db.ticket.groupBy({
+    by: ["eventId", "currency"],
+    where: { eventId: { in: events.map((event) => event.id) }, status: "CONFIRMED", amountMinor: { gt: 0 } },
+    _sum: { amountMinor: true },
+    _count: true,
+  });
+  const salesLabel = (eventId: string) =>
+    sales
+      .filter((row) => row.eventId === eventId)
+      .map((row) => `💵 ${row._count} paid · ${formatMinor(row._sum.amountMinor ?? 0, row.currency)}`)
+      .join(" · ");
 
   return (
     <div className="space-y-4">
@@ -125,6 +138,9 @@ export default async function Page() {
                     {formatEventDate(event.startsAt, event.timeZone)} · {event.city} ·{" "}
                     {event.organizer.email} · {event.seatsBooked}/
                     {event.seatsTotal} seats · {event._count.tickets} bookings
+                    {salesLabel(event.id) ? (
+                      <span className="font-semibold text-emerald-700"> · {salesLabel(event.id)}</span>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

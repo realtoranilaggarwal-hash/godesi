@@ -240,6 +240,47 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
+    q: "🌟 Why list my event on GoDesi?",
+    id: "why-list-events",
+    a: (
+      <>
+        <ul>
+          <li>Free to post, seen by desi families searching for things to do near them.</li>
+          <li>Sell tickets online with card payments, QR tickets by email and early-bird prices.</li>
+          <li>Discount codes for your clients, sponsor packages and a short link for your flyer.</li>
+          <li>Guest reviews and photo albums on your event page.</li>
+          <li>Download your full sign-up list any time, and check guests in by QR code.</li>
+          <li>Featured events take turns at the top of the GoDesi homepage.</li>
+        </ul>
+        <p><Link href="/events/new">Post your event</Link>.</p>
+      </>
+    ),
+  },
+  {
+    q: "📋 Can I see who signed up for my event?",
+    id: "event-signups",
+    a: (
+      <p>
+        Yes. Open your event page while logged in as the organiser and download
+        the attendee list — name, email, phone, tickets and check-in for every
+        booking.
+      </p>
+    ),
+  },
+  {
+    q: "🗑️ Can I delete my event?",
+    id: "delete-event",
+    a: (
+      <p>
+        Yes — the organiser (and GoDesi staff) see a <strong>Delete event</strong>{" "}
+        button next to <strong>Edit event</strong>. If people have already paid
+        for tickets, the event is hidden instead of deleted, so buyers keep their
+        tickets and receipts. Past events stay up as a record of your work and
+        drop off the upcoming lists on their own.
+      </p>
+    ),
+  },
+  {
     q: "🏷️ How do I make a coupon (discount code) for my event?",
     id: "event-coupon",
     a: (
