@@ -50,6 +50,9 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { GodesiMark } from "@/components/GodesiMark";
 import { ScrollTop } from "@/components/ScrollTop";
 import { DeleteEventButton } from "@/components/forms/DeleteEventButton";
+import { EventSponsors } from "@/components/EventSponsors";
+import { SponsorRequestsPanel } from "@/components/SponsorRequestsPanel";
+import { sponsorsForEvent } from "@/lib/sponsors";
 import { tierOnSale, tierWindowLabel } from "@/lib/ticketTiers";
 
 type SpeakerRow =
@@ -276,6 +279,10 @@ export default async function EventPage({
   const isOwnerOrDesk = Boolean(
     user && (user.id === event.organizerId || can(user, "events")),
   );
+  const allSponsors = await sponsorsForEvent(event.id, !isOwnerOrDesk);
+  const sponsors = allSponsors.filter(
+    (sponsor) => sponsor.status === "APPROVED",
+  );
   const clubMembership =
     user && event.club
       ? await db.clubMember.findUnique({
@@ -327,7 +334,11 @@ export default async function EventPage({
   const paidTicketCount =
     user && (user.id === event.organizerId || can(user, "events"))
       ? await db.ticket.count({
-          where: { eventId: event.id, status: "CONFIRMED", amountMinor: { gt: 0 } },
+          where: {
+            eventId: event.id,
+            status: "CONFIRMED",
+            amountMinor: { gt: 0 },
+          },
         })
       : 0;
   const ticketTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
@@ -422,6 +433,8 @@ export default async function EventPage({
         />
         {searchParams.error === "cancelled" ? (
           <Alert>Payment cancelled — your seats were not booked.</Alert>
+        ) : searchParams.error ? (
+          <Alert>{searchParams.error}</Alert>
         ) : null}
 
         {/* Where the visitor is, and the way back to the list they came from. */}
@@ -554,7 +567,8 @@ export default async function EventPage({
                   ✏️ Edit event
                 </Link>
               ) : null}
-              {user && (user.id === event.organizerId || can(user, "events")) ? (
+              {user &&
+              (user.id === event.organizerId || can(user, "events")) ? (
                 <DeleteEventButton
                   eventId={event.id}
                   hasPaidTickets={paidTicketCount > 0}
@@ -835,6 +849,10 @@ export default async function EventPage({
             ) : null}
             <VideoEmbed url={event.videoUrl} title={event.title} />
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
+            <EventSponsors sponsors={sponsors} />
+            {isOwnerOrDesk ? (
+              <SponsorRequestsPanel eventId={event.id} sponsors={allSponsors} />
+            ) : null}
             {event.reviews.length ? (
               <section className="space-y-2">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -1018,6 +1036,11 @@ export default async function EventPage({
                       price: tier.price,
                       seatsLeft: seatsLeft(tier),
                     }))}
+                  promoCodesHref={
+                    sponsors.some((sponsor) => sponsor.coupon?.active)
+                      ? "#sponsors"
+                      : undefined
+                  }
                   defaultName={user.name}
                   defaultEmail={user.email}
                   askReferredBy={event.askReferredBy}
