@@ -68,9 +68,9 @@ export default async function MyTicketsPage({
             {tickets.map((ticket) => (
               <li
                 key={ticket.id}
-                className="flex items-center justify-between gap-3 py-3"
+                className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
               >
-                <div>
+                <div className="min-w-0 break-words">
                   <p className="font-medium">{ticket.event.title}</p>
                   <p className="text-sm text-slate-500">
                     {formatEventDate(
@@ -84,7 +84,7 @@ export default async function MyTicketsPage({
                       : "Free"}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2 whitespace-nowrap">
                   <Badge
                     tone={ticket.status === "CONFIRMED" ? "green" : "amber"}
                   >
