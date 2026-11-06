@@ -7,6 +7,7 @@ import { formatMinor } from "@/lib/format";
 import { formatEventDate } from "@/lib/events";
 import { Alert, Badge, LinkButton } from "@/components/ui";
 import { QuoraEvent, usdValue } from "@/components/QuoraEvent";
+import { ScrollTop } from "@/components/ScrollTop";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your ticket", robots: { index: false } };
@@ -56,6 +57,7 @@ export default async function TicketPage({
 
   return (
     <div className="mx-auto max-w-md space-y-4">
+      <ScrollTop />
       {searchParams.paid ? (
         <QuoraEvent event="Purchase" valueUsd={paidUsd} />
       ) : null}
