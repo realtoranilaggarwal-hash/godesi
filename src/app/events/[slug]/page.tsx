@@ -49,6 +49,7 @@ import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 import { GodesiMark } from "@/components/GodesiMark";
 import { ScrollTop } from "@/components/ScrollTop";
+import { tierOnSale, tierWindowLabel } from "@/lib/ticketTiers";
 
 type SpeakerRow =
   Awaited<ReturnType<typeof loadEvent>> extends infer E
@@ -141,6 +142,10 @@ async function loadEvent(slug: string) {
     where: { slug },
     include: {
       tiers: { orderBy: { sortOrder: "asc" } },
+      reviews: {
+        where: { hidden: false },
+        orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
+      },
       speakers: {
         orderBy: { sortOrder: "asc" },
         include: {
@@ -700,14 +705,26 @@ export default async function EventPage({
                     {event.tiers.map((tier) => (
                       <li
                         key={tier.id}
-                        className="flex min-w-0 items-center justify-between gap-2 rounded-xl border border-dashed border-indigo-300 bg-white px-3 py-2"
+                        className={`flex min-w-0 items-center justify-between gap-2 rounded-xl border border-dashed border-indigo-300 bg-white px-3 py-2 ${tierOnSale(tier) ? "" : "opacity-60"}`}
                       >
                         <span className="min-w-0">
                           <span className="block break-words font-semibold text-slate-900">
                             {tier.name}
                           </span>
+                          {tier.note ? (
+                            <span className="block break-words text-xs text-slate-600">{tier.note}</span>
+                          ) : null}
                           <span className="block text-xs text-slate-500">
-                            {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Sold out"}
+                            {[
+                              tierWindowLabel(tier, event.timeZone),
+                              tierOnSale(tier)
+                                ? seatsLeft(tier)
+                                  ? `${seatsLeft(tier)} left`
+                                  : "Sold out"
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
                           </span>
                         </span>
                         <span className="shrink-0 font-black text-indigo-700">
@@ -794,6 +811,37 @@ export default async function EventPage({
             ) : null}
             <VideoEmbed url={event.videoUrl} title={event.title} />
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
+            {event.reviews.length ? (
+              <section className="space-y-2">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="font-bold">⭐ What guests say</h2>
+                  <Link
+                    href={`/events/${event.slug}/reviews`}
+                    className="text-sm font-semibold text-indigo-700 hover:underline"
+                  >
+                    All {event.reviews.length} reviews →
+                  </Link>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {event.reviews.slice(0, 3).map((review) => (
+                    <figure
+                      key={review.id}
+                      className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
+                    >
+                      <p className="text-amber-500" aria-label={`${review.rating} stars`}>
+                        {"★".repeat(review.rating)}
+                      </p>
+                      <blockquote className="mt-1 line-clamp-5 break-words text-sm text-slate-700">
+                        “{review.comment}”
+                      </blockquote>
+                      <figcaption className="mt-1 text-xs font-semibold text-slate-500">
+                        — {review.authorName}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
               <ShareButtons
@@ -930,7 +978,7 @@ export default async function EventPage({
                   currency={event.currency}
                   seatsLeft={left}
                   maxPerBooking={maxPerBooking}
-                  tiers={event.tiers.map((tier) => ({
+                  tiers={event.tiers.filter((tier) => tierOnSale(tier)).map((tier) => ({
                     id: tier.id,
                     name: tier.name,
                     price: tier.price,

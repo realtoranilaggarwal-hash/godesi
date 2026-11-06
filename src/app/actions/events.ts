@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { tierOnSale } from "@/lib/ticketTiers";
 import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -612,6 +613,8 @@ export async function bookTicketAction(
     if (!event.tiers.length && event.sourceId === null && eventLeft < totalQuantity)
       return { error: `Only ${eventLeft} seat(s) left for this event.` };
     for (const line of lines) {
+      if (line.tier && !tierOnSale(line.tier))
+        return { error: `${line.tier.name} tickets are not on sale right now.` };
       if (line.tier && seatsLeft(line.tier) < line.quantity)
         return {
           error: `Only ${seatsLeft(line.tier)} ${line.tier.name} seat(s) left.`,

@@ -3,6 +3,7 @@ import QRCode from "qrcode";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
+import { ticketQrTokenValid } from "@/lib/ticketQr";
 
 /**
  * The QR encodes the server-issued ticket code. Only the ticket holder, the event
@@ -17,10 +18,12 @@ export async function GET(request: Request, { params }: { params: { code: string
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const user = await getCurrentUser();
+  const signed = ticketQrTokenValid(ticket.code, new URL(request.url).searchParams.get("t"));
+  const user = signed ? null : await getCurrentUser();
   const allowed =
-    user &&
-    (user.role === "ADMIN" || user.id === ticket.userId || user.id === ticket.event.organizerId);
+    signed ||
+    (user &&
+      (user.role === "ADMIN" || user.id === ticket.userId || user.id === ticket.event.organizerId));
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const download = new URL(request.url).searchParams.get("download") === "1";

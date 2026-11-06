@@ -1,4 +1,5 @@
 import { SITE } from "@/lib/site";
+import { ticketQrEmailUrl } from "@/lib/ticketQr";
 import { siteUrl } from "@/lib/format";
 
 /**
@@ -19,9 +20,10 @@ export function emailEnabled() {
 export function shell(title: string, body: string) {
   return `<!doctype html><html><body style="margin:0;background:#f8fafc;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a">
   <div style="max-width:560px;margin:0 auto;padding:24px">
-    <div style="background:linear-gradient(90deg,#f97316,#e11d48,#c026d3);border-radius:16px 16px 0 0;padding:18px 24px">
-      <span style="color:#fff;font-size:20px;font-weight:800;letter-spacing:.5px">Godesi</span>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-bottom:0;border-radius:16px 16px 0 0;padding:16px 24px">
+      <a href="${siteUrl()}"><img src="${siteUrl()}/logo-godesi.png" alt="GoDesi.com" width="150" height="44" style="display:block;border:0;height:44px;width:150px" /></a>
     </div>
+    <div style="background:linear-gradient(90deg,#f97316,#e11d48,#c026d3);height:6px;line-height:6px;font-size:0">&nbsp;</div>
     <div style="background:#fff;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 16px 16px;padding:24px">
       <h1 style="margin:0 0 12px;font-size:20px">${title}</h1>
       ${body}
@@ -134,9 +136,10 @@ export function ticketEmail({
        <p style="margin:0 0 4px;color:#334155">📅 ${when}</p>
        <p style="margin:0 0 4px;color:#334155">📍 ${venue}</p>
        <p style="margin:0 0 16px;color:#334155">🎫 ${ticketType ? `${ticketType} · ` : ""}${seats} ticket${seats > 1 ? "s" : ""} · booking code <strong>${code}</strong></p>
-       <p style="margin:0 0 16px"><img src="${siteUrl()}/api/tickets/${code}/qr" alt="Ticket QR code" width="180" height="180" /></p>
+       <p style="margin:0 0 16px"><img src="${ticketQrEmailUrl(code)}" alt="Ticket QR code" width="180" height="180" /></p>
        <p style="margin:0"><a href="${url}" style="display:inline-block;background:#4f46e5;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none">Open my ticket</a></p>
-       <p style="margin:16px 0 0;font-size:13px;color:#64748b">Show the QR code at the entrance, on your phone or printed. One code admits ${seats}. Your tickets are also saved under My tickets on GoDesi.com.</p>`,
+       <p style="margin:16px 0 0;font-size:13px;color:#64748b">Show the QR code at the entrance, on your phone or printed. One code admits ${seats}. Your tickets are also saved under My tickets on GoDesi.com.</p>
+       <p style="margin:16px 0 0;font-size:12px;color:#94a3b8">Tickets issued by GoDesi.com</p>`,
     ),
   };
 }

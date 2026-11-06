@@ -72,6 +72,11 @@ export default async function TicketPage({
       ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-5 py-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-godesi.png" alt="GoDesi.com" width={136} height={40} className="h-10 w-auto" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">godesi.com</span>
+        </div>
         <div className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-5 py-4 text-white">
           <p className="text-xs font-bold uppercase tracking-widest opacity-80">
             🎟️ GoDesi.com ticket · Admit {ticket.quantity}
