@@ -24,15 +24,19 @@ const DESCRIPTION = [
   "Sponsors welcome — call 732-877-8585.",
 ].join("\n\n");
 
-/** `match` lists the old names so the existing late tiers (and their bookings) are kept. */
+/**
+ * The hall holds 400 people, so seats across all tiers add up to 400, counting a couple as 2:
+ * early 120 + 50 + 40×2 = 250, balcony 50, late 60 + 20 + 10×2 = 100.
+ * `match` lists the old names so the existing late tiers (and their bookings) are kept.
+ */
 const TIERS = [
-  { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 100, salesEnd: EARLY_END },
-  { name: "Kids (0–9) — Early bird", note: "Table seating included", price: 65, seats: 80, salesEnd: EARLY_END },
-  { name: "Couple — Early bird", note: "Table seating included", price: 160, seats: 50, salesEnd: EARLY_END },
+  { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 120, salesEnd: EARLY_END },
+  { name: "Kids (0–9) — Early bird", note: "Table seating included", price: 65, seats: 50, salesEnd: EARLY_END },
+  { name: "Couple — Early bird", note: "Table seating included", price: 160, seats: 40, salesEnd: EARLY_END },
   { name: "Special balcony seat", note: "Chair only, no table", price: 75, seats: 50 },
-  { name: "Adult (10+)", match: ["General"], price: 150, seats: 100, salesStart: LATE_START },
-  { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 80, salesStart: LATE_START },
-  { name: "Couple", match: ["Couple"], price: 250, seats: 50, salesStart: LATE_START },
+  { name: "Adult (10+)", match: ["General"], price: 150, seats: 60, salesStart: LATE_START },
+  { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 20, salesStart: LATE_START },
+  { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START },
 ];
 
 const REVIEWS: { name: string; comment: string; featured?: boolean }[] = [
