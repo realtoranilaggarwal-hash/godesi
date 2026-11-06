@@ -384,7 +384,9 @@ export default async function EventPage({
     organizer: {
       "@type": "Organization",
       name: event.business?.name ?? event.organizer?.name ?? "Godesi",
-      url: event.business ? `${siteUrl()}/business/${event.business.slug}` : siteUrl(),
+      url: event.business
+        ? `${siteUrl()}/business/${event.business.slug}`
+        : siteUrl(),
     },
     // Imported events are ticketed elsewhere, so no offer is claimed for them.
     ...(imported
@@ -699,7 +701,10 @@ export default async function EventPage({
                 </a>
               </div>
             ) : null}
-            {!imported && !past && left > 0 && (ticketTiers.length || event.price) ? (
+            {!imported &&
+            !past &&
+            left > 0 &&
+            (ticketTiers.length || event.price) ? (
               <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-3">
                 <p className="text-sm font-bold text-indigo-900">🎟️ Tickets</p>
                 {ticketTiers.length ? (
@@ -714,7 +719,9 @@ export default async function EventPage({
                             {tier.name}
                           </span>
                           {tier.note ? (
-                            <span className="block break-words text-xs text-slate-600">{tier.note}</span>
+                            <span className="block break-words text-xs text-slate-600">
+                              {tier.note}
+                            </span>
                           ) : null}
                           <span className="block text-xs text-slate-500">
                             {[
@@ -730,7 +737,9 @@ export default async function EventPage({
                           </span>
                         </span>
                         <span className="shrink-0 font-black text-indigo-700">
-                          {tier.price ? formatMoney(tier.price, event.currency) : "Free"}
+                          {tier.price
+                            ? formatMoney(tier.price, event.currency)
+                            : "Free"}
                         </span>
                       </li>
                     ))}
@@ -830,7 +839,10 @@ export default async function EventPage({
                       key={review.id}
                       className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
                     >
-                      <p className="text-amber-500" aria-label={`${review.rating} stars`}>
+                      <p
+                        className="text-amber-500"
+                        aria-label={`${review.rating} stars`}
+                      >
                         {"★".repeat(review.rating)}
                       </p>
                       <blockquote className="mt-1 line-clamp-5 break-words text-sm text-slate-700">
@@ -931,7 +943,11 @@ export default async function EventPage({
                 )}
                 {event.websiteUrl ? (
                   <div className="mt-3">
-                    <LinkButton href={event.websiteUrl} target="_blank" variant="secondary">
+                    <LinkButton
+                      href={event.websiteUrl}
+                      target="_blank"
+                      variant="secondary"
+                    >
                       Organiser&apos;s page ↗
                     </LinkButton>
                   </div>
@@ -966,7 +982,8 @@ export default async function EventPage({
             ) : !user ? (
               <div className="mt-3 space-y-2">
                 <p className="text-sm text-slate-600">
-                  Sign in (or join free) to buy tickets. Your tickets are saved in your account and emailed to you.
+                  Sign in (or join free) to buy tickets. Your tickets are saved
+                  in your account and emailed to you.
                 </p>
                 <LinkButton href={`/login?next=/events/${event.slug}`}>
                   Sign in to buy tickets
@@ -980,12 +997,14 @@ export default async function EventPage({
                   currency={event.currency}
                   seatsLeft={left}
                   maxPerBooking={maxPerBooking}
-                  tiers={ticketTiers.filter((tier) => tierOnSale(tier)).map((tier) => ({
-                    id: tier.id,
-                    name: tier.name,
-                    price: tier.price,
-                    seatsLeft: seatsLeft(tier),
-                  }))}
+                  tiers={ticketTiers
+                    .filter((tier) => tierOnSale(tier))
+                    .map((tier) => ({
+                      id: tier.id,
+                      name: tier.name,
+                      price: tier.price,
+                      seatsLeft: seatsLeft(tier),
+                    }))}
                   defaultName={user.name}
                   defaultEmail={user.email}
                   askReferredBy={event.askReferredBy}
@@ -996,67 +1015,87 @@ export default async function EventPage({
         )}
 
         {!imported && !past && sponsorTiers.length ? (
-          <Card id="sponsor">
-            <h2 className="font-bold">🤝 Sponsor this event</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Put your business in front of every guest. Pick a package below —
-              the organiser will contact you for your logo, clip or name.
-            </p>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-              {sponsorTiers.map((tier) => (
-                <li
-                  key={tier.id}
-                  className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
+          <Card>
+            <details id="sponsor" className="group scroll-mt-24">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold text-amber-700 hover:underline">
+                <span>
+                  🤝 Become a sponsor — packages from{" "}
+                  {formatMoney(
+                    Math.min(...sponsorTiers.map((tier) => tier.price)),
+                    event.currency,
+                  )}
+                </span>
+                <span
+                  className="text-slate-400 transition group-open:rotate-180"
+                  aria-hidden
                 >
-                  <div className="flex min-w-0 items-start justify-between gap-2">
-                    <span className="min-w-0 break-words font-semibold text-slate-900">
-                      {tier.name}
-                    </span>
-                    <span className="shrink-0 font-black text-amber-700">
-                      {formatMoney(tier.price, event.currency)}
-                    </span>
-                  </div>
-                  {tier.perks.length ? (
-                    <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-700">
-                      {tier.perks.map((perk) => (
-                        <li key={perk} className="break-words">
-                          {perk}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  <p className="mt-1 text-xs text-slate-500">
-                    {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Taken"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-            {!user ? (
-              <div className="mt-3">
-                <LinkButton href={`/login?next=/events/${event.slug}%23sponsor`}>
-                  Sign in to become a sponsor
-                </LinkButton>
-              </div>
-            ) : (
-              <div className="mt-3">
-                <TicketForm
-                  eventId={event.id}
-                  price={0}
-                  currency={event.currency}
-                  seatsLeft={left}
-                  maxPerBooking={maxPerBooking}
-                  tiers={sponsorTiers.filter((tier) => tierOnSale(tier)).map((tier) => ({
-                    id: tier.id,
-                    name: tier.name,
-                    price: tier.price,
-                    seatsLeft: seatsLeft(tier),
-                  }))}
-                  defaultName={user.name}
-                  defaultEmail={user.email}
-                  nameLabel="Business name (as it should appear)"
-                />
-              </div>
-            )}
+                  ▾
+                </span>
+              </summary>
+              <p className="mt-2 text-sm text-slate-600">
+                Put your business in front of every guest. Pick a package below
+                — the organiser will contact you for your logo, clip or name.
+              </p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {sponsorTiers.map((tier) => (
+                  <li
+                    key={tier.id}
+                    className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
+                  >
+                    <div className="flex min-w-0 items-start justify-between gap-2">
+                      <span className="min-w-0 break-words font-semibold text-slate-900">
+                        {tier.name}
+                      </span>
+                      <span className="shrink-0 font-black text-amber-700">
+                        {formatMoney(tier.price, event.currency)}
+                      </span>
+                    </div>
+                    {tier.perks.length ? (
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-700">
+                        {tier.perks.map((perk) => (
+                          <li key={perk} className="break-words">
+                            {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    <p className="mt-1 text-xs text-slate-500">
+                      {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Taken"}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              {!user ? (
+                <div className="mt-3">
+                  <LinkButton
+                    href={`/login?next=/events/${event.slug}%23sponsor`}
+                  >
+                    Sign in to become a sponsor
+                  </LinkButton>
+                </div>
+              ) : (
+                <div className="mt-3">
+                  <TicketForm
+                    eventId={event.id}
+                    price={0}
+                    currency={event.currency}
+                    seatsLeft={left}
+                    maxPerBooking={maxPerBooking}
+                    tiers={sponsorTiers
+                      .filter((tier) => tierOnSale(tier))
+                      .map((tier) => ({
+                        id: tier.id,
+                        name: tier.name,
+                        price: tier.price,
+                        seatsLeft: seatsLeft(tier),
+                      }))}
+                    defaultName={user.name}
+                    defaultEmail={user.email}
+                    nameLabel="Business name (as it should appear)"
+                  />
+                </div>
+              )}
+            </details>
           </Card>
         ) : null}
 
