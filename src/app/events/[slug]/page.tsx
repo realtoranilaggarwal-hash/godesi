@@ -49,6 +49,7 @@ import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 import { GodesiMark } from "@/components/GodesiMark";
 import { ScrollTop } from "@/components/ScrollTop";
+import { DeleteEventButton } from "@/components/forms/DeleteEventButton";
 import { tierOnSale, tierWindowLabel } from "@/lib/ticketTiers";
 
 type SpeakerRow =
@@ -323,6 +324,12 @@ export default async function EventPage({
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
   const left = seatsLeft(event);
+  const paidTicketCount =
+    user && (user.id === event.organizerId || can(user, "events"))
+      ? await db.ticket.count({
+          where: { eventId: event.id, status: "CONFIRMED", amountMinor: { gt: 0 } },
+        })
+      : 0;
   const ticketTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
   const sponsorTiers = event.tiers.filter((tier) => tier.kind === "SPONSOR");
   const theme = eventTheme(
@@ -546,6 +553,12 @@ export default async function EventPage({
                 >
                   ✏️ Edit event
                 </Link>
+              ) : null}
+              {user && (user.id === event.organizerId || can(user, "events")) ? (
+                <DeleteEventButton
+                  eventId={event.id}
+                  hasPaidTickets={paidTicketCount > 0}
+                />
               ) : null}
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">

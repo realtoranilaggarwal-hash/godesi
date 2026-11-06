@@ -1018,3 +1018,31 @@ export async function removeTicketTypeAction(
   revalidatePath(`/admin/events/${event.id}`);
   return { success: `${tier.name} removed.` };
 }
+
+/**
+ * Organisers and staff can remove an event. One with paid tickets is hidden
+ * instead, so buyers keep their tickets and receipts.
+ */
+export async function deleteEventAction(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("eventId") ?? "");
+  const event = await db.event.findUnique({
+    where: { id },
+    select: { id: true, slug: true, organizerId: true },
+  });
+  if (!event) redirect("/events");
+  if (event.organizerId !== user.id && !can(user, "events"))
+    throw new Error("Only the organiser can delete this event.");
+
+  const paid = await db.ticket.count({
+    where: { eventId: event.id, status: "CONFIRMED", amountMinor: { gt: 0 } },
+  });
+  if (paid) {
+    await db.event.update({ where: { id: event.id }, data: { status: "REJECTED", featured: false } });
+  } else {
+    await db.event.delete({ where: { id: event.id } });
+  }
+  revalidatePath("/events");
+  revalidatePath("/");
+  redirect(paid ? "/dashboard/tickets?cancelled=1" : "/dashboard/tickets?deleted=1");
+}

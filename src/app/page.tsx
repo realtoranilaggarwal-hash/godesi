@@ -141,9 +141,13 @@ export default async function HomePage() {
   const todayFests = todaysFestivals();
   const isFeaturedEvent = (event: (typeof upcoming)[number]) =>
     event.featured || planRank(event.organizer.plan) > 0;
-  const events = [...upcoming]
-    .sort((a, b) => Number(isFeaturedEvent(b)) - Number(isFeaturedEvent(a)))
-    .slice(0, 6);
+  /** Featured events take turns at the front, like the banner ads; the rest keep date order. */
+  const featuredFirst = upcoming
+    .filter(isFeaturedEvent)
+    .map((event) => ({ event, key: Math.random() }))
+    .sort((a, b) => a.key - b.key)
+    .map(({ event }) => event);
+  const events = [...featuredFirst, ...upcoming.filter((event) => !isFeaturedEvent(event))].slice(0, 6);
 
   return (
     <>
