@@ -7,7 +7,8 @@ import { siteUrl } from "@/lib/format";
 export function proxyImage(url: string) {
   if (!/^https?:\/\//i.test(url)) return url;
   if (url.includes(".public.blob.vercel-storage.com")) return url;
-  if (url.startsWith(`${siteUrl()}/`)) return url;
+  /** Same-site files go out as paths: the image optimizer only takes listed remote hosts. */
+  if (url.startsWith(`${siteUrl()}/`)) return url.slice(siteUrl().length);
   return `/api/img?u=${encodeURIComponent(url)}`;
 }
 
