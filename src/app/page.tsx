@@ -75,6 +75,24 @@ const homeEvents = cachedQuery("home-events", CONTENT_TTL, () =>
   }),
 );
 
+/** Featured events, however far out, so they always lead the homepage shelf. */
+const homeFeaturedEvents = cachedQuery("home-featured-events", CONTENT_TTL, () =>
+  db.event.findMany({
+    where: {
+      status: "APPROVED",
+      startsAt: { gte: new Date() },
+      OR: [{ featured: true }, { organizer: { plan: { not: "FREE" } } }],
+    },
+    orderBy: { startsAt: "asc" },
+    take: 24,
+    include: {
+      category: { select: { name: true, icon: true, color: true } },
+      tiers: { select: { price: true } },
+      organizer: { select: { plan: true } },
+    },
+  }),
+);
+
 const homeNews = cachedQuery("home-news", CONTENT_TTL, () =>
   db.newsItem.findMany({
     where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
@@ -113,17 +131,22 @@ const cryptoFearGreed = cachedQuery("crypto-fng", 1800, async () => {
 });
 
 export default async function HomePage() {
-  const [businesses, eventRows, newsRows, spaCount, memberRows, fng] =
+  const [businesses, eventRows, featuredRows, newsRows, spaCount, memberRows, fng] =
     await Promise.all([
       searchBusinesses({ take: 8, sort: "recent" }),
       homeEvents(),
+      homeFeaturedEvents(),
       homeNews(),
       homeSpaCount(),
       homeMembers(),
       cryptoFearGreed(),
     ]);
   // Cached rows come back JSON-serialised, so dates are strings again.
-  const upcoming = eventRows.map((event) => ({
+  const eventIds = new Set(eventRows.map((event) => event.id));
+  const upcoming = [
+    ...eventRows,
+    ...featuredRows.filter((event) => !eventIds.has(event.id)),
+  ].map((event) => ({
     ...event,
     startsAt: new Date(event.startsAt),
     endsAt: event.endsAt ? new Date(event.endsAt) : null,
