@@ -15,6 +15,8 @@ export function ScrollTop() {
     const top = () => {
       const target = hash ? document.getElementById(hash) : null;
       if (target) {
+        /** A collapsed section linked by #id (e.g. #sponsor) opens on arrival. */
+        if (target instanceof HTMLDetailsElement) target.open = true;
         target.scrollIntoView({ block: "start", behavior: "auto" });
         return;
       }
