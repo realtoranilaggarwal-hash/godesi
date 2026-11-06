@@ -323,6 +323,8 @@ export default async function EventPage({
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
   const left = seatsLeft(event);
+  const ticketTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
+  const sponsorTiers = event.tiers.filter((tier) => tier.kind === "SPONSOR");
   const theme = eventTheme(
     event.title,
     event.category?.icon,
@@ -656,14 +658,14 @@ export default async function EventPage({
                 🎫{" "}
                 {event.price ? (
                   <>
-                    {event.tiers.length
-                      ? `${event.tiers.length} ticket types from `
+                    {ticketTiers.length
+                      ? `${ticketTiers.length} ticket types from `
                       : null}
                     <Money value={event.price} currency={event.currency} />
-                    {event.tiers.length ? null : " per seat"}
+                    {ticketTiers.length ? null : " per seat"}
                   </>
-                ) : event.tiers.length ? (
-                  `${event.tiers.length} ticket types from free`
+                ) : ticketTiers.length ? (
+                  `${ticketTiers.length} ticket types from free`
                 ) : imported ? (
                   "Entry terms: see the organiser"
                 ) : (
@@ -697,12 +699,12 @@ export default async function EventPage({
                 </a>
               </div>
             ) : null}
-            {!imported && !past && left > 0 && (event.tiers.length || event.price) ? (
+            {!imported && !past && left > 0 && (ticketTiers.length || event.price) ? (
               <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-3">
                 <p className="text-sm font-bold text-indigo-900">🎟️ Tickets</p>
-                {event.tiers.length ? (
+                {ticketTiers.length ? (
                   <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {event.tiers.map((tier) => (
+                    {ticketTiers.map((tier) => (
                       <li
                         key={tier.id}
                         className={`flex min-w-0 items-center justify-between gap-2 rounded-xl border border-dashed border-indigo-300 bg-white px-3 py-2 ${tierOnSale(tier) ? "" : "opacity-60"}`}
@@ -978,7 +980,7 @@ export default async function EventPage({
                   currency={event.currency}
                   seatsLeft={left}
                   maxPerBooking={maxPerBooking}
-                  tiers={event.tiers.filter((tier) => tierOnSale(tier)).map((tier) => ({
+                  tiers={ticketTiers.filter((tier) => tierOnSale(tier)).map((tier) => ({
                     id: tier.id,
                     name: tier.name,
                     price: tier.price,
@@ -992,6 +994,71 @@ export default async function EventPage({
             )}
           </Card>
         )}
+
+        {!imported && !past && sponsorTiers.length ? (
+          <Card id="sponsor">
+            <h2 className="font-bold">🤝 Sponsor this event</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Put your business in front of every guest. Pick a package below —
+              the organiser will contact you for your logo, clip or name.
+            </p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {sponsorTiers.map((tier) => (
+                <li
+                  key={tier.id}
+                  className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
+                >
+                  <div className="flex min-w-0 items-start justify-between gap-2">
+                    <span className="min-w-0 break-words font-semibold text-slate-900">
+                      {tier.name}
+                    </span>
+                    <span className="shrink-0 font-black text-amber-700">
+                      {formatMoney(tier.price, event.currency)}
+                    </span>
+                  </div>
+                  {tier.perks.length ? (
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-700">
+                      {tier.perks.map((perk) => (
+                        <li key={perk} className="break-words">
+                          {perk}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <p className="mt-1 text-xs text-slate-500">
+                    {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Taken"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            {!user ? (
+              <div className="mt-3">
+                <LinkButton href={`/login?next=/events/${event.slug}%23sponsor`}>
+                  Sign in to become a sponsor
+                </LinkButton>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <TicketForm
+                  eventId={event.id}
+                  price={0}
+                  currency={event.currency}
+                  seatsLeft={left}
+                  maxPerBooking={maxPerBooking}
+                  tiers={sponsorTiers.filter((tier) => tierOnSale(tier)).map((tier) => ({
+                    id: tier.id,
+                    name: tier.name,
+                    price: tier.price,
+                    seatsLeft: seatsLeft(tier),
+                  }))}
+                  defaultName={user.name}
+                  defaultEmail={user.email}
+                  nameLabel="Business name (as it should appear)"
+                />
+              </div>
+            )}
+          </Card>
+        ) : null}
 
         {speakers.length ? (
           <Card>

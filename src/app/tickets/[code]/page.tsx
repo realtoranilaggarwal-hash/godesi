@@ -36,7 +36,7 @@ export default async function TicketPage({
           organizerId: true,
         },
       },
-      tier: { select: { name: true } },
+      tier: { select: { name: true, kind: true, admits: true } },
     },
   });
   if (!ticket) notFound();
@@ -54,6 +54,7 @@ export default async function TicketPage({
 
   const confirmed = ticket.status === "CONFIRMED";
   const ticketWord = `ticket${ticket.quantity === 1 ? "" : "s"}`;
+  const admits = ticket.quantity * (ticket.tier?.admits ?? 1);
 
   return (
     <div className="mx-auto max-w-md space-y-4">
@@ -81,7 +82,7 @@ export default async function TicketPage({
         </div>
         <div className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-5 py-4 text-white">
           <p className="text-xs font-bold uppercase tracking-widest opacity-80">
-            🎟️ GoDesi.com ticket · Admit {ticket.quantity}
+            🎟️ GoDesi.com {ticket.tier?.kind === "SPONSOR" ? "sponsor pass" : "ticket"} · {admits ? `Admit ${admits}` : "No entry included"}
           </p>
           <h1 className="mt-1 break-words text-xl font-black">{ticket.event.title}</h1>
         </div>
@@ -118,7 +119,7 @@ export default async function TicketPage({
               <p className="font-mono text-lg font-bold tracking-widest">{ticket.code}</p>
               <p className="text-xs text-slate-500">
                 Show this QR code at the entrance, on your phone or printed. One code
-                admits {ticket.quantity}. Checked in: {ticket.checkedInAt ? "yes" : "not yet"}
+                admits {admits}. Checked in: {ticket.checkedInAt ? "yes" : "not yet"}
               </p>
               <LinkButton href={`/api/tickets/${ticket.code}/qr?download=1`} variant="secondary">
                 Download ticket QR

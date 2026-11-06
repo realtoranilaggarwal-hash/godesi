@@ -137,10 +137,16 @@ export async function confirmTicket({
       return tx.ticket.findUniqueOrThrow({ where: { id: current.id } });
     }
 
-    await tx.event.update({
-      where: { id: current.eventId },
-      data: { seatsBooked: { increment: current.quantity } },
-    });
+    const tier = current.tierId
+      ? await tx.ticketTier.findUnique({ where: { id: current.tierId }, select: { kind: true } })
+      : null;
+    /** Sponsor packages count against their own slots, not the event's seats. */
+    if (tier?.kind !== "SPONSOR") {
+      await tx.event.update({
+        where: { id: current.eventId },
+        data: { seatsBooked: { increment: current.quantity } },
+      });
+    }
 
     if (current.tierId) {
       await tx.ticketTier.update({
@@ -162,8 +168,47 @@ export async function confirmTicket({
     });
   }
 
+  await issueSponsorBannerCodes(ticket.id);
   await sendTicketConfirmation(ticket.id);
   return { alreadyProcessed: false as const, ticket };
+}
+
+/** Code for the n-th free banner of a sponsor booking; stable so re-runs reuse it. */
+function sponsorBannerCode(ticketCode: string, index: number) {
+  return `SPONSOR-${ticketCode}-${index + 1}`;
+}
+
+/**
+ * Sponsor packages that include a banner get one single-use, 100%-off code per
+ * package bought, locked to the 320x100 slot for the package's months.
+ */
+async function issueSponsorBannerCodes(ticketId: string) {
+  const ticket = await db.ticket.findUnique({
+    where: { id: ticketId },
+    include: {
+      tier: { select: { kind: true, bannerMonths: true } },
+      event: { select: { organizerId: true } },
+    },
+  });
+  const months = ticket?.tier?.kind === "SPONSOR" ? ticket.tier.bannerMonths : null;
+  if (!ticket || !months) return;
+  for (let index = 0; index < ticket.quantity; index += 1) {
+    const code = sponsorBannerCode(ticket.code, index);
+    await db.coupon.upsert({
+      where: { code },
+      update: {},
+      create: {
+        code,
+        scope: "ADS",
+        discountKind: "PERCENT",
+        amount: 100,
+        bannerSlot: "MOBILE",
+        adMonths: months,
+        maxRedemptions: 1,
+        createdById: ticket.event.organizerId,
+      },
+    });
+  }
 }
 
 /** Ticket ids of a Checkout order: `ticketIds` for multi-type bookings, `ticketId` otherwise. */
@@ -235,10 +280,11 @@ async function sendTicketConfirmation(ticketId: string) {
           city: true,
         },
       },
-      tier: { select: { name: true } },
+      tier: { select: { name: true, kind: true, admits: true, perks: true, bannerMonths: true } },
     },
   });
   if (!ticket?.buyerEmail) return;
+  const sponsor = ticket.tier?.kind === "SPONSOR";
 
   const { subject, html } = ticketEmail({
     eventTitle: ticket.event.title,
@@ -247,6 +293,12 @@ async function sendTicketConfirmation(ticketId: string) {
     seats: ticket.quantity,
     code: ticket.code,
     ticketType: ticket.tier?.name,
+    admits: ticket.quantity * (ticket.tier?.admits ?? 1),
+    perks: sponsor ? ticket.tier?.perks : [],
+    bannerCodes:
+      sponsor && ticket.tier?.bannerMonths
+        ? Array.from({ length: ticket.quantity }, (_, index) => sponsorBannerCode(ticket.code, index))
+        : [],
   });
   await sendEmail({ to: ticket.buyerEmail, subject, html });
 }
