@@ -96,6 +96,7 @@ export function TicketForm({
   defaultName,
   defaultEmail,
   askReferredBy = false,
+  nameLabel = "Your name",
 }: {
   eventId: string;
   price: number;
@@ -106,6 +107,7 @@ export function TicketForm({
   defaultName?: string;
   defaultEmail?: string;
   askReferredBy?: boolean;
+  nameLabel?: string;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
@@ -256,7 +258,7 @@ export function TicketForm({
           {tiered ? 2 : 3}. Where should we send your tickets?
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Your name">
+          <Field label={nameLabel}>
             <input
               name="buyerName"
               required

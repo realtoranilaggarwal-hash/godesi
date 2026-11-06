@@ -119,6 +119,9 @@ export function ticketEmail({
   seats,
   code,
   ticketType,
+  admits,
+  perks = [],
+  bannerCodes = [],
 }: {
   eventTitle: string;
   when: string;
@@ -126,7 +129,22 @@ export function ticketEmail({
   seats: number;
   code: string;
   ticketType?: string | null;
+  /** People the booking lets in, when it differs from the ticket count (couples, sponsor passes). */
+  admits?: number;
+  /** Sponsor package contents, listed in the email. */
+  perks?: string[];
+  /** Single-use codes for the sponsor's free 320x100 banner. */
+  bannerCodes?: string[];
 }) {
+  const people = admits ?? seats;
+  const sponsorHtml = perks.length || bannerCodes.length
+    ? `<div style="margin:0 0 16px;padding:12px 14px;border:1px solid #fde68a;background:#fffbeb;border-radius:12px;color:#334155">
+         <p style="margin:0 0 6px;font-weight:700">🤝 Thank you for sponsoring!</p>
+         ${perks.length ? `<ul style="margin:0 0 8px;padding-left:18px">${perks.map((perk) => `<li>${perk}</li>`).join("")}</ul>` : ""}
+         <p style="margin:0 0 8px;font-size:13px">The organiser will contact you for your logo, clip or business name.</p>
+         ${bannerCodes.length ? `<p style="margin:0;font-size:13px">Your free 320×100 GoDesi banner: open <a href="${siteUrl()}/advertise?slot=MOBILE#book" style="color:#4f46e5">GoDesi advertising</a>, choose Small banner, and enter code${bannerCodes.length > 1 ? "s" : ""} <strong>${bannerCodes.join(", ")}</strong> at checkout.</p>` : ""}
+       </div>`
+    : "";
   const url = `${siteUrl()}/tickets/${code}`;
   return {
     subject: `Your ticket for ${eventTitle}`,
@@ -135,10 +153,11 @@ export function ticketEmail({
       `<p style="margin:0 0 12px;color:#334155"><strong>${eventTitle}</strong></p>
        <p style="margin:0 0 4px;color:#334155">📅 ${when}</p>
        <p style="margin:0 0 4px;color:#334155">📍 ${venue}</p>
-       <p style="margin:0 0 16px;color:#334155">🎫 ${ticketType ? `${ticketType} · ` : ""}${seats} ticket${seats > 1 ? "s" : ""} · booking code <strong>${code}</strong></p>
+       <p style="margin:0 0 16px;color:#334155">🎫 ${ticketType ? `${ticketType} · ` : ""}${seats} ticket${seats > 1 ? "s" : ""}${people !== seats ? ` · admits ${people}` : ""} · booking code <strong>${code}</strong></p>
+       ${sponsorHtml}
        <p style="margin:0 0 16px"><img src="${ticketQrEmailUrl(code)}" alt="Ticket QR code" width="180" height="180" /></p>
        <p style="margin:0"><a href="${url}" style="display:inline-block;background:#4f46e5;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none">Open my ticket</a></p>
-       <p style="margin:16px 0 0;font-size:13px;color:#64748b">Show the QR code at the entrance, on your phone or printed. One code admits ${seats}. Your tickets are also saved under My tickets on GoDesi.com.</p>
+       <p style="margin:16px 0 0;font-size:13px;color:#64748b">Show the QR code at the entrance, on your phone or printed. One code admits ${people}. Your tickets are also saved under My tickets on GoDesi.com.</p>
        <p style="margin:16px 0 0;font-size:12px;color:#94a3b8">Tickets issued by GoDesi.com</p>`,
     ),
   };

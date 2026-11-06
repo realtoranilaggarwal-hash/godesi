@@ -25,18 +25,42 @@ const DESCRIPTION = [
 ].join("\n\n");
 
 /**
- * The hall holds 400 people, so seats across all tiers add up to 400, counting a couple as 2:
+ * The hall holds 400 people, so entry tiers add up to 400, counting a couple as 2:
  * early 120 + 50 + 40×2 = 250, balcony 50, late 60 + 20 + 10×2 = 100.
  * `match` lists the old names so the existing late tiers (and their bookings) are kept.
+ * Sponsor packages are listed separately; the 2-pass ones add up to 18 more people.
  */
-const TIERS = [
+type TierSpec = {
+  name: string;
+  price: number;
+  seats: number;
+  note?: string;
+  match?: string[];
+  salesStart?: Date;
+  salesEnd?: Date;
+  kind?: "TICKET" | "SPONSOR";
+  admits?: number;
+  perks?: string[];
+  bannerMonths?: number;
+};
+
+const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
+
+const TIERS: TierSpec[] = [
   { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 120, salesEnd: EARLY_END },
   { name: "Kids (0–9) — Early bird", note: "Table seating included", price: 65, seats: 50, salesEnd: EARLY_END },
-  { name: "Couple — Early bird", note: "Table seating included", price: 160, seats: 40, salesEnd: EARLY_END },
+  { name: "Couple — Early bird", note: "Table seating included", price: 160, seats: 40, salesEnd: EARLY_END, admits: 2 },
   { name: "Special balcony seat", note: "Chair only, no table", price: 75, seats: 50 },
   { name: "Adult (10+)", match: ["General"], price: 150, seats: 60, salesStart: LATE_START },
   { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 20, salesStart: LATE_START },
-  { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START },
+  { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
+  { kind: "SPONSOR", name: "Standee sponsor", price: 350, seats: 2, admits: 2, bannerMonths: 12, perks: ["Your standee at the entrance", "2 tickets included", BANNER_YEAR] },
+  { kind: "SPONSOR", name: "Banner inside the hall", price: 300, seats: 4, admits: 2, bannerMonths: 12, perks: ["Your banner inside the Big Ball Room", "2 tickets included", BANNER_YEAR] },
+  { kind: "SPONSOR", name: "LED screen logo or clip", price: 500, seats: 3, admits: 2, bannerMonths: 12, perks: ["Your logo or video clip on the LED screen", "2 tickets included", BANNER_YEAR] },
+  { kind: "SPONSOR", name: "Table sponsor", price: 1500, seats: 10, admits: 0, bannerMonths: 12, perks: ["Bottle of champagne on the table", "Table marker: \"Table sponsored by <your business>\"", BANNER_YEAR] },
+  { kind: "SPONSOR", name: "Belly dancer sponsor", price: 600, seats: 1, admits: 0, perks: ["Belly dancer Aamra's fire dance presented by your business"] },
+  { kind: "SPONSOR", name: "Photo booth sponsor", price: 900, seats: 1, admits: 0, perks: ["Your logo on every photo booth photo"] },
+  { kind: "SPONSOR", name: "Dhol sponsor", price: 400, seats: 1, admits: 0, perks: ["Dhol performance with your business name"] },
 ];
 
 const REVIEWS: { name: string; comment: string; featured?: boolean }[] = [
@@ -77,12 +101,16 @@ async function main() {
       sortOrder: index,
       salesStart: spec.salesStart ?? null,
       salesEnd: spec.salesEnd ?? null,
+      kind: spec.kind ?? "TICKET",
+      admits: spec.admits ?? 1,
+      perks: spec.perks ?? [],
+      bannerMonths: spec.bannerMonths ?? null,
     };
     if (existing) await db.ticketTier.update({ where: { id: existing.id }, data });
     else await db.ticketTier.create({ data: { ...data, eventId: event.id } });
   }
 
-  const tiers = await db.ticketTier.findMany({ where: { eventId: event.id } });
+  const tiers = await db.ticketTier.findMany({ where: { eventId: event.id, kind: "TICKET" } });
   await db.event.update({
     where: { id: event.id },
     data: {

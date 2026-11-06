@@ -240,6 +240,114 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
+    q: "🏷️ How do I make a coupon (discount code) for my event?",
+    id: "event-coupon",
+    a: (
+      <>
+        <ol>
+          <li>
+            Log in with the account that posted the event and open{" "}
+            <Link href="/dashboard/coupons">your coupons page</Link>.
+          </li>
+          <li>
+            Under <strong>Create a coupon</strong>, fill in:
+            <ul>
+              <li><strong>Event</strong> — pick your event.</li>
+              <li>
+                <strong>Code</strong> — the word your clients will type, e.g.{" "}
+                <code>ANIL10</code> or <code>FRIENDS20</code> (letters, numbers
+                and dashes).
+              </li>
+              <li>
+                <strong>Discount type</strong> — percent off (e.g. 10%) or a
+                fixed amount off (e.g. $20).
+              </li>
+              <li><strong>Amount</strong> — how much off.</li>
+              <li>
+                <strong>Total uses</strong> — leave blank for unlimited, or set
+                a limit such as 50.
+              </li>
+              <li><strong>Expires on</strong> — optional.</li>
+            </ul>
+          </li>
+          <li>
+            Click <strong>Create coupon</strong>, then send the code to your
+            clients.
+          </li>
+        </ol>
+        <p>
+          Buyers type the code in the <strong>Coupon code</strong> box when they
+          buy tickets and the price drops before they pay. Each person can use
+          a code once. Make as many codes as you like — one per group or
+          promoter — and switch a code off on the same page.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🎟️ How do buyers get their tickets?",
+    id: "event-tickets-email",
+    a: (
+      <>
+        <p>
+          After paying, buyers get an email from GoDesi.com with their QR
+          ticket, and the ticket is saved under{" "}
+          <Link href="/dashboard/tickets">My tickets</Link>. One QR code admits
+          everyone on that ticket — a couple ticket admits two.
+        </p>
+        <p>
+          Show the QR at the entrance on a phone or printed. Organisers see
+          every booking on the event&apos;s attendee list.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "⏳ Can I sell early-bird and late prices?",
+    id: "event-price-windows",
+    a: (
+      <>
+        <p>
+          Yes. Each ticket type can have its own sale dates — for example
+          early-bird prices until Nov 15 and regular prices from Dec 20. Ticket
+          types outside their dates show as &ldquo;On sale from …&rdquo; or
+          &ldquo;Sale ended&rdquo; and can&apos;t be bought. Ask us on{" "}
+          <Link href="/contact">the contact page</Link> to set dates on your
+          ticket types.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🤝 Can businesses sponsor my event?",
+    id: "event-sponsors",
+    a: (
+      <>
+        <p>
+          Yes. Events can list sponsor packages — a standee at the entrance, a
+          banner in the hall, a logo on the LED screen, a sponsored table and
+          more. Sponsors buy a package on the event page like a ticket, get
+          their passes by email, and packages that include a GoDesi banner come
+          with a code for a free 320×100 banner.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🔗 Can my event have a short link?",
+    id: "event-short-link",
+    a: (
+      <>
+        <p>
+          Every event has its own page at godesi.com/events/&hellip; you can
+          share anywhere. For a big event we can add a short link such as{" "}
+          <Link href="/nye2027">godesi.com/nye2027</Link> that opens straight
+          to the tickets — ask us on <Link href="/contact">the contact page</Link>.
+        </p>
+      </>
+    ),
+  },
+  {
     q: "🛠️ What are Gigs? Can I sell my skills on Godesi?",
     id: "gigs",
     a: (

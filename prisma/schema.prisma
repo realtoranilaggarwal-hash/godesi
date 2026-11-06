@@ -1914,21 +1914,29 @@ model EventClaim {
 
 /// Basic / Webinar / Premium seat types for an event.
 model TicketTier {
-  id          String    @id @default(cuid())
-  eventId     String
-  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name        String
+  id           String    @id @default(cuid())
+  eventId      String
+  event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name         String
   /// Price per seat in major units of the event's currency; 0 for free tiers.
-  price       Int       @default(0)
-  seatsTotal  Int
-  seatsBooked Int       @default(0)
-  sortOrder   Int       @default(0)
+  price        Int       @default(0)
+  seatsTotal   Int
+  seatsBooked  Int       @default(0)
+  sortOrder    Int       @default(0)
   /// Optional sale window, e.g. early-bird prices until a date, late prices from one.
-  salesStart  DateTime?
-  salesEnd    DateTime?
+  salesStart   DateTime?
+  salesEnd     DateTime?
   /// Short line under the name, e.g. "Table seating included".
-  note        String?
-  createdAt   DateTime  @default(now())
+  note         String?
+  /// TICKET for entry tickets, SPONSOR for sponsorship packages (listed separately).
+  kind         String    @default("TICKET")
+  /// People one ticket lets in: 2 for a couple ticket or a sponsor package with 2 passes, 0 for no entry.
+  admits       Int       @default(1)
+  /// What a sponsor package includes, one line each.
+  perks        String[]  @default([])
+  /// Months of free 320x100 banner a sponsor package comes with.
+  bannerMonths Int?
+  createdAt    DateTime  @default(now())
 
   tickets Ticket[]
 
