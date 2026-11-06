@@ -122,6 +122,7 @@ export async function saveSponsorAction(formData: FormData) {
         where: { id: sponsorId, eventId: event.id },
       })
     : null;
+  let businessId = sponsor?.businessId;
   if (!sponsor) {
     const ref = text(formData, "business", 200)
       .replace(/^https?:\/\/[^/]+\/business\//i, "")
@@ -136,16 +137,15 @@ export async function saveSponsorAction(formData: FormData) {
         event.slug,
         "No GoDesi card found at that address. Paste the godesi.com/business/… link.",
       );
-    sponsor = await db.eventSponsor.upsert({
+    businessId = business.id;
+    sponsor = await db.eventSponsor.findUnique({
       where: {
         eventId_businessId: { eventId: event.id, businessId: business.id },
       },
-      create: { eventId: event.id, businessId: business.id },
-      update: {},
     });
   }
 
-  let couponId = sponsor.couponId;
+  let couponId = sponsor?.couponId ?? null;
   if (code) {
     if (!/^[A-Z0-9-]{3,24}$/.test(code))
       back(event.slug, "Codes are 3–24 letters, numbers or dashes.");
@@ -161,7 +161,7 @@ export async function saveSponsorAction(formData: FormData) {
       const owner = await db.eventSponsor.findUnique({
         where: { couponId: clash.id },
       });
-      if (owner && owner.id !== sponsor.id)
+      if (owner && owner.id !== sponsor?.id)
         back(
           event.slug,
           `The code ${code} already belongs to another sponsor.`,
@@ -200,6 +200,9 @@ export async function saveSponsorAction(formData: FormData) {
     });
   }
 
+  sponsor ??= await db.eventSponsor.create({
+    data: { eventId: event.id, businessId: businessId! },
+  });
   await db.eventSponsor.update({
     where: { id: sponsor.id },
     data: {
