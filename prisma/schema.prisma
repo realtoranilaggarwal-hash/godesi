@@ -963,6 +963,10 @@ model Business {
   /// Share of the price taken as the deposit at booking time.
   bookingDepositPct Int     @default(20)
 
+  /// "Sponsor local events" opt-in: the card is offered to organisers nearby.
+  sponsorsEvents Boolean        @default(false)
+  sponsorships   EventSponsor[]
+
   agentProfile  AgentProfile?
   vehicle       VehicleDetails?
   media         Media[]
@@ -1347,6 +1351,7 @@ model Event {
   tiers    TicketTier[]
   coupons  Coupon[]
   reviews  EventReview[]
+  sponsors EventSponsor[]
 
   @@unique([sourceId, sourceUid])
   @@index([startsAt])
@@ -1974,6 +1979,31 @@ enum DiscountKind {
 
 /// Discount code applied at checkout. Admin codes are platform-wide; organisers
 /// can create codes limited to one of their own events.
+/// A business sponsoring an event. Shown on the event page (and network sites)
+/// once the organiser approves it; `coupon` is the sponsor's ticket code.
+model EventSponsor {
+  id         String    @id @default(cuid())
+  eventId    String
+  event      Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  /// REQUESTED (by the business), APPROVED or DECLINED (by the organiser).
+  status     String    @default("REQUESTED")
+  /// The business's note to the organiser when it asked.
+  message    String?
+  /// Line shown under the sponsor, e.g. "Refer Realtor Anil Aggarwal".
+  offer      String?
+  couponId   String?   @unique
+  coupon     Coupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  sortOrder  Int       @default(0)
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([eventId, businessId])
+  @@index([eventId, status])
+}
+
 model Coupon {
   id             String       @id @default(cuid())
   code           String       @unique
@@ -2006,6 +2036,7 @@ model Coupon {
 
   redemptions CouponRedemption[]
   tickets     Ticket[]
+  sponsor     EventSponsor?
 
   @@index([scope, active])
   @@index([eventId])

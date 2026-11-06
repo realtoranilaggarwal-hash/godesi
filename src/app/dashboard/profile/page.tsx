@@ -141,6 +141,21 @@ export default async function ProfileEditorPage({
           />
         </Card>
 
+        {business ? (
+          <Card className="border-amber-200 bg-amber-50">
+            <h2 className="text-base font-bold text-amber-900">
+              🤝 Do you want to sponsor any event?
+            </h2>
+            <p className="mt-1 text-sm text-amber-900">
+              See upcoming events near you and ask organisers to partner. Once
+              they approve, your photo and offer show on their event page.
+            </p>
+            <LinkButton href="/dashboard/sponsor" className="mt-3">
+              Sponsor local events
+            </LinkButton>
+          </Card>
+        ) : null}
+
         <DealsAndShopStrip />
       </div>
 

@@ -70,16 +70,16 @@ function TicketStub({
           </span>
         </span>
         {action ?? (
-        <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
-            selected
-              ? "border-indigo-600 bg-indigo-600 text-white"
-              : "border-slate-300 text-transparent"
-          }`}
-          aria-hidden
-        >
-          ✓
-        </span>
+          <span
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${
+              selected
+                ? "border-indigo-600 bg-indigo-600 text-white"
+                : "border-slate-300 text-transparent"
+            }`}
+            aria-hidden
+          >
+            ✓
+          </span>
         )}
       </span>
     </span>
@@ -97,6 +97,7 @@ export function TicketForm({
   defaultEmail,
   askReferredBy = false,
   nameLabel = "Your name",
+  promoCodesHref,
 }: {
   eventId: string;
   price: number;
@@ -108,6 +109,8 @@ export function TicketForm({
   defaultEmail?: string;
   askReferredBy?: boolean;
   nameLabel?: string;
+  /** Where the event lists sponsor promo codes, e.g. "#sponsors". */
+  promoCodesHref?: string;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
@@ -299,6 +302,14 @@ export function TicketForm({
                 placeholder="e.g. EARLYBIRD"
                 className={`${inputClass} uppercase`}
               />
+              {promoCodesHref ? (
+                <a
+                  href={promoCodesHref}
+                  className="mt-1 inline-block text-sm font-bold text-amber-700 underline"
+                >
+                  🎟️ Click here to find promo codes
+                </a>
+              ) : null}
             </Field>
           ) : null}
         </div>
