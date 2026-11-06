@@ -341,7 +341,8 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
         <p>
           Every event has its own page at godesi.com/events/&hellip; you can
           share anywhere. For a big event we can add a short link such as{" "}
-          <Link href="/nye2027">godesi.com/nye2027</Link> that opens straight
+          {/* A plain link: redirects in next.config only run on full page loads. */}
+          <a href="/nye2027">godesi.com/nye2027</a> that opens straight
           to the tickets — ask us on <Link href="/contact">the contact page</Link>.
         </p>
       </>
