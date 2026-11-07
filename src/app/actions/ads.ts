@@ -59,7 +59,10 @@ export async function startAdCheckoutAction(formData: FormData) {
       (check.coupon.adMonths !== null &&
         (byImpressions || months > check.coupon.adMonths)))
   ) {
-    redirect("/advertise?error=coupon_slot");
+    const only = new URLSearchParams({ error: "coupon_slot" });
+    if (check.coupon.bannerSlot) only.set("slot", check.coupon.bannerSlot);
+    if (check.coupon.adMonths !== null) only.set("months", String(check.coupon.adMonths));
+    redirect(`/advertise?${only}`);
   }
 
   const discountMinor = check?.ok ? check.discountMinor : 0;
