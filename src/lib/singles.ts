@@ -28,6 +28,10 @@ export function safeNextPath(value: unknown) {
   // eslint-disable-next-line no-control-regex
   if (!path.startsWith("/") || /[\u0000-\u0020\\]/.test(path)) return null;
   const base = "https://same-site.invalid";
-  const url = new URL(path, base);
-  return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : null;
+  try {
+    const url = new URL(path, base);
+    return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : null;
+  } catch {
+    return null;
+  }
 }
