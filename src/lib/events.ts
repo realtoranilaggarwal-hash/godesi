@@ -29,6 +29,21 @@ export function seatsLeft(event: { seatsTotal: number; seatsBooked: number }) {
   return Math.max(0, event.seatsTotal - event.seatsBooked);
 }
 
+/**
+ * Ticket types normally cap themselves. When an event's seatsTotal is set below the
+ * sum of its ticket types (one seat pool sold at rising prices by date), the event
+ * total caps them all together; returns the seats left in that pool, or null.
+ */
+export function pooledSeatsLeft(
+  event: { seatsTotal: number; seatsBooked: number },
+  tiers: { kind: string; seatsTotal: number }[],
+) {
+  const tierSeats = tiers
+    .filter((tier) => tier.kind !== "SPONSOR")
+    .reduce((sum, tier) => sum + tier.seatsTotal, 0);
+  return tierSeats > event.seatsTotal ? seatsLeft(event) : null;
+}
+
 export function isPast(event: { startsAt: Date }) {
   return event.startsAt.getTime() < Date.now();
 }
@@ -169,6 +184,7 @@ export async function confirmTicket({
   }
 
   await issueSponsorBannerCodes(ticket.id);
+  await linkSponsorBusiness(ticket.id);
   await sendTicketConfirmation(ticket.id);
   return { alreadyProcessed: false as const, ticket };
 }
@@ -180,13 +196,13 @@ function sponsorBannerCode(ticketCode: string, index: number) {
 
 /**
  * Sponsor packages that include a banner get one single-use, 100%-off code per
- * package bought, locked to the 320x100 slot for the package's months.
+ * package bought, locked to the package's slot (320x100 by default) for its months.
  */
 async function issueSponsorBannerCodes(ticketId: string) {
   const ticket = await db.ticket.findUnique({
     where: { id: ticketId },
     include: {
-      tier: { select: { kind: true, bannerMonths: true } },
+      tier: { select: { kind: true, bannerMonths: true, bannerSlot: true } },
       event: { select: { organizerId: true } },
     },
   });
@@ -202,13 +218,38 @@ async function issueSponsorBannerCodes(ticketId: string) {
         scope: "ADS",
         discountKind: "PERCENT",
         amount: 100,
-        bannerSlot: "MOBILE",
+        bannerSlot: ticket.tier?.bannerSlot ?? "MOBILE",
         adMonths: months,
         maxRedemptions: 1,
         createdById: ticket.event.organizerId,
       },
     });
   }
+}
+
+/** A paid sponsor package lists the buyer's GoDesi business as an approved sponsor of the event. */
+async function linkSponsorBusiness(ticketId: string) {
+  const ticket = await db.ticket.findUnique({
+    where: { id: ticketId },
+    select: { eventId: true, userId: true, tier: { select: { kind: true } } },
+  });
+  if (ticket?.tier?.kind !== "SPONSOR" || !ticket.userId) return;
+  const business = await db.business.findFirst({
+    where: { ownerId: ticket.userId },
+    select: { id: true },
+  });
+  if (!business) return;
+  const key = { eventId: ticket.eventId, businessId: business.id };
+  const existing = await db.eventSponsor.findUnique({
+    where: { eventId_businessId: key },
+    select: { status: true },
+  });
+  if (existing?.status === "APPROVED") return;
+  await db.eventSponsor.upsert({
+    where: { eventId_businessId: key },
+    create: { ...key, status: "APPROVED", approvedAt: new Date() },
+    update: { status: "APPROVED", approvedAt: new Date() },
+  });
 }
 
 /** Ticket ids of a Checkout order: `ticketIds` for multi-type bookings, `ticketId` otherwise. */
@@ -280,7 +321,17 @@ async function sendTicketConfirmation(ticketId: string) {
           city: true,
         },
       },
-      tier: { select: { name: true, kind: true, admits: true, perks: true, bannerMonths: true } },
+      tier: {
+        select: {
+          name: true,
+          kind: true,
+          admits: true,
+          perks: true,
+          bannerMonths: true,
+          bannerSlot: true,
+          wallBricks: true,
+        },
+      },
     },
   });
   if (!ticket?.buyerEmail) return;
@@ -299,6 +350,8 @@ async function sendTicketConfirmation(ticketId: string) {
       sponsor && ticket.tier?.bannerMonths
         ? Array.from({ length: ticket.quantity }, (_, index) => sponsorBannerCode(ticket.code, index))
         : [],
+    bannerSlot: ticket.tier?.bannerSlot ?? undefined,
+    wallBricks: sponsor ? ticket.quantity * (ticket.tier?.wallBricks ?? 0) : 0,
   });
   await sendEmail({ to: ticket.buyerEmail, subject, html });
 }

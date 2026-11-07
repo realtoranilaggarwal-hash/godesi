@@ -1,6 +1,8 @@
 import { SITE } from "@/lib/site";
 import { ticketQrEmailUrl } from "@/lib/ticketQr";
 import { siteUrl } from "@/lib/format";
+import type { BannerSlot } from "@prisma/client";
+import { AD_PLACEMENTS } from "@/lib/ads";
 
 /**
  * Transactional email through Resend's REST API. Sending is best-effort: a
@@ -122,6 +124,8 @@ export function ticketEmail({
   admits,
   perks = [],
   bannerCodes = [],
+  bannerSlot = "MOBILE",
+  wallBricks = 0,
 }: {
   eventTitle: string;
   when: string;
@@ -133,16 +137,22 @@ export function ticketEmail({
   admits?: number;
   /** Sponsor package contents, listed in the email. */
   perks?: string[];
-  /** Single-use codes for the sponsor's free 320x100 banner. */
+  /** Single-use codes for the sponsor's free banner. */
   bannerCodes?: string[];
+  /** Placement those codes are locked to. */
+  bannerSlot?: BannerSlot;
+  /** Wall of Fame bricks credited to the buyer's account. */
+  wallBricks?: number;
 }) {
   const people = admits ?? seats;
-  const sponsorHtml = perks.length || bannerCodes.length
+  const banner = AD_PLACEMENTS[bannerSlot];
+  const sponsorHtml = perks.length || bannerCodes.length || wallBricks
     ? `<div style="margin:0 0 16px;padding:12px 14px;border:1px solid #fde68a;background:#fffbeb;border-radius:12px;color:#334155">
          <p style="margin:0 0 6px;font-weight:700">🤝 Thank you for sponsoring!</p>
          ${perks.length ? `<ul style="margin:0 0 8px;padding-left:18px">${perks.map((perk) => `<li>${perk}</li>`).join("")}</ul>` : ""}
          <p style="margin:0 0 8px;font-size:13px">The organiser will contact you for your logo, clip or business name.</p>
-         ${bannerCodes.length ? `<p style="margin:0;font-size:13px">Your free 320×100 GoDesi banner: open <a href="${siteUrl()}/advertise?slot=MOBILE#book" style="color:#4f46e5">GoDesi advertising</a>, choose Small banner, and enter code${bannerCodes.length > 1 ? "s" : ""} <strong>${bannerCodes.join(", ")}</strong> at checkout.</p>` : ""}
+         ${bannerCodes.length ? `<p style="margin:0 0 8px;font-size:13px">Your free ${banner.size.width}×${banner.size.height} GoDesi banner: open <a href="${siteUrl()}/advertise?slot=${banner.slot}#book" style="color:#4f46e5">GoDesi advertising</a>, choose ${banner.name}, and enter code${bannerCodes.length > 1 ? "s" : ""} <strong>${bannerCodes.join(", ")}</strong> at checkout.</p>` : ""}
+         ${wallBricks ? `<p style="margin:0;font-size:13px">Your ${wallBricks} Wall of Fame bricks are credited to your GoDesi account: open the <a href="${siteUrl()}/walloffame" style="color:#4f46e5">Wall of Fame</a>, drag a block of up to ${wallBricks} bricks and add your logo. The credit comes off at checkout.</p>` : ""}
        </div>`
     : "";
   const url = `${siteUrl()}/tickets/${code}`;

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "TicketTier" ADD COLUMN IF NOT EXISTS "bannerSlot" "BannerSlot",
+ADD COLUMN IF NOT EXISTS "wallBricks" INTEGER NOT NULL DEFAULT 0;

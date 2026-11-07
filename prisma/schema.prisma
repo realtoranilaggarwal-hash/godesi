@@ -1939,8 +1939,12 @@ model TicketTier {
   admits       Int       @default(1)
   /// What a sponsor package includes, one line each.
   perks        String[]  @default([])
-  /// Months of free 320x100 banner a sponsor package comes with.
+  /// Months of free GoDesi banner a sponsor package comes with.
   bannerMonths Int?
+  /// Placement of that free banner; the 320x100 small banner when unset.
+  bannerSlot   BannerSlot?
+  /// Wall of Fame bricks (10x10, $10 each) credited to the buyer's GoDesi account.
+  wallBricks   Int       @default(0)
   createdAt    DateTime  @default(now())
 
   tickets Ticket[]

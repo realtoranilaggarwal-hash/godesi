@@ -13,6 +13,7 @@ import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
 import {
   confirmTicket,
+  pooledSeatsLeft,
   seatsLeft,
   ticketCode,
   uniqueEventSlug,
@@ -630,6 +631,12 @@ export async function bookTicketAction(
           error: `Only ${seatsLeft(line.tier)} ${line.tier.name} seat(s) left.`,
         };
     }
+    const poolLeft = pooledSeatsLeft(event, event.tiers);
+    const ticketQuantity = lines
+      .filter((line) => line.tier?.kind !== "SPONSOR")
+      .reduce((sum, line) => sum + line.quantity, 0);
+    if (poolLeft !== null && poolLeft < ticketQuantity)
+      return { error: `Only ${poolLeft} seat(s) left for this event.` };
 
     const priced = lines.map((line) => ({
       ...line,
