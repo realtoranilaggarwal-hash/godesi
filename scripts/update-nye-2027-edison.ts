@@ -1,7 +1,7 @@
 /**
  * Brings the NYE 2027 Edison listing in line with the organiser's flyer: 8 PM start,
- * flyer image, early (till Nov 15) / late (from Dec 20) ticket prices plus balcony
- * seats, and guest reviews typed out from the WhatsApp review album (first names only).
+ * flyer image, early (till Nov 15) / advance (Nov 16–Dec 15) / late (from Dec 16) ticket
+ * prices plus first-come-first-served balcony seats, and guest reviews typed out from the WhatsApp review album (first names only).
  * Safe to re-run: tiers are matched by name, reviews are replaced.
  *
  *   DATABASE_URL=... npx tsx scripts/update-nye-2027-edison.ts
@@ -14,19 +14,20 @@ const REVIEWS_ALBUM = "https://photos.app.goo.gl/nQrusW5e5pojmj7P7";
 
 /** Windows are in New York time; salesEnd is exclusive, so early tickets sell through Nov 15. */
 const EARLY_END = new Date("2026-11-16T00:00:00-05:00");
-const LATE_START = new Date("2026-12-20T00:00:00-05:00");
+const LATE_START = new Date("2026-12-16T00:00:00-05:00");
 
 const DESCRIPTION = [
   "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
   "DJ Sandy of M&D Events keeps the dance floor packed all night, and famous belly dancer Aamra performs her fire dance. The Big Ball Room is lit by 22 head spot lights.",
   "Food is served in the exclusive Plaza Hall with live stations — dosa, jalebi, golgappa and many more — plus premium drinks. Valet parking and a lot more.",
-  "Early tickets (till Nov 15th) include table seating: Adult (10+) $85, Kids (0–9) $65, Couple $160. From Dec 20th: Adult $150, Kids $100, Couple $250. Special chair-only balcony seats (no table) $75.",
+  "Tickets till Nov 15th include table seating: Adult (10+) $85, Kids (0–9) $65, Couple $160. Nov 16th to Dec 15th: Adult $100, Kids $75, Couple $180. From Dec 16th: Adult $150, Kids $100, Couple $250. Balcony seats (no table, first come, first served) $75.",
   "Sponsors welcome — call 732-877-8585.",
 ].join("\n\n");
 
 /**
  * The hall holds 400 people, so entry tiers add up to 400, counting a couple as 2:
- * early 120 + 50 + 40×2 = 250, balcony 50, late 60 + 20 + 10×2 = 100.
+ * early 120 + 50 + 40×2 = 250, balcony 50, late 60 + 20 + 10×2 = 100. The advance window
+ * (Nov 16–Dec 15) repeats the early numbers, since it sells after the early tiers close.
  * `match` lists the old names so the existing late tiers (and their bookings) are kept.
  * Sponsor packages are listed separately; the 2-pass ones add up to 18 more people.
  */
@@ -46,11 +47,21 @@ type TierSpec = {
 
 const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
 
+/**
+ * Tickets the hall can sell across every window. Early and advance tiers sell the same
+ * seats at different dates, so the tiers add up to more than this; the event total
+ * caps them together (lib/events pooledSeatsLeft).
+ */
+const HALL_TICKETS = 350;
+
 const TIERS: TierSpec[] = [
   { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 120, salesEnd: EARLY_END },
   { name: "Kids (0–9) — Early bird", note: "Table seating included", price: 65, seats: 50, salesEnd: EARLY_END },
   { name: "Couple — Early bird", note: "Table seating included", price: 160, seats: 40, salesEnd: EARLY_END, admits: 2 },
-  { name: "Special balcony seat", note: "Chair only, no table", price: 75, seats: 50 },
+  { name: "Adult (10+) — Advance", price: 100, seats: 120, salesStart: EARLY_END, salesEnd: LATE_START },
+  { name: "Kids (0–9) — Advance", price: 75, seats: 50, salesStart: EARLY_END, salesEnd: LATE_START },
+  { name: "Couple — Advance", price: 180, seats: 40, salesStart: EARLY_END, salesEnd: LATE_START, admits: 2 },
+  { name: "Balcony seat — first come, first served", match: ["Special balcony seat"], note: "Seat only, no table · first come, first served", price: 75, seats: 50 },
   { name: "Adult (10+)", match: ["General"], price: 150, seats: 60, salesStart: LATE_START },
   { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 20, salesStart: LATE_START },
   { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
@@ -89,10 +100,12 @@ async function main() {
   const event = await db.event.findUnique({ where: { slug: SLUG }, include: { tiers: true } });
   if (!event) throw new Error(`No event ${SLUG}`);
 
+  const used = new Set<string>();
   for (let index = 0; index < TIERS.length; index += 1) {
     const spec = TIERS[index];
     const names = [spec.name, ...(spec.match ?? [])];
-    const existing = event.tiers.find((tier) => names.includes(tier.name));
+    const existing = event.tiers.find((tier) => !used.has(tier.id) && names.includes(tier.name));
+    if (existing) used.add(existing.id);
     const data = {
       name: spec.name,
       note: spec.note ?? null,
@@ -121,7 +134,7 @@ async function main() {
       description: DESCRIPTION,
       reviewsAlbumUrl: REVIEWS_ALBUM,
       price: Math.min(...tiers.map((tier) => tier.price)),
-      seatsTotal: tiers.reduce((sum, tier) => sum + tier.seatsTotal, 0),
+      seatsTotal: Math.max(HALL_TICKETS, tiers.reduce((sum, tier) => sum + tier.seatsBooked, 0)),
     },
   });
 

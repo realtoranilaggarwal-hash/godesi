@@ -29,6 +29,21 @@ export function seatsLeft(event: { seatsTotal: number; seatsBooked: number }) {
   return Math.max(0, event.seatsTotal - event.seatsBooked);
 }
 
+/**
+ * Ticket types normally cap themselves. When an event's seatsTotal is set below the
+ * sum of its ticket types (one seat pool sold at rising prices by date), the event
+ * total caps them all together; returns the seats left in that pool, or null.
+ */
+export function pooledSeatsLeft(
+  event: { seatsTotal: number; seatsBooked: number },
+  tiers: { kind: string; seatsTotal: number }[],
+) {
+  const tierSeats = tiers
+    .filter((tier) => tier.kind !== "SPONSOR")
+    .reduce((sum, tier) => sum + tier.seatsTotal, 0);
+  return tierSeats > event.seatsTotal ? seatsLeft(event) : null;
+}
+
 export function isPast(event: { startsAt: Date }) {
   return event.startsAt.getTime() < Date.now();
 }

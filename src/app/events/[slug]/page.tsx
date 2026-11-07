@@ -17,6 +17,7 @@ import {
   formatEventDate,
   formatEventEnd,
   isPast,
+  pooledSeatsLeft,
   seatsLeft,
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
@@ -358,6 +359,9 @@ export default async function EventPage({
       : 0;
   const ticketTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
   const sponsorTiers = event.tiers.filter((tier) => tier.kind === "SPONSOR");
+  const poolLeft = pooledSeatsLeft(event, event.tiers);
+  const ticketSeatsLeft = (tier: (typeof ticketTiers)[number]) =>
+    Math.min(seatsLeft(tier), poolLeft ?? Infinity);
   const theme = eventTheme(
     event.title,
     event.category?.icon,
@@ -769,8 +773,8 @@ export default async function EventPage({
                             {[
                               tierWindowLabel(tier, event.timeZone),
                               tierOnSale(tier)
-                                ? seatsLeft(tier)
-                                  ? `${seatsLeft(tier)} left`
+                                ? ticketSeatsLeft(tier)
+                                  ? `${ticketSeatsLeft(tier)} left`
                                   : "Sold out"
                                 : null,
                             ]
@@ -1027,7 +1031,7 @@ export default async function EventPage({
                 <Link href="/connect" className="font-semibold underline">
                   GoDesi Connect
                 </Link>{" "}
-                profile marked Single, so everyone here is ready to mingle.
+                profile marked Single, so the balcony is just for singles.
               </p>
             ) : null}
             {past ? (
@@ -1072,7 +1076,7 @@ export default async function EventPage({
                       id: tier.id,
                       name: tier.name,
                       price: tier.price,
-                      seatsLeft: seatsLeft(tier),
+                      seatsLeft: ticketSeatsLeft(tier),
                     }))}
                   promoCodesHref={
                     sponsors.some((sponsor) => sponsor.coupon?.active)
