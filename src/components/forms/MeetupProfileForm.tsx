@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useFormState } from "react-dom";
 import { saveMeetupProfileAction } from "@/app/actions/meetups";
 import { emptyState } from "@/lib/actions";
@@ -72,14 +72,18 @@ export function MeetupProfileForm({
   next,
 }: {
   defaults?: MeetupProfileDefaults;
-  /** Where to send the member once saved, e.g. back to a singles-only event. */
+  /** Same-site path to send the member to once saved, e.g. back to a singles-only event. */
   next?: string;
 }) {
   const [state, formAction] = useFormState(saveMeetupProfileAction, emptyState);
 
+  // A full navigation keeps the #hash, so members land back on e.g. an event's tickets.
+  useEffect(() => {
+    if (state.success && next) window.location.assign(next);
+  }, [state.success, next]);
+
   return (
     <form action={formAction} className="space-y-4">
-      {next ? <input type="hidden" name="next" value={next} /> : null}
       <FormError>{state.error}</FormError>
 
       <fieldset className="rounded-2xl border border-slate-200 p-4">

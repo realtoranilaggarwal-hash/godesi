@@ -1,10 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { safeNextPath } from "@/lib/singles";
 import { requireUser } from "@/lib/auth";
 import { normalizeWhatsApp } from "@/lib/format";
 import { type ActionState, fieldError } from "@/lib/actions";
@@ -47,7 +45,6 @@ export async function saveMeetupProfileAction(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  let nextPath: string | null = null;
   try {
     const user = await requireUser();
     const parsed = schema.safeParse({
@@ -129,16 +126,13 @@ export async function saveMeetupProfileAction(
     });
 
     revalidatePath("/connect");
-    nextPath = safeNextPath(formData.get("next"));
-    if (!nextPath)
-      return {
-        success:
-          "Thanks! Your Connect profile is queued for review and goes live once approved.",
-      };
+    return {
+      success:
+        "Thanks! Your Connect profile is queued for review and goes live once approved.",
+    };
   } catch (error) {
     return fieldError(error);
   }
-  redirect(nextPath);
 }
 
 /**
