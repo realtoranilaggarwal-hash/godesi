@@ -6,6 +6,7 @@ import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { isSinglesOnly, singlesBlocker } from "@/lib/singles";
 import { readSpeakers } from "@/lib/eventSpeakers";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
@@ -585,6 +586,15 @@ export async function bookTicketAction(
       return { error: "This event is not open for booking." };
     if (event.startsAt.getTime() < Date.now())
       return { error: "This event has already ended." };
+    if (isSinglesOnly(event)) {
+      const blocker = singlesBlocker(
+        await db.meetupProfile.findUnique({
+          where: { userId: user.id },
+          select: { marital: true, status: true, adultConfirmedAt: true, age: true },
+        }),
+      );
+      if (blocker) return { error: blocker };
+    }
 
     /** One line per ticket type: the form sends `qty_<tierId>` for each type it shows. */
     const requested = event.tiers.length

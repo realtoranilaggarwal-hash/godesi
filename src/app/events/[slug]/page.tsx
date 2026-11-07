@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import {
+  SINGLES_MIN_AGE,
+  connectProfileHref,
+  isSinglesOnly,
+  singlesBlocker,
+} from "@/lib/singles";
 import { venuePath } from "@/lib/venues";
 import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
@@ -270,6 +276,15 @@ export default async function EventPage({
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
+  const singlesOnly = isSinglesOnly(event);
+  const singlesProfile =
+    singlesOnly && user
+      ? await db.meetupProfile.findUnique({
+          where: { userId: user.id },
+          select: { marital: true, status: true, adultConfirmedAt: true, age: true },
+        })
+      : null;
+  const singlesBlock = singlesOnly && user ? singlesBlocker(singlesProfile) : null;
   const speakers = await withProfiles(event.speakers, event.organizer);
   const profileFor = (name: string | null) =>
     name
@@ -1002,6 +1017,19 @@ export default async function EventPage({
         ) : (
           <Card id="tickets">
             <h2 className="font-bold">🎟️ Get your tickets</h2>
+            {singlesOnly ? (
+              <p className="mt-2 rounded-lg bg-fuchsia-50 px-3 py-2 text-sm text-fuchsia-900">
+                💃 <span className="font-bold">
+                  Singles only, {SINGLES_MIN_AGE}+.
+                </span>{" "}
+                Tickets are
+                for members with a free{" "}
+                <Link href="/connect" className="font-semibold underline">
+                  GoDesi Connect
+                </Link>{" "}
+                profile marked Single, so everyone here is ready to mingle.
+              </p>
+            ) : null}
             {past ? (
               <p className="mt-2 text-sm text-slate-600">
                 This event has already taken place.
@@ -1019,6 +1047,16 @@ export default async function EventPage({
                 <LinkButton href={`/login?next=/events/${event.slug}`}>
                   Sign in to buy tickets
                 </LinkButton>
+              </div>
+            ) : singlesBlock ? (
+              <div className="mt-3 space-y-2">
+                <p className="text-sm text-slate-600">{singlesBlock}</p>
+                <LinkButton href={connectProfileHref(event.slug)}>
+                  {singlesProfile ? "Update" : "Create"} my Connect profile
+                </LinkButton>
+                <p className="text-xs text-slate-500">
+                  It takes a minute, and you come straight back here to buy.
+                </p>
               </div>
             ) : (
               <div className="mt-3">
