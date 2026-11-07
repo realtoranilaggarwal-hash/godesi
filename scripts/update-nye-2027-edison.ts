@@ -9,7 +9,7 @@
 import { db } from "@/lib/db";
 
 const SLUG = "new-year-eves-party-2027-edison";
-const FLYER = "https://godesi.com/flyers/nye-2027-royal-albert-palace.jpg";
+const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const REVIEWS_ALBUM = "https://photos.app.goo.gl/nQrusW5e5pojmj7P7";
 
 /** Windows are in New York time; salesEnd is exclusive, so early tickets sell through Nov 15. */

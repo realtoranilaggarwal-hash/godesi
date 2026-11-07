@@ -11,7 +11,7 @@ import { newsPath } from "@/lib/newsLinks";
 const MEMBER_EMAIL = "newyearevespartycom@gmail.com";
 const EVENT_SLUGS = ["new-year-eves-party-2027-edison", "singles-new-years-eve-party-2027-nj"];
 const GUID = "report:newyearevesparty-nye-2027";
-const MAIN_FLYER = "https://godesi.com/flyers/nye-2027-royal-albert-palace.jpg";
+const MAIN_FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const SINGLES_FLYER = "https://godesi.com/flyers/nye-2027-singles.jpg";
 
 const TITLE = "Grand New Year's Eve Party 2027 at Royal Albert Palace, Fords NJ — tickets on sale";
