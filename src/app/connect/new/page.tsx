@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { safeNextPath } from "@/lib/singles";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import {
   CONVERSATION_STARTERS,
@@ -107,15 +108,23 @@ function SafetyStrip() {
   );
 }
 
-export default async function ConnectProfilePage() {
+export default async function ConnectProfilePage({
+  searchParams,
+}: {
+  searchParams: { next?: string };
+}) {
   const user = await getCurrentUser();
+  const next = safeNextPath(searchParams.next) ?? undefined;
+  const selfPath = encodeURIComponent(
+    next ? `/connect/new?next=${encodeURIComponent(next)}` : "/connect/new",
+  );
 
   if (!user) {
     return (
       <div className="mx-auto max-w-4xl space-y-5">
         <Hero
           cta={{
-            href: "/signup?next=/connect/new",
+            href: `/signup?next=${selfPath}`,
             label: "Find my Desi Circle",
           }}
         />
@@ -123,7 +132,7 @@ export default async function ConnectProfilePage() {
         <Card className="text-sm text-slate-600">
           Already a member?{" "}
           <Link
-            href="/login?next=/connect/new"
+            href={`/login?next=${selfPath}`}
             className="font-semibold text-indigo-700"
           >
             Log in
@@ -310,6 +319,7 @@ export default async function ConnectProfilePage() {
           </div>
           <Card>
             <MeetupProfileForm
+              next={next}
               defaults={
                 profile
                   ? {

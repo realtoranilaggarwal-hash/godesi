@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useFormState } from "react-dom";
 import { saveMeetupProfileAction } from "@/app/actions/meetups";
 import { emptyState } from "@/lib/actions";
@@ -69,10 +69,18 @@ function Chip({
 
 export function MeetupProfileForm({
   defaults,
+  next,
 }: {
   defaults?: MeetupProfileDefaults;
+  /** Same-site path to send the member to once saved, e.g. back to a singles-only event. */
+  next?: string;
 }) {
   const [state, formAction] = useFormState(saveMeetupProfileAction, emptyState);
+
+  // A full navigation keeps the #hash, so members land back on e.g. an event's tickets.
+  useEffect(() => {
+    if (state.success && next) window.location.assign(next);
+  }, [state.success, next]);
 
   return (
     <form action={formAction} className="space-y-4">
