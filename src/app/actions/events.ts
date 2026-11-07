@@ -590,7 +590,7 @@ export async function bookTicketAction(
       const blocker = singlesBlocker(
         await db.meetupProfile.findUnique({
           where: { userId: user.id },
-          select: { marital: true, status: true, adultConfirmedAt: true },
+          select: { marital: true, status: true, adultConfirmedAt: true, age: true },
         }),
       );
       if (blocker) return { error: blocker };

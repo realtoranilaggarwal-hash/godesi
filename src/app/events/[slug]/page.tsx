@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { connectProfileHref, isSinglesOnly, singlesBlocker } from "@/lib/singles";
+import {
+  SINGLES_MIN_AGE,
+  connectProfileHref,
+  isSinglesOnly,
+  singlesBlocker,
+} from "@/lib/singles";
 import { venuePath } from "@/lib/venues";
 import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
@@ -272,15 +277,14 @@ export default async function EventPage({
 
   const user = await getCurrentUser();
   const singlesOnly = isSinglesOnly(event);
-  const singlesBlock =
+  const singlesProfile =
     singlesOnly && user
-      ? singlesBlocker(
-          await db.meetupProfile.findUnique({
-            where: { userId: user.id },
-            select: { marital: true, status: true, adultConfirmedAt: true },
-          }),
-        )
+      ? await db.meetupProfile.findUnique({
+          where: { userId: user.id },
+          select: { marital: true, status: true, adultConfirmedAt: true, age: true },
+        })
       : null;
+  const singlesBlock = singlesOnly && user ? singlesBlocker(singlesProfile) : null;
   const speakers = await withProfiles(event.speakers, event.organizer);
   const profileFor = (name: string | null) =>
     name
@@ -1015,7 +1019,10 @@ export default async function EventPage({
             <h2 className="font-bold">🎟️ Get your tickets</h2>
             {singlesOnly ? (
               <p className="mt-2 rounded-lg bg-fuchsia-50 px-3 py-2 text-sm text-fuchsia-900">
-                💃 <span className="font-bold">Singles only.</span> Tickets are
+                💃 <span className="font-bold">
+                  Singles only, {SINGLES_MIN_AGE}+.
+                </span>{" "}
+                Tickets are
                 for members with a free{" "}
                 <Link href="/connect" className="font-semibold underline">
                   GoDesi Connect
@@ -1045,7 +1052,7 @@ export default async function EventPage({
               <div className="mt-3 space-y-2">
                 <p className="text-sm text-slate-600">{singlesBlock}</p>
                 <LinkButton href={connectProfileHref(event.slug)}>
-                  Create my Connect profile
+                  {singlesProfile ? "Update" : "Create"} my Connect profile
                 </LinkButton>
                 <p className="text-xs text-slate-500">
                   It takes a minute, and you come straight back here to buy.

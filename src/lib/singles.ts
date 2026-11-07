@@ -1,5 +1,7 @@
 /** Events tagged with this only sell tickets to members with a Connect profile marked Single. */
 export const SINGLES_ONLY_TAG = "singles-only";
+/** Liquor is served at the singles party, so buyers must be 21+ (ID is checked at the door). */
+export const SINGLES_MIN_AGE = 21;
 
 export function isSinglesOnly(event: { tags: string[] }) {
   return event.tags.includes(SINGLES_ONLY_TAG);
@@ -7,14 +9,19 @@ export function isSinglesOnly(event: { tags: string[] }) {
 
 /** Why this member can't buy a singles-only ticket yet, or null when they can. */
 export function singlesBlocker(
-  profile: { marital: string; status: string; adultConfirmedAt: Date | null } | null,
+  profile: {
+    marital: string;
+    status: string;
+    adultConfirmedAt: Date | null;
+    age: number | null;
+  } | null,
 ) {
   if (!profile || profile.status === "REJECTED")
     return "This party is for singles only. Create your free GoDesi Connect profile first, marked Single.";
   if (profile.marital !== "SINGLE")
     return "This party is for singles only. Set your GoDesi Connect profile to Single to get a ticket.";
-  if (!profile.adultConfirmedAt)
-    return "Please confirm you are 18 or older on your GoDesi Connect profile.";
+  if (!profile.adultConfirmedAt || (profile.age ?? 0) < SINGLES_MIN_AGE)
+    return `This party is ${SINGLES_MIN_AGE}+ because liquor is served. Add your age (${SINGLES_MIN_AGE} or older) to your GoDesi Connect profile, and bring photo ID to the door.`;
   return null;
 }
 
