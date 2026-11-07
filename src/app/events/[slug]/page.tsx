@@ -266,6 +266,18 @@ export async function generateMetadata({
   };
 }
 
+/** Silver, Gold and Platinum sponsor levels get their own colours; add-ons stay amber. */
+function sponsorLevelStyle(name: string) {
+  const level = /^(silver|gold|platinum)\b/i.exec(name)?.[1]?.toLowerCase();
+  if (level === "platinum")
+    return { card: "border-indigo-300 bg-indigo-50/70", name: "uppercase tracking-wide text-indigo-800" };
+  if (level === "gold")
+    return { card: "border-amber-400 bg-amber-100/70", name: "uppercase tracking-wide text-amber-800" };
+  if (level === "silver")
+    return { card: "border-slate-300 bg-slate-100/70", name: "uppercase tracking-wide text-slate-700" };
+  return { card: "border-amber-200 bg-amber-50/60", name: "text-slate-900" };
+}
+
 export default async function EventPage({
   params,
   searchParams,
@@ -1118,10 +1130,12 @@ export default async function EventPage({
                 {sponsorTiers.map((tier) => (
                   <li
                     key={tier.id}
-                    className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
+                    className={`min-w-0 rounded-xl border p-3 ${sponsorLevelStyle(tier.name).card}`}
                   >
                     <div className="flex min-w-0 items-start justify-between gap-2">
-                      <span className="min-w-0 break-words font-semibold text-slate-900">
+                      <span
+                        className={`min-w-0 break-words font-semibold ${sponsorLevelStyle(tier.name).name}`}
+                      >
                         {tier.name}
                       </span>
                       <span className="shrink-0 font-black text-amber-700">
