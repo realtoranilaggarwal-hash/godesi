@@ -6,6 +6,7 @@
  *
  *   DATABASE_URL=... npx tsx scripts/update-nye-2027-edison.ts
  */
+import type { BannerSlot } from "@prisma/client";
 import { db } from "@/lib/db";
 
 const SLUG = "new-year-eves-party-2027-edison";
@@ -21,7 +22,7 @@ const DESCRIPTION = [
   "DJ Sandy of M&D Events keeps the dance floor packed all night, and famous belly dancer Aamra performs her fire dance. The Big Ball Room is lit by 22 head spot lights.",
   "Food is served in the exclusive Plaza Hall with live stations — dosa, jalebi, golgappa and many more — plus premium drinks. Valet parking and a lot more.",
   "Tickets till Nov 15th include table seating: Adult (10+) $85, Kids (0–9) $65, Couple $160. Nov 16th to Dec 15th: Adult $100, Kids $75, Couple $180. From Dec 16th: Adult $150, Kids $100, Couple $250. Balcony seats (no table, first come, first served) $75.",
-  "Sponsors welcome — call 732-877-8585.",
+  "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — call 732-877-8585.",
 ].join("\n\n");
 
 /**
@@ -43,6 +44,8 @@ type TierSpec = {
   admits?: number;
   perks?: string[];
   bannerMonths?: number;
+  bannerSlot?: BannerSlot;
+  wallBricks?: number;
 };
 
 const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
@@ -53,6 +56,9 @@ const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
  * caps them together (lib/events pooledSeatsLeft).
  */
 const HALL_TICKETS = 350;
+
+/** GoDesi business pages listed as sponsors of the party (already on the flyer). */
+const SPONSOR_BUSINESSES = ["suhag-jewelers-iselin"];
 
 const TIERS: TierSpec[] = [
   { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 120, salesEnd: EARLY_END },
@@ -65,6 +71,42 @@ const TIERS: TierSpec[] = [
   { name: "Adult (10+)", match: ["General"], price: 150, seats: 60, salesStart: LATE_START },
   { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 20, salesStart: LATE_START },
   { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
+  {
+    kind: "SPONSOR", name: "Silver sponsor", price: 1000, seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25,
+    perks: [
+      "Your logo on the flyer, the standee and the event pages on GoDesi.com and NewYearEvesParty.com",
+      "Linked to your GoDesi business page",
+      "Thank-you announcement on stage during the party",
+      "Thank-you post on GoDesi News",
+      "2 tickets included",
+      "320×100 banner on GoDesi.com for 1 year",
+      "25 Wall of Fame bricks on GoDesi.com ($250 value)",
+    ],
+  },
+  {
+    kind: "SPONSOR", name: "Gold sponsor", price: 2500, seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75,
+    perks: [
+      "Everything in Silver",
+      "Your banner inside the Big Ball Room",
+      "Your logo or 30-second clip on the LED screen",
+      "4 tickets included",
+      "300×250 side banner on GoDesi.com for 1 year (instead of 320×100)",
+      "75 Wall of Fame bricks on GoDesi.com ($750 value)",
+    ],
+  },
+  {
+    kind: "SPONSOR", name: "Platinum sponsor", price: 5000, seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200,
+    perks: [
+      "Everything in Gold",
+      "\"Countdown to 2027 presented by <your business>\" at midnight",
+      "Your standee at the entrance and your logo on the photo backdrop",
+      "Reserved table for 10 with champagne and a \"Table sponsored by\" marker",
+      "Vendor table to show your business at the party",
+      "10 tickets included",
+      "300×600 large side banner on GoDesi.com for 1 year (instead of 300×250)",
+      "200 Wall of Fame bricks on GoDesi.com ($2,000 value)",
+    ],
+  },
   { kind: "SPONSOR", name: "Standee sponsor", price: 350, seats: 2, admits: 2, bannerMonths: 12, perks: ["Your standee at the entrance", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "Banner inside the hall", price: 300, seats: 4, admits: 2, bannerMonths: 12, perks: ["Your banner inside the Big Ball Room", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "LED screen logo or clip", price: 500, seats: 3, admits: 2, bannerMonths: 12, perks: ["Your logo or video clip on the LED screen", "2 tickets included", BANNER_YEAR] },
@@ -118,6 +160,8 @@ async function main() {
       admits: spec.admits ?? 1,
       perks: spec.perks ?? [],
       bannerMonths: spec.bannerMonths ?? null,
+      bannerSlot: spec.bannerSlot ?? null,
+      wallBricks: spec.wallBricks ?? 0,
     };
     if (existing) await db.ticketTier.update({ where: { id: existing.id }, data });
     else await db.ticketTier.create({ data: { ...data, eventId: event.id } });
@@ -152,7 +196,20 @@ async function main() {
     }),
   ]);
 
-  console.log(`Updated ${SLUG}: ${tiers.length} tiers, ${REVIEWS.length} reviews`);
+  for (const slug of SPONSOR_BUSINESSES) {
+    const business = await db.business.findUnique({ where: { slug }, select: { id: true } });
+    if (!business) throw new Error(`No business ${slug}`);
+    const key = { eventId: event.id, businessId: business.id };
+    const existing = await db.eventSponsor.findUnique({ where: { eventId_businessId: key } });
+    if (existing?.status !== "APPROVED")
+      await db.eventSponsor.upsert({
+        where: { eventId_businessId: key },
+        create: { ...key, status: "APPROVED", approvedAt: new Date() },
+        update: { status: "APPROVED", approvedAt: new Date() },
+      });
+  }
+
+  console.log(`Updated ${SLUG}: ${tiers.length} tiers, ${REVIEWS.length} reviews, ${SPONSOR_BUSINESSES.length} sponsors linked`);
 }
 
 main()
