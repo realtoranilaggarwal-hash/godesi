@@ -7,6 +7,7 @@ import { emptyState } from "@/lib/actions";
 import {
   AGE_RANGES,
   CONNECT_INTERESTS,
+  DATING_MIN_AGE,
   GENDER_LABELS,
   MARITAL_LABELS,
   MEET_RADII_MILES,
@@ -36,6 +37,7 @@ export type MeetupProfileDefaults = {
   bio: string;
   whatsappNumber: string;
   visiting: boolean;
+  openToDating: boolean;
 };
 
 function Chip({
@@ -293,6 +295,23 @@ export function MeetupProfileForm({
         </span>
       </label>
 
+      <label className="flex gap-2 rounded-2xl bg-rose-50 p-3 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="openToDating"
+          defaultChecked={defaults?.openToDating}
+          className="mt-0.5 h-4 w-4 rounded border-slate-300"
+        />
+        <span>
+          <span className="font-semibold text-rose-800">
+            💛 Open to dating
+          </span>{" "}
+          — I&rsquo;m single, {DATING_MIN_AGE}+ and open to meeting someone
+          special. Needs marital status Single and your age. Only other members
+          who turned this on can see it.
+        </span>
+      </label>
+
       <fieldset className="space-y-3 rounded-2xl border border-slate-200 p-4">
         <legend className="px-1 text-sm font-bold text-slate-900">
           Before you publish
@@ -332,8 +351,9 @@ export function MeetupProfileForm({
         Save my Connect profile
       </SubmitButton>
       <p className="text-xs text-slate-500">
-        Connect is for networking, community and activities. Dating or adult
-        content is removed and the account blocked.
+        Connect is for networking, community and activities; dating is opt-in
+        for singles {DATING_MIN_AGE}+. Adult content is removed and the account
+        blocked.
       </p>
     </form>
   );

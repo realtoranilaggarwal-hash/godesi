@@ -9,6 +9,7 @@ import {
   interestLabel,
   nearbyLabel,
   parseIntents,
+  seesDating,
 } from "@/lib/meetups";
 import { circleClubs, circleEvents, circleMatches } from "@/lib/connectCircle";
 import {
@@ -51,7 +52,8 @@ const SAFETY = [
   "Your exact location is never shown",
   "Hide or delete your profile anytime",
   "Report anyone in one tap",
-  "No dating or adult content",
+  "No adult content",
+  "Dating is opt-in, singles 21+ only",
 ];
 
 function Hero({ cta }: { cta: { href: string; label: string } }) {
@@ -190,6 +192,11 @@ export default async function ConnectProfilePage({
                           {km !== null ? ` · ${nearbyLabel(km)}` : ""}
                           {match.visiting ? " · visiting / new here" : ""}
                         </p>
+                        {seesDating(profile) && match.openToDating ? (
+                          <p className="text-xs font-semibold text-amber-700">
+                            💛 Open to dating
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                     {reason ? (
@@ -336,6 +343,7 @@ export default async function ConnectProfilePage({
                       bio: profile.bio,
                       whatsappNumber: profile.whatsappNumber ?? "",
                       visiting: profile.visiting,
+                      openToDating: profile.openToDating,
                     }
                   : undefined
               }

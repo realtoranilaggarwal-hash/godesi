@@ -52,6 +52,7 @@ export default async function Page() {
                     {profile.displayName}, {profile.age} ·{" "}
                     {GENDER_LABELS[profile.gender]} ·{" "}
                     {MARITAL_LABELS[profile.marital]}
+                    {profile.openToDating ? " · 💛 Open to dating" : ""}
                   </p>
                   <p className="text-xs text-slate-400">
                     {profile.city}

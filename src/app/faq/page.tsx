@@ -968,9 +968,10 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           fitness, hobbies and family-friendly activities.
         </p>
         <p>
-          It is <strong>not</strong> a dating service. Profiles are moderated,
-          adult or dating-style content is removed and the account blocked, and
-          you can report or block anyone.
+          Dating is <strong>opt-in</strong>: members who are single and 21+ can
+          tick &ldquo;Open to dating&rdquo;, and only other members who ticked
+          it see that. Profiles are moderated, adult content is removed and the
+          account blocked, and you can report or block anyone.
         </p>
       </>
     ),

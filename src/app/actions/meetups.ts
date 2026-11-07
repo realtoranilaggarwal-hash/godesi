@@ -12,6 +12,7 @@ import {
   MEETUP_MAX_AGE,
   MEETUP_MIN_AGE,
   ageRangeById,
+  datingBlocker,
   isMeetRadius,
   parseInterests,
   roundCoord,
@@ -83,12 +84,21 @@ export async function saveMeetupProfileAction(
     const radius = Number(formData.get("meetRadiusMiles"));
     const meetRadiusMiles = isMeetRadius(radius) ? radius : null;
 
+    const openToDating = formData.get("openToDating") === "on";
+    if (openToDating) {
+      const blocker = datingBlocker({
+        marital: parsed.data.marital,
+        age: parsed.data.age ?? null,
+      });
+      if (blocker) return { error: blocker };
+    }
+
     const blocked = findBlockedTerm(
       `${parsed.data.displayName} ${parsed.data.bio} ${parsed.data.city}`,
     );
     if (blocked) {
       return {
-        error: `Connect is for business, coffee and friendly chats only — please remove "${blocked}".`,
+        error: `Connect keeps things respectful — adult wording isn't allowed, please remove "${blocked}".`,
       };
     }
     if (containsContactDetails(parsed.data.bio)) {
@@ -116,6 +126,7 @@ export async function saveMeetupProfileAction(
         ? normalizeWhatsApp(parsed.data.whatsapp)
         : null,
       visiting: formData.get("visiting") === "on",
+      openToDating,
       status: "PENDING" as const,
     };
 
@@ -215,6 +226,27 @@ export async function deleteMeetupProfileAction() {
   const user = await requireUser();
   await db.meetupProfile.deleteMany({ where: { userId: user.id } });
   revalidatePath("/connect");
+}
+
+/** Hides a member from my Connect pages, and me from theirs. */
+export async function blockMeetupMemberAction(formData: FormData) {
+  const user = await requireUser();
+  const profile = await db.meetupProfile.findUnique({
+    where: { id: String(formData.get("profileId") ?? "") },
+    select: { userId: true },
+  });
+  if (!profile || profile.userId === user.id) return;
+
+  await db.meetupBlock.upsert({
+    where: {
+      blockerId_blockedId: { blockerId: user.id, blockedId: profile.userId },
+    },
+    create: { blockerId: user.id, blockedId: profile.userId },
+    update: {},
+  });
+
+  revalidatePath("/connect");
+  revalidatePath("/connect/new");
 }
 
 export async function reportMeetupProfileAction(
