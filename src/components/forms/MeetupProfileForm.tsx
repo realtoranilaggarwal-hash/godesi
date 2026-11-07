@@ -69,13 +69,17 @@ function Chip({
 
 export function MeetupProfileForm({
   defaults,
+  next,
 }: {
   defaults?: MeetupProfileDefaults;
+  /** Where to send the member once saved, e.g. back to a singles-only event. */
+  next?: string;
 }) {
   const [state, formAction] = useFormState(saveMeetupProfileAction, emptyState);
 
   return (
     <form action={formAction} className="space-y-4">
+      {next ? <input type="hidden" name="next" value={next} /> : null}
       <FormError>{state.error}</FormError>
 
       <fieldset className="rounded-2xl border border-slate-200 p-4">
