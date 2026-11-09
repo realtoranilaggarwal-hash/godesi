@@ -1,5 +1,5 @@
 import { thumbImage } from "@/lib/proxyImage";
-import { categoryCover } from "@/lib/cityCovers";
+import { listingCategoryCover } from "@/lib/cityCovers";
 
 const DEFAULT_ART = "/images/categories/default.jpg";
 
@@ -54,7 +54,7 @@ export function LogoTile({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={categoryCover(categorySlug) ?? DEFAULT_ART}
+        src={listingCategoryCover({ name, categorySlug }) ?? DEFAULT_ART}
         alt={name}
         loading="lazy"
         className="h-full w-full object-cover"

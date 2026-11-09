@@ -4,7 +4,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { StaffEditLink } from "@/components/StaffEditLink";
 import { whatsappLink } from "@/lib/format";
 import { thumbImage } from "@/lib/proxyImage";
-import { categoryCover } from "@/lib/cityCovers";
+import { listingCategoryCover } from "@/lib/cityCovers";
 
 /**
  * News-style card for the business grids: thumbnail on the left, write-up
@@ -69,7 +69,7 @@ export function BusinessTile({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={
-                categoryCover(business.categorySlug) ??
+                listingCategoryCover(business) ??
                 "/images/categories/default.jpg"
               }
               alt={business.name}

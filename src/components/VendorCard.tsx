@@ -4,7 +4,7 @@ import { Badge, Stars } from "@/components/ui";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { PlaceLink } from "@/components/PlaceLink";
 import { formatMoney, whatsappLink } from "@/lib/format";
-import { categoryCover } from "@/lib/cityCovers";
+import { listingCategoryCover } from "@/lib/cityCovers";
 
 function priceLabel(vendor: BusinessListItem) {
   if (vendor.startingPrice !== null) {
@@ -35,7 +35,7 @@ export function VendorCard({ vendor }: { vendor: BusinessListItem }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={
-              categoryCover(vendor.categorySlug) ??
+              listingCategoryCover(vendor) ??
               "/images/categories/default.jpg"
             }
             alt=""

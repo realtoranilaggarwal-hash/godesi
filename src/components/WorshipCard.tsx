@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Faith } from "@prisma/client";
 import { Badge } from "@/components/ui";
 import { FAITH_LABELS } from "@/lib/worship";
+import { SIKH_COVER } from "@/lib/cityCovers";
 
 export type WorshipCardItem = {
   slug: string;
@@ -31,7 +32,11 @@ export function WorshipCard({ place }: { place: WorshipCardItem }) {
       ) : (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="/images/categories/religious-services.jpg"
+          src={
+            place.faith === "GURUDWARA"
+              ? SIKH_COVER
+              : "/images/categories/religious-services.jpg"
+          }
           alt=""
           aria-hidden
           loading="lazy"
