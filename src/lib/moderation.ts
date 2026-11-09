@@ -1,5 +1,5 @@
 /**
- * Keeps Connect strictly platonic: adult, escort and hook-up wording is rejected
+ * Keeps Connect respectful (dating is opt-in only): adult, escort and hook-up wording is rejected
  * outright rather than moderated later, which also keeps the section AdSense-safe.
  */
 const BLOCKED = [

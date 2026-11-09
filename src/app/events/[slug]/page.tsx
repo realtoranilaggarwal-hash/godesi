@@ -1043,7 +1043,13 @@ export default async function EventPage({
                 <Link href="/connect" className="font-semibold underline">
                   GoDesi Connect
                 </Link>{" "}
-                profile marked Single, so the balcony is just for singles.
+                profile marked Single, so the balcony is just for singles.{" "}
+                Single and {SINGLES_MIN_AGE}+? Tick &ldquo;💛 Open to
+                dating&rdquo; on your{" "}
+                <Link href="/connect/new#my-profile" className="font-semibold underline">
+                  Connect profile
+                </Link>{" "}
+                to see other singles who are open to meeting someone special.
               </p>
             ) : null}
             {past ? (

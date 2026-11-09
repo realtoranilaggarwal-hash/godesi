@@ -388,12 +388,14 @@ model User {
 
   meetupProfile MeetupProfile?
 
-  rishtaProfile RishtaProfile?
-  ambassador    Ambassador?
-  rishtaReports RishtaReport[]
-  meetupReports MeetupReport[]
-  alumni        AlumniRecord[]
-  upiRequests   UpiRequest[]
+  rishtaProfile   RishtaProfile?
+  ambassador      Ambassador?
+  rishtaReports   RishtaReport[]
+  meetupReports   MeetupReport[]
+  meetupBlocking  MeetupBlock[]  @relation("MeetupBlocker")
+  meetupBlockedBy MeetupBlock[]  @relation("MeetupBlocked")
+  alumni          AlumniRecord[]
+  upiRequests     UpiRequest[]
 
   /// Answer to the "want to be in GoDesi Elite?" prompt: SELF, OTHER or LATER.
   elitePrompt  String?
@@ -1919,33 +1921,33 @@ model EventClaim {
 
 /// Basic / Webinar / Premium seat types for an event.
 model TicketTier {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
   eventId      String
-  event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name         String
   /// Price per seat in major units of the event's currency; 0 for free tiers.
-  price        Int       @default(0)
+  price        Int         @default(0)
   seatsTotal   Int
-  seatsBooked  Int       @default(0)
-  sortOrder    Int       @default(0)
+  seatsBooked  Int         @default(0)
+  sortOrder    Int         @default(0)
   /// Optional sale window, e.g. early-bird prices until a date, late prices from one.
   salesStart   DateTime?
   salesEnd     DateTime?
   /// Short line under the name, e.g. "Table seating included".
   note         String?
   /// TICKET for entry tickets, SPONSOR for sponsorship packages (listed separately).
-  kind         String    @default("TICKET")
+  kind         String      @default("TICKET")
   /// People one ticket lets in: 2 for a couple ticket or a sponsor package with 2 passes, 0 for no entry.
-  admits       Int       @default(1)
+  admits       Int         @default(1)
   /// What a sponsor package includes, one line each.
-  perks        String[]  @default([])
+  perks        String[]    @default([])
   /// Months of free GoDesi banner a sponsor package comes with.
   bannerMonths Int?
   /// Placement of that free banner; the 320x100 small banner when unset.
   bannerSlot   BannerSlot?
   /// Wall of Fame bricks (10x10, $10 each) credited to the buyer's GoDesi account.
-  wallBricks   Int       @default(0)
-  createdAt    DateTime  @default(now())
+  wallBricks   Int         @default(0)
+  createdAt    DateTime    @default(now())
 
   tickets Ticket[]
 
@@ -2078,7 +2080,7 @@ enum MeetupMarital {
 }
 
 /// Opt-in "Connect" profile for meeting people over business, coffee or a chat.
-/// Reviewed before it goes public; strictly non-dating (see `lib/moderation`).
+/// Reviewed before it goes public; adult wording is blocked (see `lib/moderation`).
 model MeetupProfile {
   id               String        @id @default(cuid())
   userId           String        @unique
@@ -2097,6 +2099,8 @@ model MeetupProfile {
   locationSharedAt DateTime?
   /// Travellers and newcomers get a "visiting / new here" flag on their card.
   visiting         Boolean       @default(false)
+  /// Single members 21+ may opt in to dating; only other opted-in members see it.
+  openToDating     Boolean       @default(false)
   gender           MeetupGender
   marital          MeetupMarital @default(PREFER_NOT_SAY)
   city             String
@@ -2189,6 +2193,19 @@ model RishtaReport {
 }
 
 /// Member-flagged profile, queued for admin review.
+/// A member hiding another from their Connect pages; both stop seeing each other.
+model MeetupBlock {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("MeetupBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("MeetupBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
 model MeetupReport {
   id         String        @id @default(cuid())
   profileId  String

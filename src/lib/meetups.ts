@@ -1,9 +1,10 @@
 import type { MeetupGender, MeetupMarital } from "@prisma/client";
 import { CLUB_CATEGORIES } from "@/lib/clubs";
+import { SINGLES_MIN_AGE } from "@/lib/singles";
 
 /**
- * What members are open to, grouped for the form. Deliberately professional and
- * community focused — Connect is for networking and activities, not dating.
+ * What members are open to, grouped for the form. Professional and community
+ * focused; dating is a separate opt-in (`openToDating`) for singles 21+.
  */
 type MeetupIntent = { id: string; label: string };
 type MeetupIntentGroup = { id: string; label: string; intents: MeetupIntent[] };
@@ -49,7 +50,26 @@ export const MEETUP_INTENTS: MeetupIntent[] = MEETUP_INTENT_GROUPS.flatMap(
 );
 
 export const MEETUP_INTENT_NOTE =
-  "This section is for networking, community, and activities — not dating.";
+  "Connect is for networking, community and activities. Singles 21+ can also opt in to dating.";
+
+/** Dating is opt-in for singles of the same 21+ age as the singles party. */
+export const DATING_MIN_AGE = SINGLES_MIN_AGE;
+
+/** Why this member can't turn on "Open to dating", or null when they can. */
+export function datingBlocker(profile: { marital: string; age: number | null }) {
+  if (profile.marital !== "SINGLE")
+    return "\"Open to dating\" is only for members whose marital status is Single.";
+  if ((profile.age ?? 0) < DATING_MIN_AGE)
+    return `"Open to dating" is for members ${DATING_MIN_AGE} and over — add your age to turn it on.`;
+  return null;
+}
+
+/** Only members who opted in themselves (and are approved) see who else is open to dating. */
+export function seesDating(
+  profile: { openToDating: boolean; status: string } | null | undefined,
+) {
+  return Boolean(profile?.openToDating && profile.status === "APPROVED");
+}
 
 export const INTENT_LABELS: Record<string, string> = Object.fromEntries(
   MEETUP_INTENTS.map((intent) => [intent.id, intent.label]),

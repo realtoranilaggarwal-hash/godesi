@@ -13,7 +13,10 @@ import {
   distanceKm,
   intentLabels,
   nearbyLabel,
+  seesDating,
 } from "@/lib/meetups";
+import { blockMeetupMemberAction } from "@/app/actions/meetups";
+import { blockedMeetupUserIds } from "@/lib/connectCircle";
 import { InlineBanner } from "@/components/Banners";
 import { SafetyResourcesRail } from "@/components/SafetyResourcesRail";
 import { PostedBy } from "@/components/PostedBy";
@@ -32,7 +35,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Connect — meet desis near you",
   description:
-    "Meet desis in your city for networking, mentorship, cultural meetups, workshops and community groups. Reviewed and moderated; not a dating service.",
+    "Meet desis in your city for networking, mentorship, cultural meetups, workshops and community groups. Singles 21+ can opt in to dating. Every profile is reviewed.",
 };
 
 type Filters = {
@@ -61,10 +64,18 @@ export default async function ConnectPage({
   searchParams: Filters;
 }) {
   const user = await getCurrentUser();
+  const [mine, hidden] = user
+    ? await Promise.all([
+        db.meetupProfile.findUnique({ where: { userId: user.id } }),
+        blockedMeetupUserIds(user.id),
+      ])
+    : [null, []];
+  const dating = seesDating(mine);
 
   const where: Prisma.MeetupProfileWhereInput = {
     status: "APPROVED",
     visible: true,
+    ...(hidden.length ? { userId: { notIn: hidden } } : {}),
     ...(searchParams.city
       ? { city: { contains: searchParams.city, mode: "insensitive" } }
       : {}),
@@ -81,6 +92,7 @@ export default async function ConnectPage({
     ...(searchParams.intent && searchParams.intent in INTENT_LABELS
       ? { intents: { contains: searchParams.intent } }
       : {}),
+    ...(dating && searchParams.intent === "dating" ? { openToDating: true } : {}),
   };
   const age = ageRange(searchParams);
   if (age) where.age = age;
@@ -94,19 +106,14 @@ export default async function ConnectPage({
   })();
   if (here) where.latitude = { not: null };
 
-  const [found, mine] = await Promise.all([
-    db.meetupProfile.findMany({
-      where,
-      orderBy: { updatedAt: "desc" },
-      take: here ? 200 : 60,
-      include: {
-        user: { select: { name: true, username: true, avatarUrl: true } },
-      },
-    }),
-    user
-      ? db.meetupProfile.findUnique({ where: { userId: user.id } })
-      : Promise.resolve(null),
-  ]);
+  const found = await db.meetupProfile.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    take: here ? 200 : 60,
+    include: {
+      user: { select: { name: true, username: true, avatarUrl: true } },
+    },
+  });
 
   const withDistance = found.map((profile) => ({
     profile,
@@ -174,6 +181,7 @@ export default async function ConnectPage({
               className={inputClass}
             >
               <option value="">Any interest</option>
+              {dating ? <option value="dating">💛 Open to dating</option> : null}
               {MEETUP_INTENT_GROUPS.map((group) => (
                 <optgroup key={group.id} label={group.label}>
                   {group.intents.map((intent) => (
@@ -276,6 +284,9 @@ export default async function ConnectPage({
                   {km !== null ? (
                     <Badge tone="green">📍 {nearbyLabel(km)}</Badge>
                   ) : null}
+                  {dating && profile.openToDating ? (
+                    <Badge tone="amber">💛 Open to dating</Badge>
+                  ) : null}
                   {profile.visiting ? (
                     <Badge tone="indigo">✈️ Visiting / new here</Badge>
                   ) : null}
@@ -319,7 +330,18 @@ export default async function ConnectPage({
                     </LinkButton>
                   )}
                   {user && user.id !== profile.userId ? (
-                    <ReportMeetupForm profileId={profile.id} />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <ReportMeetupForm profileId={profile.id} />
+                      <form action={blockMeetupMemberAction}>
+                        <input type="hidden" name="profileId" value={profile.id} />
+                        <button
+                          type="submit"
+                          className="text-xs font-semibold text-slate-500 hover:text-rose-600"
+                        >
+                          Block
+                        </button>
+                      </form>
+                    </div>
                   ) : null}
                 </div>
               </Card>
@@ -338,12 +360,13 @@ export default async function ConnectPage({
           <ul className="mt-2 space-y-1 text-sm text-slate-600">
             <li>• 18+ only, and every profile is reviewed before it appears.</li>
             <li>
-              • Networking, community and activities only. Dating and adult content are
-              not allowed and such wording is blocked automatically.
+              • Networking, community and activities. Dating is opt-in for singles
+              21+ and only visible to others who opted in. Adult content is not
+              allowed and such wording is blocked automatically.
             </li>
             <li>• Meet in public places and never send money to anyone.</li>
             <li>
-              • Report anything uncomfortable — we review every report and remove
+              • Block anyone to stop seeing each other, and report anything uncomfortable — we review every report and remove
               offenders. Questions?{" "}
               <Link href="/contact" className="font-semibold text-indigo-600">
                 Contact us

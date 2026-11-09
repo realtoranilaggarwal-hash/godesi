@@ -13,6 +13,7 @@ const KM_PER_MILE = 1.609;
 type CircleProfile = Pick<
   MeetupProfile,
   | "id"
+  | "userId"
   | "city"
   | "intents"
   | "interests"
@@ -32,8 +33,14 @@ function sameCity(a: string, b: string) {
  * preferences filter the list; members who have not shared an age are kept.
  */
 export async function circleMatches(profile: CircleProfile, take = 6) {
+  const hidden = await blockedMeetupUserIds(profile.userId);
   const candidates = await db.meetupProfile.findMany({
-    where: { status: "APPROVED", visible: true, id: { not: profile.id } },
+    where: {
+      status: "APPROVED",
+      visible: true,
+      id: { not: profile.id },
+      userId: { notIn: hidden },
+    },
     orderBy: { updatedAt: "desc" },
     take: 400,
     include: {
@@ -86,6 +93,17 @@ export async function circleMatches(profile: CircleProfile, take = 6) {
     })
     .sort((a, b) => b.score - a.score)
     .slice(0, take);
+}
+
+/** Members this user blocked or was blocked by; neither sees the other in Connect. */
+export async function blockedMeetupUserIds(userId: string) {
+  const blocks = await db.meetupBlock.findMany({
+    where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
+    select: { blockerId: true, blockedId: true },
+  });
+  return blocks.map((block) =>
+    block.blockerId === userId ? block.blockedId : block.blockerId,
+  );
 }
 
 /** Clubs in the member's city, or online clubs, that match what they enjoy. */
