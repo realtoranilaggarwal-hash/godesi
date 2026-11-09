@@ -61,6 +61,33 @@ const CATEGORY_COVERS: Record<string, string> = {
 
 const DEFAULT_COVER = "/images/categories/default.jpg";
 
+/** Gurdwaras get a Gurdwara banner, not the generic temple art of their category. */
+export const SIKH_COVER = "/images/categories/sikh-gurdwara.jpg";
+
+const SIKH_NAME = /\b(gurdwara|gurudwara|gurudwar|sikhs?|singh sabha|khalsa)\b/i;
+const GURDWARA_NAME = /\b(gurdwara|gurudwara|gurudwar|sangat|sabha|sikh temple)\b/i;
+
+/** Sikh worship listings: any Sikh name under religious services, or a Gurdwara-named community org. */
+export function isSikhPlace(business: {
+  name?: string | null;
+  categorySlug?: string | null;
+}): boolean {
+  const name = business.name ?? "";
+  const slug = business.categorySlug ?? "";
+  if (slug.startsWith("religious-services")) return SIKH_NAME.test(name);
+  if (slug.startsWith("community-orgs"))
+    return SIKH_NAME.test(name) && GURDWARA_NAME.test(name);
+  return false;
+}
+
+/** Category art for a listing card, with the Gurdwara banner for Sikh places. */
+export function listingCategoryCover(business: {
+  name?: string | null;
+  categorySlug?: string | null;
+}): string | null {
+  return isSikhPlace(business) ? SIKH_COVER : categoryCover(business.categorySlug);
+}
+
 /** Bazaar-street banner shown on /city hubs that have no dedicated photo. */
 export const CITY_DEFAULT_COVER = DEFAULT_COVER;
 
@@ -88,15 +115,18 @@ export function categoryCover(
 /**
  * The header image for a listing page: the owner's uploaded cover wins, then
  * their city's banner, then their category's, then a generic bazaar banner —
- * so every /business page always has a finished-looking header.
+ * so every /business page always has a finished-looking header. A Gurdwara
+ * without its own photo shows the Gurdwara banner ahead of the city one.
  */
 export function listingCover(business: {
+  name?: string | null;
   coverUrl?: string | null;
   city?: string | null;
   categorySlug?: string | null;
 }): string {
   return (
     business.coverUrl ??
+    (isSikhPlace(business) ? SIKH_COVER : null) ??
     cityCover(business.city) ??
     categoryCover(business.categorySlug) ??
     DEFAULT_COVER
