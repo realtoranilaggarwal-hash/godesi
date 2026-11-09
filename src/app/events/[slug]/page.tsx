@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import {
+  SINGLES_MIN_AGE,
+  connectProfileHref,
+  isSinglesOnly,
+  singlesBlocker,
+} from "@/lib/singles";
 import { venuePath } from "@/lib/venues";
 import { getCurrentUser } from "@/lib/auth";
 import { can } from "@/lib/permissions";
@@ -11,6 +17,7 @@ import {
   formatEventDate,
   formatEventEnd,
   isPast,
+  pooledSeatsLeft,
   seatsLeft,
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
@@ -49,6 +56,11 @@ import { EventAttendees } from "@/components/EventAttendees";
 import { MapEmbed } from "@/components/MapEmbed";
 import { GodesiMark } from "@/components/GodesiMark";
 import { ScrollTop } from "@/components/ScrollTop";
+import { DeleteEventButton } from "@/components/forms/DeleteEventButton";
+import { EventSponsors } from "@/components/EventSponsors";
+import { SponsorRequestsPanel } from "@/components/SponsorRequestsPanel";
+import { sponsorsForEvent } from "@/lib/sponsors";
+import { tierOnSale, tierWindowLabel } from "@/lib/ticketTiers";
 
 type SpeakerRow =
   Awaited<ReturnType<typeof loadEvent>> extends infer E
@@ -141,6 +153,10 @@ async function loadEvent(slug: string) {
     where: { slug },
     include: {
       tiers: { orderBy: { sortOrder: "asc" } },
+      reviews: {
+        where: { hidden: false },
+        orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
+      },
       speakers: {
         orderBy: { sortOrder: "asc" },
         include: {
@@ -250,6 +266,18 @@ export async function generateMetadata({
   };
 }
 
+/** Silver, Gold and Platinum sponsor levels get their own colours; add-ons stay amber. */
+function sponsorLevelStyle(name: string) {
+  const level = /^(silver|gold|platinum)\b/i.exec(name)?.[1]?.toLowerCase();
+  if (level === "platinum")
+    return { card: "border-indigo-300 bg-indigo-50/70", name: "uppercase tracking-wide text-indigo-800" };
+  if (level === "gold")
+    return { card: "border-amber-400 bg-amber-100/70", name: "uppercase tracking-wide text-amber-800" };
+  if (level === "silver")
+    return { card: "border-slate-300 bg-slate-100/70", name: "uppercase tracking-wide text-slate-700" };
+  return { card: "border-amber-200 bg-amber-50/60", name: "text-slate-900" };
+}
+
 export default async function EventPage({
   params,
   searchParams,
@@ -261,6 +289,15 @@ export default async function EventPage({
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
+  const singlesOnly = isSinglesOnly(event);
+  const singlesProfile =
+    singlesOnly && user
+      ? await db.meetupProfile.findUnique({
+          where: { userId: user.id },
+          select: { marital: true, status: true, adultConfirmedAt: true, age: true },
+        })
+      : null;
+  const singlesBlock = singlesOnly && user ? singlesBlocker(singlesProfile) : null;
   const speakers = await withProfiles(event.speakers, event.organizer);
   const profileFor = (name: string | null) =>
     name
@@ -269,6 +306,10 @@ export default async function EventPage({
       : null;
   const isOwnerOrDesk = Boolean(
     user && (user.id === event.organizerId || can(user, "events")),
+  );
+  const allSponsors = await sponsorsForEvent(event.id, !isOwnerOrDesk);
+  const sponsors = allSponsors.filter(
+    (sponsor) => sponsor.status === "APPROVED",
   );
   const clubMembership =
     user && event.club
@@ -318,6 +359,21 @@ export default async function EventPage({
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
   const left = seatsLeft(event);
+  const paidTicketCount =
+    user && (user.id === event.organizerId || can(user, "events"))
+      ? await db.ticket.count({
+          where: {
+            eventId: event.id,
+            status: "CONFIRMED",
+            amountMinor: { gt: 0 },
+          },
+        })
+      : 0;
+  const ticketTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
+  const sponsorTiers = event.tiers.filter((tier) => tier.kind === "SPONSOR");
+  const poolLeft = pooledSeatsLeft(event, event.tiers);
+  const ticketSeatsLeft = (tier: (typeof ticketTiers)[number]) =>
+    Math.min(seatsLeft(tier), poolLeft ?? Infinity);
   const theme = eventTheme(
     event.title,
     event.category?.icon,
@@ -377,7 +433,9 @@ export default async function EventPage({
     organizer: {
       "@type": "Organization",
       name: event.business?.name ?? event.organizer?.name ?? "Godesi",
-      url: event.business ? `${siteUrl()}/business/${event.business.slug}` : siteUrl(),
+      url: event.business
+        ? `${siteUrl()}/business/${event.business.slug}`
+        : siteUrl(),
     },
     // Imported events are ticketed elsewhere, so no offer is claimed for them.
     ...(imported
@@ -406,6 +464,8 @@ export default async function EventPage({
         />
         {searchParams.error === "cancelled" ? (
           <Alert>Payment cancelled — your seats were not booked.</Alert>
+        ) : searchParams.error ? (
+          <Alert>{searchParams.error}</Alert>
         ) : null}
 
         {/* Where the visitor is, and the way back to the list they came from. */}
@@ -538,6 +598,13 @@ export default async function EventPage({
                   ✏️ Edit event
                 </Link>
               ) : null}
+              {user &&
+              (user.id === event.organizerId || can(user, "events")) ? (
+                <DeleteEventButton
+                  eventId={event.id}
+                  hasPaidTickets={paidTicketCount > 0}
+                />
+              ) : null}
             </div>
             <div className="grid gap-1 text-sm text-slate-700 sm:grid-cols-2">
               <p>
@@ -651,14 +718,14 @@ export default async function EventPage({
                 🎫{" "}
                 {event.price ? (
                   <>
-                    {event.tiers.length
-                      ? `${event.tiers.length} ticket types from `
+                    {ticketTiers.length
+                      ? `${ticketTiers.length} ticket types from `
                       : null}
                     <Money value={event.price} currency={event.currency} />
-                    {event.tiers.length ? null : " per seat"}
+                    {ticketTiers.length ? null : " per seat"}
                   </>
-                ) : event.tiers.length ? (
-                  `${event.tiers.length} ticket types from free`
+                ) : ticketTiers.length ? (
+                  `${ticketTiers.length} ticket types from free`
                 ) : imported ? (
                   "Entry terms: see the organiser"
                 ) : (
@@ -692,26 +759,45 @@ export default async function EventPage({
                 </a>
               </div>
             ) : null}
-            {!imported && !past && left > 0 && (event.tiers.length || event.price) ? (
+            {!imported &&
+            !past &&
+            left > 0 &&
+            (ticketTiers.length || event.price) ? (
               <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/50 p-3">
                 <p className="text-sm font-bold text-indigo-900">🎟️ Tickets</p>
-                {event.tiers.length ? (
+                {ticketTiers.length ? (
                   <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {event.tiers.map((tier) => (
+                    {ticketTiers.map((tier) => (
                       <li
                         key={tier.id}
-                        className="flex min-w-0 items-center justify-between gap-2 rounded-xl border border-dashed border-indigo-300 bg-white px-3 py-2"
+                        className={`flex min-w-0 items-center justify-between gap-2 rounded-xl border border-dashed border-indigo-300 bg-white px-3 py-2 ${tierOnSale(tier) ? "" : "opacity-60"}`}
                       >
                         <span className="min-w-0">
                           <span className="block break-words font-semibold text-slate-900">
                             {tier.name}
                           </span>
+                          {tier.note ? (
+                            <span className="block break-words text-xs text-slate-600">
+                              {tier.note}
+                            </span>
+                          ) : null}
                           <span className="block text-xs text-slate-500">
-                            {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Sold out"}
+                            {[
+                              tierWindowLabel(tier, event.timeZone),
+                              tierOnSale(tier)
+                                ? ticketSeatsLeft(tier)
+                                  ? `${ticketSeatsLeft(tier)} left`
+                                  : "Sold out"
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
                           </span>
                         </span>
                         <span className="shrink-0 font-black text-indigo-700">
-                          {tier.price ? formatMoney(tier.price, event.currency) : "Free"}
+                          {tier.price
+                            ? formatMoney(tier.price, event.currency)
+                            : "Free"}
                         </span>
                       </li>
                     ))}
@@ -794,6 +880,44 @@ export default async function EventPage({
             ) : null}
             <VideoEmbed url={event.videoUrl} title={event.title} />
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
+            <EventSponsors sponsors={sponsors} />
+            {isOwnerOrDesk ? (
+              <SponsorRequestsPanel eventId={event.id} sponsors={allSponsors} />
+            ) : null}
+            {event.reviews.length ? (
+              <section className="space-y-2">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="font-bold">⭐ What guests say</h2>
+                  <Link
+                    href={`/events/${event.slug}/reviews`}
+                    className="text-sm font-semibold text-indigo-700 hover:underline"
+                  >
+                    All {event.reviews.length} reviews →
+                  </Link>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {event.reviews.slice(0, 3).map((review) => (
+                    <figure
+                      key={review.id}
+                      className="min-w-0 rounded-xl border border-amber-200 bg-amber-50/60 p-3"
+                    >
+                      <p
+                        className="text-amber-500"
+                        aria-label={`${review.rating} stars`}
+                      >
+                        {"★".repeat(review.rating)}
+                      </p>
+                      <blockquote className="mt-1 line-clamp-5 break-words text-sm text-slate-700">
+                        “{review.comment}”
+                      </blockquote>
+                      <figcaption className="mt-1 text-xs font-semibold text-slate-500">
+                        — {review.authorName}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </section>
+            ) : null}
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
               <ShareButtons
@@ -881,7 +1005,11 @@ export default async function EventPage({
                 )}
                 {event.websiteUrl ? (
                   <div className="mt-3">
-                    <LinkButton href={event.websiteUrl} target="_blank" variant="secondary">
+                    <LinkButton
+                      href={event.websiteUrl}
+                      target="_blank"
+                      variant="secondary"
+                    >
                       Organiser&apos;s page ↗
                     </LinkButton>
                   </div>
@@ -905,6 +1033,25 @@ export default async function EventPage({
         ) : (
           <Card id="tickets">
             <h2 className="font-bold">🎟️ Get your tickets</h2>
+            {singlesOnly ? (
+              <p className="mt-2 rounded-lg bg-fuchsia-50 px-3 py-2 text-sm text-fuchsia-900">
+                💃 <span className="font-bold">
+                  Singles only, {SINGLES_MIN_AGE}+.
+                </span>{" "}
+                Tickets are
+                for members with a free{" "}
+                <Link href="/connect" className="font-semibold underline">
+                  GoDesi Connect
+                </Link>{" "}
+                profile marked Single, so the balcony is just for singles.{" "}
+                Single and {SINGLES_MIN_AGE}+? Tick &ldquo;💛 Open to
+                dating&rdquo; on your{" "}
+                <Link href="/connect/new#my-profile" className="font-semibold underline">
+                  Connect profile
+                </Link>{" "}
+                to see other singles who are open to meeting someone special.
+              </p>
+            ) : null}
             {past ? (
               <p className="mt-2 text-sm text-slate-600">
                 This event has already taken place.
@@ -916,11 +1063,22 @@ export default async function EventPage({
             ) : !user ? (
               <div className="mt-3 space-y-2">
                 <p className="text-sm text-slate-600">
-                  Sign in (or join free) to buy tickets. Your tickets are saved in your account and emailed to you.
+                  Sign in (or join free) to buy tickets. Your tickets are saved
+                  in your account and emailed to you.
                 </p>
                 <LinkButton href={`/login?next=/events/${event.slug}`}>
                   Sign in to buy tickets
                 </LinkButton>
+              </div>
+            ) : singlesBlock ? (
+              <div className="mt-3 space-y-2">
+                <p className="text-sm text-slate-600">{singlesBlock}</p>
+                <LinkButton href={connectProfileHref(event.slug)}>
+                  {singlesProfile ? "Update" : "Create"} my Connect profile
+                </LinkButton>
+                <p className="text-xs text-slate-500">
+                  It takes a minute, and you come straight back here to buy.
+                </p>
               </div>
             ) : (
               <div className="mt-3">
@@ -930,12 +1088,19 @@ export default async function EventPage({
                   currency={event.currency}
                   seatsLeft={left}
                   maxPerBooking={maxPerBooking}
-                  tiers={event.tiers.map((tier) => ({
-                    id: tier.id,
-                    name: tier.name,
-                    price: tier.price,
-                    seatsLeft: seatsLeft(tier),
-                  }))}
+                  tiers={ticketTiers
+                    .filter((tier) => tierOnSale(tier))
+                    .map((tier) => ({
+                      id: tier.id,
+                      name: tier.name,
+                      price: tier.price,
+                      seatsLeft: ticketSeatsLeft(tier),
+                    }))}
+                  promoCodesHref={
+                    sponsors.some((sponsor) => sponsor.coupon?.active)
+                      ? "#sponsors"
+                      : undefined
+                  }
                   defaultName={user.name}
                   defaultEmail={user.email}
                   askReferredBy={event.askReferredBy}
@@ -944,6 +1109,93 @@ export default async function EventPage({
             )}
           </Card>
         )}
+
+        {!imported && !past && sponsorTiers.length ? (
+          <Card>
+            <details id="sponsor" className="group scroll-mt-24">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold text-amber-700 hover:underline">
+                <span>
+                  🤝 Become a sponsor — packages from{" "}
+                  {formatMoney(
+                    Math.min(...sponsorTiers.map((tier) => tier.price)),
+                    event.currency,
+                  )}
+                </span>
+                <span
+                  className="text-slate-400 transition group-open:rotate-180"
+                  aria-hidden
+                >
+                  ▾
+                </span>
+              </summary>
+              <p className="mt-2 text-sm text-slate-600">
+                Put your business in front of every guest. Pick a package below
+                — the organiser will contact you for your logo, clip or name.
+              </p>
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                {sponsorTiers.map((tier) => (
+                  <li
+                    key={tier.id}
+                    className={`min-w-0 rounded-xl border p-3 ${sponsorLevelStyle(tier.name).card}`}
+                  >
+                    <div className="flex min-w-0 items-start justify-between gap-2">
+                      <span
+                        className={`min-w-0 break-words font-semibold ${sponsorLevelStyle(tier.name).name}`}
+                      >
+                        {tier.name}
+                      </span>
+                      <span className="shrink-0 font-black text-amber-700">
+                        {formatMoney(tier.price, event.currency)}
+                      </span>
+                    </div>
+                    {tier.perks.length ? (
+                      <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-700">
+                        {tier.perks.map((perk) => (
+                          <li key={perk} className="break-words">
+                            {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    <p className="mt-1 text-xs text-slate-500">
+                      {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Taken"}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              {!user ? (
+                <div className="mt-3">
+                  <LinkButton
+                    href={`/login?next=/events/${event.slug}%23sponsor`}
+                  >
+                    Sign in to become a sponsor
+                  </LinkButton>
+                </div>
+              ) : (
+                <div className="mt-3">
+                  <TicketForm
+                    eventId={event.id}
+                    price={0}
+                    currency={event.currency}
+                    seatsLeft={left}
+                    maxPerBooking={maxPerBooking}
+                    tiers={sponsorTiers
+                      .filter((tier) => tierOnSale(tier))
+                      .map((tier) => ({
+                        id: tier.id,
+                        name: tier.name,
+                        price: tier.price,
+                        seatsLeft: seatsLeft(tier),
+                      }))}
+                    defaultName={user.name}
+                    defaultEmail={user.email}
+                    nameLabel="Business name (as it should appear)"
+                  />
+                </div>
+              )}
+            </details>
+          </Card>
+        ) : null}
 
         {speakers.length ? (
           <Card>

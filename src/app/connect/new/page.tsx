@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { safeNextPath } from "@/lib/singles";
 import { siteUrl, whatsappLink } from "@/lib/format";
 import {
   CONVERSATION_STARTERS,
   interestLabel,
   nearbyLabel,
   parseIntents,
+  seesDating,
 } from "@/lib/meetups";
 import { circleClubs, circleEvents, circleMatches } from "@/lib/connectCircle";
 import {
@@ -50,7 +52,8 @@ const SAFETY = [
   "Your exact location is never shown",
   "Hide or delete your profile anytime",
   "Report anyone in one tap",
-  "No dating or adult content",
+  "No adult content",
+  "Dating is opt-in, singles 21+ only",
 ];
 
 function Hero({ cta }: { cta: { href: string; label: string } }) {
@@ -107,15 +110,23 @@ function SafetyStrip() {
   );
 }
 
-export default async function ConnectProfilePage() {
+export default async function ConnectProfilePage({
+  searchParams,
+}: {
+  searchParams: { next?: string };
+}) {
   const user = await getCurrentUser();
+  const next = safeNextPath(searchParams.next) ?? undefined;
+  const selfPath = encodeURIComponent(
+    next ? `/connect/new?next=${encodeURIComponent(next)}` : "/connect/new",
+  );
 
   if (!user) {
     return (
       <div className="mx-auto max-w-4xl space-y-5">
         <Hero
           cta={{
-            href: "/signup?next=/connect/new",
+            href: `/signup?next=${selfPath}`,
             label: "Find my Desi Circle",
           }}
         />
@@ -123,7 +134,7 @@ export default async function ConnectProfilePage() {
         <Card className="text-sm text-slate-600">
           Already a member?{" "}
           <Link
-            href="/login?next=/connect/new"
+            href={`/login?next=${selfPath}`}
             className="font-semibold text-indigo-700"
           >
             Log in
@@ -181,6 +192,11 @@ export default async function ConnectProfilePage() {
                           {km !== null ? ` · ${nearbyLabel(km)}` : ""}
                           {match.visiting ? " · visiting / new here" : ""}
                         </p>
+                        {seesDating(profile) && match.openToDating ? (
+                          <p className="text-xs font-semibold text-amber-700">
+                            💛 Open to dating
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                     {reason ? (
@@ -310,6 +326,7 @@ export default async function ConnectProfilePage() {
           </div>
           <Card>
             <MeetupProfileForm
+              next={next}
               defaults={
                 profile
                   ? {
@@ -326,6 +343,7 @@ export default async function ConnectProfilePage() {
                       bio: profile.bio,
                       whatsappNumber: profile.whatsappNumber ?? "",
                       visiting: profile.visiting,
+                      openToDating: profile.openToDating,
                     }
                   : undefined
               }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { eventJson, FEED_HEADERS } from "@/lib/publicEvents";
+import { sponsorsForEvent } from "@/lib/sponsors";
 
 export const dynamic = "force-dynamic";
 
@@ -29,5 +30,8 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(eventJson(event, ref), { headers: FEED_HEADERS });
+  const sponsors = await sponsorsForEvent(event.id);
+  return NextResponse.json(eventJson({ ...event, sponsors }, ref), {
+    headers: FEED_HEADERS,
+  });
 }

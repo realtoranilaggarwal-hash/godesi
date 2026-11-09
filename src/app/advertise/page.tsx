@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { BannerSlot } from "@prisma/client";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -37,14 +38,27 @@ const ERRORS: Record<string, string> = {
   stripe_unavailable: "Card payments are not configured yet. Please email us.",
   stripe_session: "We could not start the checkout. Please try again.",
   coupon: "That coupon code is not valid for advertising.",
-  coupon_slot:
-    "That code is only for the Small banner (320 x 100), paid monthly for 1 month. Choose that and try again.",
 };
+
+/** Names the slot and longest term a code is locked to, from the redirect's query. */
+function couponSlotError(slot?: string, months?: string) {
+  const placement = AD_SLOT_ORDER.includes(slot as BannerSlot)
+    ? AD_PLACEMENTS[slot as BannerSlot]
+    : null;
+  const term = Number(months) > 0 ? `paid monthly for up to ${Number(months)} month${Number(months) > 1 ? "s" : ""}` : null;
+  const what = [
+    placement ? `the ${placement.name} (${placement.size.width} x ${placement.size.height})` : null,
+    term,
+  ].filter(Boolean);
+  return what.length
+    ? `That code is only for ${what.join(", ")}. Choose that and try again.`
+    : "That code doesn't cover this banner or booking length.";
+}
 
 export default async function AdvertisePage({
   searchParams,
 }: {
-  searchParams: { error?: string; slot?: string };
+  searchParams: { error?: string; slot?: string; months?: string };
 }) {
   const [user, currency] = [await getCurrentUser(), requestCurrency()];
 
@@ -101,7 +115,11 @@ export default async function AdvertisePage({
       ) : null}
 
       {searchParams.error ? (
-        <Alert>{ERRORS[searchParams.error] ?? "Something went wrong."}</Alert>
+        <Alert>
+          {searchParams.error === "coupon_slot"
+            ? couponSlotError(searchParams.slot, searchParams.months)
+            : (ERRORS[searchParams.error] ?? "Something went wrong.")}
+        </Alert>
       ) : null}
 
       <WallPromo />

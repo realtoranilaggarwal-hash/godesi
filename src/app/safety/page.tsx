@@ -71,7 +71,8 @@ export default function SafetyPage() {
           <p className="mt-1">
             For Connect meet-ups: meet in public places, tell a friend where you are
             going, and never send money to anyone you have not met. Godesi Connect is a
-            community and networking space — it is not a dating service.
+            community and networking space. Dating is opt-in for singles 21+ only,
+            and you can block or report any member from their card.
           </p>
           <p className="mt-2">
             For housing: never pay a deposit for a property you have not seen, and read

@@ -7,6 +7,7 @@ import { formatMinor } from "@/lib/format";
 import { formatEventDate } from "@/lib/events";
 import { Alert, Badge, LinkButton } from "@/components/ui";
 import { QuoraEvent, usdValue } from "@/components/QuoraEvent";
+import { ScrollTop } from "@/components/ScrollTop";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your ticket", robots: { index: false } };
@@ -35,7 +36,7 @@ export default async function TicketPage({
           organizerId: true,
         },
       },
-      tier: { select: { name: true } },
+      tier: { select: { name: true, kind: true, admits: true } },
     },
   });
   if (!ticket) notFound();
@@ -53,9 +54,11 @@ export default async function TicketPage({
 
   const confirmed = ticket.status === "CONFIRMED";
   const ticketWord = `ticket${ticket.quantity === 1 ? "" : "s"}`;
+  const admits = ticket.quantity * (ticket.tier?.admits ?? 1);
 
   return (
     <div className="mx-auto max-w-md space-y-4">
+      <ScrollTop />
       {searchParams.paid ? (
         <QuoraEvent event="Purchase" valueUsd={paidUsd} />
       ) : null}
@@ -72,9 +75,14 @@ export default async function TicketPage({
       ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-white px-5 py-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-godesi.png" alt="GoDesi.com" width={136} height={40} className="h-10 w-auto" />
+          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">godesi.com</span>
+        </div>
         <div className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 px-5 py-4 text-white">
           <p className="text-xs font-bold uppercase tracking-widest opacity-80">
-            🎟️ GoDesi.com ticket · Admit {ticket.quantity}
+            🎟️ GoDesi.com {ticket.tier?.kind === "SPONSOR" ? "sponsor pass" : "ticket"} · {admits ? `Admit ${admits}` : "No entry included"}
           </p>
           <h1 className="mt-1 break-words text-xl font-black">{ticket.event.title}</h1>
         </div>
@@ -111,7 +119,7 @@ export default async function TicketPage({
               <p className="font-mono text-lg font-bold tracking-widest">{ticket.code}</p>
               <p className="text-xs text-slate-500">
                 Show this QR code at the entrance, on your phone or printed. One code
-                admits {ticket.quantity}. Checked in: {ticket.checkedInAt ? "yes" : "not yet"}
+                admits {admits}. Checked in: {ticket.checkedInAt ? "yes" : "not yet"}
               </p>
               <LinkButton href={`/api/tickets/${ticket.code}/qr?download=1`} variant="secondary">
                 Download ticket QR

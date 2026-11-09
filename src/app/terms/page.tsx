@@ -110,9 +110,10 @@ export default function TermsPage() {
 
       <h2>9. Connect and community</h2>
       <p>
-        Connect exists for networking, mentorship, cultural meetups and activities. It is
-        not a dating service. Adult, sexual, harassing or discriminatory content is
-        removed and the account blocked. Meet in public places and use your own judgement;
+        Connect exists for networking, mentorship, cultural meetups and activities.
+        Members who are single and 21 or older may also opt in to &ldquo;Open to
+        dating&rdquo;, which only other opted-in members can see. Adult, sexual,
+        harassing or discriminatory content is removed and the account blocked. Meet in public places and use your own judgement;
         we do not run background checks on members.
       </p>
 

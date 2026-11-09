@@ -1,18 +1,22 @@
 import { revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 
+/** $10 per 10x10 brick, in cents. */
+const SPONSOR_BRICK_MINOR_USD = 1000;
+
 /**
  * Dollars a member already paid for non-wall ads (featured spots, side
  * banners) become wall credit: every ad dollar buys the same in wall bricks.
  * Credit used is tracked on each wall order's wallCreditMinor. Amounts are
  * minor units, so credit is counted per currency — paise never cover a USD
- * charge or vice versa.
+ * charge or vice versa. Wall of Fame bricks in a paid sponsor package add
+ * $10 each; event sponsorships are sold in USD, so they only count there.
  */
 export async function wallCreditMinor(
   userId: string,
   currency: string,
 ): Promise<number> {
-  const [spent, used] = await Promise.all([
+  const [spent, used, sponsored] = await Promise.all([
     db.adOrder.aggregate({
       _sum: { amountMinor: true },
       where: { userId, status: "PAID", wallBlockId: null, currency },
@@ -21,10 +25,26 @@ export async function wallCreditMinor(
       _sum: { wallCreditMinor: true },
       where: { userId, wallBlockId: { not: null }, currency },
     }),
+    currency === "USD"
+      ? db.ticket.findMany({
+          where: {
+            userId,
+            status: "CONFIRMED",
+            tier: { kind: "SPONSOR", wallBricks: { gt: 0 } },
+          },
+          select: { quantity: true, tier: { select: { wallBricks: true } } },
+        })
+      : Promise.resolve([]),
   ]);
+  const sponsorBricks = sponsored.reduce(
+    (sum, ticket) => sum + ticket.quantity * (ticket.tier?.wallBricks ?? 0),
+    0,
+  );
   return Math.max(
     0,
-    (spent._sum.amountMinor ?? 0) - (used._sum.wallCreditMinor ?? 0),
+    (spent._sum.amountMinor ?? 0) +
+      sponsorBricks * SPONSOR_BRICK_MINOR_USD -
+      (used._sum.wallCreditMinor ?? 0),
   );
 }
 

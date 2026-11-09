@@ -1,4 +1,9 @@
 import { siteUrl } from "@/lib/format";
+import {
+  type EventSponsorRow,
+  sponsorDiscountLabel,
+  sponsorPhoto,
+} from "@/lib/sponsors";
 
 export const FEED_HEADERS = {
   "access-control-allow-origin": "*",
@@ -53,6 +58,7 @@ type PublicEvent = {
   }[];
   organizer: { name: string | null } | null;
   business: { name: string; slug: string } | null;
+  sponsors?: EventSponsorRow[];
 };
 
 /**
@@ -97,7 +103,9 @@ export function eventJson(event: PublicEvent, ref?: string) {
     categorySlug: event.categorySlug,
     categorySlugs: event.categorySlugs,
     organizer: event.business?.name ?? event.organizer?.name ?? null,
-    organizerUrl: event.business ? `${base}/business/${event.business.slug}` : null,
+    organizerUrl: event.business
+      ? `${base}/business/${event.business.slug}`
+      : null,
     speakers: event.speakers,
     sessions: event.sessions,
     tiers: event.tiers.map((tier) => ({
@@ -105,6 +113,26 @@ export function eventJson(event: PublicEvent, ref?: string) {
       price: tier.price,
       seatsLeft: Math.max(tier.seatsTotal - tier.seatsBooked, 0),
     })),
+    /** Organiser-approved sponsors only; no private contact details. */
+    sponsors: (event.sponsors ?? [])
+      .filter((sponsor) => sponsor.status === "APPROVED")
+      .map((sponsor) => {
+        const coupon = sponsor.coupon?.active ? sponsor.coupon : null;
+        const photo = sponsorPhoto(sponsor);
+        return {
+          name: sponsor.business.name,
+          category: sponsor.business.category,
+          city: sponsor.business.city,
+          photoUrl: photo && photo.startsWith("/") ? `${base}${photo}` : photo,
+          url: `${base}/business/${sponsor.business.slug}`,
+          offer: sponsor.offer,
+          code: coupon?.code ?? null,
+          discountKind: coupon?.discountKind ?? null,
+          discountAmount: coupon?.amount ?? null,
+          discountLabel: coupon ? sponsorDiscountLabel(sponsor) : null,
+        };
+      }),
+    sponsorSignupUrl: `${base}/dashboard/sponsor`,
     updatedAt: event.updatedAt,
     createdAt: event.createdAt,
     url: `${base}/events/${event.slug}${suffix}`,

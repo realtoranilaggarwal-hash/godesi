@@ -1,16 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { tierOnSale } from "@/lib/ticketTiers";
 import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { isSinglesOnly, singlesBlocker } from "@/lib/singles";
 import { readSpeakers } from "@/lib/eventSpeakers";
 import { can, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { requestCurrency } from "@/lib/currency";
 import {
   confirmTicket,
+  pooledSeatsLeft,
   seatsLeft,
   ticketCode,
   uniqueEventSlug,
@@ -584,6 +587,15 @@ export async function bookTicketAction(
       return { error: "This event is not open for booking." };
     if (event.startsAt.getTime() < Date.now())
       return { error: "This event has already ended." };
+    if (isSinglesOnly(event)) {
+      const blocker = singlesBlocker(
+        await db.meetupProfile.findUnique({
+          where: { userId: user.id },
+          select: { marital: true, status: true, adultConfirmedAt: true, age: true },
+        }),
+      );
+      if (blocker) return { error: blocker };
+    }
 
     /** One line per ticket type: the form sends `qty_<tierId>` for each type it shows. */
     const requested = event.tiers.length
@@ -612,11 +624,19 @@ export async function bookTicketAction(
     if (!event.tiers.length && event.sourceId === null && eventLeft < totalQuantity)
       return { error: `Only ${eventLeft} seat(s) left for this event.` };
     for (const line of lines) {
+      if (line.tier && !tierOnSale(line.tier))
+        return { error: `${line.tier.name} tickets are not on sale right now.` };
       if (line.tier && seatsLeft(line.tier) < line.quantity)
         return {
           error: `Only ${seatsLeft(line.tier)} ${line.tier.name} seat(s) left.`,
         };
     }
+    const poolLeft = pooledSeatsLeft(event, event.tiers);
+    const ticketQuantity = lines
+      .filter((line) => line.tier?.kind !== "SPONSOR")
+      .reduce((sum, line) => sum + line.quantity, 0);
+    if (poolLeft !== null && poolLeft < ticketQuantity)
+      return { error: `Only ${poolLeft} seat(s) left for this event.` };
 
     const priced = lines.map((line) => ({
       ...line,
@@ -1014,4 +1034,32 @@ export async function removeTicketTypeAction(
   revalidatePath("/dashboard/tickets");
   revalidatePath(`/admin/events/${event.id}`);
   return { success: `${tier.name} removed.` };
+}
+
+/**
+ * Organisers and staff can remove an event. One with paid tickets is hidden
+ * instead, so buyers keep their tickets and receipts.
+ */
+export async function deleteEventAction(formData: FormData) {
+  const user = await requireUser();
+  const id = String(formData.get("eventId") ?? "");
+  const event = await db.event.findUnique({
+    where: { id },
+    select: { id: true, slug: true, organizerId: true },
+  });
+  if (!event) redirect("/events");
+  if (event.organizerId !== user.id && !can(user, "events"))
+    throw new Error("Only the organiser can delete this event.");
+
+  const paid = await db.ticket.count({
+    where: { eventId: event.id, status: "CONFIRMED", amountMinor: { gt: 0 } },
+  });
+  if (paid) {
+    await db.event.update({ where: { id: event.id }, data: { status: "REJECTED", featured: false } });
+  } else {
+    await db.event.delete({ where: { id: event.id } });
+  }
+  revalidatePath("/events");
+  revalidatePath("/");
+  redirect(paid ? "/dashboard/tickets?cancelled=1" : "/dashboard/tickets?deleted=1");
 }

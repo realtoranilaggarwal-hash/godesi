@@ -19,6 +19,8 @@ export const RESERVED_USERNAMES = new Set([
   "cookies",
   "dashboard",
   "events",
+  "nye2027",
+  "9227",
   "favicon.ico",
   "leaderboard",
   "leads",

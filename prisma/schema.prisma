@@ -261,9 +261,9 @@ model User {
   foundingFeatureUntil DateTime?
 
   /// When the member took the wedding-vendor launch offer (first 50 wedding vendors, 6 months Premium free).
-  weddingLaunchAt DateTime?
+  weddingLaunchAt        DateTime?
   /// Free Premium months already paid out for referring wedding vendors (one per 3).
-  weddingReferralRewards Int @default(0)
+  weddingReferralRewards Int       @default(0)
 
   /// Opted into the local journalist programme, and the patch they cover.
   journalistSince DateTime?
@@ -388,12 +388,14 @@ model User {
 
   meetupProfile MeetupProfile?
 
-  rishtaProfile RishtaProfile?
-  ambassador    Ambassador?
-  rishtaReports RishtaReport[]
-  meetupReports MeetupReport[]
-  alumni        AlumniRecord[]
-  upiRequests   UpiRequest[]
+  rishtaProfile   RishtaProfile?
+  ambassador      Ambassador?
+  rishtaReports   RishtaReport[]
+  meetupReports   MeetupReport[]
+  meetupBlocking  MeetupBlock[]  @relation("MeetupBlocker")
+  meetupBlockedBy MeetupBlock[]  @relation("MeetupBlocked")
+  alumni          AlumniRecord[]
+  upiRequests     UpiRequest[]
 
   /// Answer to the "want to be in GoDesi Elite?" prompt: SELF, OTHER or LATER.
   elitePrompt  String?
@@ -704,22 +706,22 @@ model PollVote {
 
 /// A daily up-or-down call on a market (gold, S&P 500, bitcoin).
 model PredictionMarket {
-  id        String            @id @default(cuid())
+  id         String           @id @default(cuid())
   /// Stable market id, e.g. "gold", "sp500", "btc".
-  slug      String
-  question  String
-  options   String[]
+  slug       String
+  question   String
+  options    String[]
   /// UTC midnight of the day the call is about.
-  day       DateTime
+  day        DateTime
   /// Previous close — the level each pick is judged against.
-  baseline  Float?
+  baseline   Float?
   /// Close for that day once the feed reports it.
-  final     Float?
+  final      Float?
   /// Winning option index; null while open (and stays null if the day had no trading).
-  outcome   Int?
+  outcome    Int?
   resolvedAt DateTime?
-  picks     PredictionPick[]
-  createdAt DateTime          @default(now())
+  picks      PredictionPick[]
+  createdAt  DateTime         @default(now())
 
   @@unique([slug, day])
 }
@@ -962,6 +964,10 @@ model Business {
   bookingPriceMinor Int     @default(0)
   /// Share of the price taken as the deposit at booking time.
   bookingDepositPct Int     @default(20)
+
+  /// "Sponsor local events" opt-in: the card is offered to organisers nearby.
+  sponsorsEvents Boolean        @default(false)
+  sponsorships   EventSponsor[]
 
   agentProfile  AgentProfile?
   vehicle       VehicleDetails?
@@ -1290,6 +1296,8 @@ model Event {
   askReferredBy     Boolean            @default(false)
   /// Public Google Photos album shown as a gallery; Google hosts the photos.
   albumUrl          String?
+  /// Album of guest messages/screenshots, linked from the reviews page.
+  reviewsAlbumUrl   String?
   price             Int                @default(0)
   /// ISO currency of `price`, chosen from the organiser's location.
   currency          String             @default("INR")
@@ -1344,6 +1352,8 @@ model Event {
   /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
   tiers    TicketTier[]
   coupons  Coupon[]
+  reviews  EventReview[]
+  sponsors EventSponsor[]
 
   @@unique([sourceId, sourceUid])
   @@index([startsAt])
@@ -1359,29 +1369,29 @@ model Event {
 /// A public calendar we import community events from — a temple's iCal feed, a
 /// cultural association's Google Calendar, an organiser's event RSS.
 model EventSource {
-  id            String          @id @default(cuid())
+  id                String          @id @default(cuid())
   /// Shown on every imported event as the credit, e.g. "Umiya Dham, Edison".
-  name          String
-  url           String          @unique
-  kind          EventSourceKind @default(ICS)
+  name              String
+  url               String          @unique
+  kind              EventSourceKind @default(ICS)
   /// Where the organisation is, used when a calendar entry gives no place.
-  city          String
-  state         String?
-  country       String          @default("USA")
+  city              String
+  state             String?
+  country           String          @default("USA")
   /// Link back to the organisation, shown as "Details on their website".
-  websiteUrl    String?
-  categorySlugs String[]        @default([])
-  tags          String[]        @default([])
-  active        Boolean         @default(true)
-  lastRunAt     DateTime?
+  websiteUrl        String?
+  categorySlugs     String[]        @default([])
+  tags              String[]        @default([])
+  active            Boolean         @default(true)
+  lastRunAt         DateTime?
   /// Human-readable outcome of the last run, including the failure if it failed.
-  lastStatus    String?
+  lastStatus        String?
   /// Organiser inbox for automated "claim your listings" invites.
-  contactEmail  String?
+  contactEmail      String?
   /// When the last claim invite went out — re-sent at most monthly.
   claimInviteSentAt DateTime?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   events Event[]
 }
@@ -1911,20 +1921,54 @@ model EventClaim {
 
 /// Basic / Webinar / Premium seat types for an event.
 model TicketTier {
-  id          String   @id @default(cuid())
-  eventId     String
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  name        String
+  id           String      @id @default(cuid())
+  eventId      String
+  event        Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name         String
   /// Price per seat in major units of the event's currency; 0 for free tiers.
-  price       Int      @default(0)
-  seatsTotal  Int
-  seatsBooked Int      @default(0)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
+  price        Int         @default(0)
+  seatsTotal   Int
+  seatsBooked  Int         @default(0)
+  sortOrder    Int         @default(0)
+  /// Optional sale window, e.g. early-bird prices until a date, late prices from one.
+  salesStart   DateTime?
+  salesEnd     DateTime?
+  /// Short line under the name, e.g. "Table seating included".
+  note         String?
+  /// TICKET for entry tickets, SPONSOR for sponsorship packages (listed separately).
+  kind         String      @default("TICKET")
+  /// People one ticket lets in: 2 for a couple ticket or a sponsor package with 2 passes, 0 for no entry.
+  admits       Int         @default(1)
+  /// What a sponsor package includes, one line each.
+  perks        String[]    @default([])
+  /// Months of free GoDesi banner a sponsor package comes with.
+  bannerMonths Int?
+  /// Placement of that free banner; the 320x100 small banner when unset.
+  bannerSlot   BannerSlot?
+  /// Wall of Fame bricks (10x10, $10 each) credited to the buyer's GoDesi account.
+  wallBricks   Int         @default(0)
+  createdAt    DateTime    @default(now())
 
   tickets Ticket[]
 
   @@index([eventId])
+}
+
+/// Guest feedback the organiser shares about their event (typed out, first names only).
+model EventReview {
+  id         String   @id @default(cuid())
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  authorName String
+  comment    String
+  rating     Int      @default(5)
+  source     String?
+  featured   Boolean  @default(false)
+  hidden     Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([eventId, hidden])
 }
 
 enum CouponScope {
@@ -1941,6 +1985,31 @@ enum DiscountKind {
 
 /// Discount code applied at checkout. Admin codes are platform-wide; organisers
 /// can create codes limited to one of their own events.
+/// A business sponsoring an event. Shown on the event page (and network sites)
+/// once the organiser approves it; `coupon` is the sponsor's ticket code.
+model EventSponsor {
+  id         String    @id @default(cuid())
+  eventId    String
+  event      Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  /// REQUESTED (by the business), APPROVED or DECLINED (by the organiser).
+  status     String    @default("REQUESTED")
+  /// The business's note to the organiser when it asked.
+  message    String?
+  /// Line shown under the sponsor, e.g. "Refer Realtor Anil Aggarwal".
+  offer      String?
+  couponId   String?   @unique
+  coupon     Coupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  sortOrder  Int       @default(0)
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([eventId, businessId])
+  @@index([eventId, status])
+}
+
 model Coupon {
   id             String       @id @default(cuid())
   code           String       @unique
@@ -1973,6 +2042,7 @@ model Coupon {
 
   redemptions CouponRedemption[]
   tickets     Ticket[]
+  sponsor     EventSponsor?
 
   @@index([scope, active])
   @@index([eventId])
@@ -2010,7 +2080,7 @@ enum MeetupMarital {
 }
 
 /// Opt-in "Connect" profile for meeting people over business, coffee or a chat.
-/// Reviewed before it goes public; strictly non-dating (see `lib/moderation`).
+/// Reviewed before it goes public; adult wording is blocked (see `lib/moderation`).
 model MeetupProfile {
   id               String        @id @default(cuid())
   userId           String        @unique
@@ -2029,6 +2099,8 @@ model MeetupProfile {
   locationSharedAt DateTime?
   /// Travellers and newcomers get a "visiting / new here" flag on their card.
   visiting         Boolean       @default(false)
+  /// Single members 21+ may opt in to dating; only other opted-in members see it.
+  openToDating     Boolean       @default(false)
   gender           MeetupGender
   marital          MeetupMarital @default(PREFER_NOT_SAY)
   city             String
@@ -2121,6 +2193,19 @@ model RishtaReport {
 }
 
 /// Member-flagged profile, queued for admin review.
+/// A member hiding another from their Connect pages; both stop seeing each other.
+model MeetupBlock {
+  id        String   @id @default(cuid())
+  blockerId String
+  blocker   User     @relation("MeetupBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId String
+  blocked   User     @relation("MeetupBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
 model MeetupReport {
   id         String        @id @default(cuid())
   profileId  String
@@ -3393,21 +3478,21 @@ model Booking {
 /// A paid video-pooja request: devotee picks a package on /pooja, staff assigns
 /// a pandit who performs it on a video call (prasad shipped where offered).
 model PoojaBooking {
-  id        String   @id @default(cuid())
+  id       String @id @default(cuid())
   /// Package slug from src/lib/poojaPackages.ts (e.g. "satyanarayan").
-  package   String
-  priceUsd  Int
+  package  String
+  priceUsd Int
 
-  name    String
-  email   String
-  phone   String
+  name          String
+  email         String
+  phone         String
   /// Name + gotra the pandit chants the sankalp for.
-  sankalp String?
+  sankalp       String?
   /// Preferred date for the video pooja (devotee's pick — staff confirms).
   preferredDate DateTime?
   /// Where to ship prasad, when the package includes it.
-  address String?
-  notes   String?
+  address       String?
+  notes         String?
 
   status    String   @default("NEW") // NEW | CONFIRMED | DONE | CANCELLED
   createdAt DateTime @default(now())
