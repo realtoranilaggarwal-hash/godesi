@@ -3,6 +3,44 @@
  * is React text, never HTML, so anything a member pastes — including markup —
  * shows as the characters they typed and can never run.
  */
+const URL_PATTERN = /(https?:\/\/[^\s<>"]+|(?<![\w.@-])(?:www\.)?godesi\.com\/[^\s<>"]*)/gi;
+const TRAILING_PUNCTUATION = /[.,;:!?)\]'"]+$/;
+
+/** Turns pasted web addresses into links; everything else stays plain text. */
+function Linkified({ text }: { text: string }) {
+  const parts = text.split(URL_PATTERN);
+  return (
+    <>
+      {parts.map((part, index) => {
+        if (index % 2 === 0 || !part) return part;
+        const trailing = part.match(TRAILING_PUNCTUATION)?.[0] ?? "";
+        const label = trailing ? part.slice(0, -trailing.length) : part;
+        const href = /^https?:\/\//i.test(label) ? label : `https://${label}`;
+        let internal = false;
+        try {
+          internal = /(^|\.)godesi\.com$/i.test(new URL(href).hostname);
+        } catch {
+          return part;
+        }
+        return (
+          <span key={index}>
+            <a
+              href={href}
+              className="break-all font-semibold text-indigo-700 underline hover:text-indigo-900"
+              {...(internal
+                ? {}
+                : { target: "_blank", rel: "nofollow ugc noopener noreferrer" })}
+            >
+              {label}
+            </a>
+            {trailing}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function StoryBody({ text }: { text: string }) {
   const blocks = text
     .split(/\n{2,}/)
@@ -22,7 +60,9 @@ export function StoryBody({ text }: { text: string }) {
           return (
             <ul key={index} className="ml-5 list-disc space-y-1">
               {lines.map((line, item) => (
-                <li key={item}>{line.replace(/^[-*•]\s+/, "")}</li>
+                <li key={item}>
+                  <Linkified text={line.replace(/^[-*•]\s+/, "")} />
+                </li>
               ))}
             </ul>
           );
@@ -37,7 +77,9 @@ export function StoryBody({ text }: { text: string }) {
           return (
             <ul key={index} className="ml-5 list-disc space-y-1">
               {lines.map((line, item) => (
-                <li key={item}>{line}</li>
+                <li key={item}>
+                  <Linkified text={line} />
+                </li>
               ))}
             </ul>
           );
@@ -47,7 +89,8 @@ export function StoryBody({ text }: { text: string }) {
         if (
           lines.length === 1 &&
           lines[0].length <= 70 &&
-          !/[.!?:;,]$/.test(lines[0])
+          !/[.!?:;,]$/.test(lines[0]) &&
+          !/https?:\/\/|godesi\.com\//i.test(lines[0])
         ) {
           return (
             <h2
@@ -61,7 +104,7 @@ export function StoryBody({ text }: { text: string }) {
 
         return (
           <p key={index} className="whitespace-pre-line">
-            {lines.join("\n")}
+            <Linkified text={lines.join("\n")} />
           </p>
         );
       })}
