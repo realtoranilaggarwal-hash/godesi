@@ -136,6 +136,7 @@ export async function POST(request: Request) {
               ? session.subscription
               : (session.subscription?.id ?? null),
           setupMinor: session.amount_total ?? 0,
+          metadata: session.metadata,
         });
       } else if (session.metadata?.kind === "course" && courseEnrollmentId) {
         await confirmCourseEnrollment({

@@ -16,7 +16,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/website" },
 };
 
-export default async function WebsiteOfferPage() {
+export default async function WebsiteOfferPage({
+  searchParams,
+}: {
+  searchParams: { website?: string; wish?: string };
+}) {
   const user = await getCurrentUser();
   const business = user
     ? await db.business.findUnique({
@@ -33,7 +37,7 @@ export default async function WebsiteOfferPage() {
   const recent = recentIds.length
     ? await db.websiteProject.findMany({
         where: { id: { in: recentIds }, status: { notIn: ["CANCELLED"] } },
-        select: { id: true, businessName: true, status: true },
+        select: { id: true, businessName: true, status: true, tier: true, previewToken: true },
         orderBy: { updatedAt: "desc" },
       })
     : [];
@@ -54,7 +58,7 @@ export default async function WebsiteOfferPage() {
           </p>
           <p className="mt-2 max-w-2xl text-sm text-white/80">
             Then add the tools you need — booking, AI chat, payments, CRM, lead capture and
-            more. ${WEBSITE_OFFER.priceUsd} once, ${WEBSITE_OFFER.monthlyUsd}/month hosting, Power-Ups from $
+            more. ${WEBSITE_OFFER.priceUsd} once, hosting ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year, Power-Ups from $
             {Math.min(...POWER_UPS.map((p) => p.monthlyUsd))}/month.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
@@ -84,16 +88,17 @@ export default async function WebsiteOfferPage() {
               {recent.map((project) => (
                 <li key={project.id}>
                   <Link
-                    href={websitePath(
-                      project.id,
+                    href={
                       project.status === "APPROVED"
-                        ? "/features"
+                        ? websitePath(project.id, "/features")
                         : project.status === "PAID" || project.status === "LIVE"
-                          ? "/done"
-                          : project.status === "PREVIEW"
-                            ? "/preview"
-                            : "/verify",
-                    )}
+                          ? websitePath(project.id, "/done")
+                          : project.tier === "CUSTOM"
+                            ? project.previewToken
+                              ? `/website/look/${project.previewToken}`
+                              : "/website/custom?sent=1"
+                            : websitePath(project.id, project.status === "PREVIEW" ? "/preview" : "/verify")
+                    }
                     className="font-semibold text-indigo-700 hover:underline"
                   >
                     {project.businessName}
@@ -124,6 +129,27 @@ export default async function WebsiteOfferPage() {
           </p>
         </Card>
 
+        <Card className="border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-orange-50">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-base font-bold text-slate-900">
+                🎨 Want it custom designed? ${WEBSITE_OFFER.customPriceUsd}
+              </h2>
+              <p className="text-sm text-slate-600">
+                Send your old website, Google, Yelp or Zillow profile and up to{" "}
+                {WEBSITE_OFFER.customPages} pages of content. Our designer redesigns it and sends
+                you a private preview — pay only if you love it.
+              </p>
+            </div>
+            <Link
+              href="/website/custom"
+              className="shrink-0 rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-fuchsia-700"
+            >
+              Ask for a custom design →
+            </Link>
+          </div>
+        </Card>
+
         <Card>
           <div id="start" className="scroll-mt-24" />
           <WebsiteStartForm
@@ -132,7 +158,8 @@ export default async function WebsiteOfferPage() {
               city: business?.city ?? user?.location ?? undefined,
               phone: business?.phone ?? undefined,
               email: user?.email,
-              website: business?.websiteUrl ?? undefined,
+              website: searchParams.website ?? business?.websiteUrl ?? undefined,
+              wish: searchParams.wish,
             }}
           />
         </Card>

@@ -1978,6 +1978,7 @@ enum CouponScope {
   ADS
   TICKETS
   BUNDLE
+  WEBSITE
 }
 
 enum DiscountKind {
@@ -3070,11 +3071,37 @@ model WebsiteProject {
   liveUrl              String?
   staffNotes           String?
 
+  /// "AI" (the $99 builder) or "CUSTOM" (the $299 site our designer makes).
+  tier          String    @default("AI")
+  /// Pages the owner wrote for a custom design: [{ name, text }], up to 10.
+  pageContent   Json?
+  /// Staff only: where the custom design is hosted. Never shown to the customer.
+  designUrl     String?
+  /// Secret for the customer's private preview link (/website/look/<token>).
+  previewToken  String?   @unique
+  previewSentAt DateTime?
+  /// Hosting term: "MONTH" or "YEAR".
+  billing       String    @default("MONTH")
+
+  changeRequests WebsiteChangeRequest[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([status, createdAt])
   @@index([userId])
+}
+
+/// A change the owner asked for on their live site; hosting includes one a month.
+model WebsiteChangeRequest {
+  id        String         @id @default(cuid())
+  projectId String
+  project   WebsiteProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  text      String
+  doneAt    DateTime?
+  createdAt DateTime       @default(now())
+
+  @@index([projectId, createdAt])
 }
 
 /// A price override for one website feature; the catalogue itself lives in code.

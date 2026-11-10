@@ -29,7 +29,7 @@ function FindButton() {
 export function WebsiteStartForm({
   defaults,
 }: {
-  defaults?: { businessName?: string; city?: string; phone?: string; email?: string; website?: string };
+  defaults?: { businessName?: string; city?: string; phone?: string; email?: string; website?: string; wish?: string };
 }) {
   const [state, formAction] = useFormState(startWebsiteAction, emptyState);
   const [picked, setPicked] = useState<WebsiteSourceKey[]>(
@@ -172,6 +172,17 @@ export function WebsiteStartForm({
           </Field>
         </div>
       </section>
+
+      <Field label="Anything you want on your website, or changed from your old one? (optional)">
+        <textarea
+          name="wish"
+          rows={2}
+          maxLength={2000}
+          defaultValue={defaults?.wish}
+          placeholder='e.g. "Show our catering menu and make it look modern"'
+          className={inputClass}
+        />
+      </Field>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-slate-500">

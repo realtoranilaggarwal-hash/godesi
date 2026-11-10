@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
@@ -8,8 +9,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl } from "@/lib/format";
+import { checkCoupon, couponMetadata } from "@/lib/coupons";
+import { escapeHtml, sendEmail, shell } from "@/lib/email";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
-  BASE_SETUP_USD,
+  CUSTOM_PAGE_NAMES,
+  CUSTOM_SOURCES,
+  type CustomPage,
+  EXAMPLE_SITE_KEYS,
   isPowerUpKey,
   nextDesignSeed,
   suggestedPowerUps,
@@ -22,6 +29,7 @@ import {
 import { gatherFacts } from "@/lib/websiteFacts";
 import { quoteWish, writeContent } from "@/lib/websiteContent";
 import {
+  changeAllowance,
   loadPowerUps,
   loadProject,
   projectFound,
@@ -67,6 +75,7 @@ const startSchema = z.object({
   website: link,
   facebook: link,
   instagram: link,
+  wish: optional(2000),
 });
 
 const goalKeys = WEBSITE_GOALS.map((goal) => goal.key);
@@ -117,6 +126,7 @@ export async function startWebsiteAction(
         domain: input.domain,
         sources: sources as Prisma.InputJsonObject,
         found: found as unknown as Prisma.InputJsonObject,
+        wish: input.wish,
       },
     });
     rememberProject(project.id);
@@ -327,11 +337,32 @@ export async function launchCheckoutAction(
     const powerUps = Array.from(new Set(formData.getAll("powerUps").map(String))).filter(
       isPowerUpKey,
     );
-    const project = await db.websiteProject.update({ where: { id }, data: { powerUps } });
+    const billing = formData.get("billing") === "YEAR" ? "YEAR" : "MONTH";
+    const project = await db.websiteProject.update({ where: { id }, data: { powerUps, billing } });
     if (!stripeEnabled()) throw new Error("Payments are not switched on yet — email us and we will launch it by hand.");
     const quote = quoteFor(project, await loadPowerUps());
     const user = await getCurrentUser();
     const email = user?.email ?? project.email ?? undefined;
+
+    // Website codes take money off the one-time setup fee only, never hosting.
+    const setupMinor = quote.setupUsd * 100;
+    const code = String(formData.get("coupon") ?? "").trim();
+    let coupon: { id: string } | null = null;
+    let discountMinor = 0;
+    if (code) {
+      const check = await checkCoupon({
+        code,
+        scope: "WEBSITE",
+        userId: user?.id ?? "",
+        subtotalMinor: setupMinor,
+        currency: "USD",
+      });
+      if (!check.ok) return { error: check.error };
+      coupon = check.coupon;
+      discountMinor = Math.min(check.discountMinor, setupMinor - 100);
+    }
+    const custom = project.tier === "CUSTOM";
+    const interval = quote.term === "YEAR" ? ("year" as const) : ("month" as const);
 
     const session = await getStripe().checkout.sessions.create({
       mode: "subscription",
@@ -342,6 +373,8 @@ export async function launchCheckoutAction(
         websiteProjectId: project.id,
         userId: user?.id ?? "",
         powerUps: project.powerUps.join(","),
+        billing,
+        ...couponMetadata(coupon, discountMinor),
       },
       subscription_data: {
         metadata: { kind: "website", websiteProjectId: project.id },
@@ -351,10 +384,12 @@ export async function launchCheckoutAction(
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: BASE_SETUP_USD * 100,
+            unit_amount: setupMinor - discountMinor,
             product_data: {
-              name: `AI website setup — ${project.businessName}`,
-              description: "One-time. Design, copy, photos, mobile version, basic SEO, contact form.",
+              name: `${custom ? "Custom designed website" : "AI website setup"} — ${project.businessName}`,
+              description: custom
+                ? `One-time. Up to ${WEBSITE_OFFER.customPages} pages designed from your content, mobile version, basic SEO, contact form.${discountMinor ? ` Includes your ${code.toUpperCase()} discount.` : ""}`
+                : `One-time. Design, copy, photos, mobile version, basic SEO, contact form.${discountMinor ? ` Includes your ${code.toUpperCase()} discount.` : ""}`,
             },
           },
         },
@@ -362,9 +397,14 @@ export async function launchCheckoutAction(
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: line.monthlyUsd * 100,
-            recurring: { interval: "month" as const },
-            product_data: { name: line.label },
+            unit_amount: line.amountUsd * 100,
+            recurring: { interval },
+            product_data: {
+              name:
+                line.kind === "base"
+                  ? `${line.label} — includes ${interval === "year" ? `${WEBSITE_OFFER.changesPerYear} changes a year` : `${WEBSITE_OFFER.changesPerMonth} change a month`}`
+                  : line.label,
+            },
           },
         })),
       ],
@@ -375,8 +415,8 @@ export async function launchCheckoutAction(
     await db.websiteProject.update({
       where: { id },
       data: {
-        setupMinor: quote.setupUsd * 100,
-        monthlyMinor: quote.monthlyUsd * 100,
+        setupMinor: setupMinor - discountMinor,
+        monthlyMinor: quote.recurringUsd * 100,
       },
     });
     url = session.url;
@@ -384,4 +424,169 @@ export async function launchCheckoutAction(
     return fieldError(error);
   }
   redirect(url);
+}
+
+/* ---------- custom designed website ($299) ---------- */
+
+const customSchema = z.object({
+  businessName: z.string().trim().min(2, "Tell us your business name").max(120),
+  category: z.enum(WEBSITE_CATEGORIES, { message: "Pick a category" }),
+  city: z.string().trim().min(2, "Which city are you in?").max(120),
+  email: z.string().trim().email("We email your design here — check the address").max(160),
+  phone: optional(30),
+  whatsapp: optional(30),
+  domain: optional(120),
+  wish: optional(3000),
+});
+
+async function emailDesk(subject: string, body: string) {
+  await sendEmail({ to: WEBSITE_OFFER.email, subject, html: shell(subject, body) });
+}
+
+/** The $299 order: links, example sites and up to ten pages of the owner's words. */
+export async function startCustomWebsiteAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const input = customSchema.parse(
+      Object.fromEntries(
+        [...customSchema.keyof().options].map((key) => [key, formData.get(key) ?? ""]),
+      ),
+    );
+    const sources: Record<string, string> = {};
+    for (const key of [...CUSTOM_SOURCES.map((source) => source.key), ...EXAMPLE_SITE_KEYS]) {
+      const value = link.parse(String(formData.get(key) ?? ""));
+      if (value) sources[key] = value;
+    }
+    const pages: CustomPage[] = [];
+    for (let index = 0; index < WEBSITE_OFFER.customPages; index++) {
+      const text = String(formData.get(`pageText${index}`) ?? "").trim().slice(0, 6000);
+      if (!text) continue;
+      const name =
+        String(formData.get(`pageName${index}`) ?? "").trim().slice(0, 80) ||
+        CUSTOM_PAGE_NAMES[index] ||
+        `Page ${index + 1}`;
+      pages.push({ name, text });
+    }
+    if (!Object.keys(sources).length && !pages.length) {
+      return { error: "Give us at least one link (old website, Google, Yelp…) or one page of content." };
+    }
+    const user = await getCurrentUser();
+    const project = await db.websiteProject.create({
+      data: {
+        userId: user?.id,
+        tier: "CUSTOM",
+        businessName: input.businessName,
+        category: input.category,
+        city: input.city,
+        email: input.email,
+        phone: input.phone,
+        whatsapp: input.whatsapp,
+        domain: input.domain,
+        wish: input.wish,
+        sources: sources as Prisma.InputJsonObject,
+        pageContent: pages as unknown as Prisma.InputJsonArray,
+      },
+    });
+    rememberProject(project.id);
+    await emailDesk(
+      `Custom website order: ${project.businessName} (${project.city})`,
+      `<h2>New $${WEBSITE_OFFER.customPriceUsd} custom website request</h2>
+       <p><strong>${escapeHtml(project.businessName)}</strong> — ${escapeHtml(project.category)}, ${escapeHtml(project.city)}</p>
+       <p>${Object.keys(sources).length} links · ${pages.length} pages of content</p>
+       ${input.wish ? `<p><strong>What they want:</strong> ${escapeHtml(input.wish)}</p>` : ""}
+       <p><a href="${siteUrl()}/admin/website/${project.id}">Open in the admin</a></p>`,
+    );
+  } catch (error) {
+    return fieldError(error);
+  }
+  redirect("/website/custom?sent=1");
+}
+
+async function projectForToken(token: string) {
+  const project = await db.websiteProject.findUnique({ where: { previewToken: token } });
+  if (!project || !project.designUrl || project.status === "CANCELLED") throw new Error("FORBIDDEN");
+  return project;
+}
+
+/** "I love it" on the private preview: on to features and payment. */
+export async function approveLookAction(token: string) {
+  const project = await projectForToken(token);
+  rememberProject(project.id);
+  if (project.status === "PAID" || project.status === "LIVE") redirect(websitePath(project.id, "/done"));
+  await db.websiteProject.update({
+    where: { id: project.id },
+    data: { status: "APPROVED", approvedAt: project.approvedAt ?? new Date() },
+  });
+  redirect(websitePath(project.id, "/features"));
+}
+
+/** "I want changes" on the private preview: noted on the project and emailed to the desk. */
+export async function lookChangesAction(
+  token: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const project = await projectForToken(token);
+    if (project.status === "PAID" || project.status === "LIVE") {
+      return { error: "This website is already paid for — use “Request a change” on your website page." };
+    }
+    const notes = String(formData.get("notes") ?? "").trim().slice(0, 3000);
+    if (notes.length < 5) return { error: "Tell us what to change." };
+    const stamp = new Date().toISOString().slice(0, 10);
+    await db.websiteProject.update({
+      where: { id: project.id },
+      data: {
+        changeNotes: [project.changeNotes, `[${stamp}] ${notes}`].filter(Boolean).join("\n\n"),
+      },
+    });
+    await emailDesk(
+      `Design changes asked: ${project.businessName}`,
+      `<h2>${escapeHtml(project.businessName)} wants changes</h2>
+       <p style="white-space:pre-wrap">${escapeHtml(notes)}</p>
+       <p><a href="${siteUrl()}/admin/website/${project.id}">Open in the admin</a></p>`,
+    );
+  } catch (error) {
+    return fieldError(error);
+  }
+  return { success: "Thanks — we'll make the changes and send you the new version." };
+}
+
+/** A change to a paid site; hosting includes one a month (twelve a year on yearly). */
+export async function requestSiteChangeAction(
+  id: string,
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const project = await loadProject(id);
+    if (!project) throw new Error("FORBIDDEN");
+    if (project.status !== "PAID" && project.status !== "LIVE") {
+      return { error: "Change requests open once your website is paid for." };
+    }
+    const text = String(formData.get("text") ?? "").trim().slice(0, 3000);
+    if (text.length < 5) return { error: "Tell us what to change." };
+    const allowance = await changeAllowance(project);
+    if (!allowance.left) {
+      return {
+        error: allowance.yearly
+          ? `You've used all ${allowance.limit} changes for this year. Email ${WEBSITE_OFFER.email} and we'll quote this one.`
+          : `You've used this month's free change. Ask again next month, or email ${WEBSITE_OFFER.email} and we'll quote it.`,
+      };
+    }
+    await db.websiteChangeRequest.create({ data: { projectId: project.id, text } });
+    await emailDesk(
+      `Site change asked: ${project.businessName}`,
+      `<h2>${escapeHtml(project.businessName)} asked for a change</h2>
+       <p style="white-space:pre-wrap">${escapeHtml(text)}</p>
+       <p>${allowance.used + 1} of ${allowance.limit} this ${allowance.yearly ? "year" : "month"}.</p>
+       <p><a href="${siteUrl()}/admin/website/${project.id}">Open in the admin</a></p>`,
+    );
+    revalidatePath(websitePath(project.id, "/done"));
+  } catch (error) {
+    return fieldError(error);
+  }
+  return { success: "Got it — we'll make the change and email you when it's done." };
 }

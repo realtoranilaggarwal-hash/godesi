@@ -18,7 +18,8 @@ import {
 import { wallCreditMinor } from "@/lib/adOrders";
 import { formatMinor } from "@/lib/format";
 import { UpgradeCart } from "@/components/UpgradeCart";
-import { Alert, Card } from "@/components/ui";
+import { Alert, Card, inputClass } from "@/components/ui";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -190,6 +191,63 @@ export default async function UpgradePage({
         defaultTerm={searchParams.term === "year" ? "YEAR" : "FIVE_YEAR"}
         autoLock={searchParams.offer === "today"}
       />
+
+      <Card className="border-indigo-200">
+        <h3 className="text-lg font-bold">🌐 Add a website</h3>
+        <p className="mt-1 text-sm text-slate-600">
+          Pick one. You see your new website free first and pay only if you love it. Hosting
+          is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year and includes{" "}
+          {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a year).
+        </p>
+        <form action="/website/custom" method="get" className="mt-3 space-y-3">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="plan" value="ai" defaultChecked className="mt-1 h-4 w-4 accent-indigo-600" />
+              <span>
+                <span className="block font-semibold text-slate-900">
+                  🤖 AI website — ${WEBSITE_OFFER.priceUsd} once
+                </span>
+                <span className="block text-xs text-slate-600">
+                  Paste your Google, Yelp or old website; AI builds {WEBSITE_OFFER.pages} pages in minutes.
+                </span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input type="radio" name="plan" value="custom" className="mt-1 h-4 w-4 accent-indigo-600" />
+              <span>
+                <span className="block font-semibold text-slate-900">
+                  🎨 Custom designed website — ${WEBSITE_OFFER.customPriceUsd} once
+                </span>
+                <span className="block text-xs text-slate-600">
+                  Our designer redesigns it from your old site, Google, Yelp, Zillow and up to{" "}
+                  {WEBSITE_OFFER.customPages} pages of your content.
+                </span>
+              </span>
+            </label>
+          </div>
+          <input
+            name="website"
+            inputMode="url"
+            placeholder="Your old website, if you have one (https://…)"
+            aria-label="Your old website"
+            className={inputClass}
+          />
+          <textarea
+            name="wish"
+            rows={2}
+            maxLength={2000}
+            placeholder="What do you want on your website, or changed from your old one?"
+            aria-label="What do you want on your website, or changed from your old one?"
+            className={inputClass}
+          />
+          <button
+            type="submit"
+            className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-700"
+          >
+            Continue →
+          </button>
+        </form>
+      </Card>
 
       <Card>
         <h3 className="mb-2 text-lg font-bold">Or buy one thing at a time</h3>
