@@ -329,7 +329,7 @@ export default async function CityPage({
             <Card>
               <h2 className="text-base font-bold">✈️ Visiting {name}?</h2>
               <p className="mt-1 text-sm text-slate-600">
-                Compare hotels and flights on GoDesi Travel.
+                Find hotels on Booking.com and cheap flights on GoDesi Travel.
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold">
                 <a

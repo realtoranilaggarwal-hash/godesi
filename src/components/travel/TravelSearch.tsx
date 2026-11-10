@@ -327,8 +327,8 @@ export function TravelSearch() {
         <p className="mt-3 text-sm font-medium text-rose-600">{dateError}</p>
       ) : null}
       <p className="mt-3 text-xs text-slate-500">
-        Search opens GoDesi Travel — flight and hotel results from hundreds of
-        airlines and booking sites, powered by our travel partner.
+        Flight search opens GoDesi Travel, with fares from hundreds of
+        airlines. Hotel search opens Booking.com.
       </p>
     </div>
   );
