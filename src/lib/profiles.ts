@@ -49,6 +49,7 @@ export const RESERVED_USERNAMES = new Set([
   "godesi",
   "support",
   "help",
+  "howto",
   "about",
   "add-business",
   "alumni",

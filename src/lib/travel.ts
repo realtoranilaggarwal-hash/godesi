@@ -43,7 +43,10 @@ export function flightResultsUrl({
   return `${TRAVEL_WHITELABEL}/flights/${path}`;
 }
 
-/** White-label hotel results URL. */
+/**
+ * Hotel results on Booking.com. The white label lost its hotel search when
+ * Hotellook closed (Oct 2025), so travel.godesi.com/hotels is a 404.
+ */
 export function hotelResultsUrl({
   destination,
   checkIn,
@@ -56,12 +59,13 @@ export function hotelResultsUrl({
   adults: number;
 }): string {
   const params = new URLSearchParams({
-    destination,
-    adults: String(Math.max(1, adults)),
-    currency: "USD",
-    locale: "en",
+    ss: destination,
+    group_adults: String(Math.max(1, adults)),
+    no_rooms: "1",
+    selected_currency: "USD",
+    lang: "en-us",
   });
-  if (checkIn) params.set("checkIn", checkIn);
-  if (checkOut) params.set("checkOut", checkOut);
-  return `${TRAVEL_WHITELABEL}/hotels?${params.toString()}`;
+  if (checkIn) params.set("checkin", checkIn);
+  if (checkOut) params.set("checkout", checkOut);
+  return `https://www.booking.com/searchresults.html?${params.toString()}`;
 }

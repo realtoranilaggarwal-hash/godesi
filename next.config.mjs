@@ -117,6 +117,7 @@ const nextConfig = {
       { source: "/add-listing", destination: "/add-business", permanent: true },
       { source: "/:path(your-name|yourname|your-business)", destination: "/add-business?utm_source=social", permanent: false },
       { source: "/:code(nye2027|9227)", destination: "/events/new-year-eves-party-2027-edison#tickets", permanent: false },
+      { source: "/:code(sponsor2027|sponsors2027|nye2027-sponsor)", destination: "https://www.newyearevesparty.com/sponsors", permanent: false },
       { source: "/:code(927|singles2027|singles-nye)", destination: "/events/singles-new-years-eve-party-2027-nj#tickets", permanent: false },
       { source: "/gurdwara", destination: "/news/diwali-at-guru-nanak-sikh-heritage-monroe-township-langar-sw-cpf9hdpkgps06kgytc6lgqxa6", permanent: false },
       { source: "/ganesha", destination: "/news/why-we-worship-lord-ganesha-and-goddess-lakshmi-together-on-cyrzzor83ggag7mgrukb85s9e", permanent: false },
