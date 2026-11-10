@@ -350,7 +350,7 @@ export default function ComplaintGuidePage({
           </p>
         </Card>
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:complaints" />
     </div>
   );
 }

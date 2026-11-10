@@ -10,6 +10,7 @@ import {
 import { HelpClipForm } from "@/components/forms/HelpClipForm";
 import { Card } from "@/components/ui";
 import { deskFallback } from "@/lib/adminSections";
+import { CLIP_SECTIONS } from "@/lib/clipSections";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Help clips" };
@@ -36,7 +37,10 @@ export default async function Page() {
       depth: 1,
     })),
   ]);
-  const names = new Map(categories.map((entry) => [entry.slug, entry.name]));
+  const names = new Map<string, string>([
+    ...CLIP_SECTIONS.map((entry): [string, string] => [entry.slug, entry.name]),
+    ...categories.map((entry): [string, string] => [entry.slug, entry.name]),
+  ]);
 
   return (
     <div className="space-y-4">

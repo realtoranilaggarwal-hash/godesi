@@ -109,7 +109,7 @@ export default function ComplaintsPage() {
           </p>
         </Card>
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:complaints" />
     </div>
   );
 }

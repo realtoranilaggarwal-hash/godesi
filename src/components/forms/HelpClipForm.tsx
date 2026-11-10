@@ -7,6 +7,7 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
+import { CLIP_SECTIONS } from "@/lib/clipSections";
 
 export function HelpClipForm({
   categories,
@@ -46,12 +47,21 @@ export function HelpClipForm({
         >
           <select name="categorySlug" defaultValue="" className={inputClass}>
             <option value="">Everywhere (welcome clip)</option>
-            {categories.map((category) => (
-              <option key={category.slug} value={category.slug}>
-                {category.depth ? "— " : ""}
-                {category.name}
-              </option>
-            ))}
+            <optgroup label="Site sections">
+              {CLIP_SECTIONS.map((section) => (
+                <option key={section.slug} value={section.slug}>
+                  {section.name}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Directory categories">
+              {categories.map((category) => (
+                <option key={category.slug} value={category.slug}>
+                  {category.depth ? "— " : ""}
+                  {category.name}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </Field>
         <Field label="Order" hint="Lower shows first when a page has more than one">
