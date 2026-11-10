@@ -61,6 +61,8 @@ export default async function RootLayout({
     process.env.NEXT_PUBLIC_UMAMI_SRC ?? "https://cloud.umami.is/script.js";
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID;
+  const metaPixel =
+    process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1843333602655103";
   const quoraPixel =
     process.env.NEXT_PUBLIC_QUORA_PIXEL_ID ??
     "e1f78f6226a74980abda723156b819ed";
@@ -130,6 +132,28 @@ export default async function RootLayout({
                   style={{ display: "none" }}
                   alt=""
                   src={`https://q.quora.com/_/ad/${quoraPixel}/pixel?tag=ViewContent&noscript=1`}
+                />
+              </noscript>
+            </>
+          ) : null}
+          {/* Meta Pixel: page views for Facebook and Instagram ads. */}
+          {metaPixel ? (
+            <>
+              <Script
+                id="meta-pixel"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init',${JSON.stringify(metaPixel)});fbq('track','PageView');`,
+                }}
+              />
+              <noscript>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  height="1"
+                  width="1"
+                  style={{ display: "none" }}
+                  alt=""
+                  src={`https://www.facebook.com/tr?id=${metaPixel}&ev=PageView&noscript=1`}
                 />
               </noscript>
             </>
