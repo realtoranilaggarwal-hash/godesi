@@ -41,10 +41,14 @@ export async function sendEmail({
   to,
   subject,
   html,
+  replyTo,
+  headers,
 }: {
   to: string;
   subject: string;
   html: string;
+  replyTo?: string;
+  headers?: Record<string, string>;
 }) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
@@ -57,7 +61,14 @@ export async function sendEmail({
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from, to: [to], subject, html }),
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject,
+        html,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+        ...(headers ? { headers } : {}),
+      }),
     });
     if (!response.ok) {
       console.error(
@@ -146,15 +157,16 @@ export function ticketEmail({
 }) {
   const people = admits ?? seats;
   const banner = AD_PLACEMENTS[bannerSlot];
-  const sponsorHtml = perks.length || bannerCodes.length || wallBricks
-    ? `<div style="margin:0 0 16px;padding:12px 14px;border:1px solid #fde68a;background:#fffbeb;border-radius:12px;color:#334155">
+  const sponsorHtml =
+    perks.length || bannerCodes.length || wallBricks
+      ? `<div style="margin:0 0 16px;padding:12px 14px;border:1px solid #fde68a;background:#fffbeb;border-radius:12px;color:#334155">
          <p style="margin:0 0 6px;font-weight:700">🤝 Thank you for sponsoring!</p>
          ${perks.length ? `<ul style="margin:0 0 8px;padding-left:18px">${perks.map((perk) => `<li>${perk}</li>`).join("")}</ul>` : ""}
          <p style="margin:0 0 8px;font-size:13px">The organiser will contact you for your logo, clip or business name.</p>
          ${bannerCodes.length ? `<p style="margin:0 0 8px;font-size:13px">Your free ${banner.size.width}×${banner.size.height} GoDesi banner: open <a href="${siteUrl()}/advertise?slot=${banner.slot}#book" style="color:#4f46e5">GoDesi advertising</a>, choose ${banner.name}, and enter code${bannerCodes.length > 1 ? "s" : ""} <strong>${bannerCodes.join(", ")}</strong> at checkout.</p>` : ""}
          ${wallBricks ? `<p style="margin:0;font-size:13px">Your ${wallBricks} Wall of Fame bricks are credited to your GoDesi account: open the <a href="${siteUrl()}/walloffame" style="color:#4f46e5">Wall of Fame</a>, drag a block of up to ${wallBricks} bricks and add your logo. The credit comes off at checkout.</p>` : ""}
        </div>`
-    : "";
+      : "";
   const url = `${siteUrl()}/tickets/${code}`;
   return {
     subject: `Your ticket for ${eventTitle}`,
