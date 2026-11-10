@@ -131,14 +131,26 @@ export async function CategoryFeatured() {
           step,
         );
         const waiting = Math.max(group.paid - PER_CATEGORY, 0);
-        // The promo only takes a slot nobody else fills; a full row stays a row.
+        // Empty slots get one tile each (category art, the last one the
+        // "your spot here" promo) so a sparse row still reads as a full row.
         const openSlots = PER_CATEGORY - picks.length;
-        const promoSpan =
-          openSlots >= 3
-            ? "sm:col-span-3"
-            : openSlots === 2
-              ? "sm:col-span-2"
-              : "";
+        const categoryHref = group.slug
+          ? `/categories/${group.slug}`
+          : "/categories";
+        const pricingHref = `/pricing?category=${encodeURIComponent(group.slug ?? "")}`;
+        const fillers = Array.from({ length: openSlots }, (_, index) => {
+          const promo = index === openSlots - 1;
+          return {
+            key: promo ? "promo" : `art-${index}`,
+            href: promo ? pricingHref : categoryHref,
+            label: promo
+              ? `Your spot here starts from $${pro.priceUsd.toFixed(2)} a month →`
+              : `More in ${group.name} →`,
+            promo,
+            // Phones stack one tile per line: show only the first filler there.
+            mobileHidden: index > 0,
+          };
+        });
 
         return (
           <div key={group.slug ?? group.name}>
@@ -167,7 +179,7 @@ export async function CategoryFeatured() {
                 </p>
               ) : (
                 <Link
-                  href={`/pricing?category=${encodeURIComponent(group.slug ?? "")}`}
+                  href={pricingHref}
                   className="text-[11px] font-semibold text-rose-600 hover:underline"
                 >
                   Your spot here starts from ${pro.priceUsd.toFixed(2)} a month
@@ -177,23 +189,30 @@ export async function CategoryFeatured() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {openSlots > 0 ? (
+              {fillers.map((filler) => (
                 <Link
-                  href={
-                    group.slug ? `/categories/${group.slug}` : "/categories"
-                  }
-                  className={`group flex flex-col items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white p-2 text-center transition hover:shadow-md ${promoSpan}`}
+                  key={filler.key}
+                  href={filler.href}
+                  className={`group flex-col items-center justify-center gap-1 rounded-2xl border bg-white p-2 text-center transition hover:shadow-md ${
+                    filler.mobileHidden ? "hidden sm:flex" : "flex"
+                  } ${filler.promo ? "border-dashed border-rose-300" : "border-slate-200"}`}
                 >
                   <CategoryArt
                     slug={group.slug ?? ""}
                     icon={group.icon ?? undefined}
-                    className="h-auto w-full max-w-[240px]"
+                    className="h-auto w-full max-w-[240px] rounded-xl"
                   />
-                  <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-700">
-                    More in {group.name} →
+                  <span
+                    className={`text-xs font-bold ${
+                      filler.promo
+                        ? "text-rose-600 group-hover:underline"
+                        : "text-slate-700 group-hover:text-indigo-700"
+                    }`}
+                  >
+                    {filler.label}
                   </span>
                 </Link>
-              ) : null}
+              ))}
 
               {picks.map((business) => (
                 <BusinessTile
