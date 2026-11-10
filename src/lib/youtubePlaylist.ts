@@ -4,7 +4,8 @@ import { cachedQuery } from "@/lib/cache";
  * A member pastes a public YouTube playlist link and the playlist plays on
  * their card through YouTube's own playlist embed, which carries every video.
  * For the tile strip we read YouTube's Atom feed per playlist (no API key; it
- * lists the newest 15) once a day. Only successful reads are cached, so a
+ * lists the newest 15) once a day, falling back to the public playlist page
+ * when the feed is down (it has returned 404 for every playlist at times). Only successful reads are cached, so a
  * blocked or slow feed is retried on the next visit rather than kept for a day.
  */
 
@@ -96,6 +97,16 @@ export type PlaylistPreview = { title: string | null; videos: PlaylistVideo[] };
 const ENTRY = /<entry>([\s\S]*?)<\/entry>/g;
 
 async function readPlaylist(id: string): Promise<PlaylistPreview> {
+  try {
+    return await readPlaylistFeed(id);
+  } catch (feedError) {
+    const fromPage = await readPlaylistPage(id).catch(() => null);
+    if (fromPage?.videos.length) return fromPage;
+    throw feedError;
+  }
+}
+
+async function readPlaylistFeed(id: string): Promise<PlaylistPreview> {
   const response = await fetch(
     `https://www.youtube.com/feeds/videos.xml?playlist_id=${id}`,
     { signal: AbortSignal.timeout(8000) },
@@ -117,6 +128,49 @@ async function readPlaylist(id: string): Promise<PlaylistPreview> {
   }
 
   return { title: title ? decodeEntities(title) : null, videos };
+}
+
+const PAGE_ENTRY = /"playlistVideoRenderer":\{"videoId":"([\w-]{11})"/g;
+
+/** Same preview read from the playlist page's embedded data, playable videos only. */
+async function readPlaylistPage(id: string): Promise<PlaylistPreview> {
+  const response = await fetch(playlistPageUrl(id), {
+    headers: { "accept-language": "en" },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) throw new Error(`playlist page ${response.status}`);
+  const html = await response.text();
+
+  const title = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1];
+  const starts = Array.from(html.matchAll(PAGE_ENTRY));
+  const videos: PlaylistVideo[] = [];
+  const seen = new Set<string>();
+  starts.forEach((match, i) => {
+    const videoId = match[1];
+    const chunk = html.slice(match.index, starts[i + 1]?.index ?? undefined);
+    if (seen.has(videoId) || chunk.includes('"isPlayable":false')) return;
+    const raw = chunk.match(/"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)*)"/)?.[1];
+    if (!raw) return;
+    seen.add(videoId);
+    videos.push({
+      id: videoId,
+      title: unescapeJson(raw),
+      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    });
+  });
+
+  return {
+    title: title ? decodeEntities(title) : null,
+    videos: videos.slice(0, FEED_LIMIT),
+  };
+}
+
+function unescapeJson(value: string) {
+  try {
+    return JSON.parse(`"${value}"`) as string;
+  } catch {
+    return value;
+  }
 }
 
 function decodeEntities(value: string) {
