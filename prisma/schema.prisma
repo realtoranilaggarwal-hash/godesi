@@ -347,6 +347,7 @@ model User {
   pinterestUrl   String?
   snapchatUrl    String?
   githubUrl      String?
+  aiLoungeUrl    String?
   /// Published on purpose by the member, unlike the private account phone.
   whatsappNumber String?
 
@@ -888,6 +889,7 @@ model Business {
   /// Public page collecting the business's reviews, e.g. on Trustindex.
   reviewsUrl         String?
   linktreeUrl        String?
+  aiLoungeUrl        String?
   alignableUrl       String?
   address            String?
   /// "Packages from …" shown on marketplace cards; null hides the price line.

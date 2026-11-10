@@ -12,6 +12,7 @@ export const PERSONAL_SOCIALS = [
   { key: "pinterestUrl", label: "Pinterest", icon: "📌", placeholder: "https://pinterest.com/you" },
   { key: "snapchatUrl", label: "Snapchat", icon: "👻", placeholder: "https://snapchat.com/add/you" },
   { key: "githubUrl", label: "GitHub", icon: "🐙", placeholder: "https://github.com/you" },
+  { key: "aiLoungeUrl", label: "AI Lounge", icon: "🤖", placeholder: "https://ai.lounge.ai/@you" },
 ] as const;
 
 export type PersonalSocialKey = (typeof PERSONAL_SOCIALS)[number]["key"];

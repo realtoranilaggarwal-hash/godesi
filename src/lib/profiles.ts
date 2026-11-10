@@ -201,6 +201,7 @@ export async function publicProfile(username: string) {
       pinterestUrl: true,
       snapchatUrl: true,
       githubUrl: true,
+      aiLoungeUrl: true,
       plan: true,
       planExpiresAt: true,
       createdAt: true,
