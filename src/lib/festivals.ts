@@ -279,6 +279,21 @@ export const FESTIVALS: Festival[] = [
     dates: ["2026-11-08", "2027-10-29", "2028-10-17"],
   },
   {
+    name: "Bestu Varas (Gujarati New Year)",
+    shop: [
+      { label: "Gujarati New Year gifts", query: "gujarati new year gifts" },
+      { label: "Annakut puja items", query: "annakut puja items" },
+      { label: "Chopda Pujan account books", query: "chopda pujan account book" },
+    ],
+    genre: "diwali",
+    keywords: ["bestu varas", "gujarati new year", "nutan varsh", "saal mubarak", "annakut", "govardhan"],
+    faith: "HINDU_TEMPLE",
+    emoji: "🎊",
+    blurb:
+      "Gujarati New Year — Vikram Samvat begins the day after Diwali; temple visits, Chopda Pujan and Annakut.",
+    dates: ["2026-11-10", "2027-10-30", "2028-10-18"],
+  },
+  {
     name: "Guru Nanak Jayanti (Gurpurab)",
     shop: [
       { label: "Sikh prayer books", query: "gutka sahib nitnem" },
