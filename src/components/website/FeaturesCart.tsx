@@ -9,10 +9,12 @@ import { FormError } from "@/components/forms/FormError";
 import {
   BASE_INCLUDES,
   BASE_MONTHLY_USD,
-  BASE_SETUP_USD,
+  BASE_YEARLY_USD,
+  type HostingTerm,
   type PowerUp,
   type QuotedItem,
 } from "@/lib/websiteBuilder";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 function SaveButton({ label, busy }: { label: string; busy: string }) {
   const { pending } = useFormStatus();
@@ -44,7 +46,13 @@ export function FeaturesCart({
   suggested,
   stripeReady,
   cancelled,
+  setupUsd,
+  setupLabel,
+  billing,
 }: {
+  setupUsd: number;
+  setupLabel: string;
+  billing: HostingTerm;
   id: string;
   powerUps: PowerUp[];
   selected: string[];
@@ -56,6 +64,7 @@ export function FeaturesCart({
   const [cartState, cartAction] = useFormState(updateCartAction.bind(null, id), emptyState);
   const [launchState, launchAction] = useFormState(launchCheckoutAction.bind(null, id), emptyState);
   const [picked, setPicked] = useState<string[]>(selected);
+  const [term, setTerm] = useState<HostingTerm>(billing);
   const selectedKey = selected.join(",");
   // The "anything else" box can add a catalogue Power-Up on the server; pick it up here.
   useEffect(() => {
@@ -72,6 +81,10 @@ export function FeaturesCart({
       powerUps.filter((p) => picked.includes(p.key)).reduce((sum, p) => sum + p.monthlyUsd, 0),
     [picked, powerUps],
   );
+  const extrasMonthly = monthly - BASE_MONTHLY_USD;
+  const yearly = BASE_YEARLY_USD + extrasMonthly * 12;
+  const recurring = term === "YEAR" ? yearly : monthly;
+  const per = term === "YEAR" ? "year" : "month";
 
   return (
     <div className="space-y-6">
@@ -90,12 +103,19 @@ export function FeaturesCart({
         <table className="w-full text-sm">
           <tbody>
             <tr className="border-b border-slate-100">
-              <td className="px-4 py-2">AI website — design, copy, photos, launch</td>
-              <td className="px-4 py-2 text-right font-semibold">${BASE_SETUP_USD} once</td>
+              <td className="px-4 py-2">{setupLabel}</td>
+              <td className="px-4 py-2 text-right font-semibold">${setupUsd} once</td>
             </tr>
             <tr className="border-b border-slate-100">
-              <td className="px-4 py-2">Hosting, updates and support</td>
-              <td className="px-4 py-2 text-right font-semibold">${BASE_MONTHLY_USD}/month</td>
+              <td className="px-4 py-2">
+                Hosting, updates and support
+                <span className="block text-xs text-slate-500">
+                  Includes {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a year)
+                </span>
+              </td>
+              <td className="px-4 py-2 text-right font-semibold">
+                ${BASE_MONTHLY_USD}/month or ${BASE_YEARLY_USD}/year
+              </td>
             </tr>
             {BASE_INCLUDES.map((line) => (
               <tr key={line} className="border-b border-slate-100 text-slate-600">
@@ -200,17 +220,37 @@ export function FeaturesCart({
 
       <section className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-4">
         <h2 className="font-bold text-slate-900">Total</h2>
+        <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Pay hosting">
+          {(["MONTH", "YEAR"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={term === value}
+              onClick={() => setTerm(value)}
+              className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                term === value
+                  ? "border-emerald-600 bg-emerald-600 text-white"
+                  : "border-slate-300 bg-white text-slate-700"
+              }`}
+            >
+              {value === "MONTH"
+                ? `Pay monthly — $${BASE_MONTHLY_USD}/month hosting`
+                : `Pay yearly — $${BASE_YEARLY_USD}/year hosting (save $${BASE_MONTHLY_USD * 12 - BASE_YEARLY_USD})`}
+            </button>
+          ))}
+        </div>
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-white p-3">
             <div className="text-xs uppercase tracking-wide text-slate-500">Today</div>
-            <div className="text-2xl font-black text-slate-900">${BASE_SETUP_USD + monthly}</div>
-            <div className="text-xs text-slate-500">${BASE_SETUP_USD} setup + first month ${monthly}</div>
+            <div className="text-2xl font-black text-slate-900">${setupUsd + recurring}</div>
+            <div className="text-xs text-slate-500">${setupUsd} setup + first {per} ${recurring}</div>
           </div>
           <div className="rounded-xl bg-white p-3">
-            <div className="text-xs uppercase tracking-wide text-slate-500">Then monthly</div>
-            <div className="text-2xl font-black text-slate-900">${monthly}/month</div>
+            <div className="text-xs uppercase tracking-wide text-slate-500">Then every {per}</div>
+            <div className="text-2xl font-black text-slate-900">${recurring}/{per}</div>
             <div className="text-xs text-slate-500">
-              Hosting ${BASE_MONTHLY_USD}
+              Hosting ${term === "YEAR" ? BASE_YEARLY_USD : BASE_MONTHLY_USD}
               {picked.length ? ` + ${picked.length} Power-Up${picked.length > 1 ? "s" : ""}` : ""}
               {customLines.length ? " · custom extras quoted separately" : ""} · cancel any time
             </div>
@@ -223,9 +263,22 @@ export function FeaturesCart({
           {picked.map((key) => (
             <input key={key} type="hidden" name="powerUps" value={key} />
           ))}
+          <input type="hidden" name="billing" value={term} />
+          <label className="mb-3 block text-sm font-medium text-slate-700">
+            Discount code (optional)
+            <input
+              name="coupon"
+              maxLength={40}
+              placeholder="e.g. WEB20"
+              className={`${inputClass} mt-1 uppercase sm:max-w-xs`}
+            />
+            <span className="mt-1 block text-xs font-normal text-slate-500">
+              Codes take money off the one-time ${setupUsd} fee. Stripe shows your new price before you pay.
+            </span>
+          </label>
           <FormError>{launchState.error}</FormError>
           {stripeReady ? (
-            <LaunchButton total={`$${BASE_SETUP_USD + monthly} today`} />
+            <LaunchButton total={`$${setupUsd + recurring} today`} />
           ) : (
             <p className="rounded-xl bg-white px-3 py-2 text-sm text-slate-700">
               Card payments are not switched on yet — we have your approved preview and will

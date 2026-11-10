@@ -210,6 +210,45 @@ export const BASE_INCLUDES = [
 
 export const BASE_SETUP_USD = WEBSITE_OFFER.priceUsd;
 export const BASE_MONTHLY_USD = WEBSITE_OFFER.monthlyUsd;
+export const BASE_YEARLY_USD = WEBSITE_OFFER.yearlyUsd;
+export const CUSTOM_SETUP_USD = WEBSITE_OFFER.customPriceUsd;
+
+export type WebsiteTier = "AI" | "CUSTOM";
+export type HostingTerm = "MONTH" | "YEAR";
+
+export function setupUsdFor(tier: string) {
+  return tier === "CUSTOM" ? CUSTOM_SETUP_USD : BASE_SETUP_USD;
+}
+
+/** Links the owner gives us for a custom design, beyond the AI builder's five. */
+export const CUSTOM_SOURCES = [
+  { key: "website", label: "Old website", placeholder: "https://yourbusiness.com" },
+  { key: "google", label: "Google Business Profile / Maps", placeholder: "https://maps.app.goo.gl/…" },
+  { key: "yelp", label: "Yelp", placeholder: "https://www.yelp.com/biz/…" },
+  { key: "zillow", label: "Zillow / Realtor.com", placeholder: "https://www.zillow.com/profile/…" },
+  { key: "facebook", label: "Facebook", placeholder: "https://facebook.com/…" },
+  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/…" },
+  { key: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/…" },
+] as const;
+
+/** Websites the owner likes the look of. */
+export const EXAMPLE_SITE_KEYS = ["example1", "example2", "example3"] as const;
+
+/** Suggested names for the ten page boxes; the owner can rename any of them. */
+export const CUSTOM_PAGE_NAMES = [
+  "Home",
+  "About us",
+  "Services",
+  "Gallery / Our work",
+  "Reviews",
+  "Team",
+  "FAQ",
+  "Areas we serve",
+  "Offers / Packages",
+  "Contact",
+] as const;
+
+export type CustomPage = { name: string; text: string };
 
 /** Something the owner asked for in words, priced by the AI into the cart. */
 export type QuotedItem = {

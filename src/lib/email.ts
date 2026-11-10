@@ -15,6 +15,14 @@ const ENDPOINT = "https://api.resend.com/emails";
  * Both variables are required: EMAIL_FROM is only set once the sending domain is
  * verified, so OTP flows stay switched off until mail can actually be delivered.
  */
+export function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export function emailEnabled() {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
 }

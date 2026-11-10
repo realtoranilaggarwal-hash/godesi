@@ -77,6 +77,7 @@ export function CouponForm() {
             <option value="BUNDLE">Complete package</option>
             <option value="ADS">Advertising</option>
             <option value="TICKETS">Event tickets</option>
+            <option value="WEBSITE">Websites (one-time setup fee)</option>
           </select>
         </Field>
         <Field

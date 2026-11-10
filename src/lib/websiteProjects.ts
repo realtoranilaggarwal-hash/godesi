@@ -5,17 +5,24 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { sendEmail, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { recordCouponFromMetadata } from "@/lib/coupons";
 import {
   BASE_MONTHLY_USD,
-  BASE_SETUP_USD,
+  BASE_YEARLY_USD,
+  CUSTOM_SOURCES,
+  type CustomPage,
   EMPTY_FACTS,
+  EXAMPLE_SITE_KEYS,
+  type HostingTerm,
   type FoundFacts,
   isPowerUpKey,
   mergePowerUps,
   type PowerUp,
   type QuotedItem,
+  setupUsdFor,
   type SiteContent,
   type WebsiteSources,
+  websitePath,
 } from "@/lib/websiteBuilder";
 
 /**
@@ -76,6 +83,64 @@ export function projectSources(project: WebsiteProject): WebsiteSources {
   return out;
 }
 
+/** Every link the owner gave, labelled, for the staff desk. */
+export function projectLinks(project: WebsiteProject): { label: string; url: string }[] {
+  const raw = record(project.sources);
+  const labels: Record<string, string> = Object.fromEntries(
+    CUSTOM_SOURCES.map((source) => [source.key, source.label]),
+  );
+  EXAMPLE_SITE_KEYS.forEach((key, index) => {
+    labels[key] = `Example site ${index + 1}`;
+  });
+  return Object.entries(raw)
+    .filter((entry): entry is [string, string] => typeof entry[1] === "string" && Boolean(entry[1]))
+    .map(([key, url]) => ({ label: labels[key] ?? key, url }));
+}
+
+export function projectPages(project: WebsiteProject): CustomPage[] {
+  if (!Array.isArray(project.pageContent)) return [];
+  return (project.pageContent as unknown[])
+    .map((page) => record(page))
+    .filter((page) => typeof page.name === "string" && typeof page.text === "string")
+    .map((page) => ({ name: page.name as string, text: page.text as string }));
+}
+
+/**
+ * Where the customer sees their design: custom sites only through the
+ * private GoDesi link, so the designer's own address never appears.
+ */
+export function previewHref(project: WebsiteProject) {
+  if (project.tier === "CUSTOM") {
+    return project.previewToken ? `/website/look/${project.previewToken}` : null;
+  }
+  return websitePath(project.id, "/site");
+}
+
+export function hostingTerm(project: WebsiteProject): HostingTerm {
+  return project.billing === "YEAR" ? "YEAR" : "MONTH";
+}
+
+/**
+ * Hosting includes one change a month, or twelve a year when paid yearly
+ * (counted from the anniversary of the payment).
+ */
+export async function changeAllowance(project: WebsiteProject, now = new Date()) {
+  const yearly = hostingTerm(project) === "YEAR";
+  const limit = yearly ? WEBSITE_OFFER.changesPerYear : WEBSITE_OFFER.changesPerMonth;
+  let since: Date;
+  if (yearly) {
+    since = new Date(project.paidAt ?? project.createdAt);
+    since.setUTCFullYear(now.getUTCFullYear());
+    if (since > now) since.setUTCFullYear(now.getUTCFullYear() - 1);
+  } else {
+    since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  }
+  const used = await db.websiteChangeRequest.count({
+    where: { projectId: project.id, createdAt: { gte: since } },
+  });
+  return { limit, used, left: Math.max(0, limit - used), yearly };
+}
+
 export function projectFound(project: WebsiteProject): FoundFacts | null {
   if (!project.found) return null;
   const raw = record(project.found);
@@ -115,11 +180,13 @@ export async function confirmWebsitePayment({
   sessionId,
   subscriptionId,
   setupMinor,
+  metadata,
 }: {
   projectId: string;
   sessionId: string;
   subscriptionId: string | null;
   setupMinor: number;
+  metadata?: Record<string, string> | null;
 }) {
   const project = await db.websiteProject.findUnique({ where: { id: projectId } });
   if (!project || project.paidAt) return project;
@@ -134,6 +201,22 @@ export async function confirmWebsitePayment({
       setupMinor: setup,
     },
   });
+  if (metadata?.couponId) {
+    if (updated.userId) {
+      await recordCouponFromMetadata({
+        metadata,
+        userId: updated.userId,
+        currency: "USD",
+        reference: sessionId,
+      });
+    } else {
+      await db.coupon.update({
+        where: { id: metadata.couponId },
+        data: { timesRedeemed: { increment: 1 } },
+      });
+    }
+  }
+  const term = hostingTerm(updated) === "YEAR" ? "year" : "mo";
   await sendEmail({
     to: WEBSITE_OFFER.email,
     subject: `Website paid: ${updated.businessName} (${updated.city})`,
@@ -141,7 +224,9 @@ export async function confirmWebsitePayment({
       "New website to launch",
       `<h2>New website to launch</h2>
        <p><strong>${updated.businessName}</strong> — ${updated.category}, ${updated.city}</p>
-       <p>Setup $${(setup / 100).toFixed(0)}; monthly $${((updated.monthlyMinor ?? 0) / 100).toFixed(0)}.</p>
+       <p>${updated.tier === "CUSTOM" ? "Custom design" : "AI website"}. Setup $${(setup / 100).toFixed(0)}${
+         metadata?.couponId ? ` (after a $${(Number(metadata.couponDiscountMinor ?? 0) / 100).toFixed(2)} discount)` : ""
+       }; hosting $${((updated.monthlyMinor ?? 0) / 100).toFixed(0)}/${term}.</p>
        <p>Features: ${updated.powerUps.join(", ") || "none"}</p>
        ${
          projectQuoted(updated).filter((item) => !item.powerUp).length
@@ -166,27 +251,58 @@ export async function loadPowerUps(): Promise<PowerUp[]> {
 
 export type Quote = {
   setupUsd: number;
+  term: HostingTerm;
+  /** Every recurring line added up, per month (for display and reports). */
   monthlyUsd: number;
-  lines: { label: string; monthlyUsd: number; kind: "base" | "powerUp" | "custom" }[];
+  /** What Stripe bills each term: per month, or per year when paid yearly. */
+  recurringUsd: number;
+  lines: {
+    label: string;
+    monthlyUsd: number;
+    /** Charged per term. */
+    amountUsd: number;
+    kind: "base" | "powerUp" | "custom";
+  }[];
 };
 
-/** Setup once, then base hosting plus every ticked feature per month. */
+/** A recurring line's price for the term; yearly hosting is cheaper than 12 months. */
+export function termAmount(kind: Quote["lines"][number]["kind"], monthlyUsd: number, term: HostingTerm) {
+  if (term === "MONTH") return monthlyUsd;
+  return kind === "base" ? BASE_YEARLY_USD : monthlyUsd * 12;
+}
+
+/** Setup once, then hosting plus every ticked feature, monthly or yearly. */
 export function quoteFor(
   project: WebsiteProject,
   powerUps: PowerUp[],
+  term: HostingTerm = hostingTerm(project),
 ): Quote {
   const lines: Quote["lines"] = [
-    { label: "Hosting, domain, SSL & care", monthlyUsd: BASE_MONTHLY_USD, kind: "base" },
+    {
+      label: "Hosting, domain, SSL & care",
+      monthlyUsd: BASE_MONTHLY_USD,
+      amountUsd: termAmount("base", BASE_MONTHLY_USD, term),
+      kind: "base",
+    },
   ];
   for (const key of project.powerUps) {
     if (!isPowerUpKey(key)) continue;
     const item = powerUps.find((entry) => entry.key === key);
-    if (item?.active) lines.push({ label: item.label, monthlyUsd: item.monthlyUsd, kind: "powerUp" });
+    if (item?.active) {
+      lines.push({
+        label: item.label,
+        monthlyUsd: item.monthlyUsd,
+        amountUsd: termAmount("powerUp", item.monthlyUsd, term),
+        kind: "powerUp",
+      });
+    }
   }
   // Custom wishes are estimates a person confirms first; they are never billed here.
   return {
-    setupUsd: BASE_SETUP_USD,
+    setupUsd: setupUsdFor(project.tier),
+    term,
     monthlyUsd: lines.reduce((sum, line) => sum + line.monthlyUsd, 0),
+    recurringUsd: lines.reduce((sum, line) => sum + line.amountUsd, 0),
     lines,
   };
 }

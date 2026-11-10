@@ -6,6 +6,14 @@ export const WEBSITE_OFFER = {
   priceUsd: 99,
   /** Monthly charge that keeps the domain and hosting running. */
   monthlyUsd: 10,
+  /** The same hosting paid a year at a time. */
+  yearlyUsd: 100,
+  /** One-time price of a site our designer makes from the owner's pages. */
+  customPriceUsd: 299,
+  customPages: 10,
+  /** Site changes hosting includes: one a month, or twelve a year on yearly. */
+  changesPerMonth: 1,
+  changesPerYear: 12,
   pages: 5,
   partner: "SocialDada",
   partnerUrl: "https://socialdada.com",

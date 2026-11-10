@@ -14,7 +14,7 @@ const couponSchema = z.object({
     .min(3, "Code must be at least 3 characters")
     .max(24, "Keep the code under 24 characters")
     .regex(/^[A-Za-z0-9-]+$/, "Use letters, numbers and dashes only"),
-  scope: z.enum(["PLAN", "ADS", "TICKETS", "BUNDLE"]),
+  scope: z.enum(["PLAN", "ADS", "TICKETS", "BUNDLE", "WEBSITE"]),
   discountKind: z.enum(["PERCENT", "FIXED"]),
   amount: z.coerce.number().int().min(0).default(0),
   bonusMonths: z.coerce.number().int().min(0).max(120).default(0),
