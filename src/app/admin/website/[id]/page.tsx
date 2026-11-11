@@ -48,6 +48,7 @@ export default async function AdminWebsiteProjectPage({
     },
   });
   if (!project) notFound();
+  const sharedCode = /^Shared with code (\S+)/.exec(project.staffNotes ?? "")?.[1] ?? "";
   const found = projectFound(project);
   const links = projectLinks(project);
   const pages = projectPages(project);
@@ -168,7 +169,7 @@ export default async function AdminWebsiteProjectPage({
                 />
               </Field>
               <Field label="Discount code to fill in for them (optional)">
-                <input name="code" maxLength={40} placeholder="e.g. WEB20" className={`${inputClass} uppercase`} />
+                <input name="code" maxLength={40} defaultValue={sharedCode} placeholder="e.g. WEB20" className={`${inputClass} uppercase`} />
               </Field>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="send" value="send" defaultChecked={!project.previewSentAt} className="h-4 w-4" />
@@ -184,7 +185,7 @@ export default async function AdminWebsiteProjectPage({
                 ) : null}
                 <ShareLookLink
                   base={`${siteUrl()}/website/look/${project.previewToken}`}
-                  initialCode={/^Shared with code (\S+)/.exec(project.staffNotes ?? "")?.[1] ?? ""}
+                  initialCode={sharedCode}
                 />
                 {project.previewSentAt ? (
                   <p className="mt-1 text-xs text-slate-500">Emailed {project.previewSentAt.toLocaleString()}</p>

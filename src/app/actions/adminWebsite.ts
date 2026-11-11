@@ -104,6 +104,13 @@ async function websiteCodeProblem(code: string) {
   return `${code} isn't an active Website discount code. Make it at /admin/coupons first, or leave it blank.`;
 }
 
+/** Staff notes with the shared code recorded on the first line (the admin page reads it back). */
+function notesWithCode(notes: string | null, code: string) {
+  const rest = (notes ?? "").replace(/^Shared with code \S+\n?/, "");
+  if (!code) return rest || null;
+  return rest ? `Shared with code ${code}\n${rest}` : `Shared with code ${code}`;
+}
+
 async function emailPreview(to: string, businessName: string, link: string) {
   await sendEmail({
     to,
@@ -151,6 +158,7 @@ export async function saveDesignLinkAction(
       data: {
         designUrl: input.designUrl,
         previewToken,
+        staffNotes: notesWithCode(current.staffNotes, code),
         ...(current.status === "DRAFT" ? { status: "PREVIEW" as const } : {}),
         ...(sending ? { previewSentAt: new Date() } : {}),
       },
@@ -241,7 +249,7 @@ export async function createClientPreviewAction(
         designUrl: input.designUrl,
         previewToken,
         previewSentAt: sending ? new Date() : null,
-        staffNotes: code ? `Shared with code ${code}` : null,
+        staffNotes: notesWithCode(null, code),
       },
     });
     if (sending && input.email) {
