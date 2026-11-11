@@ -57,8 +57,8 @@ const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
  */
 const HALL_TICKETS = 350;
 
-/** GoDesi business pages listed as sponsors of the party (already on the flyer). */
-const SPONSOR_BUSINESSES = ["suhag-jewelers-iselin"];
+/** GoDesi business pages listed as sponsors of the party. */
+const SPONSOR_BUSINESSES: string[] = [];
 
 const TIERS: TierSpec[] = [
   { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 120, salesEnd: EARLY_END },
