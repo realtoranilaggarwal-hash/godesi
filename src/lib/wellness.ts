@@ -198,7 +198,7 @@ export type WellnessBlock =
 /** Blank lines split blocks; "## " / "### " headings, "- " bullets, the rest paragraphs. */
 export function wellnessBlocks(body: string): WellnessBlock[] {
   const blocks: WellnessBlock[] = [];
-  for (const raw of body.split(/\n{2,}/)) {
+  for (const raw of body.replace(/\r\n?/g, "\n").split(/\n{2,}/)) {
     const lines = raw.trim().split("\n").map((line) => line.trim()).filter(Boolean);
     if (!lines.length) continue;
     let rest = lines;

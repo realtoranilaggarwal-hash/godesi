@@ -23,11 +23,11 @@ export function WellnessText({ blocks }: { blocks: WellnessBlock[] }) {
       {blocks.map((block, index) =>
         block.type === "heading" ? (
           block.level === 2 ? (
-            <h2 key={index} id={block.id} className="scroll-mt-24 pt-2 text-xl font-black text-slate-900">
+            <h2 key={index} id={block.id} className="scroll-mt-40 pt-2 text-xl font-black text-slate-900">
               {block.text}
             </h2>
           ) : (
-            <h3 key={index} id={block.id} className="scroll-mt-24 text-lg font-bold text-slate-900">
+            <h3 key={index} id={block.id} className="scroll-mt-40 text-lg font-bold text-slate-900">
               {block.text}
             </h3>
           )

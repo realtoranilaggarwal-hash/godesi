@@ -143,7 +143,7 @@ export default async function WellnessArticlePage({
 
         {sources.length ? (
           <section className="mt-6 border-t border-slate-100 pt-4">
-            <h2 id="sources" className="text-lg font-black text-slate-900">Sources</h2>
+            <h2 id="sources" className="scroll-mt-40 text-lg font-black text-slate-900">Sources</h2>
             <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm">
               {sources.map((source) => (
                 <li key={source.url} className="break-words">
