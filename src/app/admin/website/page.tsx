@@ -5,10 +5,10 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { deskFallback } from "@/lib/adminSections";
 import { loadPowerUps } from "@/lib/websiteProjects";
-import { savePowerUpPricesAction } from "@/app/actions/adminWebsite";
+import { createClientPreviewAction, savePowerUpPricesAction } from "@/app/actions/adminWebsite";
 import { ActionForm } from "@/components/gigs/GigForms";
-import { Badge, Card, inputClass } from "@/components/ui";
-import { websitePath } from "@/lib/websiteBuilder";
+import { Badge, Card, Field, inputClass } from "@/components/ui";
+import { WEBSITE_CATEGORIES, websitePath } from "@/lib/websiteBuilder";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Websites" };
@@ -81,6 +81,56 @@ export default async function AdminWebsitePage() {
           {toLaunch.length} paid and waiting to launch · {funnel.length} in the funnel · {live.length} live
         </p>
       </div>
+
+      <Card>
+        <h2 className="font-bold">🎨 Send a design to a new client</h2>
+        <p className="mb-3 text-xs text-slate-500">
+          For a client who hasn&apos;t ordered online. Paste the design you made; they get a private
+          GoDesi link showing the design, the $299 price, hosting, extras and a discount-code box.
+          The design address is never shown to them.
+        </p>
+        <ActionForm action={createClientPreviewAction} submitLabel="Create private link" pendingLabel="Creating…">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Business name">
+              <input name="businessName" required maxLength={120} className={inputClass} />
+            </Field>
+            <Field label="Category">
+              <select name="category" required defaultValue="" className={inputClass}>
+                <option value="" disabled>
+                  Pick one
+                </option>
+                {WEBSITE_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="City (optional)">
+              <input name="city" maxLength={120} className={inputClass} />
+            </Field>
+            <Field label="Client email (optional)">
+              <input name="email" type="email" maxLength={200} className={inputClass} />
+            </Field>
+            <Field label="Client WhatsApp (optional)">
+              <input name="whatsapp" maxLength={40} className={inputClass} />
+            </Field>
+            <Field label="Their old website (optional)">
+              <input name="oldWebsite" type="url" placeholder="https://…" className={inputClass} />
+            </Field>
+            <Field label="New design link">
+              <input name="designUrl" type="url" required placeholder="https://…" className={inputClass} />
+            </Field>
+            <Field label="Discount code (optional)">
+              <input name="code" maxLength={40} placeholder="e.g. WEB20" className={`${inputClass} uppercase`} />
+            </Field>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="send" value="send" defaultChecked className="h-4 w-4" />
+            Email the private link to the client (if you gave an email)
+          </label>
+        </ActionForm>
+      </Card>
 
       <Card>
         <h2 className="font-bold">🚀 Paid — launch these</h2>

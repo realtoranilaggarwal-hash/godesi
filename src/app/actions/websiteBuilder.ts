@@ -511,7 +511,7 @@ async function projectForToken(token: string) {
 }
 
 /** "I love it" on the private preview: on to features and payment. */
-export async function approveLookAction(token: string) {
+export async function approveLookAction(token: string, code?: string) {
   const project = await projectForToken(token);
   rememberProject(project.id);
   if (project.status === "PAID" || project.status === "LIVE") redirect(websitePath(project.id, "/done"));
@@ -519,7 +519,8 @@ export async function approveLookAction(token: string) {
     where: { id: project.id },
     data: { status: "APPROVED", approvedAt: project.approvedAt ?? new Date() },
   });
-  redirect(websitePath(project.id, "/features"));
+  const query = code ? `?code=${encodeURIComponent(code)}` : "";
+  redirect(`${websitePath(project.id, "/features")}${query}`);
 }
 
 /** "I want changes" on the private preview: noted on the project and emailed to the desk. */
