@@ -22,7 +22,7 @@ export default async function FeaturesPage({
   searchParams,
 }: {
   params: { id: string };
-  searchParams: { cancelled?: string };
+  searchParams: { cancelled?: string; code?: string };
 }) {
   const project = await loadProject(params.id);
   if (!project) notFound();
@@ -58,6 +58,7 @@ export default async function FeaturesPage({
             : "AI website — design, copy, photos, launch"
         }
         billing={hostingTerm(project)}
+        defaultCoupon={(searchParams.code ?? "").slice(0, 40)}
       />
       <p className="text-center text-xs text-slate-500">
         {preview ? (

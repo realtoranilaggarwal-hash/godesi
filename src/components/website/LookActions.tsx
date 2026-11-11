@@ -17,14 +17,14 @@ function Pending({ idle, busy, className }: { idle: string; busy: string; classN
 }
 
 /** The two buttons under a custom design preview. */
-export function LookActions({ token, priceLine }: { token: string; priceLine: string }) {
+export function LookActions({ token, priceLine, code }: { token: string; priceLine: string; code?: string }) {
   const [editing, setEditing] = useState(false);
   const [state, changesAction] = useFormState(lookChangesAction.bind(null, token), emptyState);
 
   return (
     <div className="space-y-3">
       <div className="grid gap-2 sm:grid-cols-2">
-        <form action={approveLookAction.bind(null, token)}>
+        <form action={approveLookAction.bind(null, token, code)}>
           <Pending
             idle="👍 I LOVE IT — LAUNCH MY WEBSITE"
             busy="One moment…"

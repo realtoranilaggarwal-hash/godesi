@@ -49,7 +49,9 @@ export function FeaturesCart({
   setupUsd,
   setupLabel,
   billing,
+  defaultCoupon = "",
 }: {
+  defaultCoupon?: string;
   setupUsd: number;
   setupLabel: string;
   billing: HostingTerm;
@@ -269,6 +271,7 @@ export function FeaturesCart({
             <input
               name="coupon"
               maxLength={40}
+              defaultValue={defaultCoupon}
               placeholder="e.g. WEB20"
               className={`${inputClass} mt-1 uppercase sm:max-w-xs`}
             />

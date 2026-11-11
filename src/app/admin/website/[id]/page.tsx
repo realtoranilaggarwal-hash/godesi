@@ -22,13 +22,20 @@ import { siteUrl } from "@/lib/format";
 import { ActionForm } from "@/components/gigs/GigForms";
 import { Card, Field, inputClass } from "@/components/ui";
 import { WEBSITE_GOALS } from "@/lib/websiteBuilder";
+import { ShareLookLink } from "@/components/website/ShareLookLink";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Website project" };
 
 const STATUSES = ["DRAFT", "PREVIEW", "APPROVED", "PAID", "LIVE", "CANCELLED"] as const;
 
-export default async function AdminWebsiteProjectPage({ params }: { params: { id: string } }) {
+export default async function AdminWebsiteProjectPage({
+  params,
+  searchParams = {},
+}: {
+  params: { id: string };
+  searchParams?: { new?: string; sent?: string };
+}) {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=/admin/website/${params.id}`);
   if (!isStaff(user)) redirect(deskFallback(user, "Websites"));
@@ -160,21 +167,29 @@ export default async function AdminWebsiteProjectPage({ params }: { params: { id
                   className={inputClass}
                 />
               </Field>
+              <Field label="Discount code to fill in for them (optional)">
+                <input name="code" maxLength={40} placeholder="e.g. WEB20" className={`${inputClass} uppercase`} />
+              </Field>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="send" value="send" defaultChecked={!project.previewSentAt} className="h-4 w-4" />
                 Email the customer their private preview link{project.email ? ` (${project.email})` : ""}
               </label>
             </ActionForm>
             {project.previewToken ? (
-              <p className="mt-3 break-all rounded-xl bg-slate-50 px-3 py-2 text-xs">
-                <span className="text-slate-500">Private link to share (WhatsApp etc.): </span>
-                <a href={`/website/look/${project.previewToken}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-indigo-700 underline">
-                  {siteUrl()}/website/look/{project.previewToken}
-                </a>
-                {project.previewSentAt ? (
-                  <span className="block text-slate-500">Emailed {project.previewSentAt.toLocaleString()}</span>
+              <>
+                {searchParams.new ? (
+                  <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                    ✓ Client preview created{searchParams.sent ? ` and emailed to ${project.email}` : ""}. Copy the link below to send it on WhatsApp.
+                  </p>
                 ) : null}
-              </p>
+                <ShareLookLink
+                  base={`${siteUrl()}/website/look/${project.previewToken}`}
+                  initialCode={/^Shared with code (\S+)/.exec(project.staffNotes ?? "")?.[1] ?? ""}
+                />
+                {project.previewSentAt ? (
+                  <p className="mt-1 text-xs text-slate-500">Emailed {project.previewSentAt.toLocaleString()}</p>
+                ) : null}
+              </>
             ) : null}
           </Card>
         ) : null}
