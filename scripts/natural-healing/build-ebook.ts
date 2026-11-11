@@ -51,6 +51,7 @@ const chapters = ARTICLES.map(
   <h1>${esc(article.title)}</h1>
   <div class="note"><b>Safety first:</b> ${esc(article.disclaimer)}</div>
   ${blocks(article.body)}
+  <p class="online">Read this chapter online, with GoDesi's recommended products: <a href="https://godesi.com/natural-healing/${article.slug}">godesi.com/natural-healing/${article.slug}</a></p>
   <h3>Sources</h3>
   <ol class="src">${article.sources
     .split("\n")
@@ -77,6 +78,7 @@ h4 { font-family: Helvetica, Arial, sans-serif; font-size: 12pt; margin: 12pt 0 
 .src { font-size: 9pt; } .src a { color: #4338ca; word-break: break-all; }
 a { color: #4338ca; }
 ol.toc li { margin: 4pt 0; }
+.online { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; background: #ecfdf5; border-radius: 6pt; padding: 6pt 10pt; }
 </style></head><body>
 <div class="cover">${cover}</div>
 <section class="front" style="page-break-before:auto">
@@ -84,7 +86,7 @@ ol.toc li { margin: 4pt 0; }
   ${blocks(EBOOK.description.replace(/## Free for GoDesi members[\s\S]*$/, ""))}
   <div class="note"><b>Health disclaimer:</b> ${esc(DISCLAIMER)}</div>
   <p>Read the articles online and find more at <a href="https://godesi.com/natural-healing">godesi.com/natural-healing</a>.</p>
-  <p style="font-size:9pt;color:#64748b">© ${new Date().getFullYear()} GoDesi.com — free for personal use. Some pages on godesi.com may contain affiliate links; GoDesi may earn a commission when you purchase through certain links. This does not increase your purchase price.</p>
+  <p style="font-size:9pt;color:#64748b">© ${new Date().getFullYear()} GoDesi.com — free for personal use. This ebook contains no shopping links. Some pages on godesi.com contain affiliate links; GoDesi may earn a commission when you purchase through certain links, at no extra cost to you. As an Amazon Associate, GoDesi earns from qualifying purchases.</p>
 </section>
 ${chapters}
 <section class="chapter"><h1>A final word</h1><p>Traditions are worth keeping — sensibly. Enjoy these habits as part of a balanced lifestyle, keep your doctor informed, and pass the wisdom (and the safety notes) on to the next generation.</p>

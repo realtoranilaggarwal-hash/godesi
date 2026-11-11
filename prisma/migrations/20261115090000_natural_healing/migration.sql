@@ -15,6 +15,7 @@ CREATE TABLE "WellnessProduct" (
     "regularUrl" TEXT,
     "affiliateUrl" TEXT,
     "category" TEXT NOT NULL,
+    "articleSlugs" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "disclosureText" TEXT NOT NULL DEFAULT 'GoDesi may earn a commission when you purchase through certain links. This does not increase your purchase price.',
     "active" BOOLEAN NOT NULL DEFAULT true,
     "clicks" INTEGER NOT NULL DEFAULT 0,

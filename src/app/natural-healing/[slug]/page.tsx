@@ -62,7 +62,7 @@ export default async function WellnessArticlePage({
   const [articles, products] = await Promise.all([
     wellnessArticles(),
     article.productCategories.length
-      ? wellnessProducts(article.productCategories)
+      ? wellnessProducts(article.productCategories, article.slug)
       : Promise.resolve([]),
   ]);
   void db.wellnessArticle

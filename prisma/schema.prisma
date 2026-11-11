@@ -3583,6 +3583,8 @@ model WellnessProduct {
   /// Approved tracking link; null keeps the product hidden.
   affiliateUrl   String?
   category       String
+  /// WellnessArticle slugs that show this product first; others match by category.
+  articleSlugs   String[] @default([])
   disclosureText String   @default("GoDesi may earn a commission when you purchase through certain links. This does not increase your purchase price.")
   active         Boolean  @default(true)
   clicks         Int      @default(0)

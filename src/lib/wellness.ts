@@ -7,17 +7,20 @@ export const WELLNESS_EBOOK_PATH = "/natural-healing/ebook";
 export const HEALTH_DISCLAIMER =
   "This content is for educational purposes only and is not medical advice. It is not intended to diagnose, treat, cure or prevent any disease. Always consult a qualified healthcare professional before starting any new health practice, remedy or supplement — especially if you are pregnant, nursing, taking medication or managing a medical condition.";
 
+export const AMAZON_DISCLOSURE =
+  "As an Amazon Associate, GoDesi earns from qualifying purchases.";
+
 export const DEFAULT_DISCLOSURE =
   "GoDesi may earn a commission when you purchase through certain links. This does not increase your purchase price.";
 
 /** Product shelves the articles pick from; reusable across articles. */
 export const WELLNESS_CATEGORIES = [
   { slug: "copper-drinkware", label: "Copper drinkware", emoji: "🏺" },
-  { slug: "turmeric-ginger", label: "Turmeric & ginger", emoji: "🫚" },
+  { slug: "traditional-ingredients", label: "Traditional ingredients", emoji: "🫚" },
   { slug: "herbal-teas", label: "Herbal teas", emoji: "🍵" },
   { slug: "yoga-meditation", label: "Yoga & meditation", emoji: "🧘" },
-  { slug: "glass-storage", label: "Glass storage", emoji: "🫙" },
-  { slug: "home-comfort", label: "Home comfort", emoji: "🛋️" },
+  { slug: "natural-kitchen", label: "Natural kitchen", emoji: "🫙" },
+  { slug: "home-wellness", label: "Home wellness", emoji: "🛋️" },
 ] as const;
 
 export function categoryLabel(slug: string) {
@@ -31,6 +34,30 @@ export const liveProductWhere = {
   NOT: { affiliateUrl: "" },
 } as const;
 
+export function isAmazonUrl(url: string) {
+  try {
+    return /(^|\.)amazon\.[a-z.]+$|(^|\.)amzn\.to$/.test(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+/** Adds the GoDesi Associates tag to an amazon.* link that has none. */
+export function withAmazonTag(url: string, tag = process.env.AMAZON_ASSOCIATE_TAG?.trim()) {
+  if (!tag || !isAmazonUrl(url)) return url;
+  const parsed = new URL(url);
+  if (parsed.hostname.endsWith("amzn.to") || parsed.searchParams.get("tag")) return url;
+  parsed.searchParams.set("tag", tag);
+  return parsed.toString();
+}
+
+/** Amazon short links carry their tag inside; full links need ?tag=. */
+export function hasAmazonTag(url: string) {
+  if (!isAmazonUrl(url)) return false;
+  const parsed = new URL(url);
+  return parsed.hostname.endsWith("amzn.to") || Boolean(parsed.searchParams.get("tag"));
+}
+
 export function productClickPath(id: string) {
   return `/api/wellness/products/${id}/click`;
 }
@@ -43,6 +70,8 @@ const PRODUCT_SELECT = {
   description: true,
   category: true,
   disclosureText: true,
+  articleSlugs: true,
+  affiliateUrl: true,
 } as const;
 
 export type PublicProduct = {
@@ -53,21 +82,48 @@ export type PublicProduct = {
   description: string | null;
   category: string;
   disclosureText: string;
+  /** Amazon link, so the block adds the Associates disclosure. The URL itself never leaves the server. */
+  amazon: boolean;
 };
 
+/**
+ * Live products: all of them (categories null), or for an article the ones
+ * tagged with its slug — falling back to its categories when none are tagged.
+ */
 export const wellnessProducts = cachedQuery(
   "wellness-products",
   CONTENT_TTL,
-  async (categories: string[] | null): Promise<PublicProduct[]> =>
-    db.wellnessProduct.findMany({
+  async (categories: string[] | null, articleSlug?: string): Promise<PublicProduct[]> => {
+    const rows = await db.wellnessProduct.findMany({
       where: {
         ...liveProductWhere,
-        ...(categories ? { category: { in: categories } } : {}),
+        ...(categories
+          ? {
+              OR: [
+                ...(articleSlug ? [{ articleSlugs: { has: articleSlug } }] : []),
+                { category: { in: categories } },
+              ],
+            }
+          : {}),
       },
       orderBy: [{ clicks: "desc" }, { createdAt: "asc" }],
-      take: 12,
+      take: categories ? 30 : 12,
       select: PRODUCT_SELECT,
-    }),
+    });
+    const tagged = articleSlug ? rows.filter((row) => row.articleSlugs.includes(articleSlug)) : [];
+    return (tagged.length ? tagged : rows).slice(0, categories ? 6 : 12).map(
+      (row) => ({
+        id: row.id,
+        name: row.name,
+        imageUrl: row.imageUrl,
+        merchantName: row.merchantName,
+        description: row.description,
+        category: row.category,
+        disclosureText: row.disclosureText,
+        amazon: isAmazonUrl(row.affiliateUrl ?? ""),
+      }),
+    );
+  },
 );
 
 export type ArticleCard = {

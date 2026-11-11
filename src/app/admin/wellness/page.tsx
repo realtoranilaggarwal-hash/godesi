@@ -54,8 +54,14 @@ function ProductFields({ product }: { product?: Product }) {
       <Field label="Regular product URL" hint="Reference only — never shown publicly">
         <input name="regularUrl" defaultValue={product?.regularUrl ?? ""} className={inputClass} />
       </Field>
-      <Field label="Approved affiliate URL" hint="Blank keeps the product hidden from the site">
+      <Field
+        label="Approved affiliate URL"
+        hint="Blank keeps the product hidden. Plain amazon.com links get the GoDesi Associates tag added."
+      >
         <input name="affiliateUrl" defaultValue={product?.affiliateUrl ?? ""} className={inputClass} />
+      </Field>
+      <Field label="Show first on articles" hint="Article slugs, comma-separated. Blank = match by category.">
+        <input name="articleSlugs" defaultValue={product?.articleSlugs.join(", ") ?? ""} className={inputClass} />
       </Field>
       <Field label="Short description">
         <input name="description" maxLength={400} defaultValue={product?.description ?? ""} className={inputClass} />

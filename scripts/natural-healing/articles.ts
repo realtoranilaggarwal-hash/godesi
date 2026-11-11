@@ -31,7 +31,7 @@ export const ARTICLES: SeedArticle[] = [
       "Why Indian families store water in copper vessels overnight, what science actually knows about copper and drinking water, and how to use copper drinkware safely.",
     emoji: "🏺",
     featured: true,
-    productCategories: ["copper-drinkware", "glass-storage"],
+    productCategories: ["copper-drinkware", "natural-kitchen"],
     disclaimer:
       "Too much copper can be harmful. Do not store acidic drinks (lemon water, juice, buttermilk) in copper, and talk to your doctor before using copper vessels if you have Wilson disease or a liver condition.",
     body: `In many Indian homes, the day begins with a glass of water that has rested overnight in a copper lota, jug or bottle. This habit is called **tamra jal** — "copper water" — and it has been passed down for generations as part of daily routine and Ayurvedic tradition.
@@ -79,7 +79,7 @@ Tamra jal is a beautiful family tradition. Enjoy it in moderation with plain wat
     metaDescription:
       "From adrak chai to saunth, ginger is a desi kitchen staple. Here is what research says about ginger and nausea, plus who should be careful with it.",
     emoji: "🫚",
-    productCategories: ["turmeric-ginger", "herbal-teas"],
+    productCategories: ["traditional-ingredients", "herbal-teas"],
     disclaimer:
       "Ginger supplements may interact with blood thinners. Check with your doctor before taking ginger supplements if you are pregnant, take medication, or have gallstones or a bleeding disorder.",
     body: `Adrak in your chai, saunth (dry ginger) in a winter laddoo, a slice of fresh ginger with salt and lemon before a meal — ginger is everywhere in Indian cooking, and it is one of the best-studied kitchen herbs.
@@ -122,7 +122,7 @@ Ginger is a flavourful, well-loved spice with some research support for easing n
     metaDescription:
       "Honey with ginger or tulsi is a classic desi remedy for a sore throat. Learn what research says about honey and coughs, and why babies under one must never have it.",
     emoji: "🍯",
-    productCategories: ["herbal-teas", "glass-storage"],
+    productCategories: ["herbal-teas", "natural-kitchen"],
     disclaimer:
       "Never give honey to babies under 12 months — it can cause infant botulism. People with diabetes should count honey as sugar.",
     body: `A spoon of shahad with a pinch of haldi or a few drops of ginger juice is many desi families' first response to a scratchy throat. Honey also appears in Ayurveda, in prasad and in countless sweets.
@@ -208,7 +208,7 @@ Mint is refreshing and well-loved, and peppermint oil has some evidence for IBS 
     metaDescription:
       "Haldi doodh, haldi in every dal — turmeric is central to desi life. Here is what research actually shows about turmeric and curcumin, and supplement safety.",
     emoji: "🟡",
-    productCategories: ["turmeric-ginger", "glass-storage"],
+    productCategories: ["traditional-ingredients", "natural-kitchen"],
     disclaimer:
       "Turmeric and curcumin supplements have been linked to rare cases of liver injury and may interact with blood thinners and diabetes medicines. Ask your doctor before taking them.",
     body: `Haldi colours almost every desi kitchen. It goes into dal and sabzi, into haldi doodh at bedtime, and into the haldi ceremony before a wedding.
@@ -252,7 +252,7 @@ Turmeric is a wonderful spice to cook with. The research on supplements is still
     metaDescription:
       "Dal, sabzi, millets, isabgol — the traditional desi thali is full of fiber. Learn how fiber supports regular digestion and how to increase it comfortably.",
     emoji: "🌾",
-    productCategories: ["glass-storage"],
+    productCategories: ["natural-kitchen", "traditional-ingredients"],
     disclaimer:
       "Increase fiber slowly and drink enough water. Take isabgol (psyllium) at least 2 hours apart from medicines, and see a doctor for sudden changes in bowel habits.",
     body: `Our grandparents rarely talked about "fiber", but their meals were full of it: dal, rajma, chana, leafy sabzi, rotis made from whole wheat, bajra or jowar, and fruit after meals. Many families also keep a packet of **isabgol** (psyllium husk) in the cupboard.
@@ -299,7 +299,7 @@ The traditional desi thali already gives us a great fiber toolkit. Build up grad
     metaDescription:
       "A warm towel or garam paani ki bottle — sek is a desi home comfort for sore muscles and cramps. How to use heat safely and when to see a doctor.",
     emoji: "♨️",
-    productCategories: ["home-comfort"],
+    productCategories: ["home-wellness"],
     disclaimer:
       "Never apply heat to a fresh injury, an area with poor feeling, or broken skin. People with diabetes or circulation problems should ask their doctor before using heat.",
     body: `When someone in the family had a stiff back or stomach cramps, out came the garam paani ki bottle or a towel warmed on the tawa. This **sek** (warm compress) is one of the simplest home comforts there is.
@@ -347,7 +347,7 @@ A warm compress is a low-cost, comforting home habit for ordinary aches. Keep it
     metaDescription:
       "Jala neti is a yogic practice of rinsing the nose with salt water. Learn how saline rinsing is used today and the one safety rule you must never skip: safe water.",
     emoji: "💧",
-    productCategories: ["yoga-meditation"],
+    productCategories: ["home-wellness"],
     disclaimer:
       "Never use untreated tap water for nasal rinsing. Use distilled, sterile, or boiled-and-cooled water. Ask a doctor before rinsing if you have ear problems or recent nose surgery.",
     body: `**Jala neti** is one of the traditional cleansing practices (kriyas) of hatha yoga: lukewarm salt water is poured into one nostril and allowed to flow out of the other, often with a small pot called a neti pot.
@@ -394,7 +394,7 @@ Saline rinsing is an old yogic practice with modern everyday uses. It is simple 
     metaDescription:
       "Shatapawali — a hundred steps after eating — is an old Indian habit. Here is how light walking after meals fits into an active lifestyle, and how to do it safely.",
     emoji: "🚶",
-    productCategories: ["home-comfort"],
+    productCategories: ["home-wellness"],
     disclaimer:
       "If you have heart disease, diabetes, joint problems or are new to exercise, ask your doctor what activity level is right for you.",
     body: `"Khana khake sau kadam" — walk a hundred steps after eating. In Ayurveda this is called **shatapawali**, and in many desi neighbourhoods you can still see families out for their after-dinner stroll.
@@ -433,7 +433,7 @@ Shatapawali is an easy, free tradition that fits right into modern activity advi
     metaDescription:
       "Pranayama — yogic breathing like anulom vilom — is part of India's yoga heritage. What research says about breathing and relaxation, and how to begin safely.",
     emoji: "🧘",
-    productCategories: ["yoga-meditation", "home-comfort"],
+    productCategories: ["yoga-meditation", "home-wellness"],
     disclaimer:
       "Stop if you feel dizzy or lightheaded. People who are pregnant or have heart disease, high blood pressure, asthma or other lung conditions should ask a doctor before forceful breathing practices like kapalbhati or bhastrika.",
     body: `**Pranayama** — control of the breath — is one of the eight limbs of yoga described in the Yoga Sutras. Many families learned anulom vilom or bhramari from a grandparent, a teacher or a morning yoga programme on TV.
@@ -510,38 +510,64 @@ Create a free GoDesi account or log in, then download the PDF. You can re-downlo
 export type SeedProduct = {
   slug: string;
   name: string;
-  merchantName: string;
   category: string;
   description: string;
-  regularUrl?: string;
+  /** Amazon search the product links to; the seed adds AMAZON_ASSOCIATE_TAG. */
+  amazonQuery: string;
+  /** Articles that show this product first (otherwise articles match by category). */
+  articleSlugs: string[];
+};
+
+const A = {
+  copper: "copper-water-tradition-tamra-jal",
+  ginger: "ginger-adrak-traditional-uses",
+  honey: "honey-shahad-traditional-uses",
+  peppermint: "peppermint-pudina-digestion",
+  turmeric: "turmeric-haldi-traditional-uses",
+  fiber: "fiber-isabgol-whole-grains",
+  compress: "warm-compress-sek-home-comfort",
+  saline: "saline-nasal-rinsing-jala-neti",
+  walking: "walking-after-meals-shatapawali",
+  pranayama: "pranayama-yogic-breathing",
 };
 
 /**
- * Placeholder shelf: every row starts with affiliateUrl null, so nothing shows
- * publicly until an approved tracking link is entered in /admin/wellness or via
- * the WELLNESS_AFFILIATE_<SLUG> env var when seeding.
+ * The launch shelf — every product is an Amazon Associates link for GoDesi.
+ * No prices: Amazon shows the current price on its own page.
  */
 export const PRODUCTS: SeedProduct[] = [
-  {
-    slug: "house-of-ayurveda-copper-water-bottle",
-    name: "House of Ayurveda Copper Water Bottle",
-    merchantName: "House of Ayurveda",
-    category: "copper-drinkware",
-    description: "Pure copper bottle for the traditional tamra jal habit. Plain water only.",
-    regularUrl:
-      process.env.WELLNESS_HOA_COPPER_URL ??
-      "https://www.amazon.com/s?k=House+of+Ayurveda+copper+water+bottle",
-  },
-  { slug: "copper-jug-and-glass-set", name: "Copper Jug & Glass Set", merchantName: "Copper drinkware partner", category: "copper-drinkware", description: "Bedside copper jug with tumblers for overnight water." },
-  { slug: "organic-turmeric-powder", name: "Organic Turmeric (Haldi) Powder", merchantName: "Spice partner", category: "turmeric-ginger", description: "Lab-tested haldi for everyday cooking and haldi doodh." },
-  { slug: "dry-ginger-saunth-powder", name: "Dry Ginger (Saunth) Powder", merchantName: "Spice partner", category: "turmeric-ginger", description: "For adrak chai, laddoos and winter cooking." },
-  { slug: "tulsi-ginger-herbal-tea", name: "Tulsi Ginger Herbal Tea", merchantName: "Tea partner", category: "herbal-teas", description: "Caffeine-free tulsi and ginger infusion." },
-  { slug: "peppermint-herbal-tea", name: "Peppermint Herbal Tea", merchantName: "Tea partner", category: "herbal-teas", description: "A cup of pudina after dinner." },
-  { slug: "yoga-mat", name: "Non-slip Yoga Mat", merchantName: "Yoga partner", category: "yoga-meditation", description: "Cushioned mat for asana and pranayama practice." },
-  { slug: "meditation-cushion", name: "Meditation Cushion (Zafu)", merchantName: "Yoga partner", category: "yoga-meditation", description: "Comfortable seat for pranayama and meditation." },
-  { slug: "ceramic-neti-pot", name: "Ceramic Neti Pot", merchantName: "Yoga partner", category: "yoga-meditation", description: "For jala neti — use only distilled or boiled-and-cooled water." },
-  { slug: "glass-spice-jars", name: "Glass Spice Jar Set", merchantName: "Kitchen partner", category: "glass-storage", description: "Airtight glass jars for haldi, saunth and masalas." },
-  { slug: "glass-water-bottle", name: "Glass Water Bottle", merchantName: "Kitchen partner", category: "glass-storage", description: "For lemon water and other acidic drinks — never copper." },
-  { slug: "hot-water-bottle", name: "Hot Water Bottle with Cover", merchantName: "Home comfort partner", category: "home-comfort", description: "Garam paani ki bottle for a classic warm compress." },
-  { slug: "microwavable-heat-pack", name: "Microwavable Heat Pack", merchantName: "Home comfort partner", category: "home-comfort", description: "Reusable warm compress for sore shoulders and back." },
+  { slug: "copper-water-bottle", name: "Copper Water Bottle", category: "copper-drinkware", amazonQuery: "pure copper water bottle", description: "For the traditional tamra jal habit — plain water only.", articleSlugs: [A.copper] },
+  { slug: "copper-tumblers", name: "Copper Tumblers", category: "copper-drinkware", amazonQuery: "pure copper tumbler set", description: "Hammered copper glasses for your morning water.", articleSlugs: [A.copper] },
+  { slug: "copper-carafe", name: "Copper Carafe with Glass", category: "copper-drinkware", amazonQuery: "copper carafe bedside with tumbler", description: "Bedside jug for water kept overnight, the traditional way.", articleSlugs: [A.copper] },
+  { slug: "organic-turmeric-powder", name: "Organic Turmeric (Haldi) Powder", category: "traditional-ingredients", amazonQuery: "organic turmeric powder", description: "Everyday haldi for dal, sabzi and haldi doodh.", articleSlugs: [A.turmeric] },
+  { slug: "dry-ginger-powder", name: "Dry Ginger (Saunth) Powder", category: "traditional-ingredients", amazonQuery: "organic dry ginger powder", description: "For adrak chai, laddoos and winter cooking.", articleSlugs: [A.ginger] },
+  { slug: "culinary-herbs-spices", name: "Whole Spices & Culinary Herbs", category: "traditional-ingredients", amazonQuery: "indian whole spices set", description: "Jeera, ajwain, saunf and more for everyday desi cooking.", articleSlugs: [A.turmeric, A.fiber] },
+  { slug: "ginger-herbal-tea", name: "Ginger Herbal Tea", category: "herbal-teas", amazonQuery: "ginger herbal tea bags caffeine free", description: "A warming, caffeine-free cup.", articleSlugs: [A.ginger] },
+  { slug: "peppermint-herbal-tea", name: "Peppermint Herbal Tea", category: "herbal-teas", amazonQuery: "peppermint herbal tea caffeine free", description: "A cup of pudina after dinner.", articleSlugs: [A.peppermint] },
+  { slug: "tea-infuser", name: "Stainless Steel Tea Infuser", category: "herbal-teas", amazonQuery: "stainless steel loose leaf tea infuser", description: "Steep fresh adrak, pudina or tulsi leaves.", articleSlugs: [A.ginger, A.peppermint, A.honey] },
+  { slug: "glass-tea-set", name: "Glass Teapot Set", category: "herbal-teas", amazonQuery: "glass teapot set with infuser and cups", description: "For sharing herbal tea — add honey once it cools a little.", articleSlugs: [A.honey, A.peppermint] },
+  { slug: "yoga-mat", name: "Non-slip Yoga Mat", category: "yoga-meditation", amazonQuery: "non slip yoga mat", description: "Cushioned mat for asana and pranayama practice.", articleSlugs: [A.pranayama] },
+  { slug: "meditation-cushion", name: "Meditation Cushion (Zafu)", category: "yoga-meditation", amazonQuery: "meditation cushion zafu", description: "A comfortable, upright seat for breathing practice.", articleSlugs: [A.pranayama] },
+  { slug: "yoga-beginner-accessories", name: "Beginner Yoga Blocks & Strap", category: "yoga-meditation", amazonQuery: "yoga blocks and strap set beginner", description: "Support for beginners and stiff joints.", articleSlugs: [A.pranayama] },
+  { slug: "glass-storage-containers", name: "Glass Food Storage Containers", category: "natural-kitchen", amazonQuery: "glass food storage containers with lids", description: "For soaked dals, whole grains and leftovers.", articleSlugs: [A.fiber, A.turmeric] },
+  { slug: "masala-dabba-spice-box", name: "Masala Dabba Spice Box", category: "natural-kitchen", amazonQuery: "masala dabba stainless steel spice box", description: "The classic round tin that keeps haldi, jeera and rai at hand.", articleSlugs: [A.turmeric, A.ginger, A.fiber] },
+  { slug: "glass-water-bottle", name: "Glass Water Bottle", category: "natural-kitchen", amazonQuery: "glass water bottle with silicone sleeve", description: "For lemon water and other acidic drinks — never copper.", articleSlugs: [A.copper] },
+  { slug: "reusable-food-wraps", name: "Reusable Food Wraps & Produce Bags", category: "natural-kitchen", amazonQuery: "reusable beeswax food wraps", description: "Cut down on plastic in the kitchen.", articleSlugs: [A.fiber, A.honey] },
+  { slug: "hot-water-bottle", name: "Hot Water Bottle with Cover", category: "home-wellness", amazonQuery: "hot water bottle with knitted cover", description: "Garam paani ki bottle for a classic warm compress.", articleSlugs: [A.compress] },
+  { slug: "heating-pad", name: "Heating Pad with Auto Shut-off", category: "home-wellness", amazonQuery: "electric heating pad auto shut off", description: "Pick one with auto shut-off and never sleep on it.", articleSlugs: [A.compress] },
+  { slug: "sleep-mask", name: "Contoured Sleep Mask", category: "home-wellness", amazonQuery: "contoured sleep mask", description: "Darkness for a calmer wind-down.", articleSlugs: [A.pranayama, A.compress] },
+  { slug: "saline-nasal-rinse-kit", name: "Saline Nasal Rinse Kit", category: "home-wellness", amazonQuery: "saline nasal rinse kit", description: "Use only distilled, sterile or boiled-and-cooled water.", articleSlugs: [A.saline] },
+  { slug: "fitness-tracker", name: "Fitness Tracker / Step Counter", category: "home-wellness", amazonQuery: "fitness tracker step counter", description: "Count your shatapawali steps after meals.", articleSlugs: [A.walking] },
+  { slug: "walking-shoes", name: "Comfortable Walking Shoes", category: "home-wellness", amazonQuery: "comfortable walking shoes", description: "Cushioned shoes for the after-dinner stroll.", articleSlugs: [A.walking] },
+];
+
+/** Earlier placeholder rows, removed by the seed while they have no clicks. */
+export const RETIRED_PRODUCT_SLUGS = [
+  "house-of-ayurveda-copper-water-bottle",
+  "copper-jug-and-glass-set",
+  "tulsi-ginger-herbal-tea",
+  "ceramic-neti-pot",
+  "glass-spice-jars",
+  "microwavable-heat-pack",
+  "dry-ginger-saunth-powder",
 ];

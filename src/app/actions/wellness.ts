@@ -6,7 +6,13 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
-import { DEFAULT_DISCLOSURE, WELLNESS_CATEGORIES } from "@/lib/wellness";
+import {
+  DEFAULT_DISCLOSURE,
+  WELLNESS_CATEGORIES,
+  hasAmazonTag,
+  isAmazonUrl,
+  withAmazonTag,
+} from "@/lib/wellness";
 
 async function requireAdmin() {
   const user = await requireUser();
@@ -32,7 +38,17 @@ const productSchema = z.object({
     .trim()
     .max(2000)
     .refine((value) => !value || /^https:\/\//.test(value), "Affiliate link must start with https://")
-    .transform((value) => value || null),
+    .transform((value) => (value ? withAmazonTag(value) : null))
+    .refine(
+      (value) => !value || !isAmazonUrl(value) || hasAmazonTag(value),
+      "Amazon link has no Associates tag — paste the tagged link from SiteStripe or set AMAZON_ASSOCIATE_TAG",
+    ),
+  articleSlugs: z
+    .string()
+    .max(2000)
+    .transform((value) =>
+      Array.from(new Set(value.split(/[\s,]+/).map((slug) => slug.trim()).filter(Boolean))),
+    ),
   category: z.enum(WELLNESS_CATEGORIES.map((c) => c.slug) as [string, ...string[]]),
   disclosureText: z.string().trim().max(300).transform((value) => value || DEFAULT_DISCLOSURE),
   active: z.boolean(),
@@ -84,6 +100,7 @@ export async function saveWellnessProductAction(formData: FormData) {
     imageUrl: formData.get("imageUrl") ?? "",
     regularUrl: formData.get("regularUrl") ?? "",
     affiliateUrl: formData.get("affiliateUrl") ?? "",
+    articleSlugs: formData.get("articleSlugs") ?? "",
     category: formData.get("category") ?? "",
     disclosureText: formData.get("disclosureText") ?? "",
     active: formData.get("active") === "on",
@@ -93,6 +110,7 @@ export async function saveWellnessProductAction(formData: FormData) {
   const data = { ...parsed.data, slug: await uniqueSlug("product", parsed.data.name, id) };
   if (id) await db.wellnessProduct.update({ where: { id }, data });
   else await db.wellnessProduct.create({ data });
+  revalidateTag("wellness-article");
   done(id ? "Product saved." : "Product added.");
 }
 

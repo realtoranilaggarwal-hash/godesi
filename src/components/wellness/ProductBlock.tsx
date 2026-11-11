@@ -1,4 +1,4 @@
-import { DEFAULT_DISCLOSURE, categoryLabel, productClickPath, type PublicProduct } from "@/lib/wellness";
+import { AMAZON_DISCLOSURE, DEFAULT_DISCLOSURE, categoryLabel, productClickPath, type PublicProduct } from "@/lib/wellness";
 
 /**
  * Recommended products with the FTC disclosure above them. Only products with
@@ -16,7 +16,11 @@ export function ProductBlock({
 }) {
   if (!products.length) return null;
   const disclosures = Array.from(
-    new Set(products.map((product) => product.disclosureText || DEFAULT_DISCLOSURE)),
+    new Set([
+      ...(products.some((product) => product.amazon) ? [AMAZON_DISCLOSURE] : []),
+      DEFAULT_DISCLOSURE,
+      ...products.map((product) => product.disclosureText || DEFAULT_DISCLOSURE),
+    ]),
   );
   return (
     <section className={`rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 ${className}`}>
