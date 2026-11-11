@@ -20,7 +20,11 @@ export function WhatsAppButton({
         void fetch("/api/track", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ slug, type: "WHATSAPP_CLICK" }),
+          body: JSON.stringify({
+            slug,
+            type: "WHATSAPP_CLICK",
+            path: window.location.pathname,
+          }),
           keepalive: true,
         }).catch(() => undefined);
       }}

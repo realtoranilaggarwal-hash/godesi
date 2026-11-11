@@ -108,6 +108,8 @@ export default async function DashboardPage({
       }),
     ]);
 
+  const pageStats = business ? await businessPageStats(business.id) : null;
+
   const reviewCount = business?.reviews.length ?? 0;
   const rating = reviewCount
     ? business!.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
@@ -373,6 +375,10 @@ export default async function DashboardPage({
         ) : null}
 
         {business ? (
+          <>
+            {pageStats ? (
+              <PageStatsCard stats={pageStats} slug={business.slug} />
+            ) : null}
           <div className="grid gap-5 lg:grid-cols-3">
             <Card className="lg:col-span-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -488,6 +494,7 @@ export default async function DashboardPage({
               />
             </Card>
           </div>
+          </>
         ) : (
           <Card>
             <EmptyState
@@ -612,5 +619,204 @@ export default async function DashboardPage({
 
       <SidebarBanners />
     </div>
+  );
+}
+
+const STATS_DAYS = 30;
+const STATS_ZONE = "America/New_York";
+const DAY_KEY = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: STATS_ZONE,
+});
+const DAY_LABEL = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+type PageStats = Awaited<ReturnType<typeof businessPageStats>>;
+
+/** Last 30 days of a business's card events, grouped by day, type and referrer. */
+async function businessPageStats(businessId: string) {
+  const now = new Date();
+  const since = new Date(now.getTime() - STATS_DAYS * 24 * 60 * 60 * 1000);
+  const events = await db.analyticsEvent.findMany({
+    where: { businessId, createdAt: { gte: since } },
+    select: { type: true, referrer: true, createdAt: true },
+  });
+
+  const days: { key: string; views: number }[] = [];
+  for (let i = STATS_DAYS - 1; i >= 0; i--) {
+    const key = DAY_KEY.format(
+      new Date(now.getTime() - i * 24 * 60 * 60 * 1000),
+    );
+    if (days[days.length - 1]?.key !== key) days.push({ key, views: 0 });
+  }
+  const byDay = new Map(days.map((d) => [d.key, d]));
+  const todayKey = DAY_KEY.format(now);
+
+  const totals = { PROFILE_VIEW: 0, QR_SCAN: 0, WHATSAPP_CLICK: 0 };
+  const referrers = new Map<string, number>();
+  let viewsToday = 0;
+
+  for (const event of events) {
+    totals[event.type] += 1;
+    if (event.type !== "PROFILE_VIEW") continue;
+    const key = DAY_KEY.format(event.createdAt);
+    const day = byDay.get(key);
+    if (day) day.views += 1;
+    if (key === todayKey) viewsToday += 1;
+    const source = event.referrer ?? "unknown";
+    referrers.set(source, (referrers.get(source) ?? 0) + 1);
+  }
+
+  return {
+    views: totals.PROFILE_VIEW,
+    qrScans: totals.QR_SCAN,
+    whatsappClicks: totals.WHATSAPP_CLICK,
+    viewsToday,
+    days,
+    topReferrers: Array.from(referrers.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6),
+  };
+}
+
+function referrerLabel(host: string) {
+  if (host === "direct") return "Direct / typed link";
+  if (host === "unknown") return "Not recorded (older visits)";
+  if (host === "godesi.com") return "Inside GoDesi";
+  return host;
+}
+
+function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
+  const empty = !stats.views && !stats.qrScans && !stats.whatsappClicks;
+  const peak = Math.max(1, ...stats.days.map((d) => d.views));
+  const webViews = Math.max(0, stats.views - stats.qrScans);
+  const ctr = stats.views
+    ? `${((stats.whatsappClicks / stats.views) * 100).toFixed(1)}%`
+    : "—";
+  const dayLabel = (key: string) =>
+    DAY_LABEL.format(new Date(`${key}T00:00:00Z`));
+
+  const tiles = [
+    { label: "Profile views (30 days)", value: stats.views },
+    { label: "QR scans", value: stats.qrScans },
+    { label: "WhatsApp clicks", value: stats.whatsappClicks },
+    { label: "Views today", value: stats.viewsToday },
+  ];
+
+  return (
+    <Card>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-lg font-bold">📊 Your page stats</h2>
+        <p className="text-xs text-slate-500">Last 30 days</p>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {tiles.map((t) => (
+          <div key={t.label} className="min-w-0 rounded-xl bg-slate-50 p-3">
+            <p className="text-2xl font-bold text-slate-900">
+              {t.value.toLocaleString("en-US")}
+            </p>
+            <p className="text-xs text-slate-600">{t.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {empty ? (
+        <p className="mt-4 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
+          No views yet — share your page or QR code.{" "}
+          <Link href={`/business/${slug}`} className="font-semibold underline">
+            Open my page
+          </Link>
+        </p>
+      ) : (
+        <>
+          <div className="mt-4">
+            <p className="text-sm font-semibold text-slate-800">
+              Profile views, day by day
+            </p>
+            <div
+              className="mt-2 flex h-32 items-end gap-0.5 sm:gap-1"
+              role="img"
+              aria-label="Bar chart of daily profile views for the last 30 days"
+            >
+              {stats.days.map((d) => (
+                <div
+                  key={d.key}
+                  className="flex-1 rounded-t bg-indigo-500/80 transition hover:bg-indigo-600"
+                  style={{ height: `${Math.max(2, (d.views / peak) * 100)}%` }}
+                  title={`${dayLabel(d.key)}: ${d.views.toLocaleString("en-US")} views`}
+                />
+              ))}
+            </div>
+            <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+              <span>{dayLabel(stats.days[0].key)}</span>
+              <span>peak {peak.toLocaleString("en-US")} a day</span>
+              <span>{dayLabel(stats.days[stats.days.length - 1].key)}</span>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-800">
+                Where visitors came from
+              </p>
+              <ul className="mt-2 space-y-1 text-sm">
+                <li className="flex justify-between gap-2">
+                  <span>📷 QR code scans</span>
+                  <span className="font-semibold">
+                    {stats.qrScans.toLocaleString("en-US")}
+                  </span>
+                </li>
+                <li className="flex justify-between gap-2">
+                  <span>🌐 Web views</span>
+                  <span className="font-semibold">
+                    {webViews.toLocaleString("en-US")}
+                  </span>
+                </li>
+              </ul>
+              {stats.topReferrers.length ? (
+                <ul className="mt-2 space-y-1 border-t border-slate-100 pt-2 text-sm">
+                  {stats.topReferrers.map(([host, count]) => (
+                    <li key={host} className="flex justify-between gap-2">
+                      <span className="min-w-0 truncate text-slate-600">
+                        {referrerLabel(host)}
+                      </span>
+                      <span className="font-semibold">
+                        {count.toLocaleString("en-US")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-800">
+                What they did
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <div className="min-w-0 flex-1 rounded-xl bg-emerald-50 p-3">
+                  <p className="text-xl font-bold text-emerald-900">
+                    {stats.whatsappClicks.toLocaleString("en-US")}
+                  </p>
+                  <p className="text-xs text-emerald-800">WhatsApp clicks</p>
+                </div>
+                <div className="min-w-0 flex-1 rounded-xl bg-emerald-50 p-3">
+                  <p className="text-xl font-bold text-emerald-900">{ctr}</p>
+                  <p className="text-xs text-emerald-800">
+                    Click-through (clicks ÷ views)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </Card>
   );
 }
