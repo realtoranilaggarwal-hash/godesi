@@ -108,7 +108,9 @@ export default async function VenuePage({
     <div className="space-y-6">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
       />
       <Card className="border-violet-200 bg-gradient-to-br from-violet-50 via-white to-sky-50">
         <Link

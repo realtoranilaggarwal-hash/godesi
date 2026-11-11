@@ -460,7 +460,9 @@ export default async function EventPage({
       <div className="min-w-0 flex-1 space-y-6">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          }}
         />
         {searchParams.error === "cancelled" ? (
           <Alert>Payment cancelled — your seats were not booked.</Alert>
