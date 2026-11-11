@@ -638,10 +638,10 @@ const DAY_LABEL = new Intl.DateTimeFormat("en-US", {
 
 type PageStats = Awaited<ReturnType<typeof businessPageStats>>;
 
-/** Last 30 days of a business's card events, grouped by day, type and referrer. */
+/** The last 30 New York calendar days (today included) of a business's card events, grouped by day, type and referrer. */
 async function businessPageStats(businessId: string) {
   const now = new Date();
-  const since = new Date(now.getTime() - STATS_DAYS * 24 * 60 * 60 * 1000);
+  const since = new Date(now.getTime() - (STATS_DAYS + 1) * 24 * 60 * 60 * 1000);
   const events = await db.analyticsEvent.findMany({
     where: { businessId, createdAt: { gte: since } },
     select: { type: true, referrer: true, createdAt: true },
@@ -662,11 +662,12 @@ async function businessPageStats(businessId: string) {
   let viewsToday = 0;
 
   for (const event of events) {
-    totals[event.type] += 1;
-    if (event.type !== "PROFILE_VIEW") continue;
     const key = DAY_KEY.format(event.createdAt);
     const day = byDay.get(key);
-    if (day) day.views += 1;
+    if (!day) continue;
+    totals[event.type] += 1;
+    if (event.type !== "PROFILE_VIEW") continue;
+    day.views += 1;
     if (key === todayKey) viewsToday += 1;
     const source = event.referrer ?? "unknown";
     referrers.set(source, (referrers.get(source) ?? 0) + 1);
