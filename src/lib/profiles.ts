@@ -26,6 +26,7 @@ export const RESERVED_USERNAMES = new Set([
   "leads",
   "listings",
   "login",
+  "natural-healing",
   "logout",
   "me",
   "news",

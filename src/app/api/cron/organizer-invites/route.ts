@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendOrganizerInvites } from "@/lib/organizerInvites";
+import { sendWellnessSponsorOutreach } from "@/lib/wellnessSponsorOutreach";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -16,7 +17,12 @@ async function run(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    return NextResponse.json({ ok: true, ...(await sendOrganizerInvites()) });
+    const invites = await sendOrganizerInvites();
+    const wellnessSponsors = await sendWellnessSponsorOutreach().catch((error) => ({
+      sent: 0,
+      error: error instanceof Error ? error.message : "failed",
+    }));
+    return NextResponse.json({ ok: true, ...invites, wellnessSponsors });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "failed" },

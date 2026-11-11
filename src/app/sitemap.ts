@@ -27,7 +27,7 @@ const SITEMAP_TTL = 3600;
 
 /** Dates are stringified by the cache, so the rows carry ISO timestamps. */
 const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
-  const [businesses, categories, events, reports, posts, worship, clubs] =
+  const [businesses, categories, events, reports, posts, worship, clubs, wellnessArticles] =
     await Promise.all([
       // A card or event with nothing on it but a name is left out: submitting
       // thin pages is what the publisher policies count against the whole domain.
@@ -84,6 +84,10 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       }),
       db.club.findMany({
         where: { visibility: "PUBLIC" },
+        select: { slug: true, updatedAt: true },
+      }),
+      db.wellnessArticle.findMany({
+        where: { active: true, publishedAt: { lte: new Date() } },
         select: { slug: true, updatedAt: true },
       }),
     ]);
@@ -159,13 +163,17 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       id: row.id,
       updatedAt: (row.editedAt ?? row.createdAt).toISOString(),
     })),
+    wellness: wellnessArticles.map((row) => ({
+      slug: row.slug,
+      updatedAt: row.updatedAt.toISOString(),
+    })),
   };
 });
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const [
-    { businesses, categories, events, reports, posts, worship, clubs, chats },
+    { businesses, categories, events, reports, posts, worship, clubs, chats, wellness },
     cities,
     professionals,
   ] = await Promise.all([
@@ -230,6 +238,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/deals`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/shop`, changeFrequency: "weekly", priority: 0.6 },
     { url: `${base}/blog`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${base}/natural-healing`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/natural-healing/ebook`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/guide`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/desi-elite`, changeFrequency: "daily", priority: 0.8 },
     {
@@ -360,6 +370,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${base}/complaints/${guide.slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    ...wellness.map((article) => ({
+      url: `${base}/natural-healing/${article.slug}`,
+      lastModified: new Date(article.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
     ...posts.map((post) => ({
       url: `${base}/blog/${post.slug}`,
