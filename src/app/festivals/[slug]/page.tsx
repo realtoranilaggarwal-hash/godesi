@@ -304,7 +304,7 @@ export default async function FestivalPage({
           </div>
         </Card>
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:festivals" />
     </div>
   );
 }

@@ -140,7 +140,7 @@ export default function FestivalsPage() {
           </Card>
         ))}
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:festivals" />
     </div>
   );
 }

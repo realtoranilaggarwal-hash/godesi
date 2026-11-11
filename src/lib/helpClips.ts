@@ -37,6 +37,7 @@ export function clipThumbnail(url: string): string | null {
 export async function helpClipFor(
   categorySlug?: string | null,
   parentSlug?: string | null,
+  { sitewide = true }: { sitewide?: boolean } = {},
 ): Promise<HelpClipCard | null> {
   const scopes = [categorySlug, parentSlug].filter(
     (slug): slug is string => Boolean(slug),
@@ -45,7 +46,10 @@ export async function helpClipFor(
   const clips = await db.helpClip.findMany({
     where: {
       active: true,
-      OR: [{ categorySlug: null }, { categorySlug: { in: scopes } }],
+      OR: [
+        ...(sitewide ? [{ categorySlug: null }] : []),
+        { categorySlug: { in: scopes } },
+      ],
     },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     select: { id: true, title: true, note: true, url: true, categorySlug: true },
@@ -55,7 +59,8 @@ export async function helpClipFor(
   const best =
     scopes
       .map((slug) => clips.find((clip) => clip.categorySlug === slug))
-      .find(Boolean) ?? clips.find((clip) => clip.categorySlug === null);
+      .find(Boolean) ??
+    (sitewide ? clips.find((clip) => clip.categorySlug === null) : undefined);
   if (!best) return null;
 
   return {

@@ -10,6 +10,7 @@ import {
 } from "@/lib/professionalsQueries";
 import { ELITE_CATEGORIES, ELITE_ORDER, eliteWhere } from "@/lib/elite";
 import { WHOS_WHO_YOUTUBE } from "@/lib/media";
+import { HelpClipCard } from "@/components/HelpClipCard";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -46,63 +47,70 @@ export default async function EliteDirectoryPage({
 
   return (
     <div className="space-y-6">
-      <Card className="border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50">
-        <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
-          <Link href="/media" className="hover:underline">
-            GoDesi Media
-          </Link>{" "}
-          · Desi Who&apos;s Who
-        </p>
-        <h1 className="text-2xl font-black sm:text-3xl">🏆 GoDesi Elite</h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-700">
-          Recognition for desi entrepreneurs, professionals and community
-          leaders worldwide. Apply or nominate someone — our team reviews the
-          entry, interviews them for{" "}
-          <a
-            href={WHOS_WHO_YOUTUBE}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-bold underline"
-          >
-            Desi Who&apos;s Who
-          </a>{" "}
-          and publishes a profile with video. Some profiles are written by us
-          from public record and marked <b>unclaimed</b> until the person takes
-          theirs over. Not ready for that? Completing your profile lists you
-          free in{" "}
-          <Link href="/professionals" className="font-bold underline">
-            GoDesi Professionals
-          </Link>{" "}
-          straight away.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <LinkButton href="/desi-elite/apply">Apply now</LinkButton>
-          <LinkButton
-            href="/desi-elite/apply?nominate=other"
-            className="bg-white text-slate-900 ring-1 ring-slate-300"
-          >
-            Nominate someone
-          </LinkButton>
-          <LinkButton
-            href="/desi-elite/awards"
-            className="bg-white text-slate-900 ring-1 ring-slate-300"
-          >
-            🏆 Elite Awards
-          </LinkButton>
-          <LinkButton
-            href="/media"
-            className="bg-white text-slate-900 ring-1 ring-slate-300"
-          >
-            🎙️ GoDesi Media
-          </LinkButton>
-          <Link
-            href="/desi-elite/rss"
-            className="self-center text-sm font-semibold text-slate-500 hover:underline"
-          >
-            RSS
-          </Link>
-        </div>
-      </Card>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <Card className="min-w-0 flex-1 border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50">
+          <p className="text-xs font-bold uppercase tracking-wide text-amber-700">
+            <Link href="/media" className="hover:underline">
+              GoDesi Media
+            </Link>{" "}
+            · Desi Who&apos;s Who
+          </p>
+          <h1 className="text-2xl font-black sm:text-3xl">🏆 GoDesi Elite</h1>
+          <p className="mt-2 max-w-3xl text-sm text-slate-700">
+            Recognition for desi entrepreneurs, professionals and community
+            leaders worldwide. Apply or nominate someone — our team reviews the
+            entry, interviews them for{" "}
+            <a
+              href={WHOS_WHO_YOUTUBE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold underline"
+            >
+              Desi Who&apos;s Who
+            </a>{" "}
+            and publishes a profile with video. Some profiles are written by us
+            from public record and marked <b>unclaimed</b> until the person
+            takes theirs over. Not ready for that? Completing your profile lists
+            you free in{" "}
+            <Link href="/professionals" className="font-bold underline">
+              GoDesi Professionals
+            </Link>{" "}
+            straight away.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <LinkButton href="/desi-elite/apply">Apply now</LinkButton>
+            <LinkButton
+              href="/desi-elite/apply?nominate=other"
+              className="bg-white text-slate-900 ring-1 ring-slate-300"
+            >
+              Nominate someone
+            </LinkButton>
+            <LinkButton
+              href="/desi-elite/awards"
+              className="bg-white text-slate-900 ring-1 ring-slate-300"
+            >
+              🏆 Elite Awards
+            </LinkButton>
+            <LinkButton
+              href="/media"
+              className="bg-white text-slate-900 ring-1 ring-slate-300"
+            >
+              🎙️ GoDesi Media
+            </LinkButton>
+            <Link
+              href="/desi-elite/rss"
+              className="self-center text-sm font-semibold text-slate-500 hover:underline"
+            >
+              RSS
+            </Link>
+          </div>
+        </Card>
+        <HelpClipCard
+          categorySlug="section:elite"
+          sitewide={false}
+          className="w-full shrink-0 sm:w-[240px]"
+        />
+      </div>
 
       <form className="grid gap-2 sm:grid-cols-5" action="/desi-elite">
         <input
