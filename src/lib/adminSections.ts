@@ -95,6 +95,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     need: "staff",
   },
   { href: "/admin/help-clips", label: "Help clips", icon: "▶️", need: "admin" },
+  { href: "/admin/wellness", label: "Wellness", icon: "🌿", need: "admin" },
   { href: "/admin/outreach", label: "Outreach", icon: "📣", need: "staff" },
   { href: "/admin/prospects", label: "Call list", icon: "☎️", need: "staff" },
   {

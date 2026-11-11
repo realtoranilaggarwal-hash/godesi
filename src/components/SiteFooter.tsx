@@ -31,6 +31,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/news", label: "News" },
         { href: "/bollywood", label: "Bollywood news" },
         { href: "/blog", label: "Blog" },
+        { href: "/natural-healing", label: "🌿 Natural Healing" },
         { href: "/guide", label: "City guides" },
         { href: "/find", label: "Search everything" },
       ],

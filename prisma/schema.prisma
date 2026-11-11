@@ -251,6 +251,8 @@ model User {
   morningOptOutAt DateTime?
   /// GoDesi day (YYYY-MM-DD, New York) of the last morning email, so a retry never double-sends.
   morningSentDay  String?
+  /// When the Natural Healing ebook launch email went out to this member, so it is sent once.
+  wellnessLaunchSentAt DateTime?
 
   /// 1..1000 for the first thousand members — powers the 🏅 Founding member
   /// badge and their double reward points. Null once the spots are gone.
@@ -420,6 +422,7 @@ model User {
   resourceOrders ResourceOrder[]
 
   blogPosts         BlogPost[]
+  ebookDownloads    EbookDownload[]
   newsVotes         NewsVote[]
   pollVotes         PollVote[]
   predictionPicks   PredictionPick[]
@@ -2944,6 +2947,8 @@ model Prospect {
   listedSlug String?
   /// Last "post your events free" invite we mailed them — at most one ever.
   invitedAt  DateTime?
+  /// When we pitched sponsoring the Natural Healing & Wellness section — at most once.
+  wellnessPitchedAt DateTime?
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
@@ -3561,4 +3566,86 @@ model SiteVote {
 
   @@unique([siteKey, voterHash])
   @@index([siteKey])
+}
+
+/// A product recommended in the Natural Healing & Wellness section. It is only
+/// ever shown publicly once an approved affiliate tracking link is set — no
+/// free promotion. Articles pick products by category, never by URL.
+model WellnessProduct {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  imageUrl       String?
+  merchantName   String
+  description    String?
+  /// The merchant's plain product page, for reference only — never linked publicly.
+  regularUrl     String?
+  /// Approved tracking link; null keeps the product hidden.
+  affiliateUrl   String?
+  category       String
+  /// WellnessArticle slugs that show this product first; others match by category.
+  articleSlugs   String[] @default([])
+  disclosureText String   @default("GoDesi may earn a commission when you purchase through certain links. This does not increase your purchase price.")
+  active         Boolean  @default(true)
+  clicks         Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([active, category])
+}
+
+/// A free ebook members download from /natural-healing/ebook.
+model WellnessEbook {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  /// Intro and contents shown on the public preview (blank lines split paragraphs, "- " bullets).
+  description String
+  coverUrl    String?
+  /// A file name in private/ebooks/ or a full uploaded URL.
+  pdfUrl      String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  downloads EbookDownload[]
+}
+
+/// One row per member per ebook; re-downloads reuse it.
+model EbookDownload {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ebookId   String
+  ebook     WellnessEbook @relation(fields: [ebookId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, ebookId])
+  @@index([ebookId])
+}
+
+/// An educational article in the Natural Healing & Wellness section at /natural-healing/<slug>.
+model WellnessArticle {
+  id                String    @id @default(cuid())
+  slug              String    @unique
+  title             String
+  metaDescription   String
+  coverImage        String?
+  /// Markdown-lite: "## " headings (build the table of contents), "- " bullets, [words](https://…) links.
+  body              String
+  /// One "Title | https://…" per line.
+  sources           String
+  /// Extra safety note for this article, shown above the standard health disclaimer.
+  disclaimer        String?
+  /// WellnessProduct categories recommended beside the article.
+  productCategories String[]  @default([])
+  featured          Boolean   @default(false)
+  sortOrder         Int       @default(0)
+  views             Int       @default(0)
+  publishedAt       DateTime  @default(now())
+  active            Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([active, sortOrder])
 }
