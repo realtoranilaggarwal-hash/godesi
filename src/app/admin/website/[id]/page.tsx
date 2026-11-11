@@ -185,6 +185,7 @@ export default async function AdminWebsiteProjectPage({
                 ) : null}
                 <ShareLookLink
                   base={`${siteUrl()}/website/look/${project.previewToken}`}
+                  key={sharedCode}
                   initialCode={sharedCode}
                 />
                 {project.previewSentAt ? (
