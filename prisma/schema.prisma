@@ -1199,9 +1199,14 @@ model AnalyticsEvent {
   businessId String
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   type       EventType
+  /// Hostname the visitor came from ("google.com"), "direct" when none, null on older rows.
+  referrer   String?
+  /// Page path the event happened on, e.g. "/business/sharma-sweets".
+  path       String?
   createdAt  DateTime  @default(now())
 
   @@index([businessId, type])
+  @@index([businessId, createdAt])
   @@map("Event")
 }
 
