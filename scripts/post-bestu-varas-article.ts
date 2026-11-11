@@ -21,7 +21,7 @@ const POST = {
   excerpt:
     "Saal Mubarak! Bestu Varas begins Vikram Samvat 2083 the day after Diwali. Why the Gujarati New Year follows Diwali, what Chopda Pujan and Annakut mean, and India's many New Years.",
   tags: ["gujarati", "new-year", "bestu-varas", "diwali", "festivals", "guide"],
-  coverUrl: "/images/categories/festivals.jpg",
+  coverUrl: "/blog/bestu-varas-2083.jpg",
   body: `Saal Mubarak! Nutan Varshabhinandan! (સાલ મુબારક! નૂતન વર્ષાભિનંદન!)
 
 Today, November 10, 2026, is Bestu Varas (બેસતું વર્ષ), the Gujarati New Year and the first day of Vikram Samvat 2083. Across Gujarat and in Gujarati homes all over America, families are visiting temples, touching the feet of elders and sharing sweets with neighbours.
