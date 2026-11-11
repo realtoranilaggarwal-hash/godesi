@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Event venues — banquet halls, temples and community centres | Godesi",
   description:
-    "Every venue desi events are held at, with the halls used, address and upcoming events. Add yours by posting an event.",
+    "Every venue desi events are held at, with the halls used, address and upcoming events. Venue owners can add theirs free.",
 };
 
 export default async function VenuesPage({
@@ -78,6 +78,9 @@ export default async function VenuesPage({
             Search venues
           </button>
           <LinkButton href="/events/new">➕ Post an event here</LinkButton>
+          <LinkButton href="/venues/new" variant="secondary">
+            🏛️ Add your venue
+          </LinkButton>
         </form>
       </Card>
 
@@ -85,7 +88,7 @@ export default async function VenuesPage({
         <EmptyState
           title="No venues match that search yet"
           body="Organisers add venues when posting an event — pick one from the list or add a new one."
-          action={<LinkButton href="/events/new">Post an event</LinkButton>}
+          action={<LinkButton href="/venues/new">Add your venue</LinkButton>}
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -7,6 +7,7 @@ import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { MapEmbed } from "@/components/MapEmbed";
 import { EventCard } from "@/components/EventCard";
 import { metaDescription, pageTitle } from "@/lib/seo";
+import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export async function generateMetadata({
       } — halls, website, map and tickets.`,
       `Photos, capacity and contact details for ${venue.name} on GoDesi, plus every desi event booked there.`,
     ),
+    alternates: { canonical: `${siteUrl()}/venues/${venue.slug ?? venue.id}` },
   };
 }
 
@@ -72,8 +74,42 @@ export default async function VenuePage({
     .filter(Boolean)
     .join(", ");
 
+  const venueUrl = `${siteUrl()}${venuePath(venue)}`;
+  const address = {
+    "@type": "PostalAddress",
+    streetAddress: venue.address ?? undefined,
+    addressLocality: venue.city,
+    addressRegion: venue.state ?? undefined,
+    addressCountry: venue.country ?? undefined,
+  };
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EventVenue",
+    name: venue.name,
+    address,
+    url: venueUrl,
+    hasMap: venue.mapsUrl ?? undefined,
+    sameAs: venue.website ?? undefined,
+    event: upcoming.map((event) => ({
+      "@type": "Event",
+      name: event.title,
+      startDate: event.startsAt.toISOString(),
+      endDate: event.endsAt?.toISOString(),
+      url: `${siteUrl()}/events/${event.slug}`,
+      location: { "@type": "Place", name: venue.name, address },
+    })),
+  };
+  const claimHref = `/venues/new?${new URLSearchParams({
+    name: venue.name,
+    city: venue.city,
+  }).toString()}`;
+
   return (
     <div className="space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Card className="border-violet-200 bg-gradient-to-br from-violet-50 via-white to-sky-50">
         <Link
           href="/venues"
@@ -117,6 +153,15 @@ export default async function VenuePage({
           ) : null}
           <LinkButton href="/events/new">➕ Post an event here</LinkButton>
         </div>
+        <p className="mt-3 text-xs text-slate-600">
+          Is this your venue?{" "}
+          <Link
+            href={claimHref}
+            className="font-semibold text-violet-700 hover:underline"
+          >
+            Add its address, website or map link →
+          </Link>
+        </p>
         <MapEmbed
           parts={[venue.name, venue.address, place]}
           title={venue.name}
