@@ -5,7 +5,7 @@ import { PartnerPackageForm } from "@/components/advertise/PartnerPackageForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { cachedQuery } from "@/lib/cache";
 import { db } from "@/lib/db";
-import { PARTNER_PACKAGE } from "@/lib/partnerPackage";
+import { PARTNER_HOSTING_NOTE, PARTNER_PACKAGE } from "@/lib/partnerPackage";
 import { PLANS } from "@/lib/plans";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
@@ -342,6 +342,9 @@ export default async function ProposalPage({
           </table>
         </div>
         <p className="mt-2 text-xs text-slate-600">
+          {PARTNER_HOSTING_NOTE}
+        </p>
+        <p className="mt-1 text-xs text-slate-600">
           Silver, Gold and Platinum party sponsorships are available
           separately — and any sponsorship adds the GoDesi.com sidebar banner
           free for 1 year.
