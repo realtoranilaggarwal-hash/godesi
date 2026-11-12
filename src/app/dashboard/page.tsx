@@ -20,6 +20,7 @@ import {
   Stars,
 } from "@/components/ui";
 import { QrCard } from "@/components/QrCard";
+import { isAgentCard } from "@/lib/agents";
 import { siteUrl } from "@/lib/format";
 import { closeLeadAction } from "@/app/actions/leads";
 import { SidebarBanners } from "@/components/Banners";
@@ -137,6 +138,83 @@ export default async function DashboardPage({
           </DashboardTabs>
         </div>
 
+        <Card className="space-y-2">
+          <h2 className="text-lg font-bold">My profiles</h2>
+            {business ? (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+              <span aria-hidden className="text-2xl">
+                {business.profileType === "PROFESSIONAL" ? "🎓" : "🏪"}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">{business.name}</p>
+                <p className="text-xs text-slate-500">
+                  {business.profileType === "PROFESSIONAL"
+                    ? "Professional profile"
+                    : "Business card"}{" "}
+                  · {business.category}
+                </p>
+              </div>
+              <Link
+                href={`/business/${business.slug}`}
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                View
+              </Link>
+              <Link
+                href="/dashboard/profile"
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                Edit
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+              <span aria-hidden className="text-2xl">
+                🏪
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold">
+                  Business card or professional profile
+                </p>
+                <p className="text-xs text-slate-500">
+                  Not made yet — free, takes 2 minutes
+                </p>
+              </div>
+              <Link
+                href="/post?type=business"
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                Create
+              </Link>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+            <span aria-hidden className="text-2xl">
+              🙋
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">Personal profile</p>
+              <p className="text-xs text-slate-500">
+                {user.username ? `godesi.com/${user.username}` : "Pick your name"}
+              </p>
+            </div>
+            {user.username ? (
+              <Link
+                href={`/${user.username}`}
+                className="text-xs font-semibold text-indigo-600 hover:underline"
+              >
+                View
+              </Link>
+            ) : null}
+            <Link
+              href="/dashboard/me"
+              className="text-xs font-semibold text-indigo-600 hover:underline"
+            >
+              Edit
+            </Link>
+          </div>
+        </Card>
+
         {business && pageStats ? (
           <PageStatsCard stats={pageStats} slug={business.slug} />
         ) : null}
@@ -230,84 +308,7 @@ export default async function DashboardPage({
           title="What would you like to do on GoDesi?"
           hasCard={Boolean(business)}
           goals={user.joinGoals}
-        >
-          <div className="space-y-2">
-            <p className="text-sm font-bold text-slate-900">My profiles</p>
-            {business ? (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
-              <span aria-hidden className="text-2xl">
-                {business.profileType === "PROFESSIONAL" ? "🎓" : "🏪"}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">{business.name}</p>
-                <p className="text-xs text-slate-500">
-                  {business.profileType === "PROFESSIONAL"
-                    ? "Professional profile"
-                    : "Business card"}{" "}
-                  · {business.category}
-                </p>
-              </div>
-              <Link
-                href={`/business/${business.slug}`}
-                className="text-xs font-semibold text-indigo-600 hover:underline"
-              >
-                View
-              </Link>
-              <Link
-                href="/dashboard/profile"
-                className="text-xs font-semibold text-indigo-600 hover:underline"
-              >
-                Edit
-              </Link>
-            </div>
-          ) : (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
-              <span aria-hidden className="text-2xl">
-                🏪
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">
-                  Business card or professional profile
-                </p>
-                <p className="text-xs text-slate-500">
-                  Not made yet — free, takes 2 minutes
-                </p>
-              </div>
-              <Link
-                href="/post?type=business"
-                className="text-xs font-semibold text-indigo-600 hover:underline"
-              >
-                Create
-              </Link>
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
-            <span aria-hidden className="text-2xl">
-              🙋
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold">Personal profile</p>
-              <p className="text-xs text-slate-500">
-                {user.username ? `godesi.com/${user.username}` : "Pick your name"}
-              </p>
-            </div>
-            {user.username ? (
-              <Link
-                href={`/${user.username}`}
-                className="text-xs font-semibold text-indigo-600 hover:underline"
-              >
-                View
-              </Link>
-            ) : null}
-            <Link
-              href="/dashboard/me"
-              className="text-xs font-semibold text-indigo-600 hover:underline"
-            >
-              Edit
-            </Link>
-          </div>
-        </div>
-        </PostAnything>
+        />
 
         {user.morningEmailAt ? null : <MorningEmailSignup />}
 
@@ -430,9 +431,11 @@ export default async function DashboardPage({
                 <LinkButton href="/dashboard/media" variant="secondary">
                   Manage gallery
                 </LinkButton>
-                <LinkButton href="/dashboard/agent" variant="secondary">
-                  Agent credentials
-                </LinkButton>
+                {isRealEstateAgent(business) ? (
+                  <LinkButton href="/dashboard/agent" variant="secondary">
+                    Agent credentials
+                  </LinkButton>
+                ) : null}
                 <LinkButton href="/dashboard/packages" variant="secondary">
                   Packages & pricing
                 </LinkButton>
@@ -808,5 +811,17 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
         </>
       )}
     </Card>
+  );
+}
+
+/** Agent credentials only make sense on real estate agent / broker cards. */
+function isRealEstateAgent(business: {
+  category: string;
+  subcategorySlug: string | null;
+}) {
+  return (
+    isAgentCard(business.subcategorySlug) ||
+    business.category === "Real Estate Agents" ||
+    (business.category === "real-estate" && business.subcategorySlug === null)
   );
 }

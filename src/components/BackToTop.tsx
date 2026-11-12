@@ -2,27 +2,59 @@
 
 import { useEffect, useState } from "react";
 
-/** Long directory and admin pages need a way back up without endless scrolling. */
+/** Up / down arrows on long pages so people know there is more to scroll. */
 export function BackToTop() {
-  const [visible, setVisible] = useState(false);
+  const [canUp, setCanUp] = useState(false);
+  const [canDown, setCanDown] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 600);
+    const onScroll = () => {
+      const el = document.scrollingElement ?? document.documentElement;
+      setCanUp(window.scrollY > 300);
+      setCanDown(window.scrollY + window.innerHeight < el.scrollHeight - 300);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    const settle = setTimeout(onScroll, 1500);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      clearTimeout(settle);
+    };
   }, []);
 
-  if (!visible) return null;
+  if (!canUp && !canDown) return null;
+
+  const arrow =
+    "flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-lg font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white";
 
   return (
-    <button
-      type="button"
-      aria-label="Back to top"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fab-anchor fixed bottom-24 left-4 z-40 rounded-full border border-slate-200 bg-white/95 px-3 py-2 text-sm font-bold text-slate-700 shadow-lg backdrop-blur hover:bg-white sm:bottom-6"
-    >
-      ↑ Top
-    </button>
+    <div className="fab-anchor fixed bottom-24 left-4 z-40 flex flex-col gap-2 sm:bottom-6">
+      {canUp ? (
+        <button
+          type="button"
+          aria-label="Scroll to top"
+          title="Back to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className={arrow}
+        >
+          ↑
+        </button>
+      ) : null}
+      {canDown ? (
+        <button
+          type="button"
+          aria-label="Scroll down"
+          title="More below"
+          onClick={() =>
+            window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" })
+          }
+          className={arrow}
+        >
+          ↓
+        </button>
+      ) : null}
+    </div>
   );
 }
