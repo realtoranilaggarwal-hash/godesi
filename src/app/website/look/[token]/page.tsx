@@ -8,6 +8,7 @@ import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
 import { BASE_MONTHLY_USD, BASE_YEARLY_USD, setupUsdFor, websitePath } from "@/lib/websiteBuilder";
 import { loadPowerUps } from "@/lib/websiteProjects";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { PARTNER_HOSTING_NOTE } from "@/lib/partnerPackage";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -84,7 +85,7 @@ export default async function LookPage({
       ) : project.includedIn ? (
         <LookActions
           token={params.token}
-          priceLine="Included in your GoDesi Partner Package — nothing more to pay."
+          priceLine={`Included in your GoDesi Partner Package — nothing more to pay today. ${PARTNER_HOSTING_NOTE}`}
         />
       ) : (
         <>

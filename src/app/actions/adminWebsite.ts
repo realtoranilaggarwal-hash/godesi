@@ -11,7 +11,7 @@ import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { isPowerUpKey, POWER_UPS, WEBSITE_CATEGORIES } from "@/lib/websiteBuilder";
 import { normalizeCouponCode } from "@/lib/coupons";
-import { PARTNER_PACKAGE_KEY } from "@/lib/partnerPackage";
+import { PARTNER_PACKAGE, PARTNER_PACKAGE_KEY } from "@/lib/partnerPackage";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 const statusSchema = z.object({
@@ -122,7 +122,7 @@ async function emailPreview(to: string, businessName: string, link: string, incl
       `<h2>Your new website is ready to see</h2>
        <p>Hi! We designed a new website for <strong>${escapeHtml(businessName)}</strong>.</p>
        <p><a href="${link}" style="display:inline-block;background:#4f46e5;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold">See my new website</a></p>
-       <p>${included ? "It&rsquo;s included in your GoDesi Partner Package, so there&rsquo;s nothing more to pay." : "Under the design you can see the price, the extras you can add and use your discount code."} Love it? Press &ldquo;I love it&rdquo; to launch it. Want something different? Press &ldquo;I want changes&rdquo; and tell us.</p>
+       <p>${included ? `It&rsquo;s included in your GoDesi Partner Package, so there&rsquo;s nothing more to pay today. Hosting is included for the first year, then $${PARTNER_PACKAGE.hostingAfterYearUsd}/month.` : "Under the design you can see the price, the extras you can add and use your discount code."} Love it? Press &ldquo;I love it&rdquo; to launch it. Want something different? Press &ldquo;I want changes&rdquo; and tell us.</p>
        <p>This link is private to you.</p>`,
     ),
   });

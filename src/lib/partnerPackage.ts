@@ -1,5 +1,6 @@
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { SITE } from "@/lib/site";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 /** `WebsiteProject.includedIn` for a site that came with the Partner Package. */
 export const PARTNER_PACKAGE_KEY = "partner-package";
@@ -9,7 +10,11 @@ export const PARTNER_PACKAGE = {
   name: "GoDesi Partner Package",
   description:
     "Handmade website, 1-year side banner, 1-year featured listing, GoDesi Elite interview, banner at the New Year's Eve party and 1 party ticket.",
+  /** Website hosting is free for the first year, then the normal monthly charge. */
+  hostingAfterYearUsd: WEBSITE_OFFER.monthlyUsd,
 };
+
+export const PARTNER_HOSTING_NOTE = `Website hosting is included for the first year, then $${PARTNER_PACKAGE.hostingAfterYearUsd}/month.`;
 
 /** Stripe holds the order; this tells the GoDesi team and thanks the client. */
 export async function notifyPartnerPackagePaid(session: {
@@ -51,6 +56,7 @@ export async function notifyPartnerPackagePaid(session: {
         "Thank you — you're a GoDesi partner!",
         `<p>We received your $${PARTNER_PACKAGE.priceUsd} payment for the ${escapeHtml(PARTNER_PACKAGE.name)}.</p>
         <p>${escapeHtml(PARTNER_PACKAGE.description)}</p>
+        <p>${escapeHtml(PARTNER_HOSTING_NOTE)}</p>
         <p>Our team will call you within 1–2 business days to collect your logo, photos and details. Questions? Call 732-877-8585 or reply to this email.</p>`,
       ),
       replyTo: SITE.salesEmail,

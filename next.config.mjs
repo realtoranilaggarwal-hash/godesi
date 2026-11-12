@@ -52,6 +52,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // One proposal page: the duplicate /proposal points to the one with online payment.
+        source: "/proposal",
+        destination: "/advertise/proposal",
+        permanent: true,
+      },
+      {
         // The business directory lives at /search; /businesses was linked once and 404'd.
         source: "/businesses",
         destination: "/search",
