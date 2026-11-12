@@ -58,7 +58,8 @@ export default async function DonePage({
         ) : paid ? (
           <div className="space-y-2 text-sm text-slate-700">
             <p>
-              Payment received for <strong>{project.businessName}</strong>. Our team now puts your
+              {project.includedIn ? "Approved — included in your Partner Package —" : "Payment received"} for{" "}
+              <strong>{project.businessName}</strong>. Our team now puts your
               approved design on its domain, switches on the features you picked, and emails
               you the address — usually within two business days.
             </p>

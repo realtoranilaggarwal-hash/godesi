@@ -34,7 +34,7 @@ export default async function LookPage({
 }) {
   const project = await db.websiteProject.findUnique({
     where: { previewToken: params.token },
-    select: { id: true, businessName: true, designUrl: true, status: true, tier: true },
+    select: { id: true, businessName: true, designUrl: true, status: true, tier: true, includedIn: true },
   });
   if (!project?.designUrl || project.status === "CANCELLED") notFound();
   const paid = project.status === "PAID" || project.status === "LIVE";
@@ -81,6 +81,11 @@ export default async function LookPage({
             to see its address or ask for a change.
           </p>
         </Card>
+      ) : project.includedIn ? (
+        <LookActions
+          token={params.token}
+          priceLine="Included in your GoDesi Partner Package — nothing more to pay."
+        />
       ) : (
         <>
           <LookActions

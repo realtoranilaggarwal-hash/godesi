@@ -1,6 +1,9 @@
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { SITE } from "@/lib/site";
 
+/** `WebsiteProject.includedIn` for a site that came with the Partner Package. */
+export const PARTNER_PACKAGE_KEY = "partner-package";
+
 export const PARTNER_PACKAGE = {
   priceUsd: 500,
   name: "GoDesi Partner Package",

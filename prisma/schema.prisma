@@ -3087,6 +3087,8 @@ model WebsiteProject {
   previewSentAt DateTime?
   /// Hosting term: "MONTH" or "YEAR".
   billing       String    @default("MONTH")
+  /// Set when the site was already paid for in a bundle, e.g. "partner-package".
+  includedIn    String?
 
   changeRequests WebsiteChangeRequest[]
 
