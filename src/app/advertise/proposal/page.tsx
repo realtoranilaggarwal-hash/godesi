@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PrintButton } from "@/components/PrintButton";
+import { AD_PLACEMENTS } from "@/lib/ads";
 import { cachedQuery } from "@/lib/cache";
 import { db } from "@/lib/db";
+import { PLANS } from "@/lib/plans";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
@@ -57,10 +59,12 @@ const PRINT_CSS = `
 const usd = (amount: number) => `$${amount.toLocaleString("en-US")}`;
 
 const PACKAGE_ROWS: { item: string; value: string }[] = [
-  { item: `AI-built website for your business`, value: usd(WEBSITE_OFFER.priceUsd) },
+  { item: "Handmade custom website", value: "$500" },
+  { item: "300×250 side banner on GoDesi.com for 1 year", value: usd(AD_PLACEMENTS.SIDEBAR.priceUsd * 12) },
+  { item: "Featured listing on GoDesi.com for 1 year", value: usd(PLANS.PREMIUM.terms.YEAR?.usd ?? 100) },
   { item: "GoDesi Elite interview with a 30–60 second video", value: "$500 / year" },
-  { item: "Weekly podcast slot (studio or remote) and help launching your channel", value: "Included" },
-  { item: "Business-card-size back-page ad in the quarterly magazine (50 magazines)", value: "$500" },
+  { item: "Your banner inside the hall at the New Year's Eve party", value: "$300" },
+  { item: "1 ticket to enjoy the New Year's Eve party", value: "$100" },
   { item: "Email marketing — ~100 emails a day with your logo on the flyer", value: "$300 / month" },
 ];
 
@@ -141,7 +145,7 @@ export default async function ProposalPage() {
       <Section number={1} title="New Year's Eve Party Sponsorship">
         <p>
           The Grand New Year&apos;s Eve Party — Big Ball Room, Royal Albert
-          Palace, 1050 King Georges Post Rd, Fords (Edison area), NJ. About 400
+          Palace, 1050 King Georges Post Rd, Fords, NJ. About 400
           guests, and 6+ years running (celebrating since 2018).
         </p>
         {levels.length ? (
@@ -253,7 +257,7 @@ export default async function ProposalPage() {
             "Distributed by Mandarin Media to about 100 premium families — past and present clients of broker Anil Aggarwal.",
             <>
               Business-card-size ad on the back page: about $5 per magazine,{" "}
-              <strong>$500 for 50 magazines</strong>.
+              <strong>$250 for 50 magazines</strong>.
             </>,
           ]}
         />
@@ -314,8 +318,9 @@ export default async function ProposalPage() {
           </table>
         </div>
         <p className="mt-2 text-xs text-slate-600">
-          New Year&apos;s Eve party sponsorship is available separately — and
-          any sponsorship adds the GoDesi.com sidebar banner free for 1 year.
+          Silver, Gold and Platinum party sponsorships are available
+          separately — and any sponsorship adds the GoDesi.com sidebar banner
+          free for 1 year.
         </p>
         <div className="mt-4 rounded-xl bg-slate-900 p-4 text-center text-white">
           <p className="text-lg font-black">Ready to grow with GoDesi?</p>
