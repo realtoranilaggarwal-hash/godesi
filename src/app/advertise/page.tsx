@@ -101,6 +101,12 @@ export default async function AdvertisePage({
           >
             Advertiser dashboard
           </Link>
+          <Link
+            href="/advertise/proposal"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Partner Package — $500
+          </Link>
         </div>
       </section>
 

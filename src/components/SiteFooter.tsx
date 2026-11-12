@@ -49,6 +49,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         },
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
         { href: "/advertise", label: "Advertise on Godesi" },
+        { href: "/advertise/proposal", label: "Marketing partnership proposal" },
         { href: "/listings/new?kind=MARKETPLACE", label: "Post a free classified ad" },
         { href: "/events/new", label: "Post an event" },
         { href: "/clubs/new", label: "Start a club" },
