@@ -130,7 +130,23 @@ const editSchema = z.object({
   website: optionalUrl,
   mapsUrl: optionalUrl,
   halls: z.string().max(2000).optional(),
+  photos: z.string().max(12000).optional(),
 });
+
+/** "Hall | https://…" or just "https://…", one photo per line. */
+function parsePhotos(text: string) {
+  const photos: { url: string; hall: string | null }[] = [];
+  for (const line of text.split("\n")) {
+    const parts = line.split("|").map((part) => part.trim());
+    const url = parts.pop() ?? "";
+    if (!url) continue;
+    if (!/^https:\/\/\S+$/i.test(url) || url.length > 1000) {
+      throw new Error(`PHOTO:${url.slice(0, 60)}`);
+    }
+    photos.push({ url, hall: parts.join(" ").slice(0, 80) || null });
+  }
+  return photos.slice(0, 40);
+}
 
 /** The venue's owner (or staff) edits its details and list of halls. */
 export async function updateVenueAction(
@@ -148,6 +164,7 @@ export async function updateVenueAction(
       website: formData.get("website") ?? undefined,
       mapsUrl: formData.get("mapsUrl") ?? undefined,
       halls: formData.get("halls") ?? undefined,
+      photos: formData.get("photos") ?? undefined,
     });
     if (!parsed.success) {
       return { error: parsed.error.issues[0]?.message ?? "Check the form." };
@@ -173,6 +190,26 @@ export async function updateVenueAction(
       })
       .slice(0, 30);
 
+    let photos: ReturnType<typeof parsePhotos>;
+    try {
+      photos = parsePhotos(parsed.data.photos ?? "");
+    } catch (error) {
+      return {
+        error: `Photo links must start with https:// — check "${String(error).replace(/^Error: PHOTO:/, "")}"`,
+      };
+    }
+
+    await db.venuePhoto.deleteMany({ where: { venueId: venue.id } });
+    if (photos.length) {
+      await db.venuePhoto.createMany({
+        data: photos.map((photo, index) => ({
+          venueId: venue.id,
+          url: photo.url,
+          hall: photo.hall,
+          sortOrder: index,
+        })),
+      });
+    }
     await db.venue.update({
       where: { id: venue.id },
       data: {

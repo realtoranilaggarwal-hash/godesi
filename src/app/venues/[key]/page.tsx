@@ -10,6 +10,7 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { EventCard } from "@/components/EventCard";
 import { metaDescription, pageTitle } from "@/lib/seo";
 import { siteUrl } from "@/lib/format";
+import { thumbImage } from "@/lib/proxyImage";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,20 @@ export async function generateMetadata({
       `Photos, capacity and contact details for ${venue.name} on GoDesi, plus every desi event booked there.`,
     ),
     alternates: { canonical: `${siteUrl()}/venues/${venue.slug ?? venue.id}` },
+    openGraph: {
+      images: [
+        {
+          url: `${siteUrl()}${venuePath(venue)}/banner`,
+          width: 1200,
+          height: 630,
+          alt: `Events at ${venue.name}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [`${siteUrl()}${venuePath(venue)}/banner`],
+    },
   };
 }
 
@@ -186,6 +201,61 @@ export default async function VenuePage({
           title={venue.name}
           className="mt-4"
         />
+      </Card>
+
+      {venue.photos.length ? (
+        <section>
+          <h2 className="text-lg font-black">Photos of {venue.name}</h2>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {venue.photos.map((photo) => (
+              <figure
+                key={photo.id}
+                className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumbImage(photo.url, 640)}
+                  alt={
+                    photo.hall
+                      ? `${photo.hall} at ${venue.name}`
+                      : `${venue.name}, ${venue.city}`
+                  }
+                  loading="lazy"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+                {photo.hall ? (
+                  <figcaption className="px-2 py-1 text-xs font-semibold text-slate-700">
+                    {photo.hall}
+                  </figcaption>
+                ) : null}
+              </figure>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <Card>
+        <h2 className="text-sm font-bold">
+          📣 Share {venue.name}&apos;s events
+        </h2>
+        <p className="mt-1 text-xs text-slate-600">
+          Post this banner on WhatsApp, Facebook or Instagram — it links to this
+          page, which always lists every upcoming event here.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
+          <a
+            href={`${path}/banner?download=1`}
+            className="rounded-lg bg-violet-600 px-3 py-1.5 text-white hover:bg-violet-700"
+          >
+            ⬇ Download banner (Facebook / WhatsApp)
+          </a>
+          <a
+            href={`${path}/banner?size=square&download=1`}
+            className="rounded-lg border border-violet-300 px-3 py-1.5 text-violet-700 hover:bg-violet-50"
+          >
+            ⬇ Square (Instagram)
+          </a>
+        </div>
       </Card>
 
       <section>
