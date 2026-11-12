@@ -14,7 +14,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Grow Your Business with GoDesi — Marketing Partnership Proposal",
   description:
-    "New Year's Eve party sponsorship, websites, a GoDesi.com banner, podcast and GoDesi Elite interviews, a quarterly magazine ad and email marketing — the GoDesi Partner Package for local businesses.",
+    "New Year's Eve party sponsorship, websites, a GoDesi.com banner, podcast and GoDesi Elite interviews, and a quarterly magazine ad — the GoDesi Partner Package for local businesses.",
 };
 
 const NYE_SLUG = "new-year-eves-party-2027-edison";
@@ -286,21 +286,10 @@ export default async function ProposalPage({
         />
       </Section>
 
-      <Section number={6} title="Email Marketing">
-        <Bullets
-          items={[
-            "About 100 emails a day to the GoDesi database, with your logo on the flyer.",
-            <>
-              $300 a month — <strong>add it to any package</strong>.
-            </>,
-          ]}
-        />
-      </Section>
-
       <section className="break-inside-avoid rounded-2xl border-2 border-amber-400 bg-amber-50/60 p-5 print:rounded-xl print:p-4">
         <h2 className="flex items-start gap-2 text-lg font-black text-slate-900">
           <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-600 text-sm font-black text-white">
-            7
+            6
           </span>
           <span className="min-w-0 break-words">GoDesi Partner Package</span>
         </h2>
