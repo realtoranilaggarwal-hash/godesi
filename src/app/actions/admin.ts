@@ -849,7 +849,7 @@ async function saveEventEdits(
         startsAt,
         endsAt,
         timeZone: zone,
-        venue: venueName,
+        venue: venueRef?.name ?? venueName,
         venueRefId: venueRef?.id ?? null,
         hallName: online ? null : parsed.data.hallName || null,
         hallCapacity: online ? null : parsed.data.hallCapacity ?? null,

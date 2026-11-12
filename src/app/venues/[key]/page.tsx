@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { findVenue, venuePath } from "@/lib/venues";
+import { canEditVenue, findVenue, venuePath } from "@/lib/venues";
+import { getCurrentUser } from "@/lib/auth";
+import { ClaimVenueForm } from "@/components/forms/ClaimVenueForm";
 import { Card, EmptyState, LinkButton } from "@/components/ui";
 import { MapEmbed } from "@/components/MapEmbed";
 import { EventCard } from "@/components/EventCard";
 import { metaDescription, pageTitle } from "@/lib/seo";
 import { siteUrl } from "@/lib/format";
+import { thumbImage } from "@/lib/proxyImage";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +22,9 @@ export async function generateMetadata({
   const venue = await findVenue(params.key);
   if (!venue) return { title: "Venue not found | Godesi" };
   return {
-    title: pageTitle(`${venue.name}, ${venue.city} — events & tickets | Godesi`),
+    title: pageTitle(
+      `${venue.name}, ${venue.city} — events & tickets | Godesi`,
+    ),
     description: metaDescription(
       `Upcoming desi events at ${venue.name}, ${venue.city}${
         venue.address ? ` (${venue.address})` : ""
@@ -27,6 +32,22 @@ export async function generateMetadata({
       `Photos, capacity and contact details for ${venue.name} on GoDesi, plus every desi event booked there.`,
     ),
     alternates: { canonical: `${siteUrl()}/venues/${venue.slug ?? venue.id}` },
+    openGraph: {
+      images: [
+        {
+          url: `${siteUrl()}${venuePath(venue)}/banner?v=${venue.updatedAt.getTime()}`,
+          width: 1200,
+          height: 630,
+          alt: `Events at ${venue.name}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [
+        `${siteUrl()}${venuePath(venue)}/banner?v=${venue.updatedAt.getTime()}`,
+      ],
+    },
   };
 }
 
@@ -99,10 +120,8 @@ export default async function VenuePage({
       location: { "@type": "Place", name: venue.name, address },
     })),
   };
-  const claimHref = `/venues/new?${new URLSearchParams({
-    name: venue.name,
-    city: venue.city,
-  }).toString()}`;
+  const user = await getCurrentUser();
+  const path = venuePath(venue);
 
   return (
     <div className="space-y-6">
@@ -155,20 +174,90 @@ export default async function VenuePage({
           ) : null}
           <LinkButton href="/events/new">➕ Post an event here</LinkButton>
         </div>
-        <p className="mt-3 text-xs text-slate-600">
-          Is this your venue?{" "}
-          <Link
-            href={claimHref}
-            className="font-semibold text-violet-700 hover:underline"
-          >
-            Add its address, website or map link →
-          </Link>
-        </p>
+        <div className="mt-3">
+          {canEditVenue(user, venue) ? (
+            <Link
+              href={`${path}/edit`}
+              className="text-xs font-semibold text-violet-700 hover:underline"
+            >
+              ✏️ Edit this venue — halls, address, website →
+            </Link>
+          ) : venue.ownerId ? (
+            <p className="text-xs text-emerald-700">✓ Managed by the venue</p>
+          ) : user ? (
+            <ClaimVenueForm venueId={venue.id} />
+          ) : (
+            <p className="text-xs text-slate-600">
+              Is this your venue?{" "}
+              <Link
+                href={`/login?next=${encodeURIComponent(path)}`}
+                className="font-semibold text-violet-700 hover:underline"
+              >
+                Log in to claim it and edit its halls →
+              </Link>
+            </p>
+          )}
+        </div>
         <MapEmbed
           parts={[venue.name, venue.address, place]}
           title={venue.name}
           className="mt-4"
         />
+      </Card>
+
+      {venue.photos.length ? (
+        <section>
+          <h2 className="text-lg font-black">Photos of {venue.name}</h2>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {venue.photos.map((photo) => (
+              <figure
+                key={photo.id}
+                className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumbImage(photo.url, 640)}
+                  alt={
+                    photo.hall
+                      ? `${photo.hall} at ${venue.name}`
+                      : `${venue.name}, ${venue.city}`
+                  }
+                  loading="lazy"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+                {photo.hall ? (
+                  <figcaption className="px-2 py-1 text-xs font-semibold text-slate-700">
+                    {photo.hall}
+                  </figcaption>
+                ) : null}
+              </figure>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <Card>
+        <h2 className="text-sm font-bold">
+          📣 Share {venue.name}&apos;s events
+        </h2>
+        <p className="mt-1 text-xs text-slate-600">
+          Post this banner on WhatsApp, Facebook or Instagram — it links to this
+          page, which always lists every upcoming event here.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
+          <a
+            href={`${path}/banner?v=${venue.updatedAt.getTime()}&download=1`}
+            className="rounded-lg bg-violet-600 px-3 py-1.5 text-white hover:bg-violet-700"
+          >
+            ⬇ Download banner (Facebook / WhatsApp)
+          </a>
+          <a
+            href={`${path}/banner?v=${venue.updatedAt.getTime()}&size=square&download=1`}
+            className="rounded-lg border border-violet-300 px-3 py-1.5 text-violet-700 hover:bg-violet-50"
+          >
+            ⬇ Square (Instagram)
+          </a>
+        </div>
       </Card>
 
       <section>

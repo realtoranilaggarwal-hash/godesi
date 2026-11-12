@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { Field, inputClass } from "@/components/ui";
+import { similarVenues } from "@/lib/venueNames";
 
 export type VenueOption = {
   id: string;
+  slug?: string | null;
   name: string;
   city: string;
   state: string | null;
@@ -16,6 +18,7 @@ export type VenueOption = {
 };
 
 const NEW_VENUE = "__new__";
+const OTHER_HALL = "__other__";
 
 /**
  * Venue, hall and map location. Every venue already on Godesi is offered in a
@@ -42,7 +45,11 @@ export function EventVenueFields({
   );
   const [typed, setTyped] = useState(initialMatch ? "" : initialVenue);
 
+  const [hallChoice, setHallChoice] = useState("");
+
   const picked = venues.find((item) => item.id === choice);
+  const lookalikes =
+    choice === NEW_VENUE && !online ? similarVenues(typed, venues) : [];
   const adding = online || choice === NEW_VENUE;
 
   const cities = Array.from(new Set(venues.map((item) => item.city))).sort();
@@ -69,6 +76,7 @@ export function EventVenueFields({
 
   const onPick = (value: string) => {
     setChoice(value);
+    setHallChoice("");
     const venue = venues.find((item) => item.id === value);
     if (venue) fill(venue);
   };
@@ -125,26 +133,75 @@ export function EventVenueFields({
             placeholder={online ? "" : "e.g. Royal Albert's Palace"}
             className={inputClass}
           />
+          {lookalikes.length ? (
+            <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+              <p className="font-semibold">
+                Already on Godesi? Pick it instead of adding a copy:
+              </p>
+              <ul className="mt-1 space-y-1">
+                {lookalikes.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <span>
+                      {item.name}, {item.city}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onPick(item.id)}
+                      className="rounded-md bg-amber-600 px-2 py-0.5 font-semibold text-white hover:bg-amber-700"
+                    >
+                      Use this venue
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </Field>
       )}
 
       {online ? null : (
         <>
-          <Field
-            label="Hall / room"
-            hint={
-              picked?.halls.length
-                ? `Used here before: ${picked.halls.join(", ")}`
-                : "Optional — for venues with several halls, e.g. Crystal Hall"
-            }
-          >
-            <input name="hallName" list="godesi-halls" className={inputClass} />
-            <datalist id="godesi-halls">
-              {(picked?.halls ?? []).map((hall) => (
-                <option key={hall} value={hall} />
-              ))}
-            </datalist>
-          </Field>
+          {picked?.halls.length ? (
+            <Field
+              label="Hall / room"
+              hint={`${picked.name} has ${picked.halls.length} hall${picked.halls.length === 1 ? "" : "s"} listed — pick yours`}
+            >
+              <select
+                value={hallChoice}
+                onChange={(event) => setHallChoice(event.target.value)}
+                className={inputClass}
+                aria-label="Hall / room"
+              >
+                <option value="">Choose a hall…</option>
+                {picked.halls.map((hall) => (
+                  <option key={hall} value={hall}>
+                    {hall}
+                  </option>
+                ))}
+                <option value={OTHER_HALL}>Other hall (not listed)</option>
+              </select>
+              {hallChoice === OTHER_HALL ? (
+                <input
+                  name="hallName"
+                  placeholder="Hall name"
+                  aria-label="Other hall name"
+                  className={`${inputClass} mt-2`}
+                />
+              ) : (
+                <input type="hidden" name="hallName" value={hallChoice} />
+              )}
+            </Field>
+          ) : (
+            <Field
+              label="Hall / room"
+              hint="Optional — for venues with several halls, e.g. Crystal Hall"
+            >
+              <input name="hallName" className={inputClass} />
+            </Field>
+          )}
 
           <Field
             label="Hall capacity"

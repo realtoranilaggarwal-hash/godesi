@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatMoney, inrPerUsd, requestCurrency } from "@/lib/currency";
 import { effectivePlan, PLANS, planTermPrice } from "@/lib/plans";
 import { Badge, Card, LinkButton } from "@/components/ui";
+import { DashboardTabs } from "@/components/DashboardTabs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My plan" };
@@ -25,6 +26,7 @@ export default async function MyPlanPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
+      <DashboardTabs />
       <h1 className="text-2xl font-bold">My plan</h1>
 
       <Card className="space-y-2">

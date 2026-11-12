@@ -21,6 +21,7 @@ import {
 } from "@/components/Banners";
 import { InArticleAd } from "@/components/InArticleAd";
 import { OfferDemandBox } from "@/components/OfferDemandBox";
+import { DashboardTabs } from "@/components/DashboardTabs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -68,6 +69,7 @@ export default async function LeadsPage({
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
+        {user ? <DashboardTabs /> : null}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold">Lead marketplace</h1>
