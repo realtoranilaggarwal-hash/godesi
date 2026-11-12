@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { reviewClaimAction } from "@/app/actions/claims";
 import { reviewEventClaimAction } from "@/app/actions/eventClaims";
+import { reviewVenueClaimAction } from "@/app/actions/venueClaims";
+import { venuePath } from "@/lib/venues";
 import { Card } from "@/components/ui";
 import { deskFallback } from "@/lib/adminSections";
 
@@ -14,10 +16,9 @@ export const metadata: Metadata = { title: "Claims" };
 export default async function Page() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/admin/claims");
-  if (user.role !== "ADMIN")
-    redirect(deskFallback(user, "Claims"));
+  if (user.role !== "ADMIN") redirect(deskFallback(user, "Claims"));
 
-  const [claims, eventClaims] = await Promise.all([
+  const [claims, eventClaims, venueClaims] = await Promise.all([
     db.businessClaim.findMany({
       where: { status: "PENDING" },
       orderBy: { createdAt: "desc" },
@@ -42,6 +43,15 @@ export default async function Page() {
             source: { select: { name: true } },
           },
         },
+      },
+    }),
+    db.venueClaim.findMany({
+      where: { status: "PENDING" },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      include: {
+        user: { select: { email: true, name: true } },
+        venue: { select: { id: true, slug: true, name: true, city: true } },
       },
     }),
   ]);
@@ -117,8 +127,8 @@ export default async function Page() {
                     {claim.event.title}
                   </Link>
                   <p className="text-xs text-slate-400">
-                    {claim.event.city} ·{" "}
-                    {claim.event.startsAt.toDateString()} · listed from{" "}
+                    {claim.event.city} · {claim.event.startsAt.toDateString()} ·
+                    listed from{" "}
                     {claim.event.source?.name ?? "a public calendar"} · claimed
                     by {claim.user.name} ({claim.user.email})
                     {claim.email ? ` · ${claim.email}` : ""}
@@ -147,6 +157,57 @@ export default async function Page() {
           </ul>
         ) : (
           <p className="text-sm text-slate-500">No event claims waiting.</p>
+        )}
+      </Card>
+
+      <Card id="venue-claims">
+        <h2 className="mb-1 text-lg font-bold">Venue claims</h2>
+        <p className="mb-3 text-xs text-slate-500">
+          Approving lets the owner edit the venue page — its halls, address,
+          website and map link.
+        </p>
+        {venueClaims.length ? (
+          <ul className="divide-y divide-slate-100 text-sm">
+            {venueClaims.map((claim) => (
+              <li
+                key={claim.id}
+                className="flex flex-wrap items-start justify-between gap-2 py-2"
+              >
+                <div className="min-w-0">
+                  <Link
+                    href={venuePath(claim.venue)}
+                    className="font-medium text-indigo-600"
+                  >
+                    {claim.venue.name}
+                  </Link>
+                  <p className="text-xs text-slate-400">
+                    {claim.venue.city} · claimed by {claim.user.name} (
+                    {claim.user.email}){claim.email ? ` · ${claim.email}` : ""}
+                    {claim.phone ? ` · ${claim.phone}` : ""}
+                  </p>
+                  <p className="mt-1 max-w-xl text-slate-600">
+                    {claim.message}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {(["approve", "reject"] as const).map((decision) => (
+                    <form key={decision} action={reviewVenueClaimAction}>
+                      <input type="hidden" name="id" value={claim.id} />
+                      <input type="hidden" name="decision" value={decision} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold hover:bg-slate-50"
+                      >
+                        {decision}
+                      </button>
+                    </form>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-slate-500">No venue claims waiting.</p>
         )}
       </Card>
     </div>
