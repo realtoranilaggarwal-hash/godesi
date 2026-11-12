@@ -1,4 +1,5 @@
 import { citySlug } from "@/lib/citySlug";
+import { ASTROLOGER_SUBCATEGORIES } from "@/lib/astrology";
 
 /**
  * Stock banners shown on /business profile pages and /city hubs whose listing
@@ -64,6 +65,26 @@ const DEFAULT_COVER = "/images/categories/default.jpg";
 /** Gurdwaras get a Gurdwara banner, not the generic temple art of their category. */
 export const SIKH_COVER = "/images/categories/sikh-gurdwara.jpg";
 
+/** Astrologers get zodiac art instead of a city skyline or the temple banner. */
+export const ASTROLOGY_COVER = "/images/categories/astrologers.jpg";
+
+const ASTROLOGY_NAME = /\b(astrolog\w*|jyotish\w*|horoscopes?|kundli)\b/i;
+
+/** Astrologer listings: filed under an astrologer subcategory, or an astrologer-named religious/professional card. */
+export function isAstrologer(business: {
+  name?: string | null;
+  categorySlug?: string | null;
+  subcategorySlug?: string | null;
+}): boolean {
+  const slugs = [business.subcategorySlug, business.categorySlug];
+  if (slugs.some((slug) => slug && ASTROLOGER_SUBCATEGORIES.includes(slug))) return true;
+  const slug = business.categorySlug ?? "";
+  return (
+    (slug.startsWith("religious-services") || slug.startsWith("professionals")) &&
+    ASTROLOGY_NAME.test(business.name ?? "")
+  );
+}
+
 const SIKH_NAME = /\b(gurdwara|gurudwara|gurudwar|sikhs?|singh sabha|khalsa)\b/i;
 const GURDWARA_NAME = /\b(gurdwara|gurudwara|gurudwar|sangat|sabha|sikh temple)\b/i;
 
@@ -80,12 +101,15 @@ export function isSikhPlace(business: {
   return false;
 }
 
-/** Category art for a listing card, with the Gurdwara banner for Sikh places. */
+/** Category art for a listing card, with the Gurdwara banner for Sikh places and zodiac art for astrologers. */
 export function listingCategoryCover(business: {
   name?: string | null;
   categorySlug?: string | null;
+  subcategorySlug?: string | null;
 }): string | null {
-  return isSikhPlace(business) ? SIKH_COVER : categoryCover(business.categorySlug);
+  if (isSikhPlace(business)) return SIKH_COVER;
+  if (isAstrologer(business)) return ASTROLOGY_COVER;
+  return categoryCover(business.categorySlug);
 }
 
 /** Bazaar-street banner shown on /city hubs that have no dedicated photo. */
@@ -116,17 +140,20 @@ export function categoryCover(
  * The header image for a listing page: the owner's uploaded cover wins, then
  * their city's banner, then their category's, then a generic bazaar banner —
  * so every /business page always has a finished-looking header. A Gurdwara
- * without its own photo shows the Gurdwara banner ahead of the city one.
+ * without its own photo shows the Gurdwara banner ahead of the city one, and
+ * an astrologer shows zodiac art.
  */
 export function listingCover(business: {
   name?: string | null;
   coverUrl?: string | null;
   city?: string | null;
   categorySlug?: string | null;
+  subcategorySlug?: string | null;
 }): string {
   return (
     business.coverUrl ??
     (isSikhPlace(business) ? SIKH_COVER : null) ??
+    (isAstrologer(business) ? ASTROLOGY_COVER : null) ??
     cityCover(business.city) ??
     categoryCover(business.categorySlug) ??
     DEFAULT_COVER

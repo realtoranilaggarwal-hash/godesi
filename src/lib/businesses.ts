@@ -12,6 +12,7 @@ export type BusinessListItem = {
   categoryName: string | null;
   categoryColor: string | null;
   categoryIcon: string | null;
+  subcategorySlug: string | null;
   subcategoryName: string | null;
   city: string;
   country: string | null;
@@ -277,6 +278,7 @@ async function runSearchBusinesses(
         categoryName: row.categoryRef?.name ?? null,
         categoryColor: row.categoryRef?.color ?? null,
         categoryIcon: row.categoryRef?.icon ?? null,
+        subcategorySlug: row.subcategorySlug,
         subcategoryName: row.subcategoryRef?.name ?? null,
         city: row.city,
         country: row.country,
