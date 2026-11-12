@@ -35,7 +35,7 @@ export async function generateMetadata({
     openGraph: {
       images: [
         {
-          url: `${siteUrl()}${venuePath(venue)}/banner`,
+          url: `${siteUrl()}${venuePath(venue)}/banner?v=${venue.updatedAt.getTime()}`,
           width: 1200,
           height: 630,
           alt: `Events at ${venue.name}`,
@@ -44,7 +44,9 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      images: [`${siteUrl()}${venuePath(venue)}/banner`],
+      images: [
+        `${siteUrl()}${venuePath(venue)}/banner?v=${venue.updatedAt.getTime()}`,
+      ],
     },
   };
 }
@@ -244,13 +246,13 @@ export default async function VenuePage({
         </p>
         <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
           <a
-            href={`${path}/banner?download=1`}
+            href={`${path}/banner?v=${venue.updatedAt.getTime()}&download=1`}
             className="rounded-lg bg-violet-600 px-3 py-1.5 text-white hover:bg-violet-700"
           >
             ⬇ Download banner (Facebook / WhatsApp)
           </a>
           <a
-            href={`${path}/banner?size=square&download=1`}
+            href={`${path}/banner?v=${venue.updatedAt.getTime()}&size=square&download=1`}
             className="rounded-lg border border-violet-300 px-3 py-1.5 text-violet-700 hover:bg-violet-50"
           >
             ⬇ Square (Instagram)
