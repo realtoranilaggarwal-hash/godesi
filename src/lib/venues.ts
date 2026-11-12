@@ -129,7 +129,10 @@ export function venuePath(venue: { slug: string | null; id: string }) {
 
 /** Finds a venue by its slug, or by id for links made before slugs existed. */
 export function findVenue(key: string) {
-  return db.venue.findFirst({ where: { OR: [{ slug: key }, { id: key }] } });
+  return db.venue.findFirst({
+    where: { OR: [{ slug: key }, { id: key }] },
+    include: { photos: { orderBy: { sortOrder: "asc" } } },
+  });
 }
 
 /** Venue owners (approved claim) and staff may edit a venue page. */

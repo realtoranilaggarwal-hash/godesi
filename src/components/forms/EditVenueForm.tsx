@@ -18,6 +18,7 @@ export function EditVenueForm({
     website: string | null;
     mapsUrl: string | null;
     halls: string[];
+    photos: { url: string; hall: string | null }[];
   };
 }) {
   const [state, formAction] = useFormState(updateVenueAction, emptyState);
@@ -36,6 +37,22 @@ export function EditVenueForm({
           rows={6}
           defaultValue={venue.halls.join("\n")}
           placeholder={"Grand Ballroom\nCrystal Hall"}
+          className={inputClass}
+        />
+      </Field>
+      <Field
+        label="Photos"
+        hint="One photo link per line. Put the hall first to show it under that hall, e.g. Ballroom | https://…"
+      >
+        <textarea
+          name="photos"
+          rows={6}
+          defaultValue={venue.photos
+            .map((photo) =>
+              photo.hall ? `${photo.hall} | ${photo.url}` : photo.url,
+            )
+            .join("\n")}
+          placeholder="Ballroom | https://…/ballroom.jpg"
           className={inputClass}
         />
       </Field>

@@ -1443,10 +1443,24 @@ model Venue {
 
   events Event[]
   claims VenueClaim[]
+  photos VenuePhoto[]
 
   @@unique([name, city])
   @@index([city])
   @@index([ownerId])
+}
+
+/// A photo on a venue page, optionally of one of its halls.
+model VenuePhoto {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  url       String
+  hall      String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([venueId, sortOrder])
 }
 
 /// A member asking to manage a venue page (address, website, halls).
