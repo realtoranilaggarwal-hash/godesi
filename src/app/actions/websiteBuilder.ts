@@ -515,6 +515,19 @@ export async function approveLookAction(token: string, code?: string) {
   const project = await projectForToken(token);
   rememberProject(project.id);
   if (project.status === "PAID" || project.status === "LIVE") redirect(websitePath(project.id, "/done"));
+  if (project.includedIn) {
+    const now = new Date();
+    await db.websiteProject.update({
+      where: { id: project.id },
+      data: { status: "PAID", approvedAt: project.approvedAt ?? now, paidAt: project.paidAt ?? now },
+    });
+    await emailDesk(
+      `Approved — launch it: ${project.businessName}`,
+      `<p>${escapeHtml(project.businessName)} pressed &ldquo;I love it&rdquo; on their Partner Package website. It's already paid for — put it live.</p>
+       <p><a href="${siteUrl()}/admin/website/${project.id}">Open in the admin</a></p>`,
+    );
+    redirect(websitePath(project.id, "/done"));
+  }
   await db.websiteProject.update({
     where: { id: project.id },
     data: { status: "APPROVED", approvedAt: project.approvedAt ?? new Date() },

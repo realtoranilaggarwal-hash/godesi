@@ -11,6 +11,7 @@ import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { siteUrl } from "@/lib/format";
 import { isPowerUpKey, POWER_UPS, WEBSITE_CATEGORIES } from "@/lib/websiteBuilder";
 import { normalizeCouponCode } from "@/lib/coupons";
+import { PARTNER_PACKAGE_KEY } from "@/lib/partnerPackage";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 const statusSchema = z.object({
@@ -111,7 +112,7 @@ function notesWithCode(notes: string | null, code: string) {
   return rest ? `Shared with code ${code}\n${rest}` : `Shared with code ${code}`;
 }
 
-async function emailPreview(to: string, businessName: string, link: string) {
+async function emailPreview(to: string, businessName: string, link: string, included = false) {
   await sendEmail({
     to,
     replyTo: WEBSITE_OFFER.email,
@@ -121,7 +122,7 @@ async function emailPreview(to: string, businessName: string, link: string) {
       `<h2>Your new website is ready to see</h2>
        <p>Hi! We designed a new website for <strong>${escapeHtml(businessName)}</strong>.</p>
        <p><a href="${link}" style="display:inline-block;background:#4f46e5;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:bold">See my new website</a></p>
-       <p>Under the design you can see the price, the extras you can add and use your discount code. Love it? Press &ldquo;I love it&rdquo; to launch it. Want something different? Press &ldquo;I want changes&rdquo; and tell us.</p>
+       <p>${included ? "It&rsquo;s included in your GoDesi Partner Package, so there&rsquo;s nothing more to pay." : "Under the design you can see the price, the extras you can add and use your discount code."} Love it? Press &ldquo;I love it&rdquo; to launch it. Want something different? Press &ldquo;I want changes&rdquo; and tell us.</p>
        <p>This link is private to you.</p>`,
     ),
   });
@@ -169,7 +170,7 @@ export async function saveDesignLinkAction(
 
     const to = project.email ?? current.user?.email;
     if (!to) return { success: "Saved — no email on file, so copy the private link below and send it on WhatsApp." };
-    await emailPreview(to, project.businessName, link);
+    await emailPreview(to, project.businessName, link, Boolean(project.includedIn));
     return { success: `Preview sent to ${to}.` };
   } catch (error) {
     return fieldError(error);
@@ -205,6 +206,7 @@ const clientPreviewSchema = z.object({
   designUrl: z.string().trim().url("Paste the full design link, starting with https://"),
   code: z.string().trim().max(40).optional(),
   send: z.boolean(),
+  partnerPackage: z.boolean(),
 });
 
 /**
@@ -230,6 +232,7 @@ export async function createClientPreviewAction(
       designUrl: text("designUrl"),
       code: text("code"),
       send: formData.get("send") === "send",
+      partnerPackage: formData.get("partnerPackage") === "on",
     });
     const previewToken = randomBytes(18).toString("base64url");
     const code = input.code ? normalizeCouponCode(input.code) : "";
@@ -250,10 +253,11 @@ export async function createClientPreviewAction(
         previewToken,
         previewSentAt: sending ? new Date() : null,
         staffNotes: notesWithCode(null, code),
+        includedIn: input.partnerPackage ? PARTNER_PACKAGE_KEY : null,
       },
     });
     if (sending && input.email) {
-      await emailPreview(input.email, project.businessName, lookLink(previewToken, code));
+      await emailPreview(input.email, project.businessName, lookLink(previewToken, code), input.partnerPackage);
       note = "&sent=1";
     }
     id = project.id;

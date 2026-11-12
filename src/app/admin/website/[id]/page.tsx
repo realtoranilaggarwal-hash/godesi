@@ -66,6 +66,11 @@ export default async function AdminWebsiteProjectPage({
           ← Websites
         </Link>
         <h1 className="text-2xl font-bold">{project.businessName}</h1>
+        {project.includedIn ? (
+          <p className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
+            Included in $500 Partner Package — no charge
+          </p>
+        ) : null}
         <p className="text-sm text-slate-600">
           {custom ? "🎨 Custom design" : "🤖 AI website"} · {project.category} · {project.city} · {project.status}
           {project.paidAt ? ` · paid ${project.paidAt.toLocaleDateString()}` : ""}
