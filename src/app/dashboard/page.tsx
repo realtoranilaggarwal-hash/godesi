@@ -137,6 +137,10 @@ export default async function DashboardPage({
           </DashboardTabs>
         </div>
 
+        {business && pageStats ? (
+          <PageStatsCard stats={pageStats} slug={business.slug} />
+        ) : null}
+
         <EarnStrip
           user={user}
           balance={balance.balance}
@@ -364,9 +368,6 @@ export default async function DashboardPage({
 
         {business ? (
           <>
-            {pageStats ? (
-              <PageStatsCard stats={pageStats} slug={business.slug} />
-            ) : null}
           <div className="grid gap-5 lg:grid-cols-3">
             <Card className="lg:col-span-2">
               <div className="flex flex-wrap items-center justify-between gap-2">
