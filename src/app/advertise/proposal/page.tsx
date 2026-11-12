@@ -64,10 +64,9 @@ const PACKAGE_ROWS: { item: string; value: string }[] = [
   { item: "Handmade custom website", value: "$500" },
   { item: "300×250 side banner on GoDesi.com for 1 year", value: usd(AD_PLACEMENTS.SIDEBAR.priceUsd * 12) },
   { item: "Featured listing on GoDesi.com for 1 year", value: usd(PLANS.PREMIUM.terms.YEAR?.usd ?? 100) },
-  { item: "GoDesi Elite interview with a 30–60 second video", value: "$500 / year" },
+  { item: "GoDesi Elite interview with a 30–60 second video", value: "$500" },
   { item: "Your banner inside the hall at the New Year's Eve party", value: "$300" },
   { item: "1 ticket to enjoy the New Year's Eve party", value: "$100" },
-  { item: "Email marketing — ~100 emails a day with your logo on the flyer", value: "$300 / month" },
 ];
 
 function Section({
@@ -292,7 +291,7 @@ export default async function ProposalPage({
           items={[
             "About 100 emails a day to the GoDesi database, with your logo on the flyer.",
             <>
-              Normally $300 a month — <strong>included in the package</strong>.
+              $300 a month — <strong>add it to any package</strong>.
             </>,
           ]}
         />
@@ -327,7 +326,7 @@ export default async function ProposalPage({
               <tr className="border-b border-amber-300">
                 <td className="py-2 pr-3 font-bold text-slate-900">Total value</td>
                 <td className="py-2 text-right font-bold text-slate-500 line-through">
-                  $1,500+
+                  $1,848
                 </td>
               </tr>
               <tr>
