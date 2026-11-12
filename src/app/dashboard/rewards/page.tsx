@@ -13,6 +13,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { RedeemPanel } from "@/components/forms/RedeemPanel";
 import { InviteFriends } from "@/components/forms/InviteFriends";
 import { SidebarBanners } from "@/components/Banners";
+import { DashboardTabs } from "@/components/DashboardTabs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Referrals & rewards" };
@@ -57,6 +58,7 @@ export default async function RewardsPage() {
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
+        <DashboardTabs />
         <div>
           <h1 className="text-2xl font-bold">Referrals & rewards 🎁</h1>
           <p className="text-sm text-slate-600">

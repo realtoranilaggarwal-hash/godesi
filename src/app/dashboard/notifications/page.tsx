@@ -9,6 +9,7 @@ import {
   setMorningEmailAction,
 } from "@/app/actions/rewards";
 import { Card, EmptyState } from "@/components/ui";
+import { DashboardTabs } from "@/components/DashboardTabs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Notifications" };
@@ -34,6 +35,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
+      <DashboardTabs />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">Notifications 🔔</h1>
         {unread ? (

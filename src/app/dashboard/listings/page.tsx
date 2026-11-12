@@ -7,6 +7,7 @@ import { KIND_LABELS, priceLabel } from "@/lib/listings";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 import { deleteListingAction } from "@/app/actions/listings";
 import { PostAnything } from "@/components/PostAnything";
+import { DashboardTabs } from "@/components/DashboardTabs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "My listings" };
@@ -35,6 +36,7 @@ export default async function MyListingsPage() {
 
   return (
     <div className="space-y-4">
+      <DashboardTabs />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">My listings</h1>

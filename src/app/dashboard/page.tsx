@@ -32,6 +32,7 @@ import { PostAnything } from "@/components/PostAnything";
 import { BusinessNextSteps } from "@/components/BusinessNextSteps";
 import { MorningEmailSignup } from "@/components/MorningEmailSignup";
 import { VdoEbookOffer } from "@/components/VdoEbookOffer";
+import { DashboardTabs } from "@/components/DashboardTabs";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -131,22 +132,9 @@ export default async function DashboardPage({
                 : null}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <LinkButton href="/dashboard/plan" variant="secondary">
-              My plan
-            </LinkButton>
-            <LinkButton href="/dashboard/listings" variant="secondary">
-              My listings
-            </LinkButton>
-            <LinkButton href="/dashboard/rewards" variant="secondary">
-              Refer &amp; earn
-            </LinkButton>
-            <LinkButton href="/dashboard/notifications" variant="secondary">
-              Notifications
-            </LinkButton>
-            <LinkButton href="/leads">Browse leads</LinkButton>
+          <DashboardTabs>
             <SignOutButton />
-          </div>
+          </DashboardTabs>
         </div>
 
         <EarnStrip
