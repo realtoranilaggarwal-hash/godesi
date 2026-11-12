@@ -8,8 +8,9 @@
  */
 import type { BannerSlot } from "@prisma/client";
 import { db } from "@/lib/db";
+import { NYE_2027_EVENT_SLUG, nyeSponsorLevel } from "@/lib/nyeSponsorLevels";
 
-const SLUG = "new-year-eves-party-2027-edison";
+const SLUG = NYE_2027_EVENT_SLUG;
 const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const REVIEWS_ALBUM = "https://photos.app.goo.gl/nQrusW5e5pojmj7P7";
 
@@ -71,42 +72,9 @@ const TIERS: TierSpec[] = [
   { name: "Adult (10+)", match: ["General"], price: 150, seats: 60, salesStart: LATE_START },
   { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 20, salesStart: LATE_START },
   { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
-  {
-    kind: "SPONSOR", name: "Silver sponsor", price: 1000, seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25,
-    perks: [
-      "Your logo on the flyer, the standee and the event pages on GoDesi.com and NewYearEvesParty.com",
-      "Linked to your GoDesi business page",
-      "Thank-you announcement on stage during the party",
-      "Thank-you post on GoDesi News",
-      "2 tickets included",
-      "320×100 banner on GoDesi.com for 1 year",
-      "25 Wall of Fame bricks on GoDesi.com ($250 value)",
-    ],
-  },
-  {
-    kind: "SPONSOR", name: "Gold sponsor", price: 2500, seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75,
-    perks: [
-      "Everything in Silver",
-      "Your banner inside the Big Ball Room",
-      "Your logo or 30-second clip on the LED screen",
-      "4 tickets included",
-      "300×250 side banner on GoDesi.com for 1 year (instead of 320×100)",
-      "75 Wall of Fame bricks on GoDesi.com ($750 value)",
-    ],
-  },
-  {
-    kind: "SPONSOR", name: "Platinum sponsor", price: 5000, seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200,
-    perks: [
-      "Everything in Gold",
-      "\"Countdown to 2027 presented by <your business>\" at midnight",
-      "Your standee at the entrance and your logo on the photo backdrop",
-      "Reserved table for 10 with champagne and a \"Table sponsored by\" marker",
-      "Vendor table to show your business at the party",
-      "10 tickets included",
-      "300×600 large side banner on GoDesi.com for 1 year (instead of 300×250)",
-      "200 Wall of Fame bricks on GoDesi.com ($2,000 value)",
-    ],
-  },
+  { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
+  { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
+  { kind: "SPONSOR", ...nyeSponsorLevel("Platinum sponsor"), seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200 },
   { kind: "SPONSOR", name: "Standee sponsor", price: 350, seats: 2, admits: 2, bannerMonths: 12, perks: ["Your standee at the entrance", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "Banner inside the hall", price: 300, seats: 4, admits: 2, bannerMonths: 12, perks: ["Your banner inside the Big Ball Room", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "LED screen logo or clip", price: 500, seats: 3, admits: 2, bannerMonths: 12, perks: ["Your logo or video clip on the LED screen", "2 tickets included", BANNER_YEAR] },
