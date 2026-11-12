@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { venuePath } from "@/lib/venues";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { getCategoryTree } from "@/lib/directory";
 import { EventCard } from "@/components/EventCard";
@@ -193,6 +195,22 @@ export default async function EventsPage({
       when ||
       selectedFeatures.length,
   );
+  // A search for just a venue lands on that venue's own page, so the one
+  // address searches index is the venue page rather than a filtered list.
+  const venueName = venue?.trim();
+  const venueOnly = Object.entries(searchParams).every(
+    ([key, value]) => key === "venue" || !value || !value.length,
+  );
+  if (venueName && venueOnly) {
+    const matches = await db.venue.findMany({
+      where: { name: { equals: venueName, mode: "insensitive" } },
+      select: { id: true, slug: true },
+      take: 2,
+    });
+    // Same name in two cities: keep the list, which shows both.
+    if (matches.length === 1) permanentRedirect(venuePath(matches[0]));
+  }
+
   const categories = await getCategoryTree();
   const scope = category
     ? [

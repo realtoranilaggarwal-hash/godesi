@@ -4,6 +4,7 @@ import { chatterPath } from "@/lib/chatter";
 import { siteUrl } from "@/lib/format";
 import { cachedQuery } from "@/lib/cache";
 import { newsPath } from "@/lib/newsLinks";
+import { venuePath } from "@/lib/venues";
 import { popularCities } from "@/lib/cities";
 import {
   MIN_INDEXABLE_RESULTS,
@@ -27,7 +28,7 @@ const SITEMAP_TTL = 3600;
 
 /** Dates are stringified by the cache, so the rows carry ISO timestamps. */
 const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
-  const [businesses, categories, events, reports, posts, worship, clubs] =
+  const [businesses, categories, events, reports, posts, worship, clubs, venues] =
     await Promise.all([
       // A card or event with nothing on it but a name is left out: submitting
       // thin pages is what the publisher policies count against the whole domain.
@@ -86,6 +87,7 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
         where: { visibility: "PUBLIC" },
         select: { slug: true, updatedAt: true },
       }),
+      db.venue.findMany({ select: { slug: true, id: true, updatedAt: true } }),
     ]);
   // A lone one-liner is a thin page; only posts people answered or liked go in.
   const chats = await db.chatterPost.findMany({
@@ -155,6 +157,10 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
       slug: row.slug,
       updatedAt: row.updatedAt.toISOString(),
     })),
+    venues: venues.map((row) => ({
+      path: venuePath(row),
+      updatedAt: row.updatedAt.toISOString(),
+    })),
     chats: chats.map((row) => ({
       id: row.id,
       updatedAt: (row.editedAt ?? row.createdAt).toISOString(),
@@ -165,7 +171,17 @@ const sitemapRows = cachedQuery("sitemap-rows", SITEMAP_TTL, async () => {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const [
-    { businesses, categories, events, reports, posts, worship, clubs, chats },
+    {
+      businesses,
+      categories,
+      events,
+      reports,
+      posts,
+      worship,
+      clubs,
+      venues,
+      chats,
+    },
     cities,
     professionals,
   ] = await Promise.all([
@@ -316,6 +332,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...events.map((event) => ({
       url: `${base}/events/${event.slug}`,
       lastModified: new Date(event.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
+    ...venues.map((venue) => ({
+      url: `${base}${venue.path}`,
+      lastModified: new Date(venue.updatedAt),
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),
