@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { slugify } from "@/lib/slug";
+import { venueNameKey } from "@/lib/venueNames";
 
 /** How many venues the event form's dropdown offers. */
 const SUGGESTION_LIMIT = 500;
@@ -24,6 +25,25 @@ async function uniqueVenueSlug(name: string, city: string, skipId?: string) {
  * are only filled in, never overwritten with blanks. Matching ignores case so a
  * venue picked from the list is found again after the form title-cases it.
  */
+/**
+ * The venue already listed under this name in this city, ignoring spelling
+ * differences like "Royal Albert's Palace" vs "Royal Albert Palace".
+ */
+export async function findSameVenue(name: string, city: string) {
+  const inCity = await db.venue.findMany({
+    where: { city: { equals: city, mode: "insensitive" } },
+  });
+  const lower = name.trim().toLowerCase();
+  const key = venueNameKey(name);
+  return (
+    inCity.find((venue) => venue.name.toLowerCase() === lower) ??
+    (key
+      ? inCity.find((venue) => venueNameKey(venue.name) === key)
+      : undefined) ??
+    null
+  );
+}
+
 export async function rememberVenue({
   name,
   city,
@@ -43,12 +63,7 @@ export async function rememberVenue({
   website?: string | null;
   hall?: string | null;
 }) {
-  const existing = await db.venue.findFirst({
-    where: {
-      name: { equals: name, mode: "insensitive" },
-      city: { equals: city, mode: "insensitive" },
-    },
-  });
+  const existing = await findSameVenue(name, city);
 
   if (!existing) {
     return db.venue.create({
@@ -94,6 +109,7 @@ export function venueSuggestions() {
     take: SUGGESTION_LIMIT,
     select: {
       id: true,
+      slug: true,
       name: true,
       city: true,
       state: true,
@@ -114,4 +130,17 @@ export function venuePath(venue: { slug: string | null; id: string }) {
 /** Finds a venue by its slug, or by id for links made before slugs existed. */
 export function findVenue(key: string) {
   return db.venue.findFirst({ where: { OR: [{ slug: key }, { id: key }] } });
+}
+
+/** Venue owners (approved claim) and staff may edit a venue page. */
+export function canEditVenue(
+  user: { id: string; role: string } | null,
+  venue: { ownerId: string | null },
+) {
+  if (!user) return false;
+  return (
+    user.role === "ADMIN" ||
+    user.role === "MODERATOR" ||
+    venue.ownerId === user.id
+  );
 }

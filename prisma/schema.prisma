@@ -405,6 +405,10 @@ model User {
   eventClaims  EventClaim[]
   eliteOrders  EliteOrder[]
 
+  /// Venues this member runs (approved venue claims).
+  ownedVenues Venue[]      @relation("VenueOwner")
+  venueClaims VenueClaim[]
+
   /// Sales prospects this moderator is working through.
   prospects Prospect[]
 
@@ -1418,9 +1422,9 @@ enum EventPartnerStatus {
 
 /// A place events happen at. Saved once so later organisers reuse it with its halls.
 model Venue {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   /// Public address, e.g. /venues/royal-alberts-palace-fords
-  slug      String?  @unique
+  slug      String?   @unique
   name      String
   city      String
   state     String?
@@ -1429,14 +1433,39 @@ model Venue {
   mapsUrl   String?
   website   String?
   /// Every hall/room organisers have used at this venue.
-  halls     String[] @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  halls     String[]  @default([])
+  /// The member who runs the venue, once staff approve their claim.
+  ownerId   String?
+  owner     User?     @relation("VenueOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  claimedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   events Event[]
+  claims VenueClaim[]
 
   @@unique([name, city])
   @@index([city])
+  @@index([ownerId])
+}
+
+/// A member asking to manage a venue page (address, website, halls).
+model VenueClaim {
+  id      String  @id @default(cuid())
+  venueId String
+  venue   Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// How the claimant runs the venue.
+  message String
+  phone   String?
+  email   String?
+
+  status    ClaimStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+
+  @@unique([venueId, userId])
+  @@index([status])
 }
 
 model EventSpeaker {

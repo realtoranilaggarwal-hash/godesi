@@ -434,7 +434,7 @@ export async function createEventAction(
         startsAt,
         endsAt,
         timeZone: zone,
-        venue: titleCase(parsed.data.venue),
+        venue: venueRef?.name ?? titleCase(parsed.data.venue),
         hallName: venueRef ? parsed.data.hallName || null : null,
         hallCapacity: venueRef ? (parsed.data.hallCapacity ?? null) : null,
         venueUrl: venueRef ? (parsed.data.venueUrl ?? null) : null,
