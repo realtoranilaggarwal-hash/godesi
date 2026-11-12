@@ -14,6 +14,7 @@ import { confirmGigOrder } from "@/lib/gigs";
 import { confirmBooking } from "@/lib/bookings";
 import { confirmWebsitePayment } from "@/lib/websiteProjects";
 import { confirmCourseEnrollment } from "@/app/actions/course";
+import { notifyPartnerPackagePaid } from "@/lib/partnerPackage";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -152,6 +153,8 @@ export async function POST(request: Request) {
           disputeId: reviewDisputeId,
           reference: session.id,
         });
+      } else if (session.metadata?.kind === "partner-package") {
+        await notifyPartnerPackagePaid(session);
       } else if (session.metadata?.kind === "bundle" && userId) {
         const months = Number(session.metadata?.months ?? 12);
         await grantBundle({

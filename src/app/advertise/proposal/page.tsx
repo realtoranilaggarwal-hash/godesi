@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PrintButton } from "@/components/PrintButton";
+import { PartnerPackageForm } from "@/components/advertise/PartnerPackageForm";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { cachedQuery } from "@/lib/cache";
 import { db } from "@/lib/db";
+import { PARTNER_PACKAGE } from "@/lib/partnerPackage";
 import { PLANS } from "@/lib/plans";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
@@ -102,20 +104,42 @@ function Bullets({ items }: { items: React.ReactNode[] }) {
   );
 }
 
-export default async function ProposalPage() {
+export default async function ProposalPage({
+  searchParams,
+}: {
+  searchParams: { paid?: string };
+}) {
   const levels = await sponsorLevels();
 
   return (
     <div id="partner-proposal" className="mx-auto max-w-4xl space-y-5">
       <style dangerouslySetInnerHTML={{ __html: PRINT_CSS }} />
 
+      {searchParams.paid ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 print:hidden">
+          <p className="font-black">🎉 Payment received — welcome to the GoDesi Partner Package!</p>
+          <p className="mt-1">
+            We&apos;ve emailed your receipt. Our team will call you within 1–2 business days to
+            collect your logo, photos and details.
+          </p>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <p className="text-sm text-slate-500">
           Share this page with a client, or save it as a PDF to email.
         </p>
-        <PrintButton className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 print:hidden">
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="#pay"
+            className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-700"
+          >
+            💳 Pay ${PARTNER_PACKAGE.priceUsd}
+          </a>
+          <PrintButton className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 print:hidden">
           🖨️ Download / Print PDF
         </PrintButton>
+        </div>
       </div>
 
       <header className="rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white print:rounded-xl">
@@ -311,7 +335,7 @@ export default async function ProposalPage() {
                   Partner price
                 </td>
                 <td className="py-2 text-right text-2xl font-black text-amber-700">
-                  $500
+                  {usd(PARTNER_PACKAGE.priceUsd)}
                 </td>
               </tr>
             </tfoot>
@@ -337,6 +361,19 @@ export default async function ProposalPage() {
               {SITE.salesEmail}
             </a>
           </p>
+          <p className="mt-1 hidden text-sm print:block">
+            Or pay online at{" "}
+            <span className="font-bold text-amber-300">godesi.com/advertise/proposal</span>
+          </p>
+        </div>
+        <div id="pay" className="mt-4 scroll-mt-24 rounded-xl border border-amber-300 bg-white p-4 print:hidden">
+          <p className="text-lg font-black text-slate-900">
+            Pay {usd(PARTNER_PACKAGE.priceUsd)} online and get started
+          </p>
+          <p className="mb-3 mt-1 text-sm text-slate-600">
+            Fill this in and pay securely by card. We&apos;ll call you within 1–2 business days.
+          </p>
+          <PartnerPackageForm price={PARTNER_PACKAGE.priceUsd} />
         </div>
       </section>
     </div>
