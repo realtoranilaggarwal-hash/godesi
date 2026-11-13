@@ -200,6 +200,7 @@ export async function saveResourceLinkAction(
 
     revalidatePath("/resources");
     revalidatePath("/admin");
+    if (data.placement === "money-transfer") revalidatePath("/usd-to-inr");
     return { success: id ? "Link updated." : "Link added." };
   } catch (error) {
     return fieldError(error);

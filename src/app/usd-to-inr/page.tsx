@@ -7,6 +7,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { siteUrl } from "@/lib/format";
 import { Card } from "@/components/ui";
+import { SendMoneyBox } from "@/components/SendMoneyBox";
 
 export const revalidate = 3600;
 
@@ -18,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ? `USD to INR today: $1 = ₹${inr.perDollar.toFixed(2)} — dollar to rupee rate`
       : "USD to INR today — dollar to rupee rate",
     description:
-      "Today's US dollar to Indian rupee reference rate, a converter for sending money home, and dollar rates for Pakistan, Bangladesh, Sri Lanka, Nepal and the UAE.",
+      "Today's US dollar to Indian rupee reference rate, a converter for sending money home, a comparison of ways to send money from the USA to India (Remitly, Wise, Western Union and more), and dollar rates for Pakistan, Bangladesh, Sri Lanka, Nepal and the UAE.",
     alternates: { canonical: "/usd-to-inr" },
   };
 }
@@ -83,6 +84,8 @@ export default async function UsdToInrPage() {
             </p>
           </Card>
         )}
+
+        <SendMoneyBox />
 
         {others.length ? (
           <Card>

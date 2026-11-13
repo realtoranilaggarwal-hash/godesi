@@ -52,6 +52,12 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // The send-money-to-India comparison lives on the USD → INR page.
+        source: "/money-transfer-india",
+        destination: "/usd-to-inr#send-money",
+        permanent: false,
+      },
+      {
         // One proposal page: the duplicate /proposal points to the one with online payment.
         source: "/proposal",
         destination: "/advertise/proposal",
