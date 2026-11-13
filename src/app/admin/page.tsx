@@ -29,6 +29,7 @@ export default async function AdminPage() {
     pendingWorship,
     openRedemptions,
     pendingWall,
+    paidVideos,
   ] = await Promise.all([
     db.business.count(),
     db.business.count({ where: { status: "PENDING" } }),
@@ -42,6 +43,7 @@ export default async function AdminPage() {
     db.worshipPlace.count({ where: { status: "PENDING" } }),
     db.redemption.count({ where: { status: "REQUESTED" } }),
     db.wallBlock.count({ where: { status: "PENDING" } }),
+    db.videoOrder.count({ where: { status: "PAID" } }),
   ]);
 
   const waiting: { href: string; label: string; count: number }[] = [
@@ -58,6 +60,7 @@ export default async function AdminPage() {
       count: pendingWall,
     },
     { href: "/admin/upi", label: "UPI payments to check", count: pendingUpi },
+    { href: "/admin/videos", label: "AI videos to make", count: paidVideos },
     {
       href: "/admin/news#pending",
       label: "Stories to review",

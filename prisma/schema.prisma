@@ -454,6 +454,7 @@ model User {
   gigMessages     GigMessage[]
   gigReviews      GigReview[]
   websiteProjects WebsiteProject[]
+  videoOrders     VideoOrder[]
   dailySpins      DailySpin[]
   scratchCards    ScratchCard[]
 
@@ -3630,4 +3631,51 @@ model SiteVote {
 
   @@unique([siteKey, voterHash])
   @@index([siteKey])
+}
+
+enum VideoOrderStatus {
+  /// Form filled, checkout started but not paid.
+  PENDING
+  /// Paid; the desk makes the video.
+  PAID
+  /// Video sent to the buyer on WhatsApp.
+  DELIVERED
+  CANCELLED
+}
+
+/// A $50 AI spokesperson video ordered from /video-order.
+model VideoOrder {
+  id     String           @id @default(cuid())
+  userId String?
+  user   User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status VideoOrderStatus @default(PENDING)
+
+  businessName     String
+  /// What the presenter says, up to 80 words.
+  script           String
+  /// Phone/WhatsApp shown on screen in the video.
+  contactPhone     String
+  /// Website or godesi.com link shown in the video.
+  websiteUrl       String?
+  language         String
+  logoUrl          String?
+  /// Buyer's WhatsApp, where the finished video is sent.
+  deliveryWhatsapp String
+  email            String?
+
+  priceMinor            Int
+  currency              String    @default("USD")
+  stripeSessionId       String?   @unique
+  stripePaymentIntentId String?
+  paidAt                DateTime?
+  deliveredAt           DateTime?
+  /// Link to the finished video, for the desk's record.
+  videoUrl              String?
+  revisionUsed          Boolean   @default(false)
+  staffNotes            String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
 }

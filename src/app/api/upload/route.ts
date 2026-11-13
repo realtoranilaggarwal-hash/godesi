@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { mediaLimit } from "@/lib/plans";
 import { storeImage, uploadsEnabled, validateImage } from "@/lib/uploads";
 import { loadProject } from "@/lib/websiteProjects";
+import { VIDEO_OFFER } from "@/lib/videoOffer";
 
 const WEBSITE_UPLOAD_LIMIT = 12;
 
@@ -16,6 +17,7 @@ const FOLDERS = {
   banner: "banners",
   gig: "gigs",
   website: "websites",
+  video: "videos",
 } as const;
 
 type Purpose = keyof typeof FOLDERS;
@@ -47,6 +49,9 @@ export async function POST(request: Request) {
 
   const invalid = validateImage(file);
   if (invalid) return NextResponse.json({ error: invalid }, { status: 400 });
+  if (purposeRaw === "video" && file.size > VIDEO_OFFER.logoMaxBytes) {
+    return NextResponse.json({ error: "Images up to 5 MB, please." }, { status: 400 });
+  }
 
   // Website projects start before sign-in: the project cookie stands in for a
   // session, and each picture is attached to the project straight away.

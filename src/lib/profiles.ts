@@ -51,6 +51,7 @@ export const RESERVED_USERNAMES = new Set([
   "help",
   "howto",
   "about",
+  "video-order",
   "add-business",
   "alumni",
   "badge",
