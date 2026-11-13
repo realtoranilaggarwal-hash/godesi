@@ -426,7 +426,7 @@ export async function launchCheckoutAction(
   redirect(url);
 }
 
-/* ---------- custom designed website ($299) ---------- */
+/* ---------- custom designed website ---------- */
 
 const customSchema = z.object({
   businessName: z.string().trim().min(2, "Tell us your business name").max(120),
@@ -443,7 +443,7 @@ async function emailDesk(subject: string, body: string) {
   await sendEmail({ to: WEBSITE_OFFER.email, subject, html: shell(subject, body) });
 }
 
-/** The $299 order: links, example sites and up to ten pages of the owner's words. */
+/** The custom website order: links, example sites and up to ten pages of the owner's words. */
 export async function startCustomWebsiteAction(
   _prev: ActionState,
   formData: FormData,

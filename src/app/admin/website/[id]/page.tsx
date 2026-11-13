@@ -185,13 +185,16 @@ export default async function AdminWebsiteProjectPage({
               <>
                 {searchParams.new ? (
                   <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-                    ✓ Client preview created{searchParams.sent ? ` and emailed to ${project.email}` : ""}. Copy the link below to send it on WhatsApp.
+                    ✓ Client preview created{searchParams.sent ? ` and emailed to ${project.email}` : ""}. Send it with the WhatsApp or email button below, or copy the link.
                   </p>
                 ) : null}
                 <ShareLookLink
                   base={`${siteUrl()}/website/look/${project.previewToken}`}
                   key={sharedCode}
                   initialCode={sharedCode}
+                  businessName={project.businessName}
+                  whatsapp={project.whatsapp ?? project.user?.phone}
+                  email={project.email ?? project.user?.email}
                 />
                 {project.previewSentAt ? (
                   <p className="mt-1 text-xs text-slate-500">Emailed {project.previewSentAt.toLocaleString()}</p>

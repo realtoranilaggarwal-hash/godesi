@@ -9,7 +9,7 @@ export const WEBSITE_OFFER = {
   /** The same hosting paid a year at a time. */
   yearlyUsd: 100,
   /** One-time price of a site our designer makes from the owner's pages. */
-  customPriceUsd: 299,
+  customPriceUsd: 500,
   customPages: 10,
   /** Site changes hosting includes: one a month, or twelve a year on yearly. */
   changesPerMonth: 1,

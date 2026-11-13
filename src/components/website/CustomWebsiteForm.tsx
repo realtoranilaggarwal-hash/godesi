@@ -22,7 +22,7 @@ function SendButton() {
   );
 }
 
-/** The $299 order form: links, sites they like, and up to ten pages of words. */
+/** The custom website order form: links, sites they like, and up to ten pages of words. */
 export function CustomWebsiteForm({
   defaults,
 }: {

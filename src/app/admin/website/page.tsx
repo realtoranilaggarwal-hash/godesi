@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { deskFallback } from "@/lib/adminSections";
 import { loadPowerUps } from "@/lib/websiteProjects";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { createClientPreviewAction, savePowerUpPricesAction } from "@/app/actions/adminWebsite";
 import { ActionForm } from "@/components/gigs/GigForms";
 import { Badge, Card, Field, inputClass } from "@/components/ui";
@@ -85,9 +86,10 @@ export default async function AdminWebsitePage() {
       <Card>
         <h2 className="font-bold">🎨 Send a design to a new client</h2>
         <p className="mb-3 text-xs text-slate-500">
-          For a client who hasn&apos;t ordered online. Paste the design you made; they get a private
-          GoDesi link showing the design, the $299 price, hosting, extras and a discount-code box.
-          The design address is never shown to them.
+          For a client with no GoDesi account. Paste the link to the design you made and press
+          &ldquo;Create private link&rdquo;. On the next page, send it with the WhatsApp or email button. They see
+          the design with the ${WEBSITE_OFFER.customPriceUsd} price, hosting, extras and a discount-code box, and can
+          pay right there or press &ldquo;I want changes&rdquo;. The design address is never shown to them.
         </p>
         <ActionForm action={createClientPreviewAction} submitLabel="Create private link" pendingLabel="Creating…">
           <div className="grid gap-3 sm:grid-cols-2">
