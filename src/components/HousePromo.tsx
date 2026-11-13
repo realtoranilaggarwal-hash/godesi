@@ -8,6 +8,14 @@ import Link from "next/link";
  */
 const PROMOS = [
   {
+    emoji: "🌐",
+    title: "Websites from $99",
+    text: "AI-built in minutes, or handmade by our designer. Preview free.",
+    cta: "See website plans",
+    href: "/website",
+    tone: "from-indigo-600 to-fuchsia-600",
+  },
+  {
     emoji: "🏪",
     title: "List your business free",
     text: "A page with photos, reviews, WhatsApp and a QR card.",

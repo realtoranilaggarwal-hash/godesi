@@ -22,6 +22,7 @@ import { HousePromo } from "@/components/HousePromo";
 import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { SmallBannerRail } from "@/components/SmallBannerRail";
+import { WebsitePromoCard } from "@/components/WebsitePromoCard";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
 const ADSENSE_SLOTS: Partial<Record<BannerSlot, string | undefined>> = {
@@ -186,6 +187,8 @@ export async function SidebarBanners({
       className="hidden w-[260px] shrink-0 space-y-4 lg:order-last lg:block"
       aria-label="Sponsored"
     >
+      <WebsitePromoCard />
+
       {slim ? null : (
         <>
           <CategoryTree groups={categories} />
