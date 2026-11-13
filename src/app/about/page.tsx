@@ -74,12 +74,20 @@ export default async function AboutPage() {
         <li>Earn points for inviting others and spend them on ads and upgrades.</li>
       </ul>
 
-      <h2>Marketing — watch how Godesi promotes you</h2>
+      <h2 id="shorts" className="scroll-mt-28">
+        GoDesi Shorts — watch how Godesi promotes you
+      </h2>
+      <p>
+        Short vertical videos with our AI presenter. Want one about your
+        business?{" "}
+        <Link href="/video-order">Order your own AI video for $50</Link> — you
+        send the words, we WhatsApp you the video.
+      </p>
       <div className="not-prose">
         <PlaylistGallery
           url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
           owner="Godesi"
-          heading="Godesi marketing videos"
+          heading="GoDesi Shorts"
         />
       </div>
 

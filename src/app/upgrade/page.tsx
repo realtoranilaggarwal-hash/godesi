@@ -20,6 +20,7 @@ import { formatMinor } from "@/lib/format";
 import { UpgradeCart } from "@/components/UpgradeCart";
 import { Alert, Card, inputClass } from "@/components/ui";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { VIDEO_OFFER } from "@/lib/videoOffer";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -247,6 +248,31 @@ export default async function UpgradePage({
             Continue →
           </button>
         </form>
+      </Card>
+
+      <Card className="border-fuchsia-200">
+        <h3 className="text-lg font-bold">
+          🎬 AI video for your business — ${VIDEO_OFFER.priceUsd}
+        </h3>
+        <p className="mt-1 text-sm text-slate-600">
+          A talking AI presenter video about your business, like our GoDesi
+          Shorts. You send the words, we make the video and WhatsApp it back to
+          you.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <Link
+            href="/video-order"
+            className="rounded-xl bg-fuchsia-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-fuchsia-700"
+          >
+            Order my video →
+          </Link>
+          <Link
+            href={VIDEO_OFFER.examplesHref}
+            className="text-sm font-semibold text-indigo-600"
+          >
+            See examples →
+          </Link>
+        </div>
       </Card>
 
       <Card>

@@ -56,6 +56,7 @@ export async function storeImage({
     | "banners"
     | "gigs"
     | "websites"
+    | "videos"
     | "chatter";
   ownerId: string;
 }) {

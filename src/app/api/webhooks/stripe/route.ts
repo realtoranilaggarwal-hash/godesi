@@ -13,6 +13,7 @@ import { confirmReviewDispute } from "@/lib/reviewDisputes";
 import { confirmGigOrder } from "@/lib/gigs";
 import { confirmBooking } from "@/lib/bookings";
 import { confirmWebsitePayment } from "@/lib/websiteProjects";
+import { confirmVideoOrder } from "@/lib/videoOrders";
 import { confirmCourseEnrollment } from "@/app/actions/course";
 import { notifyPartnerPackagePaid } from "@/lib/partnerPackage";
 import { db } from "@/lib/db";
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
       const gigOrderId = session.metadata?.gigOrderId;
       const bookingId = session.metadata?.bookingId;
       const websiteProjectId = session.metadata?.websiteProjectId;
+      const videoOrderId = session.metadata?.videoOrderId;
       const courseEnrollmentId = session.metadata?.courseEnrollmentId;
       const userId = session.metadata?.userId ?? session.client_reference_id;
       const plan = session.metadata?.plan;
@@ -139,6 +141,16 @@ export async function POST(request: Request) {
           setupMinor: session.amount_total ?? 0,
           metadata: session.metadata,
         });
+      } else if (session.metadata?.kind === "ai-video" && videoOrderId) {
+        await confirmVideoOrder({
+          orderId: videoOrderId,
+          sessionId: session.id,
+          paymentIntentId:
+            typeof session.payment_intent === "string"
+              ? session.payment_intent
+              : (session.payment_intent?.id ?? null),
+          email: session.customer_details?.email,
+        });
       } else if (session.metadata?.kind === "course" && courseEnrollmentId) {
         await confirmCourseEnrollment({
           enrollmentId: courseEnrollmentId,
@@ -185,7 +197,8 @@ export async function POST(request: Request) {
         userId &&
         session.metadata?.kind !== "ticket" &&
         session.metadata?.kind !== "gig" &&
-        session.metadata?.kind !== "website"
+        session.metadata?.kind !== "website" &&
+        session.metadata?.kind !== "ai-video"
       ) {
         await recordCouponFromMetadata({
           metadata: session.metadata,

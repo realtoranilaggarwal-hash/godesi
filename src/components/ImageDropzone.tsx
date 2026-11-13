@@ -39,7 +39,8 @@ export type UploadPurpose =
   | "listing"
   | "banner"
   | "gig"
-  | "website";
+  | "website"
+  | "video";
 
 export function ImageDropzone({
   purpose,
