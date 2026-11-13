@@ -57,9 +57,22 @@ export async function voteDesignAction(input: { projectId: string; vote: string;
   const ip = (store.get("x-forwarded-for") ?? "").split(",")[0].trim() || store.get("x-real-ip") || "";
   const voterHash = createHash("sha256").update(`design-vote|${ip}|${userAgent}`).digest("hex");
   const jar = cookies();
-  let sessionId = jar.get(SESSION_COOKIE)?.value;
-  if (!sessionId || !/^[A-Za-z0-9_-]{16,64}$/.test(sessionId)) {
-    sessionId = randomBytes(16).toString("base64url");
+  const cookieSid = jar.get(SESSION_COOKIE)?.value;
+  const knownSid = cookieSid && /^[A-Za-z0-9_-]{16,64}$/.test(cookieSid) ? cookieSid : null;
+
+  // Repeats inside a day are accepted quietly but not counted twice.
+  const recent = await db.designVote.findFirst({
+    where: {
+      projectId,
+      createdAt: { gte: new Date(Date.now() - DAY_MS) },
+      OR: knownSid ? [{ voterHash }, { sessionId: knownSid }] : [{ voterHash }],
+    },
+    select: { sessionId: true },
+  });
+  // A repeat caught by IP + browser takes over the original vote's session id,
+  // so changing the browser afterwards doesn't open a second vote.
+  const sessionId = recent?.sessionId ?? knownSid ?? randomBytes(16).toString("base64url");
+  if (sessionId !== cookieSid) {
     jar.set(SESSION_COOKIE, sessionId, {
       httpOnly: true,
       sameSite: "lax",
@@ -68,16 +81,7 @@ export async function voteDesignAction(input: { projectId: string; vote: string;
       maxAge: 365 * 24 * 60 * 60,
     });
   }
-
-  // Repeats inside a day are accepted quietly but not counted twice.
-  const recent = await db.designVote.count({
-    where: {
-      projectId,
-      createdAt: { gte: new Date(Date.now() - DAY_MS) },
-      OR: [{ voterHash }, { sessionId }],
-    },
-  });
-  if (recent === 0) {
+  if (!recent) {
     await db.designVote.create({ data: { projectId, vote, comment, voterHash, sessionId } });
     revalidateTag(DESIGN_VOTES_TAG);
     revalidatePath("/website/examples");
@@ -93,7 +97,7 @@ export async function voteDesignAction(input: { projectId: string; vote: string;
     maxAge: DAY_MS / 1000,
   });
 
-  return { ok: true as const, tally: await tallyFor(projectId), counted: recent === 0 };
+  return { ok: true as const, tally: await tallyFor(projectId), counted: !recent };
 }
 
 const inquirySchema = z.object({
