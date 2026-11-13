@@ -6,6 +6,7 @@ import { getCurrentUser, isStaff } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessProfileForm } from "@/components/forms/BusinessProfileForm";
 import { Card } from "@/components/ui";
+import { AssignOwnerForm } from "@/components/admin/AssignOwnerForm";
 import {
   MAX_VIDEO_LIMIT,
   albumPhotoLimit,
@@ -66,6 +67,21 @@ export default async function StaffBusinessEditPage({
         Owner: {business.owner?.email ?? "unclaimed"} · Plan:{" "}
         {business.owner?.plan ?? "—"} · Status: {business.status}
       </p>
+
+      {user.role === "ADMIN" ? (
+        <Card>
+          <h2 className="text-lg font-bold">Hand this listing to its owner</h2>
+          <p className="mb-3 mt-1 text-sm text-slate-600">
+            For owners who can&apos;t claim it themselves. The listing moves
+            into their account; if they have none, one is created and they get
+            an email to set their own password.
+          </p>
+          <AssignOwnerForm
+            businessId={business.id}
+            ownerEmail={business.owner?.email ?? null}
+          />
+        </Card>
+      ) : null}
 
       <Card>
         <BusinessProfileForm
