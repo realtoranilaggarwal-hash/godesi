@@ -30,6 +30,7 @@ export const RESOURCE_PLACEMENTS = [
     label: "Party supplies & printers (Events)",
   },
   { value: "shop", label: "More stores (Shop page)" },
+  { value: "money-transfer", label: "Send money to India (USD → INR page)" },
 ] as const;
 
 export type ResourcePlacement = (typeof RESOURCE_PLACEMENTS)[number]["value"];
