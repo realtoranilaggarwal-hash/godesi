@@ -74,7 +74,7 @@ const record = (value: unknown): Record<string, unknown> =>
     ? (value as Record<string, unknown>)
     : {};
 
-export function projectSources(project: WebsiteProject): WebsiteSources {
+export function projectSources(project: Pick<WebsiteProject, "sources">): WebsiteSources {
   const raw = record(project.sources);
   const out: WebsiteSources = {};
   for (const key of ["google", "yelp", "website", "facebook", "instagram"] as const) {

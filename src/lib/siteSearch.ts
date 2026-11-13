@@ -95,6 +95,12 @@ const SITE_PAGES: {
     keywords: ["website", "domain", "hosting", "web design"],
   },
   {
+    href: "/website/examples",
+    title: "🎨 Website before & after examples",
+    subtitle: "Old sites next to our redesigns — vote which you like",
+    keywords: ["website examples", "redesign", "portfolio", "before and after", "web design"],
+  },
+  {
     href: "/live/submit",
     title: "➕ Add your radio or TV channel",
     subtitle: "Carriage, non-profit exceptions and featuring",
