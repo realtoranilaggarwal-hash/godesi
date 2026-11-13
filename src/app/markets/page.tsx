@@ -11,8 +11,27 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Markets today — stocks, USD to INR, crypto, live charts",
   description:
-    "Live markets on GoDesi: US and India indexes, USD to INR and remittance currencies, crypto prices, top US stocks and market news — powered by TradingView.",
+    "Live markets on GoDesi: US and India indexes, India and US stock screeners, USD to INR and remittance currencies, gold, silver and crude prices, crypto, a US & India economic calendar and market news — powered by TradingView.",
 };
+
+const PARTNER_OFFERS = [
+  {
+    href: "https://shop.ledger.com/?r=d8c50c491673",
+    label: "🔐 Ledger hardware wallet — secure your crypto",
+  },
+  {
+    href: "https://coinbase.com/join/HTSC8CX",
+    label: "₿ Coinbase — buy crypto, get a sign-up bonus",
+  },
+  {
+    href: "https://join.robinhood.com/anila100",
+    label: "📈 Robinhood — claim a free stock reward",
+  },
+  {
+    href: "https://www.webull.com/s/3Khqz6Gg5kk5p7nJHn",
+    label: "📊 Webull — free stocks for new accounts",
+  },
+];
 
 function Card({
   title,
@@ -39,8 +58,9 @@ export default async function MarketsPage() {
           📈 Markets today
         </h1>
         <p className="text-sm text-slate-600">
-          Live prices for US and India markets, remittance currencies and
-          crypto — free quotes by TradingView.
+          Live prices for US and India markets, remittance currencies, gold
+          and crypto, plus stock screeners and an economic calendar — free
+          quotes by TradingView.
         </p>
       </div>
 
@@ -65,9 +85,44 @@ export default async function MarketsPage() {
         </Card>
       </div>
 
-      <Card title="US stock screener — biggest companies first">
-        <TvWidget variant="screener" />
+      <Card title="Economic calendar — US & India">
+        <TvWidget variant="economic-calendar" />
       </Card>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card title="US stock screener — biggest companies first">
+          <TvWidget variant="screener" />
+        </Card>
+        <Card title="India stock screener">
+          <TvWidget variant="india-screener" />
+        </Card>
+      </div>
+
+      <Card title="Crypto screener">
+        <TvWidget variant="crypto-screener" />
+      </Card>
+
+      <div>
+        <Card title="Start investing — our partner offers">
+          <div className="grid gap-2 sm:grid-cols-2">
+            {PARTNER_OFFERS.map((offer) => (
+              <a
+                key={offer.href}
+                href={offer.href}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+              >
+                {offer.label} →
+              </a>
+            ))}
+          </div>
+        </Card>
+        <p className="mt-1 px-1 text-[11px] text-slate-500">
+          Some links are referral links — GoDesi may earn a bonus at no cost to
+          you. Not financial advice.
+        </p>
+      </div>
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
         <span>
@@ -87,14 +142,9 @@ export default async function MarketsPage() {
           USD → INR remittance guide →
         </Link>
         <span>·</span>
-        <a
-          href="https://alternative.me/crypto/fear-and-greed-index/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-semibold text-indigo-600"
-        >
+        <Link href="/crypto-fear-greed" className="font-semibold text-indigo-600">
           Crypto fear &amp; greed index →
-        </a>
+        </Link>
       </div>
     </div>
   );
