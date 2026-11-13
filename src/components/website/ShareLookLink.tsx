@@ -4,11 +4,28 @@ import { useState } from "react";
 import { inputClass } from "@/components/ui";
 
 /** Staff copy a client's private preview link, optionally with a discount code filled in. */
-export function ShareLookLink({ base, initialCode = "" }: { base: string; initialCode?: string }) {
+export function ShareLookLink({
+  base,
+  initialCode = "",
+  businessName,
+  whatsapp,
+  email,
+}: {
+  base: string;
+  initialCode?: string;
+  businessName?: string;
+  whatsapp?: string | null;
+  email?: string | null;
+}) {
   const [code, setCode] = useState(initialCode);
   const [copied, setCopied] = useState(false);
   const clean = code.trim().toUpperCase().replace(/\s+/g, "");
   const link = clean ? `${base}?code=${encodeURIComponent(clean)}` : base;
+  const message = `Hi${businessName ? ` ${businessName}` : ""}! Your new website is ready to look at: ${link} — tap "I love it" to approve, or "I want changes" to tell us what to fix.`;
+  const digits = (whatsapp ?? "").replace(/\D/g, "");
+  const waNumber = digits.length === 10 ? `1${digits}` : digits;
+  const whatsappHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+  const mailHref = `mailto:${email ?? ""}?subject=${encodeURIComponent("Your new website is ready to preview")}&body=${encodeURIComponent(message)}`;
 
   return (
     <div className="mt-3 space-y-2 rounded-xl bg-slate-50 px-3 py-2 text-xs">
@@ -39,6 +56,19 @@ export function ShareLookLink({ base, initialCode = "" }: { base: string; initia
         >
           {copied ? "Copied ✓" : "Copy"}
         </button>
+      </div>
+      <div className="flex flex-wrap gap-2 pt-1">
+        <a
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-lg bg-emerald-600 px-3 py-1.5 font-bold text-white hover:bg-emerald-700"
+        >
+          Send on WhatsApp{waNumber ? "" : " (pick a contact)"}
+        </a>
+        <a href={mailHref} className="rounded-lg bg-indigo-600 px-3 py-1.5 font-bold text-white hover:bg-indigo-700">
+          Send by email{email ? "" : " (type their address)"}
+        </a>
       </div>
     </div>
   );
