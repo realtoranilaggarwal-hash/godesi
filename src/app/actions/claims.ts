@@ -213,7 +213,7 @@ export async function adminAssignOwnerAction(
     pingIndexNowInBackground(`/business/${business.slug}`);
     return {
       success: `${business.name} now belongs to ${owner.email}${isNew ? " (new account created)" : ""}. ${sent ? "We emailed them a link to get in." : isNew
-            ? "Email is off, so let them know: they sign in with \"Forgot password\" using that email."
+            ? "Email is switched off on this site, so they can't set a password until it's back on."
             : "Email is off, so let them know it's now in their account."}`,
     };
   } catch (error) {
