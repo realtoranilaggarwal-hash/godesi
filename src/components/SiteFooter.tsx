@@ -47,6 +47,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
           href: "/website",
           label: `Get a website for $${WEBSITE_OFFER.priceUsd}`,
         },
+        { href: "/website/examples", label: "Website before & after examples" },
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
         { href: "/advertise", label: "Advertise on Godesi" },
         { href: "/advertise/proposal", label: "Marketing partnership proposal" },

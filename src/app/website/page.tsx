@@ -140,6 +140,9 @@ export default async function WebsiteOfferPage({
                 {WEBSITE_OFFER.customPages} pages of content. Our designer redesigns it and sends
                 you a private preview — pay only if you love it.
               </p>
+              <Link href="/website/examples" className="mt-1 inline-block text-sm font-semibold text-fuchsia-700 underline">
+                See before &amp; after examples →
+              </Link>
             </div>
             <Link
               href="/website/custom"

@@ -3134,12 +3134,31 @@ model WebsiteProject {
   includedIn    String?
 
   changeRequests WebsiteChangeRequest[]
+  designVotes    DesignVote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([status, createdAt])
   @@index([userId])
+}
+
+/// A visitor's pick on the public before/after page (/website/examples).
+model DesignVote {
+  id        String         @id @default(cuid())
+  projectId String
+  project   WebsiteProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  /// "NEW", "OLD" or "NEEDS_WORK".
+  vote      String
+  comment   String?
+  /// Salted hash of IP + user agent, for one vote per visitor per day.
+  voterHash String
+  /// Random id from the visitor's cookie, same purpose.
+  sessionId String?
+  createdAt DateTime       @default(now())
+
+  @@index([projectId])
+  @@index([projectId, createdAt])
 }
 
 /// A change the owner asked for on their live site; hosting includes one a month.
