@@ -19,7 +19,7 @@ const TITLE = "Grand New Year's Eve Party 2027 at Royal Albert Palace, Fords NJ 
 const SUMMARY = [
   "NewYearEvesParty.com is hosting the Grand New Year's Eve Party 2027 on Thursday, December 31st, 2026, 8:00 PM to 1:00 AM, in the Big Ball Room at Royal Albert Palace, 1050 King Georges Post Rd, Fords NJ 08863 (near Edison).",
   "It's a family party: 35 food items, an elegant seated dining experience, an exclusive Plaza Hall with live food stations (dosa, jalebi, golgappa and more), premium drinks until midnight, a midnight champagne toast, live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths, exciting raffle prizes, Woodbridge Police security and free valet parking.",
-  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 15: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Book at NewYearEvesParty.com or godesi.com/9227.",
+  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 16: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Book at NewYearEvesParty.com or godesi.com/9227.",
   "Singles get their own first-come-first-served balcony — chair only, no table, all inclusive — for only $75. Limited seats; singles seats on GoDesi are 21+ with photo ID checked at the door. Book at godesi.com/927.",
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Sponsors: godesi.com/sponsor2027.",
 ].join("\n\n");

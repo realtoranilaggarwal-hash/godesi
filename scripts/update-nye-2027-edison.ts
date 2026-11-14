@@ -23,7 +23,7 @@ const DESCRIPTION = [
   "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 2026, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
   "35 food items and an elegant seated dining experience, with an exclusive Plaza Hall of live food stations — dosa, jalebi, golgappa and more. Premium drinks until midnight and a midnight champagne toast.",
   "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Woodbridge Police security and free valet parking.",
-  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 15: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Singles balcony $75 — chair only, all inclusive, limited seats, first come, first served, no table.",
+  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 16: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Singles balcony $75 — chair only, all inclusive, limited seats, first come, first served, no table.",
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
   "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
 ].join("\n\n");
