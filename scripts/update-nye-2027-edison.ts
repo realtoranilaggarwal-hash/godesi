@@ -3,7 +3,8 @@
  * flyer image, early (till Dec 15) / late (from Dec 16) ticket prices plus the $75 Singles
  * balcony chairs, and guest reviews typed out from the WhatsApp review album (first names only).
  * Safe to re-run: tiers are matched by name, reviews are replaced. Ticket tiers no longer in
- * TIERS are deleted when unsold, or closed for sale when someone already bought one.
+ * Old tiers are deleted when unsold (abandoned checkouts just lose their tier), or closed for
+ * sale when someone already bought one.
  *
  *   DATABASE_URL=... npx tsx scripts/update-nye-2027-edison.ts
  */
@@ -137,7 +138,7 @@ async function main() {
   }
 
   for (const old of event.tiers.filter((tier) => !used.has(tier.id) && tier.kind === "TICKET")) {
-    const sold = old.seatsBooked > 0 || (await db.ticket.count({ where: { tierId: old.id } })) > 0;
+    const sold = old.seatsBooked > 0 || (await db.ticket.count({ where: { tierId: old.id, status: "CONFIRMED" } })) > 0;
     if (sold) await db.ticketTier.update({ where: { id: old.id }, data: { salesEnd: new Date(), seatsTotal: old.seatsBooked } });
     else await db.ticketTier.delete({ where: { id: old.id } });
   }
