@@ -15,7 +15,7 @@ import { SINGLES_ONLY_TAG } from "@/lib/singles";
 const MAIN_SLUG = "new-year-eves-party-2027-edison";
 const SLUG = "singles-new-years-eve-party-2027-nj";
 const OLD_SLUGS = ["singles-mingle-new-years-eve-party-2027-nj"];
-const FLYER = "https://godesi.com/flyers/nye-2027-singles.jpg";
+const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const SEATS = 50;
 const NOTE = "21+ · Limited seats · first come, first served · no table · singles band included";
 
