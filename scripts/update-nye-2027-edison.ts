@@ -3,8 +3,8 @@
  * flyer image, early (till Dec 15) / late (from Dec 16) ticket prices plus the $75 Singles
  * balcony chairs, and guest reviews typed out from the WhatsApp review album (first names only).
  * Safe to re-run: tiers are matched by name, reviews are replaced. Ticket tiers no longer in
- * TIERS are deleted when unsold (abandoned checkouts just lose their tier), or closed for
- * sale when someone already paid for one.
+ * TIERS are deleted when unsold (checkouts older than Stripe's 24h expiry just lose their tier),
+ * or closed for sale when someone paid for one or may still be paying.
  *
  *   DATABASE_URL=... npx tsx scripts/update-nye-2027-edison.ts
  */
@@ -17,6 +17,7 @@ const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const REVIEWS_ALBUM = "https://photos.app.goo.gl/nQrusW5e5pojmj7P7";
 
 /** Windows are in New York time; salesEnd is exclusive, so early tickets sell through Dec 15. */
+const CHECKOUT_EXPIRY_CUTOFF = new Date(Date.now() - 24 * 60 * 60 * 1000);
 const LATE_START = new Date("2026-12-16T00:00:00-05:00");
 const EARLY_END = LATE_START;
 
@@ -138,7 +139,14 @@ async function main() {
   }
 
   for (const old of event.tiers.filter((tier) => !used.has(tier.id) && tier.kind === "TICKET")) {
-    const sold = old.seatsBooked > 0 || (await db.ticket.count({ where: { tierId: old.id, status: "CONFIRMED" } })) > 0;
+    const sold =
+      old.seatsBooked > 0 ||
+      (await db.ticket.count({
+        where: {
+          tierId: old.id,
+          OR: [{ status: "CONFIRMED" }, { status: "PENDING", createdAt: { gt: CHECKOUT_EXPIRY_CUTOFF } }],
+        },
+      })) > 0;
     if (sold) await db.ticketTier.update({ where: { id: old.id }, data: { salesEnd: new Date(), seatsTotal: old.seatsBooked } });
     else await db.ticketTier.delete({ where: { id: old.id } });
   }
