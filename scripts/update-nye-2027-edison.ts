@@ -10,6 +10,7 @@
  */
 import type { BannerSlot } from "@prisma/client";
 import { db } from "@/lib/db";
+import { HIDE_SEATS_LEFT_TAG } from "@/lib/events";
 import { NYE_2027_EVENT_SLUG, nyeSponsorLevel } from "@/lib/nyeSponsorLevels";
 
 const SLUG = NYE_2027_EVENT_SLUG;
@@ -25,7 +26,7 @@ const DESCRIPTION = [
   "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 2026, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
   "35 food items and an elegant seated dining experience, with an exclusive Plaza Hall of live food stations — dosa, jalebi, golgappa and more. Premium drinks until midnight and a midnight champagne toast.",
   "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Woodbridge Police security and free valet parking.",
-  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 16: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Singles balcony $75 — chair only, all inclusive, limited seats, first come, first served, no table.",
+  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 16: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. VIP Table for 12 with a bottle of champagne on the table (only 5 tables): $1080 till Dec 15, $1200 from Dec 16. Singles balcony $75 — chair only, all inclusive, limited seats, first come, first served, no table.",
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
   "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
 ].join("\n\n");
@@ -51,6 +52,7 @@ type TierSpec = {
   bannerMonths?: number;
   bannerSlot?: BannerSlot;
   wallBricks?: number;
+  stockGroup?: string;
 };
 
 const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
@@ -70,11 +72,13 @@ const TIERS: TierSpec[] = [
   { name: "Kids (9–17) — Early", note: "Till Dec 15", price: 80, seats: 25, salesEnd: EARLY_END },
   { name: "Kids (0–8) — Early", note: "Till Dec 15", price: 65, seats: 25, salesEnd: EARLY_END },
   { name: "Couple — Early", match: ["Couple — Early bird"], note: "Till Dec 15", price: 180, seats: 40, salesEnd: EARLY_END, admits: 2 },
+  { name: "VIP Table for 12 with champagne — Early", note: "Till Dec 15 · 12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1080, seats: 5, salesEnd: EARLY_END, admits: 12, stockGroup: "vip-table" },
   { name: "Singles — Balcony (chair only, all inclusive)", match: ["Balcony seat — first come, first served", "Special balcony seat"], note: "Limited seats · first come, first served · no table", price: 75, seats: 50 },
   { name: "Adults (18+)", price: 150, seats: 60, salesStart: LATE_START },
   { name: "Kids (9–17)", price: 90, seats: 10, salesStart: LATE_START },
   { name: "Kids (0–8)", price: 75, seats: 10, salesStart: LATE_START },
   { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
+  { name: "VIP Table for 12 with champagne", note: "12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1200, seats: 5, salesStart: LATE_START, admits: 12, stockGroup: "vip-table" },
   { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Platinum sponsor"), seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200 },
@@ -133,6 +137,7 @@ async function main() {
       bannerMonths: spec.bannerMonths ?? null,
       bannerSlot: spec.bannerSlot ?? null,
       wallBricks: spec.wallBricks ?? 0,
+      stockGroup: spec.stockGroup ?? null,
     };
     if (existing) await db.ticketTier.update({ where: { id: existing.id }, data });
     else await db.ticketTier.create({ data: { ...data, eventId: event.id } });
@@ -161,6 +166,7 @@ async function main() {
       imageUrl: FLYER,
       description: DESCRIPTION,
       reviewsAlbumUrl: REVIEWS_ALBUM,
+      tags: event.tags.includes(HIDE_SEATS_LEFT_TAG) ? event.tags : [...event.tags, HIDE_SEATS_LEFT_TAG],
       price: Math.min(...tiers.map((tier) => tier.price)),
       seatsTotal: Math.max(HALL_TICKETS, tiers.reduce((sum, tier) => sum + tier.seatsBooked, 0)),
     },

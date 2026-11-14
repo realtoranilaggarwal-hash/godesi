@@ -14,6 +14,8 @@ import { requestCurrency } from "@/lib/currency";
 import {
   confirmTicket,
   pooledSeatsLeft,
+  hidesSeatsLeft,
+  tierSeatsLeft,
   seatsLeft,
   ticketCode,
   uniqueEventSlug,
@@ -626,9 +628,11 @@ export async function bookTicketAction(
     for (const line of lines) {
       if (line.tier && !tierOnSale(line.tier))
         return { error: `${line.tier.name} tickets are not on sale right now.` };
-      if (line.tier && seatsLeft(line.tier) < line.quantity)
+      if (line.tier && tierSeatsLeft(line.tier, event.tiers) < line.quantity)
         return {
-          error: `Only ${seatsLeft(line.tier)} ${line.tier.name} seat(s) left.`,
+          error: hidesSeatsLeft(event)
+            ? `Not enough ${line.tier.name} seats left for that many — try fewer.`
+            : `Only ${tierSeatsLeft(line.tier, event.tiers)} ${line.tier.name} seat(s) left.`,
         };
     }
     const poolLeft = pooledSeatsLeft(event, event.tiers);

@@ -10,6 +10,7 @@
  *   DATABASE_URL=... npx tsx scripts/create-nye-2027-singles.ts
  */
 import { db } from "@/lib/db";
+import { HIDE_SEATS_LEFT_TAG } from "@/lib/events";
 import { SINGLES_ONLY_TAG } from "@/lib/singles";
 
 const MAIN_SLUG = "new-year-eves-party-2027-edison";
@@ -38,7 +39,7 @@ const DESCRIPTION = [
   "Questions or group bookings: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606.",
 ].join("\n\n");
 
-const TAGS = [SINGLES_ONLY_TAG, "singles", "singles-party", "singles-new-years-eve", "desi-singles", "21-plus", "new-years-eve", "nye-2027", "new-jersey"];
+const TAGS = [SINGLES_ONLY_TAG, HIDE_SEATS_LEFT_TAG, "singles", "singles-party", "singles-new-years-eve", "desi-singles", "21-plus", "new-years-eve", "nye-2027", "new-jersey"];
 
 async function main() {
   const main = await db.event.findUnique({ where: { slug: MAIN_SLUG } });

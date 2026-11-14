@@ -19,6 +19,8 @@ import {
   isPast,
   pooledSeatsLeft,
   seatsLeft,
+  hidesSeatsLeft,
+  tierSeatsLeft,
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
@@ -359,6 +361,7 @@ export default async function EventPage({
   // the organiser. Godesi sells no seats for it, so the booking box would lie.
   const imported = event.sourceId !== null;
   const left = seatsLeft(event);
+  const hideCounts = hidesSeatsLeft(event);
   const paidTicketCount =
     user && (user.id === event.organizerId || can(user, "events"))
       ? await db.ticket.count({
@@ -373,7 +376,7 @@ export default async function EventPage({
   const sponsorTiers = event.tiers.filter((tier) => tier.kind === "SPONSOR");
   const poolLeft = pooledSeatsLeft(event, event.tiers);
   const ticketSeatsLeft = (tier: (typeof ticketTiers)[number]) =>
-    Math.min(seatsLeft(tier), poolLeft ?? Infinity);
+    Math.min(tierSeatsLeft(tier, event.tiers), poolLeft ?? Infinity);
   const theme = eventTheme(
     event.title,
     event.category?.icon,
@@ -736,11 +739,17 @@ export default async function EventPage({
               </p>
               {imported ? null : event.mode === "ONLINE" ? (
                 <p>
-                  💻 Online — {left} of {event.seatsTotal} spots available
+                  💻 Online —{" "}
+                  {hideCounts
+                    ? "limited spots"
+                    : `${left} of ${event.seatsTotal} spots available`}
                 </p>
               ) : (
                 <p>
-                  🪑 {left} of {event.seatsTotal} seats available
+                  🪑{" "}
+                  {hideCounts
+                    ? "Limited seats"
+                    : `${left} of ${event.seatsTotal} seats available`}
                 </p>
               )}
             </div>
@@ -788,7 +797,9 @@ export default async function EventPage({
                               tierWindowLabel(tier, event.timeZone),
                               tierOnSale(tier)
                                 ? ticketSeatsLeft(tier)
-                                  ? `${ticketSeatsLeft(tier)} left`
+                                  ? hideCounts
+                                    ? null
+                                    : `${ticketSeatsLeft(tier)} left`
                                   : "Sold out"
                                 : null,
                             ]
@@ -1089,6 +1100,7 @@ export default async function EventPage({
                   price={event.price}
                   currency={event.currency}
                   seatsLeft={left}
+                  hideSeatsLeft={hideCounts}
                   maxPerBooking={maxPerBooking}
                   tiers={ticketTiers
                     .filter((tier) => tierOnSale(tier))
@@ -1160,7 +1172,11 @@ export default async function EventPage({
                       </ul>
                     ) : null}
                     <p className="mt-1 text-xs text-slate-500">
-                      {seatsLeft(tier) ? `${seatsLeft(tier)} left` : "Taken"}
+                      {seatsLeft(tier)
+                        ? hideCounts
+                          ? "Available"
+                          : `${seatsLeft(tier)} left`
+                        : "Taken"}
                     </p>
                   </li>
                 ))}
@@ -1180,6 +1196,7 @@ export default async function EventPage({
                     price={0}
                     currency={event.currency}
                     seatsLeft={left}
+                    hideSeatsLeft={hideCounts}
                     maxPerBooking={maxPerBooking}
                     tiers={sponsorTiers
                       .filter((tier) => tierOnSale(tier))

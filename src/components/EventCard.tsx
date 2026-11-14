@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatEventDate, seatsLeft } from "@/lib/events";
+import { formatEventDate, hidesSeatsLeft, seatsLeft } from "@/lib/events";
 import { Money } from "@/components/Money";
 import { Badge } from "@/components/ui";
 import { eventFeatureIcon } from "@/lib/eventOptions";
@@ -33,6 +33,8 @@ export type EventListItem = {
   tiers?: { price: number }[];
   /** The event's own categories, e.g. garba-dandiya — the first one is shown. */
   genres?: string[];
+  /** Event tags; `hide-seats-left` swaps the count for "Limited seats". */
+  tags?: string[];
 };
 
 /**
@@ -215,7 +217,9 @@ export function EventCard({
             <span className="text-xs text-slate-500">
               {imported
                 ? "Community calendar"
-                : `${left} seat${left === 1 ? "" : "s"} left`}
+                : hidesSeatsLeft(event)
+                  ? "Limited seats"
+                  : `${left} seat${left === 1 ? "" : "s"} left`}
             </span>
           </div>
         </div>
