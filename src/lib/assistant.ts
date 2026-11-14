@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { searchBusinesses, type BusinessListItem } from "@/lib/businesses";
 import { CATEGORY_TREE } from "@/lib/categories";
-import { formatEventDate, seatsLeft } from "@/lib/events";
+import { formatEventDate, hidesSeatsLeft, seatsLeft } from "@/lib/events";
 import { formatMoney } from "@/lib/format";
 
 const STOPWORDS = new Set([
@@ -73,7 +73,7 @@ export async function buildContext(question: string) {
             (e) =>
               `- ${e.title} — ${formatEventDate(e.startsAt, e.timeZone)}, ${e.venue}, ${e.city}, ${
                 e.price > 0 ? formatMoney(e.price, e.currency) : "free"
-              }, ${seatsLeft(e)} seats left. Link: /events/${e.slug}`,
+              }, ${hidesSeatsLeft(e) ? "limited seats" : `${seatsLeft(e)} seats left`}. Link: /events/${e.slug}`,
           )
           .join("\n")}`
       : "Upcoming events: none scheduled.",

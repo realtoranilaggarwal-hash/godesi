@@ -22,6 +22,7 @@ function TicketStub({
   price,
   currency,
   seatsLeft,
+  hideSeatsLeft = false,
   selected,
   action,
 }: {
@@ -29,6 +30,7 @@ function TicketStub({
   price: number;
   currency: string;
   seatsLeft: number;
+  hideSeatsLeft?: boolean;
   selected: boolean;
   /** Shown in place of the tick, e.g. a − / + counter. */
   action?: React.ReactNode;
@@ -65,9 +67,11 @@ function TicketStub({
           <span className="block break-words font-bold text-slate-900">
             {name}
           </span>
-          <span className="block text-xs text-slate-500">
-            {seatsLeft} ticket{seatsLeft === 1 ? "" : "s"} left
-          </span>
+          {hideSeatsLeft ? null : (
+            <span className="block text-xs text-slate-500">
+              {seatsLeft} ticket{seatsLeft === 1 ? "" : "s"} left
+            </span>
+          )}
         </span>
         {action ?? (
           <span
@@ -91,6 +95,7 @@ export function TicketForm({
   price,
   currency,
   seatsLeft,
+  hideSeatsLeft = false,
   maxPerBooking,
   tiers,
   defaultName,
@@ -103,6 +108,8 @@ export function TicketForm({
   price: number;
   currency: string;
   seatsLeft: number;
+  /** Leave out "N tickets left" (the event has the hide-seats-left tag). */
+  hideSeatsLeft?: boolean;
   maxPerBooking: number;
   tiers: TicketTierOption[];
   defaultName?: string;
@@ -164,6 +171,7 @@ export function TicketForm({
                   price={tier.price}
                   currency={currency}
                   seatsLeft={tier.seatsLeft}
+                  hideSeatsLeft={hideSeatsLeft}
                   selected={value > 0}
                   action={
                     <span className="flex shrink-0 items-center gap-1">
@@ -212,6 +220,7 @@ export function TicketForm({
               price={price}
               currency={currency}
               seatsLeft={seatsLeft}
+              hideSeatsLeft={hideSeatsLeft}
               selected
             />
           </fieldset>

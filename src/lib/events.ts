@@ -29,6 +29,25 @@ export function seatsLeft(event: { seatsTotal: number; seatsBooked: number }) {
   return Math.max(0, event.seatsTotal - event.seatsBooked);
 }
 
+/** Seats left in a tier; tiers sharing a stockGroup also count each other's sales. */
+export function tierSeatsLeft<T extends { id: string; seatsTotal: number; seatsBooked: number; stockGroup?: string | null }>(
+  tier: T,
+  tiers: T[],
+) {
+  if (!tier.stockGroup) return seatsLeft(tier);
+  const booked = tiers
+    .filter((other) => other.stockGroup === tier.stockGroup)
+    .reduce((sum, other) => sum + other.seatsBooked, 0);
+  return Math.max(0, tier.seatsTotal - booked);
+}
+
+/** Event tag that hides "N seats left" counts from buyers (sold-out states still show). */
+export const HIDE_SEATS_LEFT_TAG = "hide-seats-left";
+
+export function hidesSeatsLeft(event: { tags?: string[] | null }) {
+  return Boolean(event.tags?.includes(HIDE_SEATS_LEFT_TAG));
+}
+
 /**
  * Ticket types normally cap themselves. When an event's seatsTotal is set below the
  * sum of its ticket types (one seat pool sold at rising prices by date), the event

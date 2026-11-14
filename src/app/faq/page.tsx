@@ -350,7 +350,7 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
       <>
         <p>
           Yes. Each ticket type can have its own sale dates — for example
-          early-bird prices until Nov 15 and regular prices from Dec 20. Ticket
+          early-bird prices until Dec 15 and regular prices from Dec 16. Ticket
           types outside their dates show as &ldquo;On sale from …&rdquo; or
           &ldquo;Sale ended&rdquo; and can&apos;t be bought. Ask us on{" "}
           <Link href="/contact">the contact page</Link> to set dates on your

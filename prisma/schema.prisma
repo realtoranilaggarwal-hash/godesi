@@ -1991,6 +1991,8 @@ model TicketTier {
   admits       Int         @default(1)
   /// What a sponsor package includes, one line each.
   perks        String[]    @default([])
+  /// Tiers sharing a stockGroup sell from one stock (e.g. early and late prices for the same 5 tables): each tier's seatsTotal is the group's total.
+  stockGroup   String?
   /// Months of free GoDesi banner a sponsor package comes with.
   bannerMonths Int?
   /// Placement of that free banner; the 320x100 small banner when unset.
