@@ -31,7 +31,8 @@ const DESCRIPTION = [
 /**
  * The hall holds 400 people, so entry tiers add up to 400, counting a couple as 2:
  * early 120 + 25 + 25 + 40×2 = 250, Singles balcony 50, late 60 + 10 + 10 + 10×2 = 100.
- * `match` lists the old names so the existing tiers (and their bookings) are kept.
+ * `match` lists old names of the same ticket (couple, balcony) so their bookings are kept;
+ * the old age-range tiers are not renamed, since that would relabel tickets already sold.
  * Sponsor packages are listed separately; the 2-pass ones add up to 18 more people.
  */
 type TierSpec = {
@@ -63,13 +64,13 @@ const HALL_TICKETS = 350;
 const SPONSOR_BUSINESSES: string[] = [];
 
 const TIERS: TierSpec[] = [
-  { name: "Adults (18+) — Early", match: ["Adult (10+) — Early bird"], note: "Till Dec 15", price: 95, seats: 120, salesEnd: EARLY_END },
-  { name: "Kids (9–17) — Early", match: ["Kids (0–9) — Early bird"], note: "Till Dec 15", price: 80, seats: 25, salesEnd: EARLY_END },
+  { name: "Adults (18+) — Early", note: "Till Dec 15", price: 95, seats: 120, salesEnd: EARLY_END },
+  { name: "Kids (9–17) — Early", note: "Till Dec 15", price: 80, seats: 25, salesEnd: EARLY_END },
   { name: "Kids (0–8) — Early", note: "Till Dec 15", price: 65, seats: 25, salesEnd: EARLY_END },
   { name: "Couple — Early", match: ["Couple — Early bird"], note: "Till Dec 15", price: 180, seats: 40, salesEnd: EARLY_END, admits: 2 },
   { name: "Singles — Balcony (chair only, all inclusive)", match: ["Balcony seat — first come, first served", "Special balcony seat"], note: "Limited seats · first come, first served · no table", price: 75, seats: 50 },
-  { name: "Adults (18+)", match: ["Adult (10+)", "General"], price: 150, seats: 60, salesStart: LATE_START },
-  { name: "Kids (9–17)", match: ["Kids (0–9)", "Teen"], price: 90, seats: 10, salesStart: LATE_START },
+  { name: "Adults (18+)", price: 150, seats: 60, salesStart: LATE_START },
+  { name: "Kids (9–17)", price: 90, seats: 10, salesStart: LATE_START },
   { name: "Kids (0–8)", price: 75, seats: 10, salesStart: LATE_START },
   { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
