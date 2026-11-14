@@ -1,8 +1,9 @@
 /**
  * Brings the NYE 2027 Edison listing in line with the organiser's flyer: 8 PM start,
- * flyer image, early (till Nov 15) / advance (Nov 16–Dec 15) / late (from Dec 16) ticket
- * prices plus first-come-first-served balcony seats, and guest reviews typed out from the WhatsApp review album (first names only).
- * Safe to re-run: tiers are matched by name, reviews are replaced.
+ * flyer image, early (till Dec 15) / late (from Dec 16) ticket prices plus the $75 Singles
+ * balcony chairs, and guest reviews typed out from the WhatsApp review album (first names only).
+ * Safe to re-run: tiers are matched by name, reviews are replaced. Ticket tiers no longer in
+ * TIERS are deleted when unsold, or closed for sale when someone already bought one.
  *
  *   DATABASE_URL=... npx tsx scripts/update-nye-2027-edison.ts
  */
@@ -14,23 +15,23 @@ const SLUG = NYE_2027_EVENT_SLUG;
 const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const REVIEWS_ALBUM = "https://photos.app.goo.gl/nQrusW5e5pojmj7P7";
 
-/** Windows are in New York time; salesEnd is exclusive, so early tickets sell through Nov 15. */
-const EARLY_END = new Date("2026-11-16T00:00:00-05:00");
+/** Windows are in New York time; salesEnd is exclusive, so early tickets sell through Dec 15. */
 const LATE_START = new Date("2026-12-16T00:00:00-05:00");
+const EARLY_END = LATE_START;
 
 const DESCRIPTION = [
-  "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
-  "DJ Sandy of M&D Events keeps the dance floor packed all night, and famous belly dancer Aamra performs her fire dance. The Big Ball Room is lit by 22 head spot lights.",
-  "Food is served in the exclusive Plaza Hall with live stations — dosa, jalebi, golgappa and many more — plus premium drinks. Valet parking and a lot more.",
-  "Tickets till Nov 15th include table seating: Adult (10+) $85, Kids (0–9) $65, Couple $160. Nov 16th to Dec 15th: Adult $100, Kids $75, Couple $180. From Dec 16th: Adult $150, Kids $100, Couple $250. Balcony seats (no table, first come, first served) $75.",
-  "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — call 732-877-8585.",
+  "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 2026, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
+  "35 food items and an elegant seated dining experience, with an exclusive Plaza Hall of live food stations — dosa, jalebi, golgappa and more. Premium drinks until midnight and a midnight champagne toast.",
+  "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Woodbridge Police security and free valet parking.",
+  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 15: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Singles balcony $75 — chair only, all inclusive, limited seats, first come, first served, no table.",
+  "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
+  "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
 ].join("\n\n");
 
 /**
  * The hall holds 400 people, so entry tiers add up to 400, counting a couple as 2:
- * early 120 + 50 + 40×2 = 250, balcony 50, late 60 + 20 + 10×2 = 100. The advance window
- * (Nov 16–Dec 15) repeats the early numbers, since it sells after the early tiers close.
- * `match` lists the old names so the existing late tiers (and their bookings) are kept.
+ * early 120 + 25 + 25 + 40×2 = 250, Singles balcony 50, late 60 + 10 + 10 + 10×2 = 100.
+ * `match` lists the old names so the existing tiers (and their bookings) are kept.
  * Sponsor packages are listed separately; the 2-pass ones add up to 18 more people.
  */
 type TierSpec = {
@@ -62,15 +63,14 @@ const HALL_TICKETS = 350;
 const SPONSOR_BUSINESSES: string[] = [];
 
 const TIERS: TierSpec[] = [
-  { name: "Adult (10+) — Early bird", note: "Table seating included", price: 85, seats: 120, salesEnd: EARLY_END },
-  { name: "Kids (0–9) — Early bird", note: "Table seating included", price: 65, seats: 50, salesEnd: EARLY_END },
-  { name: "Couple — Early bird", note: "Table seating included", price: 160, seats: 40, salesEnd: EARLY_END, admits: 2 },
-  { name: "Adult (10+) — Advance", price: 100, seats: 120, salesStart: EARLY_END, salesEnd: LATE_START },
-  { name: "Kids (0–9) — Advance", price: 75, seats: 50, salesStart: EARLY_END, salesEnd: LATE_START },
-  { name: "Couple — Advance", price: 180, seats: 40, salesStart: EARLY_END, salesEnd: LATE_START, admits: 2 },
-  { name: "Balcony seat — first come, first served", match: ["Special balcony seat"], note: "Seat only, no table · first come, first served", price: 75, seats: 50 },
-  { name: "Adult (10+)", match: ["General"], price: 150, seats: 60, salesStart: LATE_START },
-  { name: "Kids (0–9)", match: ["Teen"], price: 100, seats: 20, salesStart: LATE_START },
+  { name: "Adults (18+) — Early", match: ["Adult (10+) — Early bird"], note: "Till Dec 15", price: 95, seats: 120, salesEnd: EARLY_END },
+  { name: "Kids (9–17) — Early", match: ["Kids (0–9) — Early bird"], note: "Till Dec 15", price: 80, seats: 25, salesEnd: EARLY_END },
+  { name: "Kids (0–8) — Early", note: "Till Dec 15", price: 65, seats: 25, salesEnd: EARLY_END },
+  { name: "Couple — Early", match: ["Couple — Early bird"], note: "Till Dec 15", price: 180, seats: 40, salesEnd: EARLY_END, admits: 2 },
+  { name: "Singles — Balcony (chair only, all inclusive)", match: ["Balcony seat — first come, first served", "Special balcony seat"], note: "Limited seats · first come, first served · no table", price: 75, seats: 50 },
+  { name: "Adults (18+)", match: ["Adult (10+)", "General"], price: 150, seats: 60, salesStart: LATE_START },
+  { name: "Kids (9–17)", match: ["Kids (0–9)", "Teen"], price: 90, seats: 10, salesStart: LATE_START },
+  { name: "Kids (0–8)", price: 75, seats: 10, salesStart: LATE_START },
   { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
@@ -133,6 +133,12 @@ async function main() {
     };
     if (existing) await db.ticketTier.update({ where: { id: existing.id }, data });
     else await db.ticketTier.create({ data: { ...data, eventId: event.id } });
+  }
+
+  for (const old of event.tiers.filter((tier) => !used.has(tier.id) && tier.kind === "TICKET")) {
+    const sold = old.seatsBooked > 0 || (await db.ticket.count({ where: { tierId: old.id } })) > 0;
+    if (sold) await db.ticketTier.update({ where: { id: old.id }, data: { salesEnd: new Date(), seatsTotal: old.seatsBooked } });
+    else await db.ticketTier.delete({ where: { id: old.id } });
   }
 
   const tiers = await db.ticketTier.findMany({ where: { eventId: event.id, kind: "TICKET" } });
