@@ -3,8 +3,8 @@
  * flyer image, early (till Dec 15) / late (from Dec 16) ticket prices plus the $75 Singles
  * balcony chairs, and guest reviews typed out from the WhatsApp review album (first names only).
  * Safe to re-run: tiers are matched by name, reviews are replaced. Ticket tiers no longer in
- * Old tiers are deleted when unsold (abandoned checkouts just lose their tier), or closed for
- * sale when someone already bought one.
+ * TIERS are deleted when unsold (abandoned checkouts just lose their tier), or closed for
+ * sale when someone already paid for one.
  *
  *   DATABASE_URL=... npx tsx scripts/update-nye-2027-edison.ts
  */
