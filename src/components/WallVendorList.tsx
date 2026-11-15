@@ -61,7 +61,7 @@ export function WallVendorList({ vendors }: { vendors: WallVendor[] }) {
           {shown.map(({ vendor, rank }) => {
             const title = vendor.business ?? vendor.name;
             const byline =
-              vendor.business && fold(vendor.business) !== fold(vendor.name)
+              vendor.business && !fold(vendor.business).includes(fold(vendor.name))
                 ? vendor.name
                 : null;
             return (
