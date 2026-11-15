@@ -1,13 +1,18 @@
+import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { put } from "@vercel/blob";
+import bcrypt from "bcryptjs";
+import { canonicalEmail } from "../src/lib/signupGuard";
+import { ensureUsername } from "../src/lib/profiles";
 
 /**
  * Books Master Bedina's $500 paid spot on the Wall of Fame: 50 desi bricks
  * (100x50 px) in the top-most free rectangle, live immediately, plus a PAID
- * manual AdOrder so the $500 is on record. Creates his unclaimed astrologer
- * card first if it is missing. Re-runnable: an existing block is kept.
+ * manual AdOrder so the $500 is on record. Makes sure his astrologer card
+ * exists, is owned by his account (created with an unusable password if
+ * missing) and is featured for a year. Re-runnable: an existing block is kept.
  *
  *   npx tsx scripts/add-master-bedina-wall.ts
  */
@@ -24,6 +29,9 @@ const FREE_Y = 900; // bottom band of the board is the free zone
 const AMOUNT_MINOR = 50_000; // $500.00
 const REFERENCE = "manual:wall:master-bedina";
 const IMAGE_FILE = "public/images/wall/master-bedina.jpg";
+const EMAIL = "sanhatiusa@gmail.com";
+const PHONE = "+16463827477";
+const FEATURED_RANK = 2;
 
 const description =
   "Master Bedina is a famous astrologer, psychic and spiritualist — astrology is God's gift, passed down in his family from generation to generation. " +
@@ -49,18 +57,39 @@ async function astrologerCard() {
       slug: SLUG,
       name: "Master Bedina — Famous Astrologer, Psychic & Spiritualist",
       profileType: "PROFESSIONAL",
-      category: "religious-services",
+      category: "Astrologers",
       categorySlug: "religious-services",
       subcategorySlug: "religious-services-astrologers",
       city: "New York",
       state: "NY",
       country: "USA",
       description: cardDescription,
-      phone: "(646) 382-7477",
-      publicEmail: "sanhatiusa@gmail.com",
+      phone: PHONE,
+      publicEmail: EMAIL,
+      logoUrl: `/${IMAGE_FILE.replace(/^public\//, "")}`,
       status: "APPROVED",
     },
   });
+}
+
+/** His login-less account: an unusable password until he resets it himself. */
+async function ownerAccount() {
+  const existing = await prisma.user.findFirst({
+    where: { OR: [{ email: EMAIL }, { emailCanonical: canonicalEmail(EMAIL) }] },
+  });
+  if (existing) return existing;
+  const user = await prisma.user.create({
+    data: {
+      name: "Master Bedina",
+      email: EMAIL,
+      emailCanonical: canonicalEmail(EMAIL),
+      role: "BUSINESS",
+      passwordHash: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
+      offerPhone: PHONE,
+    },
+  });
+  await ensureUsername(user.id);
+  return user;
 }
 
 /** Top-most, then left-most free WxH rectangle on the 10px brick grid. */
@@ -92,21 +121,51 @@ async function bannerUrl(ownerId: string) {
 }
 
 async function main() {
-  const card = await astrologerCard();
-  console.log(`card: ${card.id} -> ${SITE}/business/${card.slug} (owner ${card.ownerId ?? "none"})`);
+  let card = await astrologerCard();
+  const owner = await ownerAccount();
+  if (card.ownerId && card.ownerId !== owner.id) {
+    throw new Error(`${SLUG} is owned by another account (${card.ownerId})`);
+  }
 
-  // His own account when he has claimed the card; otherwise the site admin
-  // holds the order and the vendor list falls back to the block title.
-  const admin = await prisma.user.findUniqueOrThrow({ where: { email: "godesibiz@gmail.com" } });
-  const advertiserId = card.ownerId;
-  const orderUserId = card.ownerId ?? admin.id;
+  // Paid spot: claimed by him, approved, contact filled in, featured for a year.
+  // An existing logo (his own upload) is kept.
+  const featuredUntil = new Date();
+  featuredUntil.setFullYear(featuredUntil.getFullYear() + 1);
+  card = await prisma.business.update({
+    where: { id: card.id },
+    data: {
+      ownerId: owner.id,
+      status: "APPROVED",
+      categorySlug: "religious-services",
+      subcategorySlug: "religious-services-astrologers",
+      phone: card.phone ?? PHONE,
+      publicEmail: card.publicEmail ?? EMAIL,
+      logoUrl: card.logoUrl ?? `/${IMAGE_FILE.replace(/^public\//, "")}`,
+      featured: true,
+      featuredRank: FEATURED_RANK,
+      featuredUntil:
+        card.featuredUntil && card.featuredUntil > featuredUntil ? card.featuredUntil : featuredUntil,
+    },
+  });
+  console.log(
+    `card: ${card.id} -> ${SITE}/business/${card.slug} (owner ${owner.id}, featured #${card.featuredRank} until ${card.featuredUntil?.toISOString()})`,
+  );
+
+  const advertiserId = owner.id;
+  const orderUserId = owner.id;
 
   const existing = await prisma.adOrder.findUnique({
     where: { reference: REFERENCE },
     include: { wallBlock: true },
   });
   if (existing?.wallBlock) {
-    const b = existing.wallBlock;
+    let b = existing.wallBlock;
+    if (b.advertiserId !== advertiserId || b.status !== "ACTIVE") {
+      b = await prisma.wallBlock.update({
+        where: { id: b.id },
+        data: { advertiserId, status: "ACTIVE" },
+      });
+    }
     console.log(`Already booked: block ${b.id} at ${b.x},${b.y} ${b.w}x${b.h} (${b.status}), order ${existing.id}`);
     return;
   }
