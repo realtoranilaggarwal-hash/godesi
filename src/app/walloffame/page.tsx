@@ -8,6 +8,7 @@ import { requestCurrency } from "@/lib/currency";
 import { db } from "@/lib/db";
 import { Alert } from "@/components/ui";
 import { PixelWall } from "@/components/PixelWall";
+import { WallVendorList } from "@/components/WallVendorList";
 
 export const dynamic = "force-dynamic";
 
@@ -98,7 +99,8 @@ export default async function WallOfFamePage({
   const [cards, pointsByUser] = await Promise.all([
     db.business.findMany({
       where: { ownerId: { in: vendorIds } },
-      select: { ownerId: true, category: true },
+      select: { ownerId: true, name: true, category: true },
+      orderBy: { createdAt: "asc" },
     }),
     db.pointsEntry.groupBy({
       by: ["userId"],
@@ -106,9 +108,10 @@ export default async function WallOfFamePage({
       _sum: { points: true },
     }),
   ]);
-  const categoryByUser = new Map(
-    cards.map((card) => [card.ownerId, card.category]),
-  );
+  const cardByUser = new Map<string, (typeof cards)[number]>();
+  for (const card of cards) {
+    if (card.ownerId && !cardByUser.has(card.ownerId)) cardByUser.set(card.ownerId, card);
+  }
   const walletByUser = new Map(
     pointsByUser.map((row) => [row.userId, row._sum.points ?? 0]),
   );
@@ -116,13 +119,15 @@ export default async function WallOfFamePage({
   const board = Array.from(vendors.values())
     .map((vendor) => ({
       ...vendor,
+      business: vendor.userId
+        ? (cardByUser.get(vendor.userId)?.name ?? null)
+        : null,
       category: vendor.userId
-        ? (categoryByUser.get(vendor.userId) ?? "Founding member")
+        ? (cardByUser.get(vendor.userId)?.category ?? "Founding member")
         : null,
       points: vendor.userId ? (walletByUser.get(vendor.userId) ?? 0) : null,
     }))
-    .sort((a, b) => b.pixels - a.pixels)
-    .slice(0, 50);
+    .sort((a, b) => b.pixels - a.pixels);
 
   return (
     <div className="space-y-6">
@@ -212,60 +217,7 @@ export default async function WallOfFamePage({
       />
 
       {board.length ? (
-        <section className="rounded-3xl border border-amber-200 bg-white p-4 sm:p-5">
-          <h2 className="text-lg font-black text-slate-900">
-            🏅 The Wall of Fame — vendor list
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Ranked by desi bricks owned — buy more, climb higher.
-          </p>
-          <ol className="mt-3 divide-y divide-slate-100">
-            {board.map((vendor, index) => (
-              <li key={`${vendor.name}-${vendor.href}`}>
-                <a
-                  href={vendor.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 px-2 py-2.5 transition hover:bg-amber-50"
-                >
-                  <span className="w-8 text-lg font-black text-slate-400">
-                    {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2">
-                      <span className="truncate font-bold text-slate-900">
-                        {vendor.name}
-                      </span>
-                      {vendor.category ? (
-                        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                          {vendor.category}
-                        </span>
-                      ) : null}
-                    </span>
-                    {vendor.desc ? (
-                      <span className="mt-0.5 line-clamp-2 block text-xs font-normal text-slate-500">
-                        {vendor.desc}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="flex shrink-0 flex-col items-end gap-1">
-                    <span className="rounded-full bg-amber-200/70 px-2.5 py-0.5 text-xs font-black text-amber-800">
-                      {Math.floor(vendor.pixels / 100).toLocaleString()} bricks
-                    </span>
-                    {vendor.points !== null ? (
-                      <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-[10px] font-black text-indigo-700">
-                        {vendor.points.toLocaleString()} pts
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="shrink-0 text-sm font-semibold text-indigo-600">
-                    Visit →
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </section>
+        <WallVendorList vendors={board} />
       ) : (
         <section className="rounded-3xl border border-dashed border-amber-300 bg-amber-50/50 p-5 text-center">
           <p className="text-sm font-semibold text-amber-800">
