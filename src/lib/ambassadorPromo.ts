@@ -155,15 +155,15 @@ export async function promoStats(campaigns: { id: string; code: string }[]) {
   return stats;
 }
 
-/** Distinct visitors per ambassador across all of their campaign links. */
-export async function uniqueVisitorsByAmbassador(ambassadorIds: string[]) {
+/** Distinct visitors per ambassador across the given campaign links. */
+export async function uniqueVisitorsByAmbassador(promoEventIds: string[]) {
   const result = new Map<string, number>();
-  if (!ambassadorIds.length) return result;
+  if (!promoEventIds.length) return result;
   const rows = await db.$queryRaw<{ ambassadorId: string; visitors: bigint }[]>`
     SELECT pe."ambassadorId", COUNT(DISTINCT c."visitorHash") AS visitors
     FROM "AmbassadorClick" c
     JOIN "AmbassadorPromoEvent" pe ON pe."id" = c."promoEventId"
-    WHERE pe."ambassadorId" = ANY(${ambassadorIds})
+    WHERE c."promoEventId" = ANY(${promoEventIds})
     GROUP BY 1`;
   for (const row of rows) result.set(row.ambassadorId, Number(row.visitors));
   return result;

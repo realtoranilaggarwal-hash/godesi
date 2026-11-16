@@ -74,7 +74,9 @@ export default async function AmbassadorDashboardPage() {
 
   const [stats, visitors] = await Promise.all([
     promoStats(ambassador.promoEvents),
-    uniqueVisitorsByAmbassador([ambassador.id]),
+    uniqueVisitorsByAmbassador(
+      ambassador.promoEvents.map((campaign) => campaign.id),
+    ),
   ]);
   const all = ambassador.promoEvents.map(
     (campaign) => stats.get(campaign.code)!,

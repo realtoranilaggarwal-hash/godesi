@@ -64,9 +64,7 @@ export default async function AmbassadorCampaignsPage() {
   ]);
   const [stats, visitors] = await Promise.all([
     promoStats(campaigns),
-    uniqueVisitorsByAmbassador(
-      Array.from(new Set(campaigns.map((campaign) => campaign.ambassador.id))),
-    ),
+    uniqueVisitorsByAmbassador(campaigns.map((campaign) => campaign.id)),
   ]);
 
   const byAmbassador = new Map<
