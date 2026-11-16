@@ -19,6 +19,8 @@ export function AmbassadorForm({
     phone: string;
     pitch: string;
     helps: string[];
+    businessName: string;
+    socialUrl: string;
   };
 }) {
   const [state, formAction] = useFormState(applyAmbassadorAction, emptyState);
@@ -39,6 +41,31 @@ export function AmbassadorForm({
         </Field>
         <Field label="Phone / WhatsApp" hint="Only the GoDesi team sees it.">
           <PhoneInput name="phone" defaultValue={defaults.phone} />
+        </Field>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          label="Business or organisation name"
+          hint="Optional — if you run a business or community group."
+        >
+          <input
+            name="businessName"
+            defaultValue={defaults.businessName}
+            maxLength={120}
+            className={inputClass}
+          />
+        </Field>
+        <Field
+          label="Social media link"
+          hint="Instagram, Facebook, WhatsApp community or YouTube page."
+        >
+          <input
+            name="socialUrl"
+            type="url"
+            defaultValue={defaults.socialUrl}
+            placeholder="https://instagram.com/yourpage"
+            className={inputClass}
+          />
         </Field>
       </div>
       <Field

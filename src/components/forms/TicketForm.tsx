@@ -103,6 +103,7 @@ export function TicketForm({
   askReferredBy = false,
   nameLabel = "Your name",
   promoCodesHref,
+  ambassadorCode,
 }: {
   eventId: string;
   price: number;
@@ -118,6 +119,8 @@ export function TicketForm({
   nameLabel?: string;
   /** Where the event lists sponsor promo codes, e.g. "#sponsors". */
   promoCodesHref?: string;
+  /** Ambassador tracking code from a godesi.com/r/<code> link. */
+  ambassadorCode?: string;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
@@ -152,6 +155,9 @@ export function TicketForm({
     <form action={formAction} className="space-y-4">
       <FormError>{state.error}</FormError>
       <input type="hidden" name="eventId" value={eventId} />
+      {ambassadorCode ? (
+        <input type="hidden" name="promoCode" value={ambassadorCode} />
+      ) : null}
 
       {tiered ? (
         <fieldset className="space-y-2">

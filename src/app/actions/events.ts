@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { tierOnSale } from "@/lib/ticketTiers";
 import { pingIndexNowInBackground } from "@/lib/indexNow";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { promoCookieName, resolveAmbassadorPromo } from "@/lib/ambassadorPromo";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { isSinglesOnly, singlesBlocker } from "@/lib/singles";
@@ -648,6 +650,15 @@ export async function bookTicketAction(
     }));
     const subtotalMinor = priced.reduce((sum, line) => sum + line.subtotalMinor, 0);
 
+    /** Credits the booking to the ambassador whose tracked link brought the buyer. */
+    const promo = await resolveAmbassadorPromo({
+      code:
+        formData.get("promoCode") ||
+        cookies().get(promoCookieName(event.id))?.value,
+      eventId: event.id,
+      buyerId: user.id,
+    });
+
     let discountMinor = 0;
     let couponId: string | null = null;
     if (parsed.data.couponCode) {
@@ -702,6 +713,8 @@ export async function bookTicketAction(
             referredBy: event.askReferredBy
               ? parsed.data.referredBy || null
               : null,
+            ambassadorId: promo?.ambassadorId ?? null,
+            promoCode: promo?.code ?? null,
             quantity: line.quantity,
             amountMinor: line.amountMinor,
             currency: event.currency,

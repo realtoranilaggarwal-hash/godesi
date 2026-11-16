@@ -120,7 +120,13 @@ const EARN_HERE = [
     href: "/ambassador",
     icon: "🤝",
     name: "Become a city ambassador",
-    blurb: "Represent GoDesi in your city, onboard local businesses and earn while the community grows.",
+    blurb: "Represent GoDesi in your city, promote community events with your own tracked link and earn invites and recognition.",
+  },
+  {
+    href: "/ambassador/dashboard",
+    icon: "📊",
+    name: "Ambassador dashboard",
+    blurb: "Already an ambassador? Your promo links, clicks, ticket sales and earned benefits.",
   },
   {
     href: "/dashboard/gigs",
