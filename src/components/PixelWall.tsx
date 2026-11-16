@@ -172,6 +172,8 @@ export function PixelWall({
   const move = (e: React.PointerEvent) => {
     const { px, py } = pos(e);
     if (!drag.current) {
+      // Touch and pen have no real hover: a preview would stick after a tap.
+      if (e.pointerType !== "mouse") return;
       const over = hit(blocks, px, py);
       canvasRef.current!.style.cursor = over ? "pointer" : "crosshair";
       setTip(over ? `${over.title} — click to visit` : null);
@@ -196,7 +198,13 @@ export function PixelWall({
       setSel(null);
     }
     drag.current = null;
+    if (e.pointerType !== "mouse") setHover(null);
     if (sel && !wasClick) setBooking(true);
+  };
+
+  const cancel = () => {
+    drag.current = null;
+    setHover(null);
   };
 
   const upload = async (file: File) => {
@@ -275,12 +283,14 @@ export function PixelWall({
               onPointerMove={move}
               onPointerUp={up}
               onPointerLeave={() => setHover(null)}
+              onPointerCancel={cancel}
               className="block w-full cursor-crosshair rounded-xl border border-slate-200"
               style={{ imageRendering: "pixelated", touchAction: "pan-y" }}
             />
             {hover ? (
               <div
-                className="pointer-events-none absolute z-10 w-56 -translate-y-4 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl"
+                key={hover.block.id}
+                className="water-card pointer-events-none absolute z-10 w-56 -translate-y-4 rounded-2xl border border-slate-200 bg-white/95 p-2 shadow-2xl"
                 style={{
                   left: `${(hover.cx / SIZE) * 100}%`,
                   // Keep the card fully on the board: clamp its center so a
@@ -293,12 +303,14 @@ export function PixelWall({
                 }}
               >
                 {hover.block.imageUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={hover.block.imageUrl}
-                    alt={hover.block.title}
-                    className="max-h-56 w-full rounded-xl border border-slate-100 object-contain"
-                  />
+                  <div className="water-frame">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={hover.block.imageUrl}
+                      alt={hover.block.title}
+                      className="water-reveal max-h-56 w-full rounded-xl border border-slate-100 object-contain"
+                    />
+                  </div>
                 ) : null}
                 <p className="mt-1.5 truncate px-1 text-sm font-bold text-slate-900">
                   {hover.block.title}
