@@ -126,7 +126,7 @@ const EARN_HERE = [
     href: "/ambassador/dashboard",
     icon: "📊",
     name: "Ambassador dashboard",
-    blurb: "Already an ambassador? Your promo links, clicks, ticket sales and earned benefits.",
+    blurb: "Already an ambassador? Your promo links, clicks, tickets and earned benefits.",
   },
   {
     href: "/dashboard/gigs",
