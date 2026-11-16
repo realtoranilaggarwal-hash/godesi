@@ -19,6 +19,14 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     colors: "from-amber-500 to-rose-600",
   },
   {
+    slug: "ambassador",
+    href: "/ambassador",
+    emoji: "🎟️",
+    title: "Be an ambassador",
+    line: "Promote desi events, get free tickets",
+    colors: "from-emerald-500 to-teal-700",
+  },
+  {
     slug: "rishta",
     href: "/rishta",
     emoji: "💍",

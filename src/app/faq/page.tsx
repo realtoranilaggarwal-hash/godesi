@@ -42,6 +42,7 @@ const ACTIONS: { href: string; label: string }[] = [
   { href: "/religious/new", label: "🛕 Add a temple or religious service" },
   { href: "/news/report", label: "📰 Share news as a member" },
   { href: "/journalists", label: "🎙 Become a local journalist" },
+  { href: "/ambassador", label: "🎟️ Become an ambassador (free tickets)" },
   { href: "/desi-elite/apply", label: "🏆 Apply for GoDesi Elite" },
   { href: "/live/submit", label: "🎧 Add your radio or TV channel" },
   { href: "/live-radio", label: "🎧 Listen to desi radio" },
@@ -385,6 +386,33 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           {/* A plain link: redirects in next.config only run on full page loads. */}
           <a href="/nye2027">godesi.com/nye2027</a> that opens straight
           to the tickets — ask us on <Link href="/contact">the contact page</Link>.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🎟️ How do I get free event tickets as a GoDesi ambassador?",
+    id: "ambassador-program",
+    a: (
+      <>
+        <p>
+          Join the free Community Ambassador &amp; Event Promotion Program:
+          create an account, apply at{" "}
+          <Link href="/ambassador">godesi.com/ambassador</Link> and sign the
+          ethics pledge. Once approved, your{" "}
+          <Link href="/ambassador/dashboard">ambassador dashboard</Link> gives
+          you a tracked link for each event the GoDesi team assigns you.
+        </p>
+        <p>
+          Confirmed tickets booked through your link within 30 days count
+          for you. Reach the campaign target and you earn its benefit, such
+          as complimentary tickets. Ambassadors are never paid cash,
+          commission or points.
+        </p>
+        <p>
+          More answers on the{" "}
+          <Link href="/ambassador#faq">ambassador page</Link> and in the{" "}
+          <Link href="/ambassador/terms">program terms</Link>.
         </p>
       </>
     ),
