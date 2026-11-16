@@ -102,6 +102,90 @@ blockquote {
 }
 
 /*
+ * Wall of Fame hover card: the brick's full picture surfaces "through water" —
+ * it rises out of a blur while two ripple rings spread from behind it.
+ */
+.water-card {
+  animation: water-card-in 0.35s ease-out both;
+}
+
+.water-frame {
+  position: relative;
+  isolation: isolate;
+}
+
+.water-frame::before,
+.water-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 9999px;
+  border: 2px solid rgb(56 189 248 / 0.7);
+  background: radial-gradient(circle, rgb(125 211 252 / 0.35), transparent 70%);
+  pointer-events: none;
+  animation: water-ripple 0.9s ease-out both;
+}
+
+.water-frame::after {
+  animation-delay: 0.18s;
+}
+
+.water-reveal {
+  animation: water-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes water-card-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes water-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.8);
+    filter: blur(6px) saturate(0.6) hue-rotate(-20deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.03);
+    filter: blur(1px) saturate(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: none;
+  }
+}
+
+@keyframes water-ripple {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .water-card,
+  .water-reveal {
+    animation-duration: 0.01ms;
+  }
+
+  .water-frame::before,
+  .water-frame::after {
+    display: none;
+  }
+}
+
+/*
  * The cookie bar is fixed to the bottom of the screen, where the floating
  * buttons live. On a phone it covered them, so taps did nothing — every
  * floating widget carries this class and lifts clear while the bar is up.
