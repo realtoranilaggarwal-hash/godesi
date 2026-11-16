@@ -40,8 +40,8 @@ export function ClubPromote({ club }: { club: Club }) {
             <strong>🎨 Poster in one minute.</strong> Paste this into ChatGPT,
             Gemini or Canva AI, save the image, then add it as the club photo
             (Edit club) or upload it on your next event.
-            <div className="mt-1 flex items-start gap-2 rounded-lg border border-violet-200 bg-white p-2 text-xs text-slate-600">
-              <span className="flex-1">{prompt}</span>
+            <div className="mt-1 flex min-w-0 items-start gap-2 rounded-lg border border-violet-200 bg-white p-2 text-xs text-slate-600">
+              <span className="min-w-0 flex-1 break-words">{prompt}</span>
               <CopyButton value={prompt} label="Copy prompt" />
             </div>
           </li>
