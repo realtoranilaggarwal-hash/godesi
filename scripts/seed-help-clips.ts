@@ -7,11 +7,13 @@
  *   npx tsx scripts/seed-help-clips.ts --dry-run  # only prints what it would do
  *
  * Entries with an empty `url` are skipped. Running it again updates the clip
- * already saved for that category instead of adding a second one.
+ * already saved for that category instead of adding a second one, and leaves
+ * a clip staff switched off in admin switched off.
  */
 import { db } from "../src/lib/db";
 import { CATEGORY_TREE, subcategorySlug } from "../src/lib/categories";
 import { CLIP_SECTIONS } from "../src/lib/clipSections";
+import { videoEmbedUrl } from "../src/lib/video";
 
 type ClipSeed = {
   /** Card title shown over the video. */
@@ -74,6 +76,10 @@ async function main() {
       console.log(`· ${categorySlug}: no video yet`);
       continue;
     }
+    if (!videoEmbedUrl(url)) {
+      console.warn(`✗ ${categorySlug}: not a YouTube/Vimeo link, skipped`);
+      continue;
+    }
 
     const existing = await db.helpClip.findFirst({
       where: { categorySlug },
@@ -85,7 +91,6 @@ async function main() {
       url,
       note: seed.note ?? null,
       categorySlug,
-      active: true,
     };
 
     if (dryRun) {
@@ -96,7 +101,7 @@ async function main() {
       await db.helpClip.update({ where: { id: existing.id }, data });
       console.log(`✓ ${categorySlug}: updated ${url}`);
     } else {
-      await db.helpClip.create({ data });
+      await db.helpClip.create({ data: { ...data, active: true } });
       console.log(`✓ ${categorySlug}: added ${url}`);
     }
     saved += 1;
