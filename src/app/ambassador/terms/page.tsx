@@ -45,6 +45,7 @@ const TERMS: { title: string; lines: string[] }[] = [
     lines: [
       "Benefits — such as complimentary event invites or featured recognition — are set by the GoDesi team for each campaign, together with who is eligible, and shown on the ambassador dashboard.",
       "Benefits are non-cash, non-transferable, have no cash value and cannot be exchanged for money, credit or any financial product.",
+      "Ambassadors are never paid commission, cash, points or a share of any sale, and are not GoDesi employees or agents.",
       "GoDesi may change, pause or end a campaign or its benefit at any time. Benefits already earned on verified tickets will be honoured or replaced with something of similar value.",
     ],
   },
@@ -52,7 +53,7 @@ const TERMS: { title: string; lines: string[] }[] = [
     title: "5. Business promotion",
     lines: [
       "Approved ambassadors may submit a business name, link and logo for review. GoDesi decides what is featured and may remove it at any time.",
-      "Submitted businesses must not be mortgage, real-estate settlement or insurance offers, and must not be used to solicit those services.",
+      "Mortgage, lending, real-estate (brokerage, title, escrow, closing, appraisal, home inspection) and insurance businesses cannot be featured through this program, and the spotlight must not be used to solicit those services.",
     ],
   },
   {

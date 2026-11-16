@@ -190,7 +190,8 @@ export default async function AmbassadorPage() {
         <h2 className="text-xl font-bold">Business promotion</h2>
         <p className="text-sm text-slate-600">
           Run a business? Approved ambassadors can submit their business name,
-          link and logo from their dashboard to be spotlighted here. Want more
+          link and logo from their dashboard to be spotlighted here (mortgage,
+          real-estate and insurance businesses can&apos;t be featured). Want more
           reach? See{" "}
           <Link href="/pricing" className="font-semibold underline">
             plans &amp; pricing
@@ -339,8 +340,8 @@ export default async function AmbassadorPage() {
       </Card>
 
       <p className="text-xs text-slate-500">
-        Points and benefits have no cash value. Commission is agreed in
-        writing with the GoDesi team before you sell anything.{" "}
+        Ambassadors are never paid commission, cash or points; benefits are
+        non-cash and have no cash value.{" "}
         <Link href="/ambassador/terms" className="underline">
           Program terms
         </Link>

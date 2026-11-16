@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { formatEventDate } from "@/lib/events";
-import { formatMinor, siteUrl } from "@/lib/format";
+import { siteUrl } from "@/lib/format";
 import {
   benefitEarned,
   promoStats,
@@ -200,10 +200,6 @@ export default async function AmbassadorDashboardPage() {
                 <Stat label="Bookings" value={s.bookings} />
                 <Stat label="Verified tickets" value={s.verifiedSeats} />
                 <Stat label="Paid tickets" value={s.paidSeats} />
-                <Stat
-                  label="Verified sales"
-                  value={formatMinor(s.salesMinor, campaign.event.currency)}
-                />
               </div>
               {campaign.benefit ? (
                 <div className="mt-3 text-sm">

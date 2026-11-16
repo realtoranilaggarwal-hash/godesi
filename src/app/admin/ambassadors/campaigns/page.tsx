@@ -108,6 +108,8 @@ export default async function AmbassadorCampaignsPage() {
         <h2 className="font-bold">Assign a promo link</h2>
         <p className="text-sm text-slate-600">
           Saving again for the same ambassador and event updates its benefit.
+          Benefits must be non-cash (invites, recognition) — never money, gift
+          cards, credit, points or commission.
         </p>
         <form
           action={createAmbassadorPromoAction}

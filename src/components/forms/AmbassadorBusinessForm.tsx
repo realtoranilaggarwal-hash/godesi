@@ -67,6 +67,18 @@ export function AmbassadorBusinessForm({
           className={inputClass}
         />
       </Field>
+      <label className="flex items-start gap-2 text-sm text-slate-700">
+        <input
+          type="checkbox"
+          name="notFinancial"
+          required
+          className="mt-0.5 h-4 w-4 shrink-0"
+        />
+        <span className="min-w-0">
+          This is not a mortgage, lending, real-estate, title/settlement or
+          insurance business.
+        </span>
+      </label>
       <SubmitButton pendingLabel="Saving...">Submit for review</SubmitButton>
     </form>
   );

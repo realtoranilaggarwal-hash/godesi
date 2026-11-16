@@ -250,6 +250,11 @@ export async function saveAmbassadorBusinessAction(
     });
     if (ambassador?.status !== "APPROVED")
       return { error: "Only approved ambassadors can submit a business." };
+    if (formData.get("notFinancial") !== "on")
+      return {
+        error:
+          "Mortgage, real-estate and insurance businesses can't be featured through the ambassador program.",
+      };
     const parsed = businessSchema.safeParse({
       businessName: formData.get("businessName"),
       socialUrl: formData.get("socialUrl") ?? undefined,
