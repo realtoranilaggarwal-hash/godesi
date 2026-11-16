@@ -10,6 +10,7 @@ import {
   AMBASSADOR_COMPLIANCE,
   AMBASSADOR_COMPLIANCE_REVIEW_NOTE,
   AMBASSADOR_EVENT_BENEFITS,
+  AMBASSADOR_FAQ,
   AMBASSADOR_PERKS,
   AMBASSADOR_PLEDGE,
   AMBASSADOR_PROGRAM_NAME,
@@ -255,7 +256,7 @@ export default async function AmbassadorPage() {
             "Create a free GoDesi account.",
             "Fill in the form below and sign the ethics pledge.",
             "The GoDesi team reviews you and gets in touch.",
-            "Once approved, your badge and certificate go live.",
+            "Once approved, you get your badge, certificate and event links.",
           ].map((step, index) => (
             <li key={step} className="rounded-xl bg-slate-50 p-3">
               <span className="block text-lg font-black text-emerald-700">
@@ -265,6 +266,42 @@ export default async function AmbassadorPage() {
             </li>
           ))}
         </ol>
+      </section>
+
+      <Card className="border-indigo-200 bg-indigo-50/60">
+        <h2 className="text-xl font-bold">Be your community&apos;s voice</h2>
+        <p className="mt-1 text-sm text-slate-700">
+          Ambassadors make great local reporters. Cover what&apos;s happening
+          in your neighbourhood as a GoDesi local journalist — a separate
+          program where approved news stories earn points.
+        </p>
+        <div className="mt-3">
+          <LinkButton href="/journalists" variant="secondary">
+            Become a local journalist
+          </LinkButton>
+        </div>
+      </Card>
+
+      <section id="faq" className="scroll-mt-24 space-y-3">
+        <h2 className="text-xl font-bold">Questions &amp; answers</h2>
+        <div className="space-y-2">
+          {AMBASSADOR_FAQ.map((item) => (
+            <details
+              key={item.q}
+              className="group rounded-xl border border-slate-200 bg-white open:bg-slate-50/60"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold text-slate-900">
+                <span className="min-w-0 break-words">{item.q}</span>
+                <span className="shrink-0 text-slate-400 transition group-open:rotate-180">
+                  ▾
+                </span>
+              </summary>
+              <p className="break-words px-4 pb-4 text-sm text-slate-700">
+                {item.a}
+              </p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <Card id="apply">

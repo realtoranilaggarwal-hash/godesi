@@ -78,6 +78,12 @@ export default async function AmbassadorsAdminPage({
             📣 Event campaigns &amp; performance →
           </Link>
           <Link
+            href="/ambassador/callers"
+            className="text-sm font-semibold text-indigo-600"
+          >
+            📞 Caller guide →
+          </Link>
+          <Link
             href="/ambassador"
             className="text-sm font-semibold text-indigo-600"
           >

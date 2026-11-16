@@ -158,3 +158,51 @@ export const AMBASSADOR_EVENT_BENEFITS = [
     text: "Approved ambassadors can submit their business and logo to be featured on this page.",
   },
 ];
+
+/** Shown on /ambassador and summarised in the site FAQ. */
+export const AMBASSADOR_FAQ: { q: string; a: string }[] = [
+  {
+    q: "What is the GoDesi ambassador program?",
+    a: "A free, volunteer program for people who love their local desi community. You promote GoDesi events in your city with your own tracked link and get complimentary event tickets and recognition in return.",
+  },
+  {
+    q: "How do I become an ambassador?",
+    a: "Create a free account at godesi.com/signup, then open godesi.com/ambassador, fill in the form and sign the ethics pledge. The GoDesi team reviews every application and gets in touch.",
+  },
+  {
+    q: "What do I get once I'm approved?",
+    a: "A GoDesi Local Ambassador badge on your profile, a numbered certificate, your own ambassador code (like GD-12) and an ambassador dashboard at godesi.com/ambassador/dashboard.",
+  },
+  {
+    q: "Where do I find my promo link?",
+    a: "The GoDesi team assigns you events. Each one appears on your ambassador dashboard with its own link and a copy button. Share it on WhatsApp, Instagram, Facebook groups or anywhere your community is.",
+  },
+  {
+    q: "How do I get free tickets?",
+    a: "Every event campaign shows its benefit and target, for example 2 complimentary tickets once 10 confirmed tickets are booked through your link. Your dashboard shows your progress and the GoDesi team contacts you when you've earned it.",
+  },
+  {
+    q: "How are tickets counted for me?",
+    a: "Anyone who opens your link and books that event within 30 days counts for you, even if they sign in first. Only confirmed tickets count. Your own bookings, cancelled tickets and fake accounts never count.",
+  },
+  {
+    q: "Do I get paid?",
+    a: "No. Ambassadors are never paid cash, commission, points or a share of any sale. Benefits are non-cash things like complimentary event invites and featured recognition, and have no cash value.",
+  },
+  {
+    q: "Can I also report local news?",
+    a: "Yes. Ambassadors are encouraged to be the voice of their community as GoDesi local journalists too (godesi.com/journalists). That is a separate program: reporters earn points for approved news stories, never for ticket sales or for bringing people in.",
+  },
+  {
+    q: "Can I promote my own business?",
+    a: "Approved ambassadors can submit their business name, link and logo from the dashboard for a free spotlight on the ambassador page after review. Mortgage, lending, real-estate, title/settlement and insurance businesses can't be featured. For paid ads, see godesi.com/advertise.",
+  },
+  {
+    q: "What am I not allowed to do?",
+    a: "No spam, fake accounts or misleading claims. Always say you're a GoDesi ambassador. Never mention, recommend or refer mortgage, real-estate or insurance services while acting as an ambassador.",
+  },
+  {
+    q: "Who can see my numbers, and can I stop any time?",
+    a: "Only you and the GoDesi team see your clicks and tickets. You can leave the program any time — just contact us.",
+  },
+];
