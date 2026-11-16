@@ -30,25 +30,66 @@ type ClipSeed = {
  */
 const CLIPS: Record<string, ClipSeed> = {
   "food-catering": { title: "Find desi restaurants & caterers", url: "" },
+  // jobs and events-wedding already have clips added in admin; leave the
+  // url empty here so the script does not replace them.
   "events-wedding": { title: "Plan your desi wedding", url: "" },
-  "real-estate": { title: "Buy, sell or rent with desi realtors", url: "" },
+  "events-wedding-dj-and-sound": {
+    title: "List your DJ business free",
+    url: "https://youtube.com/shorts/GlaZvg4SK5U",
+  },
+  "real-estate": {
+    title: "Find real estate opportunities",
+    url: "https://youtube.com/shorts/anxkEnohkbk",
+  },
   "rooms-roommates": { title: "Find a room or roommate", url: "" },
   jobs: { title: "Desi jobs & freelancers", url: "" },
-  "section:gigs": { title: "Hire a desi expert from $5", url: "" },
+  "section:gigs": {
+    title: "Hire a desi expert from $5",
+    url: "https://youtube.com/shorts/twW83QrB_b0",
+  },
   "section:events": { title: "Desi events near you", url: "" },
+  "section:festivals": {
+    title: "Promote your festival event",
+    url: "https://youtube.com/shorts/BSlRup0hcqw",
+  },
+  "section:complaints": {
+    title: "How to file a complaint",
+    url: "https://youtube.com/shorts/XWSaSZIQEAw",
+  },
+  "section:elite": {
+    title: "Join as a GoDesi Elite member",
+    url: "https://youtube.com/shorts/cjYvs3e-Iak",
+  },
+  "religious-services": {
+    title: "Book a pooja live from India",
+    url: "https://youtube.com/shorts/a69a2spb2dQ",
+  },
   "religious-services-temples-and-trusts": {
     title: "Temples near you",
     url: "",
   },
   "religious-services-astrologers": {
-    title: "Talk to a desi astrologer",
-    url: "",
+    title: "Consult expert astrologers",
+    url: "https://youtube.com/shorts/yn_aeuzaOe0",
+  },
+  "section:astrology": {
+    title: "Free astrology on GoDesi",
+    url: "https://youtube.com/shorts/ezizkg7yuVc",
   },
   "buy-sell": { title: "Buy & sell in the desi marketplace", url: "" },
-  "section:news": { title: "Desi news from our community", url: "" },
-  "section:live": { title: "Live desi radio & TV", url: "" },
+  "section:news": {
+    title: "Become a desi journalist",
+    url: "https://youtube.com/shorts/HZB4pXzMrmE",
+  },
+  "section:live": {
+    title: "Live desi radio & TV",
+    url: "https://youtube.com/shorts/4wx4CiPkfEE",
+  },
   "section:rishta": { title: "Find a rishta", url: "" },
-  travel: { title: "Desi travel agents & cheap flights", url: "" },
+  travel: {
+    title: "Save on flights & hotels",
+    url: "https://youtube.com/shorts/cvmSReLD9O8",
+  },
   professionals: { title: "Desi attorneys, CPAs & experts", url: "" },
 };
 
