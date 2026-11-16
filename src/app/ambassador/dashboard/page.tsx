@@ -9,6 +9,7 @@ import {
   benefitEarned,
   promoStats,
   sumStats,
+  uniqueVisitorsByAmbassador,
 } from "@/lib/ambassadorPromo";
 import { AMBASSADOR_COMPLIANCE_REVIEW_NOTE } from "@/lib/joinGoals";
 import { Alert, Badge, Card, LinkButton } from "@/components/ui";
@@ -71,11 +72,17 @@ export default async function AmbassadorDashboardPage() {
     );
   }
 
-  const stats = await promoStats(ambassador.promoEvents);
+  const [stats, visitors] = await Promise.all([
+    promoStats(ambassador.promoEvents),
+    uniqueVisitorsByAmbassador([ambassador.id]),
+  ]);
   const all = ambassador.promoEvents.map(
     (campaign) => stats.get(campaign.code)!,
   );
-  const totals = sumStats(all);
+  const totals = {
+    ...sumStats(all),
+    visitors: visitors.get(ambassador.id) ?? 0,
+  };
   const earned = ambassador.promoEvents.filter((campaign) =>
     benefitEarned(campaign, stats.get(campaign.code)!),
   );

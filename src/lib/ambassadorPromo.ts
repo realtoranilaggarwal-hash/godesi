@@ -155,6 +155,21 @@ export async function promoStats(campaigns: { id: string; code: string }[]) {
   return stats;
 }
 
+/** Distinct visitors per ambassador across all of their campaign links. */
+export async function uniqueVisitorsByAmbassador(ambassadorIds: string[]) {
+  const result = new Map<string, number>();
+  if (!ambassadorIds.length) return result;
+  const rows = await db.$queryRaw<{ ambassadorId: string; visitors: bigint }[]>`
+    SELECT pe."ambassadorId", COUNT(DISTINCT c."visitorHash") AS visitors
+    FROM "AmbassadorClick" c
+    JOIN "AmbassadorPromoEvent" pe ON pe."id" = c."promoEventId"
+    WHERE pe."ambassadorId" = ANY(${ambassadorIds})
+    GROUP BY 1`;
+  for (const row of rows) result.set(row.ambassadorId, Number(row.visitors));
+  return result;
+}
+
+/** Totals across campaigns; `visitors` is a per-link sum, so replace it with uniqueVisitorsByAmbassador. */
 export function sumStats(list: PromoStats[]): PromoStats {
   return list.reduce(
     (total, item) => ({

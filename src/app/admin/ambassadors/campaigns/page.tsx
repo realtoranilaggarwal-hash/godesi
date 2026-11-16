@@ -4,7 +4,11 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { formatMinor } from "@/lib/format";
-import { promoStats, sumStats } from "@/lib/ambassadorPromo";
+import {
+  promoStats,
+  sumStats,
+  uniqueVisitorsByAmbassador,
+} from "@/lib/ambassadorPromo";
 import { AMBASSADOR_COMPLIANCE_REVIEW_NOTE } from "@/lib/joinGoals";
 import { Badge, Card, inputClass } from "@/components/ui";
 import {
@@ -58,7 +62,12 @@ export default async function AmbassadorCampaignsPage() {
       take: 300,
     }),
   ]);
-  const stats = await promoStats(campaigns);
+  const [stats, visitors] = await Promise.all([
+    promoStats(campaigns),
+    uniqueVisitorsByAmbassador(
+      Array.from(new Set(campaigns.map((campaign) => campaign.ambassador.id))),
+    ),
+  ]);
 
   const byAmbassador = new Map<
     string,
@@ -185,7 +194,7 @@ export default async function AmbassadorCampaignsPage() {
                       </td>
                       <td className="py-1.5 pr-3">{row.codes.length}</td>
                       <td className="py-1.5 pr-3">{total.clicks}</td>
-                      <td className="py-1.5 pr-3">{total.visitors}</td>
+                      <td className="py-1.5 pr-3">{visitors.get(id) ?? 0}</td>
                       <td className="py-1.5 pr-3">{total.bookings}</td>
                       <td className="py-1.5 pr-3">{total.verifiedSeats}</td>
                       <td className="py-1.5 pr-3">
