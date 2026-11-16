@@ -10,7 +10,7 @@ export function tierOnSale(tier: Windowed, now = new Date()) {
 }
 
 
-/** "Until Nov 15", "From Dec 20" or "Ended" — null when the tier has no window. */
+/** "Until Dec 15", "From Dec 16" or "Ended" — null when the tier has no window. */
 export function tierWindowLabel(tier: Windowed, timeZone: string | null, now = new Date()) {
   const zone = timeZone || "America/New_York";
   const start = toDate(tier.salesStart);
