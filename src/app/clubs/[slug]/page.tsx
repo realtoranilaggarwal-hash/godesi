@@ -353,10 +353,10 @@ export default async function ClubPage({
       </Card>
 
       <div data-right-rail className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card>
             <h2 className="font-bold text-slate-900">About</h2>
-            <p className="mt-2 whitespace-pre-line text-sm text-slate-700">
+            <p className="mt-2 whitespace-pre-line break-words text-sm text-slate-700">
               {club.description}
             </p>
           </Card>
@@ -430,14 +430,16 @@ export default async function ClubPage({
               <h2 className="font-bold text-slate-900">Club rules</h2>
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
                 {splitRules(club.rules).lines.map((line) => (
-                  <li key={line}>{line}</li>
+                  <li key={line} className="break-words">
+                    {line}
+                  </li>
                 ))}
               </ul>
             </Card>
           ) : null}
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {isOrganizer ? <ClubPromote club={club} /> : null}
           {isOrganizer && pending.length ? (
             <Card className="!border-amber-200 bg-amber-50/40">
