@@ -81,6 +81,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/rewards", label: "Refer & earn rewards" },
         { href: "/walloffame", label: "🧱 Wall of Fame" },
         { href: "/ambassador", label: "🤝 Become an ambassador" },
+        { href: "/ambassador/dashboard", label: "📊 Ambassador dashboard" },
         { href: "/earn", label: "💸 Make money online" },
       ],
     },

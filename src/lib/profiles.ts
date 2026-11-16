@@ -33,6 +33,7 @@ export const RESERVED_USERNAMES = new Set([
   "professionals",
   "pricing",
   "privacy",
+  "r",
   "ref",
   "refunds",
   "robots.txt",

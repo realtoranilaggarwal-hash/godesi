@@ -11,6 +11,10 @@ import { SITE } from "@/lib/site";
 import { notify } from "@/lib/notifications";
 import { cleanOfferPhone } from "@/lib/offerInterests";
 import {
+  ambassadorPromoCode,
+  newCampaignCode,
+} from "@/lib/ambassadorPromo";
+import {
   AMBASSADOR_HELP_IDS,
   AMBASSADOR_PLEDGE,
   parseJoinGoals,
@@ -54,6 +58,14 @@ const ambassadorSchema = z.object({
     .min(30, "Tell us a little more about why you want to represent GoDesi")
     .max(2000),
   signedName: z.string().trim().min(2, "Type your full name to sign").max(120),
+  businessName: z.string().trim().max(120).optional(),
+  socialUrl: z
+    .string()
+    .trim()
+    .url("Enter a full link, e.g. https://instagram.com/yourpage")
+    .max(300)
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 });
 
 /** Ambassador application on /ambassador; staff review it on /admin/ambassadors. */
@@ -67,6 +79,8 @@ export async function applyAmbassadorAction(
       city: formData.get("city"),
       pitch: formData.get("pitch"),
       signedName: formData.get("signedName"),
+      businessName: formData.get("businessName") ?? undefined,
+      socialUrl: formData.get("socialUrl") ?? undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
     const data = parsed.data;
@@ -98,13 +112,16 @@ export async function applyAmbassadorAction(
       pitch: data.pitch,
       helps,
       signedName: data.signedName,
+      businessName: data.businessName || null,
+      socialUrl: data.socialUrl ?? null,
       pledgedAt: new Date(),
       status: "PENDING" as const,
     };
     const application = await db.ambassador.upsert({
       where: { userId: user.id },
       create: { userId: user.id, ...fields },
-      update: fields,
+      // A reapplication can change business details, so they need review again.
+      update: { ...fields, businessApprovedAt: null },
     });
     if (!user.joinGoals.includes("ambassador"))
       await db.user.update({
@@ -164,6 +181,9 @@ export async function reviewAmbassadorAction(formData: FormData) {
         status: "APPROVED",
         approvedAt: new Date(),
         certificateNo,
+        promoCode:
+          current.promoCode ??
+          ambassadorPromoCode({ id, certificateNo }),
         adminNote,
       },
     });
@@ -196,4 +216,191 @@ export async function reviewAmbassadorAction(formData: FormData) {
   revalidatePath("/admin/ambassadors");
   revalidatePath("/ambassador");
   if (current.user.username) revalidatePath(`/${current.user.username}`);
+}
+
+const businessSchema = z.object({
+  businessName: z.string().trim().min(2, "Business name is required").max(120),
+  socialUrl: z
+    .string()
+    .trim()
+    .url("Enter a full link, e.g. https://instagram.com/yourpage")
+    .max(300)
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  logoUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((value) => /^(https:\/\/|\/)/.test(value), "Upload the logo again")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  businessInfo: z.string().trim().max(1000).optional(),
+});
+
+/** Approved ambassadors submit their business for the recognition wall; staff re-review every change. */
+export async function saveAmbassadorBusinessAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    const user = await requireUser();
+    const ambassador = await db.ambassador.findUnique({
+      where: { userId: user.id },
+      select: { id: true, status: true },
+    });
+    if (ambassador?.status !== "APPROVED")
+      return { error: "Only approved ambassadors can submit a business." };
+    if (formData.get("notFinancial") !== "on")
+      return {
+        error:
+          "Mortgage, real-estate and insurance businesses can't be featured through the ambassador program.",
+      };
+    const parsed = businessSchema.safeParse({
+      businessName: formData.get("businessName"),
+      socialUrl: formData.get("socialUrl") ?? undefined,
+      logoUrl: formData.get("logoUrl") ?? undefined,
+      businessInfo: formData.get("businessInfo") ?? undefined,
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0].message };
+    await db.ambassador.update({
+      where: { id: ambassador.id },
+      data: {
+        businessName: parsed.data.businessName,
+        socialUrl: parsed.data.socialUrl ?? null,
+        logoUrl: parsed.data.logoUrl ?? null,
+        businessInfo: parsed.data.businessInfo || null,
+        businessApprovedAt: null,
+      },
+    });
+    revalidatePath("/ambassador");
+    revalidatePath("/ambassador/dashboard");
+    revalidatePath("/admin/ambassadors");
+    return {
+      success:
+        "Saved — the GoDesi team will review your business before it is featured.",
+    };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+export async function reviewAmbassadorBusinessAction(formData: FormData) {
+  await requireStaff();
+  const id = String(formData.get("id") ?? "");
+  const approve = formData.get("approve") === "1";
+  await db.ambassador.update({
+    where: { id },
+    data: { businessApprovedAt: approve ? new Date() : null },
+  });
+  revalidatePath("/admin/ambassadors");
+  revalidatePath("/ambassador");
+  revalidatePath("/ambassador/dashboard");
+}
+
+const campaignSchema = z.object({
+  benefit: z.string().trim().max(300).optional(),
+  eligibility: z.string().trim().max(500).optional(),
+  rewardTickets: z
+    .union([z.literal(""), z.coerce.number().int().min(1).max(1000)])
+    .optional()
+    .transform((value) => (typeof value === "number" ? value : null)),
+});
+
+function campaignFields(formData: FormData) {
+  const parsed = campaignSchema.parse({
+    benefit: formData.get("benefit") ?? undefined,
+    eligibility: formData.get("eligibility") ?? undefined,
+    rewardTickets: formData.get("rewardTickets") ?? undefined,
+  });
+  return {
+    benefit: parsed.benefit || null,
+    eligibility: parsed.eligibility || null,
+    rewardTickets: parsed.rewardTickets,
+  };
+}
+
+/**
+ * Assigns an approved ambassador a tracked link for one event. Benefit and
+ * eligibility text must be cleared by compliance before the campaign goes live.
+ */
+export async function createAmbassadorPromoAction(formData: FormData) {
+  await requireStaff();
+  const ambassadorId = String(formData.get("ambassadorId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const ambassador = await db.ambassador.findUniqueOrThrow({
+    where: { id: ambassadorId },
+    select: {
+      id: true,
+      status: true,
+      certificateNo: true,
+      promoCode: true,
+      userId: true,
+      user: { select: { name: true, email: true } },
+    },
+  });
+  if (ambassador.status !== "APPROVED")
+    throw new Error("Approve the ambassador first.");
+  const event = await db.event.findUniqueOrThrow({
+    where: { id: eventId },
+    select: { id: true, title: true },
+  });
+
+  const promoCode = ambassador.promoCode ?? ambassadorPromoCode(ambassador);
+  if (!ambassador.promoCode)
+    await db.ambassador.update({
+      where: { id: ambassador.id },
+      data: { promoCode },
+    });
+
+  const fields = campaignFields(formData);
+  const existing = await db.ambassadorPromoEvent.findUnique({
+    where: { ambassadorId_eventId: { ambassadorId, eventId } },
+    select: { id: true },
+  });
+  if (existing) {
+    await db.ambassadorPromoEvent.update({
+      where: { id: existing.id },
+      data: { ...fields, active: true },
+    });
+  } else {
+    let created = false;
+    for (let attempt = 0; attempt < 5 && !created; attempt++) {
+      try {
+        await db.ambassadorPromoEvent.create({
+          data: { code: newCampaignCode(promoCode), ambassadorId, eventId, ...fields },
+        });
+        created = true;
+      } catch (error) {
+        if (attempt === 4) throw error;
+      }
+    }
+    await notify({
+      userId: ambassador.userId,
+      title: `📣 Your promo link for ${event.title} is ready`,
+      body: "Share it and track clicks and tickets on your ambassador dashboard.",
+      href: "/ambassador/dashboard",
+    });
+  }
+
+  revalidatePath("/admin/ambassadors/campaigns");
+  revalidatePath("/ambassador/dashboard");
+}
+
+export async function updateAmbassadorPromoAction(formData: FormData) {
+  await requireStaff();
+  const id = String(formData.get("id") ?? "");
+  await db.ambassadorPromoEvent.update({
+    where: { id },
+    data: { ...campaignFields(formData), active: formData.get("active") === "on" },
+  });
+  revalidatePath("/admin/ambassadors/campaigns");
+  revalidatePath("/ambassador/dashboard");
+}
+
+export async function deleteAmbassadorPromoAction(formData: FormData) {
+  await requireStaff();
+  const id = String(formData.get("id") ?? "");
+  await db.ambassadorPromoEvent.delete({ where: { id } });
+  revalidatePath("/admin/ambassadors/campaigns");
+  revalidatePath("/ambassador/dashboard");
 }

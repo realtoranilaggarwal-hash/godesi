@@ -23,6 +23,7 @@ import {
   tierSeatsLeft,
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
+import { normalizePromoCode } from "@/lib/ambassadorPromo";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
@@ -285,12 +286,13 @@ export default async function EventPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { error?: string };
+  searchParams: { error?: string; promo?: string };
 }) {
   const event = await loadEvent(params.slug);
   if (!event || event.status === "REJECTED") notFound();
 
   const user = await getCurrentUser();
+  const ambassadorCode = normalizePromoCode(searchParams.promo) ?? undefined;
   const singlesOnly = isSinglesOnly(event);
   const singlesProfile =
     singlesOnly && user
@@ -1006,6 +1008,7 @@ export default async function EventPage({
                   <div className="mt-3">
                     <TicketForm
                       eventId={event.id}
+                      ambassadorCode={ambassadorCode}
                       price={0}
                       currency={event.currency}
                       seatsLeft={99}
@@ -1097,6 +1100,7 @@ export default async function EventPage({
               <div className="mt-3">
                 <TicketForm
                   eventId={event.id}
+                  ambassadorCode={ambassadorCode}
                   price={event.price}
                   currency={event.currency}
                   seatsLeft={left}
@@ -1193,6 +1197,7 @@ export default async function EventPage({
                 <div className="mt-3">
                   <TicketForm
                     eventId={event.id}
+                    ambassadorCode={ambassadorCode}
                     price={0}
                     currency={event.currency}
                     seatsLeft={left}

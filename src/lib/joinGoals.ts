@@ -81,16 +81,6 @@ export const AMBASSADOR_PERKS = [
     text: "A “GoDesi Local Ambassador” badge on your profile and a numbered certificate you can print and frame.",
   },
   {
-    icon: "⭐",
-    title: "Reward points",
-    text: "Points for every member you invite and every business you help claim its card — spend them on banners, featured spots or Pro.",
-  },
-  {
-    icon: "💵",
-    title: "Commission on sales",
-    text: "A share of paid plans, banners and featured listings you bring in, agreed with the GoDesi team before you start.",
-  },
-  {
     icon: "🎟️",
     title: "Events",
     text: "Free entry and a mention on stage at GoDesi events in your city, and first say in planning local meetups.",
@@ -113,7 +103,6 @@ export const AMBASSADOR_HELP = [
   { id: "members", label: "Invite friends, family and groups to join" },
   { id: "events", label: "Help run or promote GoDesi events" },
   { id: "news", label: "Share local news and community updates" },
-  { id: "sales", label: "Sell banners, featured spots and plans" },
   { id: "social", label: "Post about GoDesi on WhatsApp, Facebook, Instagram" },
 ];
 
@@ -124,9 +113,48 @@ export const AMBASSADOR_PLEDGE = [
   "I will be honest about what GoDesi is and does, and never promise anything GoDesi does not offer.",
   "I will never take money, gifts or favours in GoDesi's name. All payments go through godesi.com.",
   "I will protect members' privacy and never share anyone's phone, email or details without their permission.",
-  "I will tell people when I earn points or commission for bringing them to GoDesi.",
+  "I will never ask for or accept money, gifts or any reward for referring anyone to mortgage, real-estate or insurance services.",
   "I will treat every person and community with respect, whatever their religion, caste, language, gender or background.",
   "I will not spam people or groups, and I will stop contacting anyone who asks me to.",
   "I will follow local laws and the GoDesi terms, and report problems to the GoDesi team.",
   "I understand GoDesi may remove my ambassador badge and certificate if I break this pledge.",
+];
+
+/** Public name of the extended program on /ambassador. */
+export const AMBASSADOR_PROGRAM_NAME =
+  "GoDesi Community Ambassador & Event Promotion Program";
+
+/**
+ * Hard compliance limits, shown on /ambassador and /ambassador/terms.
+ * These terms and every campaign benefit must be reviewed by compliance
+ * personnel before the program launches.
+ */
+export const AMBASSADOR_COMPLIANCE = [
+  "This program covers event and community marketing only. It is completely separate from any mortgage, real-estate, insurance or other financial-services business, and no part of it is a referral arrangement for those services.",
+  "No reward, gift, points, invite or other benefit is given for referring mortgage, real-estate settlement (title, escrow, closing, appraisal, home inspection, lending) or insurance business — to anyone, ever.",
+  "No benefit is conditioned on buying insurance, applying for a loan, using any real-estate or settlement service, or referring insurance customers.",
+  "Ambassadors must not mention, recommend or refer mortgage, real-estate settlement or insurance services while acting as a GoDesi ambassador.",
+  "Ambassadors are never paid commission, cash or points. Event-promotion benefits are non-cash recognition (complimentary event invites, featured recognition, badges). They have no cash value and cannot be exchanged for money.",
+];
+
+export const AMBASSADOR_COMPLIANCE_REVIEW_NOTE =
+  "Program terms and benefits are subject to review by compliance personnel before launch and may change.";
+
+/** Earned through tracked event promotion; set per campaign by the GoDesi team. */
+export const AMBASSADOR_EVENT_BENEFITS = [
+  {
+    icon: "🎟️",
+    title: "Complimentary invites",
+    text: "Reach the verified-ticket target on a campaign and earn complimentary invites to that event.",
+  },
+  {
+    icon: "🌟",
+    title: "Featured recognition",
+    text: "Top promoters are thanked on stage, on the event page and in GoDesi's “Ambassador of the month”.",
+  },
+  {
+    icon: "🏪",
+    title: "Business spotlight",
+    text: "Approved ambassadors can submit their business and logo to be featured on this page.",
+  },
 ];

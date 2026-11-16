@@ -4,7 +4,10 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser, isStaff } from "@/lib/auth";
 import { Badge, Card, inputClass } from "@/components/ui";
-import { reviewAmbassadorAction } from "@/app/actions/joinGoals";
+import {
+  reviewAmbassadorAction,
+  reviewAmbassadorBusinessAction,
+} from "@/app/actions/joinGoals";
 import { AMBASSADOR_HELP, JOIN_GOALS, joinGoal } from "@/lib/joinGoals";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +43,7 @@ export default async function AmbassadorsAdminPage({
       where: status ? { status } : undefined,
       include: {
         user: { select: { name: true, email: true, username: true } },
+        _count: { select: { promoEvents: true, tickets: true } },
       },
       orderBy: { createdAt: "desc" },
       take: 200,
@@ -66,12 +70,20 @@ export default async function AmbassadorsAdminPage({
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">🤝 Ambassadors &amp; join goals</h1>
-        <Link
-          href="/ambassador"
-          className="text-sm font-semibold text-indigo-600"
-        >
-          Public page →
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/admin/ambassadors/campaigns"
+            className="text-sm font-semibold text-indigo-600"
+          >
+            📣 Event campaigns &amp; performance →
+          </Link>
+          <Link
+            href="/ambassador"
+            className="text-sm font-semibold text-indigo-600"
+          >
+            Public page →
+          </Link>
+        </div>
       </div>
 
       <Card>
@@ -190,6 +202,69 @@ export default async function AmbassadorsAdminPage({
           <p className="mt-2 whitespace-pre-line text-sm text-slate-700">
             {app.pitch}
           </p>
+          {app.status === "APPROVED" ? (
+            <p className="mt-2 text-xs text-slate-600">
+              Code <span className="font-mono font-bold">{app.promoCode ?? "—"}</span>{" "}
+              · {app._count.promoEvents} campaign(s) · {app._count.tickets}{" "}
+              attributed ticket row(s) ·{" "}
+              <Link
+                href="/admin/ambassadors/campaigns"
+                className="font-semibold text-indigo-600"
+              >
+                assign events →
+              </Link>
+            </p>
+          ) : null}
+          {app.businessName || app.socialUrl || app.logoUrl ? (
+            <div className="mt-2 flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 p-2 text-sm">
+              {app.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={app.logoUrl}
+                  alt=""
+                  className="h-12 w-12 rounded-lg border border-slate-200 object-cover"
+                />
+              ) : null}
+              <div className="min-w-0 flex-1">
+                <p className="break-words font-semibold">
+                  🏪 {app.businessName ?? "(no business name)"}
+                  {app.socialUrl ? (
+                    <a
+                      href={app.socialUrl}
+                      target="_blank"
+                      rel="nofollow noopener"
+                      className="ml-2 break-all text-xs font-normal text-indigo-600"
+                    >
+                      {app.socialUrl}
+                    </a>
+                  ) : null}
+                </p>
+                {app.businessInfo ? (
+                  <p className="break-words text-xs text-slate-600">
+                    {app.businessInfo}
+                  </p>
+                ) : null}
+              </div>
+              {app.status === "APPROVED" && app.businessName ? (
+                <form action={reviewAmbassadorBusinessAction}>
+                  <input type="hidden" name="id" value={app.id} />
+                  <input
+                    type="hidden"
+                    name="approve"
+                    value={app.businessApprovedAt ? "0" : "1"}
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold"
+                  >
+                    {app.businessApprovedAt
+                      ? "✅ Featured — unfeature"
+                      : "Feature business"}
+                  </button>
+                </form>
+              ) : null}
+            </div>
+          ) : null}
           <form
             action={reviewAmbassadorAction}
             className="mt-3 grid gap-2 sm:grid-cols-4"

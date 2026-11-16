@@ -1356,15 +1356,16 @@ model Event {
   participateOptions String[]         @default([])
   rsvps              EventRsvp[]
 
-  speakers EventSpeaker[]
-  sessions EventSession[]
-  claims   EventClaim[]
-  tickets  Ticket[]
+  speakers         EventSpeaker[]
+  sessions         EventSession[]
+  claims           EventClaim[]
+  tickets          Ticket[]
   /// Optional Basic/Webinar/Premium tiers; without them the flat `price` applies.
-  tiers    TicketTier[]
-  coupons  Coupon[]
-  reviews  EventReview[]
-  sponsors EventSponsor[]
+  tiers            TicketTier[]
+  coupons          Coupon[]
+  reviews          EventReview[]
+  sponsors         EventSponsor[]
+  ambassadorPromos AmbassadorPromoEvent[]
 
   @@unique([sourceId, sourceUid])
   @@index([startsAt])
@@ -1649,9 +1650,16 @@ model Ticket {
   coupon        Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
   discountMinor Int     @default(0)
 
+  /// Ambassador whose tracked link brought the buyer (AmbassadorPromoEvent.code).
+  ambassadorId String?
+  ambassador   Ambassador? @relation(fields: [ambassadorId], references: [id], onDelete: SetNull)
+  promoCode    String?
+
   @@index([eventId, status])
   @@index([tierId])
   @@index([userId])
+  @@index([ambassadorId])
+  @@index([promoCode])
 }
 
 model Banner {
@@ -3218,27 +3226,80 @@ enum AmbassadorStatus {
 /// pledge by typing their name; staff approve them on /admin/ambassadors, and
 /// approval gives the profile badge and the printable certificate.
 model Ambassador {
-  id            String           @id @default(cuid())
-  userId        String           @unique
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  city          String
-  phone         String?
+  id                 String           @id @default(cuid())
+  userId             String           @unique
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city               String
+  phone              String?
   /// Why they want to represent GoDesi and what they can do.
-  pitch         String
+  pitch              String
   /// Ways they want to help (lib/joinGoals AMBASSADOR_HELP ids).
-  helps         String[]         @default([])
+  helps              String[]         @default([])
   /// Name typed under the ethics pledge, and when they signed it.
-  signedName    String
-  pledgedAt     DateTime
-  status        AmbassadorStatus @default(PENDING)
+  signedName         String
+  pledgedAt          DateTime
+  status             AmbassadorStatus @default(PENDING)
   /// Certificate number shown on the certificate, set on approval.
-  certificateNo Int?             @unique
-  approvedAt    DateTime?
-  adminNote     String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  certificateNo      Int?             @unique
+  approvedAt         DateTime?
+  adminNote          String?
+  /// Business they want promoted alongside their ambassador work.
+  businessName       String?
+  socialUrl          String?
+  logoUrl            String?
+  businessInfo       String?
+  /// Set when staff approve the business details for the recognition wall.
+  businessApprovedAt DateTime?
+  /// Personal code (GD-<certificateNo>), set on approval.
+  promoCode          String?          @unique
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  promoEvents AmbassadorPromoEvent[]
+  tickets     Ticket[]
 
   @@index([status])
+}
+
+/// One ambassador's tracked promotion of one event (godesi.com/r/<code>).
+/// Benefit and eligibility text is set by staff per campaign and must be
+/// reviewed by compliance before launch.
+model AmbassadorPromoEvent {
+  id            String     @id @default(cuid())
+  /// Tracking code in the link, e.g. GD-12-NYE7.
+  code          String     @unique
+  ambassadorId  String
+  ambassador    Ambassador @relation(fields: [ambassadorId], references: [id], onDelete: Cascade)
+  eventId       String
+  event         Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  /// What the ambassador earns, e.g. "2 complimentary invites + stage mention".
+  benefit       String?
+  /// Who qualifies and how, e.g. "Verified paid tickets only, not your own".
+  eligibility   String?
+  /// Verified (confirmed) tickets needed to earn the benefit; null = no target.
+  rewardTickets Int?
+  active        Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  clicks AmbassadorClick[]
+
+  @@unique([ambassadorId, eventId])
+  @@index([eventId])
+}
+
+/// One visit through an ambassador link; visitorHash is a sha256 of IP + user agent.
+model AmbassadorClick {
+  id           String               @id @default(cuid())
+  promoEventId String
+  promoEvent   AmbassadorPromoEvent @relation(fields: [promoEventId], references: [id], onDelete: Cascade)
+  code         String
+  eventId      String
+  visitorHash  String
+  createdAt    DateTime             @default(now())
+
+  @@index([promoEventId, createdAt])
+  @@index([eventId])
 }
 
 /// Short public post on GoDesi Chatter; a reply when `parentId` is set.
