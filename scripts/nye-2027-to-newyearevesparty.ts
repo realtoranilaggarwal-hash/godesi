@@ -11,17 +11,17 @@ import { newsPath } from "@/lib/newsLinks";
 const MEMBER_EMAIL = "newyearevespartycom@gmail.com";
 const EVENT_SLUGS = ["new-year-eves-party-2027-edison", "singles-new-years-eve-party-2027-nj"];
 const GUID = "report:newyearevesparty-nye-2027";
-const MAIN_FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
+const MAIN_FLYER = "https://godesi.com/flyers/nye-2027-flyer.jpg";
 const SINGLES_FLYER = "https://godesi.com/flyers/nye-2027-singles.jpg";
 
 const TITLE = "Grand New Year's Eve Party 2027 at Royal Albert Palace, Fords NJ — tickets on sale";
 
 const SUMMARY = [
   "NewYearEvesParty.com is hosting the Grand New Year's Eve Party 2027 on Thursday, December 31st, 8:00 PM to 1:00 AM, in the Big Ball Room at Royal Albert Palace, 1050 King Georges Post Rd, Fords NJ 08863 (near Edison).",
-  "It's a family party with live food stations (dosa, jalebi, golgappa and more), premium drinks, DJ Sandy on the dance floor and belly dancer Aamra's fire dance.",
-  "Tickets till Nov 15 (with table seating): Adult (10+) $85, Kids (0–9) $65, Couple $160. Nov 16 to Dec 15: Adult $100, Kids $75, Couple $180. From Dec 16: Adult $150, Kids $100, Couple $250. Balcony seats (no table, first come, first served) are $75. Book at godesi.com/nye2027.",
-  "Singles 21+ get their own first-come-first-served balcony (seats only, no table) with food, drinks and dancing included: $75 till Nov 15, $85 from Nov 16 to Dec 15 and $100 from Dec 16. Photo ID is checked at the door. Book at godesi.com/927.",
-  "To book by phone: Rachna 908-421-1685 · Anil 732-877-8585 · Ashok 732-921-5606 · Office 732-661-1070.",
+  "It's a family party with 35 food items and an elegant seated dining experience, live food stations in the Exclusive Plaza Hall (dosa, jalebi, golgappa and more), premium drinks until midnight, Live DJ Sandy of M&D Events, a live belly dance performance, multiple photo booths, exciting raffle prizes, the New York ball drop on live TV, a midnight champagne toast, free valet parking and Woodbridge Police security.",
+  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 16: Adults (18+) $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. Book at NewYearEvesParty.com or godesi.com/9227.",
+  "Singles: $75 balcony chair, all inclusive — limited seats, first come, first served, no table. Singles 21+ can also book the singles-only balcony at godesi.com/927 (photo ID checked at the door).",
+  "Sponsors: godesi.com/sponsor2027. Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606.",
 ].join("\n\n");
 
 async function main() {

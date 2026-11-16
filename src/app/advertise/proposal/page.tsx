@@ -66,7 +66,7 @@ const PACKAGE_ROWS: { item: string; value: string }[] = [
   { item: "Featured listing on GoDesi.com for 1 year", value: usd(PLANS.PREMIUM.terms.YEAR?.usd ?? 100) },
   { item: "GoDesi Elite interview with a 30–60 second video", value: "$500" },
   { item: "Your banner inside the hall at the New Year's Eve party", value: "$300" },
-  { item: "1 ticket to enjoy the New Year's Eve party", value: "$100" },
+  { item: "1 ticket to enjoy the New Year's Eve party", value: "$150" },
 ];
 
 function Section({

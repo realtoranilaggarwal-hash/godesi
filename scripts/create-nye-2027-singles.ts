@@ -2,10 +2,11 @@
  * Creates (or refreshes) the "Singles" listing for NYE 2027: the same night and hall as
  * the main party, but its own page and its own 50 first-come-first-served balcony seats
  * (no tables), sold only to members 21+ with a Connect profile marked Single (see
- * lib/singles). The price rises by date; the event's seatsTotal of 50 caps the three
- * price windows together (lib/events pooledSeatsLeft). The main event keeps its separate
- * 50 balcony seats, so the balcony holds 100 in total.
- * Safe to re-run: the event is matched by slug (old slugs are renamed) and tiers by name.
+ * lib/singles). One $75 all-inclusive balcony chair tier; the event's seatsTotal of 50 caps it
+ * (lib/events pooledSeatsLeft). The main event keeps its separate 50 Singles balcony chairs,
+ * so the balcony holds 100 in total.
+ * Safe to re-run: the event is matched by slug (old slugs are renamed) and tiers by name;
+ * old price-window tiers are deleted when unsold, otherwise their sale is ended.
  *
  *   DATABASE_URL=... npx tsx scripts/create-nye-2027-singles.ts
  */
@@ -17,27 +18,25 @@ const SLUG = "singles-new-years-eve-party-2027-nj";
 const OLD_SLUGS = ["singles-mingle-new-years-eve-party-2027-nj"];
 const FLYER = "https://godesi.com/flyers/nye-2027-singles.jpg";
 const SEATS = 50;
-const NOTE = "21+ · First come, first served · no table · singles band included";
-
-/** Windows are in New York time; salesEnd is exclusive. */
-const NOV_16 = new Date("2026-11-16T00:00:00-05:00");
-const DEC_16 = new Date("2026-12-16T00:00:00-05:00");
+const NOTE = "21+ · Limited seats · first come, first served · no table · singles band included";
 
 const TIERS: { name: string; match?: string[]; price: number; salesStart?: Date; salesEnd?: Date }[] = [
-  { name: "Singles balcony seat — Early bird", match: ["Singles balcony seat"], price: 75, salesEnd: NOV_16 },
-  { name: "Singles balcony seat — Advance", price: 85, salesStart: NOV_16, salesEnd: DEC_16 },
-  { name: "Singles balcony seat", price: 100, salesStart: DEC_16 },
+  {
+    name: "Singles — balcony chair, all inclusive",
+    match: ["Singles balcony seat — Early bird", "Singles balcony seat", "Singles balcony seat — Advance"],
+    price: 75,
+  },
 ];
 
 const TITLE = "Singles New Year's Eve Party 2027 in NJ (21+)";
 
 const DESCRIPTION = [
-  "Single? Don't spend New Year's Eve alone! GoDesi Singles is a singles-only New Year's Eve party inside the Grand New Year's Eve Party 2027 at Royal Albert Palace, Fords NJ (near Edison) — Thursday, December 31st, 8:00 PM to 1:00 AM.",
-  "Singles get their own balcony in the Big Ball Room: seats only, no tables and no assigned seats — first come, first served. Every singles guest gets a special singles band.",
-  "You get everything the main party has: delicious food from live stations (dosa, jalebi, golgappa and more), premium drinks and liquor, DJ Sandy on the dance floor and belly dancer Aamra's fire dance. Meet new people, make friends and welcome 2027 together.",
+  "Single? Don't spend New Year's Eve alone! GoDesi Singles is a singles-only New Year's Eve party inside the Grand New Year's Eve Party 2027 at Royal Albert Palace, 1050 King Georges Post Rd, Fords NJ 08863 (near Edison) — Thursday, December 31st, 8:00 PM to 1:00 AM.",
+  "Singles get their own balcony in the Big Ball Room: chairs only, no tables and no assigned seats — limited seats, first come, first served. Every singles guest gets a special singles band.",
+  "It's all inclusive — everything the main party has: 35 food items with live stations in the Exclusive Plaza Hall (dosa, jalebi, golgappa and more), premium drinks until midnight, Live DJ Sandy of M&D Events, a live belly dance performance, multiple photo booths, raffle prizes, the New York ball drop on live TV and a midnight champagne toast. Free valet parking.",
   "This is a 21+ party because liquor is served: bring a photo ID, which is checked at the door when you pick up your singles band.",
-  "Tickets: $75 till Nov 15 · $85 from Nov 16 to Dec 15 · $100 from Dec 16. Only 50 singles seats. To keep it singles-only, you need a free GoDesi Connect profile marked Single, with your age (21 or older), before you buy — create it in a minute and come straight back to book. Short link: godesi.com/927",
-  "Questions or group bookings: Rachna 908-421-1685 · Anil 732-877-8585 · Ashok 732-921-5606 · Office 732-661-1070.",
+  "Tickets: $75, all inclusive. Only 50 singles seats. To keep it singles-only, you need a free GoDesi Connect profile marked Single, with your age (21 or older), before you buy — create it in a minute and come straight back to book. Short link: godesi.com/927",
+  "Questions or group bookings: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606.",
 ].join("\n\n");
 
 const TAGS = [SINGLES_ONLY_TAG, "singles", "singles-party", "singles-new-years-eve", "desi-singles", "21-plus", "new-years-eve", "nye-2027", "new-jersey"];
@@ -112,7 +111,14 @@ async function main() {
     } else await db.ticketTier.create({ data: { ...tierData, eventId: event.id } });
   }
 
-  /** One pool of 50 across the three price windows (below the tiers' 150, see pooledSeatsLeft). */
+  const now = new Date();
+  for (const old of existing?.tiers.filter((row) => !used.has(row.id)) ?? []) {
+    const sold = await db.ticket.count({ where: { tierId: old.id } });
+    if (sold === 0) await db.ticketTier.delete({ where: { id: old.id } });
+    else if (!old.salesEnd || old.salesEnd > now) await db.ticketTier.update({ where: { id: old.id }, data: { salesEnd: now } });
+  }
+
+  /** One pool of 50 seats (see pooledSeatsLeft). */
   const booked = await db.ticketTier.aggregate({ where: { eventId: event.id, kind: "TICKET" }, _sum: { seatsBooked: true } });
   const seatsBooked = booked._sum.seatsBooked ?? 0;
   await db.event.update({ where: { id: event.id }, data: { seatsTotal: Math.max(SEATS, seatsBooked), seatsBooked } });
