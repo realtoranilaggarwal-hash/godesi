@@ -1,4 +1,5 @@
 import { HelpClip } from "@/components/HelpClip";
+import { clipBrowseHref } from "@/lib/clipSections";
 import { helpClipFor } from "@/lib/helpClips";
 import { videoEmbedUrl } from "@/lib/video";
 
@@ -26,6 +27,12 @@ export async function HelpClipCard({
   const embedUrl = videoEmbedUrl(clip.url);
   if (!embedUrl) return null;
 
-  const card = <HelpClip clip={clip} embedUrl={embedUrl} />;
+  const card = (
+    <HelpClip
+      clip={clip}
+      embedUrl={embedUrl}
+      browseHref={clipBrowseHref(clip.categorySlug)}
+    />
+  );
   return className ? <div className={className}>{card}</div> : card;
 }

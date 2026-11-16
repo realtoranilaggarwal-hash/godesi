@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HelpClipCard } from "@/components/HelpClipCard";
 import { Card, LinkButton } from "@/components/ui";
 import { LiveEmbedCard } from "@/components/LiveEmbedCard";
 import { TV_CHANNELS } from "@/lib/liveMedia";
@@ -75,6 +76,12 @@ export default async function LiveTvPage() {
           non-profits. Something not playing? Use 🚩 Not working on the channel.
         </p>
       </Card>
+
+      <HelpClipCard
+        categorySlug="section:live"
+        sitewide={false}
+        className="w-full max-w-[260px]"
+      />
 
       {[...groups, ...(ungrouped.length ? [{ language: "More channels", channels: ungrouped }] : [])].map(
         (group, index) => (

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { HelpClipCard } from "@/lib/helpClips";
 
@@ -13,9 +14,12 @@ const SEEN_KEY = "godesi.helpClip.seen";
 export function HelpClip({
   clip,
   embedUrl,
+  browseHref = null,
 }: {
   clip: HelpClipCard;
   embedUrl: string;
+  /** "Browse this category →" under the video, into the clip's directory. */
+  browseHref?: string | null;
 }) {
   const [seen, setSeen] = useState(true);
   const [playing, setPlaying] = useState(false);
@@ -52,6 +56,15 @@ export function HelpClip({
 
   if (hidden) return null;
 
+  const browse = browseHref ? (
+    <Link
+      href={browseHref}
+      className="block border-t border-indigo-200 bg-white px-3 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+    >
+      Browse this category →
+    </Link>
+  ) : null;
+
   if (playing) {
     return (
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-black">
@@ -77,6 +90,7 @@ export function HelpClip({
             No sound? Watch on YouTube
           </a>
         </div>
+        {browse}
       </div>
     );
   }
@@ -125,6 +139,7 @@ export function HelpClip({
           ) : null}
         </span>
       </button>
+      {browse}
       <button
         type="button"
         onClick={() => {

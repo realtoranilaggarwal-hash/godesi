@@ -665,7 +665,7 @@ export default async function EventsPage({
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:events" />
     </div>
   );
 }

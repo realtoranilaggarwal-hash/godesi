@@ -413,7 +413,7 @@ export default async function NewsPage({
         <InlineBanner />
       </div>
 
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:news" />
     </div>
   );
 }

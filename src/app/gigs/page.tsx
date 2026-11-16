@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HelpClipCard } from "@/components/HelpClipCard";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -82,6 +83,12 @@ export default async function GigsPage({
           </Link>
         </div>
       </section>
+
+      <HelpClipCard
+        categorySlug="section:gigs"
+        sitewide={false}
+        className="w-full max-w-[260px]"
+      />
 
       <form className="flex gap-2" action="/gigs">
         <input

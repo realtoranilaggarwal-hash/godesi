@@ -96,7 +96,7 @@ export default async function AstrologyPage() {
 
         <p className="text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:astrology" />
     </div>
   );
 }
