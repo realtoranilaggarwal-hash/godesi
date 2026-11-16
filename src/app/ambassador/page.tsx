@@ -129,7 +129,7 @@ export default async function AmbassadorPage() {
         <h2 className="text-xl font-bold">Event promotion</h2>
         <p className="text-sm text-slate-600">
           Approved ambassadors get a personal tracked link for each event the
-          GoDesi team assigns them. Your dashboard shows clicks, tickets and
+          GoDesi team assigns them. Your dashboard shows clicks, bookings,
           verified tickets, and the benefit you are working towards.
         </p>
         {events.length ? (
