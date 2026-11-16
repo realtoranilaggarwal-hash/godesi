@@ -138,21 +138,7 @@ export default async function RootLayout({
             </>
           ) : null}
           {/* Meta Pixel: page views for Facebook and Instagram ads. */}
-          {metaPixel ? (
-            <>
-              <MetaPixel id={metaPixel} />
-              <noscript>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  height="1"
-                  width="1"
-                  style={{ display: "none" }}
-                  alt=""
-                  src={`https://www.facebook.com/tr?id=${metaPixel}&ev=PageView&noscript=1`}
-                />
-              </noscript>
-            </>
-          ) : null}
+          {metaPixel ? <MetaPixel id={metaPixel} /> : null}
           {/* Travelpayouts Drive: turns travel links into partner links and verifies the site. */}
           <Script
             id="travelpayouts-drive"
