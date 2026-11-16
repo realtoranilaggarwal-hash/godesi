@@ -210,4 +210,28 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     line: "Shopify free trial — open your shop",
     colors: "from-green-600 to-emerald-700",
   },
+  {
+    slug: "sell-home-nj",
+    href: "https://www.anilsellsnj.com/sell",
+    emoji: "🏡",
+    title: "Sell your home in NJ",
+    line: "Realtor Anil Aggarwal — get a free home valuation",
+    colors: "from-blue-600 to-slate-700",
+  },
+  {
+    slug: "nye-sponsor",
+    href: "https://www.newyearevesparty.com/sponsors",
+    emoji: "🎆",
+    title: "Sponsor New Year Party",
+    line: "Put your brand in front of the desi community",
+    colors: "from-purple-600 to-pink-600",
+  },
+  {
+    slug: "ad-partner-package",
+    href: "/advertise/proposal",
+    emoji: "📣",
+    title: "Advertise on GoDesi",
+    line: "Partner package worth $1,800 — yours for $500",
+    colors: "from-amber-500 to-red-600",
+  },
 ];

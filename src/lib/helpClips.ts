@@ -6,6 +6,8 @@ export type HelpClipCard = {
   note: string | null;
   url: string;
   thumbnailUrl: string | null;
+  /** The category or `section:` slug the clip was made for; null if sitewide. */
+  categorySlug: string | null;
 };
 
 /** The still frame YouTube publishes for a video, so the card is not blank. */
@@ -69,5 +71,6 @@ export async function helpClipFor(
     note: best.note,
     url: best.url,
     thumbnailUrl: clipThumbnail(best.url),
+    categorySlug: best.categorySlug,
   };
 }

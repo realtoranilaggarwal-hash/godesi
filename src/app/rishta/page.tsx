@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HelpClipCard } from "@/components/HelpClipCard";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
@@ -142,6 +143,12 @@ export default async function RishtaPage({
           />
         </div>
       </section>
+
+      <HelpClipCard
+        categorySlug="section:rishta"
+        sitewide={false}
+        className="w-full max-w-[260px]"
+      />
 
       {mine?.status === "PENDING" ? (
         <Alert tone="info">

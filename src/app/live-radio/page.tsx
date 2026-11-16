@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HelpClipCard } from "@/components/HelpClipCard";
 import { Card, LinkButton } from "@/components/ui";
 import { LiveRadioRow } from "@/components/LiveRadioRow";
 import { radioEntries, LIVE_CHANNEL_MONTHLY_USD } from "@/lib/liveChannels";
@@ -59,6 +60,12 @@ export default async function LiveRadioPage() {
           non-profits. Something not playing? Use 🚩 Not working on the station.
         </p>
       </Card>
+
+      <HelpClipCard
+        categorySlug="section:live"
+        sitewide={false}
+        className="w-full max-w-[260px]"
+      />
 
       <div data-right-rail className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         <ul className="grid gap-2 sm:grid-cols-2">
