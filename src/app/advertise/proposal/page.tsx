@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 const NYE_SLUG = "new-year-eves-party-2027-edison";
 const NYE_SPONSOR_HREF = `/events/${NYE_SLUG}#sponsor`;
 const PHONE = "732-983-7958";
-const PHONE_HREF = "tel:+17328778585";
+const PHONE_HREF = "tel:+17329837958";
 
 /** Silver, Gold and Platinum packages exactly as listed on the party's event page. */
 const sponsorLevels = cachedQuery("proposal-nye-sponsors", 3600, async () => {
