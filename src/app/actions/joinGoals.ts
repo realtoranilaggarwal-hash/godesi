@@ -120,7 +120,8 @@ export async function applyAmbassadorAction(
     const application = await db.ambassador.upsert({
       where: { userId: user.id },
       create: { userId: user.id, ...fields },
-      update: fields,
+      // A reapplication can change business details, so they need review again.
+      update: { ...fields, businessApprovedAt: null },
     });
     if (!user.joinGoals.includes("ambassador"))
       await db.user.update({
