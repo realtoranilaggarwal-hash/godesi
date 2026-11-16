@@ -45,6 +45,8 @@ export function MetaPixel({ id }: { id: string }) {
   const pathname = usePathname();
   useEffect(() => {
     if (!pathname || PRIVATE_PATH.test(pathname)) return;
+    const params = Array.from(new URLSearchParams(window.location.search).values());
+    if (params.some((v) => PRIVATE_PATH.test(v))) return;
     loadPixel(id)("track", "PageView");
   }, [id, pathname]);
   return null;
