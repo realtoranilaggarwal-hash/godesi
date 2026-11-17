@@ -23,6 +23,7 @@ export default function RentalEbooks({ heading = "Ebooks for NJ property owners"
         ))}
       </div>
       <p className="rounded-lg bg-violet-50 px-3 py-2 text-sm text-violet-900">📘 GoDesi members get one ebook free: your code is on your <a href="/dashboard" className="font-semibold underline">dashboard</a>.</p>
+      <p className="text-sm">✍️ <a href={`${BASE}/ebooks/my-story`} className="font-semibold text-indigo-600 hover:underline">Why I write these guides — my story</a></p>
       <p className="text-xs text-slate-500">Written by Anil Aggarwal, Broker Manager &amp; Realtor® with Vylla Home (NJ Lic #1753579). Education only, not legal or tax advice.</p>
     </section>
   );
