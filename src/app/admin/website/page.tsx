@@ -133,7 +133,7 @@ export default async function AdminWebsitePage() {
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="partnerPackage" className="h-4 w-4" />
-            Already paid — included in their $500 Partner Package (no price shown; &ldquo;I love it&rdquo; launches it)
+            Already paid — included in their Partner Package (no price shown; &ldquo;I love it&rdquo; launches it)
           </label>
         </ActionForm>
       </Card>

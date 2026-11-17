@@ -105,7 +105,7 @@ export default async function AdvertisePage({
             href="/advertise/proposal"
             className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
           >
-            Partner Package — $500
+            New Year's Eve Partnership — $500 / $2,000
           </Link>
         </div>
       </section>

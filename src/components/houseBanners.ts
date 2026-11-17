@@ -238,8 +238,8 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     slug: "ad-partner-package",
     href: "/advertise/proposal",
     emoji: "📣",
-    title: "Advertise on GoDesi",
-    line: "Partner package worth $1,800 — yours for $500",
+    title: "GoDesi Elite + New Year's Eve",
+    line: "Partnership: $500 Starter or $2,000 Premium with VIP table",
     colors: "from-amber-500 to-red-600",
   },
 ];
