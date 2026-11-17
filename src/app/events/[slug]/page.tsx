@@ -895,7 +895,10 @@ export default async function EventPage({
             ) : null}
             <VideoEmbed url={event.videoUrl} title={event.title} />
             <PhotoAlbumGallery url={event.albumUrl} heading="Event photos" />
-            <EventSponsors sponsors={sponsors} />
+            <EventSponsors
+              sponsors={sponsors}
+              rewardOpen={event.startsAt > new Date()}
+            />
             {isOwnerOrDesk ? (
               <SponsorRequestsPanel eventId={event.id} sponsors={allSponsors} />
             ) : null}

@@ -14,6 +14,9 @@ export const sponsorSelect = {
       amount: true,
       active: true,
       currency: true,
+      expiresAt: true,
+      maxRedemptions: true,
+      timesRedeemed: true,
     },
   },
   business: {
@@ -52,11 +55,68 @@ export function sponsorPhoto(sponsor: EventSponsorRow) {
 /** "10% off tickets" for a live sponsor coupon, else null. */
 export function sponsorDiscountLabel(sponsor: EventSponsorRow) {
   const coupon = sponsor.coupon;
-  if (!coupon || !coupon.active) return null;
+  if (
+    !coupon ||
+    !coupon.active ||
+    (coupon.expiresAt && coupon.expiresAt <= new Date()) ||
+    (coupon.maxRedemptions !== null &&
+      coupon.timesRedeemed >= coupon.maxRedemptions)
+  ) {
+    return null;
+  }
   return coupon.discountKind === "PERCENT"
     ? `${coupon.amount}% off tickets`
     : `${coupon.amount} ${coupon.currency ?? ""} off tickets`.replace(
         /\s+/g,
         " ",
       );
+}
+
+const liveCoupon = () => ({
+  active: true,
+  OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+});
+
+/** Live sponsor ticket codes a business hands out for its upcoming events. */
+export async function sponsorCodesForBusiness(businessId: string) {
+  const rows = await db.eventSponsor.findMany({
+    where: {
+      businessId,
+      status: "APPROVED",
+      coupon: { is: liveCoupon() },
+      event: { status: "APPROVED", startsAt: { gte: new Date() } },
+    },
+    orderBy: { event: { startsAt: "asc" } },
+    select: {
+      ...sponsorSelect,
+      event: { select: { title: true, slug: true } },
+    },
+  });
+  return rows.flatMap((row) => {
+    const label = sponsorDiscountLabel(row);
+    return row.coupon && label
+      ? [
+          {
+            code: row.coupon.code,
+            label,
+            eventTitle: row.event.title,
+            eventSlug: row.event.slug,
+          },
+        ]
+      : [];
+  });
+}
+
+/** The approved sponsor whose live code this is, for checkout on network sites. */
+export function sponsorForCode(eventSlug: string, code: string) {
+  return db.eventSponsor.findFirst({
+    where: {
+      status: "APPROVED",
+      event: { slug: eventSlug, status: "APPROVED" },
+      coupon: {
+        is: { ...liveCoupon(), code: { equals: code, mode: "insensitive" } },
+      },
+    },
+    select: sponsorSelect,
+  });
 }

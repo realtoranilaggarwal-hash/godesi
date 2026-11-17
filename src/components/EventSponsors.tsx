@@ -15,16 +15,33 @@ function initials(name: string) {
     .join("");
 }
 
-/** Approved sponsors in round photo circles, with their ticket codes. */
-export function EventSponsors({ sponsors }: { sponsors: EventSponsorRow[] }) {
+/**
+ * Approved sponsors in round photo circles. Codes stay private: buyers ask the
+ * sponsor, or post a review on its card and get the code there and by email.
+ */
+export function EventSponsors({
+  sponsors,
+  rewardOpen,
+}: {
+  sponsors: EventSponsorRow[];
+  /** False once the event has started: reviews no longer earn a ticket code. */
+  rewardOpen: boolean;
+}) {
   if (!sponsors.length) return null;
   return (
     <section id="sponsors" className="scroll-mt-24 space-y-3">
-      <h2 className="font-bold">🤝 Our sponsors &amp; promo codes</h2>
+      <h2 className="font-bold">🤝 Our sponsors &amp; ticket discounts</h2>
+      {rewardOpen ? (
+        <p className="text-sm text-slate-600">
+          Want a discount code? Ask a sponsor for theirs, or post an honest
+          review on their GoDesi page and you&apos;ll get the code right away by
+          email.
+        </p>
+      ) : null}
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {sponsors.map((sponsor) => {
           const photo = sponsorPhoto(sponsor);
-          const discount = sponsorDiscountLabel(sponsor);
+          const discount = rewardOpen ? sponsorDiscountLabel(sponsor) : null;
           return (
             <li
               key={sponsor.id}
@@ -59,14 +76,16 @@ export function EventSponsors({ sponsors }: { sponsors: EventSponsorRow[] }) {
                   {sponsor.offer}
                 </span>
               ) : null}
-              {discount && sponsor.coupon ? (
-                <span className="mt-2 rounded-lg border border-dashed border-emerald-400 bg-white px-2 py-1 text-xs">
-                  Code{" "}
-                  <b className="font-mono text-emerald-700">
-                    {sponsor.coupon.code}
-                  </b>{" "}
-                  · {discount}
-                </span>
+              {discount ? (
+                <Link
+                  href={`/business/${sponsor.business.slug}#review`}
+                  className="mt-2 rounded-lg border border-dashed border-emerald-400 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-emerald-50"
+                >
+                  🎟️ {discount}
+                  <span className="block font-semibold text-emerald-700 underline">
+                    Review to get the code
+                  </span>
+                </Link>
               ) : null}
             </li>
           );
