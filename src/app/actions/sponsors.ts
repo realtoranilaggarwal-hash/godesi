@@ -56,6 +56,7 @@ export async function requestSponsorAction(formData: FormData) {
   });
   if (!event || event.status !== "APPROVED") redirect("/dashboard/sponsor");
   const message = text(formData, "message", 600) || null;
+  const buyerGift = text(formData, "buyerGift", 160) || null;
 
   const existing = await db.eventSponsor.findUnique({
     where: {
@@ -67,8 +68,8 @@ export async function requestSponsorAction(formData: FormData) {
     where: {
       eventId_businessId: { eventId: event.id, businessId: business.id },
     },
-    create: { eventId: event.id, businessId: business.id, message },
-    update: { status: "REQUESTED", message },
+    create: { eventId: event.id, businessId: business.id, message, buyerGift },
+    update: { status: "REQUESTED", message, buyerGift },
   });
   if (!business.sponsorsEvents) {
     await db.business.update({
@@ -85,6 +86,7 @@ export async function requestSponsorAction(formData: FormData) {
     html: shell(
       "New sponsor request",
       `<p><a href="${cardUrl}">${escapeHtml(business.name)}</a> (${escapeHtml(business.category)}, ${escapeHtml(business.city)}) would like to sponsor <b>${escapeHtml(event.title)}</b>.</p>
+      ${buyerGift ? `<p><b>Gift for ticket buyers:</b> ${escapeHtml(buyerGift)}</p>` : ""}
       ${message ? `<blockquote style="margin:12px 0;padding:8px 12px;border-left:4px solid #f97316;background:#fff7ed">${escapeHtml(message)}</blockquote>` : ""}
       <p>Reply to them at ${escapeHtml(business.publicEmail || user.email)}, or approve them on your event page — approved sponsors show there with their logo and discount code.</p>
       <p><a href="${eventUrl}" style="display:inline-block;background:#4f46e5;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700">Review the request</a></p>`,
@@ -114,6 +116,7 @@ export async function saveSponsorAction(formData: FormData) {
   );
   const sponsorId = text(formData, "sponsorId", 40);
   const offer = text(formData, "offer", 120) || null;
+  const buyerGift = text(formData, "buyerGift", 160) || null;
   const code = normalizeCouponCode(text(formData, "code", 24));
   const percent = Number(formData.get("percent") || 0);
 
@@ -208,6 +211,7 @@ export async function saveSponsorAction(formData: FormData) {
     data: {
       status: "APPROVED",
       offer,
+      buyerGift,
       couponId,
       approvedAt: sponsor.approvedAt ?? new Date(),
     },

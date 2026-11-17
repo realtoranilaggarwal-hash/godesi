@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { EventType } from "@prisma/client";
 import { db } from "@/lib/db";
+import { requestGeo } from "@/lib/geo";
 
 const VALID: EventType[] = ["PROFILE_VIEW", "QR_SCAN", "WHATSAPP_CLICK"];
 const MAX_REFERRER = 2048;
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     type?: EventType;
     referrer?: unknown;
     path?: unknown;
+    source?: unknown;
   } | null;
 
   if (!body?.slug || !body.type || !VALID.includes(body.type)) {
@@ -65,6 +67,9 @@ export async function POST(request: Request) {
       referrer:
         body.referrer === undefined ? null : referrerHost(body.referrer),
       path: cleanPath(body.path),
+      city: requestGeo().city?.slice(0, 80) ?? null,
+      source:
+        body.source === "sponsor" || body.source === "qr" ? body.source : null,
     },
   });
   return NextResponse.json({ ok: true });

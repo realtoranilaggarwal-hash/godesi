@@ -31,6 +31,13 @@ function SponsorForm({
         className={`${inputClass} sm:col-span-3`}
       />
       <input
+        name="buyerGift"
+        maxLength={160}
+        defaultValue={sponsor?.buyerGift ?? ""}
+        placeholder="Gift for ticket buyers, e.g. $10 off any haircut at our Edison store"
+        className={`${inputClass} sm:col-span-6`}
+      />
+      <input
         name="code"
         maxLength={24}
         defaultValue={sponsor?.coupon?.active ? sponsor.coupon.code : ""}

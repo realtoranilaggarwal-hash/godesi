@@ -85,30 +85,30 @@ export default async function DashboardPage({
     : [0, 0];
 
   const [myLeads, adStats, myEvents] = await Promise.all([
-      db.lead.findMany({
-        where: { clientId: user.id },
-        orderBy: { createdAt: "desc" },
-      }),
-      db.banner.aggregate({
-        where: { advertiserId: user.id },
-        _sum: { impressions: true, clicks: true },
-        _count: { _all: true },
-      }),
-      db.event.findMany({
-        where: { organizerId: user.id },
-        orderBy: { startsAt: "desc" },
-        take: 5,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          startsAt: true,
-          timeZone: true,
-          status: true,
-          sourceId: true,
-        },
-      }),
-    ]);
+    db.lead.findMany({
+      where: { clientId: user.id },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.banner.aggregate({
+      where: { advertiserId: user.id },
+      _sum: { impressions: true, clicks: true },
+      _count: { _all: true },
+    }),
+    db.event.findMany({
+      where: { organizerId: user.id },
+      orderBy: { startsAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        startsAt: true,
+        timeZone: true,
+        status: true,
+        sourceId: true,
+      },
+    }),
+  ]);
 
   const pageStats = business ? await businessPageStats(business.id) : null;
 
@@ -140,7 +140,7 @@ export default async function DashboardPage({
 
         <Card className="space-y-2">
           <h2 className="text-lg font-bold">My profiles</h2>
-            {business ? (
+          {business ? (
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
               <span aria-hidden className="text-2xl">
                 {business.profileType === "PROFESSIONAL" ? "🎓" : "🏪"}
@@ -195,7 +195,9 @@ export default async function DashboardPage({
             <div className="min-w-0 flex-1">
               <p className="font-semibold">Personal profile</p>
               <p className="text-xs text-slate-500">
-                {user.username ? `godesi.com/${user.username}` : "Pick your name"}
+                {user.username
+                  ? `godesi.com/${user.username}`
+                  : "Pick your name"}
               </p>
             </div>
             {user.username ? (
@@ -296,7 +298,9 @@ export default async function DashboardPage({
                 : null
             }
             spotsLeft={weddingSpots}
-            referralLink={user.username ? `${siteUrl()}/ref/${user.username}` : null}
+            referralLink={
+              user.username ? `${siteUrl()}/ref/${user.username}` : null
+            }
             referredVendors={weddingReferrals}
             verified={business.verifiedProvider}
             slug={business.slug}
@@ -369,123 +373,126 @@ export default async function DashboardPage({
 
         {business ? (
           <>
-          <div className="grid gap-5 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-lg font-bold">{business.name}</h2>
-                  <p className="text-sm text-slate-600">
-                    {business.category} · {business.city}
-                  </p>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
-                    <Stars rating={rating} />
-                    <span>
-                      {reviewCount
-                        ? `${rating.toFixed(1)} (${reviewCount})`
-                        : "No reviews yet"}
-                    </span>
+            <div className="grid gap-5 lg:grid-cols-3">
+              <Card className="lg:col-span-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-lg font-bold">{business.name}</h2>
+                    <p className="text-sm text-slate-600">
+                      {business.category} · {business.city}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                      <Stars rating={rating} />
+                      <span>
+                        {reviewCount
+                          ? `${rating.toFixed(1)} (${reviewCount})`
+                          : "No reviews yet"}
+                      </span>
+                    </div>
                   </div>
+                  <Badge
+                    tone={
+                      business.status === "APPROVED"
+                        ? "green"
+                        : business.status === "PENDING"
+                          ? "amber"
+                          : "red"
+                    }
+                  >
+                    {business.status}
+                  </Badge>
                 </div>
-                <Badge
-                  tone={
-                    business.status === "APPROVED"
-                      ? "green"
-                      : business.status === "PENDING"
-                        ? "amber"
-                        : "red"
-                  }
-                >
-                  {business.status}
-                </Badge>
-              </div>
 
-              <p className="mt-3 text-sm text-slate-600">
-                Public link:{" "}
-                <Link
-                  href={`/business/${business.slug}`}
-                  className="font-semibold text-indigo-600"
-                >
-                  /business/{business.slug}
-                </Link>
-              </p>
-
-              {business.websiteUrl ? null : (
-                <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
-                  <strong>No website yet?</strong> We build you a{" "}
-                  {WEBSITE_OFFER.pages}-page site for ${WEBSITE_OFFER.priceUsd},
-                  then ${WEBSITE_OFFER.monthlyUsd}/month with domain and hosting
-                  included.{" "}
-                  <Link href="/website" className="font-bold underline">
-                    See what you get →
+                <p className="mt-3 text-sm text-slate-600">
+                  Public link:{" "}
+                  <Link
+                    href={`/business/${business.slug}`}
+                    className="font-semibold text-indigo-600"
+                  >
+                    /business/{business.slug}
                   </Link>
                 </p>
-              )}
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <LinkButton href="/dashboard/profile" variant="secondary">
-                  Edit profile
-                </LinkButton>
-                <LinkButton href="/dashboard/me" variant="secondary">
-                  My personal profile
-                </LinkButton>
-                <LinkButton href="/dashboard/media" variant="secondary">
-                  Manage gallery
-                </LinkButton>
-                {isRealEstateAgent(business) ? (
-                  <LinkButton href="/dashboard/agent" variant="secondary">
-                    Agent credentials
+                {business.websiteUrl ? null : (
+                  <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
+                    <strong>No website yet?</strong> We build you a{" "}
+                    {WEBSITE_OFFER.pages}-page site for $
+                    {WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}
+                    /month with domain and hosting included.{" "}
+                    <Link href="/website" className="font-bold underline">
+                      See what you get →
+                    </Link>
+                  </p>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <LinkButton href="/dashboard/profile" variant="secondary">
+                    Edit profile
                   </LinkButton>
-                ) : null}
-                <LinkButton href="/dashboard/packages" variant="secondary">
-                  Packages & pricing
-                </LinkButton>
-                <LinkButton href="/dashboard/deals" variant="secondary">
-                  🏷️ Deals &amp; offers
-                </LinkButton>
-                <LinkButton href="/dashboard/leads" variant="secondary">
-                  Unlocked leads
-                </LinkButton>
-                <LinkButton href="/dashboard/bookings" variant="secondary">
-                  📅 Bookings
-                </LinkButton>
-                <LinkButton href={`/business/${business.slug}`} variant="secondary">
-                  🪪 My digital card
-                </LinkButton>
-                <LinkButton href="/dashboard/card-leads" variant="secondary">
-                  Card leads
-                </LinkButton>
-                <LinkButton href="/dashboard/scan-card" variant="secondary">
-                  📷 Scan card
-                </LinkButton>
-                <LinkButton href="/dashboard/reviews" variant="secondary">
-                  Reviews on my card
-                </LinkButton>
-                <LinkButton href="/dashboard/tickets" variant="secondary">
-                  My tickets &amp; events
-                </LinkButton>
-                <LinkButton href="/dashboard/gigs" variant="secondary">
-                  🛠️ My gigs
-                </LinkButton>
-                <LinkButton href="/dashboard/payouts" variant="secondary">
-                  Payouts
-                </LinkButton>
-                <LinkButton href="/dashboard/coupons" variant="secondary">
-                  Event coupons
-                </LinkButton>
-                <LinkButton href="/advertise" variant="secondary">
-                  Advertise
-                </LinkButton>
-              </div>
-            </Card>
+                  <LinkButton href="/dashboard/me" variant="secondary">
+                    My personal profile
+                  </LinkButton>
+                  <LinkButton href="/dashboard/media" variant="secondary">
+                    Manage gallery
+                  </LinkButton>
+                  {isRealEstateAgent(business) ? (
+                    <LinkButton href="/dashboard/agent" variant="secondary">
+                      Agent credentials
+                    </LinkButton>
+                  ) : null}
+                  <LinkButton href="/dashboard/packages" variant="secondary">
+                    Packages & pricing
+                  </LinkButton>
+                  <LinkButton href="/dashboard/deals" variant="secondary">
+                    🏷️ Deals &amp; offers
+                  </LinkButton>
+                  <LinkButton href="/dashboard/leads" variant="secondary">
+                    Unlocked leads
+                  </LinkButton>
+                  <LinkButton href="/dashboard/bookings" variant="secondary">
+                    📅 Bookings
+                  </LinkButton>
+                  <LinkButton
+                    href={`/business/${business.slug}`}
+                    variant="secondary"
+                  >
+                    🪪 My digital card
+                  </LinkButton>
+                  <LinkButton href="/dashboard/card-leads" variant="secondary">
+                    Card leads
+                  </LinkButton>
+                  <LinkButton href="/dashboard/scan-card" variant="secondary">
+                    📷 Scan card
+                  </LinkButton>
+                  <LinkButton href="/dashboard/reviews" variant="secondary">
+                    Reviews on my card
+                  </LinkButton>
+                  <LinkButton href="/dashboard/tickets" variant="secondary">
+                    My tickets &amp; events
+                  </LinkButton>
+                  <LinkButton href="/dashboard/gigs" variant="secondary">
+                    🛠️ My gigs
+                  </LinkButton>
+                  <LinkButton href="/dashboard/payouts" variant="secondary">
+                    Payouts
+                  </LinkButton>
+                  <LinkButton href="/dashboard/coupons" variant="secondary">
+                    Event coupons
+                  </LinkButton>
+                  <LinkButton href="/advertise" variant="secondary">
+                    Advertise
+                  </LinkButton>
+                </div>
+              </Card>
 
-            <Card>
-              <h2 className="mb-3 text-lg font-bold">Your QR code</h2>
-              <QrCard
-                slug={business.slug}
-                shareUrl={`${siteUrl()}/business/${business.slug}`}
-              />
-            </Card>
-          </div>
+              <Card>
+                <h2 className="mb-3 text-lg font-bold">Your QR code</h2>
+                <QrCard
+                  slug={business.slug}
+                  shareUrl={`${siteUrl()}/business/${business.slug}`}
+                />
+              </Card>
+            </div>
           </>
         ) : (
           <Card>
@@ -633,10 +640,18 @@ type PageStats = Awaited<ReturnType<typeof businessPageStats>>;
 /** The last 30 New York calendar days (today included) of a business's card events, grouped by day, type and referrer. */
 async function businessPageStats(businessId: string) {
   const now = new Date();
-  const since = new Date(now.getTime() - (STATS_DAYS + 1) * 24 * 60 * 60 * 1000);
+  const since = new Date(
+    now.getTime() - (STATS_DAYS + 1) * 24 * 60 * 60 * 1000,
+  );
   const events = await db.analyticsEvent.findMany({
     where: { businessId, createdAt: { gte: since } },
-    select: { type: true, referrer: true, createdAt: true },
+    select: {
+      type: true,
+      referrer: true,
+      city: true,
+      source: true,
+      createdAt: true,
+    },
   });
 
   const days: { key: string; views: number }[] = [];
@@ -651,6 +666,8 @@ async function businessPageStats(businessId: string) {
 
   const totals = { PROFILE_VIEW: 0, QR_SCAN: 0, WHATSAPP_CLICK: 0 };
   const referrers = new Map<string, number>();
+  const cities = new Map<string, number>();
+  let sponsorViews = 0;
   let viewsToday = 0;
 
   for (const event of events) {
@@ -663,6 +680,8 @@ async function businessPageStats(businessId: string) {
     if (key === todayKey) viewsToday += 1;
     const source = event.referrer ?? "unknown";
     referrers.set(source, (referrers.get(source) ?? 0) + 1);
+    if (event.city) cities.set(event.city, (cities.get(event.city) ?? 0) + 1);
+    if (event.source === "sponsor") sponsorViews += 1;
   }
 
   return {
@@ -674,6 +693,10 @@ async function businessPageStats(businessId: string) {
     topReferrers: Array.from(referrers.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6),
+    topCities: Array.from(cities.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6),
+    sponsorViews,
   };
 }
 
@@ -778,6 +801,31 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
                     <li key={host} className="flex justify-between gap-2">
                       <span className="min-w-0 truncate text-slate-600">
                         {referrerLabel(host)}
+                      </span>
+                      <span className="font-semibold">
+                        {count.toLocaleString("en-US")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {stats.sponsorViews ? (
+                <p className="mt-2 border-t border-slate-100 pt-2 text-sm">
+                  🤝 From your sponsor logo on event pages:{" "}
+                  <span className="font-semibold">
+                    {stats.sponsorViews.toLocaleString("en-US")}
+                  </span>
+                </p>
+              ) : null}
+              {stats.topCities.length ? (
+                <ul className="mt-2 space-y-1 border-t border-slate-100 pt-2 text-sm">
+                  <li className="text-xs font-semibold text-slate-500">
+                    Where visitors are
+                  </li>
+                  {stats.topCities.map(([city, count]) => (
+                    <li key={city} className="flex justify-between gap-2">
+                      <span className="min-w-0 truncate text-slate-600">
+                        📍 {city}
                       </span>
                       <span className="font-semibold">
                         {count.toLocaleString("en-US")}

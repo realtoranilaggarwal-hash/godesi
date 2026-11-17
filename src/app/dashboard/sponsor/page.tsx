@@ -159,6 +159,12 @@ export default async function SponsorEventsPage({
                           placeholder="Hi! We'd like to partner with or sponsor your event. We can offer…"
                           className={inputClass}
                         />
+                        <input
+                          name="buyerGift"
+                          maxLength={160}
+                          placeholder="🎁 Gift or deal for ticket buyers (optional), e.g. $10 off any haircut, or a free entry to win a gold coin"
+                          className={inputClass}
+                        />
                         <div className="flex flex-wrap items-center gap-3">
                           <button
                             type="submit"

@@ -4,6 +4,7 @@ export const sponsorSelect = {
   id: true,
   status: true,
   offer: true,
+  buyerGift: true,
   message: true,
   sortOrder: true,
   createdAt: true,
