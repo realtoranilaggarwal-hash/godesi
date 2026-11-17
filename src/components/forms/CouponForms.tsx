@@ -34,9 +34,9 @@ function TierLimitFields({ event }: { event: CouponEventOption }) {
       <p className="mb-2 text-xs text-slate-500">
         Type how many of each ticket the code covers, e.g. Couple 1 + Small
         Kid 1 with 100% off is a comp for exactly that package — anything
-        else in the cart is paid. Leave all blank to discount the whole
-        order. Fixed-amount codes (e.g. $150 off) also work for a set
-        package.
+        else in the cart is paid. A fixed amount (e.g. $10 off with Adult
+        10) comes off once per order and only when the cart has those
+        tickets. Leave all blank to discount the whole order.
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {event.tiers.map((tier) => (
@@ -405,7 +405,7 @@ export function SendCompTicketsForm({
         {kind === "FIXED" ? (
           <Field
             label={`Amount off (${event?.currency ?? "USD"})`}
-            hint="Comes off the whole order — e.g. what they paid by Zelle"
+            hint="Comes off the tickets above — e.g. what they paid by Zelle"
           >
             <input
               name="amount"
