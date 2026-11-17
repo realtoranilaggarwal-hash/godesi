@@ -113,6 +113,9 @@ const REVIEWS: { name: string; comment: string; featured?: boolean }[] = [
   { name: "Vidhi", comment: "Amazing party. Thank you!" },
 ];
 
+/** Sponsor levels replaced by the $500/$2,000 partnerships; other sponsor tiers added by hand are left alone. */
+const RETIRED_SPONSOR_TIERS = ["Silver sponsor", "Gold sponsor", "Platinum sponsor"];
+
 async function main() {
   const event = await db.event.findUnique({ where: { slug: SLUG }, include: { tiers: true } });
   if (!event) throw new Error(`No event ${SLUG}`);
@@ -147,7 +150,9 @@ async function main() {
     else await db.ticketTier.create({ data: { ...data, eventId: event.id } });
   }
 
-  for (const old of event.tiers.filter((tier) => !used.has(tier.id) && tier.kind === "TICKET")) {
+  const retired = (tier: { kind: string; name: string }) =>
+    tier.kind === "TICKET" || RETIRED_SPONSOR_TIERS.includes(tier.name);
+  for (const old of event.tiers.filter((tier) => !used.has(tier.id) && retired(tier))) {
     const sold =
       old.seatsBooked > 0 ||
       (await db.ticket.count({
