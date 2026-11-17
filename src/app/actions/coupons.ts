@@ -207,7 +207,7 @@ const compSchema = z.object({
   buyerEmail: z.string().trim().email("Enter a valid buyer email."),
 });
 
-/** "COMP-PATEL-7K3Q": surname (last word of the name) plus a random suffix. */
+/** "COMP-PATEL-7K3QX9MD": surname (last word of the name) plus a random suffix. */
 function compCode(buyerName: string) {
   const surname =
     buyerName
@@ -218,7 +218,7 @@ function compCode(buyerName: string) {
       .replace(/[^A-Z0-9]/g, "")
       .slice(0, 10) || "GUEST";
   const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  const suffix = Array.from(randomBytes(4), (byte) => alphabet[byte % alphabet.length]).join("");
+  const suffix = Array.from(randomBytes(8), (byte) => alphabet[byte % alphabet.length]).join("");
   return `COMP-${surname}-${suffix}`;
 }
 
