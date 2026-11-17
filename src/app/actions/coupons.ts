@@ -192,7 +192,7 @@ const compSchema = z.object({
   amount: z.coerce.number().int().min(1).optional(),
 });
 
-/** COMP-SHARMA-7K3Q: the buyer's surname plus a random suffix, retried on a clash. */
+/** COMP-SHARMA-7K3Q9A1B2C: the buyer's surname plus a random suffix, retried on a clash. */
 async function uniqueCompCode(name: string) {
   const surname =
     (name.trim().split(/\s+/).pop() ?? "")
@@ -200,7 +200,7 @@ async function uniqueCompCode(name: string) {
       .replace(/[^A-Z0-9]/g, "")
       .slice(0, 12) || "GUEST";
   for (let attempt = 0; attempt < 5; attempt++) {
-    const suffix = randomBytes(3).toString("hex").toUpperCase().slice(0, 4);
+    const suffix = randomBytes(5).toString("hex").toUpperCase();
     const code = `COMP-${surname}-${suffix}`;
     if (!(await db.coupon.findUnique({ where: { code } }))) return code;
   }
