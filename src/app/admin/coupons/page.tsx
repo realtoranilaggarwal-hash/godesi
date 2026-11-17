@@ -43,9 +43,13 @@ export default async function Page({
   });
 
   const ticketEvents = await db.event.findMany({
-    where: { startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) } },
+    /** Imported wire events never sell tickets here, so only GoDesi-hosted ones are listed. */
+    where: {
+      sourceId: null,
+      startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) },
+    },
     orderBy: { startsAt: "asc" },
-    take: 100,
+    take: 500,
     select: {
       id: true,
       title: true,
