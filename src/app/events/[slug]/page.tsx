@@ -23,6 +23,7 @@ import {
   tierSeatsLeft,
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
+import { NyeExtras, isNye2027 } from "@/components/NyeExtras";
 import { normalizePromoCode } from "@/lib/ambassadorPromo";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
@@ -1128,6 +1129,7 @@ export default async function EventPage({
                 />
               </div>
             )}
+            {!past && isNye2027(event.slug) ? <NyeExtras /> : null}
           </Card>
         )}
 
