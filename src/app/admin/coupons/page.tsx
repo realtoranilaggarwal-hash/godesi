@@ -12,7 +12,11 @@ import { generateFreeCourseCodeAction } from "@/app/actions/course";
 import { FREE_CODE_PROVIDER } from "@/lib/courseCodes";
 import { courseBySlug } from "@/lib/courses";
 import { describeCoupon } from "@/lib/coupons";
-import { CouponUses, couponTicketsInclude } from "@/components/CouponUses";
+import {
+  CouponUses,
+  couponTicketsInclude,
+  withWholeBookings,
+} from "@/components/CouponUses";
 import { Badge, Card } from "@/components/ui";
 import { deskFallback } from "@/lib/adminSections";
 
@@ -29,7 +33,8 @@ export default async function Page({
   if (user.role !== "ADMIN")
     redirect(deskFallback(user, "Coupons"));
 
-  const coupons = await db.coupon.findMany({
+  const coupons = await db.coupon
+    .findMany({
     orderBy: { createdAt: "desc" },
     take: 50,
     include: {
@@ -46,7 +51,8 @@ export default async function Page({
         },
       },
     },
-  });
+  })
+    .then(withWholeBookings);
 
   const ticketEvents = await db.event.findMany({
     /** Skips imported wire listings unless they sell ticket tiers here. */

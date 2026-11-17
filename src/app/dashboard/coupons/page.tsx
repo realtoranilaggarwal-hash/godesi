@@ -9,7 +9,11 @@ import {
   SendCompTicketsForm,
 } from "@/components/forms/CouponForms";
 import { compEventOptions, compTicketEventOptions } from "@/lib/compTickets";
-import { CouponUses, couponTicketsInclude } from "@/components/CouponUses";
+import {
+  CouponUses,
+  couponTicketsInclude,
+  withWholeBookings,
+} from "@/components/CouponUses";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -35,14 +39,16 @@ export default async function MyCouponsPage() {
         },
       },
     }),
-    db.coupon.findMany({
+    db.coupon
+      .findMany({
       where: { createdById: user.id },
       orderBy: { createdAt: "desc" },
       include: {
         event: { select: { title: true } },
         tickets: couponTicketsInclude,
       },
-    }),
+    })
+      .then(withWholeBookings),
   ]);
 
   const premium = hasPremiumCoupons(user);

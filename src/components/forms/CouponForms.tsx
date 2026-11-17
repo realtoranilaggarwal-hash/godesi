@@ -27,44 +27,44 @@ export type CouponEventOption = {
 function TierLimitFields({ event }: { event: CouponEventOption }) {
   if (!event.tiers.length) return null;
   return (
-        <fieldset className="rounded-lg border border-slate-200 p-3 sm:col-span-2">
-          <legend className="px-1 text-sm font-medium text-slate-700">
-            Only these tickets (optional)
-          </legend>
-          <p className="mb-2 text-xs text-slate-500">
-            Type how many of each ticket the code covers, e.g. Couple 1 + Small
-            Kid 1 with 100% off is a comp for exactly that package — anything
-            else in the cart is paid. Leave all blank to discount the whole
-            order. Fixed-amount codes (e.g. $150 off) also work for a set
-            package.
-          </p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {event.tiers.map((tier) => (
-              <label
-                key={tier.id}
-                className="flex min-w-0 items-center justify-between gap-2 text-sm"
-              >
-                <span className="min-w-0 break-words">
-                  {tier.name}{" "}
-                  <span className="text-xs text-slate-400">
-                    {formatMoney(tier.price, event.currency)}
-                  </span>
-                </span>
-                <span className="w-20 shrink-0">
-                  <input
-                    name={`tierMax_${tier.id}`}
-                    type="number"
-                    min={1}
-                    max={10}
-                    placeholder="—"
-                    aria-label={`${tier.name} tickets covered`}
-                    className={inputClass}
-                  />
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+    <fieldset className="rounded-lg border border-slate-200 p-3 sm:col-span-2">
+      <legend className="px-1 text-sm font-medium text-slate-700">
+        Only these tickets (optional)
+      </legend>
+      <p className="mb-2 text-xs text-slate-500">
+        Type how many of each ticket the code covers, e.g. Couple 1 + Small
+        Kid 1 with 100% off is a comp for exactly that package — anything
+        else in the cart is paid. Leave all blank to discount the whole
+        order. Fixed-amount codes (e.g. $150 off) also work for a set
+        package.
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {event.tiers.map((tier) => (
+          <label
+            key={tier.id}
+            className="flex min-w-0 items-center justify-between gap-2 text-sm"
+          >
+            <span className="min-w-0 break-words">
+              {tier.name}{" "}
+              <span className="text-xs text-slate-400">
+                {formatMoney(tier.price, event.currency)}
+              </span>
+            </span>
+            <span className="w-20 shrink-0">
+              <input
+                name={`tierMax_${tier.id}`}
+                type="number"
+                min={1}
+                max={10}
+                placeholder="—"
+                aria-label={`${tier.name} tickets covered`}
+                className={inputClass}
+              />
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
