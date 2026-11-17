@@ -1,7 +1,7 @@
 /**
  * Brings the NYE 2027 Edison listing in line with the organiser's flyer: 8 PM start,
- * flyer image, early (till Nov 30) / late (from Dec 1) ticket prices plus the $75 balcony
- * chairs, and guest reviews typed out from the WhatsApp review album (first names only).
+ * flyer image, early (till Nov 30) / late (from Dec 1) ticket prices plus the balcony
+ * chairs ($75 till Nov 30, $100 from Dec 1), and guest reviews typed out from the WhatsApp review album (first names only).
  * Safe to re-run: tiers are matched by name, reviews are replaced. Ticket tiers no longer in
  * TIERS are deleted when unsold (checkouts older than Stripe's 24h expiry just lose their tier),
  * or closed for sale when someone paid for one or may still be paying.
@@ -26,7 +26,7 @@ const DESCRIPTION = [
   "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 2026, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
   "35 food items and an elegant seated dining experience, with an exclusive Plaza Hall of live food stations — dosa, jalebi, golgappa and more. Premium drinks until midnight and a midnight champagne toast.",
   "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Woodbridge Police security and free valet parking.",
-  "Till Nov 30: Couple $180, Adult (18+) $95, Big Kid (9–17) $80, Small Kid (0–8) $65. From Dec 1: Couple $250, Adult (18+) $150, Big Kid (9–17) $90, Small Kid (0–8) $75. VIP Table for 12 with a bottle of champagne on the table (only 5 tables): $1080 till Nov 30, $1200 from Dec 1. Balcony $75 — adults, chair only, all inclusive, limited seats, first come, first served, no table seating.",
+  "Till Nov 30: Couple $180, Adult (18+) $95, Big Kid (9–17) $80, Small Kid (0–8) $65. From Dec 1: Couple $250, Adult (18+) $150, Big Kid (9–17) $90, Small Kid (0–8) $75. VIP Table for 12 with a bottle of champagne on the table (only 5 tables): $1080 till Nov 30, $1200 from Dec 1. Balcony $75 till Nov 30, $100 from Dec 1 — adults, chair only, all inclusive, limited seats, first come, first served, no table seating.",
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
   "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
 ].join("\n\n");
@@ -34,7 +34,7 @@ const DESCRIPTION = [
 /**
  * The hall holds 400 people, so entry tiers add up to 400, counting a couple as 2:
  * early 40×2 + 120 + 25 + 25 = 250, Balcony 50, late 10×2 + 60 + 10 + 10 = 100.
- * Balcony sells in both windows.
+ * Balcony's early and late tiers share their 50 seats (stockGroup "balcony").
  * `match` lists old names of the same ticket so bookings are kept when a tier is relabelled.
  * Sponsor packages are listed separately; the 2-pass ones add up to 18 more people.
  */
@@ -75,12 +75,13 @@ const TIERS: TierSpec[] = [
   { name: "Big Kid (9–17) — Early", match: ["Kids (9–17) — Early"], note: "Till Nov 30", price: 80, seats: 25, salesEnd: EARLY_END },
   { name: "Small Kid (0–8) — Early", match: ["Kids (0–8) — Early"], note: "Till Nov 30", price: 65, seats: 25, salesEnd: EARLY_END },
   { name: "VIP Table for 12 with champagne — Early", note: "Till Nov 30 · 12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1080, seats: 5, salesEnd: EARLY_END, admits: 12, stockGroup: "vip-table" },
-  { name: "Balcony — first come, first served, no table seating", match: ["Singles — Balcony (chair only, all inclusive)", "Balcony seat — first come, first served", "Special balcony seat"], note: BALCONY_NOTE, price: 75, seats: 50 },
+  { name: "Balcony — Early · first come, first served, no table seating", match: ["Balcony — first come, first served, no table seating", "Singles — Balcony (chair only, all inclusive)", "Balcony seat — first come, first served", "Special balcony seat"], note: `Till Nov 30 · ${BALCONY_NOTE}`, price: 75, seats: 50, salesEnd: EARLY_END, stockGroup: "balcony" },
   { name: "Couple", match: ["Couple"], note: "Admits 2", price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
   { name: "Adult (18+)", match: ["Adults (18+)"], price: 150, seats: 60, salesStart: LATE_START },
   { name: "Big Kid (9–17)", match: ["Kids (9–17)"], price: 90, seats: 10, salesStart: LATE_START },
   { name: "Small Kid (0–8)", match: ["Kids (0–8)"], price: 75, seats: 10, salesStart: LATE_START },
   { name: "VIP Table for 12 with champagne", note: "12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1200, seats: 5, salesStart: LATE_START, admits: 12, stockGroup: "vip-table" },
+  { name: "Balcony — first come, first served, no table seating", note: BALCONY_NOTE, price: 100, seats: 50, salesStart: LATE_START, stockGroup: "balcony" },
   { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Platinum sponsor"), seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200 },
@@ -120,10 +121,14 @@ async function main() {
   if (!event) throw new Error(`No event ${SLUG}`);
 
   const used = new Set<string>();
+  /** A tier whose name is still in TIERS belongs to that spec, never to another spec's `match`. */
+  const specNames = new Set(TIERS.map((spec) => spec.name));
   for (let index = 0; index < TIERS.length; index += 1) {
     const spec = TIERS[index];
-    const names = [spec.name, ...(spec.match ?? [])];
-    const existing = event.tiers.find((tier) => !used.has(tier.id) && names.includes(tier.name));
+    const free = event.tiers.filter((tier) => !used.has(tier.id));
+    const existing =
+      free.find((tier) => tier.name === spec.name) ??
+      free.find((tier) => !specNames.has(tier.name) && spec.match?.includes(tier.name));
     if (existing) used.add(existing.id);
     const data = {
       name: spec.name,
