@@ -2093,6 +2093,9 @@ model Coupon {
   /// Event-locked TICKETS codes only: the ticket types the discount covers and how many of each,
   /// e.g. [{"tierId":"…","name":"Couple","maxQuantity":1}]. Null covers the whole order.
   tierLimits     Json?
+  /// Comp codes: who the organiser emailed it to, so the coupons page can show whether they booked.
+  sentToName     String?
+  sentToEmail    String?
   /// Total redemptions allowed across all users; null for unlimited.
   maxRedemptions Int?
   timesRedeemed  Int          @default(0)

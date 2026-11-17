@@ -12,6 +12,7 @@ import { generateFreeCourseCodeAction } from "@/app/actions/course";
 import { FREE_CODE_PROVIDER } from "@/lib/courseCodes";
 import { courseBySlug } from "@/lib/courses";
 import { describeCoupon } from "@/lib/coupons";
+import { CouponUses, couponTicketsInclude } from "@/components/CouponUses";
 import { Badge, Card } from "@/components/ui";
 import { deskFallback } from "@/lib/adminSections";
 
@@ -34,6 +35,7 @@ export default async function Page({
     include: {
       event: { select: { title: true } },
       createdBy: { select: { email: true } },
+      tickets: couponTicketsInclude,
       redemptions: {
         orderBy: { createdAt: "desc" },
         take: 10,
@@ -177,7 +179,8 @@ export default async function Page({
                     : ""}
                   {coupon.createdBy ? ` · by ${coupon.createdBy.email}` : ""}
                 </p>
-                {coupon.redemptions.length ? (
+                <CouponUses coupon={coupon} />
+                {coupon.scope !== "TICKETS" && coupon.redemptions.length ? (
                   <ul className="mt-1 text-xs text-slate-500">
                     {coupon.redemptions.map((redemption) => (
                       <li key={redemption.id}>

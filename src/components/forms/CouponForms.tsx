@@ -23,33 +23,10 @@ export type CouponEventOption = {
   tiers: { id: string; name: string; price: number }[];
 };
 
-/** Admin ticket codes: lock to one event, and optionally to a set number of each ticket type. */
-function TicketCouponFields({ events }: { events: CouponEventOption[] }) {
-  const [eventId, setEventId] = useState("");
-  const event = events.find((item) => item.id === eventId);
-
+/** Optional "how many of each ticket" boxes (`tierMax_<tierId>`) for a code locked to one event. */
+function TierLimitFields({ event }: { event: CouponEventOption }) {
+  if (!event.tiers.length) return null;
   return (
-    <>
-      <Field
-        label="Event"
-        hint="Optional — lock the code to one event, like organiser codes"
-        className="sm:col-span-2"
-      >
-        <select
-          name="eventId"
-          value={eventId}
-          onChange={(change) => setEventId(change.target.value)}
-          className={inputClass}
-        >
-          <option value="">Any event</option>
-          {events.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.title} · {item.date}
-            </option>
-          ))}
-        </select>
-      </Field>
-      {event?.tiers.length ? (
         <fieldset className="rounded-lg border border-slate-200 p-3 sm:col-span-2">
           <legend className="px-1 text-sm font-medium text-slate-700">
             Only these tickets (optional)
@@ -88,7 +65,36 @@ function TicketCouponFields({ events }: { events: CouponEventOption[] }) {
             ))}
           </div>
         </fieldset>
-      ) : null}
+  );
+}
+
+/** Admin ticket codes: lock to one event, and optionally to a set number of each ticket type. */
+function TicketCouponFields({ events }: { events: CouponEventOption[] }) {
+  const [eventId, setEventId] = useState("");
+  const event = events.find((item) => item.id === eventId);
+
+  return (
+    <>
+      <Field
+        label="Event"
+        hint="Optional — lock the code to one event, like organiser codes"
+        className="sm:col-span-2"
+      >
+        <select
+          name="eventId"
+          value={eventId}
+          onChange={(change) => setEventId(change.target.value)}
+          className={inputClass}
+        >
+          <option value="">Any event</option>
+          {events.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.title} · {item.date}
+            </option>
+          ))}
+        </select>
+      </Field>
+      {event ? <TierLimitFields event={event} /> : null}
     </>
   );
 }
@@ -211,10 +217,14 @@ export function CouponForm({
 /** Organiser view: a code limited to one of their own events. */
 export function EventCouponForm({
   events,
+  canLimitTiers,
 }: {
-  events: { id: string; title: string }[];
+  events: CouponEventOption[];
+  canLimitTiers: boolean;
 }) {
   const [state, formAction] = useFormState(createEventCouponAction, emptyState);
+  const [eventId, setEventId] = useState(events[0]?.id ?? "");
+  const event = events.find((item) => item.id === eventId);
 
   return (
     <form action={formAction} className="space-y-3">
@@ -223,10 +233,16 @@ export function EventCouponForm({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Event">
-          <select name="eventId" required className={inputClass}>
-            {events.map((event) => (
-              <option key={event.id} value={event.id}>
-                {event.title}
+          <select
+            name="eventId"
+            required
+            value={eventId}
+            onChange={(change) => setEventId(change.target.value)}
+            className={inputClass}
+          >
+            {events.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title}
               </option>
             ))}
           </select>
@@ -240,6 +256,20 @@ export function EventCouponForm({
           />
         </Field>
         <DiscountFields withCurrency={false} />
+        {event?.tiers.length ? (
+          canLimitTiers ? (
+            <TierLimitFields event={event} />
+          ) : (
+            <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 sm:col-span-2">
+              Want a code that covers only set tickets, e.g. 3 Adult or 1
+              Couple, and charges anything extra?{" "}
+              <a href="/upgrade" className="font-semibold underline">
+                Upgrade to Premium
+              </a>
+              .
+            </p>
+          )
+        ) : null}
       </div>
 
       <SubmitButton pendingLabel="Creating…">Create coupon</SubmitButton>

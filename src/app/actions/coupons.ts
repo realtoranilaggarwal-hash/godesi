@@ -6,7 +6,12 @@ import { db } from "@/lib/db";
 import { requireRole, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { randomBytes } from "node:crypto";
-import { type CouponTierLimit, normalizeCouponCode } from "@/lib/coupons";
+import {
+  type CouponTierLimit,
+  hasPremiumCoupons,
+  normalizeCouponCode,
+  parseTierLimits,
+} from "@/lib/coupons";
 import { compTicketEmail, emailEnabled, sendEmail } from "@/lib/email";
 import { formatMoney } from "@/lib/format";
 
@@ -81,16 +86,9 @@ export async function createCouponAction(
     if (parsed.data.scope === "TICKETS" && parsed.data.eventId && !event) {
       return { error: "That event no longer exists." };
     }
-    const tierLimits: CouponTierLimit[] = [];
-    for (const tier of event?.tiers ?? []) {
-      const raw = String(formData.get(`tierMax_${tier.id}`) ?? "").trim();
-      if (!raw) continue;
-      const maxQuantity = Number(raw);
-      if (!Number.isInteger(maxQuantity) || maxQuantity < 1 || maxQuantity > 10) {
-        return { error: `Enter 1–10 for ${tier.name}, or leave it blank.` };
-      }
-      tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity });
-    }
+    const tiers = parseTierLimits(formData, event?.tiers ?? []);
+    if ("error" in tiers) return { error: tiers.error };
+    const tierLimits = tiers.limits;
 
     const code = normalizeCouponCode(parsed.data.code);
     const clash = await db.coupon.findUnique({ where: { code } });
@@ -147,9 +145,20 @@ export async function createEventCouponAction(
 
     const event = await db.event.findUnique({
       where: { id: parsed.data.eventId },
+      include: {
+        tiers: {
+          orderBy: { sortOrder: "asc" },
+          select: { id: true, name: true },
+        },
+      },
     });
     if (!event || (event.organizerId !== user.id && user.role !== "ADMIN")) {
       return { error: "You can only create coupons for your own events." };
+    }
+    const tiers = parseTierLimits(formData, event.tiers);
+    if ("error" in tiers) return { error: tiers.error };
+    if (tiers.limits.length && !hasPremiumCoupons(user)) {
+      return { error: "Limiting a code to set tickets is a Premium feature." };
     }
 
     const code = normalizeCouponCode(parsed.data.code);
@@ -165,6 +174,7 @@ export async function createEventCouponAction(
         currency: parsed.data.discountKind === "FIXED" ? event.currency : null,
         eventId: event.id,
         createdById: user.id,
+        tierLimits: tiers.limits.length ? tiers.limits : undefined,
         maxRedemptions: parsed.data.maxRedemptions ?? null,
         expiresAt: parsed.data.expiresAt
           ? new Date(parsed.data.expiresAt)
@@ -217,6 +227,9 @@ export async function sendCompTicketsAction(
 ): Promise<CompTicketsState> {
   try {
     const user = await requireUser();
+    if (!hasPremiumCoupons(user)) {
+      return { error: "Sending comp tickets is a Premium feature." };
+    }
     const parsed = compSchema.safeParse({
       eventId: formData.get("eventId") ?? undefined,
       email: formData.get("email") ?? undefined,
@@ -287,6 +300,8 @@ export async function sendCompTicketsAction(
         createdById: user.id,
         maxRedemptions: 1,
         tierLimits,
+        sentToName: parsed.data.name,
+        sentToEmail: parsed.data.email,
       },
     });
     revalidatePath("/dashboard/coupons");
