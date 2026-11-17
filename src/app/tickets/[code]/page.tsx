@@ -10,6 +10,7 @@ import { QuoraEvent, usdValue } from "@/components/QuoraEvent";
 import { ScrollTop } from "@/components/ScrollTop";
 import { SubmitButton } from "@/components/SubmitButton";
 import { checkInTicketAction } from "@/app/actions/tickets";
+import { sponsorsForEvent } from "@/lib/sponsors";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your ticket", robots: { index: false } };
@@ -53,6 +54,9 @@ export default async function TicketPage({
       : undefined;
 
   const confirmed = ticket.status === "CONFIRMED";
+  const sponsorGifts = confirmed
+    ? (await sponsorsForEvent(ticket.eventId)).filter((s) => s.buyerGift)
+    : [];
   const ticketWord = `ticket${ticket.quantity === 1 ? "" : "s"}`;
   const admits = ticket.quantity * (ticket.tier?.admits ?? 1);
   const checkedInLabel = ticket.checkedInAt
@@ -111,6 +115,23 @@ export default async function TicketPage({
             <span className="break-all font-semibold">{ticket.buyerEmail}</span>. You can
             also open {ticket.quantity === 1 ? "it" : "them"} any time under My tickets.
           </p>
+        </div>
+      ) : null}
+
+      {sponsorGifts.length ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-bold">🎁 Gifts from our sponsors for ticket holders</p>
+          <ul className="mt-2 space-y-1">
+            {sponsorGifts.map((s) => (
+              <li key={s.id}>
+                <Link href={`/business/${s.business.slug}?src=sponsor`} className="font-semibold underline">
+                  {s.business.name}
+                </Link>
+                : {s.buyerGift}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs">Show this ticket to the sponsor to claim it.</p>
         </div>
       ) : null}
 

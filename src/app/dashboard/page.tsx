@@ -636,7 +636,7 @@ async function businessPageStats(businessId: string) {
   const since = new Date(now.getTime() - (STATS_DAYS + 1) * 24 * 60 * 60 * 1000);
   const events = await db.analyticsEvent.findMany({
     where: { businessId, createdAt: { gte: since } },
-    select: { type: true, referrer: true, createdAt: true },
+    select: { type: true, referrer: true, city: true, source: true, createdAt: true },
   });
 
   const days: { key: string; views: number }[] = [];
@@ -651,6 +651,8 @@ async function businessPageStats(businessId: string) {
 
   const totals = { PROFILE_VIEW: 0, QR_SCAN: 0, WHATSAPP_CLICK: 0 };
   const referrers = new Map<string, number>();
+  const cities = new Map<string, number>();
+  let sponsorViews = 0;
   let viewsToday = 0;
 
   for (const event of events) {
@@ -663,6 +665,8 @@ async function businessPageStats(businessId: string) {
     if (key === todayKey) viewsToday += 1;
     const source = event.referrer ?? "unknown";
     referrers.set(source, (referrers.get(source) ?? 0) + 1);
+    if (event.city) cities.set(event.city, (cities.get(event.city) ?? 0) + 1);
+    if (event.source === "sponsor") sponsorViews += 1;
   }
 
   return {
@@ -674,6 +678,10 @@ async function businessPageStats(businessId: string) {
     topReferrers: Array.from(referrers.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6),
+    topCities: Array.from(cities.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6),
+    sponsorViews,
   };
 }
 
@@ -778,6 +786,31 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
                     <li key={host} className="flex justify-between gap-2">
                       <span className="min-w-0 truncate text-slate-600">
                         {referrerLabel(host)}
+                      </span>
+                      <span className="font-semibold">
+                        {count.toLocaleString("en-US")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {stats.sponsorViews ? (
+                <p className="mt-2 border-t border-slate-100 pt-2 text-sm">
+                  🤝 From your sponsor logo on event pages:{" "}
+                  <span className="font-semibold">
+                    {stats.sponsorViews.toLocaleString("en-US")}
+                  </span>
+                </p>
+              ) : null}
+              {stats.topCities.length ? (
+                <ul className="mt-2 space-y-1 border-t border-slate-100 pt-2 text-sm">
+                  <li className="text-xs font-semibold text-slate-500">
+                    Where visitors are
+                  </li>
+                  {stats.topCities.map(([city, count]) => (
+                    <li key={city} className="flex justify-between gap-2">
+                      <span className="min-w-0 truncate text-slate-600">
+                        📍 {city}
                       </span>
                       <span className="font-semibold">
                         {count.toLocaleString("en-US")}

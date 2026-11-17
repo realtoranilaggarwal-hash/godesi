@@ -459,7 +459,11 @@ export default async function BusinessProfilePage({
   return (
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-5">
-        <TrackVisit slug={business.slug} fromQr={searchParams.src === "qr"} />
+        <TrackVisit
+          slug={business.slug}
+          fromQr={searchParams.src === "qr"}
+          source={searchParams.src === "sponsor" ? "sponsor" : undefined}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

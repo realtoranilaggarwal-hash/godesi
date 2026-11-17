@@ -1207,6 +1207,10 @@ model AnalyticsEvent {
   referrer   String?
   /// Page path the event happened on, e.g. "/business/sharma-sweets".
   path       String?
+  /// Visitor's city as Vercel reports it, null when unknown.
+  city       String?
+  /// How they got here: "sponsor" (a sponsor logo on an event page or partner site) or "qr".
+  source     String?
   createdAt  DateTime  @default(now())
 
   @@index([businessId, type])
@@ -2060,6 +2064,8 @@ model EventSponsor {
   message    String?
   /// Line shown under the sponsor, e.g. "Refer Realtor Anil Aggarwal".
   offer      String?
+  /// Gift or deal the sponsor gives ticket buyers, e.g. "$10 off any haircut at our Edison store".
+  buyerGift  String?
   couponId   String?   @unique
   coupon     Coupon?   @relation(fields: [couponId], references: [id], onDelete: SetNull)
   sortOrder  Int       @default(0)

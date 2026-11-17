@@ -48,7 +48,7 @@ export function EventSponsors({
               className="flex flex-col items-center rounded-2xl border border-amber-200 bg-amber-50/60 p-3 text-center"
             >
               <Link
-                href={`/business/${sponsor.business.slug}`}
+                href={`/business/${sponsor.business.slug}?src=sponsor`}
                 className="flex flex-col items-center gap-2"
               >
                 {photo ? (
@@ -74,6 +74,11 @@ export function EventSponsors({
               {sponsor.offer ? (
                 <span className="mt-1 text-xs font-semibold text-slate-700">
                   {sponsor.offer}
+                </span>
+              ) : null}
+              {sponsor.buyerGift ? (
+                <span className="mt-1 text-xs text-amber-800">
+                  🎁 {sponsor.buyerGift}
                 </span>
               ) : null}
               {discount ? (
