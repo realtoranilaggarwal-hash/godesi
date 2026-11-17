@@ -23,3 +23,27 @@ export function compEventOptions(
     tiers: event.tiers,
   }));
 }
+
+/** Comp-able events: GoDesi-run listings with at least one entry ticket (sponsor packages book separately). */
+export function compTicketEventOptions(
+  events: {
+    id: string;
+    title: string;
+    startsAt: Date;
+    currency: string;
+    sourceId: string | null;
+    tiers: { id: string; name: string; price: number; kind: string }[];
+  }[],
+): CouponEventOption[] {
+  return compEventOptions(
+    events
+      .filter((event) => event.sourceId === null)
+      .map((event) => ({
+        ...event,
+        tiers: event.tiers
+          .filter((tier) => tier.kind !== "SPONSOR")
+          .map(({ id, name, price }) => ({ id, name, price })),
+      }))
+      .filter((event) => event.tiers.length),
+  );
+}

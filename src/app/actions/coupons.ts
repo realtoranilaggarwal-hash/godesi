@@ -234,7 +234,9 @@ export async function sendCompTicketsAction(
         title: true,
         currency: true,
         organizerId: true,
+        sourceId: true,
         tiers: {
+          where: { kind: { not: "SPONSOR" } },
           orderBy: { sortOrder: "asc" },
           select: { id: true, name: true, price: true },
         },
@@ -242,6 +244,9 @@ export async function sendCompTicketsAction(
     });
     if (!event || (event.organizerId !== user.id && user.role !== "ADMIN")) {
       return { error: "You can only send tickets for your own events." };
+    }
+    if (event.sourceId !== null) {
+      return { error: "Comp tickets work only for events that sell tickets on GoDesi." };
     }
 
     const tierLimits: CouponTierLimit[] = [];
@@ -259,6 +264,9 @@ export async function sendCompTicketsAction(
     }
     if (!tierLimits.length) {
       return { error: "Enter how many of at least one ticket type." };
+    }
+    if (tierLimits.reduce((sum, limit) => sum + limit.maxQuantity, 0) > 10) {
+      return { error: "Maximum 10 tickets per comp — one booking can't hold more." };
     }
 
     const fixed = parsed.data.discountKind === "FIXED";

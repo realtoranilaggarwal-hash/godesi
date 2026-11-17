@@ -6,7 +6,7 @@ import {
   CouponForm,
   SendCompTicketsForm,
 } from "@/components/forms/CouponForms";
-import { compEventOptions } from "@/lib/compTickets";
+import { compEventOptions, compTicketEventOptions } from "@/lib/compTickets";
 import { toggleCouponAction } from "@/app/actions/coupons";
 import { generateFreeCourseCodeAction } from "@/app/actions/course";
 import { FREE_CODE_PROVIDER } from "@/lib/courseCodes";
@@ -59,9 +59,10 @@ export default async function Page({
       title: true,
       startsAt: true,
       currency: true,
+      sourceId: true,
       tiers: {
         orderBy: { sortOrder: "asc" },
-        select: { id: true, name: true, price: true },
+        select: { id: true, name: true, price: true, kind: true },
       },
     },
   });
@@ -135,7 +136,7 @@ export default async function Page({
           buyer gets an email with a one-use code that makes exactly those
           tickets free.
         </p>
-        <SendCompTicketsForm events={compEventOptions(ticketEvents)} />
+        <SendCompTicketsForm events={compTicketEventOptions(ticketEvents)} />
       </Card>
       <Card id="discount-coupons">
         <h2 className="mb-1 text-lg font-bold">Discount coupons</h2>

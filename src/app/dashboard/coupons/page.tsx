@@ -8,7 +8,7 @@ import {
   EventCouponForm,
   SendCompTicketsForm,
 } from "@/components/forms/CouponForms";
-import { compEventOptions } from "@/lib/compTickets";
+import { compTicketEventOptions } from "@/lib/compTickets";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -27,9 +27,10 @@ export default async function MyCouponsPage() {
         title: true,
         startsAt: true,
         currency: true,
+        sourceId: true,
         tiers: {
           orderBy: { sortOrder: "asc" },
-          select: { id: true, name: true, price: true },
+          select: { id: true, name: true, price: true, kind: true },
         },
       },
     }),
@@ -40,7 +41,7 @@ export default async function MyCouponsPage() {
     }),
   ]);
 
-  const compEvents = compEventOptions(
+  const compEvents = compTicketEventOptions(
     events.filter((event) => event.startsAt.getTime() >= Date.now() - 2 * 86_400_000),
   );
 
