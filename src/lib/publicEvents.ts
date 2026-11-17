@@ -126,7 +126,6 @@ export function eventJson(event: PublicEvent, ref?: string) {
           photoUrl: photo && photo.startsWith("/") ? `${base}${photo}` : photo,
           url: `${base}/business/${sponsor.business.slug}`,
           offer: sponsor.offer,
-          code: coupon?.code ?? null,
           discountKind: coupon?.discountKind ?? null,
           discountAmount: coupon?.amount ?? null,
           discountLabel: coupon ? sponsorDiscountLabel(sponsor) : null,

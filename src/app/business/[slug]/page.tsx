@@ -72,6 +72,7 @@ import { CardCompleteness } from "@/components/CardCompleteness";
 import { MapEmbed } from "@/components/MapEmbed";
 import { getCategoryTree } from "@/lib/directory";
 import { AUTHOR_PROFILE_HREF } from "@/lib/courses/types";
+import { sponsorCodesForBusiness } from "@/lib/sponsors";
 
 export const dynamic = "force-dynamic";
 
@@ -234,6 +235,7 @@ export default async function BusinessProfilePage({
       : [];
 
   const isOwner = viewer?.id === business.ownerId;
+  const sponsorCodes = isOwner ? [] : await sponsorCodesForBusiness(business.id);
   /**
    * Phone and email are only rendered for paid listings (or to the owner/admin), so a
    * free listing never exposes them in the HTML. A paid member can still switch the
@@ -1162,6 +1164,7 @@ export default async function BusinessProfilePage({
               </Card>
             ) : null}
 
+            <div id="review" className="scroll-mt-24" />
             <Card>
               <h2 className="mb-3 text-lg font-bold">
                 Reviews {reviewCount ? `(${reviewCount})` : ""}
@@ -1204,6 +1207,16 @@ export default async function BusinessProfilePage({
               {!isOwner ? (
                 <div className="mt-5 border-t border-slate-100 pt-4">
                   <h3 className="mb-3 font-semibold">Leave a review</h3>
+                  {sponsorCodes.length ? (
+                    <p className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                      🎟️ Post a review and get{" "}
+                      {sponsorCodes
+                        .map((c) => `${c.label} for ${c.eventTitle}`)
+                        .join(", ")}
+                      . The code shows here right after you post and is emailed
+                      to you. Good or bad, any honest review gets it.
+                    </p>
+                  ) : null}
                   {viewer ? (
                     <ReviewForm
                       businessId={business.id}

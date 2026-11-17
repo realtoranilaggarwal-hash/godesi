@@ -2,7 +2,8 @@
  * Creates (or refreshes) the "Singles" listing for NYE 2027: the same night and hall as
  * the main party, but its own page and its own 50 first-come-first-served balcony seats
  * (no tables), sold only to members 21+ with a Connect profile marked Single (see
- * lib/singles). One flat $75 tier, chair only and all inclusive. The main event keeps its
+ * lib/singles). $75 till Nov 30, $100 from Dec 1, chair only and all inclusive;
+ * both price windows share the 50 seats. The main event keeps its
  * separate 50 balcony seats, so the balcony holds 100 in total.
  * Safe to re-run: the event is matched by slug (old slugs are renamed) and tiers by name;
  * old price-window tiers are deleted when unsold, or closed for sale when someone bought one.
@@ -18,6 +19,9 @@ const SLUG = "singles-new-years-eve-party-2027-nj";
 const OLD_SLUGS = ["singles-mingle-new-years-eve-party-2027-nj"];
 const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
 const SEATS = 50;
+/** New York time; salesEnd is exclusive, so early tickets sell through Nov 30. */
+const LATE_START = new Date("2026-12-01T00:00:00-05:00");
+const EARLY_END = LATE_START;
 const NOTE = "21+ · Limited seats · first come, first served · no table · singles band included";
 
 const TIERS: { name: string; match?: string[]; price: number; salesStart?: Date; salesEnd?: Date }[] = [
@@ -25,7 +29,9 @@ const TIERS: { name: string; match?: string[]; price: number; salesStart?: Date;
     name: "Singles — balcony chair, all inclusive",
     match: ["Singles balcony seat — Early bird", "Singles balcony seat"],
     price: 75,
+    salesEnd: EARLY_END,
   },
+  { name: "Singles — balcony chair, all inclusive (from Dec 1)", price: 100, salesStart: LATE_START },
 ];
 
 const TITLE = "Singles New Year's Eve Party 2027 in NJ (21+)";
@@ -35,7 +41,7 @@ const DESCRIPTION = [
   "Singles get their own balcony in the Big Ball Room: chairs only, no tables and no assigned seats — limited seats, first come, first served. Every singles guest gets a special singles band.",
   "It's all inclusive — everything the main party has: 35 food items with live stations in the Plaza Hall (dosa, jalebi, golgappa and more), premium drinks until midnight, a midnight champagne toast, live DJ Sandy of M&D Events, a live belly dance performance and the New York ball drop on live TV. Free valet parking. Meet new people, make friends and welcome 2027 together.",
   "This is a 21+ party because liquor is served: bring a photo ID, which is checked at the door when you pick up your singles band.",
-  "Tickets: only $75, all inclusive. Only 50 singles seats. To keep it singles-only, you need a free GoDesi Connect profile marked Single, with your age (21 or older), before you buy — create it in a minute and come straight back to book. Short link: godesi.com/927",
+  "Tickets: $75 till Nov 30, $100 from Dec 1, all inclusive. Only 50 singles seats. To keep it singles-only, you need a free GoDesi Connect profile marked Single, with your age (21 or older), before you buy — create it in a minute and come straight back to book. Short link: godesi.com/927",
   "Questions or group bookings: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606.",
 ].join("\n\n");
 
@@ -90,10 +96,14 @@ async function main() {
     : await db.event.create({ data: { ...data, seatsTotal: SEATS } });
 
   const used = new Set<string>();
+  /** A tier whose name is still in TIERS belongs to that spec, never to another spec's `match`. */
+  const specNames = new Set(TIERS.map((spec) => spec.name));
   for (let index = 0; index < TIERS.length; index += 1) {
     const spec = TIERS[index];
-    const names = [spec.name, ...(spec.match ?? [])];
-    const tier = existing?.tiers.find((row) => !used.has(row.id) && names.includes(row.name));
+    const free = existing?.tiers.filter((row) => !used.has(row.id)) ?? [];
+    const tier =
+      free.find((row) => row.name === spec.name) ??
+      free.find((row) => !specNames.has(row.name) && spec.match?.includes(row.name));
     const tierData = {
       name: spec.name,
       note: NOTE,
@@ -104,6 +114,7 @@ async function main() {
       salesEnd: spec.salesEnd ?? null,
       kind: "TICKET",
       admits: 1,
+      stockGroup: "singles-balcony",
     };
     if (tier) {
       used.add(tier.id);
