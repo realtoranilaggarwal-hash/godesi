@@ -48,6 +48,11 @@ export function describeTierLimits(limits: CouponTierLimit[]) {
     .join(" + ");
 }
 
+/** Stands in for the tier id of an event's plain ticket (events without ticket types). */
+export const BASE_TICKET_ID = "base";
+
+const lineTierId = (line: { tierId: string | null }) => line.tierId ?? BASE_TICKET_ID;
+
 export type CouponTicketLine = {
   tierId: string | null;
   quantity: number;
@@ -65,7 +70,7 @@ export function couponEligibleMinor(
   const limits = couponTierLimits(coupon);
   return lines.map((line) => {
     if (!limits.length) return line.quantity * line.unitMinor;
-    const limit = limits.find((item) => item.tierId === line.tierId);
+    const limit = limits.find((item) => item.tierId === lineTierId(line));
     return limit
       ? Math.min(line.quantity, limit.maxQuantity) * line.unitMinor
       : 0;
@@ -162,7 +167,7 @@ export async function checkCoupon({
     const covered = (ticketLines ?? []).filter(
       (line) =>
         line.quantity > 0 &&
-        limits.some((limit) => limit.tierId === line.tierId),
+        limits.some((limit) => limit.tierId === lineTierId(line)),
     );
     if (!covered.length) {
       return {
@@ -176,7 +181,7 @@ export async function checkCoupon({
       limits.some(
         (limit) =>
           (ticketLines ?? [])
-            .filter((line) => line.tierId === limit.tierId)
+            .filter((line) => lineTierId(line) === limit.tierId)
             .reduce((sum, line) => sum + line.quantity, 0) < limit.maxQuantity,
       )
     ) {

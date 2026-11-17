@@ -6,7 +6,11 @@ import { db } from "@/lib/db";
 import { requireRole, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
 import { randomBytes } from "node:crypto";
-import { type CouponTierLimit, normalizeCouponCode } from "@/lib/coupons";
+import {
+  BASE_TICKET_ID,
+  type CouponTierLimit,
+  normalizeCouponCode,
+} from "@/lib/coupons";
 import { compTicketEmail, emailEnabled, sendEmail } from "@/lib/email";
 import { formatMoney, siteUrl } from "@/lib/format";
 import { tierOnSale } from "@/lib/ticketTiers";
@@ -110,7 +114,7 @@ export async function createCouponAction(
             ? event?.currency ?? parsed.data.currency
             : null,
         eventId: event?.id ?? null,
-        tierLimits: tierLimits.length ? tierLimits : undefined,
+        tierLimits,
         maxRedemptions: parsed.data.maxRedemptions ?? null,
         expiresAt: parsed.data.expiresAt
           ? new Date(parsed.data.expiresAt)
@@ -282,10 +286,11 @@ export async function sendCompTicketsAction(
     if (total <= 0)
       return { error: "Those tickets are free — the buyer can book them directly, no code needed." };
 
-    /** Events without ticket types have nothing to lock; the fixed amount is the guard there. */
-    const tierLimits: CouponTierLimit[] = picked.flatMap(({ tierId, name, quantity }) =>
-      tierId ? [{ tierId, name, maxQuantity: quantity }] : [],
-    );
+    const tierLimits: CouponTierLimit[] = picked.map(({ tierId, name, quantity }) => ({
+      tierId: tierId ?? BASE_TICKET_ID,
+      name,
+      maxQuantity: quantity,
+    }));
 
     let code = "";
     for (let attempt = 0; attempt < 5 && !code; attempt += 1) {
@@ -304,7 +309,7 @@ export async function sendCompTicketsAction(
         eventId: event.id,
         createdById: user.id,
         maxRedemptions: 1,
-        tierLimits: tierLimits.length ? tierLimits : undefined,
+        tierLimits,
       },
     });
 
