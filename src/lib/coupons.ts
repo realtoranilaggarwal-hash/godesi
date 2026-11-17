@@ -80,17 +80,16 @@ export type CouponTicketLine = {
 
 /**
  * How much of each booking line a code may discount: the whole line, or for a
- * tier-limited percent code only its listed ticket types up to their max
- * quantity. Fixed-amount codes always come off the whole order.
+ * tier-limited code only its listed ticket types up to their max quantity, so
+ * "$10 off Adult" comes off Adult tickets only, once per order.
  */
 export function couponEligibleMinor(
-  coupon: Pick<Coupon, "tierLimits" | "discountKind">,
+  coupon: Pick<Coupon, "tierLimits">,
   lines: CouponTicketLine[],
 ) {
   const limits = couponTierLimits(coupon);
   return lines.map((line) => {
-    if (!limits.length || coupon.discountKind === "FIXED")
-      return line.quantity * line.unitMinor;
+    if (!limits.length) return line.quantity * line.unitMinor;
     const limit = limits.find((item) => item.tierId === line.tierId);
     return limit
       ? Math.min(line.quantity, limit.maxQuantity) * line.unitMinor
