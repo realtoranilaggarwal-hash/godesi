@@ -2,48 +2,61 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PrintButton } from "@/components/PrintButton";
 import { PartnerPackageForm } from "@/components/advertise/PartnerPackageForm";
-import { AD_PLACEMENTS } from "@/lib/ads";
+import { AD_PLACEMENTS, adPrice } from "@/lib/ads";
 import { cachedQuery } from "@/lib/cache";
 import { db } from "@/lib/db";
-import { PARTNER_HOSTING_NOTE, PARTNER_PACKAGE } from "@/lib/partnerPackage";
+import {
+  PARTNER_HOSTING_NOTE,
+  PARTNER_PACKAGE,
+  PREMIUM_PARTNER_PACKAGE,
+  partnerPackageFor,
+} from "@/lib/partnerPackage";
 import { PLANS } from "@/lib/plans";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
-  title: "Grow Your Business with GoDesi — Marketing Partnership Proposal",
+  title: "GoDesi Elite Partnership + New Year's Eve Sponsorship — $500 Starter & $2,000 Premium",
   description:
-    "New Year's Eve party sponsorship, websites, a GoDesi.com banner, podcast and GoDesi Elite interviews, and a quarterly magazine ad — the GoDesi Partner Package for local businesses.",
+    "One partnership, multiple opportunities: the $500 Starter Partnership (Elite interview, membership, DesiWho'sWho.com listing, 10-second video, 320×100 banner for 12 months, AI website, 2 New Year's Eve tickets) and the $2,000 Premium Partnership (everything in Starter plus a VIP table for 12 guests and sponsor recognition at Royal Albert Palace).",
 };
 
 const NYE_SLUG = "new-year-eves-party-2027-edison";
-const NYE_SPONSOR_HREF = `/events/${NYE_SLUG}#sponsor`;
 const PHONE = "732-877-8585";
 const PHONE_HREF = "tel:+17328778585";
+const SALES_MAILTO = (subject: string) =>
+  `mailto:${SITE.salesEmail}?subject=${encodeURIComponent(subject)}`;
 
-/** Silver, Gold and Platinum packages exactly as listed on the party's event page. */
-const sponsorLevels = cachedQuery("proposal-nye-sponsors", 3600, async () => {
+/** Fallbacks are the party's till-Dec-15 prices, used if the event can't be read. */
+const FALLBACK_NYE_PRICES = { adult: 95, vipTable: 1080 };
+
+/** The adult ticket and VIP table prices on sale right now on the party's event page. */
+const nyePrices = cachedQuery("proposal-nye-prices", 3600, async () => {
   const event = await db.event.findUnique({
     where: { slug: NYE_SLUG },
     select: {
       tiers: {
-        where: { kind: "SPONSOR" },
-        orderBy: { sortOrder: "asc" },
-        select: { name: true, price: true, perks: true },
+        where: { kind: "TICKET" },
+        select: { name: true, price: true, salesStart: true, salesEnd: true },
       },
     },
   });
-  return (event?.tiers ?? []).filter((tier) =>
-    /^(silver|gold|platinum)\b/i.test(tier.name),
+  const now = Date.now();
+  const onSale = (event?.tiers ?? []).filter(
+    (tier) =>
+      (!tier.salesStart || tier.salesStart.getTime() <= now) &&
+      (!tier.salesEnd || tier.salesEnd.getTime() > now),
   );
+  const lowest = (pattern: RegExp) => {
+    const prices = onSale.filter((tier) => pattern.test(tier.name)).map((tier) => tier.price);
+    return prices.length ? Math.min(...prices) : null;
+  };
+  return {
+    adult: lowest(/^adults?\b/i) ?? FALLBACK_NYE_PRICES.adult,
+    vipTable: lowest(/^vip table/i) ?? FALLBACK_NYE_PRICES.vipTable,
+  };
 });
-
-const LEVEL_STYLE: Record<string, string> = {
-  silver: "border-slate-300 bg-slate-100/70 text-slate-700",
-  gold: "border-amber-400 bg-amber-100/70 text-amber-800",
-  platinum: "border-indigo-300 bg-indigo-50/70 text-indigo-800",
-};
 
 /** Prints only the proposal: site chrome, side banners and widgets are hidden. */
 const PRINT_CSS = `
@@ -58,68 +71,182 @@ const PRINT_CSS = `
   }
 `;
 
-const usd = (amount: number) => `$${amount.toLocaleString("en-US")}`;
+const usd = (amount: number) => `$${Math.round(amount).toLocaleString("en-US")}`;
 
-const PACKAGE_ROWS: { item: string; value: string }[] = [
-  { item: "Handmade custom website", value: "$500" },
-  { item: "300×250 side banner on GoDesi.com for 1 year", value: usd(AD_PLACEMENTS.SIDEBAR.priceUsd * 12) },
-  { item: "Featured listing on GoDesi.com for 1 year", value: usd(PLANS.PREMIUM.terms.YEAR?.usd ?? 100) },
-  { item: "GoDesi Elite interview with a 30–60 second video", value: "$500" },
-  { item: "Your banner inside the hall at the New Year's Eve party", value: "$300" },
-  { item: "1 ticket to enjoy the New Year's Eve party", value: "$100" },
+const STARTER_BENEFITS = [
+  "Professional business interview conducted by our team (GoDesi Elite feature)",
+  "GoDesi Elite membership and featured business profile",
+  "Directory listing on DesiWho'sWho.com",
+  "Professionally produced 10-second promotional video",
+  "320 × 100 pixel side banner advertisement for 12 months",
+  "Rotational banner exposure on the GoDesi homepage and relevant business category pages",
+  "AI-enabled, SEO-friendly business website",
 ];
 
-function Section({
-  number,
-  title,
-  children,
-}: {
-  number: number;
-  title: string;
-  children: React.ReactNode;
-}) {
+const PREMIUM_BENEFITS: React.ReactNode[] = [
+  <>
+    <strong>VIP table for 12 guests</strong> — 10 additional VIP seats (12 total guests including
+    the 2 complimentary tickets)
+  </>,
+  "Company logo, picture and website on the New Year's Eve event supporters banner",
+  "Personalized company placard displayed on your sponsored table",
+  "VIP seating for 12 guests",
+  "Personalized 10% ticket discount code for your clients and business associates",
+  "Additional event sponsor recognition",
+];
+
+const HIGHLIGHTS = [
+  { icon: "📈", label: "Increase Visibility" },
+  { icon: "🤝", label: "Build Credibility" },
+  { icon: "👥", label: "Network with Clients & Community" },
+  { icon: "📣", label: "Year-Round Marketing" },
+  { icon: "💻", label: "Professional Online Presence" },
+];
+
+type ValueRow = { item: string; value: number | null };
+
+function Check({ tone }: { tone: "blue" | "red" }) {
   return (
-    <section className="break-inside-avoid rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:rounded-xl print:p-4 print:shadow-none">
-      <h2 className="flex items-start gap-2 text-lg font-black text-slate-900">
-        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-600 text-sm font-black text-white">
-          {number}
-        </span>
-        <span className="min-w-0 break-words">{title}</span>
-      </h2>
-      <div className="mt-3 space-y-2 text-sm text-slate-700">{children}</div>
-    </section>
+    <span
+      aria-hidden
+      className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-black text-white ${
+        tone === "blue" ? "bg-blue-800" : "bg-red-700"
+      }`}
+    >
+      ✓
+    </span>
   );
 }
 
-function Bullets({ items }: { items: React.ReactNode[] }) {
+function Benefits({ items, tone }: { items: React.ReactNode[]; tone: "blue" | "red" }) {
   return (
-    <ul className="list-disc space-y-1 pl-5">
+    <ul className="space-y-2 text-sm text-slate-800 print:space-y-1 print:text-xs">
       {items.map((item, index) => (
-        <li key={index} className="break-words">
-          {item}
+        <li key={index} className="flex min-w-0 items-start gap-2">
+          <Check tone={tone} />
+          <span className="min-w-0 break-words">{item}</span>
         </li>
       ))}
     </ul>
   );
 }
 
+function ValueTable({
+  title,
+  rows,
+  price,
+}: {
+  title: string;
+  rows: ValueRow[];
+  price: number;
+}) {
+  const retail = rows.reduce((sum, row) => sum + (row.value ?? 0), 0);
+  const savings = retail - price;
+  const unpriced = rows.filter((row) => row.value === null).length;
+  return (
+    <div className="min-w-0 break-inside-avoid rounded-2xl border border-slate-200 bg-white p-4 shadow-sm print:shadow-none">
+      <h3 className="font-black text-slate-900">{title}</h3>
+      <table className="mt-2 w-full text-left text-sm print:text-xs">
+        <thead>
+          <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+            <th className="py-1.5 pr-3">Service</th>
+            <th className="py-1.5 text-right">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.item} className="border-b border-slate-100 align-top">
+              <td className="break-words py-1.5 pr-3 text-slate-700">{row.item}</td>
+              <td className="whitespace-nowrap py-1.5 text-right font-semibold text-slate-700">
+                {row.value === null ? (
+                  <span className="text-xs font-bold uppercase text-emerald-700">Included</span>
+                ) : (
+                  usd(row.value)
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr className="border-b border-slate-200">
+            <td className="py-1.5 pr-3 font-bold text-slate-900">Combined retail value</td>
+            <td className="py-1.5 text-right font-bold text-slate-500 line-through">
+              {usd(retail)}
+            </td>
+          </tr>
+          <tr>
+            <td className="py-1.5 pr-3 font-black text-slate-900">Partnership price</td>
+            <td className="whitespace-nowrap py-1.5 text-right text-xl font-black text-amber-700">{usd(price)}</td>
+          </tr>
+          {savings >= price * 0.05 ? (
+            <tr>
+              <td colSpan={2} className="pt-2">
+                <span className="inline-block rounded-full bg-emerald-600 px-3 py-1 text-xs font-black text-white">
+                  You save {usd(savings)} on the priced services alone
+                </span>
+              </td>
+            </tr>
+          ) : unpriced ? (
+            <tr>
+              <td colSpan={2} className="pt-2 text-xs font-bold text-emerald-700">
+                Plus {unpriced} services included that aren&apos;t sold separately
+              </td>
+            </tr>
+          ) : null}
+        </tfoot>
+      </table>
+    </div>
+  );
+}
+
 export default async function ProposalPage({
   searchParams,
 }: {
-  searchParams: { paid?: string };
+  searchParams: { paid?: string; tier?: string };
 }) {
-  const levels = await sponsorLevels();
+  const prices = await nyePrices();
+  const paidPackage = searchParams.paid ? partnerPackageFor(searchParams.paid) : null;
+
+  const bannerValue = adPrice(AD_PLACEMENTS.MOBILE, "USD", 12);
+  const starterServices: ValueRow[] = [
+    { item: "GoDesi Elite interview & feature (1 year)", value: 500 },
+    { item: "Featured business profile on GoDesi.com (1 year)", value: PLANS.PREMIUM.terms.YEAR?.usd ?? 100 },
+    { item: "320 × 100 side banner, rotating on GoDesi, 12 months", value: bannerValue },
+    { item: "AI-enabled, SEO-friendly business website", value: WEBSITE_OFFER.priceUsd },
+    { item: "DesiWho'sWho.com directory listing", value: null },
+    { item: "10-second promotional video", value: null },
+  ];
+  const starterRows: ValueRow[] = [
+    ...starterServices,
+    { item: `2 New Year's Eve party tickets (2 × ${usd(prices.adult)})`, value: prices.adult * 2 },
+  ];
+  const premiumRows: ValueRow[] = [
+    ...starterServices,
+    {
+      item: "VIP table for 12 guests (your 2 complimentary tickets + 10 additional VIP seats)",
+      value: prices.vipTable,
+    },
+    { item: "Logo, picture & website on the event supporters banner", value: null },
+    { item: "Personalized company placard on your table", value: null },
+    { item: "Personalized 10% ticket discount code for your clients", value: null },
+    { item: "Additional event sponsor recognition", value: null },
+  ];
+
+  const tierOptions = [
+    { tier: PARTNER_PACKAGE.tier, label: "Starter Partnership — Elite Marketing + Website", priceUsd: PARTNER_PACKAGE.priceUsd },
+    { tier: PREMIUM_PARTNER_PACKAGE.tier, label: "Premium Partnership — Complete Elite + VIP Sponsorship", priceUsd: PREMIUM_PARTNER_PACKAGE.priceUsd },
+  ];
 
   return (
-    <div id="partner-proposal" className="mx-auto max-w-4xl space-y-5">
+    <div id="partner-proposal" className="mx-auto max-w-5xl space-y-5">
       <style dangerouslySetInnerHTML={{ __html: PRINT_CSS }} />
 
-      {searchParams.paid ? (
+      {paidPackage ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 print:hidden">
-          <p className="font-black">🎉 Payment received — welcome to the GoDesi Partner Package!</p>
+          <p className="font-black">🎉 Payment received — welcome to the {paidPackage.name}!</p>
           <p className="mt-1">
             We&apos;ve emailed your receipt. Our team will call you within 1–2 business days to
-            collect your logo, photos and details.
+            schedule your interview and collect your logo, photos and details.
           </p>
         </div>
       ) : null}
@@ -128,244 +255,180 @@ export default async function ProposalPage({
         <p className="text-sm text-slate-500">
           Share this page with a client, or save it as a PDF to email.
         </p>
-        <div className="flex flex-wrap gap-2">
-          <a
-            href="#pay"
-            className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-700"
-          >
-            💳 Pay ${PARTNER_PACKAGE.priceUsd}
-          </a>
-          <PrintButton className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 print:hidden">
+        <PrintButton className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 print:hidden">
           🖨️ Download / Print PDF
         </PrintButton>
-        </div>
       </div>
 
-      <header className="rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white print:rounded-xl">
+      <header className="rounded-3xl bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 p-6 text-white print:rounded-xl print:p-4 sm:p-8">
         <p className="text-xs font-bold uppercase tracking-widest text-amber-300">
-          GoDesi.com · Marketing Partnership Proposal
+          GoDesi Elite Partnership + New Year&apos;s Eve Sponsorship
         </p>
-        <h1 className="mt-2 break-words text-2xl font-black sm:text-3xl">
-          Grow Your Business with GoDesi
+        <h1 className="mt-2 break-words text-3xl font-black leading-tight sm:text-4xl">
+          ONE PARTNERSHIP.{" "}
+          <span className="text-amber-300">MULTIPLE OPPORTUNITIES.</span>
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-200">
-          Put your business in front of the desi community in New Jersey and
-          beyond — at our New Year&apos;s Eve party, on GoDesi.com, on our
-          podcast, in print and in our members&apos; inboxes.
+        <p className="mt-3 max-w-3xl text-base font-semibold text-slate-100">
+          Digital Visibility. Professional Branding. Community Networking. Real-World Connections.
         </p>
-        <p className="mt-3 text-sm font-bold text-amber-300">
+        <p className="mt-3 max-w-3xl text-sm text-slate-200">
+          A complete marketing, branding and networking solution for attorneys, accountants,
+          realtors, mortgage professionals, insurance agents and other business owners — online
+          on GoDesi.com all year, and in person at our New Year&apos;s Eve party at Royal Albert
+          Palace (Big Ball Room, 1050 King Georges Post Rd, Fords, NJ).
+        </p>
+        <p className="mt-4 text-sm font-bold text-amber-300">
           Call{" "}
           <a href={PHONE_HREF} className="underline">
             {PHONE}
           </a>{" "}
           or email{" "}
-          <a href={`mailto:${SITE.salesEmail}`} className="underline">
+          <a href={SALES_MAILTO("GoDesi Elite Partnership")} className="break-all underline">
             {SITE.salesEmail}
           </a>
         </p>
       </header>
 
-      <Section number={1} title="New Year's Eve Party Sponsorship">
-        <p>
-          The Grand New Year&apos;s Eve Party — Big Ball Room, Royal Albert
-          Palace, 1050 King Georges Post Rd, Fords, NJ. About 400
-          guests, and 6+ years running (celebrating since 2018).
-        </p>
-        {levels.length ? (
-          <ul className="grid gap-3 sm:grid-cols-3 print:grid-cols-3">
-            {levels.map((tier) => {
-              const level = tier.name.split(/\s/)[0].toLowerCase();
-              return (
-                <li
-                  key={tier.name}
-                  className={`min-w-0 break-inside-avoid rounded-xl border p-3 ${LEVEL_STYLE[level] ?? LEVEL_STYLE.gold}`}
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="min-w-0 break-words font-black uppercase tracking-wide">
-                      {tier.name.replace(/\s*sponsor$/i, "")}
-                    </span>
-                    <span className="shrink-0 text-lg font-black text-amber-700">
-                      {usd(tier.price)}
-                    </span>
-                  </div>
-                  <ul className="mt-2 list-disc space-y-0.5 pl-4 text-xs text-slate-700">
-                    {tier.perks.map((perk) => (
-                      <li key={perk} className="break-words">
-                        {perk}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="font-semibold">
-            Silver $1,000 · Gold $2,500 · Platinum $5,000
-          </p>
-        )}
-        <p>
-          See every package and add-on:{" "}
-          <Link href={NYE_SPONSOR_HREF} className="font-bold text-amber-700 underline">
-            godesi.com/events/{NYE_SLUG}#sponsor
-          </Link>
-        </p>
-      </Section>
+      <div className="grid gap-5 md:grid-cols-2 print:grid-cols-2">
+        <section className="flex min-w-0 break-inside-avoid flex-col overflow-hidden rounded-3xl border-4 border-amber-400 bg-white shadow-md print:rounded-xl print:shadow-none">
+          <div className="bg-gradient-to-b from-blue-800 to-blue-900 p-5 text-center text-white">
+            <h2 className="break-words text-2xl font-black">Starter Partnership</h2>
+            <p className="mt-0.5 text-sm font-semibold italic text-blue-100">
+              Elite Marketing + Website
+            </p>
+            <p className="mx-auto mt-3 inline-block rounded-xl bg-amber-300 px-6 py-1 text-4xl font-black text-blue-950">
+              {usd(PARTNER_PACKAGE.priceUsd)}
+            </p>
+          </div>
+          <div className="flex flex-1 flex-col gap-4 p-5 print:gap-2 print:p-3">
+            <Benefits items={STARTER_BENEFITS} tone="blue" />
+            <div className="flex items-center gap-3 rounded-2xl bg-amber-100 p-3">
+              <span aria-hidden className="text-3xl">🎟️</span>
+              <p className="min-w-0 text-sm text-slate-800">
+                <strong className="block text-base text-slate-900">
+                  2 Complimentary New Year&apos;s Eve Tickets
+                </strong>
+                as a valued partner
+              </p>
+            </div>
+            <Link
+              href={`/advertise/proposal?tier=${PARTNER_PACKAGE.tier}#pay`}
+              className="mt-auto block rounded-xl bg-blue-800 px-5 py-3 text-center text-base font-black text-white hover:bg-blue-900 print:hidden"
+            >
+              💳 Get Starter — {usd(PARTNER_PACKAGE.priceUsd)}
+            </Link>
+          </div>
+        </section>
 
-      <Section number={2} title="Website Packages">
-        <div className="grid gap-3 sm:grid-cols-2 print:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="font-black text-slate-900">
-              {usd(WEBSITE_OFFER.priceUsd)} — AI-built website
+        <section className="flex min-w-0 break-inside-avoid flex-col overflow-hidden rounded-3xl border-4 border-amber-400 bg-white shadow-md print:rounded-xl print:shadow-none">
+          <div className="bg-gradient-to-b from-red-700 to-red-900 p-5 text-center text-white">
+            <h2 className="break-words text-2xl font-black">Premium Partnership</h2>
+            <p className="mt-0.5 text-sm font-semibold italic text-red-100">
+              Complete Elite + VIP Sponsorship
             </p>
-            <p className="mt-1">
-              A professional website for your business, built fast with AI.
+            <p className="mx-auto mt-3 inline-block rounded-xl bg-amber-300 px-6 py-1 text-4xl font-black text-red-900">
+              {usd(PREMIUM_PARTNER_PACKAGE.priceUsd)}
             </p>
           </div>
-          <div className="rounded-xl border border-amber-300 bg-amber-50/60 p-3">
-            <p className="font-black text-slate-900">$500 — Custom website</p>
-            <Bullets
-              items={[
-                "AI chatbot that answers your customers",
-                "SEO so customers find you on Google",
-                "Dynamic pages that pull in your videos and social content",
-                "Client review and revisions included",
-              ]}
-            />
+          <div className="flex flex-1 flex-col gap-4 p-5 print:gap-2 print:p-3">
+            <p className="text-sm font-black text-red-700">
+              Everything in the {usd(PARTNER_PACKAGE.priceUsd)} package, PLUS:
+            </p>
+            <Benefits items={PREMIUM_BENEFITS} tone="red" />
+            <div className="rounded-2xl bg-red-800 p-3 text-center text-white">
+              <p className="text-xs font-bold uppercase tracking-wide text-amber-300">
+                Total party guests
+              </p>
+              <p className="text-sm">
+                <span className="text-3xl font-black">12</span> (2 complimentary + 10 additional)
+              </p>
+            </div>
+            <Link
+              href={`/advertise/proposal?tier=${PREMIUM_PARTNER_PACKAGE.tier}#pay`}
+              className="mt-auto block rounded-xl bg-red-700 px-5 py-3 text-center text-base font-black text-white hover:bg-red-800 print:hidden"
+            >
+              💳 Get Premium — {usd(PREMIUM_PARTNER_PACKAGE.priceUsd)}
+            </Link>
           </div>
+        </section>
+      </div>
+
+      <ul className="grid break-inside-avoid grid-cols-2 gap-2 rounded-2xl bg-blue-950 p-4 text-center text-white sm:grid-cols-5 print:grid-cols-5 print:p-2">
+        {HIGHLIGHTS.map((highlight) => (
+          <li key={highlight.label} className="min-w-0 break-words text-sm font-bold print:text-xs">
+            <span aria-hidden className="block text-2xl">
+              {highlight.icon}
+            </span>
+            {highlight.label}
+          </li>
+        ))}
+      </ul>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-black text-slate-900">What each package is worth</h2>
+        <div className="grid gap-4 md:grid-cols-2 print:grid-cols-2">
+          <ValueTable
+            title={`Starter Partnership — ${usd(PARTNER_PACKAGE.priceUsd)}`}
+            rows={starterRows}
+            price={PARTNER_PACKAGE.priceUsd}
+          />
+          <ValueTable
+            title={`Premium Partnership — ${usd(PREMIUM_PARTNER_PACKAGE.priceUsd)}`}
+            rows={premiumRows}
+            price={PREMIUM_PARTNER_PACKAGE.priceUsd}
+          />
         </div>
-        <p>
-          More:{" "}
-          <Link href="/website" className="font-bold text-amber-700 underline">
-            godesi.com/website
+        <p className="text-xs text-slate-500">
+          Values are our regular prices when bought separately: GoDesi Elite interview, Featured
+          profile, 12-month small banner and AI website, plus New Year&apos;s Eve tickets at
+          today&apos;s prices on the{" "}
+          <Link href={`/events/${NYE_SLUG}`} className="underline">
+            event page
           </Link>
+          . Services marked &ldquo;Included&rdquo; aren&apos;t sold separately, so they aren&apos;t
+          counted in the retail value. {PARTNER_HOSTING_NOTE}
         </p>
-      </Section>
-
-      <Section number={3} title="Sidebar Banner on GoDesi.com">
-        <Bullets
-          items={[
-            "Your banner in the GoDesi.com sidebar, linking straight to your website.",
-            <>
-              <strong>Free for 1 year</strong> with any party sponsorship.
-            </>,
-          ]}
-        />
-      </Section>
-
-      <Section number={4} title="Podcast & GoDesi Elite Interview">
-        <Bullets
-          items={[
-            "A weekly podcast slot — record in our studio or remotely.",
-            <>
-              Your GoDesi Elite interview, published with a 30–60 second video
-              in the{" "}
-              <Link href="/desi-elite" className="font-bold text-amber-700 underline">
-                GoDesi Elite
-              </Link>{" "}
-              section.
-            </>,
-            <>
-              Launch offer: <strong>$250 for 5 years</strong> (normally $500 a
-              year).
-            </>,
-            "Help launching your own channel.",
-          ]}
-        />
-      </Section>
-
-      <Section number={5} title="Quarterly Magazine Ad">
-        <Bullets
-          items={[
-            "Distributed by Mandarin Media to about 100 premium families — past and present clients of broker Anil Aggarwal.",
-            <>
-              Business-card-size ad on the back page: about $5 per magazine,{" "}
-              <strong>$250 for 50 magazines</strong>.
-            </>,
-          ]}
-        />
-      </Section>
+      </section>
 
       <section className="break-inside-avoid rounded-2xl border-2 border-amber-400 bg-amber-50/60 p-5 print:rounded-xl print:p-4">
-        <h2 className="flex items-start gap-2 text-lg font-black text-slate-900">
-          <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-600 text-sm font-black text-white">
-            6
-          </span>
-          <span className="min-w-0 break-words">GoDesi Partner Package</span>
-        </h2>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-0 text-left text-sm">
-            <thead>
-              <tr className="border-b border-amber-300 text-xs uppercase tracking-wide text-slate-500">
-                <th className="py-2 pr-3">What you get</th>
-                <th className="py-2 text-right">Normally</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PACKAGE_ROWS.map((row) => (
-                <tr key={row.item} className="border-b border-amber-200">
-                  <td className="break-words py-2 pr-3 text-slate-700">{row.item}</td>
-                  <td className="whitespace-nowrap py-2 text-right font-semibold text-slate-700">
-                    {row.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-b border-amber-300">
-                <td className="py-2 pr-3 font-bold text-slate-900">Total value</td>
-                <td className="py-2 text-right font-bold text-slate-500 line-through">
-                  $1,848
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 pr-3 text-base font-black text-slate-900">
-                  Partner price
-                </td>
-                <td className="py-2 text-right text-2xl font-black text-amber-700">
-                  {usd(PARTNER_PACKAGE.priceUsd)}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        <p className="mt-2 text-xs text-slate-600">
-          {PARTNER_HOSTING_NOTE}
+        <h2 className="text-lg font-black text-slate-900">Want a customized sponsorship?</h2>
+        <p className="mt-1 text-sm text-slate-700">
+          Need more tables, a bigger brand presence or a package built around your business?
+          Tell us what you have in mind and we&apos;ll put it together.
         </p>
-        <p className="mt-1 text-xs text-slate-600">
-          Silver, Gold and Platinum party sponsorships are available
-          separately — and any sponsorship adds the GoDesi.com sidebar banner
-          free for 1 year.
+        <div className="mt-3 flex flex-wrap gap-2 print:hidden">
+          <a
+            href={SALES_MAILTO("Customized GoDesi sponsorship inquiry")}
+            className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-700"
+          >
+            ✉️ Email {SITE.salesEmail}
+          </a>
+          <a
+            href={PHONE_HREF}
+            className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
+          >
+            📞 Call {PHONE}
+          </a>
+        </div>
+        <p className="mt-2 hidden text-sm font-bold text-slate-900 print:block">
+          Email {SITE.salesEmail} · Call {PHONE} · Secure your partnership at godesi.com/proposal
         </p>
-        <div className="mt-4 rounded-xl bg-slate-900 p-4 text-center text-white">
-          <p className="text-lg font-black">Ready to grow with GoDesi?</p>
-          <p className="mt-1 text-sm">
-            Call{" "}
-            <a href={PHONE_HREF} className="font-bold text-amber-300 underline">
-              {PHONE}
-            </a>{" "}
-            or reply by email to{" "}
-            <a
-              href={`mailto:${SITE.salesEmail}?subject=${encodeURIComponent("GoDesi Partner Package")}`}
-              className="font-bold text-amber-300 underline"
-            >
-              {SITE.salesEmail}
-            </a>
-          </p>
-          <p className="mt-1 hidden text-sm print:block">
-            Or pay online at{" "}
-            <span className="font-bold text-amber-300">godesi.com/advertise/proposal</span>
-          </p>
-        </div>
-        <div id="pay" className="mt-4 scroll-mt-24 rounded-xl border border-amber-300 bg-white p-4 print:hidden">
-          <p className="text-lg font-black text-slate-900">
-            Pay {usd(PARTNER_PACKAGE.priceUsd)} online and get started
-          </p>
-          <p className="mb-3 mt-1 text-sm text-slate-600">
-            Fill this in and pay securely by card. We&apos;ll call you within 1–2 business days.
-          </p>
-          <PartnerPackageForm price={PARTNER_PACKAGE.priceUsd} />
-        </div>
+      </section>
+
+      <section
+        id="pay"
+        className="scroll-mt-24 rounded-2xl border border-amber-300 bg-white p-5 shadow-sm print:hidden"
+      >
+        <h2 className="text-lg font-black text-slate-900">Secure your partnership online</h2>
+        <p className="mb-3 mt-1 text-sm text-slate-600">
+          Pick your package, fill this in and pay securely by card. We&apos;ll call you within 1–2
+          business days.
+        </p>
+        <PartnerPackageForm
+          key={searchParams.tier ?? "starter"}
+          tiers={tierOptions}
+          defaultTier={searchParams.tier}
+        />
       </section>
     </div>
   );

@@ -4,10 +4,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { ActionState } from "@/lib/actions";
 import { siteUrl } from "@/lib/format";
-import { PARTNER_PACKAGE } from "@/lib/partnerPackage";
+import { PARTNER_PACKAGES, PARTNER_TIERS } from "@/lib/partnerPackage";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 const schema = z.object({
+  tier: z.enum(PARTNER_TIERS).default("starter"),
   business: z.string().trim().min(2, "Enter your business name").max(100),
   name: z.string().trim().min(2, "Enter your name").max(80),
   email: z.string().trim().email("Enter a valid email").max(120),
@@ -26,12 +27,14 @@ export async function startPartnerPackageCheckout(
     return { error: "Card payments are down right now — please call 732-877-8585." };
   }
   const data = parsed.data;
+  const pkg = PARTNER_PACKAGES[data.tier];
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     customer_email: data.email,
     metadata: {
       kind: "partner-package",
+      tier: data.tier,
       business: data.business,
       name: data.name,
       phone: data.phone,
@@ -42,15 +45,15 @@ export async function startPartnerPackageCheckout(
         quantity: 1,
         price_data: {
           currency: "usd",
-          unit_amount: PARTNER_PACKAGE.priceUsd * 100,
+          unit_amount: pkg.priceUsd * 100,
           product_data: {
-            name: `${PARTNER_PACKAGE.name} — ${data.business}`,
-            description: PARTNER_PACKAGE.description,
+            name: `${pkg.name} — ${data.business}`,
+            description: pkg.description,
           },
         },
       },
     ],
-    success_url: `${siteUrl()}/advertise/proposal?paid=1`,
+    success_url: `${siteUrl()}/advertise/proposal?paid=${data.tier}`,
     cancel_url: `${siteUrl()}/advertise/proposal#pay`,
   });
 

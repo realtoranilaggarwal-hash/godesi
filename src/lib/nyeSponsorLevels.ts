@@ -1,6 +1,6 @@
 /**
  * The NYE 2027 party's sponsor levels. scripts/update-nye-2027-edison.ts writes
- * these perks to the event's tiers and /proposal prints them, so both always match.
+ * these perks to the event's tiers.
  */
 export const NYE_2027_EVENT_SLUG = "new-year-eves-party-2027-edison";
 
