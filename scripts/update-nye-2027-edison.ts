@@ -11,7 +11,7 @@
 import type { BannerSlot } from "@prisma/client";
 import { db } from "@/lib/db";
 import { HIDE_SEATS_LEFT_TAG } from "@/lib/events";
-import { NYE_2027_EVENT_SLUG, nyeSponsorLevel } from "@/lib/nyeSponsorLevels";
+import { NYE_2027_EVENT_SLUG } from "@/lib/nyeSponsorLevels";
 
 const SLUG = NYE_2027_EVENT_SLUG;
 const FLYER = "https://godesi.com/flyers/nye-2027-grand-party.jpg";
@@ -28,7 +28,7 @@ const DESCRIPTION = [
   "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Police / security and free valet parking. Hotel rooms available.",
   "Till Nov 30: Couple $180, Adult (18+) $95, Big Kid (9–17) $80, Small Kid (0–8) $65. From Dec 1: Couple $250, Adult (18+) $150, Big Kid (9–17) $90, Small Kid (0–8) $75. VIP Table for 12 — one reserved VIP table, seats 12, with a bottle of champagne on the table (only 5 tables): $1200 till Nov 30, $2000 from Dec 1. Every ticket includes the elegant seated dining experience, 35 food items in the Plaza Hall and premium drinks until midnight. Balcony $75 till Nov 30, $100 from Dec 1 — adults, chair only, all inclusive, limited seats, first come, first served, no table seating.",
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
-  "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
+  "Sponsors welcome: the $500 Starter and $2,000 Premium partnerships, plus single add-ons — GoDesi.com/sponsor2027.",
 ].join("\n\n");
 
 /**
@@ -82,9 +82,6 @@ const TIERS: TierSpec[] = [
   { name: "Small Kid (0–8)", match: ["Kids (0–8)"], price: 75, seats: 10, salesStart: LATE_START },
   { name: "VIP Table for 12 with champagne", note: "12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 2000, seats: 5, salesStart: LATE_START, admits: 12, stockGroup: "vip-table" },
   { name: "Balcony — first come, first served, no table seating", note: BALCONY_NOTE, price: 100, seats: 50, salesStart: LATE_START, stockGroup: "balcony" },
-  { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
-  { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
-  { kind: "SPONSOR", ...nyeSponsorLevel("Platinum sponsor"), seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200 },
   { kind: "SPONSOR", name: "Standee sponsor", price: 350, seats: 2, admits: 2, bannerMonths: 12, perks: ["Your standee at the entrance", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "Banner inside the hall", price: 300, seats: 4, admits: 2, bannerMonths: 12, perks: ["Your banner inside the Big Ball Room", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "LED screen logo or clip", price: 500, seats: 3, admits: 2, bannerMonths: 12, perks: ["Your logo or video clip on the LED screen", "2 tickets included", BANNER_YEAR] },
