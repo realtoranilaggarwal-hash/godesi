@@ -89,11 +89,11 @@ export default async function MyCouponsPage() {
         <Card id="send-comp-tickets">
           <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
           <p className="mb-3 text-sm text-slate-500">
-            Premium members can email a buyer a one-use code for exact tickets
+            Featured (Premium) members can email a buyer a one-use code for exact tickets
             (e.g. 1 Couple + 1 Kid free), limit any code to set tickets, and see
             who booked with each code.
           </p>
-          <LinkButton href="/upgrade">Upgrade to Premium</LinkButton>
+          <LinkButton href="/upgrade">Upgrade to Featured (Premium)</LinkButton>
         </Card>
       ) : compEvents.length ? (
         <Card id="send-comp-tickets">

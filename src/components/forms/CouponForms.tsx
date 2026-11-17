@@ -264,7 +264,7 @@ export function EventCouponForm({
               Want a code that covers only set tickets, e.g. 3 Adult or 1
               Couple, and charges anything extra?{" "}
               <a href="/upgrade" className="font-semibold underline">
-                Upgrade to Premium
+                Upgrade to Featured (Premium)
               </a>
               .
             </p>

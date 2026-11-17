@@ -158,7 +158,7 @@ export async function createEventCouponAction(
     const tiers = parseTierLimits(formData, event.tiers);
     if ("error" in tiers) return { error: tiers.error };
     if (tiers.limits.length && !hasPremiumCoupons(user)) {
-      return { error: "Limiting a code to set tickets is a Premium feature." };
+      return { error: "Limiting a code to set tickets needs the Featured (Premium) plan." };
     }
 
     const code = normalizeCouponCode(parsed.data.code);
@@ -228,7 +228,7 @@ export async function sendCompTicketsAction(
   try {
     const user = await requireUser();
     if (!hasPremiumCoupons(user)) {
-      return { error: "Sending comp tickets is a Premium feature." };
+      return { error: "Sending comp tickets needs the Featured (Premium) plan." };
     }
     const parsed = compSchema.safeParse({
       eventId: formData.get("eventId") ?? undefined,
