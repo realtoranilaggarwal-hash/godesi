@@ -47,7 +47,10 @@ const CLIPS: Record<string, ClipSeed> = {
     title: "Hire a desi expert from $5",
     url: "https://youtube.com/shorts/twW83QrB_b0",
   },
-  "section:events": { title: "Desi events near you", url: "" },
+  "section:events": {
+    title: "Desi events near you",
+    url: "https://youtube.com/shorts/h-UFiA5wN5c",
+  },
   "section:festivals": {
     title: "Promote your festival event",
     url: "https://youtube.com/shorts/BSlRup0hcqw",
@@ -66,7 +69,7 @@ const CLIPS: Record<string, ClipSeed> = {
   },
   "religious-services-temples-and-trusts": {
     title: "Temples near you",
-    url: "",
+    url: "https://youtube.com/shorts/RKkARqMe_Eg",
   },
   "religious-services-astrologers": {
     title: "Consult expert astrologers",
