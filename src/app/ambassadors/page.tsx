@@ -159,7 +159,7 @@ export default function AmbassadorProposalPage() {
               New Year&apos;s Eve Party Ambassador
             </h2>
             <p className="mt-0.5 text-sm font-semibold italic text-fuchsia-100">
-              Ticket sales program · run by NewYearEvesParty.com
+              Ticket sales program · newyearevesparty.com/ambassadors
             </p>
           </div>
           <div className="flex flex-1 flex-col gap-4 p-5 print:gap-2 print:p-3">
