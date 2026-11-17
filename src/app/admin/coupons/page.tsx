@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { CouponForm } from "@/components/forms/CouponForms";
+import {
+  CouponForm,
+  SendCompTicketsForm,
+} from "@/components/forms/CouponForms";
+import { compEventOptions } from "@/lib/compTickets";
 import { toggleCouponAction } from "@/app/actions/coupons";
 import { generateFreeCourseCodeAction } from "@/app/actions/course";
 import { FREE_CODE_PROVIDER } from "@/lib/courseCodes";
@@ -120,6 +124,15 @@ export default async function Page({
           ) : null}
         </ul>
       </Card>
+      <Card id="send-comp-tickets">
+        <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          For Zelle/cash buyers and guests: pick the event and tickets, and the
+          buyer gets an email with a one-use code that makes exactly those
+          tickets free.
+        </p>
+        <SendCompTicketsForm events={compEventOptions(ticketEvents)} />
+      </Card>
       <Card id="discount-coupons">
         <h2 className="mb-1 text-lg font-bold">Discount coupons</h2>
         <p className="mb-3 text-sm text-slate-500">
@@ -129,20 +142,7 @@ export default async function Page({
           years), or both. Everyone who used a code is listed under it, so you
           can see which caller closed which client.
         </p>
-        <CouponForm
-          events={ticketEvents.map((event) => ({
-            id: event.id,
-            title: event.title,
-            date: event.startsAt.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-              timeZone: "America/New_York",
-            }),
-            currency: event.currency,
-            tiers: event.tiers,
-          }))}
-        />
+        <CouponForm events={compEventOptions(ticketEvents)} />
         <ul className="mt-5 divide-y divide-slate-100 border-t border-slate-100 text-sm">
           {coupons.map((coupon) => (
             <li

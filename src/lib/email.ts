@@ -192,3 +192,45 @@ export function ticketEmail({
     ),
   };
 }
+
+/** Comp tickets an organiser sends a buyer: a one-use code that makes the listed tickets free. */
+export function compTicketEmail({
+  name,
+  eventTitle,
+  eventSlug,
+  items,
+  code,
+  fixedAmount,
+}: {
+  name: string;
+  eventTitle: string;
+  eventSlug: string;
+  /** e.g. ["1 × Couple", "1 × Small Kid"] */
+  items: string[];
+  code: string;
+  /** Set for fixed-amount codes, e.g. "$175": that much comes off instead of the tickets being free. */
+  fixedAmount?: string;
+}) {
+  const url = `${siteUrl()}/events/${eventSlug}`;
+  const title = escapeHtml(eventTitle);
+  const list = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  const benefit = fixedAmount
+    ? `${escapeHtml(fixedAmount)} comes off your order`
+    : "those tickets will be free";
+  return {
+    subject: `Your tickets for ${eventTitle} are ready`,
+    html: shell(
+      `Your tickets for ${title} are ready 🎉`,
+      `<p style="margin:0 0 12px;color:#334155">Hi ${escapeHtml(name)},</p>
+       <ol style="margin:0 0 16px;padding-left:20px;color:#334155;line-height:1.6">
+         <li>Log in at <a href="${siteUrl()}/login" style="color:#4f46e5">${siteUrl().replace(/^https?:\/\//, "")}</a> (sign up free with this email if you're new).</li>
+         <li>Open the event: <a href="${url}" style="color:#4f46e5">${title}</a>.</li>
+         <li>Select <ul style="margin:4px 0;padding-left:18px">${list}</ul></li>
+         <li>Enter code <strong style="font-size:16px;letter-spacing:1px">${escapeHtml(code)}</strong> at checkout — ${benefit}.</li>
+       </ol>
+       <p style="margin:0 0 16px;color:#334155">Your QR passes arrive by email right after you book.</p>
+       <p style="margin:0"><a href="${url}" style="display:inline-block;background:#4f46e5;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none">Open the event</a></p>
+       <p style="margin:16px 0 0;font-size:13px;color:#64748b">The code works once. Any extra tickets you add are charged at the normal price.</p>`,
+    ),
+  };
+}

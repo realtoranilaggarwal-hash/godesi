@@ -4,7 +4,11 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { describeCoupon } from "@/lib/coupons";
 import { toggleCouponAction } from "@/app/actions/coupons";
-import { EventCouponForm } from "@/components/forms/CouponForms";
+import {
+  EventCouponForm,
+  SendCompTicketsForm,
+} from "@/components/forms/CouponForms";
+import { compEventOptions } from "@/lib/compTickets";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +22,16 @@ export default async function MyCouponsPage() {
     db.event.findMany({
       where: { organizerId: user.id },
       orderBy: { startsAt: "desc" },
-      select: { id: true, title: true },
+      select: {
+        id: true,
+        title: true,
+        startsAt: true,
+        currency: true,
+        tiers: {
+          orderBy: { sortOrder: "asc" },
+          select: { id: true, name: true, price: true },
+        },
+      },
     }),
     db.coupon.findMany({
       where: { createdById: user.id },
@@ -26,6 +39,10 @@ export default async function MyCouponsPage() {
       include: { event: { select: { title: true } } },
     }),
   ]);
+
+  const compEvents = compEventOptions(
+    events.filter((event) => event.startsAt.getTime() >= Date.now() - 2 * 86_400_000),
+  );
 
   return (
     <div className="space-y-5">
@@ -43,7 +60,9 @@ export default async function MyCouponsPage() {
           Each customer can use a code once.
         </p>
         {events.length ? (
-          <EventCouponForm events={events} />
+          <EventCouponForm
+            events={events.map((event) => ({ id: event.id, title: event.title }))}
+          />
         ) : (
           <EmptyState
             title="No events yet"
@@ -52,6 +71,18 @@ export default async function MyCouponsPage() {
           />
         )}
       </Card>
+
+      {compEvents.length ? (
+        <Card id="send-comp-tickets">
+          <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
+          <p className="mb-3 text-sm text-slate-500">
+            Paid by Zelle or cash, or a guest? Pick the tickets, and we email the
+            buyer a one-use code that makes exactly those tickets free. Their QR
+            passes arrive when they book with it.
+          </p>
+          <SendCompTicketsForm events={compEvents} />
+        </Card>
+      ) : null}
 
       <Card>
         <h2 className="mb-3 text-lg font-bold">Your codes</h2>
