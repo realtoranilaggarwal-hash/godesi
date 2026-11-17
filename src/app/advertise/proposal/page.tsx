@@ -28,10 +28,15 @@ const PHONE_HREF = "tel:+17328778585";
 const SALES_MAILTO = (subject: string) =>
   `mailto:${SITE.salesEmail}?subject=${encodeURIComponent(subject)}`;
 
-/** Fallbacks are the party's till-Dec-15 prices, used if the event can't be read. */
-const FALLBACK_NYE_PRICES = { adult: 95, vipTable: 1080 };
+/** Fallback is the party's till-Dec-15 adult price, used if the event can't be read. */
+const FALLBACK_NYE_PRICES = { adult: 95 };
 
-/** The adult ticket and VIP table prices on sale right now on the party's event page. */
+/** Premium's VIP table value: $1,500 through Dec 15 (Eastern), $2,500 after. */
+const VIP_TABLE_VALUE = { early: 1500, regular: 2500, earlyEnds: new Date("2026-12-16T05:00:00Z") };
+const SUPPORTERS_BANNER_VALUE = 300;
+const PROMO_VIDEO_VALUE = 50;
+
+/** The adult ticket price on sale right now on the party's event page. */
 const nyePrices = cachedQuery("proposal-nye-prices", 3600, async () => {
   const event = await db.event.findUnique({
     where: { slug: NYE_SLUG },
@@ -54,7 +59,6 @@ const nyePrices = cachedQuery("proposal-nye-prices", 3600, async () => {
   };
   return {
     adult: lowest(/^adults?\b/i) ?? FALLBACK_NYE_PRICES.adult,
-    vipTable: lowest(/^vip table/i) ?? FALLBACK_NYE_PRICES.vipTable,
   };
 });
 
@@ -214,19 +218,22 @@ export default async function ProposalPage({
     { item: "320 × 100 side banner, rotating on GoDesi, 12 months", value: bannerValue },
     { item: "AI-enabled, SEO-friendly business website", value: WEBSITE_OFFER.priceUsd },
     { item: "DesiWho'sWho.com directory listing", value: null },
-    { item: "10-second promotional video", value: null },
+    { item: "10-second promotional video", value: PROMO_VIDEO_VALUE },
   ];
   const starterRows: ValueRow[] = [
     ...starterServices,
     { item: `2 New Year's Eve party tickets (2 × ${usd(prices.adult)})`, value: prices.adult * 2 },
   ];
+  const vipEarly = Date.now() < VIP_TABLE_VALUE.earlyEnds.getTime();
   const premiumRows: ValueRow[] = [
     ...starterServices,
     {
-      item: "VIP table for 12 guests (your 2 complimentary tickets + 10 additional VIP seats)",
-      value: prices.vipTable,
+      item: vipEarly
+        ? `VIP table for 12 guests (your 2 complimentary tickets + 10 additional VIP seats) — till Dec 15, then ${usd(VIP_TABLE_VALUE.regular)}`
+        : "VIP table for 12 guests (your 2 complimentary tickets + 10 additional VIP seats)",
+      value: vipEarly ? VIP_TABLE_VALUE.early : VIP_TABLE_VALUE.regular,
     },
-    { item: "Logo, picture & website on the event supporters banner", value: null },
+    { item: "Logo, picture & website on the event supporters banner", value: SUPPORTERS_BANNER_VALUE },
     { item: "Personalized company placard on your table", value: null },
     { item: "Personalized 10% ticket discount code for your clients", value: null },
     { item: "Additional event sponsor recognition", value: null },
@@ -380,8 +387,8 @@ export default async function ProposalPage({
         </div>
         <p className="text-xs text-slate-500">
           Values are our regular prices when bought separately: GoDesi Elite interview, Featured
-          profile, 12-month small banner and AI website, plus New Year&apos;s Eve tickets at
-          today&apos;s prices on the{" "}
+          profile, 12-month small banner, AI website, promotional video, VIP table and supporters
+          banner, plus New Year&apos;s Eve tickets at today&apos;s prices on the{" "}
           <Link href={`/events/${NYE_SLUG}`} className="underline">
             event page
           </Link>
