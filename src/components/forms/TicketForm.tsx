@@ -322,7 +322,7 @@ export function TicketForm({
                   href={promoCodesHref}
                   className="mt-1 inline-block text-sm font-bold text-amber-700 underline"
                 >
-                  🎟️ Click here to find promo codes
+                  🎟️ How to get a sponsor discount code
                 </a>
               ) : null}
             </Field>

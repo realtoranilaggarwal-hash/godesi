@@ -12,6 +12,8 @@ import { siteUrl, toMinor } from "@/lib/format";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { awardPoints } from "@/lib/rewardsQueries";
 import { REVIEW_SOURCES } from "@/lib/reviewSources";
+import { escapeHtml, sendEmail, shell } from "@/lib/email";
+import { sponsorCodesForBusiness } from "@/lib/sponsors";
 
 const reviewSchema = z.object({
   businessId: z.string().min(1),
@@ -85,6 +87,17 @@ export async function createReviewAction(
     });
 
     revalidatePath(`/business/${business.slug}`);
+
+    const codes = await sponsorCodesForBusiness(business.id);
+    if (codes.length) {
+      await emailSponsorCodes(user.email, business.name, codes);
+      const list = codes
+        .map((c) => `${c.code} (${c.label}, ${c.eventTitle})`)
+        .join("; ");
+      return {
+        success: `Thanks for your review! Your ticket code: ${list}. We've emailed it to you too.`,
+      };
+    }
     return { success: "Thanks for your review!" };
   } catch (error) {
     return fieldError(error);
@@ -281,7 +294,8 @@ export async function addOffsiteReviewAction(
 
     const slug = parsed.data.businessSlug.trim().replace(/^.*\/b\//, "");
     const business = await db.business.findUnique({ where: { slug } });
-    if (!business) return { error: `No business page found at /business/${slug}.` };
+    if (!business)
+      return { error: `No business page found at /business/${slug}.` };
 
     if (/\+?\d[\d\s()-]{7,}/.test(parsed.data.comment)) {
       return {
@@ -307,4 +321,20 @@ export async function addOffsiteReviewAction(
   } catch (error) {
     return fieldError(error);
   }
+}
+
+async function emailSponsorCodes(
+  to: string,
+  businessName: string,
+  codes: Awaited<ReturnType<typeof sponsorCodesForBusiness>>,
+) {
+  const subject = "Your ticket discount code";
+  const rows = codes
+    .map(
+      (c) =>
+        `<p style="margin:0 0 12px"><b style="font-family:monospace;font-size:18px;color:#047857">${escapeHtml(c.code)}</b><br />${escapeHtml(c.label)} for <a href="${siteUrl()}/events/${c.eventSlug}">${escapeHtml(c.eventTitle)}</a></p>`,
+    )
+    .join("");
+  const body = `<p style="margin:0 0 12px">Thanks for reviewing ${escapeHtml(businessName)} on GoDesi. Here is your code. Enter it at checkout when you buy tickets.</p>${rows}`;
+  await sendEmail({ to, subject, html: shell(subject, body) });
 }

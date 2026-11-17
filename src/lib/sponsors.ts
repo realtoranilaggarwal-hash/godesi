@@ -60,3 +60,51 @@ export function sponsorDiscountLabel(sponsor: EventSponsorRow) {
         " ",
       );
 }
+
+const liveCoupon = () => ({
+  active: true,
+  OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+});
+
+/** Live sponsor ticket codes a business hands out for its upcoming events. */
+export async function sponsorCodesForBusiness(businessId: string) {
+  const rows = await db.eventSponsor.findMany({
+    where: {
+      businessId,
+      status: "APPROVED",
+      coupon: { is: liveCoupon() },
+      event: { status: "APPROVED", startsAt: { gte: new Date() } },
+    },
+    orderBy: { event: { startsAt: "asc" } },
+    select: {
+      ...sponsorSelect,
+      event: { select: { title: true, slug: true } },
+    },
+  });
+  return rows.flatMap((row) =>
+    row.coupon
+      ? [
+          {
+            code: row.coupon.code,
+            label: sponsorDiscountLabel(row) ?? "a ticket discount",
+            eventTitle: row.event.title,
+            eventSlug: row.event.slug,
+          },
+        ]
+      : [],
+  );
+}
+
+/** The approved sponsor whose live code this is, for checkout on network sites. */
+export function sponsorForCode(eventSlug: string, code: string) {
+  return db.eventSponsor.findFirst({
+    where: {
+      status: "APPROVED",
+      event: { slug: eventSlug, status: "APPROVED" },
+      coupon: {
+        is: { ...liveCoupon(), code: { equals: code, mode: "insensitive" } },
+      },
+    },
+    select: sponsorSelect,
+  });
+}
