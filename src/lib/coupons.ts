@@ -36,9 +36,12 @@ export function couponTierLimits(
   return coupon.tierLimits.flatMap((item) => {
     if (!item || typeof item !== "object" || Array.isArray(item)) return [];
     const { tierId, name, maxQuantity } = item as Record<string, unknown>;
-    if (typeof tierId !== "string" || typeof maxQuantity !== "number") return [];
+    if (typeof tierId !== "string" || typeof maxQuantity !== "number")
+      return [];
     if (!Number.isInteger(maxQuantity) || maxQuantity < 1) return [];
-    return [{ tierId, name: typeof name === "string" ? name : "", maxQuantity }];
+    return [
+      { tierId, name: typeof name === "string" ? name : "", maxQuantity },
+    ];
   });
 }
 
@@ -51,7 +54,8 @@ export function describeTierLimits(limits: CouponTierLimit[]) {
 /** Stands in for the tier id of an event's plain ticket (events without ticket types). */
 export const BASE_TICKET_ID = "base";
 
-const lineTierId = (line: { tierId: string | null }) => line.tierId ?? BASE_TICKET_ID;
+const lineTierId = (line: { tierId: string | null }) =>
+  line.tierId ?? BASE_TICKET_ID;
 
 export type CouponTicketLine = {
   tierId: string | null;
@@ -289,22 +293,35 @@ export async function loadCompEvents(where: Prisma.EventWhereInput) {
       price: true,
       tiers: {
         orderBy: { sortOrder: "asc" },
-        where: { kind: { not: "SPONSOR" } },
-        select: { id: true, name: true, price: true, salesStart: true, salesEnd: true },
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          salesStart: true,
+          salesEnd: true,
+          kind: true,
+        },
       },
     },
   });
-  return events.map((event) => ({
-    id: event.id,
-    title: event.title,
-    currency: event.currency,
-    tiers: event.tiers.length
-      ? event.tiers.map((tier) => ({
-          id: tier.id as string | null,
-          name: tier.name,
-          price: tier.price,
-          onSale: tierOnSale(tier),
-        }))
-      : [{ id: null, name: "Ticket", price: event.price, onSale: true }],
-  }));
+  /** Sponsorships check out on their own form, so comps cover entry tickets only. */
+  return events.flatMap((event) => {
+    const entryTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
+    if (event.tiers.length && !entryTiers.length) return [];
+    return [
+      {
+        id: event.id,
+        title: event.title,
+        currency: event.currency,
+        tiers: entryTiers.length
+          ? entryTiers.map((tier) => ({
+              id: tier.id as string | null,
+              name: tier.name,
+              price: tier.price,
+              onSale: tierOnSale(tier),
+            }))
+          : [{ id: null, name: "Ticket", price: event.price, onSale: true }],
+      },
+    ];
+  });
 }

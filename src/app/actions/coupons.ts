@@ -246,8 +246,7 @@ export async function sendCompTicketsAction(
     const event = await db.event.findUnique({
       where: { id: parsed.data.eventId },
       include: {
-        /** Sponsorships check out on their own form, so comps cover entry tickets only. */
-        tiers: { where: { kind: { not: "SPONSOR" } }, orderBy: { sortOrder: "asc" } },
+        tiers: { orderBy: { sortOrder: "asc" } },
         organizer: { select: { name: true } },
       },
     });
@@ -257,8 +256,12 @@ export async function sendCompTicketsAction(
     if (event.startsAt.getTime() < Date.now())
       return { error: "This event has already ended." };
 
-    const options = event.tiers.length
-      ? event.tiers.map((tier) => ({
+    /** Sponsorships check out on their own form, so comps cover entry tickets only. */
+    const entryTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
+    if (event.tiers.length && !entryTiers.length)
+      return { error: "This event only sells sponsorships, so there are no tickets to send." };
+    const options = entryTiers.length
+      ? entryTiers.map((tier) => ({
           tierId: tier.id as string | null,
           name: tier.name,
           price: tier.price,
