@@ -120,7 +120,7 @@ function Check({ tone }: { tone: "blue" | "red" }) {
 
 function Benefits({ items, tone }: { items: React.ReactNode[]; tone: "blue" | "red" }) {
   return (
-    <ul className="space-y-2 text-sm text-slate-800">
+    <ul className="space-y-2 text-sm text-slate-800 print:space-y-1 print:text-xs">
       {items.map((item, index) => (
         <li key={index} className="flex min-w-0 items-start gap-2">
           <Check tone={tone} />
@@ -146,7 +146,7 @@ function ValueTable({
   return (
     <div className="min-w-0 break-inside-avoid rounded-2xl border border-slate-200 bg-white p-4 shadow-sm print:shadow-none">
       <h3 className="font-black text-slate-900">{title}</h3>
-      <table className="mt-2 w-full text-left text-sm">
+      <table className="mt-2 w-full text-left text-sm print:text-xs">
         <thead>
           <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
             <th className="py-1.5 pr-3">Service</th>
@@ -260,7 +260,7 @@ export default async function ProposalPage({
         </PrintButton>
       </div>
 
-      <header className="rounded-3xl bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 p-6 text-white print:rounded-xl sm:p-8">
+      <header className="rounded-3xl bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 p-6 text-white print:rounded-xl print:p-4 sm:p-8">
         <p className="text-xs font-bold uppercase tracking-widest text-amber-300">
           GoDesi Elite Partnership + New Year&apos;s Eve Sponsorship
         </p>
@@ -300,7 +300,7 @@ export default async function ProposalPage({
               {usd(PARTNER_PACKAGE.priceUsd)}
             </p>
           </div>
-          <div className="flex flex-1 flex-col gap-4 p-5">
+          <div className="flex flex-1 flex-col gap-4 p-5 print:gap-2 print:p-3">
             <Benefits items={STARTER_BENEFITS} tone="blue" />
             <div className="flex items-center gap-3 rounded-2xl bg-amber-100 p-3">
               <span aria-hidden className="text-3xl">🎟️</span>
@@ -330,7 +330,7 @@ export default async function ProposalPage({
               {usd(PREMIUM_PARTNER_PACKAGE.priceUsd)}
             </p>
           </div>
-          <div className="flex flex-1 flex-col gap-4 p-5">
+          <div className="flex flex-1 flex-col gap-4 p-5 print:gap-2 print:p-3">
             <p className="text-sm font-black text-red-700">
               Everything in the {usd(PARTNER_PACKAGE.priceUsd)} package, PLUS:
             </p>
@@ -353,9 +353,9 @@ export default async function ProposalPage({
         </section>
       </div>
 
-      <ul className="grid grid-cols-2 gap-2 rounded-2xl bg-blue-950 p-4 text-center text-white sm:grid-cols-5 print:grid-cols-5">
+      <ul className="grid break-inside-avoid grid-cols-2 gap-2 rounded-2xl bg-blue-950 p-4 text-center text-white sm:grid-cols-5 print:grid-cols-5 print:p-2">
         {HIGHLIGHTS.map((highlight) => (
-          <li key={highlight.label} className="min-w-0 break-words text-sm font-bold">
+          <li key={highlight.label} className="min-w-0 break-words text-sm font-bold print:text-xs">
             <span aria-hidden className="block text-2xl">
               {highlight.icon}
             </span>
