@@ -1,7 +1,14 @@
-import type { Coupon, CouponScope, Plan } from "@prisma/client";
+import type { Coupon, CouponScope, Plan, User } from "@prisma/client";
 import { db } from "@/lib/db";
 import { toMinor } from "@/lib/format";
-import type { TermId } from "@/lib/plans";
+import { effectivePlan, type TermId } from "@/lib/plans";
+
+/** Comp tickets and ticket-type limits on organiser codes are a Premium tool (admins always). */
+export function hasPremiumCoupons(
+  user: Pick<User, "role" | "plan" | "planExpiresAt">,
+) {
+  return user.role === "ADMIN" || effectivePlan(user) === "PREMIUM";
+}
 
 export function normalizeCouponCode(input: string) {
   return input.trim().toUpperCase().replace(/\s+/g, "");
@@ -45,6 +52,24 @@ export function describeTierLimits(limits: CouponTierLimit[]) {
   return limits
     .map((limit) => `${limit.name || "ticket"} ×${limit.maxQuantity}`)
     .join(" + ");
+}
+
+/** Reads the optional `tierMax_<tierId>` boxes of a coupon form (1–10 each, blank = not covered). */
+export function parseTierLimits(
+  formData: FormData,
+  tiers: { id: string; name: string }[],
+): { limits: CouponTierLimit[] } | { error: string } {
+  const limits: CouponTierLimit[] = [];
+  for (const tier of tiers) {
+    const raw = String(formData.get(`tierMax_${tier.id}`) ?? "").trim();
+    if (!raw) continue;
+    const maxQuantity = Number(raw);
+    if (!Number.isInteger(maxQuantity) || maxQuantity < 1 || maxQuantity > 10) {
+      return { error: `Enter 1–10 for ${tier.name}, or leave it blank.` };
+    }
+    limits.push({ tierId: tier.id, name: tier.name, maxQuantity });
+  }
+  return { limits };
 }
 
 export type CouponTicketLine = {

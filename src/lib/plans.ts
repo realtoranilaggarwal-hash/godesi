@@ -144,6 +144,7 @@ export const PLANS: Record<Plan, PlanInfo> = {
       "5 categories in all — your main one plus 4 more",
       "10 news stories a week",
       "Create deals and coupon codes for your customers",
+      "Event comp tickets: email a guest a one-use code for exact tickets (e.g. 1 Couple + 1 Kid free), limit any coupon to set ticket types, and see who booked with each code",
       "Unlock lead contact details",
       "Get ticket money paid straight into your own Stripe account",
       "Analytics dashboard",

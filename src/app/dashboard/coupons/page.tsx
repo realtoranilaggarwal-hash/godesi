@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { describeCoupon } from "@/lib/coupons";
+import { describeCoupon, hasPremiumCoupons } from "@/lib/coupons";
 import { toggleCouponAction } from "@/app/actions/coupons";
 import {
   EventCouponForm,
   SendCompTicketsForm,
 } from "@/components/forms/CouponForms";
-import { compTicketEventOptions } from "@/lib/compTickets";
+import { compEventOptions, compTicketEventOptions } from "@/lib/compTickets";
+import {
+  CouponUses,
+  couponTicketsInclude,
+  withWholeBookings,
+} from "@/components/CouponUses";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -34,13 +39,19 @@ export default async function MyCouponsPage() {
         },
       },
     }),
-    db.coupon.findMany({
+    db.coupon
+      .findMany({
       where: { createdById: user.id },
       orderBy: { createdAt: "desc" },
-      include: { event: { select: { title: true } } },
-    }),
+      include: {
+        event: { select: { title: true } },
+        tickets: couponTicketsInclude,
+      },
+    })
+      .then(withWholeBookings),
   ]);
 
+  const premium = hasPremiumCoupons(user);
   const compEvents = compTicketEventOptions(
     events.filter((event) => event.startsAt.getTime() >= Date.now() - 2 * 86_400_000),
   );
@@ -62,7 +73,8 @@ export default async function MyCouponsPage() {
         </p>
         {events.length ? (
           <EventCouponForm
-            events={events.map((event) => ({ id: event.id, title: event.title }))}
+            events={compEventOptions(events)}
+            canLimitTiers={premium}
           />
         ) : (
           <EmptyState
@@ -73,7 +85,17 @@ export default async function MyCouponsPage() {
         )}
       </Card>
 
-      {compEvents.length ? (
+      {!premium ? (
+        <Card id="send-comp-tickets">
+          <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
+          <p className="mb-3 text-sm text-slate-500">
+            Featured (Premium) members can email a buyer a one-use code for exact tickets
+            (e.g. 1 Couple + 1 Kid free), limit any code to set tickets, and see
+            who booked with each code.
+          </p>
+          <LinkButton href="/upgrade">Upgrade to Featured (Premium)</LinkButton>
+        </Card>
+      ) : compEvents.length ? (
         <Card id="send-comp-tickets">
           <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
           <p className="mb-3 text-sm text-slate-500">
@@ -106,6 +128,7 @@ export default async function MyCouponsPage() {
                       ? ` · expires ${coupon.expiresAt.toLocaleDateString()}`
                       : ""}
                   </p>
+                  <CouponUses coupon={coupon} />
                 </div>
                 <form action={toggleCouponAction}>
                   <input type="hidden" name="id" value={coupon.id} />
