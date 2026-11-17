@@ -58,7 +58,11 @@ export default async function TicketPage({
   const checkedInLabel = ticket.checkedInAt
     ? formatEventDate(ticket.checkedInAt, ticket.event.timeZone)
     : null;
-  const justCheckedIn = searchParams.checkin === "done" && checkedInLabel;
+  /** The green "admit" state is only for the scan that just checked in; a forged ?checkin=done on an older check-in still warns. */
+  const justCheckedIn =
+    searchParams.checkin === "done" &&
+    ticket.checkedInAt &&
+    Date.now() - ticket.checkedInAt.getTime() < 2 * 60 * 1000;
 
   return (
     <div className="mx-auto max-w-md space-y-4">
