@@ -38,15 +38,14 @@ import { ClaimBusinessForm } from "@/components/forms/ClaimBusinessForm";
 import { VideoEmbed } from "@/components/VideoEmbed";
 import { PhotoAlbumGallery } from "@/components/PhotoAlbumGallery";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
-import {
-  InlineBanner,
-  SidebarBanners,
-  SmallBanners,
-} from "@/components/Banners";
+import { InlineBanner, SidebarBanners, SmallBanners } from "@/components/Banners";
 import { HiringChecklist, NeedHelpBox } from "@/components/NeedHelp";
 import { RecommendedLinks } from "@/components/RecommendedLinks";
 import { LogoTile } from "@/components/LogoTile";
-import { BUSINESS_SOCIALS, isMusicSubcategory } from "@/lib/businessSocials";
+import {
+  BUSINESS_SOCIALS,
+  isMusicSubcategory,
+} from "@/lib/businessSocials";
 import {
   disclaimerFor,
   specialtySet,
@@ -236,9 +235,7 @@ export default async function BusinessProfilePage({
       : [];
 
   const isOwner = viewer?.id === business.ownerId;
-  const sponsorCodes = isOwner
-    ? []
-    : await sponsorCodesForBusiness(business.id);
+  const sponsorCodes = isOwner ? [] : await sponsorCodesForBusiness(business.id);
   /**
    * Phone and email are only rendered for paid listings (or to the owner/admin), so a
    * free listing never exposes them in the HTML. A paid member can still switch the
@@ -360,15 +357,7 @@ export default async function BusinessProfilePage({
             href={`/book/${business.slug}`}
             className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 px-3 py-3 text-sm font-bold text-white shadow-sm hover:from-rose-700 hover:to-pink-700"
           >
-            📅 Book now —{" "}
-            {formatBookingMoney(
-              bookingSplits(
-                business.bookingPriceMinor,
-                business.bookingDepositPct,
-              ).depositMinor,
-              bookingCurrency(business),
-            )}{" "}
-            deposit
+            📅 Book now — {formatBookingMoney(bookingSplits(business.bookingPriceMinor, business.bookingDepositPct).depositMinor, bookingCurrency(business))} deposit
           </Link>
         ) : null}
       </div>
@@ -497,783 +486,762 @@ export default async function BusinessProfilePage({
 
         <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
           <div className="min-w-0 space-y-5">
-            <Card>
-              {/* eslint-disable-next-line @next/next/no-img-element -- member-supplied URL */}
-              <img
-                src={listingCover(business)}
-                alt={`${business.name} cover photo`}
-                className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
-              />
-              <div
-                className={`grid items-start gap-5 ${
-                  locationBlock ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
-                }`}
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  <LogoTile
-                    name={business.name}
-                    icon={business.categoryRef?.icon}
-                    imageUrl={business.logoUrl}
-                    categorySlug={business.categorySlug}
-                    className={`h-20 w-20 ${
-                      ownerPlan === "PREMIUM"
-                        ? "ring-4 ring-amber-400 ring-offset-2"
-                        : ""
-                    }`}
-                    emojiClassName="text-4xl"
-                  />
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-bold">{business.name}</h1>
-                      <StaffEditLink
-                        href={`/admin/business/${business.slug}`}
-                      />
-                      {isOwner ? (
-                        <Link
-                          href="/dashboard/profile"
-                          className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-bold text-white hover:bg-indigo-700"
-                        >
-                          ✏️ Edit my card
-                        </Link>
-                      ) : null}
-                      {ownerPlan !== "FREE" ? (
-                        <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
-                      ) : null}
-                      {business.owner ? (
-                        <FoundingBadge number={business.owner.foundingNumber} />
-                      ) : (
-                        <Badge tone="slate">Unclaimed</Badge>
-                      )}
-                      {business.profileType === "PROFESSIONAL" ? (
-                        <Badge tone="green">Professional</Badge>
-                      ) : null}
-                      {business.featured ? (
-                        <Badge tone="amber">Featured</Badge>
-                      ) : null}
-                    </div>
-                    <p className="text-slate-600">
-                      {business.category} ·{" "}
-                      <PlaceLink
-                        city={business.city}
-                        state={business.state}
-                        country={business.country}
-                      />
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {(() => {
-                        // "#VendorName" → /trending shows every mention of the business.
-                        const tag = business.name
-                          .replace(/[^a-zA-Z0-9 ]/g, "")
-                          .split(" ")
-                          .filter(Boolean)
-                          .slice(0, 3)
-                          .join("")
-                          .slice(0, 24);
-                        return tag ? (
-                          <Link
-                            href={`/trending?tag=${encodeURIComponent(`#${tag}`)}`}
-                            className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-800"
-                          >
-                            🏷️ #{tag}
-                          </Link>
-                        ) : null;
-                      })()}
-                      {business.city ? (
-                        <Link
-                          href={`/city/${citySlug(business.city)}`}
-                          className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
-                        >
-                          📍 {business.city}
-                        </Link>
-                      ) : null}
-                      {business.state ? (
-                        <Link
-                          href={`/search?state=${encodeURIComponent(business.state)}`}
-                          className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800"
-                        >
-                          🗺️ {business.state}
-                        </Link>
-                      ) : null}
-                      {business.categoryRef ? (
-                        <>
-                          <Link
-                            href={`/categories/${business.categoryRef.slug}`}
-                            className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
-                          >
-                            {business.categoryRef.icon}{" "}
-                            {business.categoryRef.name}
-                          </Link>
-                          {business.subcategoryRef ? (
-                            <Link
-                              href={`/categories/${business.subcategoryRef.slug}`}
-                              className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
-                            >
-                              {business.subcategoryRef.name}
-                            </Link>
-                          ) : null}
-                          {extraCategories.map((extra) => (
-                            <Link
-                              key={extra.slug}
-                              href={`/categories/${extra.slug}`}
-                              className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef?.color ?? "indigo")}`}
-                            >
-                              {extra.name}
-                            </Link>
-                          ))}
-                        </>
-                      ) : null}
-                    </div>
-                    <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
-                      <Stars rating={rating} />
-                      <span>
-                        {reviewCount
-                          ? `${rating.toFixed(1)} (${reviewCount} reviews)`
-                          : "No reviews yet"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                {locationBlock}
-                {/* Everything past the name row spans the full card width — the
+          <Card>
+            {/* eslint-disable-next-line @next/next/no-img-element -- member-supplied URL */}
+            <img
+              src={listingCover(business)}
+              alt={`${business.name} cover photo`}
+              className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-2xl object-cover sm:h-52"
+            />
+            <div
+              className={`grid items-start gap-5 ${
+                locationBlock ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""
+              }`}
+            >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <LogoTile
+              name={business.name}
+              icon={business.categoryRef?.icon}
+              imageUrl={business.logoUrl}
+              categorySlug={business.categorySlug}
+              className={`h-20 w-20 ${
+                ownerPlan === "PREMIUM"
+                  ? "ring-4 ring-amber-400 ring-offset-2"
+                  : ""
+              }`}
+              emojiClassName="text-4xl"
+            />
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold">{business.name}</h1>
+                <StaffEditLink href={`/admin/business/${business.slug}`} />
+                {isOwner ? (
+                  <Link
+                    href="/dashboard/profile"
+                    className="rounded-lg bg-indigo-600 px-2 py-1 text-xs font-bold text-white hover:bg-indigo-700"
+                  >
+                    ✏️ Edit my card
+                  </Link>
+                ) : null}
+                {ownerPlan !== "FREE" ? (
+                  <Badge tone="indigo">{PLANS[ownerPlan].name}</Badge>
+                ) : null}
+                {business.owner ? (
+                  <FoundingBadge number={business.owner.foundingNumber} />
+                ) : (
+                  <Badge tone="slate">Unclaimed</Badge>
+                )}
+                {business.profileType === "PROFESSIONAL" ? (
+                  <Badge tone="green">Professional</Badge>
+                ) : null}
+                {business.featured ? (
+                  <Badge tone="amber">Featured</Badge>
+                ) : null}
+              </div>
+              <p className="text-slate-600">
+                {business.category} ·{" "}
+                <PlaceLink
+                  city={business.city}
+                  state={business.state}
+                  country={business.country}
+                />
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {(() => {
+                  // "#VendorName" → /trending shows every mention of the business.
+                  const tag = business.name
+                    .replace(/[^a-zA-Z0-9 ]/g, "")
+                    .split(" ")
+                    .filter(Boolean)
+                    .slice(0, 3)
+                    .join("")
+                    .slice(0, 24);
+                  return tag ? (
+                    <Link
+                      href={`/trending?tag=${encodeURIComponent(`#${tag}`)}`}
+                      className="rounded-full border border-violet-200 bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-800"
+                    >
+                      🏷️ #{tag}
+                    </Link>
+                  ) : null;
+                })()}
+                {business.city ? (
+                    <Link
+                      href={`/city/${citySlug(business.city)}`}
+                      className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800"
+                    >
+                      📍 {business.city}
+                    </Link>
+                  ) : null}
+                  {business.state ? (
+                    <Link
+                      href={`/search?state=${encodeURIComponent(business.state)}`}
+                      className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-semibold text-sky-800"
+                    >
+                      🗺️ {business.state}
+                    </Link>
+                  ) : null}
+                  {business.categoryRef ? (
+                    <>
+                      <Link
+                        href={`/categories/${business.categoryRef.slug}`}
+                        className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
+                      >
+                        {business.categoryRef.icon} {business.categoryRef.name}
+                      </Link>
+                  {business.subcategoryRef ? (
+                    <Link
+                      href={`/categories/${business.subcategoryRef.slug}`}
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef.color)}`}
+                    >
+                      {business.subcategoryRef.name}
+                    </Link>
+                  ) : null}
+                  {extraCategories.map((extra) => (
+                    <Link
+                      key={extra.slug}
+                      href={`/categories/${extra.slug}`}
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${softFor(business.categoryRef?.color ?? "indigo")}`}
+                    >
+                      {extra.name}
+                    </Link>
+                  ))}
+                    </>
+                  ) : null}
+              </div>
+              <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                <Stars rating={rating} />
+                <span>
+                  {reviewCount
+                    ? `${rating.toFixed(1)} (${reviewCount} reviews)`
+                    : "No reviews yet"}
+                </span>
+              </div>
+            </div>
+            </div>
+            {locationBlock}
+            {/* Everything past the name row spans the full card width — the
                 two-column split is only for the header + map, otherwise the
                 map column leaves a tall empty strip beside the text. */}
-                <div className="min-w-0 lg:col-span-full">
-                  {description ? (
-                    <p className="mt-3 whitespace-pre-line break-words text-slate-700">
-                      {description}
-                    </p>
-                  ) : null}
+            <div className="min-w-0 lg:col-span-full">
+              {description ? (
+                <p className="mt-3 whitespace-pre-line break-words text-slate-700">
+                  {description}
+                </p>
+              ) : null}
 
-                  {picks.specialties.length ? (
-                    <div className="mt-3">
-                      <h2 className="text-sm font-bold text-slate-900">
-                        {specialtySet(business.subcategorySlug)?.title ??
-                          "Services"}
-                      </h2>
-                      <div className="mt-1.5 flex flex-wrap gap-1.5">
-                        {business.featuredSpecialty ? (
-                          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
-                            ⭐ {business.featuredSpecialty}
-                          </span>
-                        ) : null}
-                        {picks.specialties
-                          .filter((item) => item !== business.featuredSpecialty)
-                          .map((item) => (
-                            <Link
-                              key={item}
-                              href={`/categories/${business.subcategorySlug}?service=${encodeURIComponent(item)}`}
-                              className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800 hover:bg-cyan-100"
-                            >
-                              {item}
-                            </Link>
-                          ))}
-                      </div>
-                    </div>
-                  ) : null}
+              {picks.specialties.length ? (
+                <div className="mt-3">
+                  <h2 className="text-sm font-bold text-slate-900">
+                    {specialtySet(business.subcategorySlug)?.title ??
+                      "Services"}
+                  </h2>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {business.featuredSpecialty ? (
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                        ⭐ {business.featuredSpecialty}
+                      </span>
+                    ) : null}
+                    {picks.specialties
+                      .filter((item) => item !== business.featuredSpecialty)
+                      .map((item) => (
+                        <Link
+                          key={item}
+                          href={`/categories/${business.subcategorySlug}?service=${encodeURIComponent(item)}`}
+                          className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800 hover:bg-cyan-100"
+                        >
+                          {item}
+                        </Link>
+                      ))}
+                  </div>
+                </div>
+              ) : null}
 
-                  {business.vehicle ? (
-                    <div className="mt-3 rounded-2xl border border-lime-300 bg-lime-50/60 p-4">
-                      <h2 className="text-sm font-bold text-lime-900">
-                        Vehicle details
-                      </h2>
-                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-700 sm:grid-cols-3">
-                        {[
-                          ["Type", business.vehicle.vehicleType],
-                          [
-                            "Make & model",
-                            `${business.vehicle.make} ${business.vehicle.model}`,
-                          ],
-                          ["Year", String(business.vehicle.year)],
-                          [
-                            "Mileage",
-                            business.vehicle.mileage === null
-                              ? null
-                              : `${business.vehicle.mileage.toLocaleString()} ${business.vehicle.mileageUnit}`,
-                          ],
-                          ["Fuel", business.vehicle.fuelType],
-                          ["Transmission", business.vehicle.transmission],
-                          ["Ownership", business.vehicle.ownership],
-                          ["Condition", business.vehicle.condition],
-                          [
-                            "Price",
-                            business.vehicle.price === null
-                              ? null
-                              : `${business.vehicle.currency === "INR" ? "₹" : "$"}${business.vehicle.price.toLocaleString()}${business.vehicle.negotiable ? " (negotiable)" : ""}`,
-                          ],
-                        ]
-                          .filter((row): row is [string, string] =>
-                            Boolean(row[1]),
-                          )
-                          .map(([label, value]) => (
-                            <div key={label}>
-                              <dt className="text-xs font-semibold text-lime-900/70">
-                                {label}
-                              </dt>
-                              <dd className="font-semibold">{value}</dd>
-                            </div>
-                          ))}
-                      </dl>
-                      {business.vehicle.features.length ? (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {business.vehicle.features.map((item) => (
-                            <span
-                              key={item}
-                              className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-lime-900"
-                            >
-                              {item}
-                            </span>
-                          ))}
+              {business.vehicle ? (
+                <div className="mt-3 rounded-2xl border border-lime-300 bg-lime-50/60 p-4">
+                  <h2 className="text-sm font-bold text-lime-900">
+                    Vehicle details
+                  </h2>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-700 sm:grid-cols-3">
+                    {[
+                      ["Type", business.vehicle.vehicleType],
+                      [
+                        "Make & model",
+                        `${business.vehicle.make} ${business.vehicle.model}`,
+                      ],
+                      ["Year", String(business.vehicle.year)],
+                      [
+                        "Mileage",
+                        business.vehicle.mileage === null
+                          ? null
+                          : `${business.vehicle.mileage.toLocaleString()} ${business.vehicle.mileageUnit}`,
+                      ],
+                      ["Fuel", business.vehicle.fuelType],
+                      ["Transmission", business.vehicle.transmission],
+                      ["Ownership", business.vehicle.ownership],
+                      ["Condition", business.vehicle.condition],
+                      [
+                        "Price",
+                        business.vehicle.price === null
+                          ? null
+                          : `${business.vehicle.currency === "INR" ? "₹" : "$"}${business.vehicle.price.toLocaleString()}${business.vehicle.negotiable ? " (negotiable)" : ""}`,
+                      ],
+                    ]
+                      .filter((row): row is [string, string] => Boolean(row[1]))
+                      .map(([label, value]) => (
+                        <div key={label}>
+                          <dt className="text-xs font-semibold text-lime-900/70">
+                            {label}
+                          </dt>
+                          <dd className="font-semibold">{value}</dd>
                         </div>
-                      ) : null}
-                      {business.vehicle.documents.length ? (
-                        <p className="mt-2 text-xs font-semibold text-lime-900">
-                          ✅ {business.vehicle.documents.join(" · ")}
-                        </p>
-                      ) : null}
-                    </div>
-                  ) : null}
-
-                  {picks.serviceOptions.length ||
-                  business.priceFrom ||
-                  business.priceHourly ||
-                  business.priceExtra ||
-                  business.availability ? (
-                    <div className="mt-3 rounded-2xl border border-violet-200 bg-violet-50/60 p-4">
-                      <h2 className="text-sm font-bold text-violet-900">
-                        Service details
-                      </h2>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {business.verifiedProvider ? (
-                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                            ✅ Verified provider
-                          </span>
-                        ) : null}
-                        {picks.serviceOptions.map((option) => (
-                          <Link
-                            key={option}
-                            href={`/categories/${business.subcategorySlug}?opt=${encodeURIComponent(option)}`}
-                            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100"
-                          >
-                            {option}
-                          </Link>
-                        ))}
-                      </div>
-                      <dl className="mt-3 grid gap-x-4 gap-y-1 text-sm text-slate-700 sm:grid-cols-2">
-                        {[
-                          ["Starting price", business.priceFrom],
-                          ["Per hour", business.priceHourly],
-                          ["Home visit extra", business.priceExtra],
-                          ["Availability", business.availability],
-                        ]
-                          .filter((row): row is [string, string] =>
-                            Boolean(row[1]),
-                          )
-                          .map(([label, value]) => (
-                            <div key={label}>
-                              <dt className="text-xs font-semibold text-violet-900/70">
-                                {label}
-                              </dt>
-                              <dd>{value}</dd>
-                            </div>
-                          ))}
-                      </dl>
-                    </div>
-                  ) : null}
-
-                  {business.certifications.length ||
-                  business.licenseNumber ||
-                  business.feeStructure ||
-                  business.carriers ||
-                  business.yearsExperience !== null ? (
-                    <div className="mt-3 space-y-1 text-sm text-slate-700">
-                      {business.yearsExperience !== null ? (
-                        <p>
-                          <span className="font-semibold">Experience:</span>{" "}
-                          {business.yearsExperience} years
-                        </p>
-                      ) : null}
-                      {business.licenseNumber ? (
-                        <p>
-                          <span className="font-semibold">Licence:</span>{" "}
-                          {business.licenseNumber}
-                        </p>
-                      ) : null}
-                      {business.certifications.length ? (
-                        <p>
-                          <span className="font-semibold">Certifications:</span>{" "}
-                          {business.certifications.join(", ")}
-                        </p>
-                      ) : null}
-                      {business.feeStructure ? (
-                        <p>
-                          <span className="font-semibold">Fees:</span>{" "}
-                          {business.feeStructure}
-                        </p>
-                      ) : null}
-                      {business.carriers ? (
-                        <p>
-                          <span className="font-semibold">Carriers:</span>{" "}
-                          {business.carriers}
-                        </p>
-                      ) : null}
-                      <p className="text-xs text-slate-500">
-                        {disclaimerFor(business.subcategorySlug)}
-                      </p>
-                    </div>
-                  ) : null}
-
-                  {videos.length ? (
-                    <div
-                      className={`mt-3 grid gap-3 ${videos.length > 1 ? "sm:grid-cols-2" : ""}`}
-                    >
-                      {videos.map((video) => (
-                        <VideoEmbed
-                          key={video}
-                          url={video}
-                          title={business.name}
-                        />
+                      ))}
+                  </dl>
+                  {business.vehicle.features.length ? (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {business.vehicle.features.map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-lime-900"
+                        >
+                          {item}
+                        </span>
                       ))}
                     </div>
                   ) : null}
-
-                  {playlistUrl ? (
-                    <div className="mt-3">
-                      <PlaylistGallery
-                        url={playlistUrl}
-                        owner={business.name}
-                      />
-                    </div>
-                  ) : null}
-
-                  {isOwner && mediaHidden ? (
-                    <Link
-                      href="/pricing"
-                      className="mt-3 block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
-                    >
-                      🔒 Your Google Photos album or YouTube playlist is saved
-                      but hidden on the Free plan. Go Pro to show it to everyone
-                      →
-                    </Link>
-                  ) : null}
-
-                  {albumUrl ? (
-                    <div className="mt-3">
-                      <PhotoAlbumGallery
-                        url={albumUrl}
-                        heading="Photos"
-                        limit={albumPhotoLimit(business.owner)}
-                      />
-                    </div>
-                  ) : null}
-
-                  {business.startingPrice !== null || business.customQuote ? (
-                    <p className="mt-3 text-sm font-bold text-emerald-700">
-                      {business.startingPrice !== null ? (
-                        <>
-                          Packages from{" "}
-                          <Money
-                            value={business.startingPrice}
-                            currency={business.priceCurrency ?? "USD"}
-                          />
-                        </>
-                      ) : (
-                        "Custom quote for every booking"
-                      )}
+                  {business.vehicle.documents.length ? (
+                    <p className="mt-2 text-xs font-semibold text-lime-900">
+                      ✅ {business.vehicle.documents.join(" · ")}
                     </p>
                   ) : null}
-
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    {business.owner ? (
-                      <PostedBy user={business.owner} prefix="Listed by" />
-                    ) : (
-                      <p className="text-sm text-slate-500">Not claimed yet</p>
-                    )}
-                    <ShareButtons
-                      url={`${siteUrl()}/business/${business.slug}`}
-                      title={business.name}
-                    />
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {business.whatsappNumber ? (
-                      <WhatsAppButton
-                        slug={business.slug}
-                        href={whatsappLink(
-                          business.whatsappNumber,
-                          `Hi ${business.name}, I found you on Godesi.`,
-                        )}
-                      />
-                    ) : null}
-                    {contactVisible && business.phone ? (
-                      <a
-                        href={`tel:${business.phone}`}
-                        className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
-                      >
-                        Call {business.phone}
-                      </a>
-                    ) : null}
-                    {contactVisible && business.publicEmail ? (
-                      <a
-                        href={`mailto:${business.publicEmail}`}
-                        className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
-                      >
-                        Email
-                      </a>
-                    ) : null}
-                    {BUSINESS_SOCIALS.map(({ key, label, icon }) =>
-                      business[key] ? (
-                        <a
-                          key={key}
-                          href={business[key] as string}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
-                        >
-                          <span aria-hidden>{icon}</span>
-                          {label}
-                        </a>
-                      ) : null,
-                    )}
-                  </div>
                 </div>
-              </div>
-            </Card>
+              ) : null}
 
-            {/* Card face + tools under the info on phones */}
-            <div className="space-y-4 lg:hidden">{cardColumn}</div>
-
-            {linkedEvents.length ? (
-              <Card id="events">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-lg font-bold">
-                    🎟️ Events &amp; activities
+              {picks.serviceOptions.length ||
+              business.priceFrom ||
+              business.priceHourly ||
+              business.priceExtra ||
+              business.availability ? (
+                <div className="mt-3 rounded-2xl border border-violet-200 bg-violet-50/60 p-4">
+                  <h2 className="text-sm font-bold text-violet-900">
+                    Service details
                   </h2>
-                  <Link
-                    href={`/events?venue=${encodeURIComponent(business.name)}`}
-                    className="text-sm font-semibold text-indigo-700 hover:underline"
-                  >
-                    All events →
-                  </Link>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[...upcomingEvents, ...pastEvents].map((event) => (
-                    <EventCard key={event.id} event={event} variant="compact" />
-                  ))}
-                </div>
-              </Card>
-            ) : null}
-
-            {business.deals.length || isOwner ? (
-              <Card id="deals">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                  <h2 className="text-lg font-bold">🏷️ Deals &amp; offers</h2>
-                  {isOwner ? (
-                    <Link
-                      href="/dashboard/deals"
-                      className="text-sm font-semibold text-indigo-700 hover:underline"
-                    >
-                      {business.deals.length ? "Manage deals" : "Post a deal →"}
-                    </Link>
-                  ) : null}
-                </div>
-                {business.deals.length ? (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {business.deals.map((deal) => (
-                      <DealCard
-                        key={deal.id}
-                        title={deal.title}
-                        details={
-                          deal.details
-                            ? contactVisible
-                              ? deal.details
-                              : maskContactDetails(deal.details)
-                            : null
-                        }
-                        code={deal.code}
-                        linkUrl={deal.linkUrl}
-                        expiresAt={deal.expiresAt}
-                      />
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {business.verifiedProvider ? (
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                        ✅ Verified provider
+                      </span>
+                    ) : null}
+                    {picks.serviceOptions.map((option) => (
+                      <Link
+                        key={option}
+                        href={`/categories/${business.subcategorySlug}?opt=${encodeURIComponent(option)}`}
+                        className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100"
+                      >
+                        {option}
+                      </Link>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-sm text-slate-600">
-                    Only you can see this: post an offer for GoDesi visitors and
-                    it shows here and on godesi.com/deals.
-                  </p>
-                )}
-              </Card>
-            ) : null}
+                  <dl className="mt-3 grid gap-x-4 gap-y-1 text-sm text-slate-700 sm:grid-cols-2">
+                    {[
+                      ["Starting price", business.priceFrom],
+                      ["Per hour", business.priceHourly],
+                      ["Home visit extra", business.priceExtra],
+                      ["Availability", business.availability],
+                    ]
+                      .filter((row): row is [string, string] => Boolean(row[1]))
+                      .map(([label, value]) => (
+                        <div key={label}>
+                          <dt className="text-xs font-semibold text-violet-900/70">
+                            {label}
+                          </dt>
+                          <dd>{value}</dd>
+                        </div>
+                      ))}
+                  </dl>
+                </div>
+              ) : null}
 
-            {!business.owner ? (
-              <Card className="space-y-3 border-amber-200 bg-amber-50">
-                <p className="text-sm text-amber-900">
-                  🏷️ This is a starter listing — nobody has claimed it yet. If
-                  you run {business.name}, claim it to add photos, packages,
-                  WhatsApp and your contact details.
-                </p>
-                {business.source === "osm" ? (
-                  <p className="text-xs text-amber-800">
-                    Basic details from{" "}
-                    <a
-                      href="https://www.openstreetmap.org/copyright"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      OpenStreetMap contributors
-                    </a>{" "}
-                    (ODbL).
+              {business.certifications.length ||
+              business.licenseNumber ||
+              business.feeStructure ||
+              business.carriers ||
+              business.yearsExperience !== null ? (
+                <div className="mt-3 space-y-1 text-sm text-slate-700">
+                  {business.yearsExperience !== null ? (
+                    <p>
+                      <span className="font-semibold">Experience:</span>{" "}
+                      {business.yearsExperience} years
+                    </p>
+                  ) : null}
+                  {business.licenseNumber ? (
+                    <p>
+                      <span className="font-semibold">Licence:</span>{" "}
+                      {business.licenseNumber}
+                    </p>
+                  ) : null}
+                  {business.certifications.length ? (
+                    <p>
+                      <span className="font-semibold">Certifications:</span>{" "}
+                      {business.certifications.join(", ")}
+                    </p>
+                  ) : null}
+                  {business.feeStructure ? (
+                    <p>
+                      <span className="font-semibold">Fees:</span>{" "}
+                      {business.feeStructure}
+                    </p>
+                  ) : null}
+                  {business.carriers ? (
+                    <p>
+                      <span className="font-semibold">Carriers:</span>{" "}
+                      {business.carriers}
+                    </p>
+                  ) : null}
+                  <p className="text-xs text-slate-500">
+                    {disclaimerFor(business.subcategorySlug)}
                   </p>
-                ) : null}
-                {business.sourceUrl ? (
-                  <p className="text-xs text-amber-800">
-                    Listed from{" "}
-                    <a
-                      href={business.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer nofollow"
-                      className="underline"
-                    >
-                      a public page
-                    </a>
-                    . Claiming replaces these basics with your own.
-                  </p>
-                ) : null}
-                {viewer ? (
-                  <ClaimBusinessForm
-                    businessId={business.id}
-                    open={searchParams.claim === "1"}
+                </div>
+              ) : null}
+
+              {videos.length ? (
+                <div
+                  className={`mt-3 grid gap-3 ${videos.length > 1 ? "sm:grid-cols-2" : ""}`}
+                >
+                  {videos.map((video) => (
+                    <VideoEmbed key={video} url={video} title={business.name} />
+                  ))}
+                </div>
+              ) : null}
+
+              {playlistUrl ? (
+                <div className="mt-3">
+                  <PlaylistGallery url={playlistUrl} owner={business.name} />
+                </div>
+              ) : null}
+
+              {isOwner && mediaHidden ? (
+                <Link
+                  href="/pricing"
+                  className="mt-3 block rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+                >
+                  🔒 Your Google Photos album or YouTube playlist is saved but
+                  hidden on the Free plan. Go Pro to show it to everyone →
+                </Link>
+              ) : null}
+
+              {albumUrl ? (
+                <div className="mt-3">
+                  <PhotoAlbumGallery
+                    url={albumUrl}
+                    heading="Photos"
+                    limit={albumPhotoLimit(business.owner)}
                   />
-                ) : (
-                  <LinkButton
-                    href={`/login?next=/business/${business.slug}?claim=1`}
-                  >
-                    Sign in to claim this business
-                  </LinkButton>
-                )}
-              </Card>
-            ) : null}
+                </div>
+              ) : null}
 
-            {!paidContact && (business.phone || business.publicEmail) ? (
-              <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">
-                <p className="text-sm text-amber-900">
-                  {business.owner
-                    ? "📞 Pro and Featured members can show their phone and email here, and switch them off again whenever they like. Meanwhile you can chat on WhatsApp."
-                    : `📞 Contact details are hidden. We hold a phone number and email for ${business.name} but we only show them once the owner has claimed this page — claim it to put your number and email up.`}
+              {business.startingPrice !== null || business.customQuote ? (
+                <p className="mt-3 text-sm font-bold text-emerald-700">
+                  {business.startingPrice !== null ? (
+                    <>
+                      Packages from{" "}
+                      <Money
+                        value={business.startingPrice}
+                        currency={business.priceCurrency ?? "USD"}
+                      />
+                    </>
+                  ) : (
+                    "Custom quote for every booking"
+                  )}
                 </p>
-                {isOwner ? (
-                  <LinkButton href="/dashboard/profile">
-                    {business.hideContact
-                      ? "Show my contact"
-                      : "Upgrade to show contact"}
-                  </LinkButton>
-                ) : null}
-              </Card>
-            ) : null}
+              ) : null}
 
-            {isAgent && business.agentProfile ? (
-              <div className="space-y-5">
-                <AgentDetails
-                  profile={business.agentProfile}
-                  reviews={business.reviews}
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                {business.owner ? (
+                  <PostedBy user={business.owner} prefix="Listed by" />
+                ) : (
+                  <p className="text-sm text-slate-500">Not claimed yet</p>
+                )}
+                <ShareButtons
+                  url={`${siteUrl()}/business/${business.slug}`}
+                  title={business.name}
                 />
               </div>
-            ) : null}
 
-            {isAgent && isOwner && !business.agentProfile ? (
-              <Card className="border-indigo-200 bg-indigo-50">
-                <p className="text-sm text-indigo-900">
-                  Add your licence, service areas, specialties and closed sales
-                  so buyers can see you know their area.
-                </p>
-                <LinkButton href="/dashboard/agent" className="mt-2">
-                  Complete my agent profile
-                </LinkButton>
-              </Card>
-            ) : null}
-
-            {isAgent && agentListings.length ? (
-              <Card>
-                <h2 className="mb-3 text-lg font-bold">Available listings</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {agentListings.map((listing) => (
-                    <Link
-                      key={listing.id}
-                      href={`/listings/${listing.slug}`}
-                      className="rounded-2xl border border-slate-200 p-3 transition hover:border-indigo-300 hover:bg-indigo-50/50"
+              <div className="mt-4 flex flex-wrap gap-2">
+                {business.whatsappNumber ? (
+                  <WhatsAppButton
+                    slug={business.slug}
+                    href={whatsappLink(
+                      business.whatsappNumber,
+                      `Hi ${business.name}, I found you on Godesi.`,
+                    )}
+                  />
+                ) : null}
+                {contactVisible && business.phone ? (
+                  <a
+                    href={`tel:${business.phone}`}
+                    className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
+                  >
+                    Call {business.phone}
+                  </a>
+                ) : null}
+                {contactVisible && business.publicEmail ? (
+                  <a
+                    href={`mailto:${business.publicEmail}`}
+                    className="inline-flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
+                  >
+                    Email
+                  </a>
+                ) : null}
+                {BUSINESS_SOCIALS.map(({ key, label, icon }) =>
+                  business[key] ? (
+                    <a
+                      key={key}
+                      href={business[key] as string}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
                     >
-                      <p className="font-semibold text-slate-900">
-                        {listing.title}
+                      <span aria-hidden>{icon}</span>
+                      {label}
+                    </a>
+                  ) : null,
+                )}
+              </div>
+            </div>
+            </div>
+          </Card>
+
+          {/* Card face + tools under the info on phones */}
+          <div className="space-y-4 lg:hidden">{cardColumn}</div>
+
+        {linkedEvents.length ? (
+          <Card id="events">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-bold">🎟️ Events &amp; activities</h2>
+              <Link
+                href={`/events?venue=${encodeURIComponent(business.name)}`}
+                className="text-sm font-semibold text-indigo-700 hover:underline"
+              >
+                All events →
+              </Link>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[...upcomingEvents, ...pastEvents].map((event) => (
+                <EventCard key={event.id} event={event} variant="compact" />
+              ))}
+            </div>
+          </Card>
+        ) : null}
+
+        {business.deals.length || isOwner ? (
+          <Card id="deals">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-bold">🏷️ Deals &amp; offers</h2>
+              {isOwner ? (
+                <Link
+                  href="/dashboard/deals"
+                  className="text-sm font-semibold text-indigo-700 hover:underline"
+                >
+                  {business.deals.length ? "Manage deals" : "Post a deal →"}
+                </Link>
+              ) : null}
+            </div>
+            {business.deals.length ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {business.deals.map((deal) => (
+                  <DealCard
+                    key={deal.id}
+                    title={deal.title}
+                    details={
+                      deal.details
+                        ? contactVisible
+                          ? deal.details
+                          : maskContactDetails(deal.details)
+                        : null
+                    }
+                    code={deal.code}
+                    linkUrl={deal.linkUrl}
+                    expiresAt={deal.expiresAt}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-600">
+                Only you can see this: post an offer for GoDesi visitors and it
+                shows here and on godesi.com/deals.
+              </p>
+            )}
+          </Card>
+        ) : null}
+
+        {!business.owner ? (
+          <Card className="space-y-3 border-amber-200 bg-amber-50">
+            <p className="text-sm text-amber-900">
+              🏷️ This is a starter listing — nobody has claimed it yet. If you
+              run {business.name}, claim it to add photos, packages, WhatsApp
+              and your contact details.
+            </p>
+            {business.source === "osm" ? (
+              <p className="text-xs text-amber-800">
+                Basic details from{" "}
+                <a
+                  href="https://www.openstreetmap.org/copyright"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  OpenStreetMap contributors
+                </a>{" "}
+                (ODbL).
+              </p>
+            ) : null}
+            {business.sourceUrl ? (
+              <p className="text-xs text-amber-800">
+                Listed from{" "}
+                <a
+                  href={business.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="underline"
+                >
+                  a public page
+                </a>
+                . Claiming replaces these basics with your own.
+              </p>
+            ) : null}
+            {viewer ? (
+              <ClaimBusinessForm
+                businessId={business.id}
+                open={searchParams.claim === "1"}
+              />
+            ) : (
+              <LinkButton href={`/login?next=/business/${business.slug}?claim=1`}>
+                Sign in to claim this business
+              </LinkButton>
+            )}
+          </Card>
+        ) : null}
+
+        {!paidContact && (business.phone || business.publicEmail) ? (
+          <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-200 bg-amber-50">
+            <p className="text-sm text-amber-900">
+              {business.owner
+                ? "📞 Pro and Featured members can show their phone and email here, and switch them off again whenever they like. Meanwhile you can chat on WhatsApp."
+                : `📞 Contact details are hidden. We hold a phone number and email for ${business.name} but we only show them once the owner has claimed this page — claim it to put your number and email up.`}
+            </p>
+            {isOwner ? (
+              <LinkButton href="/dashboard/profile">
+                {business.hideContact
+                  ? "Show my contact"
+                  : "Upgrade to show contact"}
+              </LinkButton>
+            ) : null}
+          </Card>
+        ) : null}
+
+        {isAgent && business.agentProfile ? (
+          <div className="space-y-5">
+            <AgentDetails
+              profile={business.agentProfile}
+              reviews={business.reviews}
+            />
+          </div>
+        ) : null}
+
+        {isAgent && isOwner && !business.agentProfile ? (
+          <Card className="border-indigo-200 bg-indigo-50">
+            <p className="text-sm text-indigo-900">
+              Add your licence, service areas, specialties and closed sales so
+              buyers can see you know their area.
+            </p>
+            <LinkButton href="/dashboard/agent" className="mt-2">
+              Complete my agent profile
+            </LinkButton>
+          </Card>
+        ) : null}
+
+        {isAgent && agentListings.length ? (
+          <Card>
+            <h2 className="mb-3 text-lg font-bold">Available listings</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {agentListings.map((listing) => (
+                <Link
+                  key={listing.id}
+                  href={`/listings/${listing.slug}`}
+                  className="rounded-2xl border border-slate-200 p-3 transition hover:border-indigo-300 hover:bg-indigo-50/50"
+                >
+                  <p className="font-semibold text-slate-900">
+                    {listing.title}
+                  </p>
+                  <p className="text-sm text-emerald-700">
+                    {priceLabel(listing)}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {listing.city}
+                    {listing.area ? ` · ${listing.area}` : ""}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </Card>
+        ) : null}
+
+        <div className="space-y-5">
+            {business.packages.length ? (
+              <Card>
+                <h2 className="mb-3 text-lg font-bold">Packages & pricing</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {business.packages.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-rose-50 p-4"
+                    >
+                      <p className="font-bold">{item.name}</p>
+                      <p className="text-xl font-black text-emerald-700">
+                        <Money value={item.price} currency={item.currency} />
                       </p>
-                      <p className="text-sm text-emerald-700">
-                        {priceLabel(listing)}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {listing.city}
-                        {listing.area ? ` · ${listing.area}` : ""}
-                      </p>
-                    </Link>
+                      {item.description ? (
+                        <p className="mt-1 text-sm text-slate-600">
+                          {item.description}
+                        </p>
+                      ) : null}
+                      {item.includes ? (
+                        <ul className="mt-2 space-y-0.5 text-sm text-slate-600">
+                          {item.includes
+                            .split("\n")
+                            .map((line) => line.trim())
+                            .filter(Boolean)
+                            .map((line) => (
+                              <li key={line}>✓ {line}</li>
+                            ))}
+                        </ul>
+                      ) : null}
+                    </div>
                   ))}
                 </div>
               </Card>
             ) : null}
 
-            <div className="space-y-5">
-              {business.packages.length ? (
-                <Card>
-                  <h2 className="mb-3 text-lg font-bold">Packages & pricing</h2>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {business.packages.map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-rose-50 p-4"
-                      >
-                        <p className="font-bold">{item.name}</p>
-                        <p className="text-xl font-black text-emerald-700">
-                          <Money value={item.price} currency={item.currency} />
-                        </p>
-                        {item.description ? (
-                          <p className="mt-1 text-sm text-slate-600">
-                            {item.description}
-                          </p>
-                        ) : null}
-                        {item.includes ? (
-                          <ul className="mt-2 space-y-0.5 text-sm text-slate-600">
-                            {item.includes
-                              .split("\n")
-                              .map((line) => line.trim())
-                              .filter(Boolean)
-                              .map((line) => (
-                                <li key={line}>✓ {line}</li>
-                              ))}
-                          </ul>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              ) : null}
-
-              {business.media.length ? (
-                <Card>
-                  <h2 className="mb-3 text-lg font-bold">Gallery</h2>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {business.media.map((item) =>
-                      item.type === "VIDEO" ? (
-                        <video
-                          key={item.id}
-                          src={item.url}
-                          controls
-                          className="h-48 w-full rounded-xl bg-black object-cover"
-                        />
-                      ) : (
-                        <a
-                          key={item.id}
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener"
-                          title="View full size"
-                          className="relative block h-48 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={item.url}
-                            alt=""
-                            aria-hidden
-                            loading="lazy"
-                            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
-                          />
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={item.url}
-                            alt={item.caption ?? business.name}
-                            loading="lazy"
-                            className="relative h-full w-full object-contain"
-                          />
-                          <GodesiMark />
-                        </a>
-                      ),
-                    )}
-                  </div>
-                </Card>
-              ) : null}
-
-              <div id="review" className="scroll-mt-24" />
+            {business.media.length ? (
               <Card>
-                <h2 className="mb-3 text-lg font-bold">
-                  Reviews {reviewCount ? `(${reviewCount})` : ""}
-                </h2>
-                <div className="space-y-4">
-                  {business.reviews.length ? (
-                    business.reviews.map((review) => (
-                      <div
-                        key={review.id}
-                        className="border-b border-slate-100 pb-3 last:border-0"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Stars rating={review.rating} />
-                          <span className="text-sm font-semibold">
-                            {review.authorName}
-                          </span>
-                          <span className="text-xs text-slate-400">
-                            {review.createdAt.toLocaleDateString("en-IN")}
-                          </span>
-                        </div>
-                        {review.comment ? (
-                          <p className="mt-1 text-sm text-slate-700">
-                            {review.comment}
-                          </p>
-                        ) : null}
-                        {reviewSourceLabel(review.source) ? (
-                          <p className="mt-1 text-xs text-slate-400">
-                            {reviewSourceLabel(review.source)}
-                          </p>
-                        ) : null}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-slate-500">
-                      Be the first to leave a review.
-                    </p>
-                  )}
-                </div>
-
-                {!isOwner ? (
-                  <div className="mt-5 border-t border-slate-100 pt-4">
-                    <h3 className="mb-3 font-semibold">Leave a review</h3>
-                    {sponsorCodes.length ? (
-                      <p className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-                        🎟️ Post a review and get{" "}
-                        {sponsorCodes
-                          .map((c) => `${c.label} for ${c.eventTitle}`)
-                          .join(", ")}
-                        . The code shows here right after you post and is
-                        emailed to you. Good or bad, any honest review gets it.
-                      </p>
-                    ) : null}
-                    {viewer ? (
-                      <ReviewForm
-                        businessId={business.id}
-                        defaultName={viewer.name}
-                        detailed={isAgent}
+                <h2 className="mb-3 text-lg font-bold">Gallery</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {business.media.map((item) =>
+                    item.type === "VIDEO" ? (
+                      <video
+                        key={item.id}
+                        src={item.url}
+                        controls
+                        className="h-48 w-full rounded-xl bg-black object-cover"
                       />
                     ) : (
-                      <div className="space-y-2">
-                        <p className="text-sm text-slate-600">
-                          Reviews run under a real Godesi account, so businesses
-                          are not judged by anonymous strangers.
-                        </p>
-                        <LinkButton
-                          href={`/login?next=/business/${business.slug}`}
-                        >
-                          Sign in to review
-                        </LinkButton>
-                      </div>
-                    )}
-                  </div>
-                ) : null}
+                      <a
+                        key={item.id}
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener"
+                        title="View full size"
+                        className="relative block h-48 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-900"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.url}
+                          alt=""
+                          aria-hidden
+                          loading="lazy"
+                          className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-lg"
+                        />
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.url}
+                          alt={item.caption ?? business.name}
+                          loading="lazy"
+                          className="relative h-full w-full object-contain"
+                        />
+                        <GodesiMark />
+                      </a>
+                    ),
+                  )}
+                </div>
               </Card>
-            </div>
+            ) : null}
+
+            <div id="review" className="scroll-mt-24" />
+            <Card>
+              <h2 className="mb-3 text-lg font-bold">
+                Reviews {reviewCount ? `(${reviewCount})` : ""}
+              </h2>
+              <div className="space-y-4">
+                {business.reviews.length ? (
+                  business.reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      className="border-b border-slate-100 pb-3 last:border-0"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Stars rating={review.rating} />
+                        <span className="text-sm font-semibold">
+                          {review.authorName}
+                        </span>
+                        <span className="text-xs text-slate-400">
+                          {review.createdAt.toLocaleDateString("en-IN")}
+                        </span>
+                      </div>
+                      {review.comment ? (
+                        <p className="mt-1 text-sm text-slate-700">
+                          {review.comment}
+                        </p>
+                      ) : null}
+                      {reviewSourceLabel(review.source) ? (
+                        <p className="mt-1 text-xs text-slate-400">
+                          {reviewSourceLabel(review.source)}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">
+                    Be the first to leave a review.
+                  </p>
+                )}
+              </div>
+
+              {!isOwner ? (
+                <div className="mt-5 border-t border-slate-100 pt-4">
+                  <h3 className="mb-3 font-semibold">Leave a review</h3>
+                  {sponsorCodes.length ? (
+                    <p className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                      🎟️ Post a review and get{" "}
+                      {sponsorCodes
+                        .map((c) => `${c.label} for ${c.eventTitle}`)
+                        .join(", ")}
+                      . The code shows here right after you post and is emailed
+                      to you. Good or bad, any honest review gets it.
+                    </p>
+                  ) : null}
+                  {viewer ? (
+                    <ReviewForm
+                      businessId={business.id}
+                      defaultName={viewer.name}
+                      detailed={isAgent}
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-slate-600">
+                        Reviews run under a real Godesi account, so businesses
+                        are not judged by anonymous strangers.
+                      </p>
+                      <LinkButton href={`/login?next=/business/${business.slug}`}>
+                        Sign in to review
+                      </LinkButton>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </Card>
+          </div>
           </div>
 
           {/* Desktop right rail — the digital card and all its tools */}
@@ -1288,9 +1256,7 @@ export default async function BusinessProfilePage({
                   straight to your Godesi page.
                 </p>
                 <div className="mt-3">
-                  <BadgeEmbed
-                    listingUrl={`${siteUrl()}/business/${business.slug}`}
-                  />
+                  <BadgeEmbed listingUrl={`${siteUrl()}/business/${business.slug}`} />
                 </div>
               </Card>
             ) : null}
