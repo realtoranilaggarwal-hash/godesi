@@ -99,6 +99,7 @@ export const AMBASSADOR_PERKS = [
 
 /** Ways an ambassador can help; ticked on the application. */
 export const AMBASSADOR_HELP = [
+  { id: "area", label: "Represent GoDesi in my area" },
   { id: "businesses", label: "Help local businesses claim their GoDesi card" },
   { id: "members", label: "Invite friends, family and groups to join" },
   { id: "events", label: "Help run or promote GoDesi events" },
