@@ -8,6 +8,8 @@ import { formatEventDate } from "@/lib/events";
 import { Alert, Badge, LinkButton } from "@/components/ui";
 import { QuoraEvent, usdValue } from "@/components/QuoraEvent";
 import { ScrollTop } from "@/components/ScrollTop";
+import { SubmitButton } from "@/components/SubmitButton";
+import { checkInTicketAction } from "@/app/actions/tickets";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your ticket", robots: { index: false } };
@@ -17,7 +19,7 @@ export default async function TicketPage({
   searchParams,
 }: {
   params: { code: string };
-  searchParams: { paid?: string };
+  searchParams: { paid?: string; checkin?: string };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=/tickets/${params.code}`);
@@ -41,10 +43,8 @@ export default async function TicketPage({
   });
   if (!ticket) notFound();
 
-  const allowed =
-    user.role === "ADMIN" ||
-    user.id === ticket.userId ||
-    user.id === ticket.event.organizerId;
+  const doorStaff = user.role === "ADMIN" || user.id === ticket.event.organizerId;
+  const allowed = doorStaff || user.id === ticket.userId;
   if (!allowed) notFound();
 
   const paidUsd =
@@ -55,6 +55,10 @@ export default async function TicketPage({
   const confirmed = ticket.status === "CONFIRMED";
   const ticketWord = `ticket${ticket.quantity === 1 ? "" : "s"}`;
   const admits = ticket.quantity * (ticket.tier?.admits ?? 1);
+  const checkedInLabel = ticket.checkedInAt
+    ? formatEventDate(ticket.checkedInAt, ticket.event.timeZone)
+    : null;
+  const justCheckedIn = searchParams.checkin === "done" && checkedInLabel;
 
   return (
     <div className="mx-auto max-w-md space-y-4">
@@ -63,7 +67,39 @@ export default async function TicketPage({
         <QuoraEvent event="Purchase" valueUsd={paidUsd} />
       ) : null}
 
-      {confirmed ? (
+      {doorStaff ? (
+        <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4 text-center shadow">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Door check-in</p>
+          {!confirmed ? (
+            <div className="rounded-xl border-2 border-red-500 bg-red-50 p-3 text-red-800">
+              <p className="text-lg font-black">⛔ Not confirmed — do not admit</p>
+              <p className="text-sm">This ticket is {ticket.status.toLowerCase()}, not paid.</p>
+            </div>
+          ) : justCheckedIn ? (
+            <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 p-3 text-emerald-900">
+              <p className="text-lg font-black">✅ Checked in — admit {admits}</p>
+              <p className="text-sm">{checkedInLabel}</p>
+            </div>
+          ) : checkedInLabel ? (
+            <div role="alert" className="rounded-xl border-2 border-red-600 bg-red-600 p-4 text-white">
+              <p className="text-xl font-black">⚠️ Already checked in at {checkedInLabel}</p>
+              <p className="mt-1 text-sm">
+                This QR code was already used at the door. Do not admit again without checking
+                with the organiser.
+              </p>
+            </div>
+          ) : (
+            <form action={checkInTicketAction}>
+              <input type="hidden" name="code" value={ticket.code} />
+              <SubmitButton className="w-full !py-3 text-lg" pendingLabel="Checking in...">
+                Mark checked in · admit {admits}
+              </SubmitButton>
+            </form>
+          )}
+        </div>
+      ) : null}
+
+      {confirmed && (!doorStaff || user.id === ticket.userId) ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center text-emerald-900">
           <p className="text-lg font-black">🎉 You&apos;re in! Your {ticketWord} {ticket.quantity === 1 ? "is" : "are"} confirmed.</p>
           <p className="mt-1 text-sm">
@@ -119,7 +155,7 @@ export default async function TicketPage({
               <p className="font-mono text-lg font-bold tracking-widest">{ticket.code}</p>
               <p className="text-xs text-slate-500">
                 Show this QR code at the entrance, on your phone or printed. One code
-                admits {admits}. Checked in: {ticket.checkedInAt ? "yes" : "not yet"}
+                admits {admits}. Checked in: {checkedInLabel ?? "not yet"}
               </p>
               <LinkButton href={`/api/tickets/${ticket.code}/qr?download=1`} variant="secondary">
                 Download ticket QR

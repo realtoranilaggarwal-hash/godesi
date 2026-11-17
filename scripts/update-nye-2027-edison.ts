@@ -1,7 +1,7 @@
 /**
  * Brings the NYE 2027 Edison listing in line with the organiser's flyer: 8 PM start,
- * flyer image, early (till Dec 15) / late (from Dec 16) ticket prices plus the $75 Singles
- * balcony chairs, and guest reviews typed out from the WhatsApp review album (first names only).
+ * flyer image, early (till Dec 15) / late (from Dec 16) ticket prices plus the $75 balcony
+ * chairs and Kid — no seat, and guest reviews typed out from the WhatsApp review album (first names only).
  * Safe to re-run: tiers are matched by name, reviews are replaced. Ticket tiers no longer in
  * TIERS are deleted when unsold (checkouts older than Stripe's 24h expiry just lose their tier),
  * or closed for sale when someone paid for one or may still be paying.
@@ -22,20 +22,26 @@ const CHECKOUT_EXPIRY_CUTOFF = new Date(Date.now() - 24 * 60 * 60 * 1000);
 const LATE_START = new Date("2026-12-16T00:00:00-05:00");
 const EARLY_END = LATE_START;
 
+/** Kids who share a parent's chair: let in at the door but not given a seat. */
+const KID_NO_SEAT_PRICE = 0;
+const KID_NO_SEAT_STOCK = 25;
+const KID_NO_SEAT_LABEL = KID_NO_SEAT_PRICE ? `$${KID_NO_SEAT_PRICE}` : "free";
+
 const DESCRIPTION = [
   "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 2026, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
   "35 food items and an elegant seated dining experience, with an exclusive Plaza Hall of live food stations — dosa, jalebi, golgappa and more. Premium drinks until midnight and a midnight champagne toast.",
   "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Woodbridge Police security and free valet parking.",
-  "Till Dec 15: Adults (18+) $95, Kids (9–17) $80, Kids (0–8) $65, Couple $180. From Dec 16: Adults $150, Kids (9–17) $90, Kids (0–8) $75, Couple $250. VIP Table for 12 with a bottle of champagne on the table (only 5 tables): $1080 till Dec 15, $1200 from Dec 16. Singles balcony $75 — chair only, all inclusive, limited seats, first come, first served, no table.",
+  `Till Dec 15: Couple $180, Adult (18+) $95, Big Kid (9–17) $80, Small Kid (0–8) $65. From Dec 16: Couple $250, Adult (18+) $150, Big Kid (9–17) $90, Small Kid (0–8) $75. Kid — no seat (sits with a parent, no chair of their own): ${KID_NO_SEAT_LABEL}. VIP Table for 12 with a bottle of champagne on the table (only 5 tables): $1080 till Dec 15, $1200 from Dec 16. Balcony $75 — adults, chair only, all inclusive, limited seats, first come, first served, no table seating.`,
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
   "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
 ].join("\n\n");
 
 /**
  * The hall holds 400 people, so entry tiers add up to 400, counting a couple as 2:
- * early 120 + 25 + 25 + 40×2 = 250, Singles balcony 50, late 60 + 10 + 10 + 10×2 = 100.
- * `match` lists old names of the same ticket (couple, balcony) so their bookings are kept;
- * the old age-range tiers are not renamed, since that would relabel tickets already sold.
+ * early 40×2 + 120 + 25 + 25 = 250, Balcony 50, late 10×2 + 60 + 10 + 10 = 100.
+ * Kid — no seat is let in at the door but takes no chair, so its stock sits on top of
+ * the seated pool (see HALL_TICKETS). Balcony and Kid — no seat sell in both windows.
+ * `match` lists old names of the same ticket so bookings are kept when a tier is relabelled.
  * Sponsor packages are listed separately; the 2-pass ones add up to 18 more people.
  */
 type TierSpec = {
@@ -62,22 +68,27 @@ const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
  * seats at different dates, so the tiers add up to more than this; the event total
  * caps them together (lib/events pooledSeatsLeft).
  */
-const HALL_TICKETS = 350;
+const SEATED_TICKETS = 350;
+const HALL_TICKETS = SEATED_TICKETS + KID_NO_SEAT_STOCK;
+
+const BALCONY_NOTE = "Adults · chair only, all inclusive · first come, first served · no table seating";
+const KID_NO_SEAT_NOTE = "Sits with a parent · no chair or table seat of their own";
 
 /** GoDesi business pages listed as sponsors of the party. */
 const SPONSOR_BUSINESSES: string[] = [];
 
 const TIERS: TierSpec[] = [
-  { name: "Adults (18+) — Early", note: "Till Dec 15", price: 95, seats: 120, salesEnd: EARLY_END },
-  { name: "Kids (9–17) — Early", note: "Till Dec 15", price: 80, seats: 25, salesEnd: EARLY_END },
-  { name: "Kids (0–8) — Early", note: "Till Dec 15", price: 65, seats: 25, salesEnd: EARLY_END },
-  { name: "Couple — Early", match: ["Couple — Early bird"], note: "Till Dec 15", price: 180, seats: 40, salesEnd: EARLY_END, admits: 2 },
+  { name: "Couple — Early", match: ["Couple — Early bird"], note: "Till Dec 15 · admits 2", price: 180, seats: 40, salesEnd: EARLY_END, admits: 2 },
+  { name: "Adult (18+) — Early", match: ["Adults (18+) — Early"], note: "Till Dec 15", price: 95, seats: 120, salesEnd: EARLY_END },
+  { name: "Big Kid (9–17) — Early", match: ["Kids (9–17) — Early"], note: "Till Dec 15", price: 80, seats: 25, salesEnd: EARLY_END },
+  { name: "Small Kid (0–8) — Early", match: ["Kids (0–8) — Early"], note: "Till Dec 15", price: 65, seats: 25, salesEnd: EARLY_END },
   { name: "VIP Table for 12 with champagne — Early", note: "Till Dec 15 · 12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1080, seats: 5, salesEnd: EARLY_END, admits: 12, stockGroup: "vip-table" },
-  { name: "Singles — Balcony (chair only, all inclusive)", match: ["Balcony seat — first come, first served", "Special balcony seat"], note: "Limited seats · first come, first served · no table", price: 75, seats: 50 },
-  { name: "Adults (18+)", price: 150, seats: 60, salesStart: LATE_START },
-  { name: "Kids (9–17)", price: 90, seats: 10, salesStart: LATE_START },
-  { name: "Kids (0–8)", price: 75, seats: 10, salesStart: LATE_START },
-  { name: "Couple", match: ["Couple"], price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
+  { name: "Kid — no seat", note: KID_NO_SEAT_NOTE, price: KID_NO_SEAT_PRICE, seats: KID_NO_SEAT_STOCK },
+  { name: "Balcony — first come, first served, no table seating", match: ["Singles — Balcony (chair only, all inclusive)", "Balcony seat — first come, first served", "Special balcony seat"], note: BALCONY_NOTE, price: 75, seats: 50 },
+  { name: "Couple", match: ["Couple"], note: "Admits 2", price: 250, seats: 10, salesStart: LATE_START, admits: 2 },
+  { name: "Adult (18+)", match: ["Adults (18+)"], price: 150, seats: 60, salesStart: LATE_START },
+  { name: "Big Kid (9–17)", match: ["Kids (9–17)"], price: 90, seats: 10, salesStart: LATE_START },
+  { name: "Small Kid (0–8)", match: ["Kids (0–8)"], price: 75, seats: 10, salesStart: LATE_START },
   { name: "VIP Table for 12 with champagne", note: "12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1200, seats: 5, salesStart: LATE_START, admits: 12, stockGroup: "vip-table" },
   { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
@@ -167,7 +178,8 @@ async function main() {
       description: DESCRIPTION,
       reviewsAlbumUrl: REVIEWS_ALBUM,
       tags: event.tags.includes(HIDE_SEATS_LEFT_TAG) ? event.tags : [...event.tags, HIDE_SEATS_LEFT_TAG],
-      price: Math.min(...tiers.map((tier) => tier.price)),
+      /** The free Kid — no seat add-on would otherwise list the whole party as free. */
+      price: Math.min(...tiers.filter((tier) => tier.price > 0).map((tier) => tier.price)),
       seatsTotal: Math.max(HALL_TICKETS, tiers.reduce((sum, tier) => sum + tier.seatsBooked, 0)),
     },
   });
