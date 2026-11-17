@@ -2090,6 +2090,9 @@ model Coupon {
   /// Restricts a TICKETS code to a single event.
   eventId        String?
   event          Event?       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  /// Event-locked TICKETS codes only: the ticket types the discount covers and how many of each,
+  /// e.g. [{"tierId":"…","name":"Couple","maxQuantity":1}]. Null covers the whole order.
+  tierLimits     Json?
   /// Total redemptions allowed across all users; null for unlimited.
   maxRedemptions Int?
   timesRedeemed  Int          @default(0)

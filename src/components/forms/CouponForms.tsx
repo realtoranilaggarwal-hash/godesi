@@ -1,15 +1,97 @@
 "use client";
 
+import { useState } from "react";
 import { useFormState } from "react-dom";
 import {
+  type CompTicketsState,
   createCouponAction,
   createEventCouponAction,
+  sendCompTicketsAction,
 } from "@/app/actions/coupons";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { FormSuccess } from "@/components/forms/FormSuccess";
+import { formatMoney } from "@/lib/format";
+
+export type CouponEventOption = {
+  id: string;
+  title: string;
+  date: string;
+  currency: string;
+  tiers: { id: string; name: string; price: number }[];
+};
+
+/** Admin ticket codes: lock to one event, and optionally to a set number of each ticket type. */
+function TicketCouponFields({ events }: { events: CouponEventOption[] }) {
+  const [eventId, setEventId] = useState("");
+  const event = events.find((item) => item.id === eventId);
+
+  return (
+    <>
+      <Field
+        label="Event"
+        hint="Optional — lock the code to one event, like organiser codes"
+        className="sm:col-span-2"
+      >
+        <select
+          name="eventId"
+          value={eventId}
+          onChange={(change) => setEventId(change.target.value)}
+          className={inputClass}
+        >
+          <option value="">Any event</option>
+          {events.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.title} · {item.date}
+            </option>
+          ))}
+        </select>
+      </Field>
+      {event?.tiers.length ? (
+        <fieldset className="rounded-lg border border-slate-200 p-3 sm:col-span-2">
+          <legend className="px-1 text-sm font-medium text-slate-700">
+            Only these tickets (optional)
+          </legend>
+          <p className="mb-2 text-xs text-slate-500">
+            Type how many of each ticket the code covers, e.g. Couple 1 + Small
+            Kid 1 with 100% off is a comp for exactly that package — anything
+            else in the cart is paid. Leave all blank to discount the whole
+            order. Fixed-amount codes (e.g. $150 off) also work for a set
+            package.
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {event.tiers.map((tier) => (
+              <label
+                key={tier.id}
+                className="flex min-w-0 items-center justify-between gap-2 text-sm"
+              >
+                <span className="min-w-0 break-words">
+                  {tier.name}{" "}
+                  <span className="text-xs text-slate-400">
+                    {formatMoney(tier.price, event.currency)}
+                  </span>
+                </span>
+                <span className="w-20 shrink-0">
+                  <input
+                    name={`tierMax_${tier.id}`}
+                    type="number"
+                    min={1}
+                    max={10}
+                    placeholder="—"
+                    aria-label={`${tier.name} tickets covered`}
+                    className={inputClass}
+                  />
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ) : null}
+    </>
+  );
+}
 
 function DiscountFields({ withCurrency }: { withCurrency: boolean }) {
   return (
@@ -31,7 +113,7 @@ function DiscountFields({ withCurrency }: { withCurrency: boolean }) {
         <input name="amount" type="number" min={0} className={inputClass} />
       </Field>
       {withCurrency ? (
-        <Field label="Currency" hint="Used for fixed-amount codes only">
+        <Field label="Currency" hint="Fixed-amount codes only; event codes use the event's currency">
           <select name="currency" defaultValue="USD" className={inputClass}>
             <option value="USD">USD ($)</option>
             <option value="INR">INR (₹)</option>
@@ -54,8 +136,13 @@ function DiscountFields({ withCurrency }: { withCurrency: boolean }) {
 }
 
 /** Admin-only: a platform code you can hand to clients. */
-export function CouponForm() {
+export function CouponForm({
+  events = [],
+}: {
+  events?: CouponEventOption[];
+}) {
   const [state, formAction] = useFormState(createCouponAction, emptyState);
+  const [scope, setScope] = useState("PLAN");
 
   return (
     <form action={formAction} className="space-y-3">
@@ -72,7 +159,12 @@ export function CouponForm() {
           />
         </Field>
         <Field label="Applies to">
-          <select name="scope" defaultValue="PLAN" className={inputClass}>
+          <select
+            name="scope"
+            value={scope}
+            onChange={(change) => setScope(change.target.value)}
+            className={inputClass}
+          >
             <option value="PLAN">Plan upgrades</option>
             <option value="BUNDLE">Complete package</option>
             <option value="ADS">Advertising</option>
@@ -80,6 +172,7 @@ export function CouponForm() {
             <option value="WEBSITE">Websites (one-time setup fee)</option>
           </select>
         </Field>
+        {scope === "TICKETS" ? <TicketCouponFields events={events} /> : null}
         <Field
           label="Extra months free"
           hint="Package codes only — 48 turns the one-year package into five years"
@@ -150,6 +243,154 @@ export function EventCouponForm({
       </div>
 
       <SubmitButton pendingLabel="Creating…">Create coupon</SubmitButton>
+    </form>
+  );
+}
+
+const emptyCompState: CompTicketsState = {};
+
+/** Organiser/admin: email a buyer a one-use code that makes the chosen tickets free. */
+export function SendCompTicketsForm({
+  events,
+}: {
+  events: CouponEventOption[];
+}) {
+  const [state, formAction] = useFormState(sendCompTicketsAction, emptyCompState);
+  const [eventId, setEventId] = useState(events[0]?.id ?? "");
+  const [quantities, setQuantities] = useState<Record<string, string>>({});
+  const [kind, setKind] = useState<"PERCENT" | "FIXED">("PERCENT");
+  const [amount, setAmount] = useState("");
+  const event = events.find((item) => item.id === eventId);
+  const total = (event?.tiers ?? []).reduce(
+    (sum, tier) => sum + tier.price * (Number(quantities[tier.id]) || 0),
+    0,
+  );
+
+  return (
+    <form action={formAction} className="space-y-3">
+      {state.code ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm">
+          <p className="text-xs text-slate-500">Code to text the buyer</p>
+          <p className="select-all break-all font-mono text-lg font-bold tracking-wide text-emerald-800">
+            {state.code}
+          </p>
+          <p className="text-xs text-slate-600">
+            {state.emailed ? "✅ Email sent" : "⚠️ Email not sent"}
+          </p>
+        </div>
+      ) : null}
+      <FormError>{state.error}</FormError>
+      <FormSuccess>{state.success}</FormSuccess>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Event" className="sm:col-span-2">
+          <select
+            name="eventId"
+            required
+            value={eventId}
+            onChange={(change) => {
+              setEventId(change.target.value);
+              setQuantities({});
+            }}
+            className={inputClass}
+          >
+            {events.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title} · {item.date}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Buyer name">
+          <input name="name" required maxLength={80} placeholder="Ravi Sharma" className={inputClass} />
+        </Field>
+        <Field label="Buyer email">
+          <input name="email" type="email" required placeholder="ravi@example.com" className={inputClass} />
+        </Field>
+      </div>
+
+      {event?.tiers.length ? (
+        <fieldset className="rounded-lg border border-slate-200 p-3">
+          <legend className="px-1 text-sm font-medium text-slate-700">
+            Tickets to send
+          </legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {event.tiers.map((tier) => (
+              <label
+                key={tier.id}
+                className="flex min-w-0 items-center justify-between gap-2 text-sm"
+              >
+                <span className="min-w-0 break-words">
+                  {tier.name}{" "}
+                  <span className="text-xs text-slate-400">
+                    {formatMoney(tier.price, event.currency)}
+                  </span>
+                </span>
+                <span className="w-20 shrink-0">
+                  <input
+                    name={`compQty_${tier.id}`}
+                    type="number"
+                    min={0}
+                    max={10}
+                    placeholder="0"
+                    value={quantities[tier.id] ?? ""}
+                    onChange={(change) =>
+                      setQuantities((prev) => ({
+                        ...prev,
+                        [tier.id]: change.target.value,
+                      }))
+                    }
+                    aria-label={`${tier.name} tickets to send`}
+                    className={inputClass}
+                  />
+                </span>
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            Total {formatMoney(total, event.currency)}. Extra tickets the buyer
+            adds are charged at full price.
+          </p>
+        </fieldset>
+      ) : (
+        <p className="text-sm text-slate-500">
+          This event has no ticket types yet — add them on the event first.
+        </p>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Discount">
+          <select
+            name="discountKind"
+            value={kind}
+            onChange={(change) =>
+              setKind(change.target.value as "PERCENT" | "FIXED")
+            }
+            className={inputClass}
+          >
+            <option value="PERCENT">100% off selected tickets</option>
+            <option value="FIXED">Fixed dollar amount</option>
+          </select>
+        </Field>
+        {kind === "FIXED" ? (
+          <Field
+            label={`Amount off (${event?.currency ?? "USD"})`}
+            hint="Comes off the whole order — e.g. what they paid by Zelle"
+          >
+            <input
+              name="amount"
+              type="number"
+              min={1}
+              value={amount}
+              placeholder={total ? String(total) : ""}
+              onChange={(change) => setAmount(change.target.value)}
+              className={inputClass}
+            />
+          </Field>
+        ) : null}
+      </div>
+
+      <SubmitButton pendingLabel="Sending…">Send comp tickets</SubmitButton>
     </form>
   );
 }

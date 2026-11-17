@@ -17,7 +17,60 @@ export function describeCoupon(coupon: Coupon) {
   const bonus = coupon.bonusMonths
     ? `+${coupon.bonusMonths} months free`
     : null;
-  return [money, bonus].filter(Boolean).join(" · ") || "no discount";
+  const limits = couponTierLimits(coupon);
+  const covers = limits.length ? `covers ${describeTierLimits(limits)}` : null;
+  return [money, bonus, covers].filter(Boolean).join(" · ") || "no discount";
+}
+
+export type CouponTierLimit = {
+  tierId: string;
+  name: string;
+  maxQuantity: number;
+};
+
+export function couponTierLimits(
+  coupon: Pick<Coupon, "tierLimits">,
+): CouponTierLimit[] {
+  if (!Array.isArray(coupon.tierLimits)) return [];
+  return coupon.tierLimits.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const { tierId, name, maxQuantity } = item as Record<string, unknown>;
+    if (typeof tierId !== "string" || typeof maxQuantity !== "number") return [];
+    if (!Number.isInteger(maxQuantity) || maxQuantity < 1) return [];
+    return [{ tierId, name: typeof name === "string" ? name : "", maxQuantity }];
+  });
+}
+
+export function describeTierLimits(limits: CouponTierLimit[]) {
+  return limits
+    .map((limit) => `${limit.name || "ticket"} ×${limit.maxQuantity}`)
+    .join(" + ");
+}
+
+export type CouponTicketLine = {
+  tierId: string | null;
+  quantity: number;
+  unitMinor: number;
+};
+
+/**
+ * How much of each booking line a code may discount: the whole line, or for a
+ * tier-limited percent code only its listed ticket types up to their max
+ * quantity. Fixed-amount codes always come off the whole order.
+ */
+export function couponEligibleMinor(
+  coupon: Pick<Coupon, "tierLimits" | "discountKind">,
+  lines: CouponTicketLine[],
+) {
+  const limits = couponTierLimits(coupon);
+  return lines.map((line) => {
+    if (!limits.length || coupon.discountKind === "FIXED")
+      return line.quantity * line.unitMinor;
+    const limit = limits.find((item) => item.tierId === line.tierId);
+    return limit
+      ? Math.min(line.quantity, limit.maxQuantity) * line.unitMinor
+      : 0;
+  });
 }
 
 /** Discount in minor units, never more than the amount being charged. */
@@ -64,6 +117,7 @@ export async function checkCoupon({
   subtotalMinor,
   currency,
   requireDiscount = true,
+  ticketLines,
 }: {
   code: string;
   scope: CouponScope | CouponScope[];
@@ -73,6 +127,8 @@ export async function checkCoupon({
   currency: string;
   /** Bundle codes may give extra months instead of money off. */
   requireDiscount?: boolean;
+  /** Ticket checkout lines, so tier-limited codes only discount the tickets they cover. */
+  ticketLines?: CouponTicketLine[];
 }): Promise<CouponCheck> {
   const normalized = normalizeCouponCode(code);
   if (!normalized) return { ok: false, error: "Enter a coupon code." };
@@ -101,7 +157,31 @@ export async function checkCoupon({
   });
   if (used) return { ok: false, error: "You have already used that coupon." };
 
-  const discountMinor = discountFor({ coupon, subtotalMinor, currency });
+  let eligibleMinor = subtotalMinor;
+  const limits = couponTierLimits(coupon);
+  if (limits.length) {
+    const covered = (ticketLines ?? []).filter(
+      (line) =>
+        line.quantity > 0 &&
+        limits.some((limit) => limit.tierId === line.tierId),
+    );
+    if (!covered.length) {
+      return {
+        ok: false,
+        error: `That coupon only covers ${describeTierLimits(limits)} tickets.`,
+      };
+    }
+    eligibleMinor = couponEligibleMinor(coupon, ticketLines ?? []).reduce(
+      (sum, value) => sum + value,
+      0,
+    );
+  }
+
+  const discountMinor = discountFor({
+    coupon,
+    subtotalMinor: Math.min(eligibleMinor, subtotalMinor),
+    currency,
+  });
   if (discountMinor <= 0 && requireDiscount) {
     return { ok: false, error: "That coupon does not apply to this amount." };
   }

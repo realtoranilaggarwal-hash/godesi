@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { CouponForm } from "@/components/forms/CouponForms";
+import {
+  CouponForm,
+  SendCompTicketsForm,
+} from "@/components/forms/CouponForms";
+import { compEventOptions, compTicketEventOptions } from "@/lib/compTickets";
 import { toggleCouponAction } from "@/app/actions/coupons";
 import { generateFreeCourseCodeAction } from "@/app/actions/course";
 import { FREE_CODE_PROVIDER } from "@/lib/courseCodes";
@@ -38,6 +42,27 @@ export default async function Page({
           createdAt: true,
           user: { select: { email: true, name: true } },
         },
+      },
+    },
+  });
+
+  const ticketEvents = await db.event.findMany({
+    /** Skips imported wire listings unless they sell ticket tiers here. */
+    where: {
+      OR: [{ sourceId: null }, { tiers: { some: {} } }],
+      startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) },
+    },
+    orderBy: { startsAt: "asc" },
+    take: 500,
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      currency: true,
+      sourceId: true,
+      tiers: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, name: true, price: true, kind: true },
       },
     },
   });
@@ -104,6 +129,15 @@ export default async function Page({
           ) : null}
         </ul>
       </Card>
+      <Card id="send-comp-tickets">
+        <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          For Zelle/cash buyers and guests: pick the event and tickets, and the
+          buyer gets an email with a one-use code that makes exactly those
+          tickets free.
+        </p>
+        <SendCompTicketsForm events={compTicketEventOptions(ticketEvents)} />
+      </Card>
       <Card id="discount-coupons">
         <h2 className="mb-1 text-lg font-bold">Discount coupons</h2>
         <p className="mb-3 text-sm text-slate-500">
@@ -113,7 +147,7 @@ export default async function Page({
           years), or both. Everyone who used a code is listed under it, so you
           can see which caller closed which client.
         </p>
-        <CouponForm />
+        <CouponForm events={compEventOptions(ticketEvents)} />
         <ul className="mt-5 divide-y divide-slate-100 border-t border-slate-100 text-sm">
           {coupons.map((coupon) => (
             <li

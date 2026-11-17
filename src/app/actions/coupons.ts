@@ -5,7 +5,10 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireRole, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { normalizeCouponCode } from "@/lib/coupons";
+import { randomBytes } from "node:crypto";
+import { type CouponTierLimit, normalizeCouponCode } from "@/lib/coupons";
+import { compTicketEmail, emailEnabled, sendEmail } from "@/lib/email";
+import { formatMoney } from "@/lib/format";
 
 const couponSchema = z.object({
   code: z
@@ -59,6 +62,36 @@ export async function createCouponAction(
       return { error: "Give the code a discount, extra months, or both." };
     }
 
+    /** Ticket codes can be locked to one event and, optionally, to some of its ticket types. */
+    const event =
+      parsed.data.scope === "TICKETS" && parsed.data.eventId
+        ? await db.event.findUnique({
+            where: { id: parsed.data.eventId },
+            select: {
+              id: true,
+              title: true,
+              currency: true,
+              tiers: {
+                orderBy: { sortOrder: "asc" },
+                select: { id: true, name: true },
+              },
+            },
+          })
+        : null;
+    if (parsed.data.scope === "TICKETS" && parsed.data.eventId && !event) {
+      return { error: "That event no longer exists." };
+    }
+    const tierLimits: CouponTierLimit[] = [];
+    for (const tier of event?.tiers ?? []) {
+      const raw = String(formData.get(`tierMax_${tier.id}`) ?? "").trim();
+      if (!raw) continue;
+      const maxQuantity = Number(raw);
+      if (!Number.isInteger(maxQuantity) || maxQuantity < 1 || maxQuantity > 10) {
+        return { error: `Enter 1–10 for ${tier.name}, or leave it blank.` };
+      }
+      tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity });
+    }
+
     const code = normalizeCouponCode(parsed.data.code);
     const clash = await db.coupon.findUnique({ where: { code } });
     if (clash) return { error: "That code already exists." };
@@ -72,7 +105,11 @@ export async function createCouponAction(
         bonusMonths: parsed.data.bonusMonths,
         publicOffer: parsed.data.publicOffer,
         currency:
-          parsed.data.discountKind === "FIXED" ? parsed.data.currency : null,
+          parsed.data.discountKind === "FIXED"
+            ? event?.currency ?? parsed.data.currency
+            : null,
+        eventId: event?.id ?? null,
+        tierLimits: tierLimits.length ? tierLimits : undefined,
         maxRedemptions: parsed.data.maxRedemptions ?? null,
         expiresAt: parsed.data.expiresAt
           ? new Date(parsed.data.expiresAt)
@@ -81,7 +118,11 @@ export async function createCouponAction(
     });
 
     revalidatePath("/admin/coupons");
-    return { success: `Coupon ${code} created.` };
+    return {
+      success: event
+        ? `Coupon ${code} created for ${event.title}.`
+        : `Coupon ${code} created.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
@@ -133,6 +174,155 @@ export async function createEventCouponAction(
 
     revalidatePath("/dashboard/coupons");
     return { success: `Coupon ${code} is live for ${event.title}.` };
+  } catch (error) {
+    return fieldError(error);
+  }
+}
+
+export type CompTicketsState = ActionState & {
+  code?: string;
+  emailed?: boolean;
+};
+
+const compSchema = z.object({
+  eventId: z.string().min(1, "Choose the event."),
+  email: z.string().trim().toLowerCase().email("Enter the buyer's email."),
+  name: z.string().trim().min(1, "Enter the buyer's name.").max(80),
+  discountKind: z.enum(["PERCENT", "FIXED"]),
+  amount: z.coerce.number().int().min(1).optional(),
+});
+
+/** COMP-SHARMA-7K3Q9A1B2C: the buyer's surname plus a random suffix, retried on a clash. */
+async function uniqueCompCode(name: string) {
+  const surname =
+    (name.trim().split(/\s+/).pop() ?? "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 12) || "GUEST";
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const suffix = randomBytes(5).toString("hex").toUpperCase();
+    const code = `COMP-${surname}-${suffix}`;
+    if (!(await db.coupon.findUnique({ where: { code } }))) return code;
+  }
+  throw new Error("Could not make a unique code — please try again.");
+}
+
+/**
+ * Organisers (and admins) send a buyer complimentary tickets: a one-use code
+ * covering exactly the chosen tickets, emailed to the buyer.
+ */
+export async function sendCompTicketsAction(
+  _prev: CompTicketsState,
+  formData: FormData,
+): Promise<CompTicketsState> {
+  try {
+    const user = await requireUser();
+    const parsed = compSchema.safeParse({
+      eventId: formData.get("eventId") ?? undefined,
+      email: formData.get("email") ?? undefined,
+      name: formData.get("name") ?? undefined,
+      discountKind: formData.get("discountKind") ?? undefined,
+      amount: String(formData.get("amount") ?? "").trim() || undefined,
+    });
+    if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+    const event = await db.event.findUnique({
+      where: { id: parsed.data.eventId },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        currency: true,
+        organizerId: true,
+        sourceId: true,
+        tiers: {
+          where: { kind: { not: "SPONSOR" } },
+          orderBy: { sortOrder: "asc" },
+          select: { id: true, name: true, price: true },
+        },
+      },
+    });
+    if (!event || (event.organizerId !== user.id && user.role !== "ADMIN")) {
+      return { error: "You can only send tickets for your own events." };
+    }
+    if (event.sourceId !== null) {
+      return { error: "Comp tickets work only for events that sell tickets on GoDesi." };
+    }
+
+    const tierLimits: CouponTierLimit[] = [];
+    let totalMajor = 0;
+    for (const tier of event.tiers) {
+      const raw = String(formData.get(`compQty_${tier.id}`) ?? "").trim();
+      if (!raw) continue;
+      const quantity = Number(raw);
+      if (!Number.isInteger(quantity) || quantity < 0 || quantity > 10) {
+        return { error: `Enter 0–10 for ${tier.name}.` };
+      }
+      if (!quantity) continue;
+      tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity: quantity });
+      totalMajor += tier.price * quantity;
+    }
+    if (!tierLimits.length) {
+      return { error: "Enter how many of at least one ticket type." };
+    }
+    if (tierLimits.reduce((sum, limit) => sum + limit.maxQuantity, 0) > 10) {
+      return { error: "Maximum 10 tickets per comp — one booking can't hold more." };
+    }
+
+    const fixed = parsed.data.discountKind === "FIXED";
+    const amount = fixed ? parsed.data.amount ?? totalMajor : 100;
+    if (fixed && amount <= 0) {
+      return { error: "These tickets are already free — use 100% off." };
+    }
+
+    const code = await uniqueCompCode(parsed.data.name);
+    await db.coupon.create({
+      data: {
+        code,
+        scope: "TICKETS",
+        discountKind: fixed ? "FIXED" : "PERCENT",
+        amount,
+        currency: fixed ? event.currency : null,
+        eventId: event.id,
+        createdById: user.id,
+        maxRedemptions: 1,
+        tierLimits,
+      },
+    });
+    revalidatePath("/dashboard/coupons");
+    revalidatePath("/admin/coupons");
+
+    const items = tierLimits.map(
+      (limit) => `${limit.maxQuantity} × ${limit.name}`,
+    );
+    const message = compTicketEmail({
+      name: parsed.data.name,
+      eventTitle: event.title,
+      eventSlug: event.slug,
+      items,
+      code,
+      fixedAmount: fixed ? formatMoney(amount, event.currency) : undefined,
+    });
+    const emailed = emailEnabled()
+      ? await sendEmail({
+          to: parsed.data.email,
+          subject: message.subject,
+          html: message.html,
+          replyTo: user.email,
+        })
+      : false;
+
+    return emailed
+      ? {
+          code,
+          emailed,
+          success: `Code ${code} (${items.join(" + ")}) emailed to ${parsed.data.email}.`,
+        }
+      : {
+          code,
+          emailed,
+          error: `Code ${code} was created, but the email to ${parsed.data.email} could not be sent — text them the code instead.`,
+        };
   } catch (error) {
     return fieldError(error);
   }
