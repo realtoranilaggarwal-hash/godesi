@@ -25,6 +25,8 @@ export const metadata: Metadata = {
 const NYE_SLUG = "new-year-eves-party-2027-edison";
 const PHONE = "732-877-8585";
 const PHONE_HREF = "tel:+17328778585";
+const NYE_PARTY_URL = "https://www.newyearevesparty.com";
+const NYE_TICKETS_URL = `${NYE_PARTY_URL}/events/grand-new-years-eve-party-2027#tickets`;
 const SALES_MAILTO = (subject: string) =>
   `mailto:${SITE.salesEmail}?subject=${encodeURIComponent(subject)}`;
 
@@ -77,22 +79,53 @@ const PRINT_CSS = `
 
 const usd = (amount: number) => `$${Math.round(amount).toLocaleString("en-US")}`;
 
-const STARTER_BENEFITS = [
-  "Professional business interview conducted by our team (GoDesi Elite feature)",
-  "GoDesi Elite membership and featured business profile",
-  "Directory listing on DesiWho'sWho.com",
+/** A "see what you get" link after a benefit; external links open in a new tab. */
+function SeeLink({ href, children }: { href: string; children: React.ReactNode }) {
+  const className = "whitespace-nowrap font-bold text-blue-700 underline hover:text-blue-900";
+  return href.startsWith("http") ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      {children} ↗
+    </a>
+  ) : (
+    <Link href={href} className={className}>
+      {children} →
+    </Link>
+  );
+}
+
+const STARTER_BENEFITS: React.ReactNode[] = [
+  <>
+    Professional business interview conducted by our team (GoDesi Elite feature) —{" "}
+    <SeeLink href="/desi-elite">see Elite features</SeeLink>
+  </>,
+  <>
+    GoDesi Elite membership and featured business profile —{" "}
+    <SeeLink href="/upgrade">what&apos;s included</SeeLink>
+  </>,
+  <>
+    Directory listing on <SeeLink href="https://desiwhoswho.com">DesiWho&apos;sWho.com</SeeLink>
+  </>,
   "Professionally produced 10-second promotional video",
-  "320 × 100 pixel side banner advertisement for 12 months",
+  <>
+    320 × 100 pixel side banner advertisement for 12 months —{" "}
+    <SeeLink href="/advertise">see ad spots</SeeLink>
+  </>,
   "Rotational banner exposure on the GoDesi homepage and relevant business category pages",
-  "AI-enabled, SEO-friendly business website",
+  <>
+    AI-enabled, SEO-friendly business website —{" "}
+    <SeeLink href="/website/examples">see examples</SeeLink>
+  </>,
 ];
 
 const PREMIUM_BENEFITS: React.ReactNode[] = [
   <>
     <strong>VIP table for 12 guests</strong> — 10 additional VIP seats (12 total guests including
-    the 2 complimentary tickets)
+    the 2 complimentary tickets) — <SeeLink href={NYE_TICKETS_URL}>see the party</SeeLink>
   </>,
-  "Company logo, picture and website on the New Year's Eve event supporters banner",
+  <>
+    Company logo, picture and website on the New Year&apos;s Eve event supporters banner —{" "}
+    <SeeLink href={`${NYE_PARTY_URL}/sponsors`}>see sponsors</SeeLink>
+  </>,
   "Personalized company placard displayed on your sponsored table",
   "VIP seating for 12 guests",
   "Personalized 10% ticket discount code for your clients and business associates",
@@ -282,7 +315,16 @@ export default async function ProposalPage({
           A complete marketing, branding and networking solution for attorneys, accountants,
           realtors, mortgage professionals, insurance agents and other business owners — online
           on GoDesi.com all year, and in person at our New Year&apos;s Eve party at Royal Albert
-          Palace (Big Ball Room, 1050 King Georges Post Rd, Fords, NJ).
+          Palace (Big Ball Room, 1050 King Georges Post Rd, Fords, NJ). Party details, DJ and
+          tickets:{" "}
+          <a
+            href={NYE_PARTY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-amber-300 underline"
+          >
+            NewYearEvesParty.com ↗
+          </a>
         </p>
         <p className="mt-4 text-sm font-bold text-amber-300">
           Call{" "}
@@ -315,7 +357,8 @@ export default async function ProposalPage({
                 <strong className="block text-base text-slate-900">
                   2 Complimentary New Year&apos;s Eve Tickets
                 </strong>
-                as a valued partner
+                as a valued partner —{" "}
+                <SeeLink href={NYE_TICKETS_URL}>see the party at NewYearEvesParty.com</SeeLink>
               </p>
             </div>
             <Link
