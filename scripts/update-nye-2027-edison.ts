@@ -25,7 +25,7 @@ const EARLY_END = LATE_START;
 const DESCRIPTION = [
   "Grand New Year's Eve Party 2027 in the Big Ball Room at Royal Albert Palace — Thursday, December 31st, 2026, 8:00 PM to 1:00 AM. Hosted by NewYearEvesParty.com, celebrating since 2018.",
   "35 food items and an elegant seated dining experience, with an exclusive Plaza Hall of live food stations — dosa, jalebi, golgappa and more. Premium drinks until midnight and a midnight champagne toast.",
-  "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Woodbridge Police security and free valet parking.",
+  "Live DJ Sandy of M&D Events, a live belly dance performance, the New York ball drop on live TV, multiple photo booths and exciting raffle prizes. Police / security and free valet parking. Hotel rooms available: $120 with jacuzzi, $110 without.",
   "Till Nov 30: Couple $180, Adult (18+) $95, Big Kid (9–17) $80, Small Kid (0–8) $65. From Dec 1: Couple $250, Adult (18+) $150, Big Kid (9–17) $90, Small Kid (0–8) $75. VIP Table for 12 with a bottle of champagne on the table (only 5 tables): $1080 till Nov 30, $1200 from Dec 1. Balcony $75 till Nov 30, $100 from Dec 1 — adults, chair only, all inclusive, limited seats, first come, first served, no table seating.",
   "Call for tickets & info: Rachna 908-421-1685 · Anil 732-983-7958 · Ashok 732-921-5606. Book online at NewYearEvesParty.com or GoDesi.com/9227.",
   "Sponsors welcome: Silver $1,000, Gold $2,500 and Platinum $5,000 packages, plus single add-ons — GoDesi.com/sponsor2027.",
@@ -64,6 +64,10 @@ const BANNER_YEAR = "320×100 banner on GoDesi.com for 1 year";
  */
 const HALL_TICKETS = 350;
 
+/** Hotel rooms are sold as ticket tiers that admit nobody; their rooms are added to the event's seat cap. */
+const HOTEL_ROOMS_PER_TYPE = 10;
+const HOTEL_NOTE = "New Year's Eve night (Dec 31 → Jan 1) · hotel details sent after booking · room only, buy party tickets separately";
+
 const BALCONY_NOTE = "Adults · chair only, all inclusive · first come, first served · no table seating";
 
 /** GoDesi business pages listed as sponsors of the party. */
@@ -82,6 +86,8 @@ const TIERS: TierSpec[] = [
   { name: "Small Kid (0–8)", match: ["Kids (0–8)"], price: 75, seats: 10, salesStart: LATE_START },
   { name: "VIP Table for 12 with champagne", note: "12 seats at a reserved VIP table, bottle of champagne on the table · only 5 tables", price: 1200, seats: 5, salesStart: LATE_START, admits: 12, stockGroup: "vip-table" },
   { name: "Balcony — first come, first served, no table seating", note: BALCONY_NOTE, price: 100, seats: 50, salesStart: LATE_START, stockGroup: "balcony" },
+  { name: "Hotel room with jacuzzi", note: HOTEL_NOTE, price: 120, seats: HOTEL_ROOMS_PER_TYPE, admits: 0 },
+  { name: "Hotel room (no jacuzzi)", note: HOTEL_NOTE, price: 110, seats: HOTEL_ROOMS_PER_TYPE, admits: 0 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Silver sponsor"), seats: 10, admits: 2, bannerMonths: 12, bannerSlot: "MOBILE", wallBricks: 25 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Gold sponsor"), seats: 5, admits: 4, bannerMonths: 12, bannerSlot: "SIDEBAR", wallBricks: 75 },
   { kind: "SPONSOR", ...nyeSponsorLevel("Platinum sponsor"), seats: 2, admits: 10, bannerMonths: 12, bannerSlot: "HALFPAGE", wallBricks: 200 },
@@ -175,7 +181,7 @@ async function main() {
       reviewsAlbumUrl: REVIEWS_ALBUM,
       tags: event.tags.includes(HIDE_SEATS_LEFT_TAG) ? event.tags : [...event.tags, HIDE_SEATS_LEFT_TAG],
       price: Math.min(...tiers.map((tier) => tier.price)),
-      seatsTotal: Math.max(HALL_TICKETS, tiers.reduce((sum, tier) => sum + tier.seatsBooked, 0)),
+      seatsTotal: Math.max(HALL_TICKETS + 2 * HOTEL_ROOMS_PER_TYPE, tiers.reduce((sum, tier) => sum + tier.seatsBooked, 0)),
     },
   });
 
