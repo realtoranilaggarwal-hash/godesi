@@ -27,7 +27,11 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
-import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
+import {
+  checkCoupon,
+  couponEligibleMinor,
+  normalizeCouponCode,
+} from "@/lib/coupons";
 import {
   EVENT_FEATURES,
   ONLINE_OPEN_SEATS,
@@ -646,7 +650,13 @@ export async function bookTicketAction(
 
     const priced = lines.map((line) => ({
       ...line,
+      unitMinor: toMinor(line.tier ? line.tier.price : event.price),
       subtotalMinor: toMinor((line.tier ? line.tier.price : event.price) * line.quantity),
+    }));
+    const ticketLines = priced.map((line) => ({
+      tierId: line.tier?.id ?? null,
+      quantity: line.quantity,
+      unitMinor: line.unitMinor,
     }));
     const subtotalMinor = priced.reduce((sum, line) => sum + line.subtotalMinor, 0);
 
@@ -661,6 +671,7 @@ export async function bookTicketAction(
 
     let discountMinor = 0;
     let couponId: string | null = null;
+    let eligibleMinor = priced.map((line) => line.subtotalMinor);
     if (parsed.data.couponCode) {
       const check = await checkCoupon({
         code: parsed.data.couponCode,
@@ -669,20 +680,22 @@ export async function bookTicketAction(
         eventId: event.id,
         subtotalMinor,
         currency: event.currency,
+        ticketLines,
       });
       if (!check.ok) return { error: check.error };
       discountMinor = Math.min(check.discountMinor, subtotalMinor);
       couponId = check.coupon.id;
+      eligibleMinor = couponEligibleMinor(check.coupon, ticketLines);
     }
 
     /**
-     * The discount comes off the lines in order, and the coupon is recorded on the
-     * first ticket only, so one booking counts as one redemption.
+     * The discount comes off the lines the code covers, in order, and the coupon is
+     * recorded on the first ticket only, so one booking counts as one redemption.
      */
     let discountLeft = discountMinor;
     const premiumClub = clubIsPremium(event.club);
     const orderLines = priced.map((line, index) => {
-      const lineDiscount = Math.min(discountLeft, line.subtotalMinor);
+      const lineDiscount = Math.min(discountLeft, eligibleMinor[index]);
       discountLeft -= lineDiscount;
       const amountMinor = line.subtotalMinor - lineDiscount;
       return {

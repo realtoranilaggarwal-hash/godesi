@@ -42,6 +42,22 @@ export default async function Page({
     },
   });
 
+  const ticketEvents = await db.event.findMany({
+    where: { startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) } },
+    orderBy: { startsAt: "asc" },
+    take: 100,
+    select: {
+      id: true,
+      title: true,
+      startsAt: true,
+      currency: true,
+      tiers: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, name: true, price: true },
+      },
+    },
+  });
+
   const freeCodeUses = await db.courseEnrollment.findMany({
     where: { provider: FREE_CODE_PROVIDER },
     orderBy: { createdAt: "desc" },
@@ -113,7 +129,20 @@ export default async function Page({
           years), or both. Everyone who used a code is listed under it, so you
           can see which caller closed which client.
         </p>
-        <CouponForm />
+        <CouponForm
+          events={ticketEvents.map((event) => ({
+            id: event.id,
+            title: event.title,
+            date: event.startsAt.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              timeZone: "America/New_York",
+            }),
+            currency: event.currency,
+            tiers: event.tiers,
+          }))}
+        />
         <ul className="mt-5 divide-y divide-slate-100 border-t border-slate-100 text-sm">
           {coupons.map((coupon) => (
             <li

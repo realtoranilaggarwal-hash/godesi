@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireRole, requireUser } from "@/lib/auth";
 import { type ActionState, fieldError } from "@/lib/actions";
-import { normalizeCouponCode } from "@/lib/coupons";
+import { type CouponTierLimit, normalizeCouponCode } from "@/lib/coupons";
 
 const couponSchema = z.object({
   code: z
@@ -59,6 +59,37 @@ export async function createCouponAction(
       return { error: "Give the code a discount, extra months, or both." };
     }
 
+    /** Ticket codes can be locked to one event and, optionally, to some of its ticket types. */
+    const event =
+      parsed.data.scope === "TICKETS" && parsed.data.eventId
+        ? await db.event.findUnique({
+            where: { id: parsed.data.eventId },
+            select: {
+              id: true,
+              title: true,
+              currency: true,
+              tiers: {
+                orderBy: { sortOrder: "asc" },
+                select: { id: true, name: true },
+              },
+            },
+          })
+        : null;
+    if (parsed.data.scope === "TICKETS" && parsed.data.eventId && !event) {
+      return { error: "That event no longer exists." };
+    }
+    const tierLimits: CouponTierLimit[] = [];
+    for (const tier of event?.tiers ?? []) {
+      const raw = String(formData.get(`tierMax_${tier.id}`) ?? "").trim();
+      if (!raw) continue;
+      const maxQuantity = Number(raw);
+      if (!Number.isInteger(maxQuantity) || maxQuantity < 0 || maxQuantity > 10) {
+        return { error: `Enter 1–10 for ${tier.name}, or leave it blank.` };
+      }
+      if (maxQuantity > 0)
+        tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity });
+    }
+
     const code = normalizeCouponCode(parsed.data.code);
     const clash = await db.coupon.findUnique({ where: { code } });
     if (clash) return { error: "That code already exists." };
@@ -72,7 +103,11 @@ export async function createCouponAction(
         bonusMonths: parsed.data.bonusMonths,
         publicOffer: parsed.data.publicOffer,
         currency:
-          parsed.data.discountKind === "FIXED" ? parsed.data.currency : null,
+          parsed.data.discountKind === "FIXED"
+            ? event?.currency ?? parsed.data.currency
+            : null,
+        eventId: event?.id ?? null,
+        tierLimits: tierLimits.length ? tierLimits : undefined,
         maxRedemptions: parsed.data.maxRedemptions ?? null,
         expiresAt: parsed.data.expiresAt
           ? new Date(parsed.data.expiresAt)
@@ -81,7 +116,11 @@ export async function createCouponAction(
     });
 
     revalidatePath("/admin/coupons");
-    return { success: `Coupon ${code} created.` };
+    return {
+      success: event
+        ? `Coupon ${code} created for ${event.title}.`
+        : `Coupon ${code} created.`,
+    };
   } catch (error) {
     return fieldError(error);
   }
