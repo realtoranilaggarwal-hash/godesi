@@ -14,6 +14,9 @@ export const sponsorSelect = {
       amount: true,
       active: true,
       currency: true,
+      expiresAt: true,
+      maxRedemptions: true,
+      timesRedeemed: true,
     },
   },
   business: {
@@ -52,7 +55,15 @@ export function sponsorPhoto(sponsor: EventSponsorRow) {
 /** "10% off tickets" for a live sponsor coupon, else null. */
 export function sponsorDiscountLabel(sponsor: EventSponsorRow) {
   const coupon = sponsor.coupon;
-  if (!coupon || !coupon.active) return null;
+  if (
+    !coupon ||
+    !coupon.active ||
+    (coupon.expiresAt && coupon.expiresAt <= new Date()) ||
+    (coupon.maxRedemptions !== null &&
+      coupon.timesRedeemed >= coupon.maxRedemptions)
+  ) {
+    return null;
+  }
   return coupon.discountKind === "PERCENT"
     ? `${coupon.amount}% off tickets`
     : `${coupon.amount} ${coupon.currency ?? ""} off tickets`.replace(
@@ -81,18 +92,19 @@ export async function sponsorCodesForBusiness(businessId: string) {
       event: { select: { title: true, slug: true } },
     },
   });
-  return rows.flatMap((row) =>
-    row.coupon
+  return rows.flatMap((row) => {
+    const label = sponsorDiscountLabel(row);
+    return row.coupon && label
       ? [
           {
             code: row.coupon.code,
-            label: sponsorDiscountLabel(row) ?? "a ticket discount",
+            label,
             eventTitle: row.event.title,
             eventSlug: row.event.slug,
           },
         ]
-      : [],
-  );
+      : [];
+  });
 }
 
 /** The approved sponsor whose live code this is, for checkout on network sites. */

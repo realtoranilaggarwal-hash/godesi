@@ -19,19 +19,29 @@ function initials(name: string) {
  * Approved sponsors in round photo circles. Codes stay private: buyers ask the
  * sponsor, or post a review on its card and get the code there and by email.
  */
-export function EventSponsors({ sponsors }: { sponsors: EventSponsorRow[] }) {
+export function EventSponsors({
+  sponsors,
+  rewardOpen,
+}: {
+  sponsors: EventSponsorRow[];
+  /** False once the event has started: reviews no longer earn a ticket code. */
+  rewardOpen: boolean;
+}) {
   if (!sponsors.length) return null;
   return (
     <section id="sponsors" className="scroll-mt-24 space-y-3">
       <h2 className="font-bold">🤝 Our sponsors &amp; ticket discounts</h2>
-      <p className="text-sm text-slate-600">
-        Want a discount code? Ask a sponsor for theirs, or post an honest review
-        on their GoDesi page and you&apos;ll get the code right away by email.
-      </p>
+      {rewardOpen ? (
+        <p className="text-sm text-slate-600">
+          Want a discount code? Ask a sponsor for theirs, or post an honest
+          review on their GoDesi page and you&apos;ll get the code right away by
+          email.
+        </p>
+      ) : null}
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {sponsors.map((sponsor) => {
           const photo = sponsorPhoto(sponsor);
-          const discount = sponsorDiscountLabel(sponsor);
+          const discount = rewardOpen ? sponsorDiscountLabel(sponsor) : null;
           return (
             <li
               key={sponsor.id}

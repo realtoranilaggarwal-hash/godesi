@@ -19,7 +19,8 @@ export async function GET(
   const code = new URL(request.url).searchParams.get("code")?.trim() ?? "";
   const sponsor =
     code && code.length <= 40 ? await sponsorForCode(params.slug, code) : null;
-  if (!sponsor?.coupon) {
+  const discountLabel = sponsor ? sponsorDiscountLabel(sponsor) : null;
+  if (!sponsor?.coupon || !discountLabel) {
     return NextResponse.json(
       { valid: false },
       { status: 404, headers: HEADERS },
@@ -32,7 +33,7 @@ export async function GET(
       code: sponsor.coupon.code,
       discountKind: sponsor.coupon.discountKind,
       discountAmount: sponsor.coupon.amount,
-      discountLabel: sponsorDiscountLabel(sponsor),
+      discountLabel,
     },
     { headers: HEADERS },
   );

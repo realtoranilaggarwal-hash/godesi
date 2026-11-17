@@ -90,12 +90,12 @@ export async function createReviewAction(
 
     const codes = await sponsorCodesForBusiness(business.id);
     if (codes.length) {
-      await emailSponsorCodes(user.email, business.name, codes);
+      const emailed = await emailSponsorCodes(user.email, business.name, codes);
       const list = codes
         .map((c) => `${c.code} (${c.label}, ${c.eventTitle})`)
         .join("; ");
       return {
-        success: `Thanks for your review! Your ticket code: ${list}. We've emailed it to you too.`,
+        success: `Thanks for your review! Your ticket code: ${list}. ${emailed ? "We've emailed it to you too." : "Please save it now: we couldn't email it to you."}`,
       };
     }
     return { success: "Thanks for your review!" };
@@ -336,5 +336,5 @@ async function emailSponsorCodes(
     )
     .join("");
   const body = `<p style="margin:0 0 12px">Thanks for reviewing ${escapeHtml(businessName)} on GoDesi. Here is your code. Enter it at checkout when you buy tickets.</p>${rows}`;
-  await sendEmail({ to, subject, html: shell(subject, body) });
+  return sendEmail({ to, subject, html: shell(subject, body) });
 }
