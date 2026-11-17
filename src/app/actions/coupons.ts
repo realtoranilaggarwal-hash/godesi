@@ -83,11 +83,10 @@ export async function createCouponAction(
       const raw = String(formData.get(`tierMax_${tier.id}`) ?? "").trim();
       if (!raw) continue;
       const maxQuantity = Number(raw);
-      if (!Number.isInteger(maxQuantity) || maxQuantity < 0 || maxQuantity > 10) {
+      if (!Number.isInteger(maxQuantity) || maxQuantity < 1 || maxQuantity > 10) {
         return { error: `Enter 1–10 for ${tier.name}, or leave it blank.` };
       }
-      if (maxQuantity > 0)
-        tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity });
+      tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity });
     }
 
     const code = normalizeCouponCode(parsed.data.code);
