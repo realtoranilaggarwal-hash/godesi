@@ -43,9 +43,9 @@ export default async function Page({
   });
 
   const ticketEvents = await db.event.findMany({
-    /** Imported wire events never sell tickets here, so only GoDesi-hosted ones are listed. */
+    /** Skips imported wire listings unless they sell ticket tiers here. */
     where: {
-      sourceId: null,
+      OR: [{ sourceId: null }, { tiers: { some: {} } }],
       startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) },
     },
     orderBy: { startsAt: "asc" },
