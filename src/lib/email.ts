@@ -192,3 +192,45 @@ export function ticketEmail({
     ),
   };
 }
+
+/** Comp tickets: the organiser issued a $0 code for these exact tickets. */
+export function compTicketEmail({
+  eventTitle,
+  eventUrl,
+  buyerName,
+  items,
+  code,
+  organizerName,
+  currency,
+}: {
+  eventTitle: string;
+  eventUrl: string;
+  currency: string;
+  buyerName: string;
+  /** e.g. ["1 × Couple", "1 × Small Kid"] */
+  items: string[];
+  code: string;
+  organizerName?: string | null;
+}) {
+  const title = escapeHtml(eventTitle);
+  const list = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  return {
+    subject: `Your tickets for ${eventTitle} are ready`,
+    html: shell(
+      `Your tickets for ${title} are ready 🎉`,
+      `<p style="margin:0 0 12px;color:#334155">Hi ${escapeHtml(buyerName)},${
+        organizerName ? ` ${escapeHtml(organizerName)} has` : " the organiser has"
+      } set aside these tickets for you:</p>
+       <ul style="margin:0 0 16px;padding-left:18px;color:#334155">${list}</ul>
+       <ol style="margin:0 0 16px;padding-left:18px;color:#334155">
+         <li style="margin-bottom:6px">Log in (or sign up free) at <a href="${siteUrl()}/login" style="color:#4f46e5">GoDesi.com</a>.</li>
+         <li style="margin-bottom:6px">Open the event: <a href="${eventUrl}" style="color:#4f46e5">${title}</a>.</li>
+         <li style="margin-bottom:6px">Select ${list ? escapeHtml(items.join(", ")) : "your tickets"}.</li>
+         <li>Enter this code at checkout:</li>
+       </ol>
+       <p style="margin:0 0 16px;font-size:26px;font-weight:800;letter-spacing:2px">${escapeHtml(code)}</p>
+       <p style="margin:0 0 16px"><a href="${eventUrl}" style="display:inline-block;background:#4f46e5;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none">Open the event</a></p>
+       <p style="margin:0;font-size:13px;color:#64748b">Your total will be ${currency.toUpperCase() === "INR" ? "₹0" : "$0"} and your QR tickets arrive by email. The code works once, for this event only.</p>`,
+    ),
+  };
+}

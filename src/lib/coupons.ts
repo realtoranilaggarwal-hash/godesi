@@ -1,6 +1,7 @@
-import type { Coupon, CouponScope, Plan } from "@prisma/client";
+import type { Coupon, CouponScope, Plan, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { toMinor } from "@/lib/format";
+import { tierOnSale } from "@/lib/ticketTiers";
 import type { TermId } from "@/lib/plans";
 
 export function normalizeCouponCode(input: string) {
@@ -175,4 +176,76 @@ export async function recordCouponUse({
   } catch {
     // Already recorded — the unique constraints are the guard, not an error path.
   }
+}
+
+/** One ticket type a comp code was issued for; `tierId` is null on events without types. */
+export type CompTier = { tierId: string | null; name: string; quantity: number };
+
+export function readCompTiers(value: unknown): CompTier[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object") return [];
+    const { tierId, name, quantity } = entry as Record<string, unknown>;
+    if (typeof quantity !== "number" || quantity < 1) return [];
+    return [
+      {
+        tierId: typeof tierId === "string" ? tierId : null,
+        name: typeof name === "string" ? name : "Ticket",
+        quantity,
+      },
+    ];
+  });
+}
+
+/** "1 × Couple, 1 × Small Kid" */
+export function compTierList(tiers: CompTier[]) {
+  return tiers.map((tier) => `${tier.quantity} × ${tier.name}`).join(", ");
+}
+
+/**
+ * The comp tickets an order is missing, empty when it holds at least every
+ * ticket the code was issued for.
+ */
+export function compTierShortfall(
+  required: CompTier[],
+  lines: { tierId: string | null; quantity: number }[],
+) {
+  return required.filter((tier) => {
+    const booked = lines
+      .filter((line) => line.tierId === tier.tierId)
+      .reduce((sum, line) => sum + line.quantity, 0);
+    return booked < tier.quantity;
+  });
+}
+
+/** Upcoming events with their ticket types, for the comp-ticket form. */
+export async function loadCompEvents(where: Prisma.EventWhereInput) {
+  const events = await db.event.findMany({
+    where: { ...where, startsAt: { gte: new Date() }, status: "APPROVED" },
+    orderBy: { startsAt: "asc" },
+    take: 200,
+    select: {
+      id: true,
+      title: true,
+      currency: true,
+      price: true,
+      tiers: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, name: true, price: true, salesStart: true, salesEnd: true },
+      },
+    },
+  });
+  return events.map((event) => ({
+    id: event.id,
+    title: event.title,
+    currency: event.currency,
+    tiers: event.tiers.length
+      ? event.tiers.map((tier) => ({
+          id: tier.id as string | null,
+          name: tier.name,
+          price: tier.price,
+          onSale: tierOnSale(tier),
+        }))
+      : [{ id: null, name: "Ticket", price: event.price, onSale: true }],
+  }));
 }

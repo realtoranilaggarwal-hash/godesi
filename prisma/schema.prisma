@@ -2098,6 +2098,10 @@ model Coupon {
   bannerSlot     BannerSlot?
   /// Longest booking, in months, an ADS code may be used on.
   adMonths       Int?
+  /// Comp-ticket codes: the tickets the code was issued for, as
+  /// [{ tierId, name, quantity }] (tierId null on events without ticket types).
+  /// Checkout only applies the code when the order holds at least these.
+  compTiers      Json?
   active         Boolean      @default(true)
   createdAt      DateTime     @default(now())
 

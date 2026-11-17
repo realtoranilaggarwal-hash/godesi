@@ -27,7 +27,13 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl, toMinor } from "@/lib/format";
 import { isSupportedVideoUrl } from "@/lib/video";
 import { isAlbumLink } from "@/lib/photoAlbum";
-import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
+import {
+  checkCoupon,
+  compTierList,
+  compTierShortfall,
+  normalizeCouponCode,
+  readCompTiers,
+} from "@/lib/coupons";
 import {
   EVENT_FEATURES,
   ONLINE_OPEN_SEATS,
@@ -671,6 +677,17 @@ export async function bookTicketAction(
         currency: event.currency,
       });
       if (!check.ok) return { error: check.error };
+      const compTiers = readCompTiers(check.coupon.compTiers);
+      const missing = compTierShortfall(
+        compTiers,
+        lines.map((line) => ({ tierId: line.tier?.id ?? null, quantity: line.quantity })),
+      );
+      if (missing.length)
+        return {
+          error: `This code is for ${compTierList(compTiers)} — select ${
+            compTiers.length > 1 ? "those tickets" : "that ticket"
+          } to use it.`,
+        };
       discountMinor = Math.min(check.discountMinor, subtotalMinor);
       couponId = check.coupon.id;
     }
