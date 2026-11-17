@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { describeCoupon } from "@/lib/coupons";
+import { describeCoupon, loadCompEvents } from "@/lib/coupons";
 import { toggleCouponAction } from "@/app/actions/coupons";
-import { EventCouponForm } from "@/components/forms/CouponForms";
+import {
+  CompTicketForm,
+  EventCouponForm,
+} from "@/components/forms/CouponForms";
 import { Badge, Card, EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +17,7 @@ export default async function MyCouponsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/dashboard/coupons");
 
-  const [events, coupons] = await Promise.all([
+  const [events, coupons, compEvents] = await Promise.all([
     db.event.findMany({
       where: { organizerId: user.id },
       orderBy: { startsAt: "desc" },
@@ -25,6 +28,7 @@ export default async function MyCouponsPage() {
       orderBy: { createdAt: "desc" },
       include: { event: { select: { title: true } } },
     }),
+    loadCompEvents({ organizerId: user.id }),
   ]);
 
   return (
@@ -52,6 +56,18 @@ export default async function MyCouponsPage() {
           />
         )}
       </Card>
+
+      {compEvents.length ? (
+        <Card id="comp-tickets">
+          <h2 className="mb-1 text-lg font-bold">Send comp tickets 🎁</h2>
+          <p className="mb-3 text-sm text-slate-500">
+            Paid you by cash or Zelle, or a guest? Pick their tickets and we
+            email them a one-use code that makes those tickets free at checkout,
+            so they get real QR tickets.
+          </p>
+          <CompTicketForm events={compEvents} />
+        </Card>
+      ) : null}
 
       <Card>
         <h2 className="mb-3 text-lg font-bold">Your codes</h2>

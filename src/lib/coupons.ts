@@ -1,6 +1,7 @@
-import type { Coupon, CouponScope, Plan } from "@prisma/client";
+import type { Coupon, CouponScope, Plan, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { toMinor } from "@/lib/format";
+import { tierOnSale } from "@/lib/ticketTiers";
 import type { TermId } from "@/lib/plans";
 
 export function normalizeCouponCode(input: string) {
@@ -169,6 +170,21 @@ export async function checkCoupon({
         error: `That coupon only covers ${describeTierLimits(limits)} tickets.`,
       };
     }
+    /** A fixed-amount code with ticket types is a package (e.g. comp tickets): the order must hold all of it. */
+    if (
+      coupon.discountKind === "FIXED" &&
+      limits.some(
+        (limit) =>
+          (ticketLines ?? [])
+            .filter((line) => line.tierId === limit.tierId)
+            .reduce((sum, line) => sum + line.quantity, 0) < limit.maxQuantity,
+      )
+    ) {
+      return {
+        ok: false,
+        error: `That code is for ${describeTierLimits(limits)} — select those tickets to use it.`,
+      };
+    }
     eligibleMinor = couponEligibleMinor(coupon, ticketLines ?? []).reduce(
       (sum, value) => sum + value,
       0,
@@ -253,4 +269,36 @@ export async function recordCouponUse({
   } catch {
     // Already recorded — the unique constraints are the guard, not an error path.
   }
+}
+
+/** Upcoming events with their ticket types, for the comp-ticket form. */
+export async function loadCompEvents(where: Prisma.EventWhereInput) {
+  const events = await db.event.findMany({
+    where: { ...where, startsAt: { gte: new Date() }, status: "APPROVED" },
+    orderBy: { startsAt: "asc" },
+    take: 200,
+    select: {
+      id: true,
+      title: true,
+      currency: true,
+      price: true,
+      tiers: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, name: true, price: true, salesStart: true, salesEnd: true },
+      },
+    },
+  });
+  return events.map((event) => ({
+    id: event.id,
+    title: event.title,
+    currency: event.currency,
+    tiers: event.tiers.length
+      ? event.tiers.map((tier) => ({
+          id: tier.id as string | null,
+          name: tier.name,
+          price: tier.price,
+          onSale: tierOnSale(tier),
+        }))
+      : [{ id: null, name: "Ticket", price: event.price, onSale: true }],
+  }));
 }

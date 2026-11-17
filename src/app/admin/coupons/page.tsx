@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { CouponForm } from "@/components/forms/CouponForms";
+import { CompTicketForm, CouponForm } from "@/components/forms/CouponForms";
 import { toggleCouponAction } from "@/app/actions/coupons";
 import { generateFreeCourseCodeAction } from "@/app/actions/course";
 import { FREE_CODE_PROVIDER } from "@/lib/courseCodes";
 import { courseBySlug } from "@/lib/courses";
-import { describeCoupon } from "@/lib/coupons";
+import { describeCoupon, loadCompEvents } from "@/lib/coupons";
 import { Badge, Card } from "@/components/ui";
 import { deskFallback } from "@/lib/adminSections";
 
@@ -62,6 +62,7 @@ export default async function Page({
     },
   });
 
+  const compEvents = await loadCompEvents({});
   const freeCodeUses = await db.courseEnrollment.findMany({
     where: { provider: FREE_CODE_PROVIDER },
     orderBy: { createdAt: "desc" },
@@ -123,6 +124,19 @@ export default async function Page({
             <li className="py-2 text-slate-500">No free-course codes used yet.</li>
           ) : null}
         </ul>
+      </Card>
+      <Card id="comp-tickets">
+        <h2 className="mb-1 text-lg font-bold">Send comp tickets</h2>
+        <p className="mb-3 text-sm text-slate-500">
+          For cash/Zelle buyers or guests on any upcoming event: pick their
+          tickets and the buyer gets a one-use code by email that makes those
+          tickets free at checkout.
+        </p>
+        {compEvents.length ? (
+          <CompTicketForm events={compEvents} />
+        ) : (
+          <p className="text-sm text-slate-500">No upcoming events.</p>
+        )}
       </Card>
       <Card id="discount-coupons">
         <h2 className="mb-1 text-lg font-bold">Discount coupons</h2>

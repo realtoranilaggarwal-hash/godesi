@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useFormState } from "react-dom";
 import {
+  type CompTicketState,
   createCouponAction,
   createEventCouponAction,
+  sendCompTicketsAction,
 } from "@/app/actions/coupons";
 import { emptyState } from "@/lib/actions";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -241,6 +243,166 @@ export function EventCouponForm({
       </div>
 
       <SubmitButton pendingLabel="Creating…">Create coupon</SubmitButton>
+    </form>
+  );
+}
+
+export type CompEvent = {
+  id: string;
+  title: string;
+  currency: string;
+  /** Without ticket types the event sells one "Ticket" at its base price. */
+  tiers: { id: string | null; name: string; price: number; onSale: boolean }[];
+};
+
+const money = (value: number, currency: string) =>
+  new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(value);
+
+/** Organiser/admin: a one-use $0 code for chosen tickets, emailed to the buyer. */
+export function CompTicketForm({ events }: { events: CompEvent[] }) {
+  const [state, formAction] = useFormState<CompTicketState, FormData>(
+    sendCompTicketsAction,
+    {},
+  );
+  const [eventId, setEventId] = useState(events[0]?.id ?? "");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const event = events.find((item) => item.id === eventId) ?? events[0];
+  const total = event
+    ? event.tiers.reduce(
+        (sum, tier) => sum + tier.price * (quantities[tier.id ?? "base"] ?? 0),
+        0,
+      )
+    : 0;
+
+  return (
+    <form action={formAction} className="space-y-3">
+      {state.code ? (
+        <div
+          className={`rounded-xl border p-3 text-sm ${
+            state.emailed
+              ? "border-green-200 bg-green-50 text-green-900"
+              : "border-amber-300 bg-amber-50 text-amber-900"
+          }`}
+          role="status"
+        >
+          <p className="font-semibold">
+            {state.emailed
+              ? `✅ Emailed to ${state.buyerEmail}`
+              : `⚠️ Email to ${state.buyerEmail} not sent — share the code yourself`}
+          </p>
+          <p className="mt-1">
+            Code:{" "}
+            <span className="select-all font-mono text-lg font-bold">
+              {state.code}
+            </span>
+          </p>
+          <p className="mt-1 break-words">
+            For {state.items}. The buyer logs in, opens the event, selects these
+            tickets and enters the code at checkout — nothing to pay.
+          </p>
+        </div>
+      ) : (
+        <FormError>{state.error}</FormError>
+      )}
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label="Event">
+          <select
+            name="eventId"
+            required
+            value={event?.id ?? ""}
+            onChange={(change) => {
+              setEventId(change.target.value);
+              setQuantities({});
+            }}
+            className={inputClass}
+          >
+            {events.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.title}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <div className="hidden sm:block" />
+        <Field label="Buyer name">
+          <input
+            name="buyerName"
+            required
+            minLength={2}
+            className={inputClass}
+          />
+        </Field>
+        <Field label="Buyer email" hint="The code is emailed here">
+          <input
+            name="buyerEmail"
+            type="email"
+            required
+            className={inputClass}
+          />
+        </Field>
+      </div>
+
+      {event ? (
+        <fieldset key={event.id} className="space-y-2">
+          <legend className="mb-1 text-sm font-semibold">
+            Tickets to send
+          </legend>
+          {event.tiers.map((tier) => {
+            const key = tier.id ?? "base";
+            return (
+              <label
+                key={key}
+                className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              >
+                <span className="min-w-0 flex-1 break-words">
+                  <span className="font-semibold">{tier.name}</span>{" "}
+                  <span className="text-slate-500">
+                    {money(tier.price, event.currency)}
+                    {tier.onSale ? "" : " · not on sale now"}
+                  </span>
+                </span>
+                <span className="w-20 shrink-0">
+                  <input
+                    name={`qty_${key}`}
+                    type="number"
+                    min={0}
+                    max={10}
+                    inputMode="numeric"
+                    disabled={!tier.onSale}
+                    value={quantities[key] ?? 0}
+                    onChange={(change) =>
+                      setQuantities((current) => ({
+                        ...current,
+                        [key]: Math.max(0, Number(change.target.value) || 0),
+                      }))
+                    }
+                    className={inputClass}
+                  />
+                </span>
+              </label>
+            );
+          })}
+          <p className="text-sm">
+            Code value: <strong>{money(total, event.currency)}</strong>
+          </p>
+        </fieldset>
+      ) : null}
+
+      <p className="text-xs text-slate-500">
+        The code works once, only for this event, and only when the order holds
+        at least these tickets; it takes off exactly their price, so extra
+        tickets are paid for. Seats are not held — the buyer books them like
+        anyone else.
+      </p>
+
+      <SubmitButton pendingLabel="Sending…">
+        Create code &amp; email buyer
+      </SubmitButton>
     </form>
   );
 }
