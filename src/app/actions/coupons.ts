@@ -242,7 +242,8 @@ export async function sendCompTicketsAction(
     const event = await db.event.findUnique({
       where: { id: parsed.data.eventId },
       include: {
-        tiers: { orderBy: { sortOrder: "asc" } },
+        /** Sponsorships check out on their own form, so comps cover entry tickets only. */
+        tiers: { where: { kind: { not: "SPONSOR" } }, orderBy: { sortOrder: "asc" } },
         organizer: { select: { name: true } },
       },
     });

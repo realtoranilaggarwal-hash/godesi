@@ -284,6 +284,7 @@ export async function loadCompEvents(where: Prisma.EventWhereInput) {
       price: true,
       tiers: {
         orderBy: { sortOrder: "asc" },
+        where: { kind: { not: "SPONSOR" } },
         select: { id: true, name: true, price: true, salesStart: true, salesEnd: true },
       },
     },
