@@ -47,9 +47,13 @@ export default async function Page({
   });
 
   const ticketEvents = await db.event.findMany({
-    where: { startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) } },
+    /** Skips imported wire listings unless they sell ticket tiers here. */
+    where: {
+      OR: [{ sourceId: null }, { tiers: { some: {} } }],
+      startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) },
+    },
     orderBy: { startsAt: "asc" },
-    take: 100,
+    take: 500,
     select: {
       id: true,
       title: true,

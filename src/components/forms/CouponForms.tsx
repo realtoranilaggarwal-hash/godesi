@@ -77,7 +77,7 @@ function TicketCouponFields({ events }: { events: CouponEventOption[] }) {
                   <input
                     name={`tierMax_${tier.id}`}
                     type="number"
-                    min={0}
+                    min={1}
                     max={10}
                     placeholder="—"
                     aria-label={`${tier.name} tickets covered`}
