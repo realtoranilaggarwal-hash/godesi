@@ -63,8 +63,7 @@ export async function sendEmail({
   if (!key || !from) return false;
 
   const staffInbox = [SITE.supportEmail, SITE.salesEmail].includes(to);
-  const recipients =
-    staffInbox && SITE.alertsEmail && SITE.alertsEmail !== to ? [to, SITE.alertsEmail] : [to];
+  const recipients = staffInbox && SITE.alertsEmail ? [SITE.alertsEmail] : [to];
 
   try {
     const response = await fetch(ENDPOINT, {
