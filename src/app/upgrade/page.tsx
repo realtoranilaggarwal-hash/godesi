@@ -20,6 +20,7 @@ import { formatMinor } from "@/lib/format";
 import { UpgradeCart } from "@/components/UpgradeCart";
 import { Alert, Card, inputClass } from "@/components/ui";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { SocialGrowthServices } from "@/components/social/SocialGrowthServices";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -300,6 +301,14 @@ export default async function UpgradePage({
             — recognition listing and awards
           </li>
         </ul>
+      </Card>
+      <Card className="border-sky-200" id="social-growth">
+        <h3 className="text-lg font-bold">📣 Social media growth</h3>
+        <p className="mb-3 mt-1 text-sm text-slate-600">
+          Followers, likes, views and shares for Instagram, Facebook, TikTok and YouTube. Pick a
+          package and we take payment by phone or Zelle.
+        </p>
+        <SocialGrowthServices source="upgrade" />
       </Card>
     </div>
   );

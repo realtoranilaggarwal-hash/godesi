@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PrintButton } from "@/components/PrintButton";
+import { SocialGrowthServices } from "@/components/social/SocialGrowthServices";
 import { PartnerPackageForm } from "@/components/advertise/PartnerPackageForm";
 import { AD_PLACEMENTS, adPrice } from "@/lib/ads";
 import { cachedQuery } from "@/lib/cache";
@@ -438,6 +439,15 @@ export default async function ProposalPage({
           . Services marked &ldquo;Included&rdquo; aren&apos;t sold separately, so they aren&apos;t
           counted in the retail value. {PARTNER_HOSTING_NOTE}
         </p>
+      </section>
+
+      <section id="add-ons" className="scroll-mt-24 space-y-2">
+        <h2 className="text-xl font-black text-slate-900">Add-ons: social media growth</h2>
+        <p className="text-sm text-slate-600">
+          Add followers, likes, views or shares to any partnership. Add-ons are ordered and paid
+          separately by phone or Zelle.
+        </p>
+        <SocialGrowthServices source="proposal" />
       </section>
 
       <section className="break-inside-avoid rounded-2xl border-2 border-amber-400 bg-amber-50/60 p-5 print:rounded-xl print:p-4">
