@@ -58,7 +58,7 @@ export function ProfessionalCard({
       <div className="mt-auto flex flex-wrap items-center gap-1">
         {person.foundingNumber !== null ? (
           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">
-            🏅 Founding #{person.foundingNumber}
+            🏅 Founding member
           </span>
         ) : null}
         {person.openToWork ? (

@@ -119,7 +119,7 @@ export async function welcomeFoundingMember(userId: string) {
   await awardPoints({
     userId,
     reason: "FOUNDING_MEMBER",
-    note: `Founding member #${seat} of ${FOUNDING_LIMIT}`,
+    note: `Founding member — one of the first ${FOUNDING_LIMIT}`,
     once: true,
   });
   return seat;
