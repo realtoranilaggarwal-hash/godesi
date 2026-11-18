@@ -5,11 +5,11 @@ export function FoundingBadge({ number }: { number: number | null }) {
   if (number === null) return null;
   return (
     <span
-      title={`Founding member #${number} — one of the first ${FOUNDING_LIMIT} on Godesi`}
+      title={`Founding member — one of the first ${FOUNDING_LIMIT} on Godesi`}
       className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-[10px] font-bold text-white"
     >
       <span aria-hidden>🏅</span>
-      Founding member #{number}
+      Founding member
     </span>
   );
 }
