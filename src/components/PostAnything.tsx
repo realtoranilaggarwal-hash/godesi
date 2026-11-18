@@ -45,11 +45,10 @@ const SECTIONS: { title: string; options: PostOption[] }[] = [
   {
     title: "💼 Business & services",
     options: [
-      { href: "/dashboard/profile", icon: "🏪", label: "Business card" },
       {
-        href: "/post?type=professional",
-        icon: "🎓",
-        label: "Professional profile",
+        href: "/dashboard/profile",
+        icon: "🏪",
+        label: "Business card / professional profile",
       },
       {
         href: "/dashboard/gigs",
@@ -102,12 +101,10 @@ export function PostAnything({
   const sections = hasCard
     ? SECTIONS.map((section) => ({
         ...section,
-        options: section.options.flatMap((option) =>
-          option.href === "/post?type=professional"
-            ? []
-            : option.href === "/dashboard/profile"
-              ? [{ ...option, label: "My card ✓ — edit" }]
-              : [option],
+        options: section.options.map((option) =>
+          option.href === "/dashboard/profile"
+            ? { ...option, label: "My card ✓ — edit" }
+            : option,
         ),
       }))
     : SECTIONS;
