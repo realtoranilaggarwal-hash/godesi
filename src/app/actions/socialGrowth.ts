@@ -23,7 +23,7 @@ const schema = z.object({
   source: z.enum(["upgrade", "proposal"]).default("upgrade"),
 });
 
-/** Takes the order request only; payment is collected by phone or Zelle. */
+/** Takes the order request only; payment is collected by Venmo, Zelle or phone. */
 export async function requestSocialGrowthOrder(
   _prev: ActionState,
   formData: FormData,
@@ -56,7 +56,7 @@ export async function requestSocialGrowthOrder(
   const sent = await sendEmail({
     to: SITE.salesEmail,
     subject: `Social media order — ${order}`,
-    html: shell("New social media growth order", `<table>${rows}</table><p>Collect payment by phone or Zelle, then place the order.</p>`),
+    html: shell("New social media growth order", `<table>${rows}</table><p>Collect payment by Venmo, Zelle or phone, then place the order.</p>`),
     replyTo: data.email,
   });
   if (!sent) {
@@ -69,13 +69,13 @@ export async function requestSocialGrowthOrder(
     html: shell(
       "Thanks — your order is in",
       `<p>${escapeHtml(order)} for ${escapeHtml(data.link)}.</p>
-      <p>We'll call or text you at ${escapeHtml(data.phone)} within one business day to take payment by phone or Zelle. Your order starts as soon as it's paid.</p>
+      <p>We'll call or text you at ${escapeHtml(data.phone)} within one business day to take payment by Venmo, Zelle or phone. Your order starts as soon as it's paid.</p>
       <p>Questions? Call ${SOCIAL_ORDER_PHONE} or reply to this email.</p>`,
     ),
     replyTo: SITE.salesEmail,
   });
 
   return {
-    success: `Order received: ${order}. We'll call or text you within one business day to take payment by phone or Zelle.`,
+    success: `Order received: ${order}. We'll call or text you within one business day to take payment by Venmo, Zelle or phone.`,
   };
 }

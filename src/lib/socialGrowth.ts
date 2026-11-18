@@ -1,4 +1,4 @@
-/** Social media growth services sold as add-ons; ordered by phone or Zelle, not by card. */
+/** Social media growth services sold as add-ons; ordered by Venmo, Zelle or phone, not by card. */
 
 export type SocialPackage = { qty: number; priceUsd: number };
 

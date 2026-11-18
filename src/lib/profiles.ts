@@ -92,6 +92,7 @@ export const RESERVED_USERNAMES = new Set([
   "crypto-fear-greed",
   "unsubscribe",
   "upgrade",
+  "venmo",
   "classifieds",
   "dj",
   "desi-websites",

@@ -445,7 +445,7 @@ export default async function ProposalPage({
         <h2 className="text-xl font-black text-slate-900">Add-ons: social media growth</h2>
         <p className="text-sm text-slate-600">
           Add followers, likes, views or shares to any partnership. Add-ons are ordered and paid
-          separately by phone or Zelle.
+          separately by Venmo, Zelle or phone.
         </p>
         <SocialGrowthServices source="proposal" />
       </section>

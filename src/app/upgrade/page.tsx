@@ -306,7 +306,7 @@ export default async function UpgradePage({
         <h3 className="text-lg font-bold">📣 Social media growth</h3>
         <p className="mb-3 mt-1 text-sm text-slate-600">
           Followers, likes, views and shares for Instagram, Facebook, TikTok and YouTube. Pick a
-          package and we take payment by phone or Zelle.
+          package and we take payment by Venmo, Zelle or phone.
         </p>
         <SocialGrowthServices source="upgrade" />
       </Card>

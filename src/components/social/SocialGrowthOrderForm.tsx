@@ -87,7 +87,7 @@ export function SocialGrowthOrderForm({ source }: { source: "upgrade" | "proposa
       <FormSuccess>{state.success}</FormSuccess>
       <SubmitButton pendingLabel="Sending…">Request this order</SubmitButton>
       <p className="text-xs text-slate-500">
-        No card needed. We call or text you to take payment by phone or Zelle, and your order
+        No card needed. We call or text you to take payment by Venmo, Zelle or phone, and your order
         starts once it&apos;s paid.
       </p>
     </form>

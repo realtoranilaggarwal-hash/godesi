@@ -7,8 +7,9 @@ import {
   formatSocialUsd,
 } from "@/lib/socialGrowth";
 import { SocialGrowthOrderForm } from "./SocialGrowthOrderForm";
+import { VenmoPay } from "@/components/VenmoPay";
 
-/** Price list for every social media service plus the phone/Zelle order form. */
+/** Price list for every social media service plus the Venmo and the order form. */
 export function SocialGrowthServices({ source }: { source: "upgrade" | "proposal" }) {
   return (
     <div className="space-y-4">
@@ -60,8 +61,12 @@ export function SocialGrowthServices({ source }: { source: "upgrade" | "proposal
         <a href={SOCIAL_ORDER_PHONE_HREF} className="font-semibold underline">
           {SOCIAL_ORDER_PHONE}
         </a>{" "}
-        — we take payment by phone or Zelle.
+        — we take payment by Venmo, Zelle or phone.
       </p>
+      <VenmoPay
+        compact
+        note="Send your order request first, then pay the package price and put your name and the service in the Venmo note."
+      />
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 print:hidden">
         <h4 className="mb-2 font-bold text-slate-900">Order a package</h4>
         <SocialGrowthOrderForm source={source} />
