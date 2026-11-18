@@ -62,6 +62,10 @@ export async function sendEmail({
   const from = process.env.EMAIL_FROM;
   if (!key || !from) return false;
 
+  const staffInbox = [SITE.supportEmail, SITE.salesEmail].includes(to);
+  const recipients =
+    staffInbox && SITE.alertsEmail && SITE.alertsEmail !== to ? [to, SITE.alertsEmail] : [to];
+
   try {
     const response = await fetch(ENDPOINT, {
       method: "POST",
@@ -71,7 +75,7 @@ export async function sendEmail({
       },
       body: JSON.stringify({
         from,
-        to: [to],
+        to: recipients,
         subject,
         html,
         ...(replyTo ? { reply_to: replyTo } : {}),
