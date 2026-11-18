@@ -9,103 +9,101 @@ import { displayCurrency } from "@/lib/displayCurrency";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { trafficReportUrl } from "@/lib/traffic";
 
+const statsUrl = trafficReportUrl();
+
 /** Five roughly equal columns, so no single list runs far past the others. */
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
   [
     {
       title: "Directory",
       links: [
-        { href: "/categories", label: "Categories" },
+        { href: "/blog", label: "Blog" },
+        { href: "/bollywood", label: "Bollywood news" },
         { href: "/search", label: "Cards" },
-        { href: "/classifieds", label: "📣 Free desi classifieds" },
-        { href: "/leads", label: "Leads" },
-        { href: "/events", label: "Events" },
+        { href: "/categories", label: "Categories" },
+        { href: "/guide", label: "City guides" },
         { href: "/clubs", label: "Clubs" },
         { href: "/deals", label: "🏷️ Deals & offers" },
         { href: "/shop", label: "🛍️ Desi shop" },
+        { href: "/events", label: "Events" },
+        { href: "/classifieds", label: "📣 Free desi classifieds" },
         { href: "/gigs", label: "Gigs — services $5–$100" },
         { href: "/jobs", label: "Jobs & mini jobs" },
-        { href: "/travel", label: "✈️ Travel — flights & hotels" },
-        { href: "/venues", label: "Venues" },
+        { href: "/leads", label: "Leads" },
         { href: "/resources", label: "Links" },
         { href: "/news", label: "News" },
-        { href: "/bollywood", label: "Bollywood news" },
-        { href: "/blog", label: "Blog" },
-        { href: "/guide", label: "City guides" },
         { href: "/find", label: "Search everything" },
+        { href: "/travel", label: "✈️ Travel — flights & hotels" },
+        { href: "/venues", label: "Venues" },
       ],
     },
     {
       title: "For business",
       links: [
+        { href: "/advertise", label: "Advertise on Godesi" },
         { href: "/claim", label: "Claim godesi.com/yourname" },
-        { href: "/signup", label: "List your business free" },
-        { href: "/why-godesi", label: "Why Godesi" },
-        { href: "/why-list", label: "Why list on Godesi?" },
-        { href: "/pricing", label: "Membership plans" },
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/tools", label: "🧰 Free business tools" },
         {
           href: "/website",
           label: `Get a website for $${WEBSITE_OFFER.priceUsd}`,
         },
-        { href: "/website/examples", label: "Website before & after examples" },
+        { href: "/signup", label: "List your business free" },
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },
-        { href: "/advertise", label: "Advertise on Godesi" },
-        { href: "/walloffame", label: "🧱 Wall of Fame — $10 a brick" },
+        { href: "/pricing", label: "Membership plans" },
         { href: "/advertise/proposal", label: "New Year's Eve partnership — $500 / $2,000" },
-        { href: "/listings/new?kind=MARKETPLACE", label: "Post a free classified ad" },
-        { href: "/events/new", label: "Post an event" },
-        { href: "/clubs/new", label: "Start a club" },
         { href: "/dashboard/deals", label: "Post a deal" },
-        { href: "/dashboard/gigs", label: "Sell a gig" },
+        { href: "/listings/new?kind=MARKETPLACE", label: "Post a free classified ad" },
         { href: "/jobs/new", label: "Post a job" },
-        { href: "/search", label: "🪪 Digital business cards" },
-        { href: "/tools", label: "🧰 Free business tools" },
-        { href: "/dashboard", label: "Dashboard" },
+        { href: "/events/new", label: "Post an event" },
+        { href: "/dashboard/gigs", label: "Sell a gig" },
+        { href: "/clubs/new", label: "Start a club" },
+        { href: "/walloffame", label: "🧱 Wall of Fame — $10 a brick" },
+        { href: "/website/examples", label: "Website before & after examples" },
+        { href: "/why-godesi", label: "Why Godesi" },
+        { href: "/why-list", label: "Why list on Godesi?" },
       ],
     },
     {
       title: "Community",
       links: [
-        { href: "/connect", label: "Connect" },
-        { href: "/chatter", label: "💬 GoDesi Chatter" },
-        { href: "/rishta", label: "💍 Rishta — marriage profiles" },
-        { href: "/rishta/new", label: "Post a Rishta profile" },
-        { href: "/clubs", label: "🎤 Clubs & meetups" },
-        { href: "/people", label: "People on GoDesi" },
-        { href: "/professionals", label: "GoDesi Professionals" },
-        { href: "/alumni", label: "Find your batchmates" },
-        { href: "/buzz", label: "#godesi social wall" },
-        { href: QUORA_SPACE, label: "GoDesi on Quora" },
-        { href: "/news/report", label: "Share news" },
-        { href: "/journalists", label: "Become a local journalist" },
-        { href: "/rewards", label: "Refer & earn rewards" },
-        { href: "/walloffame", label: "🧱 Wall of Fame" },
-        { href: "/ambassador", label: "🤝 Become an ambassador" },
         { href: "/ambassador/dashboard", label: "📊 Ambassador dashboard" },
+        { href: "/ambassador", label: "🤝 Become an ambassador" },
+        { href: "/connect", label: "Connect" },
+        { href: "/alumni", label: "Find your batchmates" },
+        { href: "/chatter", label: "💬 GoDesi Chatter" },
+        { href: QUORA_SPACE, label: "GoDesi on Quora" },
+        { href: "/professionals", label: "GoDesi Professionals" },
+        { href: "/buzz", label: "#godesi social wall" },
         { href: "/earn", label: "💸 Make money online" },
+        { href: "/people", label: "People on GoDesi" },
+        { href: "/rishta/new", label: "Post a Rishta profile" },
+        { href: "/rewards", label: "Refer & earn rewards" },
+        { href: "/rishta", label: "💍 Rishta — marriage profiles" },
+        { href: "/news/report", label: "Share news" },
       ],
     },
     {
       title: "Live, media & daily",
       links: [
-        { href: "/live-radio", label: "🎧 Listen live — desi radio" },
-        { href: "/live-tv", label: "📺 Watch live — desi TV" },
-        { href: "/games", label: "🎮 Free games" },
-        { href: "/markets", label: "📈 Markets today" },
         { href: "/live/submit", label: "Add your radio or TV channel" },
-        { href: "/desi-elite", label: "GoDesi Elite" },
         { href: "/desi-elite/apply", label: "Apply for GoDesi Elite" },
+        { href: "/astrology", label: "🔮 Astrology guides" },
+        { href: "/pooja", label: "🙏 Book a video pooja" },
+        { href: "/crypto-fear-greed", label: "😱 Crypto Fear & Greed" },
+        { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
+        { href: "/festivals", label: "🪔 Festival calendar" },
+        { href: "/games", label: "🎮 Free games" },
+        { href: "/desi-elite", label: "GoDesi Elite" },
         { href: "/desi-elite/awards", label: "🏆 GoDesi Elite Awards" },
         { href: "/media", label: "🎙️ GoDesi Media" },
         { href: "/media/join", label: "Join the media team" },
+        { href: "/live-radio", label: "🎧 Listen live — desi radio" },
+        { href: "/markets", label: "📈 Markets today" },
         { href: "/leaderboard", label: "🏅 Top contributors" },
         { href: "/trending", label: "🔥 Trending hashtags" },
-        { href: "/festivals", label: "🪔 Festival calendar" },
-        { href: "/pooja", label: "🙏 Book a video pooja" },
         { href: "/visa-bulletin", label: "🛂 Visa Bulletin for India" },
-        { href: "/usd-to-inr", label: "💱 Dollar to rupee today" },
-        { href: "/crypto-fear-greed", label: "😱 Crypto Fear & Greed" },
-        { href: "/astrology", label: "🔮 Astrology guides" },
+        { href: "/live-tv", label: "📺 Watch live — desi TV" },
       ],
     },
     {
@@ -113,24 +111,24 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
       links: [
         { href: "/about", label: "About us" },
         { href: "/contact", label: "Contact us" },
-        { href: "/faq", label: "FAQ" },
-        { href: "/sitemap", label: "Sitemap" },
-        { href: "/feeds", label: "📡 RSS feeds" },
-        { href: "/report", label: "Report an issue" },
-        { href: "/terms", label: "Terms of service" },
-        { href: "/privacy", label: "Privacy policy" },
         { href: "/cookies", label: "Cookie policy" },
-        { href: "/refunds", label: "Refund policy" },
-        { href: "/safety", label: "Trust & safety" },
+        { href: "/faq", label: "FAQ" },
         { href: "/complaints", label: "⚠️ How to file a complaint" },
+        ...(statsUrl ? [{ href: statsUrl, label: "Live traffic stats" }] : []),
         { href: "/news/report?topic=consumer", label: "Post a consumer alert" },
+        { href: "/privacy", label: "Privacy policy" },
+        { href: "/refunds", label: "Refund policy" },
+        { href: "/report", label: "Report an issue" },
+        { href: "/feeds", label: "📡 RSS feeds" },
+        { href: "/sitemap", label: "Sitemap" },
+        { href: "/terms", label: "Terms of service" },
+        { href: "/safety", label: "Trust & safety" },
       ],
     },
   ];
 
 export function SiteFooter() {
   const socials = socialLinks();
-  const statsUrl = trafficReportUrl();
 
   return (
     <footer className="mt-12 border-t border-slate-200 bg-white">
@@ -217,19 +215,6 @@ export function SiteFooter() {
                   )}
                 </li>
               ))}
-              {section.title === "Company" && statsUrl ? (
-                <li>
-                  <a
-                    href={statsUrl}
-                    {...(statsUrl.startsWith("/")
-                      ? {}
-                      : { target: "_blank", rel: "noreferrer" })}
-                    className="hover:text-slate-900"
-                  >
-                    Live traffic stats
-                  </a>
-                </li>
-              ) : null}
             </ul>
           </div>
         ))}
