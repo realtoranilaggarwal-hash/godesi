@@ -6,7 +6,7 @@ export const SITE = {
   name: "Godesi",
   supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "admin@godesi.com",
   salesEmail: process.env.NEXT_PUBLIC_SALES_EMAIL ?? "sales@godesi.com",
-  /** Private inbox copied on every staff alert sent to the support or sales address. */
+  /** Private inbox that receives every staff alert addressed to the support or sales address. */
   alertsEmail: process.env.ALERTS_EMAIL ?? "godesibiz@gmail.com",
 };
 
