@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OfferCountdown } from "@/components/OfferCountdown";
 import { proxyImage } from "@/lib/proxyImage";
 import {
   type EventSponsorRow,
@@ -91,6 +92,14 @@ export function EventSponsors({
                     Review to get the code
                   </span>
                 </Link>
+              ) : null}
+              {discount && sponsor.coupon?.expiresAt ? (
+                <span className="mt-1 text-xs font-semibold text-red-600">
+                  ⏳ Code ends in{" "}
+                  <OfferCountdown
+                    endsAt={sponsor.coupon.expiresAt.toISOString()}
+                  />
+                </span>
               ) : null}
             </li>
           );

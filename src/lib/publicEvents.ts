@@ -130,6 +130,9 @@ export function eventJson(event: PublicEvent, ref?: string) {
           discountKind: coupon?.discountKind ?? null,
           discountAmount: coupon?.amount ?? null,
           discountLabel: coupon ? sponsorDiscountLabel(sponsor) : null,
+          /** When the code stops working, for a countdown; null if it never expires. */
+          discountEndsAt:
+            coupon && sponsorDiscountLabel(sponsor) ? coupon.expiresAt : null,
         };
       }),
     sponsorSignupUrl: `${base}/dashboard/sponsor`,
