@@ -113,6 +113,22 @@ const PROMOS = [
   },
 ] as const;
 
+/** Sells the slot itself: every advertiser gets a live views & clicks dashboard. */
+const AD_STATS_PROMO = {
+  emoji: "📊",
+  title: "Advertise here — see every view & click",
+  text: "Your own live dashboard comes with every GoDesi banner.",
+  cta: "Advertise",
+  href: "/advertise",
+  tone: "from-orange-500 via-pink-600 to-purple-700",
+};
+
+/** Ready-made creatives for the shapes they fit. */
+const AD_STATS_IMAGES = [
+  { src: "/banners/advertise-stats-970x90.png", width: 970, height: 90 },
+  { src: "/banners/advertise-stats-320x100.png", width: 320, height: 100 },
+];
+
 export function HousePromo({
   width,
   height,
@@ -127,7 +143,39 @@ export function HousePromo({
 }) {
   let hash = 0;
   for (const character of seed) hash = (hash * 31 + character.charCodeAt(0)) % 9973;
-  const promo = PROMOS[hash % PROMOS.length];
+  const ratio = width / height;
+  // Every leaderboard-like strip (970×90, 728×90, 468×60) takes the wide one.
+  const image =
+    ratio >= 7
+      ? AD_STATS_IMAGES[0]
+      : AD_STATS_IMAGES.find(
+          (creative) =>
+            Math.abs(creative.width / creative.height - ratio) / ratio < 0.1,
+        );
+
+  if (image) {
+    return (
+      <Link
+        href={AD_STATS_PROMO.href}
+        title={AD_STATS_PROMO.title}
+        style={{ maxWidth: width }}
+        className={`mx-auto block overflow-hidden rounded-xl transition hover:opacity-95 ${className}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image.src}
+          alt={`${AD_STATS_PROMO.title}. ${AD_STATS_PROMO.text}`}
+          width={image.width}
+          height={image.height}
+          loading="lazy"
+          className="h-auto w-full"
+        />
+      </Link>
+    );
+  }
+
+  // Every other empty slot of the other shapes sells advertising too.
+  const promo = hash % 2 === 0 ? AD_STATS_PROMO : PROMOS[(hash >> 1) % PROMOS.length];
   const tall = height > width;
 
   return (

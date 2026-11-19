@@ -8,8 +8,9 @@ import {
   AD_SLOT_ORDER,
   formatAdPrice,
   formatCpm,
+  formatCtr,
 } from "@/lib/ads";
-import { activeBanners, slotSoldCount } from "@/lib/banners";
+import { activeBanners, slotSoldCount, slotStats } from "@/lib/banners";
 import { requestCurrency } from "@/lib/currency";
 import { getCurrentUser } from "@/lib/auth";
 import { proxyImage } from "@/lib/proxyImage";
@@ -49,12 +50,14 @@ export default async function PlacementPage({
   if (slot === "WALL") redirect("/walloffame");
 
   const placement = AD_PLACEMENTS[slot];
-  const [user, currency, running, live] = await Promise.all([
+  const [user, currency, running, live, stats] = await Promise.all([
     getCurrentUser(),
     requestCurrency(),
     slotSoldCount(slot),
     activeBanners(slot, 1),
+    slotStats(slot),
   ]);
+  const number = (value: number) => value.toLocaleString("en-US");
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -75,6 +78,59 @@ export default async function PlacementPage({
         </p>
         <p className="mt-3 text-slate-600">{placement.blurb}</p>
       </div>
+
+      <Card id="stats">
+        <h2 className="text-lg font-bold">This spot&apos;s numbers</h2>
+        {stats.impressions ? (
+          <>
+            <p className="mt-1 text-sm text-slate-600">
+              Live totals for every banner that has run here since{" "}
+              {stats.since?.toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}
+              . Updated every few minutes.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <SpotStat
+                label="Views"
+                value={number(stats.impressions)}
+                tone="bg-indigo-50 text-indigo-700"
+              />
+              <SpotStat
+                label="Clicks"
+                value={number(stats.clicks)}
+                tone="bg-emerald-50 text-emerald-700"
+              />
+              <SpotStat
+                label="Click rate"
+                value={formatCtr(stats.impressions, stats.clicks)}
+                tone="bg-amber-50 text-amber-700"
+              />
+              <SpotStat
+                label="Views a day"
+                value={number(Math.round(stats.impressions / stats.days))}
+                tone="bg-fuchsia-50 text-fuchsia-700"
+              />
+            </div>
+            <p className="mt-3 text-xs text-slate-500">
+              A view is counted each time a page shows a banner here; a click
+              each time someone taps through to the advertiser.
+              {running > 1
+                ? ` ${running} advertisers share this spot right now, taking turns.`
+                : ""}{" "}
+              Once you book, your own banner&apos;s views and clicks are in your
+              dashboard.
+            </p>
+          </>
+        ) : (
+          <p className="mt-1 text-sm text-slate-600">
+            No banner has run here yet. Once one does, its views and clicks are
+            counted and shown here.
+          </p>
+        )}
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
@@ -177,6 +233,23 @@ export default async function PlacementPage({
           without payment.
         </Alert>
       ) : null}
+    </div>
+  );
+}
+
+function SpotStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: string;
+}) {
+  return (
+    <div className={`rounded-xl p-3 ${tone}`}>
+      <p className="text-xs font-bold uppercase tracking-wide">{label}</p>
+      <p className="mt-1 text-2xl font-bold">{value}</p>
     </div>
   );
 }

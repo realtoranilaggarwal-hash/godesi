@@ -51,6 +51,15 @@ export function AdminBannersCard({
                 <td className="w-24 py-2 text-xs font-semibold">
                   {banner.slot}{" "}
                   {banner.position ? `#${banner.position}` : "(unassigned)"}
+                  <a
+                    href={`/advertise/where/${banner.slot.toLowerCase()}#stats`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 block font-normal text-indigo-600 hover:underline"
+                    title="Public page with this spot's views and clicks, to send to buyers"
+                  >
+                    spot stats ↗
+                  </a>
                 </td>
                 <td>
                   <div className="flex items-start gap-2">

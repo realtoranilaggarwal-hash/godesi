@@ -734,6 +734,39 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
+    q: "📊 How do I see the views and clicks of the banner I booked?",
+    id: "banner-stats",
+    a: (
+      <>
+        <ol>
+          <li>
+            Book your banner on <Link href="/advertise">Advertise</Link> while
+            logged in — or, if GoDesi set it up for you, make sure your account
+            uses the email you gave us.
+          </li>
+          <li>
+            Log in and open{" "}
+            <Link href="/dashboard/ads">Dashboard → My ads</Link> any time.
+          </li>
+          <li>
+            Each of your banners shows its <strong>views</strong> (how often it
+            was shown), <strong>clicks</strong> (visitors sent to your website)
+            and <strong>click rate</strong>, plus your totals. The numbers
+            update live, with every view and click.
+          </li>
+        </ol>
+        <p>
+          Before you book, each spot&apos;s page shows what it delivers — e.g.
+          the{" "}
+          <Link href="/advertise/where/header#stats">
+            header banner&apos;s views and clicks
+          </Link>
+          . Only you (and GoDesi admins) can see your own banner&apos;s numbers.
+        </p>
+      </>
+    ),
+  },
+  {
     q: "🌍 Which countries does Godesi support?",
     a: (
       <>

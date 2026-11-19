@@ -8,6 +8,12 @@ import { HOUSE_BANNERS } from "@/components/houseBanners";
 import { CategoryTree } from "@/components/CategoryTree";
 import type { PickerGroup } from "@/components/CategoryPicker";
 
+/** Leads every rail's GoDesi promos: sells the slot with its live stats. */
+const AD_STATS_BANNER = {
+  src: "/banners/advertise-stats-320x100.png",
+  title: "Advertise here — see every view & click on your own live dashboard",
+};
+
 export type SmallBanner = { id: string; title: string; imageUrl: string };
 
 /** Rail width plus the gap beside it. */
@@ -177,14 +183,15 @@ export function SmallBannerRail({
   }
 
   const count = fills
-    ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length)
+    ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length + 1)
     : show;
   const visible = Array.from(
     { length: Math.min(count, banners.length) },
     (_, index) => banners[(offset + index) % banners.length],
   );
+  const showAdStats = count > visible.length;
   const house = Array.from(
-    { length: count - visible.length },
+    { length: Math.max(0, count - visible.length - 1) },
     (_, index) => HOUSE_BANNERS[(offset + index) % HOUSE_BANNERS.length],
   );
 
@@ -214,6 +221,24 @@ export function SmallBannerRail({
           />
         </a>
       ))}
+      {showAdStats ? (
+        <Link
+          href="/advertise"
+          title={AD_STATS_BANNER.title}
+          data-house-banner="advertise-stats"
+          className="block overflow-hidden rounded-xl shadow-sm transition hover:shadow-md"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={AD_STATS_BANNER.src}
+            alt={AD_STATS_BANNER.title}
+            width={320}
+            height={100}
+            loading="lazy"
+            className="h-auto w-full"
+          />
+        </Link>
+      ) : null}
       {house.map((banner) => (
         <Link
           key={banner.slug}
