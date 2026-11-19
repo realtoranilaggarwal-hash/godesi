@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { TEMPLES_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { gradientFor } from "@/lib/categories";
@@ -100,6 +102,12 @@ export default async function ReligiousPage({
             </LinkButton>
           </div>
         </section>
+
+        <ShortVideoCard
+          video={TEMPLES_VIDEO_URL}
+          heading="🛕 Find temples, gurudwaras, mosques & churches — watch"
+          note="Places of worship near you, festival dates and temple events — added by the community."
+        />
 
         <Card>
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">

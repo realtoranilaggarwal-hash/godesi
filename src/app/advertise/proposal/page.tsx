@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { PROPOSAL_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { PrintButton } from "@/components/PrintButton";
 import { SocialGrowthServices } from "@/components/social/SocialGrowthServices";
@@ -258,6 +260,7 @@ export default async function ProposalPage({
     ...starterServices,
     { item: `2 New Year's Eve party tickets (2 × ${usd(prices.adult)})`, value: prices.adult * 2 },
   ];
+  const starterRetail = starterRows.reduce((sum, row) => sum + (row.value ?? 0), 0);
   const vipEarly = Date.now() < VIP_TABLE_VALUE.earlyEnds.getTime();
   const premiumRows: ValueRow[] = [
     ...starterServices,
@@ -338,6 +341,13 @@ export default async function ProposalPage({
           </a>
         </p>
       </header>
+
+      <ShortVideoCard
+        video={PROPOSAL_VIDEO_URL}
+        heading={`📣 Partner package worth ${usd(starterRetail)} — yours for ${usd(PARTNER_PACKAGE.priceUsd)}`}
+        note="Elite feature, featured profile, a year of side banners, a website and 2 New Year's Eve tickets — the whole pitch in one short video."
+        className="print:hidden"
+      />
 
       <div className="grid gap-5 md:grid-cols-2 print:grid-cols-2">
         <section className="flex min-w-0 break-inside-avoid flex-col overflow-hidden rounded-3xl border-4 border-amber-400 bg-white shadow-md print:rounded-xl print:shadow-none">

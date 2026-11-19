@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { MARKETS_VIDEO_URL } from "@/lib/godesiVideos";
 import type { Metadata } from "next";
 import { MarketTape } from "@/components/MarketTape";
 import { TvWidget } from "@/components/tradingview/TvWidget";
@@ -63,6 +65,12 @@ export default async function MarketsPage() {
           quotes by TradingView.
         </p>
       </div>
+
+      <ShortVideoCard
+        video={MARKETS_VIDEO_URL}
+        heading="📈 Markets today on GoDesi — watch"
+        note="US and India markets, rupee rate, gold and crypto on one page — plus a daily prediction game."
+      />
 
       <div id="predict">
         <DailyPredictions initial={markets} signedIn={Boolean(me)} />

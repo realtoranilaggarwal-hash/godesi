@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { JOURNALIST_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -50,6 +52,12 @@ export default async function JournalistsPage() {
             your profile, and your photo and name run with the story.
           </p>
         </section>
+
+        <ShortVideoCard
+          video={JOURNALIST_VIDEO_URL}
+          heading="📰 Become a local journalist for GoDesi — watch"
+          note="Cover what's happening in your desi neighbourhood — your name and photo run with every approved story."
+        />
 
         <NewsMediaStrip />
 

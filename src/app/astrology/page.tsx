@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { ASTROLOGY_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import {
   ASTROLOGER_SUBCATEGORIES,
@@ -72,6 +74,12 @@ export default async function AstrologyPage() {
             </Link>
           </div>
         </section>
+
+        <ShortVideoCard
+          video={ASTROLOGY_VIDEO_URL}
+          heading="🔮 Astrology on GoDesi — watch"
+          note="Free kundli, daily horoscope and panchang, and astrologers you can call."
+        />
 
         <div className="grid gap-3 sm:grid-cols-2">
           {ASTROLOGY_GUIDES.map((guide) => (

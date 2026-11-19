@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { GODESI_SHORTS_PLAYLIST } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 import { SidebarBanners } from "@/components/Banners";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { ShareAnchor } from "@/components/ShareAnchor";
 import { FaqAsk, FaqSearch } from "@/components/FaqSearch";
 import { SITE } from "@/lib/site";
@@ -1057,6 +1059,15 @@ export default function FaqPage() {
       <div className="min-w-0 flex-1">
         <LegalPage title="Godesi FAQ — everything you need to know">
           <FaqSearch items={faqItems} />
+
+          <h2>🎬 How to — watch it in 30 seconds</h2>
+          <div className="not-prose">
+            <PlaylistGallery
+              url={GODESI_SHORTS_PLAYLIST}
+              owner="Godesi"
+              heading="GoDesi how-to Shorts"
+            />
+          </div>
 
           <h2>⚡ Do it now — direct links</h2>
           <div className="not-prose grid gap-2 sm:grid-cols-2">

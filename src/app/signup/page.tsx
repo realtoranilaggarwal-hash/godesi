@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { BIZCARD_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
@@ -57,6 +59,13 @@ export default async function SignupPage({
             next={searchParams.next}
           />
         </Card>
+        {searchParams.next?.startsWith("/dashboard/profile") ? (
+          <ShortVideoCard
+            video={BIZCARD_VIDEO_URL}
+            heading="🪪 Your free digital business card — watch"
+            note="Photos, services, hours, WhatsApp button and QR code — one link to share anywhere."
+          />
+        ) : null}
         <Card className="space-y-2 border-indigo-200 bg-indigo-50/60">
           <h2 className="font-bold text-slate-900">
             Free bonuses you get the day you join 🎁

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { BIZCARD_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { HandleClaim } from "@/components/HandleClaim";
 import { Card, LinkButton } from "@/components/ui";
@@ -213,6 +215,12 @@ export default async function WhyGodesiPage() {
           </Link>
         </p>
       </section>
+
+      <ShortVideoCard
+        video={BIZCARD_VIDEO_URL}
+        heading="🪪 Your free digital business card — watch"
+        note="Photos, services, hours, WhatsApp button and QR code — one link to share anywhere."
+      />
 
       {GROUPS.map((group) => (
         <section key={group.heading}>

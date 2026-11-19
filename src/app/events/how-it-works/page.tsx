@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { RAFFLE_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { Card, LinkButton } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
@@ -249,6 +251,14 @@ export default function EventFeesPage() {
             </Link>
           </div>
         </section>
+
+        <ShortVideoCard
+          video={RAFFLE_VIDEO_URL}
+          heading="🎁 Free gifts at our events — watch the raffle video"
+          note="We're giving away gifts — see what you can win."
+          tone="gradient"
+          showPlaylist
+        />
 
         <Card>
           <h2 className="text-lg font-bold">

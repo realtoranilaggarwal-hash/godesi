@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { WHAT_IS_GODESI_VIDEO_URL } from "@/lib/godesiVideos";
 import { db } from "@/lib/db";
 import { searchBusinesses } from "@/lib/businesses";
 import { BusinessTile } from "@/components/BusinessTile";
@@ -260,6 +262,13 @@ export default async function HomePage() {
                 </Link>
               ) : null}
             </nav>
+
+            <ShortVideoCard
+              video={WHAT_IS_GODESI_VIDEO_URL}
+              heading="👋 What is GoDesi? — watch in 30 seconds"
+              note="New here? Your free godesi.com/name page, the desi directory, events, deals and news — in one short video."
+              showPlaylist
+            />
 
             <div className="grid gap-3 [&>*]:min-w-0">
               {today.panchang ? (

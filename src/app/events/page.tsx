@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { RAFFLE_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -465,6 +467,14 @@ export default async function EventsPage({
         </section>
 
         <FeaturedEventStrip />
+
+        <ShortVideoCard
+          video={RAFFLE_VIDEO_URL}
+          heading="🎁 Free gifts at our events — watch the raffle video"
+          note="We're giving away gifts — see what you can win."
+          tone="gradient"
+          showPlaylist
+        />
 
         <Card>
           <form

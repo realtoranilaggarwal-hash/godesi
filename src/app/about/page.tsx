@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { GODESI_SHORTS_PLAYLIST, WHAT_IS_GODESI_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
@@ -23,6 +25,15 @@ export default async function AboutPage() {
         and the community around them. One place to be found, to find trusted desi
         services, and to keep up with what is happening in your city.
       </p>
+
+      <div className="not-prose">
+        <ShortVideoCard
+          video={WHAT_IS_GODESI_VIDEO_URL}
+          heading="👋 What is GoDesi? — watch in 30 seconds"
+          note="Your free godesi.com/name page, the desi directory, events, deals and news — in one short video."
+          showPlaylist
+        />
+      </div>
 
       <h2>What you can do here</h2>
       <p>
@@ -77,7 +88,7 @@ export default async function AboutPage() {
       <h2>Marketing — watch how Godesi promotes you</h2>
       <div className="not-prose">
         <PlaylistGallery
-          url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
+          url={GODESI_SHORTS_PLAYLIST}
           owner="Godesi"
           heading="Godesi marketing videos"
         />
