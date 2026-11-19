@@ -94,9 +94,9 @@ function Box() {
 
 function Blank({ label }: { label: string }) {
   return (
-    <span className="flex min-w-0 flex-1 items-end gap-2">
+    <span className="flex min-w-[10rem] flex-1 items-end gap-2">
       <span className="font-serif font-bold text-slate-800">{label}:</span>
-      <span className="mb-1 min-w-[6rem] flex-1 border-b border-slate-400" />
+      <span className="mb-1 min-w-0 flex-1 border-b border-slate-400" />
     </span>
   );
 }
