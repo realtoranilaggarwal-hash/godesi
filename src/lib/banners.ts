@@ -147,6 +147,37 @@ export async function activeBanners(
   return rotate(eligible, limit ?? slotCapacity(slots[0]));
 }
 
+const slotTotals = cachedQuery(
+  "banner-slot-stats",
+  300,
+  async (slot: BannerSlot) => {
+    const totals = await db.banner.aggregate({
+      where: { slot },
+      _sum: { impressions: true, clicks: true },
+      _min: { createdAt: true },
+    });
+    return {
+      impressions: totals._sum.impressions ?? 0,
+      clicks: totals._sum.clicks ?? 0,
+      since: totals._min.createdAt?.toISOString() ?? null,
+    };
+  },
+);
+
+/**
+ * Lifetime views and clicks of every banner that has run in a slot, shown
+ * publicly so a buyer can see what the spot delivers. Totals only — no
+ * advertiser's own numbers are exposed.
+ */
+export async function slotStats(slot: BannerSlot) {
+  const totals = await slotTotals(slot);
+  const since = totals.since ? new Date(totals.since) : null;
+  const days = since
+    ? Math.max(1, Math.ceil((Date.now() - since.getTime()) / 86_400_000))
+    : 0;
+  return { ...totals, since, days };
+}
+
 /** How many advertisers currently share a slot, used to show unsold inventory. */
 export async function slotSoldCount(slot: BannerSlot) {
   return (await inventory()).filter((banner) => banner.slot === slot).length;
