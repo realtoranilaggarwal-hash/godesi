@@ -86,7 +86,7 @@ const TIERS: TierSpec[] = [
   { kind: "SPONSOR", name: "Banner inside the hall", price: 300, seats: 4, admits: 2, bannerMonths: 12, perks: ["Your banner inside the Big Ball Room", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "LED screen logo or clip", price: 500, seats: 3, admits: 2, bannerMonths: 12, perks: ["Your logo or video clip on the LED screen", "2 tickets included", BANNER_YEAR] },
   { kind: "SPONSOR", name: "Table sponsor", price: 1500, seats: 10, admits: 0, bannerMonths: 12, perks: ["Bottle of champagne on the table", "Table marker: \"Table sponsored by <your business>\"", BANNER_YEAR] },
-  { kind: "SPONSOR", name: "Belly dancer sponsor", price: 600, seats: 1, admits: 0, perks: ["Belly dancer Aamra's fire dance presented by your business"] },
+  { kind: "SPONSOR", name: "Belly dancer sponsor", price: 600, seats: 1, admits: 0, perks: ["Belly dance performance presented by your business"] },
   { kind: "SPONSOR", name: "Photo booth sponsor", price: 900, seats: 1, admits: 0, perks: ["Your logo on every photo booth photo"] },
   { kind: "SPONSOR", name: "Dhol sponsor", price: 400, seats: 1, admits: 0, perks: ["Dhol performance with your business name"] },
 ];
