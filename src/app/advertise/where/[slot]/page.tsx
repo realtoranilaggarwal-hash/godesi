@@ -81,7 +81,12 @@ export default async function PlacementPage({
 
       <Card id="stats">
         <h2 className="text-lg font-bold">This spot&apos;s numbers</h2>
-        {stats.impressions ? (
+        {!stats ? (
+          <p className="mt-1 text-sm text-slate-600">
+            The numbers are temporarily unavailable — please check back in a
+            few minutes.
+          </p>
+        ) : stats.impressions ? (
           <>
             <p className="mt-1 text-sm text-slate-600">
               Live totals for every banner that has run here since{" "}

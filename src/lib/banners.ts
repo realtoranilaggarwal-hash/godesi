@@ -170,7 +170,8 @@ const slotTotals = cachedQuery(
  * advertiser's own numbers are exposed.
  */
 export async function slotStats(slot: BannerSlot) {
-  const totals = await slotTotals(slot);
+  const totals = await optionalRead(() => slotTotals(slot), null);
+  if (!totals) return null;
   const since = totals.since ? new Date(totals.since) : null;
   const days = since
     ? Math.max(1, Math.ceil((Date.now() - since.getTime()) / 86_400_000))
