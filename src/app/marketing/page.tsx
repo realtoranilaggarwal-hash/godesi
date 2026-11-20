@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GODESI_SHORTS_PLAYLIST } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
@@ -71,7 +72,7 @@ export default function MarketingPage() {
       <GodesiWikiBanner />
 
       <PlaylistGallery
-        url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
+        url={GODESI_SHORTS_PLAYLIST}
         owner="Godesi"
         heading="Watch: free marketing on Godesi"
       />

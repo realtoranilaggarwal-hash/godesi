@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { JOURNALIST_VIDEO_URL } from "@/lib/godesiVideos";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { can, getCurrentUser } from "@/lib/auth";
@@ -216,6 +218,27 @@ export default async function NewsPage({
             </Link>
           ))}
         </div>
+
+<ShortVideoCard
+          video={JOURNALIST_VIDEO_URL}
+          heading="📰 Become a local journalist for GoDesi — watch"
+          note="Cover what's happening in your desi neighbourhood — your name and photo run with every approved story."
+        >
+          <div className="mt-2 flex flex-wrap justify-center gap-2 text-sm font-semibold sm:justify-start">
+            <Link
+              href="/journalists"
+              className="rounded-xl bg-sky-600 px-3 py-1.5 text-white hover:bg-sky-700"
+            >
+              🗞️ Become a local journalist
+            </Link>
+            <Link
+              href="/news/report"
+              className="rounded-xl border border-sky-200 px-3 py-1.5 text-sky-700 hover:bg-sky-50"
+            >
+              📰 Report local news
+            </Link>
+          </div>
+        </ShortVideoCard>
 
         {user && !user.journalistSince ? (
           <Card className="border-amber-200 bg-amber-50">

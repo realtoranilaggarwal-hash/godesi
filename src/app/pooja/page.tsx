@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { POOJA_VIDEO_URL } from "@/lib/godesiVideos";
 import { POOJA_PACKAGES } from "@/lib/poojaPackages";
 import { PoojaBookingForm } from "@/components/PoojaBookingForm";
 import { Card } from "@/components/ui";
@@ -49,6 +51,12 @@ export default function PoojaPage({
           ))}
         </div>
       </section>
+
+      <ShortVideoCard
+        video={POOJA_VIDEO_URL}
+        heading="🙏 Book a video pooja on GoDesi — watch"
+        note="A trusted pandit performs the pooja at a real temple in India, in your name and gotra — you join live on video."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {POOJA_PACKAGES.map((pkg) => (
