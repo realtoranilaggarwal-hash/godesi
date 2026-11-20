@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 async function newestMembers() {
   const [members, total] = await Promise.all([
     db.user.findMany({
-      where: { emailVerifiedAt: { not: null } },
+      where: { emailVerifiedAt: { not: null }, bannedAt: null },
       orderBy: { createdAt: "desc" },
       take: 24,
       select: {
