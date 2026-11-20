@@ -716,57 +716,6 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
-    q: "📢 How does advertising work?",
-    a: (
-      <>
-        <p>You can promote your business using:</p>
-        <ul>
-          <li>Sidebar banners (300×250)</li>
-          <li>Header banners</li>
-          <li>Featured listings</li>
-        </ul>
-        <p>
-          Your dashboard shows impressions, clicks and performance — simple,
-          measurable advertising built into the platform.{" "}
-          <Link href="/advertise">Advertise on Godesi</Link>.
-        </p>
-      </>
-    ),
-  },
-  {
-    q: "📊 How do I see the views and clicks of the banner I booked?",
-    id: "banner-stats",
-    a: (
-      <>
-        <ol>
-          <li>
-            Book your banner on <Link href="/advertise">Advertise</Link> while
-            logged in — or, if GoDesi set it up for you, make sure your account
-            uses the email you gave us.
-          </li>
-          <li>
-            Log in and open{" "}
-            <Link href="/dashboard/ads">Dashboard → My ads</Link> any time.
-          </li>
-          <li>
-            Each of your banners shows its <strong>views</strong> (how often it
-            was shown), <strong>clicks</strong> (visitors sent to your website)
-            and <strong>click rate</strong>, plus your totals. The numbers
-            update live, with every view and click.
-          </li>
-        </ol>
-        <p>
-          Before you book, each spot&apos;s page shows what it delivers — e.g.
-          the{" "}
-          <Link href="/advertise/where/header#stats">
-            header banner&apos;s views and clicks
-          </Link>
-          . Only you (and GoDesi admins) can see your own banner&apos;s numbers.
-        </p>
-      </>
-    ),
-  },
-  {
     q: "🌍 Which countries does Godesi support?",
     a: (
       <>
@@ -1080,8 +1029,120 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
   },
 ];
 
+/** Shown under their own heading: booking banners and checking their numbers. */
+const AD_FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
+  {
+    q: "📢 How does advertising work?",
+    a: (
+      <>
+        <p>You can promote your business using:</p>
+        <ul>
+          <li>Sidebar banners (300×250)</li>
+          <li>Header banners</li>
+          <li>Featured listings</li>
+        </ul>
+        <p>
+          Your dashboard shows impressions, clicks and performance — simple,
+          measurable advertising built into the platform.{" "}
+          <Link href="/advertise">Advertise on Godesi</Link>.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "📊 How do I see the views and clicks of the banner I booked?",
+    id: "banner-stats",
+    a: (
+      <>
+        <ol>
+          <li>
+            Book your banner on <Link href="/advertise">Advertise</Link> while
+            logged in — or, if GoDesi set it up for you, make sure your account
+            uses the email you gave us.
+          </li>
+          <li>
+            Log in and open{" "}
+            <Link href="/dashboard/ads">Dashboard → My ads</Link> any time.
+          </li>
+          <li>
+            Each of your banners shows its <strong>views</strong> (how often it
+            was shown), <strong>clicks</strong> (visitors sent to your website)
+            and <strong>click rate</strong>, plus your totals. The numbers
+            update live, with every view and click.
+          </li>
+        </ol>
+        <p>
+          Before you book, each spot&apos;s page shows what it delivers — e.g.
+          the{" "}
+          <Link href="/advertise/where/header#stats">
+            header banner&apos;s views and clicks
+          </Link>
+          . Only you (and GoDesi admins) can see your own banner&apos;s numbers.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🗓 How do I book a banner?",
+    id: "book-banner",
+    a: (
+      <>
+        <ol>
+          <li>
+            Log in, open <Link href="/advertise">Advertise</Link> and pick a
+            spot — <Link href="/advertise/where/header">header</Link>, sidebar,
+            homepage hero and more.
+          </li>
+          <li>
+            Choose how many months, enter a coupon code if you have one, and
+            pay online.
+          </li>
+          <li>
+            Upload your banner in{" "}
+            <Link href="/dashboard/ads">Dashboard → My ads</Link> (no design?{" "}
+            <Link href="/advertise/design">get sizes and design help</Link>).
+            We approve it within a day and it goes live.
+          </li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    q: "🔎 Can I see a banner spot's numbers before I buy?",
+    id: "spot-stats",
+    a: (
+      <>
+        <p>
+          Yes. Every spot has its own page with live totals — views, clicks,
+          click rate and views a day — for all the banners that have run
+          there. For example, the{" "}
+          <Link href="/advertise/where/header#stats">header banner spot</Link>
+          . Open any spot from <Link href="/advertise">Advertise</Link> and
+          scroll to &ldquo;This spot&apos;s numbers&rdquo;.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🧮 How are banner views and clicks counted?",
+    id: "banner-counting",
+    a: (
+      <>
+        <p>
+          A <strong>view</strong> is counted each time a page shows your
+          banner; a <strong>click</strong> each time someone taps it and is
+          sent to your website. Click rate is clicks ÷ views. Your numbers
+          are private: only you and GoDesi admins see them in{" "}
+          <Link href="/dashboard/ads">My ads</Link>; spot pages show totals for
+          the spot, never one advertiser&apos;s numbers.
+        </p>
+      </>
+    ),
+  },
+];
+
 export default function FaqPage() {
-  const faqItems = FAQS.map((faq) => ({
+  const faqItems = [...FAQS, ...AD_FAQS].map((faq) => ({
     q: faq.q,
     anchor: faq.id ?? slugify(faq.q),
   }));
@@ -1105,28 +1166,16 @@ export default function FaqPage() {
           </div>
 
 
-          {FAQS.map((faq, index) => {
-            const anchor = faq.id ?? slugify(faq.q);
-            return (
-              <details
-                key={faq.q}
-                id={anchor}
-                open={index === 0}
-                className="group scroll-mt-24 rounded-xl border border-slate-200 open:bg-slate-50/60"
-              >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-base font-bold text-slate-900">
-                  {faq.q}
-                  <span className="text-slate-400 transition group-open:rotate-180">
-                    ▾
-                  </span>
-                </summary>
-                <div className="space-y-3 px-4 pb-4">
-                  {faq.a}
-                  <ShareAnchor anchor={anchor} title={faq.q} />
-                </div>
-              </details>
-            );
-          })}
+          {FAQS.map((faq, index) => (
+            <FaqItem key={faq.q} faq={faq} open={index === 0} />
+          ))}
+
+          <h2 id="advertising" className="scroll-mt-24">
+            📢 Advertising &amp; banners
+          </h2>
+          {AD_FAQS.map((faq) => (
+            <FaqItem key={faq.q} faq={faq} open={false} />
+          ))}
 
           <h2>❓ Can&apos;t find your answer? Ask us</h2>
           <p>
@@ -1147,5 +1196,33 @@ export default function FaqPage() {
 
       <SidebarBanners />
     </div>
+  );
+}
+
+function FaqItem({
+  faq,
+  open,
+}: {
+  faq: { q: string; a: React.ReactNode; id?: string };
+  open: boolean;
+}) {
+  const anchor = faq.id ?? slugify(faq.q);
+  return (
+    <details
+      id={anchor}
+      open={open}
+      className="group scroll-mt-24 rounded-xl border border-slate-200 open:bg-slate-50/60"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-base font-bold text-slate-900">
+        {faq.q}
+        <span className="text-slate-400 transition group-open:rotate-180">
+          ▾
+        </span>
+      </summary>
+      <div className="space-y-3 px-4 pb-4">
+        {faq.a}
+        <ShareAnchor anchor={anchor} title={faq.q} />
+      </div>
+    </details>
   );
 }

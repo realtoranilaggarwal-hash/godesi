@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, type BannerSlot } from "@prisma/client";
 import {
   deleteBannerAction,
   toggleBannerAction,
@@ -6,7 +6,7 @@ import {
 } from "@/app/actions/admin";
 import { BannerForm } from "@/components/forms/BannerForm";
 import { BannerCreativeInput } from "@/components/forms/BannerCreativeInput";
-import { formatCtr } from "@/lib/ads";
+import { AD_SLOT_ORDER, formatCtr } from "@/lib/ads";
 import { proxyImage } from "@/lib/proxyImage";
 import { Card } from "@/components/ui";
 
@@ -51,15 +51,17 @@ export function AdminBannersCard({
                 <td className="w-24 py-2 text-xs font-semibold">
                   {banner.slot}{" "}
                   {banner.position ? `#${banner.position}` : "(unassigned)"}
-                  <a
-                    href={`/advertise/where/${banner.slot.toLowerCase()}#stats`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-1 block font-normal text-indigo-600 hover:underline"
-                    title="Public page with this spot's views and clicks, to send to buyers"
-                  >
-                    spot stats ↗
-                  </a>
+                  {hasSpotStats(banner.slot) ? (
+                    <a
+                      href={`/advertise/where/${banner.slot.toLowerCase()}#stats`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 block font-normal text-indigo-600 hover:underline"
+                      title="Public page with this spot's views and clicks, to send to buyers"
+                    >
+                      spot stats ↗
+                    </a>
+                  ) : null}
                 </td>
                 <td>
                   <div className="flex items-start gap-2">
@@ -152,4 +154,9 @@ export function AdminBannersCard({
       </div>
     </Card>
   );
+}
+
+/** WALL redirects to the board and retired slots have no public page. */
+function hasSpotStats(slot: BannerSlot) {
+  return slot !== "WALL" && AD_SLOT_ORDER.includes(slot);
 }
