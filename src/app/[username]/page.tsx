@@ -46,6 +46,7 @@ import { db } from "@/lib/db";
 import { profileFactsList } from "@/lib/profileQuiz";
 import { thumbImage } from "@/lib/proxyImage";
 import { metaDescription, pageTitle } from "@/lib/seo";
+import { TrackVisit } from "@/components/TrackVisit";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,7 @@ export default async function PublicProfilePage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {isOwner || !user.username ? null : <TrackVisit username={user.username} />}
       {isOwner ? (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
           <span className="font-semibold">
