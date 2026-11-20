@@ -110,6 +110,49 @@ export async function BusinessNextSteps({
           </Link>
         </div>
       ) : null}
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+        <p className="font-bold text-slate-900">💡 Did you know?</p>
+        <ul className="mt-2 space-y-2 text-sm text-slate-700">
+          {DID_YOU_KNOW.map((tip) => (
+            <li key={tip.href} className="flex gap-2">
+              <span aria-hidden>{tip.icon}</span>
+              <span className="min-w-0">
+                {tip.text}{" "}
+                <Link href={tip.href} className="font-semibold text-indigo-700 underline">
+                  {tip.link} →
+                </Link>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Card>
   );
 }
+
+const DID_YOU_KNOW = [
+  {
+    icon: "🌐",
+    text: "Need a website? We build one from $99 with your domain, hosting and updates handled.",
+    link: "Read the website guide",
+    href: "/website/guide",
+  },
+  {
+    icon: "🧱",
+    text: "Wall of Fame bricks put your logo on the wall, and the more bricks you own the higher you sit on its vendor list. Money you spend on GoDesi ads also counts as brick credit.",
+    link: "Add more bricks",
+    href: "/walloffame",
+  },
+  {
+    icon: "⭐",
+    text: "Being active earns points: approved news stories, reviews, daily polls and friends you refer. Spend them on a featured listing, a banner or a month of Pro.",
+    link: "See rewards",
+    href: "/rewards",
+  },
+  {
+    icon: "📰",
+    text: "You can be a GoDesi local journalist: report news from your area and climb from Contributor to Editor with a press card.",
+    link: "Become a journalist",
+    href: "/journalists",
+  },
+];
