@@ -33,7 +33,7 @@ const PRINT_CSS = `
 
 const PLATINUM: React.ReactNode[] = [
   <>
-    <strong>VIP table for 12 guests</strong> ($1,200 value)
+    <strong>VIP table for 12 guests</strong> ($1,500 value till Dec 15, then $2,500)
   </>,
   "Featured GoDesi business profile for 12 months, with video playlist",
   "320×100 side banner on GoDesi.com for 12 months",
@@ -49,8 +49,13 @@ const PLATINUM: React.ReactNode[] = [
 ];
 
 const GOLD_BENEFITS = [
-  "2 event tickets",
-  "Standard business profile on GoDesi.com",
+  "2 complimentary New Year's Eve tickets",
+  "GoDesi Elite interview & feature",
+  "GoDesi Elite membership + featured business profile",
+  "DesiWho'sWho listing",
+  "1 promo video (10 sec)",
+  "320×100 side banner on GoDesi.com for 12 months",
+  "AI-enabled, SEO-friendly business website (hosting free year 1)",
   "Name on the event supporters banner",
   "10% discount code for your clients",
   "10 Wall of Fame bricks",
