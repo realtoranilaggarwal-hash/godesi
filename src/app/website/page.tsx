@@ -79,6 +79,9 @@ export default async function WebsiteOfferPage({
               </a>
             ) : null}
           </div>
+          <Link href="/website/guide" className="mt-4 inline-block text-sm font-semibold text-white underline">
+            New here? Read the step-by-step guide →
+          </Link>
         </section>
 
         {recent.length ? (
