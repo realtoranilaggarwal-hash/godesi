@@ -59,6 +59,27 @@ export const SHOP_SHELVES = [
     blurb: "Hindi, Gujarati and Tamil learning books, Amar Chitra Katha.",
     query: "hindi learning books kids amar chitra katha",
   },
+  {
+    key: "party",
+    icon: "🎉",
+    title: "Party & New Year",
+    blurb: "Balloons, LED lights, photo props, banners and party favours.",
+    query: "new year party decorations balloons led lights",
+  },
+  {
+    key: "auto",
+    icon: "🚗",
+    title: "Auto & motorcycle",
+    blurb: "Car and bike accessories, phone mounts, LED lights and tools.",
+    query: "car accessories motorcycle phone mount led",
+  },
+  {
+    key: "home",
+    icon: "🏠",
+    title: "Home decor",
+    blurb: "Wall art, cushions, fairy lights, rugs and kitchen decor.",
+    query: "home decor wall art fairy lights",
+  },
 ] as const;
 
 export type ShopShelf = (typeof SHOP_SHELVES)[number];
@@ -75,6 +96,33 @@ export const TURBOTAX_AFFILIATE_URL =
   "https://www.kqzyfj.com/click-100712969-17206111";
 export const TURBOTAX_TRACKING_PIXEL =
   "https://www.ftjcfx.com/image-100712969-17206111";
+
+/** AliExpress CJ links. Keep the URLs exactly as CJ issued them. */
+export const ALIEXPRESS_AFFILIATE_URL =
+  "https://www.kqzyfj.com/click-100494444-17242121";
+export const ALIEXPRESS_BANNER_URL =
+  "https://www.ftjcfx.com/image-100494444-17242121";
+export const ALIEXPRESS_WIDE_URL =
+  "https://www.jdoqocy.com/click-100494444-17242131";
+export const ALIEXPRESS_WIDE_BANNER_URL =
+  "https://www.lduhtrp.net/image-100494444-17242131";
+export const ALIEXPRESS_AUTO_URL =
+  "https://www.anrdoezrs.net/click-100494444-17242069";
+export const ALIEXPRESS_AUTO_PIXEL =
+  "https://www.awltovhc.com/image-100494444-17242069";
+export const ALIEXPRESS_HOME_URL =
+  "https://www.kqzyfj.com/click-100494444-17242063";
+export const ALIEXPRESS_HOME_PIXEL =
+  "https://www.tqlkg.com/image-100494444-17242063";
+
+export const ALIEXPRESS_SHELF_URLS: Record<string, string> = {
+  auto: ALIEXPRESS_AUTO_URL,
+  home: ALIEXPRESS_HOME_URL,
+};
+
+export function aliexpressShelfUrl(key: string) {
+  return ALIEXPRESS_SHELF_URLS[key] ?? ALIEXPRESS_AFFILIATE_URL;
+}
 
 /** Store IDs are public tracking IDs, set in the environment once each programme approves GoDesi. */
 export function shopConfig() {
