@@ -12,16 +12,19 @@ function referrerHost(): string {
 
 export function TrackVisit({
   slug,
-  fromQr,
+  username,
+  fromQr = false,
   source,
 }: {
-  slug: string;
-  fromQr: boolean;
+  /** Business card slug, or `username` for a personal profile. */
+  slug?: string;
+  username?: string;
+  fromQr?: boolean;
   /** "sponsor" when the visitor clicked a sponsor logo (?src=sponsor). */
   source?: string;
 }) {
   useEffect(() => {
-    const key = `godesi:view:${slug}:${fromQr ? "qr" : (source ?? "web")}`;
+    const key = `godesi:view:${slug ?? `@${username}`}:${fromQr ? "qr" : (source ?? "web")}`;
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
 
@@ -33,6 +36,7 @@ export function TrackVisit({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slug,
+          username,
           type,
           referrer,
           path,
@@ -43,7 +47,7 @@ export function TrackVisit({
 
     void send("PROFILE_VIEW");
     if (fromQr) void send("QR_SCAN");
-  }, [slug, fromQr, source]);
+  }, [slug, username, fromQr, source]);
 
   return null;
 }

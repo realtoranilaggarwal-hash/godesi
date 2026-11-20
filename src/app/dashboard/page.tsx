@@ -49,12 +49,13 @@ export default async function DashboardPage({
     upgraded?: string;
     verified?: string;
     password?: string;
+    me?: string;
   };
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (user.role === "ADMIN") redirect("/admin");
-  if (user.role === "MODERATOR") redirect("/admin/content");
+  if (user.role === "MODERATOR" && !searchParams.me) redirect("/admin/content");
 
   const plan = effectivePlan(user);
 
@@ -110,7 +111,10 @@ export default async function DashboardPage({
       }),
     ]);
 
-  const pageStats = business ? await businessPageStats(business.id) : null;
+  const [pageStats, profileStats] = await Promise.all([
+    business ? businessPageStats(business.id) : null,
+    user.username ? profilePageStats(user.id) : null,
+  ]);
 
   const reviewCount = business?.reviews.length ?? 0;
   const rating = reviewCount
@@ -216,7 +220,16 @@ export default async function DashboardPage({
         </Card>
 
         {business && pageStats ? (
-          <PageStatsCard stats={pageStats} slug={business.slug} />
+          <PageStatsCard stats={pageStats} href={`/business/${business.slug}`} />
+        ) : null}
+
+        {user.username && profileStats ? (
+          <PageStatsCard
+            stats={profileStats}
+            href={`/${user.username}`}
+            title="📊 Your personal profile stats"
+            personal
+          />
         ) : null}
 
         <EarnStrip
@@ -628,16 +641,48 @@ const DAY_LABEL = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
-type PageStats = Awaited<ReturnType<typeof businessPageStats>>;
+type PageStats = ReturnType<typeof summarizeStats>;
 
-/** The last 30 New York calendar days (today included) of a business's card events, grouped by day, type and referrer. */
+function statsSince(now: Date) {
+  return new Date(now.getTime() - (STATS_DAYS + 1) * 24 * 60 * 60 * 1000);
+}
+
 async function businessPageStats(businessId: string) {
   const now = new Date();
-  const since = new Date(now.getTime() - (STATS_DAYS + 1) * 24 * 60 * 60 * 1000);
   const events = await db.analyticsEvent.findMany({
-    where: { businessId, createdAt: { gte: since } },
+    where: { businessId, createdAt: { gte: statsSince(now) } },
     select: { type: true, referrer: true, city: true, source: true, createdAt: true },
   });
+  return summarizeStats(events, now);
+}
+
+async function profilePageStats(userId: string) {
+  const now = new Date();
+  const views = await db.profileView.findMany({
+    where: { userId, createdAt: { gte: statsSince(now) } },
+    select: { referrer: true, city: true, createdAt: true },
+  });
+  return summarizeStats(
+    views.map((view) => ({
+      ...view,
+      type: "PROFILE_VIEW" as const,
+      source: null,
+    })),
+    now,
+  );
+}
+
+/** The last 30 New York calendar days (today included) of page events, grouped by day, type and referrer. */
+function summarizeStats(
+  events: {
+    type: "PROFILE_VIEW" | "QR_SCAN" | "WHATSAPP_CLICK";
+    referrer: string | null;
+    city: string | null;
+    source: string | null;
+    createdAt: Date;
+  }[],
+  now: Date,
+) {
 
   const days: { key: string; views: number }[] = [];
   for (let i = STATS_DAYS - 1; i >= 0; i--) {
@@ -692,7 +737,18 @@ function referrerLabel(host: string) {
   return host;
 }
 
-function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
+function PageStatsCard({
+  stats,
+  href,
+  title = "📊 Your page stats",
+  personal = false,
+}: {
+  stats: PageStats;
+  href: string;
+  title?: string;
+  /** Personal profiles have no QR code or WhatsApp button to count. */
+  personal?: boolean;
+}) {
   const empty = !stats.views && !stats.qrScans && !stats.whatsappClicks;
   const peak = Math.max(1, ...stats.days.map((d) => d.views));
   const webViews = Math.max(0, stats.views - stats.qrScans);
@@ -704,15 +760,19 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
 
   const tiles = [
     { label: "Profile views (30 days)", value: stats.views },
-    { label: "QR scans", value: stats.qrScans },
-    { label: "WhatsApp clicks", value: stats.whatsappClicks },
+    ...(personal
+      ? []
+      : [
+          { label: "QR scans", value: stats.qrScans },
+          { label: "WhatsApp clicks", value: stats.whatsappClicks },
+        ]),
     { label: "Views today", value: stats.viewsToday },
   ];
 
   return (
     <Card>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-bold">📊 Your page stats</h2>
+        <h2 className="text-lg font-bold">{title}</h2>
         <p className="text-xs text-slate-500">Last 30 days</p>
       </div>
 
@@ -730,7 +790,7 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
       {empty ? (
         <p className="mt-4 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900">
           No views yet — share your page or QR code.{" "}
-          <Link href={`/business/${slug}`} className="font-semibold underline">
+          <Link href={href} className="font-semibold underline">
             Open my page
           </Link>
         </p>
@@ -766,7 +826,7 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
               <p className="text-sm font-semibold text-slate-800">
                 Where visitors came from
               </p>
-              <ul className="mt-2 space-y-1 text-sm">
+              <ul className={personal ? "hidden" : "mt-2 space-y-1 text-sm"}>
                 <li className="flex justify-between gap-2">
                   <span>📷 QR code scans</span>
                   <span className="font-semibold">
@@ -821,7 +881,7 @@ function PageStatsCard({ stats, slug }: { stats: PageStats; slug: string }) {
               ) : null}
             </div>
 
-            <div className="min-w-0">
+            <div className={personal ? "hidden" : "min-w-0"}>
               <p className="text-sm font-semibold text-slate-800">
                 What they did
               </p>

@@ -77,7 +77,15 @@ export default async function ContentDeskPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black">Content desk</h1>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h1 className="text-2xl font-black">Content desk</h1>
+          <Link
+            href="/dashboard?me=1"
+            className="text-sm font-semibold text-indigo-600 hover:underline"
+          >
+            📊 My page stats
+          </Link>
+        </div>
         <p className="text-sm text-slate-600">
           Add and moderate events, listings, news and blog posts. Member
           details, payments and reward points stay with admins. New here? Read

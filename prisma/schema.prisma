@@ -456,6 +456,7 @@ model User {
   websiteProjects WebsiteProject[]
   dailySpins      DailySpin[]
   scratchCards    ScratchCard[]
+  profileViews    ProfileView[]
 
   @@index([emailCanonical])
   @@index([signupIp, createdAt])
@@ -1216,6 +1217,20 @@ model AnalyticsEvent {
   @@index([businessId, type])
   @@index([businessId, createdAt])
   @@map("Event")
+}
+
+/// One visit to a member's personal profile (godesi.com/<username>), for the
+/// owner's dashboard stats. Owners viewing their own page are not counted.
+model ProfileView {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Hostname the visitor came from ("google.com"), "direct" when none.
+  referrer  String?
+  city      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 /// An anonymous page-view ping powering the live visitor map. No IPs stored.

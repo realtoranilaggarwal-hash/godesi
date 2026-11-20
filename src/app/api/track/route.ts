@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { EventType } from "@prisma/client";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { requestGeo } from "@/lib/geo";
 
 const VALID: EventType[] = ["PROFILE_VIEW", "QR_SCAN", "WHATSAPP_CLICK"];
@@ -44,11 +45,33 @@ function cleanPath(raw: unknown): string | null {
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     slug?: string;
+    username?: string;
     type?: EventType;
     referrer?: unknown;
     path?: unknown;
     source?: unknown;
   } | null;
+
+  if (body?.username && body.type === "PROFILE_VIEW") {
+    const [member, viewer] = await Promise.all([
+      db.user.findUnique({
+        where: { username: body.username },
+        select: { id: true },
+      }),
+      getCurrentUser(),
+    ]);
+    if (!member) return NextResponse.json({ ok: false }, { status: 404 });
+    if (viewer?.id === member.id) return NextResponse.json({ ok: true });
+    await db.profileView.create({
+      data: {
+        userId: member.id,
+        referrer:
+          body.referrer === undefined ? null : referrerHost(body.referrer),
+        city: requestGeo().city?.slice(0, 80) ?? null,
+      },
+    });
+    return NextResponse.json({ ok: true });
+  }
 
   if (!body?.slug || !body.type || !VALID.includes(body.type)) {
     return NextResponse.json({ ok: false }, { status: 400 });
