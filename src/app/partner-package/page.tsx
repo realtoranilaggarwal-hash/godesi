@@ -158,7 +158,7 @@ export default function PartnerPackagePage() {
               <strong className="font-serif" style={{ color: GOLD }}>
                 BONUS:
               </strong>{" "}
-              the remaining $800 becomes <strong>80 permanent Wall of Fame bricks</strong> ($10/brick).
+              <strong>80 permanent Wall of Fame bricks</strong> included ($10/brick, $800 value).
               The wall is ranked by bricks owned — more bricks = higher placement.
             </p>
           </div>
