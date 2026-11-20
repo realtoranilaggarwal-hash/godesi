@@ -73,7 +73,7 @@ export default async function Page({
                     </p>
                     <p className="text-xs text-slate-500">
                       Searched {miss.count}×{" "}
-                      {miss.page === "find" ? "on Search everything" : "on Cards"}{" "}
+                      {miss.page === "find" ? "on Search everything" : miss.page === "ask" ? "in Ask GoDesi" : "on Cards"}{" "}
                       · GoDesi had {miss.lastResults} result
                       {miss.lastResults === 1 ? "" : "s"} · last{" "}
                       {miss.lastAt.toLocaleDateString("en-US", {
