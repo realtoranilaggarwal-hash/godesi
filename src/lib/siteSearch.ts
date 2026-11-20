@@ -286,7 +286,15 @@ export async function siteSearch(
           _count: { select: { events: { where: { status: "APPROVED" } } } },
         },
       }),
-      findProfilesByName(q, 5),
+      findProfilesByName(q, city ? 25 : 5).then((rows) =>
+        city
+          ? rows
+              .filter((row) =>
+                row.location?.toLowerCase().includes(city.toLowerCase()),
+              )
+              .slice(0, 5)
+          : rows,
+      ),
     ]);
 
   const results: SiteSearchResults = {
