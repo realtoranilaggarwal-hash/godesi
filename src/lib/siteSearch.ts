@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { findProfilesByName } from "@/lib/peopleLookup";
 
 export type SiteSearchHit = {
   href: string;
@@ -16,6 +17,7 @@ export type SiteSearchResults = {
   categories: SiteSearchHit[];
   resources: SiteSearchHit[];
   venues: SiteSearchHit[];
+  members: SiteSearchHit[];
   pages: SiteSearchHit[];
   total: number;
 };
@@ -170,6 +172,7 @@ export async function siteSearch(
     categories: [],
     resources: [],
     venues: [],
+    members: [],
     pages: [],
     total: 0,
   };
@@ -187,6 +190,7 @@ export async function siteSearch(
     categories,
     resources,
     venues,
+    members,
   ] = await Promise.all([
       db.business.findMany({
         where: {
@@ -282,6 +286,7 @@ export async function siteSearch(
           _count: { select: { events: { where: { status: "APPROVED" } } } },
         },
       }),
+      findProfilesByName(q, 5),
     ]);
 
   const results: SiteSearchResults = {
@@ -341,6 +346,14 @@ export async function siteSearch(
         .join(" · "),
       badge: "Venue",
     })),
+    members: members.map((row) => ({
+      href: `/${row.username}`,
+      title: row.name,
+      subtitle:
+        [row.headline, row.location].filter(Boolean).join(" · ") ||
+        "GoDesi member",
+      badge: "Member",
+    })),
     pages: pageHits(q),
     total: 0,
   };
@@ -354,6 +367,7 @@ export async function siteSearch(
     results.categories.length +
     results.resources.length +
     results.venues.length +
+    results.members.length +
     results.pages.length;
 
   return results;
