@@ -26,6 +26,7 @@ export function BannerForm({ slot }: { slot?: string }) {
   );
   const [saved, setSaved] = useState(0);
   const size = AD_PLACEMENTS[chosen].size;
+  const textOnly = chosen === "SKIN";
 
   // A saved banner is done with: clearing the fields stops the next save from
   // silently re-posting the previous creative.
@@ -76,17 +77,22 @@ export function BannerForm({ slot }: { slot?: string }) {
             className={inputClass}
           />
         </Field>
-        <Field label="Advertiser / title">
+        <Field
+          label={textOnly ? "Strip text" : "Advertiser / title"}
+          hint={textOnly ? "The one line of words shown in the top strip" : undefined}
+        >
           <input name="title" required className={inputClass} />
         </Field>
-        <ImageField
-          key={saved}
-          name="imageUrl"
-          label="Banner image"
-          purpose="banner"
-          hint={`Upload it at exactly ${size.width} × ${size.height} px`}
-          previewClassName="h-24 w-40 rounded-xl object-contain bg-slate-50"
-        />
+        {textOnly ? null : (
+          <ImageField
+            key={saved}
+            name="imageUrl"
+            label="Banner image"
+            purpose="banner"
+            hint={`Upload it at exactly ${size.width} × ${size.height} px`}
+            previewClassName="h-24 w-40 rounded-xl object-contain bg-slate-50"
+          />
+        )}
         <Field label="Destination URL">
           <input name="linkUrl" type="url" required className={inputClass} />
         </Field>
