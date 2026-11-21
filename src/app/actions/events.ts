@@ -30,6 +30,7 @@ import { isAlbumLink } from "@/lib/photoAlbum";
 import {
   checkCoupon,
   couponEligibleMinor,
+  MAX_COMP_TICKETS,
   maxTicketsPerBooking,
   normalizeCouponCode,
 } from "@/lib/coupons";
@@ -541,7 +542,7 @@ const bookingSchema = z.object({
     .number()
     .int()
     .min(1, "Book at least 1 seat")
-    .max(10, "Maximum 10 tickets per booking."),
+    .max(MAX_COMP_TICKETS, `Maximum ${MAX_COMP_TICKETS} tickets per booking.`),
   buyerName: z.string().trim().min(2, "Your name is required"),
   buyerEmail: z.string().trim().email("Enter a valid email"),
   buyerPhone: z.string().trim().optional(),
