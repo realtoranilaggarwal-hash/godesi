@@ -209,7 +209,7 @@ export async function saveBannerAction(
       position: formData.get("position") || undefined,
       advertiserEmail: formData.get("advertiserEmail") || undefined,
       title: formData.get("title"),
-      imageUrl: formData.get("imageUrl"),
+      imageUrl: formData.get("imageUrl") ?? "",
       linkUrl: formData.get("linkUrl"),
       impressionCap: formData.get("impressionCap") || undefined,
       endsAt: formData.get("endsAt") || undefined,
