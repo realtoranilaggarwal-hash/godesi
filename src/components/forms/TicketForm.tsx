@@ -104,6 +104,8 @@ export function TicketForm({
   nameLabel = "Your name",
   promoCodesHref,
   ambassadorCode,
+  initialCounts,
+  initialCoupon,
 }: {
   eventId: string;
   price: number;
@@ -121,12 +123,15 @@ export function TicketForm({
   promoCodesHref?: string;
   /** Ambassador tracking code from a godesi.com/r/<code> link. */
   ambassadorCode?: string;
+  /** Tickets to pre-pick, e.g. from a comp email link. */
+  initialCounts?: Record<string, number>;
+  initialCoupon?: string;
 }) {
   const [state, formAction] = useFormState(bookTicketAction, emptyState);
   const bookable = tiers.filter((tier) => tier.seatsLeft > 0);
   const tiered = bookable.length > 0;
   const [counts, setCounts] = useState<Record<string, number>>(
-    bookable[0] ? { [bookable[0].id]: 1 } : {},
+    initialCounts ?? (bookable[0] ? { [bookable[0].id]: 1 } : {}),
   );
   const [quantity, setQuantity] = useState(1);
   const [email, setEmail] = useState(defaultEmail ?? "");
@@ -314,6 +319,7 @@ export function TicketForm({
             <Field label="Coupon code" hint="Optional — from the organiser">
               <input
                 name="couponCode"
+                defaultValue={initialCoupon}
                 placeholder="e.g. EARLYBIRD"
                 className={`${inputClass} uppercase`}
               />

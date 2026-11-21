@@ -9,6 +9,7 @@ import { randomBytes } from "node:crypto";
 import {
   type CouponTierLimit,
   hasPremiumCoupons,
+  MAX_COMP_TICKETS,
   normalizeCouponCode,
   parseTierLimits,
 } from "@/lib/coupons";
@@ -268,8 +269,8 @@ export async function sendCompTicketsAction(
       const raw = String(formData.get(`compQty_${tier.id}`) ?? "").trim();
       if (!raw) continue;
       const quantity = Number(raw);
-      if (!Number.isInteger(quantity) || quantity < 0 || quantity > 10) {
-        return { error: `Enter 0–10 for ${tier.name}.` };
+      if (!Number.isInteger(quantity) || quantity < 0 || quantity > MAX_COMP_TICKETS) {
+        return { error: `Enter 0–${MAX_COMP_TICKETS} for ${tier.name}.` };
       }
       if (!quantity) continue;
       tierLimits.push({ tierId: tier.id, name: tier.name, maxQuantity: quantity });
@@ -278,8 +279,8 @@ export async function sendCompTicketsAction(
     if (!tierLimits.length) {
       return { error: "Enter how many of at least one ticket type." };
     }
-    if (tierLimits.reduce((sum, limit) => sum + limit.maxQuantity, 0) > 10) {
-      return { error: "Maximum 10 tickets per comp — one booking can't hold more." };
+    if (tierLimits.reduce((sum, limit) => sum + limit.maxQuantity, 0) > MAX_COMP_TICKETS) {
+      return { error: `Maximum ${MAX_COMP_TICKETS} tickets per comp.` };
     }
 
     const fixed = parsed.data.discountKind === "FIXED";

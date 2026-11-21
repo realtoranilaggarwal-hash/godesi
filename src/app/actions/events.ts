@@ -30,6 +30,7 @@ import { isAlbumLink } from "@/lib/photoAlbum";
 import {
   checkCoupon,
   couponEligibleMinor,
+  maxTicketsPerBooking,
   normalizeCouponCode,
 } from "@/lib/coupons";
 import {
@@ -626,7 +627,17 @@ export async function bookTicketAction(
           ? "Pick at least one ticket."
           : "Book at least 1 seat",
       };
-    if (totalQuantity > 10) return { error: "Maximum 10 tickets per booking." };
+    const maxTickets = maxTicketsPerBooking(
+      parsed.data.couponCode
+        ? await db.coupon.findUnique({
+            where: { code: normalizeCouponCode(parsed.data.couponCode) },
+            select: { tierLimits: true, eventId: true, active: true },
+          })
+        : null,
+      event.id,
+    );
+    if (totalQuantity > maxTickets)
+      return { error: `Maximum ${maxTickets} tickets per booking.` };
 
     const eventLeft = seatsLeft(event);
     if (!event.tiers.length && event.sourceId === null && eventLeft < totalQuantity)
