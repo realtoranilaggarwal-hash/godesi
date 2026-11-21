@@ -151,9 +151,20 @@ export default async function PlacementPage({
           <p className="mb-3 mt-1 text-sm text-slate-600">
             {live[0]
               ? "Running here right now:"
-              : `Your artwork, at ${placement.size.width} × ${placement.size.height}:`}
+              : slot === "SKIN"
+                ? "One line of your words, linked to your page:"
+                : `Your artwork, at ${placement.size.width} × ${placement.size.height}:`}
           </p>
-          {live[0] ? (
+          {slot === "SKIN" ? (
+            <div className="flex h-9 min-w-0 items-center justify-center rounded-lg border-2 border-indigo-400 bg-white px-3 text-sm font-semibold text-slate-800">
+              <span className="truncate">
+                {live[0]?.title ?? "Your offer in one line — Book now"}
+              </span>
+              <span className="ml-2 shrink-0 text-indigo-600" aria-hidden>
+                →
+              </span>
+            </div>
+          ) : live[0] ? (
             <div
               style={{
                 aspectRatio: `${placement.size.width} / ${placement.size.height}`,

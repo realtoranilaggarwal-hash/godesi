@@ -137,11 +137,19 @@ function AdvertiseHere({
 }
 
 /** Even a filled spot stays for sale: the next advertiser can book the rotation. */
-function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
+export function BookThisSpot({
+  slot,
+  label,
+  className = "block text-center",
+}: {
+  slot: BannerSlot;
+  label: string;
+  className?: string;
+}) {
   return (
     <Link
       href={`/advertise?slot=${slot}#book`}
-      className="block text-center text-[11px] font-semibold text-slate-400 hover:text-indigo-600"
+      className={`${className} text-[11px] font-semibold text-slate-400 hover:text-indigo-600`}
     >
       Book this spot — {label}
     </Link>

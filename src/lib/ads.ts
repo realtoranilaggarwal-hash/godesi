@@ -310,6 +310,29 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       { label: "Daily Panchang", href: "/astrology/panchang" },
     ],
   },
+  SKIN: {
+    slot: "SKIN",
+    name: "Top strip",
+    size: { width: 1200, height: 40 },
+    slots: 2,
+    blurb:
+      "A slim text-only strip right under the menu at the top of every page — one line of words and your link, no image needed. Two advertisers share the rotation.",
+    priceInr: 7499,
+    priceUsd: 89,
+    cpmInr: 300,
+    cpmUsd: 3.5,
+    highlights: [
+      "Top of every page, on phones and computers",
+      "Text only — one line, no artwork needed",
+      "Two advertisers in rotation",
+    ],
+    region: "header",
+    where: [
+      { label: "Every page on Godesi", href: "/" },
+      { label: "Events", href: "/events" },
+      { label: "News", href: "/news" },
+    ],
+  },
 };
 
 /** Placements on sale. HERO has no spot on any page, so it isn't offered. */
@@ -317,6 +340,7 @@ export const AD_SLOT_ORDER: BannerSlot[] = [
   "WALL",
   "BILLBOARD",
   "HEADER",
+  "SKIN",
   "LEADERBOARD",
   "INCONTENT",
   "FULLBANNER",
