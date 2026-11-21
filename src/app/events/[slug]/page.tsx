@@ -1104,7 +1104,7 @@ export default async function EventPage({
                   Sign in (or join free) to buy tickets. Your tickets are saved
                   in your account and emailed to you.
                 </p>
-                <LinkButton href={`/login?next=/events/${event.slug}`}>
+                <LinkButton href={`/login?next=${encodeURIComponent(`/events/${event.slug}${compCounts && comp ? `?comp=${comp.code}` : ""}`)}`}>
                   Sign in to buy tickets
                 </LinkButton>
               </div>
