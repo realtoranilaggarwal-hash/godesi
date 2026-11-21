@@ -6,19 +6,33 @@ import { TopSkinHouse } from "@/components/TopSkinHouse";
 
 const SLOT: BannerSlot = "SKIN";
 
-/** One bordered line of words under the header; the spot always stays for sale. */
-export async function TopSkinBanner() {
+/**
+ * One bordered line of words; the spot always stays for sale. "header" sits in
+ * the header bar on wide screens, "row" is its own line under the header.
+ */
+export async function TopSkinBanner({
+  variant = "row",
+}: {
+  variant?: "row" | "header";
+}) {
   const [banner] = await activeBanners(SLOT, 1);
+  const header = variant === "header";
 
   return (
-    <div className="mx-auto w-full max-w-screen-2xl px-4 pt-2">
+    <div
+      className={
+        header
+          ? "relative w-full min-w-0"
+          : "mx-auto w-full max-w-screen-2xl px-4 pt-2"
+      }
+    >
       {banner ? (
         <a
           href={`/api/banners/${banner.id}/click`}
           target="_blank"
           rel="noreferrer sponsored"
           title={banner.title}
-          className="flex h-9 w-full min-w-0 items-center justify-center rounded-lg border-2 border-indigo-400 bg-white px-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50"
+          className={`flex ${header ? "h-8" : "h-9"} w-full min-w-0 items-center justify-center rounded-lg border-2 border-indigo-400 bg-white px-3 text-sm font-semibold text-slate-800 hover:bg-indigo-50`}
         >
           <BannerImpression id={banner.id} />
           <span className="truncate">{banner.title}</span>
@@ -27,12 +41,16 @@ export async function TopSkinBanner() {
           </span>
         </a>
       ) : (
-        <TopSkinHouse />
+        <TopSkinHouse variant={variant} />
       )}
       <BookThisSpot
         slot={SLOT}
         label="top strip"
-        className="mt-0.5 block text-right"
+        className={
+          header
+            ? "absolute right-0 top-full block whitespace-nowrap leading-3"
+            : "mt-0.5 block text-right"
+        }
       />
     </div>
   );

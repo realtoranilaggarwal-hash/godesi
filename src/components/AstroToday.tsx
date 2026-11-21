@@ -52,7 +52,6 @@ const ASTRO_LINKS = [
   },
   { href: "/festivals", label: "🎉 Festivals" },
   { href: "/pooja", label: "🙏 Book a pooja" },
-  { href: "/astrology", label: "✨ All astrology" },
 ];
 
 /**
@@ -113,6 +112,12 @@ export function AstroToday({
               Astrology &amp; Panchang today · {place}
             </Link>
             <span className="text-slate-500">{panchang.vaar}</span>
+            <Link
+              href="/astrology"
+              className="ml-auto shrink-0 rounded-full border border-amber-300 bg-white px-2.5 py-1 font-semibold text-slate-800 hover:bg-amber-50"
+            >
+              ✨ All astrology
+            </Link>
           </p>
           <p className="sm:truncate">
             {panchang.observances.length ? (

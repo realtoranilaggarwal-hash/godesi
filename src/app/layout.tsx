@@ -217,7 +217,9 @@ export default async function RootLayout({
         />
         <UnregisterServiceWorkers />
         <SiteHeader />
-        <TopSkinBanner />
+        <div className="xl:hidden">
+          <TopSkinBanner />
+        </div>
         <DealRibbon />
         <SiteTicker />
         <main className="mx-auto flex w-full max-w-screen-2xl gap-6 px-4 py-6">

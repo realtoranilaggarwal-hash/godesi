@@ -31,43 +31,7 @@ export function PlayLiveButton({
   );
 }
 
-/** Chips beside the search box: one tap starts the floating player. */
-export function LiveMediaChips({ className = "" }: { className?: string }) {
-  const chip =
-    "rounded-full px-2.5 py-1.5 text-xs font-bold text-white shadow-sm hover:brightness-110";
-
-  return (
-    <div className={`flex shrink-0 items-center gap-1 ${className}`}>
-      <button
-        type="button"
-        onClick={() =>
-          openLiveMedia({ kind: "radio", id: RADIO_STATIONS[0].id })
-        }
-        title="Play live desi radio"
-        className={`${chip} bg-gradient-to-r from-emerald-500 to-teal-600`}
-      >
-        🎧 Radio
-      </button>
-      <button
-        type="button"
-        onClick={() => openLiveMedia({ kind: "tv", id: TV_CHANNELS[0].id })}
-        title="Watch live desi TV"
-        className={`${chip} bg-gradient-to-r from-rose-500 to-orange-500`}
-      >
-        📺 TV
-      </button>
-      <Link
-        href="/news"
-        title="Desi news and local reports"
-        className={`${chip} bg-gradient-to-r from-sky-500 to-indigo-600`}
-      >
-        📰 News
-      </Link>
-    </div>
-  );
-}
-
-/** "🎧 Live Radio | 📺 Live TV | 🔗 Links" row used in the header bar and the footer. */
+/** "🎧 Live Radio | 📺 Live TV | 📰 News | 🔗 Links" row used in the header bar and the footer. */
 export function LiveMediaLinks({
   className = "",
   buttonClass = "",
@@ -101,6 +65,12 @@ export function LiveMediaLinks({
       >
         📺 {live}TV
       </button>
+      <Link
+        href="/news"
+        className={`${base} ${compact ? "max-sm:hidden" : ""}`}
+      >
+        📰 News
+      </Link>
       <Link
         href="/resources"
         className={`${base} ${compact ? "max-sm:hidden" : ""}`}
