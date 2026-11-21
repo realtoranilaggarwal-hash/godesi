@@ -10,6 +10,19 @@ export function hasPremiumCoupons(
   return user.role === "ADMIN" || effectivePlan(user) === "PREMIUM";
 }
 
+/** A comp code can cover more than the usual 10 tickets per booking, up to this many. */
+export const MAX_COMP_TICKETS = 50;
+
+/** Most tickets one booking may hold: 10, or everything a comp code for this event covers. */
+export function maxTicketsPerBooking(
+  coupon: Pick<Coupon, "tierLimits" | "eventId" | "active"> | null,
+  eventId: string,
+) {
+  if (!coupon?.active || coupon.eventId !== eventId) return 10;
+  const covered = couponTierLimits(coupon).reduce((sum, limit) => sum + limit.maxQuantity, 0);
+  return Math.min(MAX_COMP_TICKETS, Math.max(10, covered));
+}
+
 export function normalizeCouponCode(input: string) {
   return input.trim().toUpperCase().replace(/\s+/g, "");
 }

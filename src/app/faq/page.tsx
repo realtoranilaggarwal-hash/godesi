@@ -282,6 +282,47 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
+    q: "🎁 How do I send someone free (comp) tickets for my event?",
+    id: "comp-tickets",
+    a: (
+      <>
+        <p>
+          Use this when a guest paid you offline (cash, Zelle) or is your guest. It needs
+          the Featured (Premium) plan.
+        </p>
+        <ol>
+          <li>
+            Log in with the account that posted the event and open{" "}
+            <Link href="/dashboard/coupons">your coupons page</Link> →{" "}
+            <strong>Send comp tickets</strong>.
+          </li>
+          <li>Pick the event and type the guest&apos;s name and email.</li>
+          <li>
+            Type how many of each ticket they get, e.g. 4 Couple + 3 Small Kid. One comp
+            can cover up to 50 tickets.
+          </li>
+          <li>
+            Pick <strong>100% off</strong> if they paid in full, or{" "}
+            <strong>Fixed dollar amount</strong> to take off what they already paid; they
+            pay the rest online.
+          </li>
+          <li>
+            Click <strong>Send</strong>. The guest gets an email with a one-use code and a
+            link that opens the event with those tickets and the code already filled in.
+            You also see the code on screen so you can text it.
+          </li>
+        </ol>
+        <p>
+          The guest logs in (or signs up) with that email and books. Each ticket says{" "}
+          <strong>Complimentary · paid in full</strong> and has its own QR code, emailed
+          to them. On your coupons page the code changes to <strong>booked</strong> and
+          lists the tickets; <strong>checked in</strong> shows once it is scanned at the
+          door. Other tickets added to the same order are charged normally.
+        </p>
+      </>
+    ),
+  },
+  {
     q: "🏷️ How do I make a coupon (discount code) for my event?",
     id: "event-coupon",
     a: (

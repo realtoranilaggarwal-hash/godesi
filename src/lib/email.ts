@@ -143,6 +143,7 @@ export function ticketEmail({
   seats,
   code,
   ticketType,
+  complimentary = false,
   admits,
   perks = [],
   bannerCodes = [],
@@ -155,6 +156,8 @@ export function ticketEmail({
   seats: number;
   code: string;
   ticketType?: string | null;
+  /** A paid ticket type issued at $0, e.g. with a comp code. */
+  complimentary?: boolean;
   /** People the booking lets in, when it differs from the ticket count (couples, sponsor passes). */
   admits?: number;
   /** Sponsor package contents, listed in the email. */
@@ -187,6 +190,7 @@ export function ticketEmail({
        <p style="margin:0 0 4px;color:#334155">📅 ${when}</p>
        <p style="margin:0 0 4px;color:#334155">📍 ${venue}</p>
        <p style="margin:0 0 16px;color:#334155">🎫 ${ticketType ? `${ticketType} · ` : ""}${seats} ticket${seats > 1 ? "s" : ""}${people !== seats ? ` · admits ${people}` : ""} · booking code <strong>${code}</strong></p>
+       ${complimentary ? `<p style="margin:0 0 16px;color:#047857;font-weight:700">✓ Complimentary · paid in full</p>` : ""}
        ${sponsorHtml}
        <p style="margin:0 0 16px"><img src="${ticketQrEmailUrl(code)}" alt="Ticket QR code" width="180" height="180" /></p>
        <p style="margin:0"><a href="${url}" style="display:inline-block;background:#4f46e5;color:#fff;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none">Open my ticket</a></p>
@@ -214,7 +218,7 @@ export function compTicketEmail({
   /** Set for fixed-amount codes, e.g. "$175": that much comes off instead of the tickets being free. */
   fixedAmount?: string;
 }) {
-  const url = `${siteUrl()}/events/${eventSlug}`;
+  const url = `${siteUrl()}/events/${eventSlug}?comp=${encodeURIComponent(code)}`;
   const title = escapeHtml(eventTitle);
   const list = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   const benefit = fixedAmount

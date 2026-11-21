@@ -345,6 +345,7 @@ async function sendTicketConfirmation(ticketId: string) {
           name: true,
           kind: true,
           admits: true,
+          price: true,
           perks: true,
           bannerMonths: true,
           bannerSlot: true,
@@ -363,6 +364,7 @@ async function sendTicketConfirmation(ticketId: string) {
     seats: ticket.quantity,
     code: ticket.code,
     ticketType: ticket.tier?.name,
+    complimentary: !ticket.amountMinor && Boolean(ticket.tier?.price),
     admits: ticket.quantity * (ticket.tier?.admits ?? 1),
     perks: sponsor ? ticket.tier?.perks : [],
     bannerCodes:

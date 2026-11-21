@@ -39,7 +39,7 @@ export default async function TicketPage({
           organizerId: true,
         },
       },
-      tier: { select: { name: true, kind: true, admits: true } },
+      tier: { select: { name: true, kind: true, admits: true, price: true } },
     },
   });
   if (!ticket) notFound();
@@ -155,7 +155,11 @@ export default async function TicketPage({
           <p>
             🎫 {ticket.tier ? `${ticket.tier.name} · ` : ""}
             {ticket.quantity} {ticketWord} ·{" "}
-            {ticket.amountMinor ? formatMinor(ticket.amountMinor, ticket.currency) : "Free"}
+            {ticket.amountMinor
+              ? formatMinor(ticket.amountMinor, ticket.currency)
+              : ticket.tier?.price
+                ? "Complimentary · paid in full"
+                : "Free"}
           </p>
           <p className="break-words">👤 {ticket.buyerName}</p>
         </div>

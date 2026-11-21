@@ -361,7 +361,7 @@ export function SendCompTicketsForm({
                     name={`compQty_${tier.id}`}
                     type="number"
                     min={0}
-                    max={10}
+                    max={50}
                     placeholder="0"
                     value={quantities[tier.id] ?? ""}
                     onChange={(change) =>

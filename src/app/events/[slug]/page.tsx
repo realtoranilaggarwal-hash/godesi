@@ -3,6 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import {
+  couponTierLimits,
+  maxTicketsPerBooking,
+  normalizeCouponCode,
+} from "@/lib/coupons";
+import {
   SINGLES_MIN_AGE,
   connectProfileHref,
   isSinglesOnly,
@@ -287,7 +292,7 @@ export default async function EventPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { error?: string; promo?: string };
+  searchParams: { error?: string; promo?: string; comp?: string };
 }) {
   const event = await loadEvent(params.slug);
   if (!event || event.status === "REJECTED") notFound();
@@ -386,7 +391,20 @@ export default async function EventPage({
     event.category?.color,
   );
   const past = isPast(event);
-  const maxPerBooking = Math.min(10, left);
+  /** A comp email links here with ?comp=CODE: pre-pick its tickets and allow more than 10. */
+  const comp = searchParams.comp
+    ? await db.coupon.findUnique({
+        where: { code: normalizeCouponCode(searchParams.comp) },
+        select: { code: true, tierLimits: true, eventId: true, active: true },
+      })
+    : null;
+  const compCounts =
+    comp && comp.active && comp.eventId === event.id
+      ? Object.fromEntries(
+          couponTierLimits(comp).map((limit) => [limit.tierId, limit.maxQuantity]),
+        )
+      : undefined;
+  const maxPerBooking = Math.min(maxTicketsPerBooking(comp, event.id), left);
   /** Somebody else's calendar entry until it is claimed: no network ads on it. */
   const thin = eventIsThin(event);
   const endLabel = event.endsAt
@@ -1086,7 +1104,7 @@ export default async function EventPage({
                   Sign in (or join free) to buy tickets. Your tickets are saved
                   in your account and emailed to you.
                 </p>
-                <LinkButton href={`/login?next=/events/${event.slug}`}>
+                <LinkButton href={`/login?next=${encodeURIComponent(`/events/${event.slug}${compCounts && comp ? `?comp=${comp.code}` : ""}`)}`}>
                   Sign in to buy tickets
                 </LinkButton>
               </div>
@@ -1110,6 +1128,8 @@ export default async function EventPage({
                   seatsLeft={left}
                   hideSeatsLeft={hideCounts}
                   maxPerBooking={maxPerBooking}
+                  initialCounts={compCounts}
+                  initialCoupon={compCounts ? comp?.code : undefined}
                   tiers={ticketTiers
                     .filter((tier) => tierOnSale(tier))
                     .map((tier) => ({
