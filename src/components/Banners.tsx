@@ -43,7 +43,7 @@ type BannerRow = {
   linkUrl: string;
 };
 
-function BannerLink({
+export function BannerLink({
   banner,
   width,
   height,
@@ -137,7 +137,7 @@ function AdvertiseHere({
 }
 
 /** Even a filled spot stays for sale: the next advertiser can book the rotation. */
-function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
+export function BookThisSpot({ slot, label }: { slot: BannerSlot; label: string }) {
   return (
     <Link
       href={`/advertise?slot=${slot}#book`}

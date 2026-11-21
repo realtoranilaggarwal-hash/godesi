@@ -55,6 +55,29 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
       { label: "News", href: "/news" },
     ],
   },
+  SKIN: {
+    slot: "SKIN",
+    name: "Top skin strip",
+    size: { width: 970, height: 90 },
+    slots: 2,
+    blurb:
+      "The full-width strip right under the GoDesi menu, at the very top of every page — the first ad anyone sees, shared by two advertisers in rotation.",
+    priceInr: 9999,
+    priceUsd: 119,
+    cpmInr: 380,
+    cpmUsd: 4.5,
+    highlights: [
+      "Very top of every page, desktop and phone",
+      "Seen before the page itself",
+      "Only two advertisers share it",
+    ],
+    region: "header",
+    where: [
+      { label: "Every page on Godesi", href: "/" },
+      { label: "Events", href: "/events" },
+      { label: "News", href: "/news" },
+    ],
+  },
   HERO: {
     slot: "HERO",
     name: "Homepage hero banner",
@@ -315,6 +338,7 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
 /** Placements on sale. HERO has no spot on any page, so it isn't offered. */
 export const AD_SLOT_ORDER: BannerSlot[] = [
   "WALL",
+  "SKIN",
   "BILLBOARD",
   "HEADER",
   "LEADERBOARD",

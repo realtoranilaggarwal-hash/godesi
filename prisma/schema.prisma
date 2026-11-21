@@ -104,6 +104,8 @@ enum BannerSlot {
   WALL
   /// Small banners on the left of the astrology pages, sold to astrologers only.
   ASTRO
+  /// Full-width strip directly under the site header on every page.
+  SKIN
 }
 
 enum BannerStatus {
