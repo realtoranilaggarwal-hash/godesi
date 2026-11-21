@@ -5,6 +5,7 @@ import { SOCIAL_TAG } from "@/lib/social";
 import { socialWallPosts } from "@/lib/socialQueries";
 import { newsPath } from "@/lib/newsLinks";
 import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
+import { PUBLIC_PROFILE } from "@/lib/peopleLookup";
 
 export type WallItem = {
   id: string;
@@ -59,7 +60,7 @@ async function buildWallItems(limit = 24): Promise<WallItem[]> {
   const [members, businesses, listings, events, reports, social, updates] =
     await Promise.all([
       db.user.findMany({
-        where: { username: { not: null } },
+        where: PUBLIC_PROFILE,
         orderBy: { createdAt: "desc" },
         take: TAKE_PER_SOURCE,
         select: {
