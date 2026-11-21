@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DealRibbon } from "@/components/DealRibbon";
+import { TopSkinBanner } from "@/components/TopSkinBanner";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhoneSmallBanners, SmallBanners } from "@/components/Banners";
@@ -216,6 +217,7 @@ export default async function RootLayout({
         />
         <UnregisterServiceWorkers />
         <SiteHeader />
+        <TopSkinBanner />
         <DealRibbon />
         <SiteTicker />
         <main className="mx-auto flex w-full max-w-screen-2xl gap-6 px-4 py-6">
