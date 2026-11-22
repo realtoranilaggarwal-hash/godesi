@@ -55,9 +55,8 @@ export default async function CustomWebsitePage({
           preview. <strong>Pay only if you love it.</strong>
         </p>
         <p className="mt-2 max-w-2xl text-sm text-white/80">
-          Then hosting is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year, and
-          includes {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a
-          year).
+          Then hosting is ${WEBSITE_OFFER.customHostingYearUsd}/year and includes{" "}
+          {WEBSITE_OFFER.changesPerYear} changes a year.
         </p>
       </section>
 

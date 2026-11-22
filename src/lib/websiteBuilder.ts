@@ -212,6 +212,7 @@ export const BASE_SETUP_USD = WEBSITE_OFFER.priceUsd;
 export const BASE_MONTHLY_USD = WEBSITE_OFFER.monthlyUsd;
 export const BASE_YEARLY_USD = WEBSITE_OFFER.yearlyUsd;
 export const CUSTOM_SETUP_USD = WEBSITE_OFFER.customPriceUsd;
+export const CUSTOM_HOSTING_YEAR_USD = WEBSITE_OFFER.customHostingYearUsd;
 
 export type WebsiteTier = "AI" | "CUSTOM";
 export type HostingTerm = "MONTH" | "YEAR";
@@ -229,6 +230,23 @@ export const CUSTOM_SOURCES = [
   { key: "facebook", label: "Facebook", placeholder: "https://facebook.com/…" },
   { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/…" },
   { key: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/…" },
+] as const;
+
+/** Photo album and video playlist the custom site shows as galleries. */
+export const MEDIA_SOURCES = [
+  { key: "googleAlbum", label: "Google Photos album", placeholder: "https://photos.app.goo.gl/…" },
+  { key: "youtubePlaylist", label: "YouTube playlist", placeholder: "https://www.youtube.com/playlist?list=…" },
+] as const;
+
+/** What every custom-built website comes with. */
+export const CUSTOM_INCLUDES = [
+  "Home, About us, Services and Contact pages",
+  `Up to ${WEBSITE_OFFER.customPages} pages in all`,
+  "Custom design for your business",
+  "AI chat bot that answers your visitors",
+  "Photo gallery from your Google Photos album",
+  "Video gallery from your YouTube playlist",
+  "Works on phones, contact form, basic Google setup",
 ] as const;
 
 /** Websites the owner likes the look of. */

@@ -9,10 +9,12 @@ import { recordCouponFromMetadata } from "@/lib/coupons";
 import {
   BASE_MONTHLY_USD,
   BASE_YEARLY_USD,
+  CUSTOM_HOSTING_YEAR_USD,
   CUSTOM_SOURCES,
   type CustomPage,
   EMPTY_FACTS,
   EXAMPLE_SITE_KEYS,
+  MEDIA_SOURCES,
   type HostingTerm,
   type FoundFacts,
   isPowerUpKey,
@@ -87,7 +89,7 @@ export function projectSources(project: Pick<WebsiteProject, "sources">): Websit
 export function projectLinks(project: WebsiteProject): { label: string; url: string }[] {
   const raw = record(project.sources);
   const labels: Record<string, string> = Object.fromEntries(
-    CUSTOM_SOURCES.map((source) => [source.key, source.label]),
+    [...CUSTOM_SOURCES, ...MEDIA_SOURCES].map((source) => [source.key, source.label]),
   );
   EXAMPLE_SITE_KEYS.forEach((key, index) => {
     labels[key] = `Example site ${index + 1}`;
@@ -117,7 +119,7 @@ export function previewHref(project: WebsiteProject) {
 }
 
 export function hostingTerm(project: WebsiteProject): HostingTerm {
-  return project.billing === "YEAR" ? "YEAR" : "MONTH";
+  return project.tier === "CUSTOM" || project.billing === "YEAR" ? "YEAR" : "MONTH";
 }
 
 /**
@@ -275,13 +277,16 @@ export function termAmount(kind: Quote["lines"][number]["kind"], monthlyUsd: num
 export function quoteFor(
   project: WebsiteProject,
   powerUps: PowerUp[],
-  term: HostingTerm = hostingTerm(project),
+  requestedTerm: HostingTerm = hostingTerm(project),
 ): Quote {
+  const term: HostingTerm = project.tier === "CUSTOM" ? "YEAR" : requestedTerm;
+  // Custom-built sites are hosted for a flat fee once a year.
+  const custom = project.tier === "CUSTOM";
   const lines: Quote["lines"] = [
     {
       label: "Hosting, domain, SSL & care",
-      monthlyUsd: BASE_MONTHLY_USD,
-      amountUsd: termAmount("base", BASE_MONTHLY_USD, term),
+      monthlyUsd: custom ? Math.round(CUSTOM_HOSTING_YEAR_USD / 12) : BASE_MONTHLY_USD,
+      amountUsd: custom ? CUSTOM_HOSTING_YEAR_USD : termAmount("base", BASE_MONTHLY_USD, term),
       kind: "base",
     },
   ];

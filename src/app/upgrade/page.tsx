@@ -197,8 +197,8 @@ export default async function UpgradePage({
         <h3 className="text-lg font-bold">🌐 Add a website</h3>
         <p className="mt-1 text-sm text-slate-600">
           You see your new website free first and pay only if you love it. Hosting
-          is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year and includes{" "}
-          {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a year).
+          is ${WEBSITE_OFFER.customHostingYearUsd}/year and includes {WEBSITE_OFFER.changesPerYear}{" "}
+          changes a year.
         </p>
         <p className="mt-2 text-sm text-slate-700">
           🎨 <strong>Custom built website — from ${WEBSITE_OFFER.customPriceUsd} once.</strong> Our

@@ -10,7 +10,7 @@ import {
   previewHref,
   projectQuoted,
 } from "@/lib/websiteProjects";
-import { setupUsdFor, suggestedPowerUps, websitePath } from "@/lib/websiteBuilder";
+import { CUSTOM_HOSTING_YEAR_USD, setupUsdFor, suggestedPowerUps, websitePath } from "@/lib/websiteBuilder";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { stripeEnabled } from "@/lib/stripe";
 
@@ -58,6 +58,7 @@ export default async function FeaturesPage({
             : "AI website — design, copy, photos, launch"
         }
         billing={hostingTerm(project)}
+        hostingYearUsd={custom ? CUSTOM_HOSTING_YEAR_USD : undefined}
         defaultCoupon={(searchParams.code ?? "").slice(0, 40)}
       />
       <p className="text-center text-xs text-slate-500">

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -10,24 +9,12 @@ import { CustomWebsiteForm } from "@/components/website/CustomWebsiteForm";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { websitePath } from "@/lib/websiteBuilder";
 
-const NAMESILO_URL = "https://www.namesilo.com/?rid=8ec0177ty";
-
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: `Get your business website — custom built from $${WEBSITE_OFFER.customPriceUsd}`,
-  description: `Three steps: book your domain, tell us the pages you want, and our website team builds it. Custom websites from $${WEBSITE_OFFER.customPriceUsd}. Call ${WEBSITE_OFFER.phoneDisplay}.`,
+  title: `Get your business website — custom built for $${WEBSITE_OFFER.customPriceUsd}`,
+  description: `Tell us your domain, the pages you want, your photos and videos, and our website team builds it. Custom websites for $${WEBSITE_OFFER.customPriceUsd} with an AI chat bot, hosting $${WEBSITE_OFFER.customHostingYearUsd}/year. Call ${WEBSITE_OFFER.phoneDisplay}.`,
   alternates: { canonical: "/website" },
 };
-
-function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
-  return (
-    <Card>
-      <div className="text-xs font-bold text-indigo-600">STEP {n}</div>
-      <h2 className="text-xl font-black text-slate-900">{title}</h2>
-      <div className="mt-2 space-y-3 text-sm text-slate-700">{children}</div>
-    </Card>
-  );
-}
 
 export default async function WebsiteOfferPage({
   searchParams,
@@ -59,19 +46,22 @@ export default async function WebsiteOfferPage({
       <div className="min-w-0 flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
           <h1 className="text-3xl font-black leading-tight sm:text-4xl">
-            Get Your Business Website in 3 Simple Steps
+            Tell us about your website
           </h1>
-          <ol className="mt-3 max-w-2xl list-decimal space-y-1 pl-5 text-lg text-white/90">
-            <li>Book your domain, or tell us the one you have.</li>
-            <li>Tell us the pages you want and websites you like.</li>
-            <li>Our website team builds it. Custom websites start at ${WEBSITE_OFFER.customPriceUsd}.</li>
-          </ol>
+          <p className="mt-3 max-w-2xl text-lg text-white/90">
+            Answer a few quick questions: your domain, the pages you want, your photos and videos.
+            Our team builds your custom website for ${WEBSITE_OFFER.customPriceUsd}, with an AI chat
+            bot, photo and video galleries. Hosting is ${WEBSITE_OFFER.customHostingYearUsd} a year.
+          </p>
+          <p className="mt-2 max-w-2xl text-sm font-semibold text-amber-200">
+            🎁 Use code {WEBSITE_OFFER.giftCode} and get a free featured ad on GoDesi for 1 year.
+          </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <a
               href="#start"
               className="rounded-xl bg-white px-5 py-3 text-base font-bold text-indigo-700 shadow"
             >
-              🚀 Start my website
+              🚀 Get started
             </a>
             <a
               href={WEBSITE_OFFER.phoneTel}
@@ -116,59 +106,23 @@ export default async function WebsiteOfferPage({
           </Card>
         ) : null}
 
-        <Step n={1} title="Book your domain first">
-          <p>
-            Your domain is your website&apos;s address, like <strong>mybusiness.com</strong>. Book
-            it at{" "}
-            <a
-              href={NAMESILO_URL}
-              target="_blank"
-              rel="noopener noreferrer nofollow sponsored"
-              className="font-semibold text-indigo-700 underline"
-            >
-              NameSilo
-            </a>{" "}
-            for about $10–15 a year. Keep it short, match your business name, and pick .com if you
-            can.
-          </p>
-          <p>
-            <strong>Already have a domain?</strong> Just type it in Step 2.
-          </p>
-          <a
-            href={NAMESILO_URL}
-            target="_blank"
-            rel="noopener noreferrer nofollow sponsored"
-            className="inline-block rounded-xl bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-700"
-          >
-            Search domains on NameSilo →
-          </a>
-          <p className="text-xs text-slate-500">
-            NameSilo link is a referral link; it costs you nothing extra.
-          </p>
-        </Step>
-
         <div id="start" className="scroll-mt-24" />
-        <Step n={2} title="Tell us what you want">
-          <p>
-            Which pages you need (About us, Services, Contact…), what each should say, and websites
-            you like the look of. Not sure? Fill in what you can and we&apos;ll call you.
-          </p>
-          <CustomWebsiteForm
-            defaults={{
-              businessName: business?.name,
-              city: business?.city ?? user?.location ?? undefined,
-              phone: business?.phone ?? undefined,
-              email: user?.email,
-              website: searchParams.website ?? business?.websiteUrl ?? undefined,
-              wish: searchParams.wish,
-            }}
-          />
-        </Step>
+        <CustomWebsiteForm
+          defaults={{
+            businessName: business?.name,
+            city: business?.city ?? user?.location ?? undefined,
+            phone: business?.phone ?? undefined,
+            email: user?.email,
+            website: searchParams.website ?? business?.websiteUrl ?? undefined,
+            wish: searchParams.wish,
+          }}
+        />
 
-        <Step n={3} title={`Our team builds it — from $${WEBSITE_OFFER.customPriceUsd}`}>
-          <ul className="list-disc space-y-1 pl-5">
+        <Card>
+          <h2 className="text-xl font-black text-slate-900">Who builds your website</h2>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
             <li>
-              Our admin team builds your website, working with our partner{" "}
+              Our admin team builds it, working with our partner{" "}
               <a
                 href={WEBSITE_OFFER.partnerUrl}
                 target="_blank"
@@ -181,9 +135,6 @@ export default async function WebsiteOfferPage({
             </li>
             <li>You get a private preview first and pay only if you love it.</li>
             <li>
-              Hosting is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year.
-            </li>
-            <li>
               Your one contact in the USA:{" "}
               <a href={WEBSITE_OFFER.phoneTel} className="font-semibold text-indigo-700 underline">
                 {WEBSITE_OFFER.phoneDisplay}
@@ -191,22 +142,9 @@ export default async function WebsiteOfferPage({
               . For anything else, the team takes care of it.
             </li>
           </ul>
-          <Link href="/website/examples" className="inline-block font-semibold text-indigo-700 underline">
+          <Link href="/website/examples" className="mt-2 inline-block text-sm font-semibold text-indigo-700 underline">
             See websites the team has built →
           </Link>
-        </Step>
-
-        <Card className="border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-orange-50">
-          <div className="text-xs font-bold text-fuchsia-700">OPTIONAL ADD-ON</div>
-          <h2 className="text-xl font-black text-slate-900">
-            Daily articles — ${WEBSITE_OFFER.dailyArticlesUsd}/year
-          </h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
-            <li>365 articles, one every day, written for your kind of business.</li>
-            <li>Each comes with a picture and hashtags, emailed to you.</li>
-            <li>Fresh articles help your website show up on Google.</li>
-            <li>Tick the box in Step 2 to add it.</li>
-          </ul>
         </Card>
       </div>
 
