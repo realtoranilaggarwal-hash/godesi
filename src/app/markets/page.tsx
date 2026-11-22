@@ -5,6 +5,7 @@ import { TvWidget } from "@/components/tradingview/TvWidget";
 import { DailyPredictions } from "@/components/DailyPredictions";
 import { predictionsState } from "@/lib/predictions";
 import { cachedCurrentUser } from "@/lib/auth";
+import { PARTNER_OFFERS } from "@/lib/partnerOffers";
 
 export const dynamic = "force-dynamic";
 
@@ -13,25 +14,6 @@ export const metadata: Metadata = {
   description:
     "Live markets on GoDesi: US and India indexes, India and US stock screeners, USD to INR and remittance currencies, gold, silver and crude prices, crypto, a US & India economic calendar and market news — powered by TradingView.",
 };
-
-const PARTNER_OFFERS = [
-  {
-    href: "https://shop.ledger.com/?r=d8c50c491673",
-    label: "🔐 Ledger hardware wallet — secure your crypto",
-  },
-  {
-    href: "https://coinbase.com/join/HTSC8CX",
-    label: "₿ Coinbase — buy crypto, get a sign-up bonus",
-  },
-  {
-    href: "https://join.robinhood.com/anila100",
-    label: "📈 Robinhood — claim a free stock reward",
-  },
-  {
-    href: "https://www.webull.com/s/3Khqz6Gg5kk5p7nJHn",
-    label: "📊 Webull — free stocks for new accounts",
-  },
-];
 
 function Card({
   title,

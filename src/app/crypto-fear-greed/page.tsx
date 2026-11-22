@@ -8,8 +8,19 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { siteUrl } from "@/lib/format";
 import { Card } from "@/components/ui";
+import { FinancialAdviceBanner } from "@/components/FinancialAdviceBanner";
+import { cryptoHeadlines } from "@/lib/cryptoNews";
+import { PARTNER_OFFERS } from "@/lib/partnerOffers";
 
 export const revalidate = 3600;
+
+function shortDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "America/New_York",
+  });
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const [today] = await cryptoFearGreed();
@@ -119,7 +130,10 @@ function Attribution() {
 }
 
 export default async function CryptoFearGreedPage() {
-  const days = await cryptoFearGreed();
+  const [days, headlines] = await Promise.all([
+    cryptoFearGreed(),
+    cryptoHeadlines(),
+  ]);
   const today = days[0];
   const history = days.slice(0, 30).reverse();
 
@@ -192,6 +206,62 @@ export default async function CryptoFearGreedPage() {
             </p>
           </Card>
         )}
+
+        <FinancialAdviceBanner />
+
+        <div>
+          <Card>
+            <h2 className="mb-3 font-bold">
+              Buy, trade and store crypto — our partner offers
+            </h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {PARTNER_OFFERS.map((offer) => (
+                <a
+                  key={offer.href}
+                  href={offer.href}
+                  target="_blank"
+                  rel="noopener noreferrer sponsored"
+                  className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                >
+                  {offer.label} →
+                </a>
+              ))}
+            </div>
+          </Card>
+          <p className="mt-1 px-1 text-[11px] text-slate-500">
+            Ad · these are referral links — GoDesi may earn a bonus at no cost
+            to you. Not financial advice.
+          </p>
+        </div>
+
+        {headlines.length ? (
+          <Card>
+            <h2 className="font-bold">📰 Latest crypto news</h2>
+            <p className="mb-3 text-xs text-slate-500">
+              Bitcoin, Ethereum and crypto headlines from news sites across the
+              web, refreshed every hour. Each one opens on the publisher&apos;s
+              own site.
+            </p>
+            <ul className="divide-y divide-slate-100">
+              {headlines.map((item) => (
+                <li key={item.link} className="py-2">
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-semibold text-slate-900 hover:text-indigo-700 hover:underline"
+                  >
+                    {item.title}
+                  </a>
+                  <span className="block text-xs text-slate-500">
+                    {item.source ? `${item.source} · ` : ""}
+                    {shortDate(item.publishedAt)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
 
         <Card>
           <h2 className="mb-2 font-bold">How to read it</h2>
