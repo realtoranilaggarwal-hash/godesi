@@ -95,7 +95,10 @@ async function owner() {
   if (existing) {
     // Signups get a session before verifying their email, so only a verified
     // (or staff) account may take over the official card.
-    if (!existing.emailVerifiedAt && existing.role !== "ADMIN") {
+    const ownsCard = await db.business.findFirst({
+      where: { slug: SLUG, ownerId: existing.id },
+    });
+    if (!existing.emailVerifiedAt && existing.role !== "ADMIN" && !ownsCard) {
       throw new Error(
         `${EMAIL} is registered but not verified (${existing.id}); verify it first`,
       );
@@ -108,6 +111,7 @@ async function owner() {
       email: EMAIL,
       emailCanonical: canonicalEmail(EMAIL),
       role: "BUSINESS",
+      emailVerifiedAt: new Date(),
       passwordHash: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
       offerPhone: PHONE,
       ...plan,
