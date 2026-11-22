@@ -239,11 +239,12 @@ export async function eventComments(eventId: string) {
   const replies = comments.length
     ? await db.chatterPost.findMany({
         where: { parentId: { in: comments.map((c) => c.id) }, ...visible },
-        orderBy: { createdAt: "asc" },
+        orderBy: { createdAt: "desc" },
         take: 300,
         select: postSelect,
       })
     : [];
+  replies.reverse();
   return comments.map((comment) => ({
     comment,
     replies: replies.filter((reply) => reply.parentId === comment.id),
