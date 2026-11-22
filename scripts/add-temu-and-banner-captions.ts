@@ -26,6 +26,8 @@ const CAPTIONED: Record<string, string> = {
 const ENDS = new Date("2026-12-01T05:00:00Z");
 const GIFTS_LINK = "https://temu.to/k/prbu41omq9p";
 const WELCOME_LINK = "https://temu.to/k/us2rOByobnO4K79";
+const BEST_SELLERS_LINK = "https://temu.to/k/p655yfxxokq";
+const LOWEST_PRICE_LINK = "https://temu.to/k/p5vn344tcf8";
 const GIFTS_DISCLAIMER =
   "Select gift(s) on the promotion page with qualifying orders. The purchase required is determined by the gift(s)' value. T&Cs apply.";
 
@@ -40,12 +42,13 @@ const OFFERS = [
   },
   {
     externalId: "temu-coupon-bundle",
-    title: "$200 coupon bundle for new Temu users",
+    title: "Temu best sellers + $200 coupon bundle",
     description:
-      "Open the link to claim your $200 coupon bundle in the TEMU app. Only for app users with qualifying orders. T&Cs apply.",
+      "Explore Temu best sellers and claim your $200 coupon bundle in the TEMU app. Only for app users with qualifying orders. T&Cs apply.",
     code: null,
-    clickUrl: WELCOME_LINK,
+    clickUrl: BEST_SELLERS_LINK,
   },
+
   {
     externalId: "temu-gifts-0",
     title: "Gifts at $0 on Temu",
@@ -66,6 +69,12 @@ const BANNERS = [
     title: `Temu Black Friday — search code alc303030 for Gifts at $0 in TEMU app. ${GIFTS_DISCLAIMER}`,
     imageUrl: "/images/ads/temu-gifts-0.png",
     linkUrl: GIFTS_LINK,
+  },
+  {
+    title:
+      "Temu Black Friday — Lowest Price in last 30 days, plus claim your $200 coupon bundle",
+    imageUrl: "/images/ads/temu-lowest-price.png",
+    linkUrl: LOWEST_PRICE_LINK,
   },
 ];
 
