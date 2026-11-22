@@ -469,8 +469,10 @@ export async function startCustomWebsiteAction(
         `Page ${index + 1}`;
       pages.push({ name, text });
     }
-    if (!Object.keys(sources).length && !pages.length) {
-      return { error: "Give us at least one link (old website, Google, Yelp…) or one page of content." };
+    if (!Object.keys(sources).length && !pages.length && !input.domain && !input.wish) {
+      return {
+        error: "Tell us your domain, a link (old website, Google, Yelp…), one page of content, or what you want.",
+      };
     }
     const dailyArticles = formData.get("dailyArticles") === "1";
     const wish =
