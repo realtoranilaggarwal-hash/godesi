@@ -292,7 +292,11 @@ export async function deleteChatterPostAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const post = await db.chatterPost.findUnique({
     where: { id },
-    select: { authorId: true, parentId: true, event: { select: { slug: true } } },
+    select: {
+      authorId: true,
+      parentId: true,
+      event: { select: { slug: true } },
+    },
   });
   if (!post || post.authorId !== user.id) return;
   await db.$transaction(async (tx) => {
@@ -306,7 +310,7 @@ export async function deleteChatterPostAction(formData: FormData) {
   });
   refreshChatter(post.parentId);
   revalidateTag("sitemap-rows");
-  if (post.event) redirect(eventCommentsPath(post.event.slug));
+  if (post.event) redirect(`/events/${post.event.slug}?at=comments`);
   redirect(post.parentId ? chatterPath(post.parentId) : "/chatter");
 }
 

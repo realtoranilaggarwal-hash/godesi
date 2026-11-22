@@ -11,7 +11,11 @@ import { useEffect } from "react";
 export function ScrollTop() {
   useEffect(() => {
     /** A link like /events/x#tickets should land on that section, not the top. */
-    const hash = decodeURIComponent(window.location.hash.slice(1));
+    /** Server-action redirects drop the #hash, so they pass ?at=<id> instead. */
+    const hash =
+      decodeURIComponent(window.location.hash.slice(1)) ||
+      new URLSearchParams(window.location.search).get("at") ||
+      "";
     const top = () => {
       const target = hash ? document.getElementById(hash) : null;
       if (target) {

@@ -113,7 +113,9 @@ export function ChatterPostCard({
             <span className="font-bold">{name}</span>
           )}
           {author.username ? (
-            <span className="text-xs text-slate-400">@{author.username}</span>
+            <span className="break-all text-xs text-slate-400">
+              @{author.username}
+            </span>
           ) : null}
           <span className="text-xs text-slate-400">·</span>
           <Link
