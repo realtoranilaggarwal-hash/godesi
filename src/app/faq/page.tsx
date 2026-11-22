@@ -63,12 +63,7 @@ const ACTIONS: { href: string; label: string }[] = [
 ];
 
 /** Short how-to videos for claiming a listing (YouTube, Shorts or Vimeo links). */
-const CLAIM_VIDEOS: { url: string; title: string }[] = [
-  {
-    url: "https://youtube.com/shorts/dO4XuvC2hN4",
-    title: "How to claim your business on Godesi",
-  },
-];
+const CLAIM_VIDEOS: { url: string; title: string }[] = [];
 
 const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
   {
@@ -246,6 +241,10 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           entry — perfect for organisers, temples, communities and businesses.{" "}
           <Link href="/events/new">Post an event</Link>.
         </p>
+        <VideoEmbed
+          url="https://youtube.com/shorts/dO4XuvC2hN4"
+          title="Promote your events, sell tickets and create coupons on Godesi"
+        />
       </>
     ),
   },
@@ -617,6 +616,10 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
           images, short summaries and regular updates, so the platform stays
           active and engaging daily. <Link href="/news">Read the news</Link>.
         </p>
+        <VideoEmbed
+          url="https://youtube.com/shorts/YzYuR54r7JA"
+          title="Godesi News: be a reporter and share your story"
+        />
       </>
     ),
   },
