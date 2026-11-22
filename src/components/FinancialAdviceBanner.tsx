@@ -39,7 +39,7 @@ export function FinancialAdviceBanner() {
       </a>
       <p className="mt-1 px-1 text-[11px] text-slate-500">
         Ad · Anil Aggarwal, Future Finance Planning · Life Producer Lic
-        #1687981 · NMLS #2678719
+        #1687981
       </p>
     </div>
   );
