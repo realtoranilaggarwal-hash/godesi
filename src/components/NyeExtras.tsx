@@ -11,6 +11,8 @@ export const UBER_URL = `https://m.uber.com/ul/?action=setPickup&pickup=my_locat
 export const UBER_INVITE_CODE = "1p4f8p2heffp";
 export const UBER_INVITE_URL = `https://referrals.uber.com/refer?id=${UBER_INVITE_CODE}`;
 
+export const NYE_WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/BmuEFJUZfUw0VkM2e69I4Y";
+
 export function isNye2027(slug: string) {
   return NYE_2027_SLUGS.includes(slug);
 }
@@ -49,5 +51,27 @@ export function NyeExtras() {
       </p>
       <p className="text-xs text-slate-500">As an Amazon Associate GoDesi earns from qualifying purchases.</p>
     </div>
+  );
+}
+
+/** Invite to the NYE guests' WhatsApp group, shown on the NYE 2027 event pages. */
+export function NyeWhatsAppGroup() {
+  return (
+    <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+      <div className="min-w-0">
+        <p className="font-bold text-slate-900">💬 Join the NYE party WhatsApp group</p>
+        <p className="text-sm text-slate-600">
+          Ask questions, find people to go with, and get line-up, parking and ticket updates first.
+        </p>
+      </div>
+      <a
+        href={NYE_WHATSAPP_GROUP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1eb457]"
+      >
+        Join on WhatsApp ↗
+      </a>
+    </section>
   );
 }
