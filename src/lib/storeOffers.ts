@@ -30,15 +30,23 @@ export type PublicStoreOffer = Prisma.StoreOfferGetPayload<{
 
 /** Coupons first, then whatever ends soonest, so a page shows the most useful few. */
 export async function liveStoreOffers(take = 24): Promise<PublicStoreOffer[]> {
-  const offers = await db.storeOffer.findMany({
-    where: liveStoreOfferWhere(),
-    select: storeOfferSelect,
-    orderBy: [
-      { code: { sort: "asc", nulls: "last" } },
-      { endsAt: { sort: "asc", nulls: "last" } },
-    ],
-    take: take * 3,
-  });
+  const query = (source: Prisma.StoreOfferWhereInput["source"]) =>
+    db.storeOffer.findMany({
+      where: { ...liveStoreOfferWhere(), source },
+      select: storeOfferSelect,
+      orderBy: [
+        { code: { sort: "asc", nulls: "last" } },
+        { endsAt: { sort: "asc", nulls: "last" } },
+      ],
+      take: take * 3,
+    });
+  // Offers the owner adds by hand (e.g. Temu) come before the CJ feed,
+  // which has hundreds of rows and would otherwise crowd them out.
+  const [own, feed] = await Promise.all([
+    query({ not: "CJ" }),
+    query("CJ"),
+  ]);
+  const offers = [...own, ...feed];
   // One advertiser can post dozens; spread the space across stores.
   const perStore = new Map<string, number>();
   const picked: PublicStoreOffer[] = [];

@@ -265,6 +265,27 @@ export default async function HomePage() {
                   <AstroToday panchang={today.panchang} place={today.label} />
                 ) : null}
               </div>
+
+              {newMembers.length ? (
+                <section>
+                  <SectionHeading
+                    title="Newest members 👋"
+                    href="/people"
+                    linkLabel="All members"
+                    gradient="from-emerald-500 to-teal-500"
+                  />
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                    {newMembers.map((member, index) => (
+                      <div
+                        key={member.id}
+                        className={index >= 6 ? "hidden sm:block" : ""}
+                      >
+                        <MemberTile member={member} compact />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
             </div>
             <aside className="relative hidden xl:block">
               <div className="absolute inset-0 space-y-3 overflow-y-auto">
@@ -282,27 +303,6 @@ export default async function HomePage() {
             </aside>
           </div>
         </div>
-
-        {newMembers.length ? (
-          <section>
-            <SectionHeading
-              title="Newest members 👋"
-              href="/people"
-              linkLabel="All members"
-              gradient="from-emerald-500 to-teal-500"
-            />
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {newMembers.map((member, index) => (
-                <div
-                  key={member.id}
-                  className={index >= 6 ? "hidden sm:block" : ""}
-                >
-                  <MemberTile member={member} compact />
-                </div>
-              ))}
-            </div>
-          </section>
-        ) : null}
 
         <DealsStrip />
 

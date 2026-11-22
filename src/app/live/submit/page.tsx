@@ -9,6 +9,7 @@ import {
   LIVE_CHANNEL_MONTHS,
 } from "@/lib/liveChannels";
 import { startLiveChannelCheckoutAction } from "@/app/actions/liveChannels";
+import { TemuStudioGear } from "@/components/TemuStudioGear";
 
 export const metadata: Metadata = {
   title: "Add your radio station or TV channel | Godesi",
@@ -243,6 +244,8 @@ export default async function SubmitLiveChannelPage({
           )}
         </Card>
       ) : null}
+
+      <TemuStudioGear />
 
       <div className="flex flex-wrap gap-2">
         <LinkButton href="/live-radio">🎧 Live radio</LinkButton>

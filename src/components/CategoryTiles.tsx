@@ -30,7 +30,7 @@ export function CategoryTiles({
   if (dense) {
     // Slim festival-banner tiles: one gradient strip per category.
     return (
-      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid gap-2.5 sm:grid-cols-2">
         {categories.map((category) => (
           <Link
             key={category.slug}
@@ -43,7 +43,7 @@ export function CategoryTiles({
               {category.icon}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-black leading-tight">
+              <span className="block text-sm font-black leading-tight">
                 {category.name}
               </span>
               <span className="block truncate text-[11px] text-white/85">

@@ -317,8 +317,8 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
     slots: 2,
     blurb:
       "A slim text-only strip right under the menu at the top of every page — one line of words and your link, no image needed. Two advertisers share the rotation.",
-    priceInr: 7499,
-    priceUsd: 89,
+    priceInr: 8499,
+    priceUsd: 100,
     cpmInr: 300,
     cpmUsd: 3.5,
     highlights: [
