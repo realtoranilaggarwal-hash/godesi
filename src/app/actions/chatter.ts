@@ -311,7 +311,11 @@ export async function deleteChatterPostAction(formData: FormData) {
   });
   refreshChatter(post.parentId);
   revalidateTag("sitemap-rows");
-  if (post.event) redirect(eventCommentsReturnPath(post.event.slug));
+  if (post.event) {
+    revalidatePath(`/events/${post.event.slug}`);
+    if (formData.get("stay")) return;
+    redirect(eventCommentsReturnPath(post.event.slug));
+  }
   redirect(post.parentId ? chatterPath(post.parentId) : "/chatter");
 }
 

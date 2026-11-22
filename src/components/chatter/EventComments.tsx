@@ -46,6 +46,7 @@ export async function EventComments({
       liked={viewer.liked.has(row.id)}
       following={viewer.following.has(row.author.id)}
       uploads={uploads}
+      onEventPage
     />
   );
 
