@@ -789,7 +789,7 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
-    id: "claim-your-business",
+    id: "i-found-my-business-already-listed-what-do-i-do",
     q: "🛠 I found my business already listed. How do I claim it?",
     a: (
       <>
