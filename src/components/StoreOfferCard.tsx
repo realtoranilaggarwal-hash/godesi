@@ -16,7 +16,7 @@ export function StoreOfferCard({ offer }: { offer: PublicStoreOffer }) {
       </p>
       <p className="break-words font-bold text-slate-900">{offer.title}</p>
       {offer.description ? (
-        <p className="line-clamp-3 break-words text-sm text-slate-600">
+        <p className="break-words text-sm text-slate-600">
           {offer.description}
         </p>
       ) : null}
