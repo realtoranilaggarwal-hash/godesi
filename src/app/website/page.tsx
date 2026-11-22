@@ -49,12 +49,24 @@ export default async function WebsiteOfferPage({
             Tell us about your website
           </h1>
           <p className="mt-3 max-w-2xl text-lg text-white/90">
-            Answer a few quick questions: your domain, the pages you want, your photos and videos.
-            Our team builds your custom website for ${WEBSITE_OFFER.customPriceUsd}, with an AI chat
-            bot, photo and video galleries. Hosting is ${WEBSITE_OFFER.customHostingYearUsd} a year.
+            Answer a few quick questions: your domain, the pages you want, your
+            photos and videos. Our team builds your custom website with an AI
+            chat bot, photo and video galleries. Hosting is $
+            {WEBSITE_OFFER.customHostingYearUsd} a year.
+          </p>
+          <p className="mt-3 text-2xl font-black">
+            <s className="mr-2 text-lg font-bold text-white/60">
+              ${WEBSITE_OFFER.customListPriceUsd}
+            </s>
+            ${WEBSITE_OFFER.customPriceUsd}{" "}
+            <span className="rounded-full bg-amber-300 px-2 py-0.5 align-middle text-xs font-bold text-amber-950">
+              Limited-time price
+            </span>
           </p>
           <p className="mt-2 max-w-2xl text-sm font-semibold text-amber-200">
-            🎁 Use code {WEBSITE_OFFER.giftCode} and get a free featured ad on GoDesi for 1 year.
+            🎁 Use code {WEBSITE_OFFER.giftCode} and get a free featured ad on
+            GoDesi for 1 year. Refer {WEBSITE_OFFER.referralFriends} friends and
+            your first year of hosting is free.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <a

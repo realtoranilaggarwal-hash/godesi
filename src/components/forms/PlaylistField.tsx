@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Field, inputClass } from "@/components/ui";
 
-const STEPS = [
+export const PLAYLIST_LINK_STEPS = [
   "Open youtube.com and sign in with the account that has your videos.",
   "Tap your profile picture → Your channel → Playlists (or Library → Playlists on your phone).",
   "Tap New playlist, name it (e.g. “Our weddings”), and set visibility to Public or Unlisted — not Private.",
@@ -50,7 +50,7 @@ export function PlaylistField({
       </button>
       {open ? (
         <ol className="mt-2 list-decimal space-y-1 rounded-xl bg-indigo-50 p-3 pl-7 text-xs text-indigo-900">
-          {STEPS.map((step) => (
+          {PLAYLIST_LINK_STEPS.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ol>

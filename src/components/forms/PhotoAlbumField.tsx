@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Field, inputClass } from "@/components/ui";
 
-const STEPS = [
+export const ALBUM_LINK_STEPS = [
   "Open photos.google.com on your phone or computer and sign in.",
   "Tap Collections → Albums → Create album, give it a name like “My jewellery”.",
   "Tap Select photos and add every picture you want to show — there is no limit.",
@@ -50,7 +50,7 @@ export function PhotoAlbumField({
       </button>
       {open ? (
         <ol className="mt-2 list-decimal space-y-1 rounded-xl bg-indigo-50 p-3 pl-7 text-xs text-indigo-900">
-          {STEPS.map((step) => (
+          {ALBUM_LINK_STEPS.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ol>

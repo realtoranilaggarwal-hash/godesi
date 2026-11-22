@@ -17,6 +17,7 @@ import {
   CUSTOM_SOURCES,
   type CustomPage,
   EXAMPLE_SITE_KEYS,
+  EXTRA_SOCIAL_SOURCES,
   isPowerUpKey,
   MEDIA_SOURCES,
   nextDesignSeed,
@@ -440,6 +441,10 @@ const customSchema = z.object({
   wish: optional(3000),
   contactName: optional(120),
   code: optional(40),
+  friend1Name: optional(120),
+  friend1Contact: optional(160),
+  friend2Name: optional(120),
+  friend2Contact: optional(160),
 });
 
 async function emailDesk(subject: string, body: string) {
@@ -461,6 +466,7 @@ export async function startCustomWebsiteAction(
     for (const key of [
       ...CUSTOM_SOURCES.map((source) => source.key),
       ...MEDIA_SOURCES.map((source) => source.key),
+      ...EXTRA_SOCIAL_SOURCES.map((source) => source.key),
       ...EXAMPLE_SITE_KEYS,
     ]) {
       const value = link.parse(String(formData.get(key) ?? ""));
@@ -482,6 +488,12 @@ export async function startCustomWebsiteAction(
       };
     }
     const dailyArticles = formData.get("dailyArticles") === "1";
+    const onlineOrdering = formData.get("onlineOrdering") === "1";
+    const friends = [
+      [input.friend1Name, input.friend1Contact],
+      [input.friend2Name, input.friend2Contact],
+    ].filter(([name, contact]) => name && contact);
+    const referred = friends.length >= WEBSITE_OFFER.referralFriends;
     const gift = input.code?.toUpperCase() === WEBSITE_OFFER.giftCode;
     const goals = Array.from(new Set(formData.getAll("goals").map(String))).filter((key) =>
       goalKeys.includes(key as (typeof goalKeys)[number]),
@@ -495,6 +507,14 @@ export async function startCustomWebsiteAction(
             ? `Entered code: ${input.code}.`
             : "",
         dailyArticles ? `Wants the daily articles add-on ($${WEBSITE_OFFER.dailyArticlesUsd}/year).` : "",
+        onlineOrdering
+          ? `Wants online ordering linked to a payment gateway ($${WEBSITE_OFFER.onlineOrderingUsd} one time).`
+          : "",
+        friends.length
+          ? `Referred ${friends.length} friend${friends.length === 1 ? "" : "s"}${
+              referred ? " (first year of hosting free once confirmed)" : ""
+            }: ${friends.map(([name, contact]) => `${name} — ${contact}`).join("; ")}.`
+          : "",
         input.wish ?? "",
       ]
         .filter(Boolean)
@@ -519,7 +539,9 @@ export async function startCustomWebsiteAction(
     });
     rememberProject(project.id);
     await emailDesk(
-      `Custom website order: ${project.businessName} (${project.city})${gift ? ` — code ${WEBSITE_OFFER.giftCode}` : ""}`,
+      `Custom website order: ${project.businessName} (${project.city})${gift ? ` — code ${WEBSITE_OFFER.giftCode}` : ""}${
+        onlineOrdering ? " — online ordering" : ""
+      }${referred ? " — 2 referrals" : ""}`,
       `<h2>New $${WEBSITE_OFFER.customPriceUsd} custom website request</h2>
        <p><strong>${escapeHtml(project.businessName)}</strong> — ${escapeHtml(project.category)}, ${escapeHtml(project.city)}</p>
        <p>${Object.keys(sources).length} links · ${pages.length} pages of content</p>
