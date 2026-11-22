@@ -141,8 +141,7 @@ export async function createChatterPostAction(
         select: { blockerId: true },
       });
       if (blockedByAuthor) return { error: "You can't reply to this member." };
-      // Event pages show one level of replies, so a reply to a reply joins its comment.
-      parentId = parent.event && parent.parentId ? parent.parentId : parent.id;
+      parentId = parent.id;
       eventSlug = parent.event?.slug ?? null;
     } else {
       const rawEvent = String(formData.get("eventId") ?? "").trim();
@@ -199,7 +198,11 @@ export async function createChatterPostAction(
         userId: parent.authorId,
         title: `${properName(user.name)} replied to your Chatter post`,
         body: chatterExcerpt(parsed.data.body, 120),
-        href: eventSlug ? eventCommentsPath(eventSlug) : chatterPath(parent.id),
+        // Event pages show one level of replies; deeper ones live on the thread page.
+        href:
+          eventSlug && !parent.parentId
+            ? eventCommentsPath(eventSlug)
+            : chatterPath(parent.id),
       });
     }
     if (event && event.organizerId !== user.id) {
