@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { findProfilesByName } from "@/lib/peopleLookup";
+import { searchWords } from "@/lib/keywordSearch";
 
 export type SiteSearchHit = {
   href: string;
@@ -153,6 +154,35 @@ const LISTING_LABELS: Record<string, string> = {
   ITEM: "Item for sale",
 };
 
+/** Short forms people type for event names ("nye" → New Year's Eve). */
+const EVENT_ALIASES: Record<string, string> = {
+  nye: "new year eve",
+};
+
+/**
+ * Every word of the query must appear somewhere in the event, so "new years
+ * eve" or "nye" find "New Year's Eve Party" even though the exact phrase differs.
+ */
+function eventWordsMatch(q: string) {
+  const words = searchWords(
+    q
+      .toLowerCase()
+      .replace(/'/g, "")
+      .split(/\s+/)
+      .map((word) => EVENT_ALIASES[word] ?? word)
+      .join(" "),
+  );
+  if (!words.length) return [];
+  return [
+    {
+      AND: words.map((word) => {
+        const has = { contains: word, mode: "insensitive" as const };
+        return { OR: [{ title: has }, { description: has }, { venue: has }] };
+      }),
+    },
+  ];
+}
+
 /**
  * One query across every surface — businesses, wedding vendors, events, property
  * and item listings, temples, requirements, categories and resource links — so
@@ -226,11 +256,22 @@ export async function siteSearch(
           status: "APPROVED",
           startsAt: { gte: new Date() },
           ...cityFilter,
-          OR: [{ title: like }, { description: like }, { venue: like }],
+          OR: [
+            { title: like },
+            { description: like },
+            { venue: like },
+            ...eventWordsMatch(q),
+          ],
         },
         orderBy: { startsAt: "asc" },
         take: 6,
-        select: { slug: true, title: true, city: true, startsAt: true },
+        select: {
+          slug: true,
+          title: true,
+          city: true,
+          startsAt: true,
+          timeZone: true,
+        },
       }),
       db.listing.findMany({
         where: {
@@ -309,7 +350,9 @@ export async function siteSearch(
     events: events.map((row) => ({
       href: `/events/${row.slug}`,
       title: row.title,
-      subtitle: `${row.city} · ${row.startsAt.toLocaleDateString()}`,
+      subtitle: `${row.city} · ${row.startsAt.toLocaleDateString("en-US", {
+        timeZone: row.timeZone ?? "America/New_York",
+      })}`,
       badge: "Event",
     })),
     listings: listings.map((row) => ({
