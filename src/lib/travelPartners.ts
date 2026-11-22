@@ -1,7 +1,6 @@
 /**
  * Travelpayouts partner programs shown on /travel. Links go to the brand's own
- * site on purpose — the Travelpayouts "Drive" script loaded in the site <head>
- * rewrites brand links into affiliate links with our partner marker on click.
+ * site.
  */
 export type TravelPartner = {
   name: string;
