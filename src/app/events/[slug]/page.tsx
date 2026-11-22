@@ -34,6 +34,7 @@ import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
 import { PostedBy } from "@/components/PostedBy";
 import { ShareButtons } from "@/components/ShareButtons";
+import { EventComments } from "@/components/chatter/EventComments";
 import { EventShareKit } from "@/components/EventShareKit";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { EventEmbed } from "@/components/EventEmbed";
@@ -995,6 +996,13 @@ export default async function EventPage({
                 </div>
               </details>
             )}
+            {event.status === "APPROVED" ? (
+              <EventComments
+                eventId={event.id}
+                slug={event.slug}
+                viewerId={user?.id ?? null}
+              />
+            ) : null}
           </div>
         </div>
 

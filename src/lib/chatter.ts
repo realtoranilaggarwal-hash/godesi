@@ -61,6 +61,7 @@ const postSelect = {
   editedAt: true,
   createdAt: true,
   author: { select: chatterAuthorSelect },
+  event: { select: { slug: true, title: true } },
 } satisfies Prisma.ChatterPostSelect;
 
 export type ChatterPostRow = Prisma.ChatterPostGetPayload<{
@@ -97,12 +98,18 @@ export type FeedFilter = {
   before?: string;
 };
 
+/** Event comments stay out of public Chatter unless the event itself is public. */
+const publicEvent = {
+  OR: [{ eventId: null }, { event: { status: "APPROVED" } }],
+} satisfies Prisma.ChatterPostWhereInput;
+
 function feedWhere(filter: FeedFilter): Prisma.ChatterPostWhereInput {
   const before = filter.before ? new Date(filter.before) : null;
   return {
     parentId: null,
     hiddenAt: null,
     author: { bannedAt: null },
+    ...publicEvent,
     ...(filter.topic && isChatterTopic(filter.topic)
       ? { topic: filter.topic }
       : {}),
@@ -188,6 +195,7 @@ export async function chatterThread(id: string) {
       id,
       hiddenAt: null,
       author: { bannedAt: null },
+      AND: [publicEvent],
       OR: [
         { parentId: null },
         { parent: { hiddenAt: null, author: { bannedAt: null } } },
@@ -213,6 +221,34 @@ export async function chatterThread(id: string) {
     select: postSelect,
   });
   return { post, replies: replies.reverse() };
+}
+
+export function eventCommentsPath(slug: string) {
+  return `/events/${slug}#comments`;
+}
+
+/** Comments under an event page, newest first, each with its replies oldest first. */
+export async function eventComments(eventId: string) {
+  const visible = { hiddenAt: null, author: { bannedAt: null } };
+  const comments = await db.chatterPost.findMany({
+    where: { eventId, parentId: null, ...visible },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: postSelect,
+  });
+  const replies = comments.length
+    ? await db.chatterPost.findMany({
+        where: { parentId: { in: comments.map((c) => c.id) }, ...visible },
+        orderBy: { createdAt: "desc" },
+        take: 300,
+        select: postSelect,
+      })
+    : [];
+  replies.reverse();
+  return comments.map((comment) => ({
+    comment,
+    replies: replies.filter((reply) => reply.parentId === comment.id),
+  }));
 }
 
 /** Members this viewer has blocked; their posts are left out of the feed. */

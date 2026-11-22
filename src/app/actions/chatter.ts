@@ -16,6 +16,7 @@ import {
   CHATTER_RATE,
   chatterExcerpt,
   chatterPath,
+  eventCommentsPath,
   extractHashtags,
   isChatterLanguage,
   isChatterTopic,
@@ -83,6 +84,7 @@ export async function createChatterPostAction(
 ): Promise<ActionState> {
   let createdId: string;
   let parentId: string | null = null;
+  let eventSlug: string | null = null;
   try {
     const user = await requireUser();
     if (!user.emailVerifiedAt) {
@@ -104,13 +106,29 @@ export async function createChatterPostAction(
     let parent: {
       id: string;
       authorId: string;
+      parentId: string | null;
       topic: string;
       city: string | null;
+      event: { id: string; slug: string } | null;
+    } | null = null;
+    let event: {
+      id: string;
+      slug: string;
+      title: string;
+      city: string;
+      organizerId: string;
     } | null = null;
     if (rawParent) {
       parent = await db.chatterPost.findFirst({
         where: { id: rawParent, hiddenAt: null },
-        select: { id: true, authorId: true, topic: true, city: true },
+        select: {
+          id: true,
+          authorId: true,
+          parentId: true,
+          topic: true,
+          city: true,
+          event: { select: { id: true, slug: true } },
+        },
       });
       if (!parent) return { error: "That post is no longer available." };
       const blockedByAuthor = await db.chatterBlock.findUnique({
@@ -124,6 +142,23 @@ export async function createChatterPostAction(
       });
       if (blockedByAuthor) return { error: "You can't reply to this member." };
       parentId = parent.id;
+      eventSlug = parent.event?.slug ?? null;
+    } else {
+      const rawEvent = String(formData.get("eventId") ?? "").trim();
+      if (rawEvent) {
+        event = await db.event.findFirst({
+          where: { id: rawEvent, status: "APPROVED" },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            city: true,
+            organizerId: true,
+          },
+        });
+        if (!event) return { error: "That event is no longer available." };
+        eventSlug = event.slug;
+      }
     }
 
     const photo = await readPhoto(formData, user.id);
@@ -135,8 +170,13 @@ export async function createChatterPostAction(
           authorId: user.id,
           body: parsed.data.body,
           imageUrl: photo.url,
-          topic: parent?.topic ?? parsed.data.topic,
-          city: parent ? parent.city : parsed.data.city || null,
+          topic: parent?.topic ?? (event ? "local" : parsed.data.topic),
+          city: parent
+            ? parent.city
+            : event
+              ? event.city
+              : parsed.data.city || null,
+          eventId: parent?.event?.id ?? event?.id ?? null,
           language: parsed.data.language,
           tags: extractHashtags(parsed.data.body),
           parentId,
@@ -158,14 +198,28 @@ export async function createChatterPostAction(
         userId: parent.authorId,
         title: `${properName(user.name)} replied to your Chatter post`,
         body: chatterExcerpt(parsed.data.body, 120),
-        href: chatterPath(parent.id),
+        // Event pages show one level of replies; deeper ones live on the thread page.
+        href:
+          eventSlug && !parent.parentId
+            ? eventCommentsPath(eventSlug)
+            : chatterPath(parent.id),
+      });
+    }
+    if (event && event.organizerId !== user.id) {
+      await notify({
+        userId: event.organizerId,
+        title: `${properName(user.name)} commented on ${event.title}`,
+        body: chatterExcerpt(parsed.data.body, 120),
+        href: eventCommentsPath(event.slug),
       });
     }
     refreshChatter(createdId, parentId);
+    if (eventSlug) revalidatePath(`/events/${eventSlug}`);
   } catch (error) {
     return fieldError(error);
   }
   if (parentId) return { success: "Reply posted." };
+  if (eventSlug) return { success: "Comment posted." };
   redirect(chatterPath(createdId));
 }
 
@@ -178,7 +232,13 @@ export async function editChatterPostAction(
     const id = String(formData.get("id") ?? "");
     const post = await db.chatterPost.findUnique({
       where: { id },
-      select: { authorId: true, parentId: true, topic: true, language: true },
+      select: {
+        authorId: true,
+        parentId: true,
+        eventId: true,
+        topic: true,
+        language: true,
+      },
     });
     if (!post || post.authorId !== user.id) {
       return { error: "You can only edit your own posts." };
@@ -209,12 +269,12 @@ export async function editChatterPostAction(
         language: parsed.data.language,
         editedAt: new Date(),
         ...(keepPhoto ? {} : { imageUrl: photo.url }),
-        ...(post.parentId
+        ...(post.parentId || post.eventId
           ? {}
           : { topic: parsed.data.topic, city: parsed.data.city || null }),
       },
     });
-    if (!post.parentId) {
+    if (!post.parentId && !post.eventId) {
       await db.chatterPost.updateMany({
         where: { parentId: id },
         data: { topic: parsed.data.topic, city: parsed.data.city || null },
@@ -232,7 +292,7 @@ export async function deleteChatterPostAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const post = await db.chatterPost.findUnique({
     where: { id },
-    select: { authorId: true, parentId: true },
+    select: { authorId: true, parentId: true, event: { select: { slug: true } } },
   });
   if (!post || post.authorId !== user.id) return;
   await db.$transaction(async (tx) => {
@@ -246,6 +306,7 @@ export async function deleteChatterPostAction(formData: FormData) {
   });
   refreshChatter(post.parentId);
   revalidateTag("sitemap-rows");
+  if (post.event) redirect(eventCommentsPath(post.event.slug));
   redirect(post.parentId ? chatterPath(post.parentId) : "/chatter");
 }
 

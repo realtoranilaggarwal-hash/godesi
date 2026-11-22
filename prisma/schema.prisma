@@ -1387,6 +1387,7 @@ model Event {
   reviews          EventReview[]
   sponsors         EventSponsor[]
   ambassadorPromos AmbassadorPromoEvent[]
+  chatterPosts     ChatterPost[]
 
   @@unique([sourceId, sourceUid])
   @@index([startsAt])
@@ -3348,6 +3349,9 @@ model ChatterPost {
   parentId     String?
   parent       ChatterPost?  @relation("ChatterReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies      ChatterPost[] @relation("ChatterReplies")
+  /// Set on comments under an event page, and on their replies.
+  eventId      String?
+  event        Event?        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   likeCount    Int           @default(0)
   replyCount   Int           @default(0)
   /// Set by staff, or automatically once enough members report it.
@@ -3363,6 +3367,7 @@ model ChatterPost {
   @@index([authorId, createdAt])
   @@index([topic, createdAt])
   @@index([city, createdAt])
+  @@index([eventId, parentId, createdAt])
 }
 
 model ChatterLike {
