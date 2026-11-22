@@ -145,7 +145,7 @@ export async function createChatterPostAction(
       const rawEvent = String(formData.get("eventId") ?? "").trim();
       if (rawEvent) {
         event = await db.event.findFirst({
-          where: { id: rawEvent, status: { not: "REJECTED" } },
+          where: { id: rawEvent, status: "APPROVED" },
           select: {
             id: true,
             slug: true,

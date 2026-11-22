@@ -98,12 +98,18 @@ export type FeedFilter = {
   before?: string;
 };
 
+/** Event comments stay out of public Chatter unless the event itself is public. */
+const publicEvent = {
+  OR: [{ eventId: null }, { event: { status: "APPROVED" } }],
+} satisfies Prisma.ChatterPostWhereInput;
+
 function feedWhere(filter: FeedFilter): Prisma.ChatterPostWhereInput {
   const before = filter.before ? new Date(filter.before) : null;
   return {
     parentId: null,
     hiddenAt: null,
     author: { bannedAt: null },
+    ...publicEvent,
     ...(filter.topic && isChatterTopic(filter.topic)
       ? { topic: filter.topic }
       : {}),
@@ -189,6 +195,7 @@ export async function chatterThread(id: string) {
       id,
       hiddenAt: null,
       author: { bannedAt: null },
+      AND: [publicEvent],
       OR: [
         { parentId: null },
         { parent: { hiddenAt: null, author: { bannedAt: null } } },

@@ -996,11 +996,13 @@ export default async function EventPage({
                 </div>
               </details>
             )}
-            <EventComments
-              eventId={event.id}
-              slug={event.slug}
-              viewerId={user?.id ?? null}
-            />
+            {event.status === "APPROVED" ? (
+              <EventComments
+                eventId={event.id}
+                slug={event.slug}
+                viewerId={user?.id ?? null}
+              />
+            ) : null}
           </div>
         </div>
 
