@@ -17,6 +17,7 @@ import {
   chatterExcerpt,
   chatterPath,
   eventCommentsPath,
+  eventCommentsReturnPath,
   extractHashtags,
   isChatterLanguage,
   isChatterTopic,
@@ -310,7 +311,7 @@ export async function deleteChatterPostAction(formData: FormData) {
   });
   refreshChatter(post.parentId);
   revalidateTag("sitemap-rows");
-  if (post.event) redirect(`/events/${post.event.slug}?at=comments`);
+  if (post.event) redirect(eventCommentsReturnPath(post.event.slug));
   redirect(post.parentId ? chatterPath(post.parentId) : "/chatter");
 }
 
