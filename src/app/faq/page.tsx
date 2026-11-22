@@ -63,7 +63,12 @@ const ACTIONS: { href: string; label: string }[] = [
 ];
 
 /** Short how-to videos for claiming a listing (YouTube, Shorts or Vimeo links). */
-const CLAIM_VIDEOS: { url: string; title: string }[] = [];
+const CLAIM_VIDEOS: { url: string; title: string }[] = [
+  {
+    url: "https://youtube.com/shorts/dO4XuvC2hN4",
+    title: "How to claim your business on Godesi",
+  },
+];
 
 const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
   {
