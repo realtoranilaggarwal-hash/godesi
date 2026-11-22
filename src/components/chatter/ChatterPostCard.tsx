@@ -10,6 +10,7 @@ import {
   chatterAge,
   chatterExcerpt,
   chatterPath,
+  eventCommentsPath,
   topicOf,
   translateLink,
   type ChatterPostRow,
@@ -142,7 +143,16 @@ export function ChatterPostCard({
             </form>
           ) : null}
         </div>
-        {post.parentId ? null : (
+        {post.parentId ? null : post.event ? (
+          <div className="flex flex-wrap gap-1.5 text-xs">
+            <Link
+              href={eventCommentsPath(post.event.slug)}
+              className="rounded-full bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-700"
+            >
+              🎟️ {post.event.title}
+            </Link>
+          </div>
+        ) : (
           <div className="flex flex-wrap gap-1.5 text-xs">
             <Link
               href={`/chatter?topic=${topic.id}`}
@@ -215,7 +225,7 @@ export function ChatterPostCard({
                   city: post.city,
                   language: post.language,
                   imageUrl: post.imageUrl,
-                  isReply: Boolean(post.parentId),
+                  isReply: Boolean(post.parentId || post.event),
                 }}
               />
               <form action={deleteChatterPostAction}>

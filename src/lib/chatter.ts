@@ -61,6 +61,7 @@ const postSelect = {
   editedAt: true,
   createdAt: true,
   author: { select: chatterAuthorSelect },
+  event: { select: { slug: true, title: true } },
 } satisfies Prisma.ChatterPostSelect;
 
 export type ChatterPostRow = Prisma.ChatterPostGetPayload<{
@@ -213,6 +214,33 @@ export async function chatterThread(id: string) {
     select: postSelect,
   });
   return { post, replies: replies.reverse() };
+}
+
+export function eventCommentsPath(slug: string) {
+  return `/events/${slug}#comments`;
+}
+
+/** Comments under an event page, newest first, each with its replies oldest first. */
+export async function eventComments(eventId: string) {
+  const visible = { hiddenAt: null, author: { bannedAt: null } };
+  const comments = await db.chatterPost.findMany({
+    where: { eventId, parentId: null, ...visible },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: postSelect,
+  });
+  const replies = comments.length
+    ? await db.chatterPost.findMany({
+        where: { parentId: { in: comments.map((c) => c.id) }, ...visible },
+        orderBy: { createdAt: "asc" },
+        take: 300,
+        select: postSelect,
+      })
+    : [];
+  return comments.map((comment) => ({
+    comment,
+    replies: replies.filter((reply) => reply.parentId === comment.id),
+  }));
 }
 
 /** Members this viewer has blocked; their posts are left out of the feed. */

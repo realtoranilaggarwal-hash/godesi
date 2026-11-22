@@ -12,14 +12,19 @@ import {
 import { SubmitButton } from "@/components/SubmitButton";
 import { inputClass } from "@/components/ui";
 
-/** New post, or a reply when `parentId` is given (topic and city follow the post). */
+/**
+ * New post, a reply when `parentId` is given (topic and city follow the post),
+ * or a comment under an event page when `eventId` is given.
+ */
 export function ChatterComposer({
   parentId,
+  eventId,
   defaultCity,
   defaultTopic,
   uploads,
 }: {
   parentId?: string;
+  eventId?: string;
   defaultCity?: string | null;
   defaultTopic?: string;
   uploads: boolean;
@@ -27,6 +32,7 @@ export function ChatterComposer({
   const [state, formAction] = useFormState(createChatterPostAction, emptyState);
   const [length, setLength] = useState(0);
   const form = useRef<HTMLFormElement>(null);
+  const short = Boolean(parentId || eventId);
 
   useEffect(() => {
     if (state.success) {
@@ -40,22 +46,27 @@ export function ChatterComposer({
       {parentId ? (
         <input type="hidden" name="parentId" value={parentId} />
       ) : null}
+      {eventId ? <input type="hidden" name="eventId" value={eventId} /> : null}
       <textarea
         name="body"
         required
-        rows={parentId ? 2 : 3}
+        rows={short ? 2 : 3}
         maxLength={CHATTER_MAX}
         onChange={(event) => setLength(event.target.value.length)}
         placeholder={
           parentId
             ? "Write a reply…"
-            : "What's on your mind? Add #words so others can find it."
+            : eventId
+              ? "Ask a question, or tell people you're going…"
+              : "What's on your mind? Add #words so others can find it."
         }
-        aria-label={parentId ? "Your reply" : "Your post"}
+        aria-label={
+          parentId ? "Your reply" : eventId ? "Your comment" : "Your post"
+        }
         className={`${inputClass} resize-y`}
       />
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        {parentId ? null : (
+        {short ? null : (
           <>
             <select
               name="topic"
@@ -108,7 +119,7 @@ export function ChatterComposer({
           {length}/{CHATTER_MAX}
         </span>
         <SubmitButton pendingLabel="Posting…">
-          {parentId ? "Reply" : "Post"}
+          {parentId ? "Reply" : eventId ? "Comment" : "Post"}
         </SubmitButton>
       </div>
       {state.error ? (
