@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { GoogleWebResults } from "@/components/GoogleWebResults";
 
 type Turn = { role: "user" | "assistant"; content: string };
 type Source = { name: string; url: string };
@@ -43,6 +44,8 @@ export function AiChat() {
   const [open, setOpen] = useState(false);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [sources, setSources] = useState<Source[]>([]);
+  const [webQuery, setWebQuery] = useState<string | null>(null);
+  const [showWeb, setShowWeb] = useState(false);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +62,8 @@ export function AiChat() {
     setTurns(next);
     setInput("");
     setSources([]);
+    setWebQuery(null);
+    setShowWeb(false);
     setError(null);
     setBusy(true);
     const body = JSON.stringify({ messages: next.slice(-10) });
@@ -71,6 +76,7 @@ export function AiChat() {
       const data = (await res.json().catch(() => null)) as {
         reply?: string;
         sources?: Source[];
+        webQuery?: string | null;
         error?: string;
       } | null;
       return { res, data };
@@ -89,6 +95,7 @@ export function AiChat() {
       }
       setTurns([...next, { role: "assistant", content: data.reply }]);
       setSources(data.sources ?? []);
+      setWebQuery(data.webQuery ?? null);
     } catch {
       setError(
         navigator.onLine
@@ -184,6 +191,17 @@ export function AiChat() {
             ))}
           </div>
         )}
+
+        {webQuery && !busy && !showWeb && (
+          <button
+            type="button"
+            onClick={() => setShowWeb(true)}
+            className="w-full rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-left text-xs font-semibold text-sky-800 hover:bg-sky-100"
+          >
+            🌐 Not on GoDesi yet? Search Google for “{webQuery}” →
+          </button>
+        )}
+        {webQuery && !busy && showWeb && <GoogleWebResults query={webQuery} />}
 
         {busy && <p className="text-xs text-slate-500">Thinking…</p>}
         {error && (

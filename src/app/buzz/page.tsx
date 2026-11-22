@@ -12,7 +12,7 @@ import { TweetEmbed } from "@/components/TweetEmbed";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: `#${SOCIAL_TAG} — the community around Godesi`,
-  description: `Posts tagged #${SOCIAL_TAG} from X, Instagram and more, picked by the Godesi team.`,
+  description: `Posts tagged #${SOCIAL_TAG} from X, Instagram and more, picked by the Godesi team. See what the desi community is sharing about food, festivals and local news.`,
   alternates: { canonical: "/buzz" },
 };
 
