@@ -227,6 +227,11 @@ export function eventCommentsPath(slug: string) {
   return `/events/${slug}#comments`;
 }
 
+/** For redirects that drop the #hash (server actions, sign-in): `ScrollTop` reads ?at=. */
+export function eventCommentsReturnPath(slug: string) {
+  return `/events/${slug}?at=comments`;
+}
+
 /** Comments under an event page, newest first, each with its replies oldest first. */
 export async function eventComments(eventId: string) {
   const visible = { hiddenAt: null, author: { bannedAt: null } };

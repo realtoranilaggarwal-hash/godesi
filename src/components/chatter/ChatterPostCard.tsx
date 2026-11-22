@@ -77,12 +77,15 @@ export function ChatterPostCard({
   liked,
   following,
   uploads,
+  onEventPage = false,
 }: {
   post: ChatterPostRow;
   viewerId: string | null;
   liked: boolean;
   following: boolean;
   uploads: boolean;
+  /** Deleting here re-renders the event page in place instead of redirecting. */
+  onEventPage?: boolean;
 }) {
   const author = post.author;
   const name = properName(author.name);
@@ -113,7 +116,9 @@ export function ChatterPostCard({
             <span className="font-bold">{name}</span>
           )}
           {author.username ? (
-            <span className="text-xs text-slate-400">@{author.username}</span>
+            <span className="break-all text-xs text-slate-400">
+              @{author.username}
+            </span>
           ) : null}
           <span className="text-xs text-slate-400">·</span>
           <Link
@@ -230,6 +235,9 @@ export function ChatterPostCard({
               />
               <form action={deleteChatterPostAction}>
                 <input type="hidden" name="id" value={post.id} />
+                {onEventPage ? (
+                  <input type="hidden" name="stay" value="1" />
+                ) : null}
                 <button
                   type="submit"
                   className="text-xs font-semibold text-slate-500 hover:text-rose-600"

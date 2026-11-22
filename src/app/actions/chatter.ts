@@ -17,6 +17,7 @@ import {
   chatterExcerpt,
   chatterPath,
   eventCommentsPath,
+  eventCommentsReturnPath,
   extractHashtags,
   isChatterLanguage,
   isChatterTopic,
@@ -292,7 +293,11 @@ export async function deleteChatterPostAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const post = await db.chatterPost.findUnique({
     where: { id },
-    select: { authorId: true, parentId: true, event: { select: { slug: true } } },
+    select: {
+      authorId: true,
+      parentId: true,
+      event: { select: { slug: true } },
+    },
   });
   if (!post || post.authorId !== user.id) return;
   await db.$transaction(async (tx) => {
@@ -306,7 +311,11 @@ export async function deleteChatterPostAction(formData: FormData) {
   });
   refreshChatter(post.parentId);
   revalidateTag("sitemap-rows");
-  if (post.event) redirect(eventCommentsPath(post.event.slug));
+  if (post.event) {
+    revalidatePath(`/events/${post.event.slug}`);
+    if (formData.get("stay")) return;
+    redirect(eventCommentsReturnPath(post.event.slug));
+  }
   redirect(post.parentId ? chatterPath(post.parentId) : "/chatter");
 }
 

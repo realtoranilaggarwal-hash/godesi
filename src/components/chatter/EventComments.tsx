@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   eventComments,
-  eventCommentsPath,
+  eventCommentsReturnPath,
   viewerState,
   type ChatterPostRow,
 } from "@/lib/chatter";
@@ -32,9 +32,12 @@ export async function EventComments({
         (reply) => !viewer.blocked.has(reply.author.id),
       ),
     }));
-  const count = shown.reduce((sum, thread) => sum + 1 + thread.replies.length, 0);
+  const count = shown.reduce(
+    (sum, thread) => sum + 1 + thread.replies.length,
+    0,
+  );
   const uploads = uploadsEnabled();
-  const signIn = `/login?next=${encodeURIComponent(eventCommentsPath(slug))}`;
+  const signIn = `/login?next=${encodeURIComponent(eventCommentsReturnPath(slug))}`;
   const card = (row: ChatterPostRow) => (
     <ChatterPostCard
       key={row.id}
@@ -43,6 +46,7 @@ export async function EventComments({
       liked={viewer.liked.has(row.id)}
       following={viewer.following.has(row.author.id)}
       uploads={uploads}
+      onEventPage
     />
   );
 
@@ -52,9 +56,7 @@ export async function EventComments({
       className="scroll-mt-24 space-y-3 border-t border-slate-100 pt-4"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-bold">
-          💬 Comments{count ? ` (${count})` : ""}
-        </h2>
+        <h2 className="font-bold">💬 Comments{count ? ` (${count})` : ""}</h2>
         <Link
           href="/chatter/rules"
           className="text-xs text-slate-500 hover:underline"
@@ -66,7 +68,10 @@ export async function EventComments({
         <ChatterComposer eventId={eventId} uploads={uploads} />
       ) : (
         <p className="text-sm text-slate-600">
-          <Link href={signIn} className="font-semibold text-indigo-700 underline">
+          <Link
+            href={signIn}
+            className="font-semibold text-indigo-700 underline"
+          >
             Log in
           </Link>{" "}
           to ask a question or tell people you&apos;re going.
