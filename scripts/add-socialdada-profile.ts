@@ -27,7 +27,6 @@ const OLD_BANNER = "/images/ads/website-99.png";
 const BANNER = {
   imageUrl: "/images/ads/website-499.png",
   title: "Your website for just $499 (was $999) — built by SocialDada.com",
-  linkUrl: `/business/${SLUG}`,
 };
 
 const description = [
@@ -194,30 +193,40 @@ async function main() {
   const card = existing
     ? await db.business.update({
         where: { id: existing.id },
-        data: { slug: SLUG, ...data },
+        data,
       })
     : await db.business.create({ data: { slug: SLUG, ...data } });
 
-  // Packages and gallery are seeded once; later edits from the dashboard stay.
-  if (!(await db.vendorPackage.count({ where: { businessId: card.id } })))
-    await db.vendorPackage.createMany({
-      data: PACKAGES.map((item, sortOrder) => ({
-        ...item,
-        businessId: card.id,
-        currency: "USD",
-        sortOrder,
-      })),
-    });
-  if (!(await db.media.count({ where: { businessId: card.id } })))
-    await db.media.createMany({
-      data: BUILT.map(([file, caption], sortOrder) => ({
-        businessId: card.id,
-        url: `${SITE}/images/business/socialdada-built-${file}.jpg`,
-        caption,
-        sortOrder,
-      })),
-    });
+  // Only missing packages and photos are added; dashboard edits stay.
+  const have = await db.vendorPackage.findMany({
+    where: { businessId: card.id },
+    select: { name: true },
+  });
+  const haveNames = new Set(have.map((item) => item.name));
+  await db.vendorPackage.createMany({
+    data: PACKAGES.map((item, sortOrder) => ({
+      ...item,
+      businessId: card.id,
+      currency: "USD",
+      sortOrder,
+    })).filter((item) => !haveNames.has(item.name)),
+  });
+  const photos = await db.media.findMany({
+    where: { businessId: card.id },
+    select: { url: true },
+  });
+  const haveUrls = new Set(photos.map((item) => item.url));
+  await db.media.createMany({
+    data: BUILT.map(([file, caption], sortOrder) => ({
+      businessId: card.id,
+      url: `${SITE}/images/business/socialdada-built-${file}.jpg`,
+      caption,
+      sortOrder,
+    })).filter((item) => !haveUrls.has(item.url)),
+  });
   console.log(`card: ${SITE}/business/${card.slug}`);
+  // An adopted card keeps its address, so links to it keep working.
+  const linkUrl = `/business/${card.slug}`;
 
   const banners = await db.banner.findMany({
     where: { slot: "SIDEBAR", imageUrl: { in: [OLD_BANNER, BANNER.imageUrl] } },
@@ -226,9 +235,15 @@ async function main() {
   for (const banner of banners) {
     await db.banner.update({
       where: { id: banner.id },
-      data: { ...BANNER, active: true, status: "ACTIVE", endsAt: null },
+      data: {
+        ...BANNER,
+        linkUrl,
+        active: true,
+        status: "ACTIVE",
+        endsAt: null,
+      },
     });
-    console.log(`banner ${banner.slot} -> ${BANNER.linkUrl}`);
+    console.log(`banner ${banner.slot} -> ${linkUrl}`);
   }
   if (!banners.length) {
     const last = await db.banner.aggregate({
@@ -238,6 +253,7 @@ async function main() {
     await db.banner.create({
       data: {
         ...BANNER,
+        linkUrl,
         slot: "SIDEBAR",
         position: (last._max.position ?? 0) + 1,
       },
