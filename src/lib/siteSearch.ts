@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { findProfilesByName } from "@/lib/peopleLookup";
 import { searchWords } from "@/lib/keywordSearch";
+import { LEGACY_EVENT_ZONE } from "@/lib/time";
 
 export type SiteSearchHit = {
   href: string;
@@ -351,7 +352,7 @@ export async function siteSearch(
       href: `/events/${row.slug}`,
       title: row.title,
       subtitle: `${row.city} · ${row.startsAt.toLocaleDateString("en-US", {
-        timeZone: row.timeZone ?? "America/New_York",
+        timeZone: row.timeZone || LEGACY_EVENT_ZONE,
       })}`,
       badge: "Event",
     })),
