@@ -106,6 +106,7 @@ export async function createChatterPostAction(
     let parent: {
       id: string;
       authorId: string;
+      parentId: string | null;
       topic: string;
       city: string | null;
       event: { id: string; slug: string } | null;
@@ -123,6 +124,7 @@ export async function createChatterPostAction(
         select: {
           id: true,
           authorId: true,
+          parentId: true,
           topic: true,
           city: true,
           event: { select: { id: true, slug: true } },
@@ -139,7 +141,8 @@ export async function createChatterPostAction(
         select: { blockerId: true },
       });
       if (blockedByAuthor) return { error: "You can't reply to this member." };
-      parentId = parent.id;
+      // Event pages show one level of replies, so a reply to a reply joins its comment.
+      parentId = parent.event && parent.parentId ? parent.parentId : parent.id;
       eventSlug = parent.event?.slug ?? null;
     } else {
       const rawEvent = String(formData.get("eventId") ?? "").trim();
