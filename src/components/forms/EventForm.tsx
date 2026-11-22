@@ -209,7 +209,7 @@ export function EventForm({
               target="_blank"
               className="font-semibold text-indigo-600"
             >
-              Godesi can build you one for ${WEBSITE_OFFER.priceUsd}
+              Our team builds custom websites from ${WEBSITE_OFFER.customPriceUsd}
             </a>
             .
           </p>

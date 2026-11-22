@@ -53,7 +53,7 @@ const ACTIONS: { href: string; label: string }[] = [
   { href: "/advertise", label: "📢 Advertise on Godesi" },
   {
     href: "/website",
-    label: `🌐 Get a website for $${WEBSITE_OFFER.priceUsd}`,
+    label: `🌐 Custom websites from $${WEBSITE_OFFER.customPriceUsd}`,
   },
   { href: "/connect", label: "🤝 Connect & meet-ups" },
   { href: "/alumni", label: "🎓 Find your batchmates" },

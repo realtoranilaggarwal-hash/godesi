@@ -6,6 +6,7 @@ import { startCustomWebsiteAction } from "@/app/actions/websiteBuilder";
 import { emptyState } from "@/lib/actions";
 import { Button, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
   CUSTOM_PAGE_NAMES,
   CUSTOM_SOURCES,
@@ -36,7 +37,14 @@ export function CustomWebsiteForm({
       <FormError>{state.error}</FormError>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-900">1. About your business</h2>
+        <h2 className="text-lg font-bold text-slate-900">Your domain</h2>
+        <Field label="Your domain" hint="e.g. mybusiness.com. Not booked yet? Book it first (Step 1 above), or leave this blank and we help you.">
+          <input name="domain" placeholder="mybusiness.com" className={inputClass} />
+        </Field>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-bold text-slate-900">About your business</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Business name" required>
             <input name="businessName" required defaultValue={defaults?.businessName} className={inputClass} />
@@ -61,14 +69,11 @@ export function CustomWebsiteForm({
           <Field label="WhatsApp">
             <input name="whatsapp" type="tel" className={inputClass} />
           </Field>
-          <Field label="Your domain, if you have one" hint="e.g. mybusiness.com — or leave blank and we register one.">
-            <input name="domain" className={inputClass} />
-          </Field>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-900">2. Where you are online now</h2>
+        <h2 className="text-lg font-bold text-slate-900">Where you are online now (optional)</h2>
         <p className="text-sm text-slate-600">
           Paste any links you have. We pull your photos, reviews, services and wording from them.
         </p>
@@ -88,7 +93,7 @@ export function CustomWebsiteForm({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-900">3. Websites you like</h2>
+        <h2 className="text-lg font-bold text-slate-900">Websites you like</h2>
         <p className="text-sm text-slate-600">Up to three sites whose look you want — any business, anywhere.</p>
         <div className="grid gap-3 sm:grid-cols-3">
           {EXAMPLE_SITE_KEYS.map((key, index) => (
@@ -100,7 +105,7 @@ export function CustomWebsiteForm({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-900">4. Your pages (up to {CUSTOM_PAGE_NAMES.length})</h2>
+        <h2 className="text-lg font-bold text-slate-900">Pages you want (up to {CUSTOM_PAGE_NAMES.length})</h2>
         <p className="text-sm text-slate-600">
           Type or paste what each page should say. Rename any page. Leave a page empty to skip it.
         </p>
@@ -134,7 +139,7 @@ export function CustomWebsiteForm({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-900">5. Anything else?</h2>
+        <h2 className="text-lg font-bold text-slate-900">Anything else?</h2>
         <Field label="What do you want on your website, or changed from your old one?">
           <textarea
             name="wish"
@@ -146,6 +151,15 @@ export function CustomWebsiteForm({
           />
         </Field>
       </section>
+
+      <label className="flex items-start gap-3 rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-3 text-sm text-slate-700">
+        <input type="checkbox" name="dailyArticles" value="1" className="mt-0.5 h-4 w-4 shrink-0 accent-fuchsia-600" />
+        <span>
+          <strong>Add daily articles — ${WEBSITE_OFFER.dailyArticlesUsd}/year.</strong> One article a
+          day for 365 days, with a picture and hashtags, emailed to you and written for your kind of
+          business.
+        </span>
+      </label>
 
       <SendButton />
     </form>

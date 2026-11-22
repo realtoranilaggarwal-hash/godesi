@@ -133,9 +133,9 @@ export async function BusinessNextSteps({
 const DID_YOU_KNOW = [
   {
     icon: "🌐",
-    text: "Need a website? We build one from $99 with your domain, hosting and updates handled.",
-    link: "Read the website guide",
-    href: "/website/guide",
+    text: "Need a website? Our team builds custom websites from $499 with your domain, hosting and updates handled.",
+    link: "See how it works",
+    href: "/website",
   },
   {
     icon: "🧱",

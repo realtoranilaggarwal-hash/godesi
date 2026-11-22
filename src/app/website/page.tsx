@@ -1,20 +1,33 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
-import { WebsiteStartForm } from "@/components/website/WebsiteStartForm";
-import { WEBSITE_OFFER, whatsappOfferLink } from "@/lib/websiteOffer";
-import { BASE_INCLUDES, POWER_UPS, WEBSITE_STEPS, websitePath } from "@/lib/websiteBuilder";
-import { cookies } from "next/headers";
+import { CustomWebsiteForm } from "@/components/website/CustomWebsiteForm";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { websitePath } from "@/lib/websiteBuilder";
+
+const NAMESILO_URL = "https://www.namesilo.com/?rid=8ec0177ty";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Your business already exists online. Let AI turn it into a website.",
-  description: `Paste your Google, Yelp or existing website link. AI builds your new website, you preview it free, and pay $${WEBSITE_OFFER.priceUsd} only if you love it.`,
+  title: `Get your business website — custom built from $${WEBSITE_OFFER.customPriceUsd}`,
+  description: `Three steps: book your domain, tell us the pages you want, and our website team builds it. Custom websites from $${WEBSITE_OFFER.customPriceUsd}. Call ${WEBSITE_OFFER.phoneDisplay}.`,
   alternates: { canonical: "/website" },
 };
+
+function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+  return (
+    <Card>
+      <div className="text-xs font-bold text-indigo-600">STEP {n}</div>
+      <h2 className="text-xl font-black text-slate-900">{title}</h2>
+      <div className="mt-2 space-y-3 text-sm text-slate-700">{children}</div>
+    </Card>
+  );
+}
 
 export default async function WebsiteOfferPage({
   searchParams,
@@ -28,7 +41,6 @@ export default async function WebsiteOfferPage({
         select: { name: true, city: true, phone: true, websiteUrl: true },
       })
     : null;
-  const whatsapp = whatsappOfferLink();
 
   const recentIds = (cookies().get("godesi_web_projects")?.value ?? "")
     .split(",")
@@ -47,42 +59,33 @@ export default async function WebsiteOfferPage({
       <div className="min-w-0 flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
           <h1 className="text-3xl font-black leading-tight sm:text-4xl">
-            Your Business Already Exists Online.
-            <br />
-            Let AI Turn It Into A Website.
+            Get Your Business Website in 3 Simple Steps
           </h1>
-          <p className="mt-3 max-w-2xl text-lg text-white/90">
-            Give us your Google, Yelp or existing website. AI builds your new website.{" "}
-            <strong>Preview it FREE.</strong> Love it? Pay and launch. Don&apos;t like it?
-            You don&apos;t pay.
-          </p>
-          <p className="mt-2 max-w-2xl text-sm text-white/80">
-            Then add the tools you need — booking, AI chat, payments, CRM, lead capture and
-            more. ${WEBSITE_OFFER.priceUsd} once, hosting ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year, Power-Ups from $
-            {Math.min(...POWER_UPS.map((p) => p.monthlyUsd))}/month.
-          </p>
+          <ol className="mt-3 max-w-2xl list-decimal space-y-1 pl-5 text-lg text-white/90">
+            <li>Book your domain, or tell us the one you have.</li>
+            <li>Tell us the pages you want and websites you like.</li>
+            <li>Our website team builds it. Custom websites start at ${WEBSITE_OFFER.customPriceUsd}.</li>
+          </ol>
           <div className="mt-5 flex flex-wrap gap-2">
             <a
               href="#start"
               className="rounded-xl bg-white px-5 py-3 text-base font-bold text-indigo-700 shadow"
             >
-              🚀 Build My Website FREE
+              🚀 Start my website
             </a>
-            {whatsapp ? (
-              <a
-                href={whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white"
-              >
-                💬 Ask on WhatsApp
-              </a>
-            ) : null}
+            <a
+              href={WEBSITE_OFFER.phoneTel}
+              className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white"
+            >
+              📞 Call {WEBSITE_OFFER.phoneDisplay}
+            </a>
           </div>
-          <Link href="/website/guide" className="mt-4 inline-block text-sm font-semibold text-white underline">
-            New here? Read the step-by-step guide →
-          </Link>
         </section>
+
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <strong>Our ${WEBSITE_OFFER.priceUsd} AI website plan is full right now.</strong> We are
+          only taking custom-built websites, from ${WEBSITE_OFFER.customPriceUsd}.
+        </p>
 
         {recent.length ? (
           <Card>
@@ -113,52 +116,44 @@ export default async function WebsiteOfferPage({
           </Card>
         ) : null}
 
-        <Card>
-          <ol className="grid gap-3 text-sm sm:grid-cols-5">
-            {WEBSITE_STEPS.map((step, index) => (
-              <li key={step} className="rounded-xl bg-slate-50 p-3">
-                <div className="text-xs font-bold text-indigo-600">STEP {index + 1}</div>
-                <div className="font-semibold text-slate-900">{step}</div>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-3 text-xs text-slate-500">
-            Every website includes: {BASE_INCLUDES.join(", ").toLowerCase()}. Built and hosted
-            by GoDesi with our partner{" "}
-            <a href={WEBSITE_OFFER.partnerUrl} target="_blank" rel="noopener noreferrer nofollow" className="underline">
-              {WEBSITE_OFFER.partner}
-            </a>
-            .
-          </p>
-        </Card>
-
-        <Card className="border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-orange-50">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="text-base font-bold text-slate-900">
-                🎨 Want it custom designed? ${WEBSITE_OFFER.customPriceUsd}
-              </h2>
-              <p className="text-sm text-slate-600">
-                Send your old website, Google, Yelp or Zillow profile and up to{" "}
-                {WEBSITE_OFFER.customPages} pages of content. Our designer redesigns it and sends
-                you a private preview — pay only if you love it.
-              </p>
-              <Link href="/website/examples" className="mt-1 inline-block text-sm font-semibold text-fuchsia-700 underline">
-                See before &amp; after examples →
-              </Link>
-            </div>
-            <Link
-              href="/website/custom"
-              className="shrink-0 rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-fuchsia-700"
+        <Step n={1} title="Book your domain first">
+          <p>
+            Your domain is your website&apos;s address, like <strong>mybusiness.com</strong>. Book
+            it at{" "}
+            <a
+              href={NAMESILO_URL}
+              target="_blank"
+              rel="noopener noreferrer nofollow sponsored"
+              className="font-semibold text-indigo-700 underline"
             >
-              Ask for a custom design →
-            </Link>
-          </div>
-        </Card>
+              NameSilo
+            </a>{" "}
+            for about $10–15 a year. Keep it short, match your business name, and pick .com if you
+            can.
+          </p>
+          <p>
+            <strong>Already have a domain?</strong> Just type it in Step 2.
+          </p>
+          <a
+            href={NAMESILO_URL}
+            target="_blank"
+            rel="noopener noreferrer nofollow sponsored"
+            className="inline-block rounded-xl bg-indigo-600 px-4 py-2.5 font-semibold text-white hover:bg-indigo-700"
+          >
+            Search domains on NameSilo →
+          </a>
+          <p className="text-xs text-slate-500">
+            NameSilo link is a referral link; it costs you nothing extra.
+          </p>
+        </Step>
 
-        <Card>
-          <div id="start" className="scroll-mt-24" />
-          <WebsiteStartForm
+        <div id="start" className="scroll-mt-24" />
+        <Step n={2} title="Tell us what you want">
+          <p>
+            Which pages you need (About us, Services, Contact…), what each should say, and websites
+            you like the look of. Not sure? Fill in what you can and we&apos;ll call you.
+          </p>
+          <CustomWebsiteForm
             defaults={{
               businessName: business?.name,
               city: business?.city ?? user?.location ?? undefined,
@@ -168,6 +163,50 @@ export default async function WebsiteOfferPage({
               wish: searchParams.wish,
             }}
           />
+        </Step>
+
+        <Step n={3} title={`Our team builds it — from $${WEBSITE_OFFER.customPriceUsd}`}>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>
+              Our admin team builds your website, working with our partner{" "}
+              <a
+                href={WEBSITE_OFFER.partnerUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline"
+              >
+                {WEBSITE_OFFER.partner}
+              </a>
+              . The team has built many websites.
+            </li>
+            <li>You get a private preview first and pay only if you love it.</li>
+            <li>
+              Hosting is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year.
+            </li>
+            <li>
+              Your one contact in the USA:{" "}
+              <a href={WEBSITE_OFFER.phoneTel} className="font-semibold text-indigo-700 underline">
+                {WEBSITE_OFFER.phoneDisplay}
+              </a>
+              . For anything else, the team takes care of it.
+            </li>
+          </ul>
+          <Link href="/website/examples" className="inline-block font-semibold text-indigo-700 underline">
+            See websites the team has built →
+          </Link>
+        </Step>
+
+        <Card className="border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-orange-50">
+          <div className="text-xs font-bold text-fuchsia-700">OPTIONAL ADD-ON</div>
+          <h2 className="text-xl font-black text-slate-900">
+            Daily articles — ${WEBSITE_OFFER.dailyArticlesUsd}/year
+          </h2>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+            <li>365 articles, one every day, written for your kind of business.</li>
+            <li>Each comes with a picture and hashtags, emailed to you.</li>
+            <li>Fresh articles help your website show up on Google.</li>
+            <li>Tick the box in Step 2 to add it.</li>
+          </ul>
         </Card>
       </div>
 

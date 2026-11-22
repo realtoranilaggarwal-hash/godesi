@@ -196,36 +196,16 @@ export default async function UpgradePage({
       <Card className="border-indigo-200">
         <h3 className="text-lg font-bold">🌐 Add a website</h3>
         <p className="mt-1 text-sm text-slate-600">
-          Pick one. You see your new website free first and pay only if you love it. Hosting
+          You see your new website free first and pay only if you love it. Hosting
           is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year and includes{" "}
           {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a year).
         </p>
-        <form action="/website/custom" method="get" className="mt-3 space-y-3">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
-              <input type="radio" name="plan" value="ai" defaultChecked className="mt-1 h-4 w-4 accent-indigo-600" />
-              <span>
-                <span className="block font-semibold text-slate-900">
-                  🤖 AI website — ${WEBSITE_OFFER.priceUsd} once
-                </span>
-                <span className="block text-xs text-slate-600">
-                  Paste your Google, Yelp or old website; AI builds {WEBSITE_OFFER.pages} pages in minutes.
-                </span>
-              </span>
-            </label>
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
-              <input type="radio" name="plan" value="custom" className="mt-1 h-4 w-4 accent-indigo-600" />
-              <span>
-                <span className="block font-semibold text-slate-900">
-                  🎨 Custom designed website — ${WEBSITE_OFFER.customPriceUsd} once
-                </span>
-                <span className="block text-xs text-slate-600">
-                  Our designer redesigns it from your old site, Google, Yelp, Zillow and up to{" "}
-                  {WEBSITE_OFFER.customPages} pages of your content.
-                </span>
-              </span>
-            </label>
-          </div>
+        <p className="mt-2 text-sm text-slate-700">
+          🎨 <strong>Custom built website — from ${WEBSITE_OFFER.customPriceUsd} once.</strong> Our
+          website team builds it from your old site, Google, Yelp or Zillow and up to{" "}
+          {WEBSITE_OFFER.customPages} pages of your content.
+        </p>
+        <form action="/website" method="get" className="mt-3 space-y-3">
           <input
             name="website"
             inputMode="url"

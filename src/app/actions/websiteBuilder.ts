@@ -472,6 +472,11 @@ export async function startCustomWebsiteAction(
     if (!Object.keys(sources).length && !pages.length) {
       return { error: "Give us at least one link (old website, Google, Yelp…) or one page of content." };
     }
+    const dailyArticles = formData.get("dailyArticles") === "1";
+    const wish =
+      [dailyArticles ? `Wants the daily articles add-on ($${WEBSITE_OFFER.dailyArticlesUsd}/year).` : "", input.wish ?? ""]
+        .filter(Boolean)
+        .join("\n\n") || undefined;
     const user = await getCurrentUser();
     const project = await db.websiteProject.create({
       data: {
@@ -484,7 +489,7 @@ export async function startCustomWebsiteAction(
         phone: input.phone,
         whatsapp: input.whatsapp,
         domain: input.domain,
-        wish: input.wish,
+        wish,
         sources: sources as Prisma.InputJsonObject,
         pageContent: pages as unknown as Prisma.InputJsonArray,
       },
@@ -495,7 +500,7 @@ export async function startCustomWebsiteAction(
       `<h2>New $${WEBSITE_OFFER.customPriceUsd} custom website request</h2>
        <p><strong>${escapeHtml(project.businessName)}</strong> — ${escapeHtml(project.category)}, ${escapeHtml(project.city)}</p>
        <p>${Object.keys(sources).length} links · ${pages.length} pages of content</p>
-       ${input.wish ? `<p><strong>What they want:</strong> ${escapeHtml(input.wish)}</p>` : ""}
+       ${wish ? `<p><strong>What they want:</strong> ${escapeHtml(wish)}</p>` : ""}
        <p><a href="${siteUrl()}/admin/website/${project.id}">Open in the admin</a></p>`,
     );
   } catch (error) {
