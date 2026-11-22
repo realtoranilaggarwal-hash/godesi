@@ -1,7 +1,6 @@
 /**
  * Static travel guides rendered under /travel/guides. External links point at
- * Travelpayouts partner brand sites — the "Drive" script in the site <head>
- * rewrites them into affiliate links with our marker when a visitor clicks.
+ * Travelpayouts partner brand sites.
  */
 export type TravelGuideLink = { label: string; href: string };
 

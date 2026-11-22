@@ -139,13 +139,6 @@ export default async function RootLayout({
           ) : null}
           {/* Meta Pixel: page views for Facebook and Instagram ads. */}
           {metaPixel ? <MetaPixel id={metaPixel} /> : null}
-          {/* Travelpayouts Drive: turns travel links into partner links and verifies the site. */}
-          <Script
-            id="travelpayouts-drive"
-            strategy="afterInteractive"
-            src="https://emrldco.com/NTg3NTE5.js?t=587519"
-            data-cmp-ab="2"
-          />
           {/* Google Reader Revenue Manager (swg-basic): enables the GoDesi
               publication's newsletter/reader CTAs and is required for Google
               News Publisher Center review. Plain script tags (not next/script)
