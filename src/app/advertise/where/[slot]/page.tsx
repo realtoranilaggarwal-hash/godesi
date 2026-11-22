@@ -1,3 +1,4 @@
+import { TopStripPreview } from "@/components/TopStripPreview";
 import type { Metadata } from "next";
 import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import {
   AD_PLACEMENTS,
   AD_SLOT_ORDER,
   formatAdPrice,
+  placementSpec,
   formatCpm,
   formatCtr,
 } from "@/lib/ads";
@@ -70,8 +72,7 @@ export default async function PlacementPage({
         </Link>
         <h1 className="mt-2 text-3xl font-bold">{placement.name}</h1>
         <p className="mt-1 text-sm font-medium text-slate-500">
-          {placement.size.width} × {placement.size.height} px · {placement.slots}{" "}
-          shown at a time ·{" "}
+          {placementSpec(placement)} ·{" "}
           {running
             ? `${running} advertiser${running > 1 ? "s" : ""} in rotation`
             : "no advertiser here yet"}
@@ -156,14 +157,7 @@ export default async function PlacementPage({
                 : `Your artwork, at ${placement.size.width} × ${placement.size.height}:`}
           </p>
           {slot === "SKIN" ? (
-            <div className="flex h-9 min-w-0 items-center justify-center rounded-lg border-2 border-indigo-400 bg-white px-3 text-sm font-semibold text-slate-800">
-              <span className="truncate">
-                {live[0]?.title ?? "Your offer in one line — Book now"}
-              </span>
-              <span className="ml-2 shrink-0 text-indigo-600" aria-hidden>
-                →
-              </span>
-            </div>
+            <TopStripPreview text={live[0]?.title} />
           ) : live[0] ? (
             <div
               style={{

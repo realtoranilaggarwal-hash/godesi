@@ -54,8 +54,10 @@ export function BannerForm({ slot }: { slot?: string }) {
                 const placement = AD_PLACEMENTS[option];
                 return (
                   <option key={option} value={option}>
-                    {placement.name} — {placement.size.width}×
-                    {placement.size.height}{" "}
+                    {placement.name} —{" "}
+                    {option === "SKIN"
+                      ? "text only"
+                      : `${placement.size.width}×${placement.size.height}`}{" "}
                     {option === retired
                       ? "(not shown on the site)"
                       : `(${placement.slots} shown at a time)`}
