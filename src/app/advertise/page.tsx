@@ -1,3 +1,4 @@
+import { TopStripPreview } from "@/components/TopStripPreview";
 import type { Metadata } from "next";
 import type { BannerSlot } from "@prisma/client";
 import Link from "next/link";
@@ -11,6 +12,7 @@ import {
   durationDiscount,
   formatAdImpressionPrice,
   formatAdPrice,
+  placementSpec,
   formatCpm,
   packDiscount,
 } from "@/lib/ads";
@@ -185,8 +187,7 @@ export default async function AdvertisePage({
                 <div>
                   <h2 className="text-lg font-bold">{placement.name}</h2>
                   <p className="text-xs font-medium text-slate-500">
-                    {placement.size.width} × {placement.size.height} px · shows{" "}
-                    {placement.slots} at a time ·{" "}
+                    {placementSpec(placement)} ·{" "}
                     {running
                       ? `${running} advertiser${running > 1 ? "s" : ""} in rotation — always open`
                       : "open, no advertiser yet"}
@@ -194,11 +195,15 @@ export default async function AdvertisePage({
                 </div>
               </div>
 
-              <AdPreview
-                width={placement.size.width}
-                height={placement.size.height}
-                className="mt-4"
-              />
+              {slot === "SKIN" ? (
+                <TopStripPreview className="mt-4" />
+              ) : (
+                <AdPreview
+                  width={placement.size.width}
+                  height={placement.size.height}
+                  className="mt-4"
+                />
+              )}
 
               <Link
                 href={`/advertise/where/${slot.toLowerCase()}`}

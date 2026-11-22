@@ -335,6 +335,13 @@ export const AD_PLACEMENTS: Record<BannerSlot, AdPlacement> = {
   },
 };
 
+/** Size and how many show at once, e.g. "300 × 250 px · shows 2 at a time". */
+export function placementSpec(placement: AdPlacement) {
+  return placement.slot === "SKIN"
+    ? "Text only, one line · 1 shown at a time"
+    : `${placement.size.width} × ${placement.size.height} px · shows ${placement.slots} at a time`;
+}
+
 /** Placements on sale. HERO has no spot on any page, so it isn't offered. */
 export const AD_SLOT_ORDER: BannerSlot[] = [
   "WALL",
