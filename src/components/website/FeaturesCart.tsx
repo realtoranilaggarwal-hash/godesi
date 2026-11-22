@@ -49,9 +49,12 @@ export function FeaturesCart({
   setupUsd,
   setupLabel,
   billing,
+  hostingYearUsd,
   defaultCoupon = "",
 }: {
   defaultCoupon?: string;
+  /** Set for sites hosted only yearly, at this flat price. */
+  hostingYearUsd?: number;
   setupUsd: number;
   setupLabel: string;
   billing: HostingTerm;
@@ -66,7 +69,9 @@ export function FeaturesCart({
   const [cartState, cartAction] = useFormState(updateCartAction.bind(null, id), emptyState);
   const [launchState, launchAction] = useFormState(launchCheckoutAction.bind(null, id), emptyState);
   const [picked, setPicked] = useState<string[]>(selected);
-  const [term, setTerm] = useState<HostingTerm>(billing);
+  const yearlyOnly = hostingYearUsd !== undefined;
+  const [term, setTerm] = useState<HostingTerm>(yearlyOnly ? "YEAR" : billing);
+  const baseYear = hostingYearUsd ?? BASE_YEARLY_USD;
   const selectedKey = selected.join(",");
   // The "anything else" box can add a catalogue Power-Up on the server; pick it up here.
   useEffect(() => {
@@ -84,7 +89,7 @@ export function FeaturesCart({
     [picked, powerUps],
   );
   const extrasMonthly = monthly - BASE_MONTHLY_USD;
-  const yearly = BASE_YEARLY_USD + extrasMonthly * 12;
+  const yearly = baseYear + extrasMonthly * 12;
   const recurring = term === "YEAR" ? yearly : monthly;
   const per = term === "YEAR" ? "year" : "month";
 
@@ -112,11 +117,13 @@ export function FeaturesCart({
               <td className="px-4 py-2">
                 Hosting, updates and support
                 <span className="block text-xs text-slate-500">
-                  Includes {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a year)
+                  {yearlyOnly
+                    ? `Includes ${WEBSITE_OFFER.changesPerYear} changes a year`
+                    : `Includes ${WEBSITE_OFFER.changesPerMonth} change a month (${WEBSITE_OFFER.changesPerYear} a year)`}
                 </span>
               </td>
               <td className="px-4 py-2 text-right font-semibold">
-                ${BASE_MONTHLY_USD}/month or ${BASE_YEARLY_USD}/year
+                {yearlyOnly ? `$${baseYear}/year` : `$${BASE_MONTHLY_USD}/month or $${BASE_YEARLY_USD}/year`}
               </td>
             </tr>
             {BASE_INCLUDES.map((line) => (
@@ -222,6 +229,7 @@ export function FeaturesCart({
 
       <section className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-4">
         <h2 className="font-bold text-slate-900">Total</h2>
+        {yearlyOnly ? null : (
         <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Pay hosting">
           {(["MONTH", "YEAR"] as const).map((value) => (
             <button
@@ -242,6 +250,7 @@ export function FeaturesCart({
             </button>
           ))}
         </div>
+        )}
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl bg-white p-3">
             <div className="text-xs uppercase tracking-wide text-slate-500">Today</div>
@@ -252,7 +261,7 @@ export function FeaturesCart({
             <div className="text-xs uppercase tracking-wide text-slate-500">Then every {per}</div>
             <div className="text-2xl font-black text-slate-900">${recurring}/{per}</div>
             <div className="text-xs text-slate-500">
-              Hosting ${term === "YEAR" ? BASE_YEARLY_USD : BASE_MONTHLY_USD}
+              Hosting ${term === "YEAR" ? baseYear : BASE_MONTHLY_USD}
               {picked.length ? ` + ${picked.length} Power-Up${picked.length > 1 ? "s" : ""}` : ""}
               {customLines.length ? " · custom extras quoted separately" : ""} · cancel any time
             </div>

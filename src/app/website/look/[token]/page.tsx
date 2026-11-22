@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { Card, inputClass } from "@/components/ui";
 import { LookActions } from "@/components/website/LookActions";
 import { checkCoupon, normalizeCouponCode } from "@/lib/coupons";
-import { BASE_MONTHLY_USD, BASE_YEARLY_USD, setupUsdFor, websitePath } from "@/lib/websiteBuilder";
+import { CUSTOM_HOSTING_YEAR_USD, setupUsdFor, websitePath } from "@/lib/websiteBuilder";
 import { loadPowerUps } from "@/lib/websiteProjects";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import { PARTNER_HOSTING_NOTE } from "@/lib/partnerPackage";
@@ -118,35 +118,20 @@ export default async function LookPage({
                       )}
                     </td>
                   </tr>
-                  <tr className="border-b border-slate-100">
-                    <td className="py-2 pr-2">
-                      Hosting, updates and support — <strong>monthly</strong>
-                      <span className="block text-xs text-slate-500">
-                        Includes {WEBSITE_OFFER.changesPerMonth} change a month · cancel any time
-                      </span>
-                    </td>
-                    <td className="py-2 text-right font-semibold">${BASE_MONTHLY_USD}/month</td>
-                  </tr>
                   <tr>
                     <td className="py-2 pr-2">
-                      …or <strong>yearly</strong> (save ${BASE_MONTHLY_USD * 12 - BASE_YEARLY_USD})
+                      Hosting, updates and support — <strong>yearly</strong>
                       <span className="block text-xs text-slate-500">
                         Includes {WEBSITE_OFFER.changesPerYear} changes a year
                       </span>
                     </td>
-                    <td className="py-2 text-right font-semibold">${BASE_YEARLY_USD}/year</td>
+                    <td className="py-2 text-right font-semibold">${CUSTOM_HOSTING_YEAR_USD}/year</td>
                   </tr>
                 </tbody>
               </table>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-center">
-                <div className="rounded-xl bg-slate-50 p-2">
-                  <div className="text-xs text-slate-500">Today, monthly hosting</div>
-                  <div className="text-lg font-black">{usd(setupDue + BASE_MONTHLY_USD * 100)}</div>
-                </div>
-                <div className="rounded-xl bg-slate-50 p-2">
-                  <div className="text-xs text-slate-500">Today, yearly hosting</div>
-                  <div className="text-lg font-black">{usd(setupDue + BASE_YEARLY_USD * 100)}</div>
-                </div>
+              <div className="mt-3 rounded-xl bg-slate-50 p-2 text-center">
+                <div className="text-xs text-slate-500">Today, with the first year of hosting</div>
+                <div className="text-lg font-black">{usd(setupDue + CUSTOM_HOSTING_YEAR_USD * 100)}</div>
               </div>
 
               <form method="get" className="mt-4 space-y-1">
@@ -185,7 +170,7 @@ export default async function LookPage({
               <Card>
                 <h2 className="font-bold text-slate-900">✨ Extras you can add</h2>
                 <p className="text-xs text-slate-500">
-                  Optional. Tick the ones you want on the next step. On yearly hosting they bill 12× the monthly price.
+                  Optional. Tick the ones you want on the next step. They bill yearly, at 12× the monthly price.
                 </p>
                 <ul className="mt-2 divide-y divide-slate-100 text-sm">
                   {powerUps.map((powerUp) => (

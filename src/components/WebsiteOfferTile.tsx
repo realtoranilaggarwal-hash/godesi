@@ -15,8 +15,7 @@ export function WebsiteOfferTile() {
         <div className="min-w-0">
           <p className="text-sm font-bold leading-tight">Get a website</p>
           <p className="text-[11px] text-white/80">
-            ${WEBSITE_OFFER.priceUsd} for {WEBSITE_OFFER.pages} pages, live in
-            days
+            Custom built, from ${WEBSITE_OFFER.customPriceUsd}
           </p>
         </div>
       </div>

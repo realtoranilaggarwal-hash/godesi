@@ -9,7 +9,14 @@ export const WEBSITE_OFFER = {
   /** The same hosting paid a year at a time. */
   yearlyUsd: 100,
   /** One-time price of a site our designer makes from the owner's pages. */
-  customPriceUsd: 500,
+  customPriceUsd: 499,
+  /** Hosting for a custom-built site, billed once a year. */
+  customHostingYearUsd: 200,
+  /** Code that adds a free featured ad on GoDesi to a website order. */
+  giftCode: "GODESI",
+  giftFeaturedMonths: 12,
+  /** Yearly add-on: one article a day, with a picture and hashtags, emailed to the owner. */
+  dailyArticlesUsd: 500,
   customPages: 10,
   /** Site changes hosting includes: one a month, or twelve a year on yearly. */
   changesPerMonth: 1,
@@ -21,6 +28,9 @@ export const WEBSITE_OFFER = {
   email: "godesibiz@gmail.com",
   /** Digits only, in international format, for wa.me links. */
   whatsapp: process.env.NEXT_PUBLIC_WEBSITE_OFFER_WHATSAPP ?? "17329837958",
+  /** The one US contact members can call about a website. */
+  phoneDisplay: "(732) 983-7958",
+  phoneTel: "tel:+17329837958",
 };
 
 /** What the build covers, shown on the offer page and in the nudge. */
@@ -46,6 +56,6 @@ export const WEBSITE_OFFER_PAGE_PROMPTS = [
 /** Pre-filled WhatsApp enquiry for the website offer, or null if no number is set. */
 export function whatsappOfferLink() {
   if (!WEBSITE_OFFER.whatsapp) return null;
-  const message = `Hi Godesi, I would like the $${WEBSITE_OFFER.priceUsd} website for my business.`;
+  const message = `Hi Godesi, I would like a custom website for my business.`;
   return `https://wa.me/${WEBSITE_OFFER.whatsapp}?text=${encodeURIComponent(message)}`;
 }

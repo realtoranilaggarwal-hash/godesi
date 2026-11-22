@@ -46,7 +46,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/tools", label: "🧰 Free business tools" },
         {
           href: "/website",
-          label: `Get a website for $${WEBSITE_OFFER.priceUsd}`,
+          label: `Custom websites from $${WEBSITE_OFFER.customPriceUsd}`,
         },
         { href: "/signup", label: "List your business free" },
         { href: "/badge", label: "🏅 “Listed on Godesi” badge" },

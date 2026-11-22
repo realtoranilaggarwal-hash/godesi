@@ -382,9 +382,9 @@ export function ListingForm({
       {isRoom ? <RoomSharingNotice /> : null}
 
       <p className="rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
-        <strong>Selling or renting regularly?</strong> Godesi builds you a{" "}
-        {WEBSITE_OFFER.pages}-page website for ${WEBSITE_OFFER.priceUsd}, then $
-        {WEBSITE_OFFER.monthlyUsd}/month with domain and hosting included.{" "}
+        <strong>Selling or renting regularly?</strong> Our team builds you a
+        custom website from ${WEBSITE_OFFER.customPriceUsd}, then $
+        {WEBSITE_OFFER.monthlyUsd}/month with hosting included.{" "}
         <a href="/website" target="_blank" className="font-bold underline">
           See what you get →
         </a>

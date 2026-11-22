@@ -581,10 +581,9 @@ export function BusinessProfileForm({
           <span className="text-amber-700">(affiliate link)</span>
         </p>
         <p className="mt-3 rounded-xl bg-indigo-50 p-3 text-xs text-indigo-900">
-          <strong>No website yet?</strong> Godesi builds you a{" "}
-          {WEBSITE_OFFER.pages}-page mobile-friendly site for $
-          {WEBSITE_OFFER.priceUsd}, then ${WEBSITE_OFFER.monthlyUsd}
-          /month with domain and hosting included.{" "}
+          <strong>No website yet?</strong> Our team builds you a custom website
+          from ${WEBSITE_OFFER.customPriceUsd}, then ${WEBSITE_OFFER.monthlyUsd}
+          /month with hosting included.{" "}
           <a href="/website" target="_blank" className="font-bold underline">
             See what you get and send your details →
           </a>

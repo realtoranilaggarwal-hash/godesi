@@ -18,6 +18,7 @@ import {
   type CustomPage,
   EXAMPLE_SITE_KEYS,
   isPowerUpKey,
+  MEDIA_SOURCES,
   nextDesignSeed,
   suggestedPowerUps,
   WEBSITE_CATEGORIES,
@@ -337,7 +338,7 @@ export async function launchCheckoutAction(
     const powerUps = Array.from(new Set(formData.getAll("powerUps").map(String))).filter(
       isPowerUpKey,
     );
-    const billing = formData.get("billing") === "YEAR" ? "YEAR" : "MONTH";
+    const billing = current.tier === "CUSTOM" || formData.get("billing") === "YEAR" ? "YEAR" : "MONTH";
     const project = await db.websiteProject.update({ where: { id }, data: { powerUps, billing } });
     if (!stripeEnabled()) throw new Error("Payments are not switched on yet — email us and we will launch it by hand.");
     const quote = quoteFor(project, await loadPowerUps());
@@ -437,6 +438,8 @@ const customSchema = z.object({
   whatsapp: optional(30),
   domain: optional(120),
   wish: optional(3000),
+  contactName: optional(120),
+  code: optional(40),
 });
 
 async function emailDesk(subject: string, body: string) {
@@ -455,23 +458,47 @@ export async function startCustomWebsiteAction(
       ),
     );
     const sources: Record<string, string> = {};
-    for (const key of [...CUSTOM_SOURCES.map((source) => source.key), ...EXAMPLE_SITE_KEYS]) {
+    for (const key of [
+      ...CUSTOM_SOURCES.map((source) => source.key),
+      ...MEDIA_SOURCES.map((source) => source.key),
+      ...EXAMPLE_SITE_KEYS,
+    ]) {
       const value = link.parse(String(formData.get(key) ?? ""));
       if (value) sources[key] = value;
     }
     const pages: CustomPage[] = [];
     for (let index = 0; index < WEBSITE_OFFER.customPages; index++) {
       const text = String(formData.get(`pageText${index}`) ?? "").trim().slice(0, 6000);
-      if (!text) continue;
+      if (!text && formData.get(`pageOn${index}`) !== "1") continue;
       const name =
         String(formData.get(`pageName${index}`) ?? "").trim().slice(0, 80) ||
         CUSTOM_PAGE_NAMES[index] ||
         `Page ${index + 1}`;
       pages.push({ name, text });
     }
-    if (!Object.keys(sources).length && !pages.length) {
-      return { error: "Give us at least one link (old website, Google, Yelp…) or one page of content." };
+    if (!Object.keys(sources).length && !pages.length && !input.domain && !input.wish) {
+      return {
+        error: "Tell us your domain, a link (old website, Google, Yelp…), one page of content, or what you want.",
+      };
     }
+    const dailyArticles = formData.get("dailyArticles") === "1";
+    const gift = input.code?.toUpperCase() === WEBSITE_OFFER.giftCode;
+    const goals = Array.from(new Set(formData.getAll("goals").map(String))).filter((key) =>
+      goalKeys.includes(key as (typeof goalKeys)[number]),
+    );
+    const wish =
+      [
+        input.contactName ? `Contact: ${input.contactName}.` : "",
+        gift
+          ? `Used code ${WEBSITE_OFFER.giftCode}: give them a free featured ad on GoDesi for ${WEBSITE_OFFER.giftFeaturedMonths} months.`
+          : input.code
+            ? `Entered code: ${input.code}.`
+            : "",
+        dailyArticles ? `Wants the daily articles add-on ($${WEBSITE_OFFER.dailyArticlesUsd}/year).` : "",
+        input.wish ?? "",
+      ]
+        .filter(Boolean)
+        .join("\n\n") || undefined;
     const user = await getCurrentUser();
     const project = await db.websiteProject.create({
       data: {
@@ -484,18 +511,19 @@ export async function startCustomWebsiteAction(
         phone: input.phone,
         whatsapp: input.whatsapp,
         domain: input.domain,
-        wish: input.wish,
+        wish,
+        goals,
         sources: sources as Prisma.InputJsonObject,
         pageContent: pages as unknown as Prisma.InputJsonArray,
       },
     });
     rememberProject(project.id);
     await emailDesk(
-      `Custom website order: ${project.businessName} (${project.city})`,
+      `Custom website order: ${project.businessName} (${project.city})${gift ? ` — code ${WEBSITE_OFFER.giftCode}` : ""}`,
       `<h2>New $${WEBSITE_OFFER.customPriceUsd} custom website request</h2>
        <p><strong>${escapeHtml(project.businessName)}</strong> — ${escapeHtml(project.category)}, ${escapeHtml(project.city)}</p>
        <p>${Object.keys(sources).length} links · ${pages.length} pages of content</p>
-       ${input.wish ? `<p><strong>What they want:</strong> ${escapeHtml(input.wish)}</p>` : ""}
+       ${wish ? `<p><strong>What they want:</strong> ${escapeHtml(wish)}</p>` : ""}
        <p><a href="${siteUrl()}/admin/website/${project.id}">Open in the admin</a></p>`,
     );
   } catch (error) {

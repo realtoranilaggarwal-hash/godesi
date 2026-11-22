@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
-import { WebsiteStartForm } from "@/components/website/WebsiteStartForm";
-import { WEBSITE_OFFER, whatsappOfferLink } from "@/lib/websiteOffer";
-import { BASE_INCLUDES, POWER_UPS, WEBSITE_STEPS, websitePath } from "@/lib/websiteBuilder";
-import { cookies } from "next/headers";
+import { CustomWebsiteForm } from "@/components/website/CustomWebsiteForm";
+import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { websitePath } from "@/lib/websiteBuilder";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Your business already exists online. Let AI turn it into a website.",
-  description: `Paste your Google, Yelp or existing website link. AI builds your new website, you preview it free, and pay $${WEBSITE_OFFER.priceUsd} only if you love it.`,
+  title: `Get your business website — custom built for $${WEBSITE_OFFER.customPriceUsd}`,
+  description: `Tell us your domain, the pages you want, your photos and videos, and our website team builds it. Custom websites for $${WEBSITE_OFFER.customPriceUsd} with an AI chat bot, hosting $${WEBSITE_OFFER.customHostingYearUsd}/year. Call ${WEBSITE_OFFER.phoneDisplay}.`,
   alternates: { canonical: "/website" },
 };
 
@@ -28,7 +28,6 @@ export default async function WebsiteOfferPage({
         select: { name: true, city: true, phone: true, websiteUrl: true },
       })
     : null;
-  const whatsapp = whatsappOfferLink();
 
   const recentIds = (cookies().get("godesi_web_projects")?.value ?? "")
     .split(",")
@@ -47,42 +46,36 @@ export default async function WebsiteOfferPage({
       <div className="min-w-0 flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
           <h1 className="text-3xl font-black leading-tight sm:text-4xl">
-            Your Business Already Exists Online.
-            <br />
-            Let AI Turn It Into A Website.
+            Tell us about your website
           </h1>
           <p className="mt-3 max-w-2xl text-lg text-white/90">
-            Give us your Google, Yelp or existing website. AI builds your new website.{" "}
-            <strong>Preview it FREE.</strong> Love it? Pay and launch. Don&apos;t like it?
-            You don&apos;t pay.
+            Answer a few quick questions: your domain, the pages you want, your photos and videos.
+            Our team builds your custom website for ${WEBSITE_OFFER.customPriceUsd}, with an AI chat
+            bot, photo and video galleries. Hosting is ${WEBSITE_OFFER.customHostingYearUsd} a year.
           </p>
-          <p className="mt-2 max-w-2xl text-sm text-white/80">
-            Then add the tools you need — booking, AI chat, payments, CRM, lead capture and
-            more. ${WEBSITE_OFFER.priceUsd} once, hosting ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year, Power-Ups from $
-            {Math.min(...POWER_UPS.map((p) => p.monthlyUsd))}/month.
+          <p className="mt-2 max-w-2xl text-sm font-semibold text-amber-200">
+            🎁 Use code {WEBSITE_OFFER.giftCode} and get a free featured ad on GoDesi for 1 year.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <a
               href="#start"
               className="rounded-xl bg-white px-5 py-3 text-base font-bold text-indigo-700 shadow"
             >
-              🚀 Build My Website FREE
+              🚀 Get started
             </a>
-            {whatsapp ? (
-              <a
-                href={whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white"
-              >
-                💬 Ask on WhatsApp
-              </a>
-            ) : null}
+            <a
+              href={WEBSITE_OFFER.phoneTel}
+              className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white"
+            >
+              📞 Call {WEBSITE_OFFER.phoneDisplay}
+            </a>
           </div>
-          <Link href="/website/guide" className="mt-4 inline-block text-sm font-semibold text-white underline">
-            New here? Read the step-by-step guide →
-          </Link>
         </section>
+
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <strong>Our ${WEBSITE_OFFER.priceUsd} AI website plan is full right now.</strong> We are
+          only taking custom-built websites, from ${WEBSITE_OFFER.customPriceUsd}.
+        </p>
 
         {recent.length ? (
           <Card>
@@ -113,61 +106,45 @@ export default async function WebsiteOfferPage({
           </Card>
         ) : null}
 
-        <Card>
-          <ol className="grid gap-3 text-sm sm:grid-cols-5">
-            {WEBSITE_STEPS.map((step, index) => (
-              <li key={step} className="rounded-xl bg-slate-50 p-3">
-                <div className="text-xs font-bold text-indigo-600">STEP {index + 1}</div>
-                <div className="font-semibold text-slate-900">{step}</div>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-3 text-xs text-slate-500">
-            Every website includes: {BASE_INCLUDES.join(", ").toLowerCase()}. Built and hosted
-            by GoDesi with our partner{" "}
-            <a href={WEBSITE_OFFER.partnerUrl} target="_blank" rel="noopener noreferrer nofollow" className="underline">
-              {WEBSITE_OFFER.partner}
-            </a>
-            .
-          </p>
-        </Card>
-
-        <Card className="border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 to-orange-50">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="text-base font-bold text-slate-900">
-                🎨 Want it custom designed? ${WEBSITE_OFFER.customPriceUsd}
-              </h2>
-              <p className="text-sm text-slate-600">
-                Send your old website, Google, Yelp or Zillow profile and up to{" "}
-                {WEBSITE_OFFER.customPages} pages of content. Our designer redesigns it and sends
-                you a private preview — pay only if you love it.
-              </p>
-              <Link href="/website/examples" className="mt-1 inline-block text-sm font-semibold text-fuchsia-700 underline">
-                See before &amp; after examples →
-              </Link>
-            </div>
-            <Link
-              href="/website/custom"
-              className="shrink-0 rounded-xl bg-fuchsia-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-fuchsia-700"
-            >
-              Ask for a custom design →
-            </Link>
-          </div>
-        </Card>
+        <div id="start" className="scroll-mt-24" />
+        <CustomWebsiteForm
+          defaults={{
+            businessName: business?.name,
+            city: business?.city ?? user?.location ?? undefined,
+            phone: business?.phone ?? undefined,
+            email: user?.email,
+            website: searchParams.website ?? business?.websiteUrl ?? undefined,
+            wish: searchParams.wish,
+          }}
+        />
 
         <Card>
-          <div id="start" className="scroll-mt-24" />
-          <WebsiteStartForm
-            defaults={{
-              businessName: business?.name,
-              city: business?.city ?? user?.location ?? undefined,
-              phone: business?.phone ?? undefined,
-              email: user?.email,
-              website: searchParams.website ?? business?.websiteUrl ?? undefined,
-              wish: searchParams.wish,
-            }}
-          />
+          <h2 className="text-xl font-black text-slate-900">Who builds your website</h2>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+            <li>
+              Our admin team builds it, working with our partner{" "}
+              <a
+                href={WEBSITE_OFFER.partnerUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="underline"
+              >
+                {WEBSITE_OFFER.partner}
+              </a>
+              . The team has built many websites.
+            </li>
+            <li>You get a private preview first and pay only if you love it.</li>
+            <li>
+              Your one contact in the USA:{" "}
+              <a href={WEBSITE_OFFER.phoneTel} className="font-semibold text-indigo-700 underline">
+                {WEBSITE_OFFER.phoneDisplay}
+              </a>
+              . For anything else, the team takes care of it.
+            </li>
+          </ul>
+          <Link href="/website/examples" className="mt-2 inline-block text-sm font-semibold text-indigo-700 underline">
+            See websites the team has built →
+          </Link>
         </Card>
       </div>
 

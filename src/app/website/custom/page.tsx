@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
@@ -16,16 +14,8 @@ export const metadata: Metadata = {
 export default async function CustomWebsitePage({
   searchParams,
 }: {
-  searchParams: { plan?: string; website?: string; wish?: string; sent?: string };
+  searchParams: { website?: string; wish?: string; sent?: string };
 }) {
-  // The upgrade page's website box posts here for both options.
-  if (searchParams.plan === "ai") {
-    const query = new URLSearchParams();
-    if (searchParams.website) query.set("website", searchParams.website);
-    if (searchParams.wish) query.set("wish", searchParams.wish);
-    redirect(`/website${query.size ? `?${query}` : ""}#start`);
-  }
-
   if (searchParams.sent) {
     return (
       <div className="mx-auto max-w-2xl space-y-4">
@@ -65,9 +55,8 @@ export default async function CustomWebsitePage({
           preview. <strong>Pay only if you love it.</strong>
         </p>
         <p className="mt-2 max-w-2xl text-sm text-white/80">
-          Then hosting is ${WEBSITE_OFFER.monthlyUsd}/month or ${WEBSITE_OFFER.yearlyUsd}/year, and
-          includes {WEBSITE_OFFER.changesPerMonth} change a month ({WEBSITE_OFFER.changesPerYear} a
-          year).
+          Then hosting is ${WEBSITE_OFFER.customHostingYearUsd}/year and includes{" "}
+          {WEBSITE_OFFER.changesPerYear} changes a year.
         </p>
       </section>
 
@@ -84,12 +73,6 @@ export default async function CustomWebsitePage({
         />
       </Card>
 
-      <p className="text-center text-sm text-slate-600">
-        Want it faster and cheaper?{" "}
-        <Link href="/website" className="font-semibold text-indigo-700 underline">
-          Let AI build it for ${WEBSITE_OFFER.priceUsd}
-        </Link>
-      </p>
     </div>
   );
 }
