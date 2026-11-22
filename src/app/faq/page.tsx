@@ -4,6 +4,7 @@ import { LegalPage } from "@/components/LegalPage";
 import { SidebarBanners } from "@/components/Banners";
 import { ShareAnchor } from "@/components/ShareAnchor";
 import { FaqAsk, FaqSearch } from "@/components/FaqSearch";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { SITE } from "@/lib/site";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
@@ -60,6 +61,9 @@ const ACTIONS: { href: string; label: string }[] = [
   { href: "/pricing", label: "💎 Membership plans" },
   { href: "/report", label: "🛡 Report an issue" },
 ];
+
+/** Short how-to videos for claiming a listing (YouTube, Shorts or Vimeo links). */
+const CLAIM_VIDEOS: { url: string; title: string }[] = [];
 
 const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
   {
@@ -785,18 +789,106 @@ const FAQS: { q: string; a: React.ReactNode; id?: string }[] = [
     ),
   },
   {
-    q: "🛠 I found my business already listed. What do I do?",
+    id: "i-found-my-business-already-listed-what-do-i-do",
+    q: "🛠 I found my business already listed. How do I claim it?",
     a: (
       <>
-        <p>You can claim it:</p>
+        <p>
+          Some businesses are added as free starter listings. If yours is one of
+          them, claim it and it becomes yours to edit:
+        </p>
         <ol>
-          <li>Open your listing</li>
-          <li>Click “Is this your business? Claim it”</li>
-          <li>Verify ownership</li>
+          <li>
+            <Link href="/signup">Sign up</Link> or <Link href="/login">log in</Link>{" "}
+            to Godesi. A free account is enough.
+          </li>
+          <li>
+            Open your listing. Search for your business name, or use the claim
+            link you were sent.
+          </li>
+          <li>
+            Click <strong>“Is this your business? Claim it”</strong>. If you are
+            not logged in, the button says “Sign in to claim this business”.
+          </li>
+          <li>
+            Tell us how you are connected to the business (at least 20
+            characters), e.g. “I am the owner of this business, our office is in…”. Add a contact number so we can verify you.
+          </li>
+          <li>
+            Click <strong>Submit claim</strong>. Our team reviews it and hands the
+            listing over to you.
+          </li>
         </ol>
         <p>
-          Once approved you can edit everything and add photos, services and
-          contact details.
+          Once approved, the “Unclaimed” tag disappears and you can edit
+          everything from <Link href="/dashboard/profile">your dashboard</Link>:
+          logo, photos, video, packages, WhatsApp, website and contact details.
+        </p>
+        {CLAIM_VIDEOS.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {CLAIM_VIDEOS.map((video) => (
+              <VideoEmbed key={video.url} url={video.url} title={video.title} />
+            ))}
+          </div>
+        ) : null}
+      </>
+    ),
+  },
+  {
+    q: "⚠️ I signed up, but I don't see the claim button any more. What now?",
+    a: (
+      <>
+        <p>
+          After you sign up and verify your email, Godesi takes you to your
+          dashboard. Just open your listing (or the claim link) again. Now that
+          you are logged in, you will see{" "}
+          <strong>“Is this your business? Claim it”</strong>.
+        </p>
+        <p>
+          Do not create a new business card first. Each account can own only one
+          business, so a new card blocks you from claiming your existing
+          listing. Created one by mistake? Email{" "}
+          <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> and we
+          will sort it out.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🙋 Can Godesi hand my listing to me without the claim form?",
+    a: (
+      <>
+        <p>
+          Yes. Email{" "}
+          <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> with
+          your listing link and the email address you want to use. Our team can
+          hand the listing to that email. If you are new to Godesi, you will get
+          an email with a link to set your password.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🔍 My business is not on Godesi. Can I still claim it?",
+    a: (
+      <>
+        <p>
+          There is nothing to claim, so just{" "}
+          <Link href="/signup">list your business free</Link>. It takes a few
+          minutes and the listing is yours straight away.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "🚫 Someone else claimed my business. What can I do?",
+    a: (
+      <>
+        <p>
+          If the page says “This listing has already been claimed” and it was not
+          you, <Link href="/report">report it</Link> or email{" "}
+          <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> with proof
+          that you run the business. We review every case.
         </p>
       </>
     ),
