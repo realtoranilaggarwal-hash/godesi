@@ -6,12 +6,15 @@ import { startCustomWebsiteAction } from "@/app/actions/websiteBuilder";
 import { emptyState } from "@/lib/actions";
 import { Button, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
+import { ALBUM_LINK_STEPS } from "@/components/forms/PhotoAlbumField";
+import { PLAYLIST_LINK_STEPS } from "@/components/forms/PlaylistField";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
   CUSTOM_INCLUDES,
   CUSTOM_PAGE_NAMES,
   CUSTOM_SOURCES,
   EXAMPLE_SITE_KEYS,
+  EXTRA_SOCIAL_SOURCES,
   MEDIA_SOURCES,
   WEBSITE_CATEGORIES,
   WEBSITE_GOALS,
@@ -19,7 +22,22 @@ import {
 
 const NAMESILO_URL = "https://www.namesilo.com/?rid=8ec0177ty";
 const DEFAULT_PAGES = ["Home", "About us", "Services", "Contact"];
-const GOAL_KEYS = ["call", "whatsapp", "inquiry", "appointment", "quote", "buy", "ai-chat", "reviews"];
+const GOAL_KEYS = [
+  "call",
+  "whatsapp",
+  "inquiry",
+  "appointment",
+  "quote",
+  "buy",
+  "order-food",
+  "ai-chat",
+  "reviews",
+];
+const LINK_STEPS: Record<string, readonly string[]> = {
+  googleAlbum: ALBUM_LINK_STEPS,
+  youtubePlaylist: PLAYLIST_LINK_STEPS,
+};
+const usd = (amount: number) => `$${amount.toLocaleString("en-US")}`;
 const GOALS = WEBSITE_GOALS.filter((goal) => GOAL_KEYS.includes(goal.key));
 
 function SendButton() {
@@ -42,7 +60,39 @@ function Section({ n, title, lead, children }: { n: number; title: string; lead?
   );
 }
 
-function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
+function HowTo({ steps }: { steps: readonly string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="mt-2 text-xs font-semibold text-indigo-700 underline"
+      >
+        {open
+          ? "Hide the steps"
+          : `How do I get this link? (${steps.length} steps)`}
+      </button>
+      {open ? (
+        <ol className="mt-2 list-decimal space-y-1 rounded-xl bg-indigo-50 p-3 pl-7 text-xs text-indigo-900">
+          {steps.map((step) => (
+            <li key={step}>{step.replace("the box above", "the box")}</li>
+          ))}
+        </ol>
+      ) : null}
+    </>
+  );
+}
+
+function Choice({
+  on,
+  onClick,
+  children,
+}: {
+  on: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -68,10 +118,36 @@ export function CustomWebsiteForm({
   const [pages, setPages] = useState<string[]>(DEFAULT_PAGES);
   const [goals, setGoals] = useState<string[]>([]);
   const [articles, setArticles] = useState(false);
+  const [ordering, setOrdering] = useState(false);
+  const [category, setCategory] = useState("");
+  const [moreLinks, setMoreLinks] = useState(false);
+  const [friends, setFriends] = useState([
+    { name: "", contact: "" },
+    { name: "", contact: "" },
+  ]);
   const [code, setCode] = useState("");
   const gift = code.trim().toUpperCase() === WEBSITE_OFFER.giftCode;
-  const today = WEBSITE_OFFER.customPriceUsd + WEBSITE_OFFER.customHostingYearUsd + (articles ? WEBSITE_OFFER.dailyArticlesUsd : 0);
-  const yearly = WEBSITE_OFFER.customHostingYearUsd + (articles ? WEBSITE_OFFER.dailyArticlesUsd : 0);
+  const referred =
+    friends.filter((friend) => friend.name.trim() && friend.contact.trim())
+      .length >= WEBSITE_OFFER.referralFriends;
+  const restaurant = category === "Restaurant";
+  const orderingLabel = restaurant
+    ? "Online menu & ordering"
+    : "Online ordering system";
+  const yearly =
+    WEBSITE_OFFER.customHostingYearUsd +
+    (articles ? WEBSITE_OFFER.dailyArticlesUsd : 0);
+  const today =
+    WEBSITE_OFFER.customPriceUsd +
+    yearly -
+    (referred ? WEBSITE_OFFER.customHostingYearUsd : 0) +
+    (ordering ? WEBSITE_OFFER.onlineOrderingUsd : 0);
+  const setFriend = (index: number, field: "name" | "contact", value: string) =>
+    setFriends(
+      friends.map((friend, i) =>
+        i === index ? { ...friend, [field]: value } : friend,
+      ),
+    );
   const toggle = (list: string[], value: string) =>
     list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 
@@ -81,12 +157,29 @@ export function CustomWebsiteForm({
       <ul className="mt-2 space-y-1.5">
         <li className="flex justify-between gap-2">
           <span>Custom website</span>
-          <strong>${WEBSITE_OFFER.customPriceUsd} once</strong>
+          <span className="text-right">
+            <s className="mr-1 text-slate-400">
+              {usd(WEBSITE_OFFER.customListPriceUsd)}
+            </s>
+            <strong>{usd(WEBSITE_OFFER.customPriceUsd)} once</strong>
+          </span>
         </li>
         <li className="flex justify-between gap-2">
           <span>Hosting</span>
           <strong>${WEBSITE_OFFER.customHostingYearUsd}/year</strong>
         </li>
+        {referred ? (
+          <li className="flex justify-between gap-2 text-emerald-800">
+            <span>Hosting, year 1 (2 referrals)</span>
+            <strong className="shrink-0">FREE</strong>
+          </li>
+        ) : null}
+        {ordering ? (
+          <li className="flex justify-between gap-2">
+            <span>{orderingLabel}</span>
+            <strong>{usd(WEBSITE_OFFER.onlineOrderingUsd)} once</strong>
+          </li>
+        ) : null}
         {articles ? (
           <li className="flex justify-between gap-2">
             <span>Daily articles</span>
@@ -96,14 +189,14 @@ export function CustomWebsiteForm({
         {gift ? (
           <li className="flex justify-between gap-2 text-emerald-800">
             <span>GoDesi featured ad, 1 yr</span>
-            <strong>FREE</strong>
+            <strong className="shrink-0">FREE</strong>
           </li>
         ) : null}
       </ul>
       <div className="mt-3 border-t border-emerald-200 pt-2">
         <div className="flex justify-between gap-2 text-base">
           <span className="font-semibold">First year</span>
-          <strong>${today}</strong>
+          <strong>{usd(today)}</strong>
         </div>
         <div className="text-xs text-slate-600">Then ${yearly}/year. You pay only after you love the preview.</div>
       </div>
@@ -140,8 +233,16 @@ export function CustomWebsiteForm({
 
         <Section n={2} title="Your business">
           <Field label="What type of business do you have?" required>
-            <select name="category" required defaultValue="" className={inputClass}>
-              <option value="" disabled>Pick one…</option>
+            <select
+              name="category"
+              required
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Pick one…
+              </option>
               {WEBSITE_CATEGORIES.map((category) => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -197,8 +298,8 @@ export function CustomWebsiteForm({
 
         <Section
           n={4}
-          title={`Your website — $${WEBSITE_OFFER.customPriceUsd}`}
-          lead={`Everything below is included. Hosting is $${WEBSITE_OFFER.customHostingYearUsd} a year.`}
+          title={`Your website — ${usd(WEBSITE_OFFER.customPriceUsd)}`}
+          lead={`Regular price ${usd(WEBSITE_OFFER.customListPriceUsd)}, now ${usd(WEBSITE_OFFER.customPriceUsd)} for a limited time. Everything below is included. Hosting is $${WEBSITE_OFFER.customHostingYearUsd} a year.`}
         >
           <ul className="grid gap-1.5 text-sm text-slate-700 sm:grid-cols-2">
             {CUSTOM_INCLUDES.map((line) => (
@@ -248,7 +349,13 @@ export function CustomWebsiteForm({
           <div className="grid gap-3 sm:grid-cols-2">
             {MEDIA_SOURCES.map((source) => (
               <Field key={source.key} label={source.label}>
-                <input name={source.key} inputMode="url" placeholder={source.placeholder} className={inputClass} />
+                <input
+                  name={source.key}
+                  inputMode="url"
+                  placeholder={source.placeholder}
+                  className={inputClass}
+                />
+                <HowTo steps={LINK_STEPS[source.key]} />
               </Field>
             ))}
           </div>
@@ -272,6 +379,27 @@ export function CustomWebsiteForm({
               </Field>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setMoreLinks(!moreLinks)}
+            className="text-sm font-semibold text-indigo-700 underline"
+          >
+            {moreLinks
+              ? "Hide more links"
+              : `+ More social links (YouTube, TikTok, X, WhatsApp and ${EXTRA_SOCIAL_SOURCES.length - 4} more)`}
+          </button>
+          <div className={moreLinks ? "grid gap-3 sm:grid-cols-2" : "hidden"}>
+            {EXTRA_SOCIAL_SOURCES.map((source) => (
+              <Field key={source.key} label={source.label}>
+                <input
+                  name={source.key}
+                  inputMode="url"
+                  placeholder={source.placeholder}
+                  className={inputClass}
+                />
+              </Field>
+            ))}
+          </div>
         </Section>
 
         <Section n={8} title="Websites you like (optional)" lead="Up to three sites whose look you like, any business, anywhere.">
@@ -284,7 +412,35 @@ export function CustomWebsiteForm({
           </div>
         </Section>
 
-        <Section n={9} title="Add-on (optional)">
+        <Section n={9} title="Add-ons (optional)">
+          <label
+            className={`flex items-start gap-3 rounded-xl border p-3 text-sm text-slate-700 ${
+              restaurant
+                ? "border-orange-300 bg-orange-50"
+                : "border-slate-200 bg-slate-50"
+            }`}
+          >
+            <input
+              type="checkbox"
+              name="onlineOrdering"
+              value="1"
+              checked={ordering}
+              onChange={(event) => setOrdering(event.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-orange-600"
+            />
+            <span>
+              <strong>
+                {restaurant ? "🍽️ " : "🛒 "}
+                {orderingLabel} — {usd(WEBSITE_OFFER.onlineOrderingUsd)} one
+                time.
+              </strong>{" "}
+              {restaurant
+                ? "Customers see your menu, place their order on your website and pay online, and the order comes straight to you."
+                : "Customers order and pay on your website, and each order comes straight to you."}{" "}
+              We connect it to your payment gateway (like Stripe, Square or
+              PayPal).
+            </span>
+          </label>
           <label className="flex items-start gap-3 rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-3 text-sm text-slate-700">
             <input
               type="checkbox"
@@ -302,8 +458,54 @@ export function CustomWebsiteForm({
           </label>
         </Section>
 
-        <Section n={10} title="Special code">
-          <Field label="Have a code?" hint={`Use ${WEBSITE_OFFER.giftCode} to get a free featured ad on GoDesi for 1 year.`}>
+        <Section
+          n={10}
+          title={`Refer ${WEBSITE_OFFER.referralFriends} friends, get your first year of hosting free`}
+          lead={`Know ${WEBSITE_OFFER.referralFriends} people who need a website? Add them here and save $${WEBSITE_OFFER.customHostingYearUsd}. Our team contacts them and confirms your free year.`}
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            {friends.map((friend, index) => (
+              <div
+                key={index}
+                className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-3"
+              >
+                <Field label={`Friend ${index + 1} name`}>
+                  <input
+                    name={`friend${index + 1}Name`}
+                    value={friend.name}
+                    onChange={(event) =>
+                      setFriend(index, "name", event.target.value)
+                    }
+                    maxLength={120}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Phone or email">
+                  <input
+                    name={`friend${index + 1}Contact`}
+                    value={friend.contact}
+                    onChange={(event) =>
+                      setFriend(index, "contact", event.target.value)
+                    }
+                    maxLength={160}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+            ))}
+          </div>
+          {referred ? (
+            <p className="text-sm font-semibold text-emerald-700">
+              ✓ Your first year of hosting is free.
+            </p>
+          ) : null}
+        </Section>
+
+        <Section n={11} title="Special code">
+          <Field
+            label="Have a code?"
+            hint={`Use ${WEBSITE_OFFER.giftCode} to get a free featured ad on GoDesi for 1 year.`}
+          >
             <input
               name="code"
               value={code}
@@ -320,7 +522,7 @@ export function CustomWebsiteForm({
           ) : null}
         </Section>
 
-        <Section n={11} title="Anything else?">
+        <Section n={12} title="Anything else?">
           <Field label="Other wishes, questions, or what to change from your old site">
             <textarea
               name="wish"

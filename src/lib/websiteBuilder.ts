@@ -4,6 +4,7 @@
  * be rolled into. Shared by server and client, so nothing here touches the
  * database or the network.
  */
+import { BUSINESS_SOCIALS } from "@/lib/businessSocials";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 export const WEBSITE_CATEGORIES = [
@@ -231,6 +232,21 @@ export const CUSTOM_SOURCES = [
   { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/…" },
   { key: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/…" },
 ] as const;
+
+const COVERED_SOCIALS: readonly string[] = [
+  "websiteUrl",
+  "instagramUrl",
+  "facebookUrl",
+  "linkedinUrl",
+  "mapsUrl",
+  "yelpUrl",
+  "zillowUrl",
+];
+
+/** Every other profile link a GoDesi listing takes, offered behind "More social links". */
+export const EXTRA_SOCIAL_SOURCES = BUSINESS_SOCIALS.filter(
+  (social) => !COVERED_SOCIALS.includes(social.key),
+).map(({ key, label, placeholder }) => ({ key, label, placeholder }));
 
 /** Photo album and video playlist the custom site shows as galleries. */
 export const MEDIA_SOURCES = [

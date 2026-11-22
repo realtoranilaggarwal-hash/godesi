@@ -10,6 +10,8 @@ export const WEBSITE_OFFER = {
   yearlyUsd: 100,
   /** One-time price of a site our designer makes from the owner's pages. */
   customPriceUsd: 499,
+  /** Regular price, shown slashed next to the current one. */
+  customListPriceUsd: 999,
   /** Hosting for a custom-built site, billed once a year. */
   customHostingYearUsd: 200,
   /** Code that adds a free featured ad on GoDesi to a website order. */
@@ -17,6 +19,10 @@ export const WEBSITE_OFFER = {
   giftFeaturedMonths: 12,
   /** Yearly add-on: one article a day, with a picture and hashtags, emailed to the owner. */
   dailyArticlesUsd: 500,
+  /** One-time add-on: online menu / ordering linked to the owner's payment account. */
+  onlineOrderingUsd: 1000,
+  /** Friends a customer refers to get the first year of hosting free. */
+  referralFriends: 2,
   customPages: 10,
   /** Site changes hosting includes: one a month, or twelve a year on yearly. */
   changesPerMonth: 1,

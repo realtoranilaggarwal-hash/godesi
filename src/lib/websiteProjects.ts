@@ -14,6 +14,7 @@ import {
   type CustomPage,
   EMPTY_FACTS,
   EXAMPLE_SITE_KEYS,
+  EXTRA_SOCIAL_SOURCES,
   MEDIA_SOURCES,
   type HostingTerm,
   type FoundFacts,
@@ -89,7 +90,9 @@ export function projectSources(project: Pick<WebsiteProject, "sources">): Websit
 export function projectLinks(project: WebsiteProject): { label: string; url: string }[] {
   const raw = record(project.sources);
   const labels: Record<string, string> = Object.fromEntries(
-    [...CUSTOM_SOURCES, ...MEDIA_SOURCES].map((source) => [source.key, source.label]),
+    [...CUSTOM_SOURCES, ...MEDIA_SOURCES, ...EXTRA_SOCIAL_SOURCES].map(
+      (source) => [source.key, source.label],
+    ),
   );
   EXAMPLE_SITE_KEYS.forEach((key, index) => {
     labels[key] = `Example site ${index + 1}`;
