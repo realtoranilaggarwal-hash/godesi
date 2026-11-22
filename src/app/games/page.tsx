@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { GAMES_VIDEO_URL } from "@/lib/godesiVideos";
 import type { Metadata } from "next";
 import { gamesFeed } from "@/lib/gamesFeed";
 
@@ -23,6 +25,12 @@ export default async function GamesPage() {
           download, no signup. Works on phone and computer.
         </p>
       </div>
+
+      <ShortVideoCard
+        video={GAMES_VIDEO_URL}
+        heading="🎮 Free games on GoDesi — watch"
+        note="Quick look at the browser games you can play here — no download, no signup."
+      />
 
       {categories.length ? (
         <div className="flex flex-wrap gap-1.5">

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ShortVideoCard } from "@/components/ShortVideoCard";
+import { BANNERS_VIDEO_URL } from "@/lib/godesiVideos";
 import type { BannerSlot } from "@prisma/client";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
@@ -167,6 +169,12 @@ export default async function AdvertisePage({
           , with impressions, clicks and CTR for each banner you run.
         </p>
       </Card>
+
+      <ShortVideoCard
+        video={BANNERS_VIDEO_URL}
+        heading="📢 Your banner on every GoDesi page — watch"
+        note="How the 320×100 side banners rotate across GoDesi, and what they cost. Pick your spot below."
+      />
 
       <section id="placements" className="grid gap-4 lg:grid-cols-3">
         {order.map((slot) => {
