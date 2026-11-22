@@ -5,6 +5,7 @@ import { recommendedLinks } from "@/lib/resourcesQueries";
 import { cachedLiveStoreOffers } from "@/lib/storeOffers";
 import { LinkImpressions } from "@/components/LinkImpressions";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
+import { TemuPicks } from "@/components/TemuPicks";
 import { Card } from "@/components/ui";
 import {
   ALIEXPRESS_AFFILIATE_URL,
@@ -263,6 +264,8 @@ export default async function ShopPage() {
           </ul>
         </section>
       ) : null}
+
+      <TemuPicks />
 
       {storeOffers.length ? (
         <section className="space-y-3">
