@@ -13,7 +13,7 @@ import { HeaderShell } from "@/components/HeaderShell";
 import type { StripGroup } from "@/components/CategoryStrip";
 import { MobileMenu } from "@/components/MobileMenu";
 import { LocalePicker } from "@/components/LocalePicker";
-import { LiveMediaChips } from "@/components/LiveMediaButtons";
+import { TopSkinBanner } from "@/components/TopSkinBanner";
 import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
@@ -99,7 +99,10 @@ const STRIP_GROUPS: StripGroup[] = [
 ];
 
 /** Pages listed under each header section, before its directory categories. */
-const SECTION_LINKS: Record<string, { href: string; label: string; icon: string }[]> = {
+const SECTION_LINKS: Record<
+  string,
+  { href: string; label: string; icon: string }[]
+> = {
   explore: [
     { href: "/live-radio", label: "Live Radio", icon: "🎧" },
     { href: "/live-tv", label: "Live TV", icon: "📺" },
@@ -153,9 +156,7 @@ const SECTION_LINKS: Record<string, { href: string; label: string; icon: string 
   ],
   property: [{ href: "/rooms", label: "Rooms", icon: "🛋️" }],
   jobs: [{ href: "/gigs", label: "Gigs", icon: "🛠️" }],
-  professionals: [
-    { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
-  ],
+  professionals: [{ href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" }],
   news: [{ href: "/bollywood", label: "Bollywood", icon: "🎬" }],
 };
 
@@ -372,7 +373,9 @@ export async function SiteHeader() {
               </button>
             </form>
 
-            <LiveMediaChips className="hidden lg:flex" />
+            <div className="hidden min-w-0 flex-1 xl:block">
+              <TopSkinBanner variant="header" />
+            </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-1 text-sm font-medium sm:gap-2">
               <Link

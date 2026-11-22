@@ -2,9 +2,19 @@
 
 import { useEffect } from "react";
 
-/** Counts one impression per banner per page view, from the browser. */
-export function BannerImpression({ id }: { id: string }) {
+/**
+ * Counts one impression per banner per page view, from the browser. `media`
+ * limits it to screens where that copy is shown (CSS-hidden twins skip it).
+ */
+export function BannerImpression({
+  id,
+  media,
+}: {
+  id: string;
+  media?: string;
+}) {
   useEffect(() => {
+    if (media && !window.matchMedia(media).matches) return;
     const body = JSON.stringify({ id });
     if (navigator.sendBeacon) {
       navigator.sendBeacon(
@@ -19,7 +29,7 @@ export function BannerImpression({ id }: { id: string }) {
       body,
       keepalive: true,
     });
-  }, [id]);
+  }, [id, media]);
 
   return null;
 }

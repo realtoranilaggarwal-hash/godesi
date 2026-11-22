@@ -188,11 +188,15 @@ const bannerSchema = z.object({
     .min(2, "Banner title is required")
     // The title is a label in the admin table and the image alt text, not ad copy.
     .max(120, "Keep the banner title under 120 characters"),
-  imageUrl: z.string().trim().url("Enter a valid image URL"),
+  /** Blank only for the text-only top strip, which never shows an image. */
+  imageUrl: z.string().trim().url("Enter a valid image URL").or(z.literal("")),
   linkUrl: z.string().trim().url("Enter a valid destination URL"),
   impressionCap: z.coerce.number().int().min(1).optional(),
   endsAt: z.coerce.date().optional(),
 });
+
+const TEXT_ONLY_CREATIVE =
+  "https://placehold.co/1200x40/6366f1/ffffff?text=Top+strip";
 
 export async function saveBannerAction(
   _prev: ActionState,
@@ -205,12 +209,16 @@ export async function saveBannerAction(
       position: formData.get("position") || undefined,
       advertiserEmail: formData.get("advertiserEmail") || undefined,
       title: formData.get("title"),
-      imageUrl: formData.get("imageUrl"),
+      imageUrl: formData.get("imageUrl") ?? "",
       linkUrl: formData.get("linkUrl"),
       impressionCap: formData.get("impressionCap") || undefined,
       endsAt: formData.get("endsAt") || undefined,
     });
     if (!parsed.success) return { error: parsed.error.issues[0].message };
+    if (!parsed.data.imageUrl) {
+      if (parsed.data.slot !== "SKIN") return { error: "Upload a banner image" };
+      parsed.data.imageUrl = TEXT_ONLY_CREATIVE;
+    }
 
     const {
       slot,

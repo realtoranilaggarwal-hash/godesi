@@ -193,94 +193,94 @@ export default async function HomePage() {
         GoDesi.com — Desi business directory, events, deals &amp; community
       </h1>
       <div className="space-y-8">
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="min-w-0 space-y-3">
-            {todayFests.length ? (
-              <div className="flex flex-wrap gap-2">
-                {todayFests.map((f) => (
-                  <Link
-                    key={f.name}
-                    href={`/festivals/${festivalSlug(f)}`}
-                    className="rounded-full bg-gradient-to-r from-amber-400 to-rose-500 px-3 py-1 text-sm font-bold text-white shadow-sm hover:opacity-90"
-                  >
-                    {f.emoji}{" "}
-                    {f.daysAway === 0
-                      ? `Happy ${f.name}!`
-                      : `${f.name} tomorrow`}
-                  </Link>
-                ))}
-              </div>
-            ) : null}
-
-            <ChatterHomeBox />
-
-            <div className="space-y-3 xl:hidden">
-              <Link
-                href="/markets#predict"
-                className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
-              >
-                🎯 Daily prediction — call it right, win 10 points{" "}
-                <span className="font-normal text-indigo-600">
-                  → play on the markets page
-                </span>
-              </Link>
-            </div>
-
-            <nav className="flex flex-wrap gap-2 text-sm font-semibold">
-              <Link
-                href="/markets"
-                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-800 hover:bg-indigo-100"
-              >
-                📈 Markets today
-              </Link>
-              <Link
-                href="/travel"
-                className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-800 hover:bg-indigo-100"
-              >
-                ✈️ Travel deals
-              </Link>
-              <Link
-                href="/games"
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:bg-slate-100"
-              >
-                🎮 Games
-              </Link>
-              <Link
-                href="/claim"
-                className="rounded-full bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-700"
-              >
-                Claim godesi.com/yourname
-              </Link>
-              {fng ? (
+        <div className="space-y-3">
+          {todayFests.length ? (
+            <div className="flex flex-wrap gap-2">
+              {todayFests.map((f) => (
                 <Link
-                  href="/crypto-fear-greed"
+                  key={f.name}
+                  href={`/festivals/${festivalSlug(f)}`}
+                  className="rounded-full bg-gradient-to-r from-amber-400 to-rose-500 px-3 py-1 text-sm font-bold text-white shadow-sm hover:opacity-90"
+                >
+                  {f.emoji}{" "}
+                  {f.daysAway === 0 ? `Happy ${f.name}!` : `${f.name} tomorrow`}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
+          <ChatterHomeBox />
+
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="min-w-0 space-y-3">
+              <div className="space-y-3 xl:hidden">
+                <Link
+                  href="/markets#predict"
+                  className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
+                >
+                  🎯 Daily prediction — call it right, win 10 points{" "}
+                  <span className="font-normal text-indigo-600">
+                    → play on the markets page
+                  </span>
+                </Link>
+              </div>
+
+              <nav className="flex flex-wrap gap-2 text-sm font-semibold">
+                <Link
+                  href="/markets"
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-800 hover:bg-indigo-100"
+                >
+                  📈 Markets today
+                </Link>
+                <Link
+                  href="/travel"
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-800 hover:bg-indigo-100"
+                >
+                  ✈️ Travel deals
+                </Link>
+                <Link
+                  href="/games"
                   className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:bg-slate-100"
                 >
-                  😬 Crypto mood: {fng.value} · {fng.label}
+                  🎮 Games
                 </Link>
-              ) : null}
-            </nav>
+                <Link
+                  href="/claim"
+                  className="rounded-full bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-700"
+                >
+                  Claim godesi.com/yourname
+                </Link>
+                {fng ? (
+                  <Link
+                    href="/crypto-fear-greed"
+                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:bg-slate-100"
+                  >
+                    😬 Crypto mood: {fng.value} · {fng.label}
+                  </Link>
+                ) : null}
+              </nav>
 
-            <div className="grid gap-3 [&>*]:min-w-0">
-              {today.panchang ? (
-                <AstroToday panchang={today.panchang} place={today.label} />
-              ) : null}
+              <div className="grid gap-3 [&>*]:min-w-0">
+                {today.panchang ? (
+                  <AstroToday panchang={today.panchang} place={today.label} />
+                ) : null}
+              </div>
             </div>
+            <aside className="relative hidden xl:block">
+              <div className="absolute inset-0 space-y-3 overflow-y-auto">
+                <Link
+                  href="/markets#predict"
+                  className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
+                >
+                  🎯 Daily prediction — call it right, win 10 points{" "}
+                  <span className="font-normal text-indigo-600">
+                    → play on the markets page
+                  </span>
+                </Link>
+                <CategoryTree groups={pickerGroups} />
+              </div>
+            </aside>
           </div>
-          <aside className="relative hidden xl:block">
-            <div className="absolute inset-0 space-y-3 overflow-y-auto">
-              <Link
-                href="/markets#predict"
-                className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
-              >
-                🎯 Daily prediction — call it right, win 10 points{" "}
-                <span className="font-normal text-indigo-600">
-                  → play on the markets page
-                </span>
-              </Link>
-              <CategoryTree groups={pickerGroups} />
-            </div>
-          </aside>
         </div>
 
         {newMembers.length ? (
