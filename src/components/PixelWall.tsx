@@ -71,11 +71,29 @@ export function PixelWall({
   const [usePoints, setUsePoints] = useState(false);
   /** Sold block under the pointer — drives the big hover preview card. */
   const [hover, setHover] = useState<{ block: Block; cx: number; cy: number } | null>(null);
+  /** Backing pixels per board pixel, so the board stays sharp on retina screens. */
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const fit = () => {
+      const needed = (canvas.clientWidth * (window.devicePixelRatio || 1)) / SIZE;
+      setScale(Math.min(4, Math.max(1, Math.ceil(needed))));
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
 
   const draw = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
     // festive open-pixels checkerboard
     for (let yy = 0; yy < SIZE; yy += 10) {
@@ -154,7 +172,7 @@ export function PixelWall({
     }
     draw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blocks, sel, imageUrl]);
+  }, [blocks, sel, imageUrl, scale]);
 
   const pos = (e: React.PointerEvent) => {
     const rect = canvasRef.current!.getBoundingClientRect();
@@ -277,15 +295,15 @@ export function PixelWall({
           <div className="relative min-w-[640px]">
             <canvas
               ref={canvasRef}
-              width={SIZE}
-              height={SIZE}
+              width={SIZE * scale}
+              height={SIZE * scale}
               onPointerDown={down}
               onPointerMove={move}
               onPointerUp={up}
               onPointerLeave={() => setHover(null)}
               onPointerCancel={cancel}
               className="block w-full cursor-crosshair rounded-xl border border-slate-200"
-              style={{ imageRendering: "pixelated", touchAction: "pan-y" }}
+              style={{ touchAction: "pan-y" }}
             />
             {hover ? (
               <div
