@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LinkedText } from "@/components/LinkedText";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
@@ -902,7 +903,7 @@ export default async function EventPage({
               </div>
             ) : null}
             <p className="whitespace-pre-line text-slate-700">
-              {event.description}
+              <LinkedText text={event.description} />
             </p>
             {event.tags.length ? (
               <div className="flex flex-wrap gap-1.5">

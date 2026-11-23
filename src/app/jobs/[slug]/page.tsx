@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LinkedText } from "@/components/LinkedText";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -86,7 +87,7 @@ export default async function JobPage({
             <p className="text-sm text-emerald-900">Paid by {methods.join(", ")}</p>
           ) : null}
         </div>
-        <p className="mt-4 whitespace-pre-line text-slate-700">{job.description}</p>
+        <p className="mt-4 whitespace-pre-line text-slate-700"><LinkedText text={job.description} /></p>
         {job.requirements ? (
           <div className="mt-4">
             <h2 className="font-bold">What you need</h2>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LinkedText } from "@/components/LinkedText";
 import { cache } from "react";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -626,7 +627,14 @@ export default async function BusinessProfilePage({
             <div className="min-w-0 lg:col-span-full">
               {description ? (
                 <p className="mt-3 whitespace-pre-line break-words text-slate-700">
-                  {description}
+                  <LinkedText
+                    text={description}
+                    exclude={[
+                      business.categorySlug && `/categories/${business.categorySlug}`,
+                      business.subcategorySlug &&
+                        `/categories/${business.subcategorySlug}`,
+                    ]}
+                  />
                 </p>
               ) : null}
 

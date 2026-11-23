@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LinkedText } from "@/components/LinkedText";
 import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -165,7 +166,7 @@ export default async function GigPage({
           <section>
             <h2 className="text-lg font-bold">About this gig</h2>
             <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">
-              {gig.description}
+              <LinkedText text={gig.description} />
             </p>
             {gig.tags.length ? (
               <div className="mt-3 flex flex-wrap gap-2">

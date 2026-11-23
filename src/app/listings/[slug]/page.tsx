@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LinkedText } from "@/components/LinkedText";
 import { metaDescription } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
@@ -235,7 +236,10 @@ export default async function ListingPage({
         <Card>
           <h2 className="mb-2 font-bold">About this listing</h2>
           <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">
-            {description}
+            <LinkedText
+              text={description}
+              exclude={[listing.categorySlug && `/categories/${listing.categorySlug}`]}
+            />
           </p>
         </Card>
         {similar.length ? (
