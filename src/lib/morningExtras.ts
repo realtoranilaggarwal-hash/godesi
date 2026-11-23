@@ -30,7 +30,7 @@ export async function newsSection(base: string, now: Date, take = 6) {
     status: "PUBLISHED" as const,
     submittedById: null,
     createdAt: { gte: new Date(now.getTime() - DAY_MS), lte: now },
-    publishedAt: { gte: new Date(now.getTime() - 2 * DAY_MS) },
+    publishedAt: { gte: new Date(now.getTime() - 2 * DAY_MS), lte: now },
   };
   const select = { id: true, title: true, source: true, topic: true };
   const [known, others] = await Promise.all([
