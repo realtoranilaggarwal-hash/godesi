@@ -47,6 +47,8 @@ const description = [
   "Offices: 1 Austin Ave, Suite C, Iselin, NJ 08830, USA · R 12, Sector 12, Noida, UP 201301, India. USA (732) 983-7958 · India +91 87967 76123 · care@socialdada.com",
 ].join("\n");
 
+// Every package is ordered on the /website form.
+const ORDER_URL = "/website";
 const PACKAGES = [
   {
     name: "Custom website",
@@ -208,8 +210,17 @@ async function main() {
       ...item,
       businessId: card.id,
       currency: "USD",
+      linkUrl: ORDER_URL,
       sortOrder,
     })).filter((item) => !haveNames.has(item.name)),
+  });
+  await db.vendorPackage.updateMany({
+    where: {
+      businessId: card.id,
+      name: { in: PACKAGES.map((item) => item.name) },
+      linkUrl: null,
+    },
+    data: { linkUrl: ORDER_URL },
   });
   const photos = await db.media.findMany({
     where: { businessId: card.id },

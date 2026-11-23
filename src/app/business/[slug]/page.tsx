@@ -1118,6 +1118,12 @@ export default async function BusinessProfilePage({
                             ))}
                         </ul>
                       ) : null}
+                      {item.linkUrl?.startsWith("/") &&
+                      !item.linkUrl.startsWith("//") ? (
+                        <LinkButton href={item.linkUrl} className="mt-3">
+                          Order now →
+                        </LinkButton>
+                      ) : null}
                     </div>
                   ))}
                 </div>
