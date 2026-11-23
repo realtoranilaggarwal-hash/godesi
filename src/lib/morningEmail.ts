@@ -7,6 +7,11 @@ import { dailySky } from "@/lib/horoscope";
 import { newsPath } from "@/lib/newsLinks";
 import { RASHIS } from "@/lib/kundliSigns";
 import {
+  marketsSection,
+  newsSection,
+  trafficSection,
+} from "@/lib/morningExtras";
+import {
   DEFAULT_PANCHANG_CITY,
   computePanchang,
   panchangTime,
@@ -41,14 +46,25 @@ const escape = (value: string) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[char] ?? char,
   );
 
-/** The shared part of the morning email: panchang, sky, deal of the day, events. */
+/**
+ * The shared part of the morning email: panchang, sky, news, markets, deal of
+ * the day, events, new members and how the site is growing.
+ */
 export async function morningContent(now = new Date()) {
   const base = siteUrl();
   const city = DEFAULT_PANCHANG_CITY;
   const sky = dailySky(now);
   const panchang = computePanchang(city, sky.date);
   const yesterday = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-  const [{ deal, offer }, events, joiners, fresh] = await Promise.all([
+  const [
+    { deal, offer },
+    events,
+    joiners,
+    fresh,
+    newsHtml,
+    marketsHtml,
+    trafficHtml,
+  ] = await Promise.all([
     dealOfTheDay(now),
     db.event.findMany({
       where: { status: "APPROVED", startsAt: { gte: now } },
@@ -90,6 +106,9 @@ export async function morningContent(now = new Date()) {
         select: { slug: true, title: true, city: true },
       }),
     ]),
+    newsSection(base, now).catch(() => ""),
+    marketsSection(base).catch(() => ""),
+    trafficSection(base, now).catch(() => ""),
   ]);
   const [freshNews, freshCards, freshListings] = fresh;
 
@@ -176,8 +195,17 @@ export async function morningContent(now = new Date()) {
 
   return {
     day: sky.date,
-    subject: `${sky.dateLabel.split(",").slice(0, 2).join(",")}: panchang, horoscope & deal of the day`,
-    body: panchangHtml + skyHtml + dealHtml + eventHtml + joinerHtml + freshHtml,
+    subject: `${sky.dateLabel.split(",").slice(0, 2).join(",")}: news, markets, panchang & deal of the day`,
+    body:
+      newsHtml +
+      marketsHtml +
+      panchangHtml +
+      skyHtml +
+      dealHtml +
+      eventHtml +
+      joinerHtml +
+      freshHtml +
+      trafficHtml,
   };
 }
 
