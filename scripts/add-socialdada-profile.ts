@@ -47,7 +47,7 @@ const description = [
   "Offices: 1 Austin Ave, Suite C, Iselin, NJ 08830, USA · R 12, Sector 12, Noida, UP 201301, India. USA (732) 983-7958 · India +91 87967 76123 · care@socialdada.com",
 ].join("\n");
 
-// Every package is ordered on the /website form.
+// Every package is ordered on the /website form; add-ons arrive ticked.
 const ORDER_URL = "/website";
 const PACKAGES = [
   {
@@ -69,6 +69,7 @@ const PACKAGES = [
     description:
       "One time. Customers order online; linked to your Stripe, Square or PayPal.",
     includes: null,
+    linkUrl: `${ORDER_URL}?add=ordering#start`,
   },
   {
     name: "Daily articles, per year",
@@ -76,6 +77,7 @@ const PACKAGES = [
     description:
       "365 articles with a picture and hashtags, emailed to you every day for SEO.",
     includes: null,
+    linkUrl: `${ORDER_URL}?add=articles#start`,
   },
 ];
 
@@ -207,21 +209,19 @@ async function main() {
   const haveNames = new Set(have.map((item) => item.name));
   await db.vendorPackage.createMany({
     data: PACKAGES.map((item, sortOrder) => ({
+      linkUrl: `${ORDER_URL}#start`,
       ...item,
       businessId: card.id,
       currency: "USD",
-      linkUrl: ORDER_URL,
       sortOrder,
     })).filter((item) => !haveNames.has(item.name)),
   });
-  await db.vendorPackage.updateMany({
-    where: {
-      businessId: card.id,
-      name: { in: PACKAGES.map((item) => item.name) },
-      linkUrl: null,
-    },
-    data: { linkUrl: ORDER_URL },
-  });
+  for (const item of PACKAGES) {
+    await db.vendorPackage.updateMany({
+      where: { businessId: card.id, name: item.name, linkUrl: null },
+      data: { linkUrl: "linkUrl" in item ? item.linkUrl : `${ORDER_URL}#start` },
+    });
+  }
   const photos = await db.media.findMany({
     where: { businessId: card.id },
     select: { url: true },

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default async function WebsiteOfferPage({
   searchParams,
 }: {
-  searchParams: { website?: string; wish?: string };
+  searchParams: { website?: string; wish?: string; add?: string };
 }) {
   const user = await getCurrentUser();
   const business = user
@@ -127,6 +127,8 @@ export default async function WebsiteOfferPage({
             email: user?.email,
             website: searchParams.website ?? business?.websiteUrl ?? undefined,
             wish: searchParams.wish,
+            articles: searchParams.add === "articles",
+            ordering: searchParams.add === "ordering",
           }}
         />
 
