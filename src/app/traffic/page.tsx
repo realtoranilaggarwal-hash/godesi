@@ -10,7 +10,7 @@ import {
   type GaRank,
 } from "@/lib/ga";
 import { siteTraffic } from "@/lib/traffic";
-import { VisitorMap } from "@/components/VisitorMap";
+import { VisitorMapLazy } from "@/components/VisitorMapLazy";
 
 export const dynamic = "force-dynamic";
 
@@ -153,12 +153,12 @@ export default async function TrafficPage() {
             🗺️ Where visitors are — live map
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Amber dots show the last 30 days of visitors; pulsing green dots
-            are people on the site right now. Drag to explore, tap a dot for
+            Amber dots show the last 30 days of visitors; pulsing green dots are
+            people on the site right now. Drag to explore, tap a dot for
             numbers.
           </p>
           <div className="mt-3">
-            <VisitorMap countries={mapCountries} />
+            <VisitorMapLazy countries={mapCountries} />
           </div>
         </Card>
       ) : null}
