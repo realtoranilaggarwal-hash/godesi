@@ -91,7 +91,10 @@ export function PixelWall({
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    // Read the scale off the canvas itself: image onload callbacks keep an
+    // older `draw`, and must still paint at the canvas's current size.
+    const k = canvas.width / SIZE;
+    ctx.setTransform(k, 0, 0, k, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
 
