@@ -665,6 +665,8 @@ model VendorPackage {
   description String?
   /// One inclusion per line, listed as ticks under the package.
   includes    String?
+  /// Optional on-site page where the package is ordered, e.g. "/website". Set by staff.
+  linkUrl     String?
   sortOrder   Int      @default(0)
 
   @@index([businessId])

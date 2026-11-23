@@ -111,14 +111,23 @@ function Choice({
 export function CustomWebsiteForm({
   defaults,
 }: {
-  defaults?: { businessName?: string; city?: string; phone?: string; email?: string; website?: string; wish?: string };
+  defaults?: {
+    businessName?: string;
+    city?: string;
+    phone?: string;
+    email?: string;
+    website?: string;
+    wish?: string;
+    articles?: boolean;
+    ordering?: boolean;
+  };
 }) {
   const [state, formAction] = useFormState(startCustomWebsiteAction, emptyState);
   const [hasDomain, setHasDomain] = useState<"yes" | "no" | "">("");
   const [pages, setPages] = useState<string[]>(DEFAULT_PAGES);
   const [goals, setGoals] = useState<string[]>([]);
-  const [articles, setArticles] = useState(false);
-  const [ordering, setOrdering] = useState(false);
+  const [articles, setArticles] = useState(Boolean(defaults?.articles));
+  const [ordering, setOrdering] = useState(Boolean(defaults?.ordering));
   const [category, setCategory] = useState("");
   const [moreLinks, setMoreLinks] = useState(false);
   const [friends, setFriends] = useState([
