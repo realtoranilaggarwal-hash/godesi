@@ -207,16 +207,15 @@ async function visitorDays(): Promise<Day[]> {
 }
 
 /**
- * Last full week of visitors, all-time visitors and members, so the community
- * sees GoDesi growing. The week-on-week change is only shown when it is up;
+ * Last full week of visitors, all-time visitors and new members, so the
+ * community sees GoDesi growing. The total member count is left out on purpose. The week-on-week change is only shown when it is up;
  * today is left out because it isn't over yet.
  */
 export async function trafficSection(base: string, now: Date) {
   const todayKey = now.toISOString().slice(0, 10);
-  const [days, total, members, newMembers] = await Promise.all([
+  const [days, total, newMembers] = await Promise.all([
     visitorDays().catch(() => [] as Day[]),
     siteTraffic(),
-    db.user.count({ where: { bannedAt: null } }),
     db.user.count({
       where: {
         bannedAt: null,
@@ -240,10 +239,8 @@ export async function trafficSection(base: string, now: Date) {
   if (total.visitors) {
     lines.push(`${count(total.visitors)} visitors since GoDesi started`);
   }
-  if (members) {
-    lines.push(
-      `${count(members)} members${newMembers ? `, ${count(newMembers)} joined this week` : ""}`,
-    );
+  if (newMembers) {
+    lines.push(`${count(newMembers)} new members joined this week`);
   }
   if (!lines.length) return "";
   return `${h2("🚀 GoDesi is growing")}
