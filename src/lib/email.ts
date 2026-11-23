@@ -77,7 +77,9 @@ export async function sendEmail({
         to: recipients,
         subject,
         html,
-        ...(replyTo ? { reply_to: replyTo } : {}),
+        ...(replyTo || SITE.alertsEmail
+          ? { reply_to: replyTo || SITE.alertsEmail }
+          : {}),
         ...(headers ? { headers } : {}),
       }),
     });
