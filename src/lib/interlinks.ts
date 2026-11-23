@@ -48,8 +48,9 @@ const PATTERN = new RegExp(
   "gi",
 );
 
-// A space-separated chunk with any of these is a web address, email or @handle.
-const ADDRESS = /[/@=?&#+]|:\/\/|www\.|\.(com|org|net|in|us|io)\b/i;
+// A space-separated chunk with any of these (or a dot inside a word, like acme.photography)
+// is a web address, email or @handle.
+const ADDRESS = /[/@=]|:\/\/|www\.|\w\.\w/i;
 
 function inAddress(text: string, start: number, end: number) {
   const before = text.slice(0, start).match(/\S*$/)?.[0] ?? "";
