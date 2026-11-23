@@ -24,16 +24,34 @@ const NEWS_TOPICS = ["general", "nri", "entertainment", "faith", "food"];
  * can't crowd out India and NRI news.
  */
 export async function newsSection(base: string, now: Date, take = 6) {
-  const items = await db.newsItem.findMany({
-    where: {
-      status: "PUBLISHED",
-      submittedById: null,
-      publishedAt: { gte: new Date(now.getTime() - DAY_MS), lte: now },
-    },
-    orderBy: { publishedAt: "desc" },
-    take: 60,
-    select: { id: true, title: true, source: true, topic: true },
-  });
+  // The feed is crawled once a day, so "today's news" is what was imported in
+  // the last 24h; one query per topic keeps a busy topic from filling the list.
+  const where = {
+    status: "PUBLISHED" as const,
+    submittedById: null,
+    createdAt: { gte: new Date(now.getTime() - DAY_MS), lte: now },
+    publishedAt: { gte: new Date(now.getTime() - 2 * DAY_MS) },
+  };
+  const select = { id: true, title: true, source: true, topic: true };
+  const [known, others] = await Promise.all([
+    Promise.all(
+      NEWS_TOPICS.map((topic) =>
+        db.newsItem.findMany({
+          where: { ...where, topic },
+          orderBy: { publishedAt: "desc" },
+          take,
+          select,
+        }),
+      ),
+    ),
+    db.newsItem.findMany({
+      where: { ...where, topic: { notIn: NEWS_TOPICS } },
+      orderBy: { publishedAt: "desc" },
+      take: take * 3,
+      select,
+    }),
+  ]);
+  const items = [...known.flat(), ...others];
   const byTopic = new Map<string, typeof items>();
   for (const item of items) {
     const list = byTopic.get(item.topic) ?? [];
@@ -216,7 +234,7 @@ export async function trafficSection(base: string, now: Date) {
   if (week) {
     const pct = before ? Math.round(((week - before) / before) * 100) : 0;
     lines.push(
-      `${count(week)} visitors in the last 7 days${pct > 0 ? ` <span style="color:#15803d">▲ ${pct}% on the week before</span>` : ""}`,
+      `${count(week)} visits in the last 7 days${pct > 0 ? ` <span style="color:#15803d">▲ ${pct}% on the week before</span>` : ""}`,
     );
   }
   if (total.visitors) {
