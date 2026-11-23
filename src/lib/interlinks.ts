@@ -43,11 +43,20 @@ const TERMS = INTERLINKS.flatMap(({ terms, href }) =>
 
 const HREF_BY_TERM = new Map(TERMS.map(({ term, href }) => [term.toLowerCase(), href]));
 
-// Whole words only, and never inside a web address, email or @handle.
 const PATTERN = new RegExp(
-  `(?<![\\w/.@#-])(${TERMS.map(({ term }) => escape(term)).join("|")})(?![\\w@-]|\\.\\w|/)`,
+  `(?<![\\w-])(${TERMS.map(({ term }) => escape(term)).join("|")})(?![\\w-])`,
   "gi",
 );
+
+// A space-separated chunk with any of these is a web address, email or @handle.
+const ADDRESS = /[/@=?&#+]|:\/\/|www\.|\.(com|org|net|in|us|io)\b/i;
+
+function inAddress(text: string, start: number, end: number) {
+  const before = text.slice(0, start).match(/\S*$/)?.[0] ?? "";
+  // Ending punctuation ("Need a DJ?") belongs to the sentence, not an address.
+  const after = (text.slice(end).match(/^\S*/)?.[0] ?? "").replace(/[.,!?;:)\]"']+$/, "");
+  return ADDRESS.test(before + text.slice(start, end) + after);
+}
 
 export type TextPart = string | { text: string; href: string };
 
@@ -67,6 +76,7 @@ export function interlinkText(
     if (!href || used.has(href)) continue;
     if (match[0].length <= 3 && match[0] !== match[0].toUpperCase()) continue;
     const start = match.index ?? 0;
+    if (inAddress(text, start, start + match[0].length)) continue;
     if (start > last) parts.push(text.slice(last, start));
     parts.push({ text: match[0], href });
     last = start + match[0].length;
