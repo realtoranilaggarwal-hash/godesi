@@ -284,6 +284,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/complaints`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/astrology`, changeFrequency: "weekly", priority: 0.7 },
     {
+      url: `${base}/astrology/media-kit`,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
       url: `${base}/astrology/kundli-calculator`,
       changeFrequency: "monthly",
       priority: 0.7,
