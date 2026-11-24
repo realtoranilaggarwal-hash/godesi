@@ -20,12 +20,22 @@ export const CLIP_SECTIONS = [
     href: "/complaints",
   },
   { slug: "section:events", name: "Events (/events)", href: "/events" },
+  {
+    slug: "section:event-organizers",
+    name: "Event organizers (/events/new, /events/how-it-works, foot of /events)",
+    href: "/events/how-it-works",
+  },
   { slug: "section:gigs", name: "Gigs (/gigs)", href: "/gigs" },
   { slug: "section:news", name: "News (/news)", href: "/news" },
   {
     slug: "section:astrology",
     name: "Astrology (/astrology)",
     href: "/astrology",
+  },
+  {
+    slug: "section:astrology-media-kit",
+    name: "Astrologer media kit (/astrology/media-kit, horoscope, Kundli and guide pages)",
+    href: "/astrology/media-kit",
   },
   { slug: "section:rishta", name: "Rishta (/rishta)", href: "/rishta" },
   {

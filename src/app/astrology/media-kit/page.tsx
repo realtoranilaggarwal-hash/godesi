@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
 import { AstrologerBanners } from "@/components/Banners";
+import { HelpClipCard } from "@/components/HelpClipCard";
 
 export const revalidate = 3600;
 
@@ -50,6 +51,11 @@ export default function AstrologerMediaKitPage() {
             </Link>
           </div>
         </section>
+        <HelpClipCard
+          categorySlug="section:astrology-media-kit"
+          sitewide={false}
+          className="w-full max-w-[260px]"
+        />
         <a
           href={ASTRO_MEDIA_KIT.pdf}
           className="block overflow-hidden rounded-2xl border border-slate-200 shadow-sm"

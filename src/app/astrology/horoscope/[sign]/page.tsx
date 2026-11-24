@@ -93,7 +93,7 @@ export default async function SignHoroscopePage({
 
         <p className="text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:astrology-media-kit" />
     </div>
   );
 }

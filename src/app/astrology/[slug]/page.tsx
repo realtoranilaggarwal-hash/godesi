@@ -178,7 +178,7 @@ export default async function AstrologyGuidePage({
           <p className="mt-3 text-xs text-slate-500">{ASTROLOGY_DISCLAIMER}</p>
         </Card>
       </div>
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:astrology-media-kit" />
     </div>
   );
 }

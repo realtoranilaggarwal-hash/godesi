@@ -918,7 +918,7 @@ export default function EventFeesPage() {
         </section>
       </div>
 
-      <SidebarBanners />
+      <SidebarBanners categorySlug="section:event-organizers" />
     </div>
   );
 }
