@@ -28,6 +28,14 @@ export const ASTROLOGER_SUBCATEGORIES = [
   "professionals-astrologers",
 ];
 
+/** Astrologer advertising flier, published as a page and a PDF download. */
+export const ASTRO_MEDIA_KIT = {
+  href: "/astrology/media-kit",
+  pdf: "/media-kit/godesi-astrologer-media-kit.pdf",
+  image: "/media-kit/godesi-astrologer-media-kit.jpg",
+  banner: "/banners/astrologer-media-kit-320x100.png",
+};
+
 export const ASTROLOGY_DISCLAIMER =
   "Astrology is a traditional practice and a matter of personal belief. These guides explain how it is used in desi families; they are not medical, legal, financial or mental-health advice.";
 

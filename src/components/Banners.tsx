@@ -21,6 +21,7 @@ import { AdSenseUnit } from "@/components/AdSenseUnit";
 import { HousePromo } from "@/components/HousePromo";
 import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
+import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
 import { SmallBannerRail } from "@/components/SmallBannerRail";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
@@ -596,7 +597,24 @@ export async function AstrologerBanners() {
           height={placement.size.height}
         />
       ))}
-      {Array.from({ length: Math.min(open, 3) }).map((_, index) => (
+      {open > 0 ? (
+        <Link
+          href={ASTRO_MEDIA_KIT.href}
+          title="Astrologer media kit"
+          className="block overflow-hidden rounded-xl border border-violet-200 shadow-sm transition hover:shadow-md"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={ASTRO_MEDIA_KIT.banner}
+            alt="Astrologers: advertise on GoDesi, see the media kit"
+            width={placement.size.width}
+            height={placement.size.height}
+            loading="lazy"
+            className="h-auto w-full"
+          />
+        </Link>
+      ) : null}
+      {Array.from({ length: Math.min(open - 1, 2) }).map((_, index) => (
         <Link
           key={`astro-open-${index}`}
           href="/advertise?slot=ASTRO#book"

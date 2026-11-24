@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { BusinessListItem } from "@/lib/businesses";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Card } from "@/components/ui";
+import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
 
 export function AstrologerList({
   astrologers,
@@ -46,6 +47,20 @@ export function AstrologerList({
         </Link>{" "}
         or claim your card if it&apos;s already here.
       </p>
+      <Link
+        href={ASTRO_MEDIA_KIT.href}
+        className="mt-3 block max-w-[320px] overflow-hidden rounded-xl border border-violet-200 shadow-sm transition hover:shadow-md"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={ASTRO_MEDIA_KIT.banner}
+          alt="Astrologers: advertise on GoDesi, see the media kit"
+          width={320}
+          height={100}
+          loading="lazy"
+          className="h-auto w-full"
+        />
+      </Link>
     </Card>
   );
 }
