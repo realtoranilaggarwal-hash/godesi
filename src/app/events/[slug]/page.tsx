@@ -393,13 +393,34 @@ export default async function EventPage({
     event.category?.color,
   );
   const past = isPast(event);
-  /** A comp email links here with ?comp=CODE: pre-pick its tickets and allow more than 10. */
+  /**
+   * A comp email links here with ?comp=CODE: pre-pick its tickets and allow more than 10.
+   * Without the link (e.g. lost while signing up), use an unused code sent to the viewer's verified email.
+   */
+  const compSelect = { code: true, tierLimits: true, eventId: true, active: true } as const;
   const comp = searchParams.comp
     ? await db.coupon.findUnique({
         where: { code: normalizeCouponCode(searchParams.comp) },
-        select: { code: true, tierLimits: true, eventId: true, active: true },
+        select: compSelect,
       })
-    : null;
+    : user?.email && user.emailVerifiedAt
+      ? (
+          await db.coupon.findMany({
+            where: {
+              eventId: event.id,
+              active: true,
+              sentToEmail: { equals: user.email, mode: "insensitive" },
+              OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+            },
+            orderBy: { createdAt: "desc" },
+            select: { ...compSelect, timesRedeemed: true, maxRedemptions: true },
+          })
+        ).find(
+          (coupon) =>
+            couponTierLimits(coupon).length > 0 &&
+            (coupon.maxRedemptions === null || coupon.timesRedeemed < coupon.maxRedemptions),
+        ) ?? null
+      : null;
   const compCounts =
     comp && comp.active && comp.eventId === event.id
       ? Object.fromEntries(
