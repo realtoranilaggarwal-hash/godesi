@@ -51,11 +51,14 @@ function BannerLink({
   className = "",
   sellSlot,
   sellLabel,
+  media,
 }: {
   banner: BannerRow;
   width: number;
   height: number;
   className?: string;
+  /** Media query the banner is visible at, so CSS-hidden copies count no views. */
+  media?: string;
   /** Adds a "post your banner here" line underneath, so filled spots still sell. */
   sellSlot?: BannerSlot;
   sellLabel?: string;
@@ -68,7 +71,7 @@ function BannerLink({
       title={banner.title}
       className={`block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md ${className}`}
     >
-      <BannerImpression id={banner.id} />
+      <BannerImpression id={banner.id} media={media} />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={proxyImage(banner.imageUrl)}
@@ -595,6 +598,7 @@ export async function AstrologerBanners() {
           banner={banner}
           width={placement.size.width}
           height={placement.size.height}
+          media="(min-width: 1280px)"
         />
       ))}
       {open > 0 ? (
