@@ -395,7 +395,7 @@ export default async function EventPage({
   const past = isPast(event);
   /**
    * A comp email links here with ?comp=CODE: pre-pick its tickets and allow more than 10.
-   * Without the link (e.g. lost while signing up), use an unused code sent to the viewer's email.
+   * Without the link (e.g. lost while signing up), use an unused code sent to the viewer's verified email.
    */
   const compSelect = { code: true, tierLimits: true, eventId: true, active: true } as const;
   const comp = searchParams.comp
@@ -403,7 +403,7 @@ export default async function EventPage({
         where: { code: normalizeCouponCode(searchParams.comp) },
         select: compSelect,
       })
-    : user?.email
+    : user?.email && user.emailVerifiedAt
       ? (
           await db.coupon.findMany({
             where: {
