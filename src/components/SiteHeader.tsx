@@ -18,6 +18,7 @@ import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
 import { emailEnabled } from "@/lib/email";
+import { festivalSlug, headerFestival } from "@/lib/festivals";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -244,6 +245,7 @@ export async function SiteHeader() {
   const unread = user ? await optionalRead(() => unreadCount(user.id), 0) : 0;
   const geo = requestGeo();
   const firstName = user ? (user.name || user.email).split(/[\s@]/)[0] : null;
+  const gurpurab = headerFestival();
 
   const categoryItems = [
     ...Object.entries(SECTION_LINKS).flatMap(([group, links]) =>
@@ -339,6 +341,7 @@ export async function SiteHeader() {
         }
         bar={
           <div className="relative mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4 lg:pr-16">
+            <div className="flex shrink-0 items-center gap-1.5">
             <Link href="/" className="shrink-0" aria-label="Godesi home">
               <Image
                 src="/logo-godesi.png"
@@ -351,6 +354,23 @@ export async function SiteHeader() {
                 className="h-8 w-auto sm:h-9"
               />
             </Link>
+            {gurpurab?.headerIcon ? (
+              <Link
+                href={`/festivals/${festivalSlug(gurpurab)}`}
+                title={`Happy ${gurpurab.name}`}
+                className="shrink-0"
+              >
+                <Image
+                  src={gurpurab.headerIcon}
+                  alt={gurpurab.name}
+                  width={303}
+                  height={374}
+                  unoptimized
+                  className="h-8 w-auto sm:h-9"
+                />
+              </Link>
+            ) : null}
+            </div>
 
             <form
               action="/find"
