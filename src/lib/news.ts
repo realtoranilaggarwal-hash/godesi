@@ -346,7 +346,10 @@ export async function ingestNews({ perFeed = 12 }: { perFeed?: number } = {}) {
   return { ...result, purged };
 }
 
-/** News is a rolling window: anything older than six days drops off the site. */
+/**
+ * News is a rolling window: anything older than six days drops off the site.
+ * Only feed items are deleted; our own reports keep their page and links.
+ */
 export const NEWS_MAX_AGE_DAYS = 6;
 
 export function freshNewsCutoff() {
@@ -355,7 +358,7 @@ export function freshNewsCutoff() {
 
 export async function purgeOldNews() {
   const { count } = await db.newsItem.deleteMany({
-    where: { publishedAt: { lt: freshNewsCutoff() } },
+    where: { publishedAt: { lt: freshNewsCutoff() }, submittedById: null },
   });
   return count;
 }
