@@ -69,6 +69,12 @@ export default function AstrologerMediaKitPage() {
             className="h-auto w-full"
           />
         </a>
+        <Link
+          href="/astrology/why-astrologers-should-be-on-godesi"
+          className="block font-semibold text-violet-700 hover:underline"
+        >
+          🌟 Why every astrologer should be on GoDesi.com →
+        </Link>
         <p className="text-sm text-slate-600">
           Questions? Call or WhatsApp (732) 983-7958 or email
           godesibiz@gmail.com. Prices are in US dollars; visitors in India see ₹
