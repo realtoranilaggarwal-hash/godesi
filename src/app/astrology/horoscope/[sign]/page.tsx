@@ -16,7 +16,7 @@ import { RASHIS } from "@/lib/kundliSigns";
 import { AstrologerList } from "@/components/AstrologerList";
 import { AstrologyShop } from "@/components/AstrologyShop";
 import { DEFAULT_ASTRO_SHOP, astroShopItemsById } from "@/lib/astrologyShop";
-import { SidebarBanners } from "@/components/Banners";
+import { AstrologerBanners, SidebarBanners } from "@/components/Banners";
 import { DailySkyBox } from "@/components/DailySkyBox";
 import { HoroscopeCard } from "@/components/HoroscopeCard";
 
@@ -56,6 +56,7 @@ export default async function SignHoroscopePage({
 
   return (
     <div className="flex justify-center gap-6">
+      <AstrologerBanners />
       <div className="min-w-0 max-w-3xl flex-1 space-y-5">
         <section className="rounded-3xl bg-gradient-to-r from-indigo-700 via-violet-600 to-fuchsia-600 px-5 py-8 text-white sm:px-8">
           <Link
