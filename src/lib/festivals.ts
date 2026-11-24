@@ -13,6 +13,10 @@ export type Festival = {
   keywords: string[];
   /** Store searches shown as "Shop for …" links (see FestivalShop). */
   shop: { label: string; query: string }[];
+  /** Faith symbol shown beside the GoDesi logo in the header on the festival day. */
+  headerIcon?: string;
+  /** Greeting video shown on the festival page. */
+  videoUrl?: string;
 };
 
 /**
@@ -305,6 +309,8 @@ export const FESTIVALS: Festival[] = [
     emoji: "🪯",
     blurb: "Birth of Guru Nanak Dev Ji — akhand path, nagar kirtan, langar.",
     dates: ["2026-11-24", "2027-11-14", "2028-11-02"],
+    headerIcon: "/images/khanda.svg",
+    videoUrl: "https://youtube.com/shorts/obwapquWtSM",
   },
   {
     name: "Christmas",
@@ -365,6 +371,27 @@ export function upcomingFestivals(limit = 6, now = new Date()): UpcomingFestival
 export function todaysFestivals(now = new Date()): UpcomingFestival[] {
   return upcomingFestivals(FESTIVALS.length, now).filter(
     (festival) => festival.daysAway <= 1,
+  );
+}
+
+/**
+ * The festival whose symbol sits beside the logo: from 3 days before the day
+ * until the day after, counted in US Eastern time.
+ */
+export function headerFestival(now = new Date()): Festival | null {
+  const today = Date.parse(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(now),
+  );
+  const day = 86_400_000;
+  return (
+    FESTIVALS.find(
+      (festival) =>
+        festival.headerIcon &&
+        festival.dates.some((date) => {
+          const diff = Date.parse(date) - today;
+          return diff >= -day && diff <= 3 * day;
+        }),
+    ) ?? null
   );
 }
 

@@ -43,7 +43,7 @@ export default async function ReligiousPage({
       where: worshipWhere(searchParams),
       orderBy: [{ name: "asc" }],
       include: { images: { orderBy: { sortOrder: "asc" }, take: 1 } },
-      take: 48,
+      take: 120,
     }),
     db.event.findMany({
       where: {

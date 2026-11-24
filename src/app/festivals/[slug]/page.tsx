@@ -18,6 +18,8 @@ import { FestivalShop } from "@/components/FestivalShop";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
+import { SocialEmbed } from "@/components/SocialEmbed";
+import { newsPath } from "@/lib/newsLinks";
 import { Card, LinkButton } from "@/components/ui";
 
 export const revalidate = 3600;
@@ -27,7 +29,10 @@ export function generateStaticParams() {
 }
 
 function nextDate(dates: Date[], now = new Date()) {
-  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  // Festival dates are US calendar days, so "today" is the Eastern date.
+  const today = Date.parse(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(now),
+  );
   return dates.find((date) => date.getTime() >= today) ?? null;
 }
 
@@ -82,12 +87,29 @@ export default async function FestivalPage({
 
   const storeOffers = await optionalRead(() => liveStoreOffers(3), []);
 
+  const stories = await optionalRead(
+    () =>
+      db.newsItem.findMany({
+        where: {
+          status: "PUBLISHED",
+          submittedById: { not: null },
+          OR: festival.keywords.map((keyword) => ({
+            title: { contains: keyword, mode: "insensitive" as const },
+          })),
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+        select: { id: true, title: true, summary: true },
+      }),
+    [],
+  );
+
   const temples = await optionalRead(
     () =>
       db.worshipPlace.findMany({
         where: { status: "APPROVED", faith: festival.faith },
         orderBy: { createdAt: "desc" },
-        take: 6,
+        take: 12,
         select: {
           slug: true,
           name: true,
@@ -207,6 +229,34 @@ export default async function FestivalPage({
                 Ask for a custom {festival.name} puja
               </LinkButton>
             </div>
+          </Card>
+        ) : null}
+
+        {festival.videoUrl ? (
+          <Card>
+            <h2 className="mb-3 font-bold">Watch: {festival.name}</h2>
+            <SocialEmbed url={festival.videoUrl} label="Watch the video" />
+          </Card>
+        ) : null}
+
+        {stories.length ? (
+          <Card>
+            <h2 className="font-bold">{festival.name} on GoDesi News</h2>
+            <ul className="mt-3 space-y-3">
+              {stories.map((story) => (
+                <li key={story.id}>
+                  <Link
+                    href={newsPath(story)}
+                    className="block rounded-xl border border-slate-200 p-3 hover:border-amber-400"
+                  >
+                    <p className="text-sm font-bold">{story.title}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                      {story.summary}
+                    </p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </Card>
         ) : null}
 
