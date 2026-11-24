@@ -29,7 +29,10 @@ export function generateStaticParams() {
 }
 
 function nextDate(dates: Date[], now = new Date()) {
-  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  // Festival dates are US calendar days, so "today" is the Eastern date.
+  const today = Date.parse(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(now),
+  );
   return dates.find((date) => date.getTime() >= today) ?? null;
 }
 
