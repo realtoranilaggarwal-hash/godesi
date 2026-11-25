@@ -51,6 +51,10 @@
     {
       "path": "/api/cron/partner-followups",
       "schedule": "17 14 * * *"
+    },
+    {
+      "path": "/api/cron/oaktree-invites",
+      "schedule": "30 15 * * *"
     }
   ]
 }

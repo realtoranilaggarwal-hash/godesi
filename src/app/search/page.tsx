@@ -14,6 +14,10 @@ import {
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { gradientFor } from "@/lib/categories";
 
+/** Searches that mean Oak Tree Road or an Indian market get a link to the /bazaar hub. */
+const OAK_TREE_QUERY =
+  /oak\s*tree|iselin|(desi|india|indian)\s+(market|bazaa?r|shops?|stores?)|little india/i;
+
 export const dynamic = "force-dynamic";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -109,6 +113,16 @@ export default async function SearchPage({
         </section>
 
         <FeaturedStrip categorySlugs={categorySlugs} />
+
+        {OAK_TREE_QUERY.test(q) ? (
+          <Link
+            href="/bazaar"
+            className="block rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 hover:bg-amber-100"
+          >
+            🛍️ Oak Tree Road Bazaar, Iselin NJ — every Indian shop, restaurant and jeweller on
+            New Jersey&apos;s desi market street →
+          </Link>
+        ) : null}
 
         <Card>
           <form className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

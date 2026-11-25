@@ -74,6 +74,7 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { getCategoryTree } from "@/lib/directory";
 import { AUTHOR_PROFILE_HREF } from "@/lib/courses/types";
 import { sponsorCodesForBusiness } from "@/lib/sponsors";
+import { LOCAL_FEATURE_MIN_USD, localFeaturePath } from "@/lib/localFeature";
 
 export const dynamic = "force-dynamic";
 
@@ -1017,6 +1018,16 @@ export default async function BusinessProfilePage({
                   a public page
                 </a>
                 . Claiming replaces these basics with your own.
+              </p>
+            ) : null}
+            {(business.state ?? "").toUpperCase() === "NJ" &&
+            !(business.featuredUntil && business.featuredUntil > new Date()) ? (
+              <p className="text-xs text-amber-800">
+                Local NJ business?{" "}
+                <Link href={localFeaturePath(business.slug)} className="font-semibold underline">
+                  Pay what you want (from ${LOCAL_FEATURE_MIN_USD}) to be featured for a year
+                </Link>{" "}
+                and support GoDesi&apos;s New Year&apos;s Eve party.
               </p>
             ) : null}
             {viewer ? (

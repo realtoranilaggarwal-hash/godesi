@@ -942,6 +942,8 @@ model Business {
   featuredRank       Int           @default(0)
   /// When the paid term runs out; null on a card that was never paid for.
   featuredUntil      DateTime?
+  /// Stripe Checkout sessions already applied as "local support" feature years (see localFeature.ts).
+  featurePaymentRefs String[]  @default([])
   /// Paid cards show phone and email unless the owner switches them off here.
   hideContact        Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.
@@ -3748,4 +3750,26 @@ model PartnerFollowUp {
   lastSentAt   DateTime?
   sentCount    Int       @default(0)
   createdAt    DateTime  @default(now())
+}
+
+/// One address in a local claim-and-sponsor email campaign (e.g. the Oak Tree
+/// Road businesses before NYE 2027): up to three emails on day 0, 4 and 10,
+/// stopped as soon as one of its businesses is claimed, paid to be featured,
+/// or the address opts out.
+model LocalOutreach {
+  id          String    @id @default(cuid())
+  campaign    String
+  /// Canonical (lower-case) address; several listings can share one.
+  email       String
+  businessIds String[]  @default([])
+  /// How many emails have gone out (0–3).
+  step        Int       @default(0)
+  firstSentAt DateTime?
+  lastSentAt  DateTime?
+  stoppedAt   DateTime?
+  stopReason  String?
+  createdAt   DateTime  @default(now())
+
+  @@unique([campaign, email])
+  @@index([campaign, stoppedAt])
 }

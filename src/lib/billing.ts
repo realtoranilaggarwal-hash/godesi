@@ -67,12 +67,20 @@ export async function activatePlan({
       data: { plan, planExpiresAt: expiresAt },
     }),
     db.business.updateMany({
-      where: { ownerId: userId },
+      where: {
+        ownerId: userId,
+        OR: [{ featuredUntil: null }, { featuredUntil: { lte: expiresAt } }],
+      },
       data: {
         featured: true,
         featuredRank: plan === "PREMIUM" ? 2 : 1,
         featuredUntil: expiresAt,
       },
+    }),
+    // A paid local-support year that runs past this term keeps its own end date.
+    db.business.updateMany({
+      where: { ownerId: userId, featuredUntil: { gt: expiresAt } },
+      data: { featured: true },
     }),
   ]);
 
@@ -202,7 +210,15 @@ export async function downgradeToFree(userId: string) {
       data: { plan: "FREE", planExpiresAt: null },
     }),
     db.business.updateMany({
-      where: { ownerId: userId },
+      // Keep a separately paid local-support year that hasn't ended yet.
+      where: {
+        ownerId: userId,
+        OR: [
+          { featurePaymentRefs: { isEmpty: true } },
+          { featuredUntil: null },
+          { featuredUntil: { lte: new Date() } },
+        ],
+      },
       data: { featured: false, featuredRank: 0, featuredUntil: null },
     }),
   ]);
