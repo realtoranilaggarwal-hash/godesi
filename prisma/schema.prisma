@@ -853,6 +853,8 @@ model Business {
   description        String?
   logoUrl            String?
   websiteUrl         String?
+  /// Featured cards only: their site's RSS/Atom feed; the 5 latest posts show on the card.
+  rssFeedUrl         String?
   whatsappNumber     String?
   phone              String?
   publicEmail        String?

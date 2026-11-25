@@ -75,6 +75,7 @@ import { getCategoryTree } from "@/lib/directory";
 import { AUTHOR_PROFILE_HREF } from "@/lib/courses/types";
 import { sponsorCodesForBusiness } from "@/lib/sponsors";
 import { LOCAL_FEATURE_MIN_USD, localFeaturePath } from "@/lib/localFeature";
+import { businessCanShowFeed, businessFeedItems } from "@/lib/businessFeed";
 
 export const dynamic = "force-dynamic";
 
@@ -238,6 +239,10 @@ export default async function BusinessProfilePage({
 
   const isOwner = viewer?.id === business.ownerId;
   const sponsorCodes = isOwner ? [] : await sponsorCodesForBusiness(business.id);
+  const feedItems =
+    business.rssFeedUrl && businessCanShowFeed(business)
+      ? await businessFeedItems(business.rssFeedUrl)
+      : [];
   /**
    * Phone and email are only rendered for paid listings (or to the owner/admin), so a
    * free listing never exposes them in the HTML. A paid member can still switch the
@@ -924,6 +929,40 @@ export default async function BusinessProfilePage({
 
           {/* Card face + tools under the info on phones */}
           <div className="space-y-4 lg:hidden">{cardColumn}</div>
+
+        {feedItems.length ? (
+          <Card id="latest">
+            <h2 className="mb-3 text-lg font-bold">
+              📰 Latest from {business.name}
+            </h2>
+            <ul className="space-y-3">
+              {feedItems.map((item) => (
+                <li key={item.link}>
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener"
+                    className="font-semibold text-indigo-700 hover:underline"
+                  >
+                    {item.title}
+                  </a>
+                  <p className="text-xs text-slate-500">
+                    {new Date(item.publishedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  {item.summary ? (
+                    <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">
+                      {item.summary}
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
 
         {linkedEvents.length ? (
           <Card id="events">

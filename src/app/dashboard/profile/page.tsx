@@ -8,6 +8,7 @@ import { isAgentCard } from "@/lib/agents";
 import { Card, LinkButton } from "@/components/ui";
 import { PostingSidebar } from "@/components/PostingSidebar";
 import { ListingHelp } from "@/components/ListingHelp";
+import { businessCanShowFeed } from "@/lib/businessFeed";
 import {
   albumPhotoLimit,
   effectivePlan,
@@ -132,6 +133,10 @@ export default async function ProfileEditorPage({
             }
             defaultCountry={requestCountry()}
             canFeatureSpecialty={effectivePlan(user) !== "FREE"}
+            canAddFeed={
+              effectivePlan(user) !== "FREE" ||
+              Boolean(business && businessCanShowFeed(business))
+            }
             extraCategoryLimit={extraCategoryLimit(user)}
             videoLimit={videoLimit(user)}
             servicePickLimit={servicePickLimit(user)}

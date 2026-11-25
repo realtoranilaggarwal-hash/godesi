@@ -77,6 +77,7 @@ export function BusinessProfileForm({
   albumPhotoLimit = 6,
   mediaLocked = false,
   servicePickLimit,
+  canAddFeed = false,
 }: {
   business: Business | null;
   /** Saved Cars & Bikes details, when the card already has them. */
@@ -103,6 +104,8 @@ export function BusinessProfileForm({
   mediaLocked?: boolean;
   /** Ticks allowed per service picker; staff edits leave it unset. */
   servicePickLimit?: number;
+  /** Featured cards (and staff) can show their site's latest posts from RSS. */
+  canAddFeed?: boolean;
 }) {
   const [state, formAction] = useFormState(
     saveBusinessProfileAction,
@@ -458,6 +461,20 @@ export function BusinessProfileForm({
               : undefined
           }
         />
+        {canAddFeed ? (
+          <Field
+            label="📰 Your website's RSS feed (Featured)"
+            hint="Paste your blog or news feed, e.g. https://yoursite.com/feed.xml — the 5 latest posts show on your GoDesi page with links back to your site, and update by themselves."
+          >
+            <input
+              name="rssFeedUrl"
+              type="url"
+              defaultValue={business?.rssFeedUrl ?? ""}
+              placeholder="https://yoursite.com/feed.xml"
+              className={inputClass}
+            />
+          </Field>
+        ) : null}
         <Field
           label={
             videoLimit > 1

@@ -9,6 +9,7 @@ import { WEDDING_SLUG } from "@/lib/wedding";
 import { weddingVendorJoined } from "@/lib/weddingLaunch";
 import { db } from "@/lib/db";
 import { isStaff, requireUser } from "@/lib/auth";
+import { businessCanShowFeed } from "@/lib/businessFeed";
 import { type ActionState, fieldError } from "@/lib/actions";
 import {
   MAX_VIDEO_LIMIT,
@@ -156,6 +157,7 @@ const profileSchema = z.object({
   address: z.string().trim().optional(),
   logoUrl: optionalUrl,
   websiteUrl: optionalUrl,
+  rssFeedUrl: optionalUrl,
   instagramUrl: optionalUrl,
   facebookUrl: optionalUrl,
   youtubeUrl: optionalUrl,
@@ -253,6 +255,7 @@ function readProfileForm(formData: FormData) {
     address: value("address"),
     logoUrl: value("logoUrl"),
     websiteUrl: value("websiteUrl"),
+    rssFeedUrl: value("rssFeedUrl"),
     instagramUrl: value("instagramUrl"),
     facebookUrl: value("facebookUrl"),
     youtubeUrl: value("youtubeUrl"),
@@ -471,8 +474,19 @@ export async function saveBusinessProfileAction(
           : []
     ).slice(0, staffEdit ? MAX_VIDEO_LIMIT : videoLimit(user));
 
+    const ownCard = staffEdit
+      ? null
+      : await db.business.findUnique({
+          where: { ownerId: user.id },
+          select: { featured: true, featuredUntil: true },
+        });
+    const canSetFeed =
+      staffEdit ||
+      effectivePlan(user) !== "FREE" ||
+      Boolean(ownCard && businessCanShowFeed(ownCard));
+
     // showContact is the form's wording; the column stores the opposite.
-    const { showContact, ...fields } = parsed.data;
+    const { showContact, rssFeedUrl, ...fields } = parsed.data;
     const data = {
       ...fields,
       name: titleCase(parsed.data.name),
@@ -508,6 +522,10 @@ export async function saveBusinessProfileAction(
       hideContact: !showContact,
       logoUrl: parsed.data.logoUrl ?? null,
       websiteUrl: parsed.data.websiteUrl ?? null,
+      // Featured/paid cards only; a form without the field leaves the saved feed alone.
+      ...(canSetFeed && formData.has("rssFeedUrl")
+        ? { rssFeedUrl: rssFeedUrl ?? null }
+        : {}),
       instagramUrl: parsed.data.instagramUrl ?? null,
       facebookUrl: parsed.data.facebookUrl ?? null,
       youtubeUrl: parsed.data.youtubeUrl ?? null,

@@ -116,6 +116,7 @@ export default async function StaffBusinessEditPage({
           categories={categories}
           defaultCountry={business.country ?? ""}
           canFeatureSpecialty
+          canAddFeed
           extraCategoryLimit={20}
           foundingMember
           staffEdit
