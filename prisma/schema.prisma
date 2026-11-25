@@ -942,6 +942,8 @@ model Business {
   featuredRank       Int           @default(0)
   /// When the paid term runs out; null on a card that was never paid for.
   featuredUntil      DateTime?
+  /// Stripe Checkout sessions already applied as "local support" feature years (see localFeature.ts).
+  featurePaymentRefs String[]  @default([])
   /// Paid cards show phone and email unless the owner switches them off here.
   hideContact        Boolean       @default(false)
   /// "osm" for openly-licensed starter rows; null for user-created cards.

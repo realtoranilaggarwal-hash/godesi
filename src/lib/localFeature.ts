@@ -54,14 +54,17 @@ export async function confirmLocalFeature(session: {
   const now = Date.now();
   const from = Math.max(now, business.featuredUntil?.getTime() ?? 0);
   const until = new Date(from + YEAR_MS);
-  await db.business.update({
-    where: { id: business.id },
+  // Stripe can deliver the same session more than once: apply each payment once.
+  const applied = await db.business.updateMany({
+    where: { id: business.id, NOT: { featurePaymentRefs: { has: session.id } } },
     data: {
       featured: true,
       featuredRank: Math.max(business.featuredRank, 2),
       featuredUntil: until,
+      featurePaymentRefs: { push: session.id },
     },
   });
+  if (!applied.count) return;
   await db.localOutreach.updateMany({
     where: { businessIds: { has: business.id }, stoppedAt: null },
     data: { stoppedAt: new Date(), stopReason: "paid" },
@@ -100,4 +103,17 @@ export async function confirmLocalFeature(session: {
       replyTo: SITE.alertsEmail,
     });
   }
+}
+
+/** Daily: a paid local-support year that has ended stops ranking the card as featured. */
+export async function expireLocalFeatures() {
+  const { count } = await db.business.updateMany({
+    where: {
+      featured: true,
+      featuredUntil: { lt: new Date() },
+      featurePaymentRefs: { isEmpty: false },
+    },
+    data: { featured: false, featuredRank: 0 },
+  });
+  return count;
 }

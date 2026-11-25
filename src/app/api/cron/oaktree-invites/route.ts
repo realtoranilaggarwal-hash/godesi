@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { expireLocalFeatures } from "@/lib/localFeature";
 import { sendOakTreeInvites } from "@/lib/oakTreeOutreach";
 
 export const dynamic = "force-dynamic";
@@ -15,5 +16,6 @@ export async function GET(request: Request) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ ok: true, results: await sendOakTreeInvites() });
+  const expired = await expireLocalFeatures();
+  return NextResponse.json({ ok: true, expired, results: await sendOakTreeInvites() });
 }

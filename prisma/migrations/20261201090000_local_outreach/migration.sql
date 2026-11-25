@@ -19,3 +19,6 @@ CREATE UNIQUE INDEX "LocalOutreach_campaign_email_key" ON "LocalOutreach"("campa
 
 -- CreateIndex
 CREATE INDEX "LocalOutreach_campaign_stoppedAt_idx" ON "LocalOutreach"("campaign", "stoppedAt");
+
+-- AlterTable
+ALTER TABLE "Business" ADD COLUMN "featurePaymentRefs" TEXT[] DEFAULT ARRAY[]::TEXT[];
