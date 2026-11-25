@@ -31,7 +31,7 @@ import {
 import { TicketForm } from "@/components/forms/TicketForm";
 import { NyeExtras, NyeWhatsAppGroup, isNye2027 } from "@/components/NyeExtras";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
-import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
+import { GODESI_PLAYLISTS, nyeVideosLive } from "@/lib/youtubePlaylist";
 import { normalizePromoCode } from "@/lib/ambassadorPromo";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
@@ -981,7 +981,7 @@ export default async function EventPage({
               </section>
             ) : null}
             {!past && isNye2027(event.slug) ? <NyeWhatsAppGroup /> : null}
-            {isNye2027(event.slug) ? (
+            {isNye2027(event.slug) && nyeVideosLive() ? (
               <PlaylistGallery
                 url={GODESI_PLAYLISTS.events}
                 owner="GoDesi"
