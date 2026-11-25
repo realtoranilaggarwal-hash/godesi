@@ -946,13 +946,15 @@ export default async function BusinessProfilePage({
                   >
                     {item.title}
                   </a>
-                  <p className="text-xs text-slate-500">
-                    {new Date(item.publishedAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
+                  {item.publishedAt ? (
+                    <p className="text-xs text-slate-500">
+                      {new Date(item.publishedAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                  ) : null}
                   {item.summary ? (
                     <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">
                       {item.summary}
