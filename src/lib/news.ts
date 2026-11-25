@@ -242,7 +242,7 @@ function atomLink(block: string) {
     const rel = link.match(/\brel=(["'])(.*?)\1/i)?.[2];
     return !rel || rel.toLowerCase() === "alternate";
   });
-  const href = (article ?? links[0])?.match(/\bhref=(["'])(.+?)\1/i)?.[2];
+  const href = (article ?? links[0])?.match(/\bhref=(["'])(.*?)\1/i)?.[2];
   return href ? decode(href) : null;
 }
 
