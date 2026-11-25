@@ -104,8 +104,8 @@ export default async function WorshipPlacePage({ params }: { params: { slug: str
                 {place.serviceTimes}
               </p>
               <p className="mt-2 text-xs text-slate-500">
-                From {place.websiteUrl ? "their website" : "public listings"}.
-                Timings change on Gurpurabs and holidays, so call ahead.
+                From their website or public listings. Timings change on
+                festivals and holidays, so call ahead.
               </p>
             </div>
           ) : null}
@@ -153,7 +153,9 @@ export default async function WorshipPlacePage({ params }: { params: { slug: str
             {place.submittedBy ? (
               <PostedBy user={place.submittedBy} prefix="Added by" />
             ) : (
-              <p className="text-sm text-slate-500">Imported from OpenStreetMap</p>
+              <p className="text-sm text-slate-500">
+                {place.source === "osm" ? "Imported from OpenStreetMap" : "Added by GoDesi"}
+              </p>
             )}
             <ShareButtons
               url={`${siteUrl()}/religious/${place.slug}`}
