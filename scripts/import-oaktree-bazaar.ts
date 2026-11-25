@@ -3,10 +3,11 @@ import { db } from "../src/lib/db";
 import { uniqueSlug } from "../src/lib/uniqueSlug";
 
 /**
- * Seeds unclaimed starter listings for the Oak Tree Road businesses listed in
- * scripts/data/oaktree-bazaar.json (compiled from the public business list on
- * oaktreeroadbazaar.com). Rows are created with no owner so the public
- * "Claim this business" panel applies, marked city=Iselin, and tagged with
+ * Seeds unclaimed starter listings for the businesses listed in
+ * scripts/data/oaktree-bazaar.json (compiled from every public business page on
+ * oaktreeroadbazaar.com: Oak Tree Road shops plus Indian restaurants and
+ * services across New Jersey; national chains are left out). Rows are created with no owner so the public
+ * "Claim this business" panel applies, placed in the town of their address, and tagged with
  * their source page so re-runs refuse duplicates.
  *
  * On re-runs, ownerless imported rows only get EMPTY fields filled in —
@@ -33,6 +34,8 @@ type Row = {
   address?: string | null;
   description?: string | null;
   specialties?: string[];
+  /** Opening hours as the source page lists them, e.g. "Monday: Closed; Tuesday: 12:00 – 07:30". */
+  availability?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
   profileType?: string;
@@ -80,8 +83,11 @@ async function main() {
       },
     });
     if (duplicate) {
-      // Repair rows we imported earlier: refresh facts on ownerless cards.
-      if (apply && !duplicate.ownerId && duplicate.sourceUrl === sourceUrl) {
+      // Repair rows we imported earlier: refresh facts on ownerless cards. A
+      // starter card from another source (e.g. OpenStreetMap) with no source
+      // page yet is adopted, so it gets the email and hours too.
+      const adopt = !duplicate.sourceUrl && !duplicate.ownerId;
+      if (apply && !duplicate.ownerId && (duplicate.sourceUrl === sourceUrl || adopt)) {
         const data: Record<string, unknown> = {};
         /** Empty fields get filled; staff edits survive a re-import. */
         const fill = (field: keyof typeof duplicate, value: unknown) => {
@@ -100,6 +106,8 @@ async function main() {
         fill("address", row.address || null);
         fill("instagramUrl", row.instagramUrl || null);
         fill("facebookUrl", row.facebookUrl || null);
+        fill("availability", row.availability || null);
+        if (adopt) data.sourceUrl = sourceUrl;
         if (row.specialties?.length && (!duplicate.specialties?.length || overwrite)) {
           data.specialties = row.specialties;
         }
@@ -109,7 +117,7 @@ async function main() {
         ) {
           data.description = row.description;
         }
-        data.country = "USA";
+        if (!adopt || overwrite) data.country = "USA";
         await db.business.update({ where: { id: duplicate.id }, data });
         console.log(`updated ${row.name}`);
         updated++;
@@ -142,6 +150,7 @@ async function main() {
         address: row.address || null,
         description: row.description || null,
         specialties: row.specialties ?? [],
+        availability: row.availability || null,
         instagramUrl: row.instagramUrl || null,
         facebookUrl: row.facebookUrl || null,
         profileType: row.profileType === "PROFESSIONAL" ? "PROFESSIONAL" : "BUSINESS",

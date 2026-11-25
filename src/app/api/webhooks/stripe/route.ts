@@ -17,6 +17,7 @@ import { confirmCourseEnrollment } from "@/app/actions/course";
 import { notifyPartnerPackagePaid } from "@/lib/partnerPackage";
 import { markPartnerFollowUpPaid } from "@/lib/partnerFollowUp";
 import { notifyInvoicePaid } from "@/lib/invoices";
+import { confirmLocalFeature } from "@/lib/localFeature";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -164,6 +165,8 @@ export async function POST(request: Request) {
         );
       } else if (session.metadata?.kind === "invoice") {
         await notifyInvoicePaid(session);
+      } else if (session.metadata?.kind === "local-feature") {
+        await confirmLocalFeature(session);
       } else if (session.metadata?.kind === "bundle" && userId) {
         const months = Number(session.metadata?.months ?? 12);
         await grantBundle({

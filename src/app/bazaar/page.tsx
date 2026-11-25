@@ -21,7 +21,14 @@ async function loadBazaar() {
 
   const [businesses, events, listings, deals, reports] = await Promise.all([
     db.business.findMany({
-      where: { status: "APPROVED", ...where },
+      // Oak Tree Road runs through Edison as well as Iselin.
+      where: {
+        status: "APPROVED",
+        OR: [
+          where,
+          { address: { contains: "oak tree r", mode: "insensitive" } },
+        ],
+      },
       orderBy: [{ category: "asc" }, { name: "asc" }],
       take: 1000,
       select: {

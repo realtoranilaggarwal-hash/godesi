@@ -223,6 +223,7 @@ async function runSearchBusinesses(
                   },
                   { category: { contains: q, mode: "insensitive" as const } },
                   { city: { contains: q, mode: "insensitive" as const } },
+                  { address: { contains: q, mode: "insensitive" as const } },
                   {
                     categoryRef: {
                       name: { contains: q, mode: "insensitive" as const },
