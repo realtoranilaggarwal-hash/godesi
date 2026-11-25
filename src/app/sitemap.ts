@@ -241,6 +241,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     })),
     { url: `${base}/visa-bulletin`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/daily`, changeFrequency: "daily", priority: 0.8 },
     { url: `${base}/usd-to-inr`, changeFrequency: "daily", priority: 0.7 },
     { url: `${base}/crypto-fear-greed`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/deals`, changeFrequency: "daily", priority: 0.7 },

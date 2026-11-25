@@ -105,6 +105,7 @@ const SECTION_LINKS: Record<
   { href: string; label: string; icon: string }[]
 > = {
   explore: [
+    { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
     { href: "/live-radio", label: "Live Radio", icon: "🎧" },
     { href: "/live-tv", label: "Live TV", icon: "📺" },
     { href: "/resources", label: "Links", icon: "🔗" },
@@ -140,6 +141,7 @@ const SECTION_LINKS: Record<
     { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
   ],
   home: [
+    { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
     { href: "/blog", label: "Blog", icon: "✍️" },
     { href: "/tools", label: "Free business tools", icon: "🧰" },
     { href: "/pricing", label: "Pricing", icon: "⭐" },
@@ -285,6 +287,7 @@ export async function SiteHeader() {
   }));
   const menuLinks = [
     ...NAV,
+    { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
     { href: "/journalists", label: "Local journalists", icon: "🗞️" },
     { href: "/buzz", label: "#godesi wall", icon: "🌍" },
     { href: "/alumni", label: "Find batchmates", icon: "🎓" },

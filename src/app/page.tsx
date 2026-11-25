@@ -23,6 +23,7 @@ import { MemberTile } from "@/components/MemberTile";
 import { DealsStrip } from "@/components/DealsStrip";
 import { CONTENT_TTL, cachedQuery } from "@/lib/cache";
 import { ChatterHomeBox } from "@/components/chatter/ChatterHomeBox";
+import { ExploreGroups } from "@/components/ExploreGroups";
 
 import { visitorPanchang } from "@/lib/panchangGeo";
 import { todaysFestivals, festivalSlug } from "@/lib/festivals";
@@ -210,6 +211,8 @@ export default async function HomePage() {
           ) : null}
 
           <ChatterHomeBox />
+
+          <ExploreGroups />
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0 space-y-3">
