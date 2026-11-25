@@ -15,6 +15,7 @@ import { confirmBooking } from "@/lib/bookings";
 import { confirmWebsitePayment } from "@/lib/websiteProjects";
 import { confirmCourseEnrollment } from "@/app/actions/course";
 import { notifyPartnerPackagePaid } from "@/lib/partnerPackage";
+import { markPartnerFollowUpPaid } from "@/lib/partnerFollowUp";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -155,6 +156,11 @@ export async function POST(request: Request) {
         });
       } else if (session.metadata?.kind === "partner-package") {
         await notifyPartnerPackagePaid(session);
+        await markPartnerFollowUpPaid(
+          session.customer_details?.email ?? session.customer_email,
+          session.metadata?.business,
+          session.metadata?.followUpKey,
+        );
       } else if (session.metadata?.kind === "bundle" && userId) {
         const months = Number(session.metadata?.months ?? 12);
         await grantBundle({

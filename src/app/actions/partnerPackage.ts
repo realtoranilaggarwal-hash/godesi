@@ -1,10 +1,11 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { ActionState } from "@/lib/actions";
 import { siteUrl } from "@/lib/format";
-import { PARTNER_PACKAGES, PARTNER_TIERS } from "@/lib/partnerPackage";
+import { PARTNER_PACKAGES, PARTNER_REF_COOKIE, PARTNER_TIERS } from "@/lib/partnerPackage";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 const schema = z.object({
@@ -39,6 +40,7 @@ export async function startPartnerPackageCheckout(
       name: data.name,
       phone: data.phone,
       website: data.website ?? "",
+      followUpKey: cookies().get(PARTNER_REF_COOKIE)?.value.slice(0, 64) ?? "",
     },
     line_items: [
       {
