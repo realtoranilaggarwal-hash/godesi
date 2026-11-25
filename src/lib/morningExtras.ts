@@ -23,7 +23,7 @@ const NEWS_TOPICS = ["general", "nri", "entertainment", "faith", "food"];
  * The day's top feed headlines, one topic at a time so a busy Bollywood day
  * can't crowd out India and NRI news.
  */
-export async function newsSection(base: string, now: Date, take = 6) {
+export async function dailyNewsPicks(now: Date, take = 6) {
   // The feed is crawled once a day, so "today's news" is what was imported in
   // the last 24h; one query per topic keeps a busy topic from filling the list.
   const where = {
@@ -74,6 +74,11 @@ export async function newsSection(base: string, now: Date, take = 6) {
     }
     if (!added) break;
   }
+  return picked;
+}
+
+export async function newsSection(base: string, now: Date, take = 6) {
+  const picked = await dailyNewsPicks(now, take);
   if (!picked.length) return "";
   const rows = picked
     .map(
@@ -147,7 +152,10 @@ async function rupeeFallback(): Promise<Quote | null> {
   }
 }
 
-function money(value: number, format: (typeof MARKETS)[number]["format"]) {
+export function money(
+  value: number,
+  format: (typeof MARKETS)[number]["format"],
+) {
   if (format === "inr") return `₹${value.toFixed(2)}`;
   const digits = format === "usd" && value < 100 ? 2 : 0;
   const text = value.toLocaleString("en-US", {
@@ -166,7 +174,7 @@ function change(q: Quote) {
 }
 
 /** Rupee, gold, silver, US and India indexes and bitcoin, with the day's move. */
-export async function marketsSection(base: string) {
+export async function marketQuotes() {
   const quotes = await Promise.all(
     MARKETS.map(async (market) => {
       const q =
@@ -175,8 +183,11 @@ export async function marketsSection(base: string) {
       return q ? { ...market, q } : null;
     }),
   );
-  const rows = quotes
-    .filter((row) => row !== null)
+  return quotes.filter((row) => row !== null);
+}
+
+export async function marketsSection(base: string) {
+  const rows = (await marketQuotes())
     .map(
       (row) =>
         `<tr><td style="padding:4px 8px 4px 0">${row.label}</td><td style="padding:4px 8px;text-align:right;font-weight:700">${money(row.q.price, row.format)}</td><td style="padding:4px 0 4px 8px;text-align:right;font-size:13px">${change(row.q)}</td></tr>`,
