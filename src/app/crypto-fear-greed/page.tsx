@@ -11,6 +11,7 @@ import { Card } from "@/components/ui";
 import { FinancialAdviceBanner } from "@/components/FinancialAdviceBanner";
 import { cryptoHeadlines } from "@/lib/cryptoNews";
 import { PARTNER_OFFERS } from "@/lib/partnerOffers";
+import { TemuCryptoStore } from "@/components/TemuCryptoStore";
 
 export const revalidate = 3600;
 
@@ -233,6 +234,8 @@ export default async function CryptoFearGreedPage() {
             to you. Not financial advice.
           </p>
         </div>
+
+        <TemuCryptoStore />
 
         {headlines.length ? (
           <Card>

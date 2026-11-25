@@ -64,6 +64,20 @@ export function PanchangPage({
           </Link>
         </p>
 
+        <section className="space-y-2">
+          <h2 className="text-sm font-bold text-slate-700">🎥 If you love astrology</h2>
+          <div className="mx-auto aspect-[9/16] w-full max-w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-black">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/85m1z6QR8sM"
+              title="If you love astrology — GoDesi.com"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="h-full w-full"
+            />
+          </div>
+        </section>
+
         <MorningEmailSignup />
 
         <section>
