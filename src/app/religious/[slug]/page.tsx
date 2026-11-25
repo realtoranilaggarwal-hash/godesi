@@ -91,7 +91,28 @@ export default async function WorshipPlacePage({ params }: { params: { slug: str
             <p className="whitespace-pre-line text-slate-700">{place.description}</p>
           ) : null}
 
+          {place.serviceTimes ? (
+            <div className="rounded-xl bg-amber-50 p-4">
+              <h2 className="font-bold">🕐 Service timings</h2>
+              <p className="mt-1 whitespace-pre-line text-sm text-slate-700">
+                {place.serviceTimes}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">
+                From {place.websiteUrl ? "their website" : "public listings"}.
+                Timings change on Gurpurabs and holidays, so call ahead.
+              </p>
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap gap-2">
+            {place.phone ? (
+              <a
+                href={`tel:${place.phone.replace(/[^\d+]/g, "")}`}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-indigo-300"
+              >
+                📞 {place.phone}
+              </a>
+            ) : null}
             {place.whatsapp ? (
               <a
                 href={whatsappLink(place.whatsapp, `Namaste! I found ${place.name} on Godesi.`)}

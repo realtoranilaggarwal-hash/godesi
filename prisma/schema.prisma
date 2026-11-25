@@ -788,6 +788,8 @@ model WorshipPlace {
   whatsapp    String?
   phone       String?
   websiteUrl  String?
+  /// Diwan / service timings as plain lines, e.g. "Sunday diwan: 10 AM – 2:30 PM".
+  serviceTimes String?
   /// "osm" for imported rows, "user" for submissions.
   source      String        @default("user")
   osmId       String?       @unique

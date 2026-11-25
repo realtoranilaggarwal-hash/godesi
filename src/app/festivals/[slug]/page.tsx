@@ -302,6 +302,7 @@ export default async function FestivalPage({
           url={GODESI_PLAYLISTS.festivals}
           owner="GoDesi"
           heading="Watch: festivals on GoDesi"
+          compact
         />
 
         {storeOffers.length ? (

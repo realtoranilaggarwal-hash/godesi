@@ -12,6 +12,7 @@ export type WorshipCardItem = {
   state: string | null;
   country: string;
   address: string | null;
+  serviceTimes?: string | null;
   images: { url: string }[];
 };
 
@@ -51,6 +52,11 @@ export function WorshipCard({ place }: { place: WorshipCardItem }) {
           {place.city}
           {place.state ? `, ${place.state}` : ""} · {place.country}
         </p>
+        {place.serviceTimes ? (
+          <p className="line-clamp-2 text-xs text-slate-500">
+            🕐 {place.serviceTimes.split("\n")[0]}
+          </p>
+        ) : null}
       </div>
     </Link>
   );

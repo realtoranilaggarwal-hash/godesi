@@ -17,6 +17,8 @@ import {
   type WorshipFilters,
 } from "@/lib/worship";
 import { WorshipCard } from "@/components/WorshipCard";
+import { GoogleWebResults } from "@/components/GoogleWebResults";
+import { stateLabel } from "@/lib/eventSearch";
 import { NewsCard } from "@/components/NewsCard";
 import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
@@ -229,6 +231,21 @@ export default async function ReligiousPage({
             body="Be the first to add a temple, gurudwara, mosque or church in your city — it takes a minute."
           />
         )}
+
+        {places.length < 3 && (searchParams.q || searchParams.city) ? (
+          <GoogleWebResults
+            query={[
+              isFaith(searchParams.faith)
+                ? FAITH_LABELS[searchParams.faith]
+                : "temple gurudwara",
+              searchParams.q,
+              searchParams.city ? stateLabel(searchParams.city) : null,
+              "timings",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          />
+        ) : null}
 
         <p className="text-xs text-slate-400">
           Starter entries come from{" "}
