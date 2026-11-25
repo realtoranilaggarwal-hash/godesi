@@ -159,6 +159,7 @@ export async function POST(request: Request) {
         await markPartnerFollowUpPaid(
           session.customer_details?.email ?? session.customer_email,
           session.metadata?.business,
+          session.metadata?.followUpKey,
         );
       } else if (session.metadata?.kind === "bundle" && userId) {
         const months = Number(session.metadata?.months ?? 12);

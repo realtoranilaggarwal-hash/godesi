@@ -131,8 +131,13 @@ export async function sendPartnerFollowUps(now = new Date()) {
 }
 
 /** Stops the reminders once the prospect pays for a partner package online. */
-export async function markPartnerFollowUpPaid(email: string | null | undefined, business: string | null | undefined) {
+export async function markPartnerFollowUpPaid(
+  email: string | null | undefined,
+  business: string | null | undefined,
+  key?: string | null,
+) {
   const or = [
+    ...(key ? [{ key }] : []),
     ...(email ? [{ email: { equals: email.trim(), mode: "insensitive" as const } }] : []),
     ...(business?.trim()
       ? [{ businessName: { equals: business.trim(), mode: "insensitive" as const } }]

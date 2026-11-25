@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { PARTNER_TIERS } from "@/lib/partnerPackage";
+import { PARTNER_REF_COOKIE, PARTNER_TIERS } from "@/lib/partnerPackage";
 
 export const dynamic = "force-dynamic";
 
@@ -23,5 +23,13 @@ export async function GET(request: Request, { params }: { params: { key: string 
       )
       .catch(() => null);
   }
-  return NextResponse.redirect(new URL(target, request.url), 302);
+  const response = NextResponse.redirect(new URL(target, request.url), 302);
+  response.cookies.set(PARTNER_REF_COOKIE, params.key, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true,
+    maxAge: 60 * 60 * 24 * 60,
+    path: "/",
+  });
+  return response;
 }

@@ -29,6 +29,9 @@ export const PARTNER_PACKAGES = {
   premium: PREMIUM_PARTNER_PACKAGE,
 } as const;
 
+/** Set by /go/partner/<key> so a checkout from that browser stops that prospect's reminders. */
+export const PARTNER_REF_COOKIE = "gd_partner_ref";
+
 export type PartnerTier = keyof typeof PARTNER_PACKAGES;
 export const PARTNER_TIERS = Object.keys(PARTNER_PACKAGES) as [PartnerTier, ...PartnerTier[]];
 
