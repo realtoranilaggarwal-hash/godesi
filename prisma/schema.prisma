@@ -3730,3 +3730,20 @@ model SiteVote {
   @@unique([siteKey, voterHash])
   @@index([siteKey])
 }
+
+/// Daily partner-proposal reminder to one prospect until they pay or the deadline passes.
+model PartnerFollowUp {
+  id           String    @id @default(cuid())
+  /// Used in the tracked link /go/partner/<key>.
+  key          String    @unique
+  email        String
+  contactName  String
+  businessName String
+  deadline     DateTime
+  clickedAt    DateTime?
+  clicks       Int       @default(0)
+  paidAt       DateTime?
+  lastSentAt   DateTime?
+  sentCount    Int       @default(0)
+  createdAt    DateTime  @default(now())
+}
