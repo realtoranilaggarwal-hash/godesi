@@ -41,6 +41,78 @@ export const ASTROLOGY_DISCLAIMER =
 
 export const ASTROLOGY_GUIDES: AstrologyGuide[] = [
   {
+    slug: "why-astrologers-should-be-on-godesi",
+    emoji: "🌟",
+    title:
+      "Why Every Astrologer Should Be on GoDesi.com – Get Discovered, Grow Your Practice and Help People Discover Their Stars!",
+    description:
+      "Astrologers, Vedic astrology experts, horoscope readers and numerologists: publish your profile on GoDesi.com to get discovered by the South Asian community, share your knowledge and reach more clients.",
+    intro: [
+      "Are you an astrologer, Vedic astrology expert, horoscope reader, numerologist or spiritual guide? GoDesi.com gives you an opportunity to introduce your services to the growing South Asian community and connect with people interested in astrology and spiritual guidance.",
+    ],
+    sections: [
+      {
+        heading: "Why Should Astrologers Publish on GoDesi?",
+        paragraphs: [
+          "GoDesi.com is more than a business directory. It is a Desi business, community, events and media platform designed to bring businesses and consumers together.",
+          "By publishing your astrology profile on GoDesi, you can:",
+        ],
+        points: [
+          "Get Discovered: Showcase your astrology services to people searching for astrologers, horoscope readings and Vedic astrology.",
+          "Promote Your Expertise: Introduce yourself, your experience, specialties and consultation services.",
+          "Share Your Knowledge: Publish astrology articles, horoscope updates, planetary transits, zodiac insights and festival-related astrological information.",
+          "Reach More Clients: Give potential clients an easy way to discover and contact you.",
+          "Build Your Personal Brand: Establish your online presence and become a recognized name in the Desi community.",
+          "Promote Events: Announce astrology workshops, online sessions, classes and spiritual events.",
+        ],
+      },
+      {
+        heading: "How Can Visitors Get Free Horoscope Information on GoDesi?",
+        paragraphs: [
+          "You don’t have to be an astrologer or pay for a consultation to explore astrology!",
+          "Visit GoDesi.com/astrology to explore the astrology section and its available information.",
+          "Visitors can discover:",
+        ],
+        points: [
+          "Daily horoscope information.",
+          "Zodiac signs and their characteristics.",
+          "Vedic astrology and planetary positions.",
+          "Panchang and important astrological dates.",
+          "Information about Navagraha and planetary movements.",
+          "Astrology-related articles and educational content.",
+        ],
+      },
+      {
+        heading: "Explore your zodiac sign",
+        paragraphs: [
+          "Explore the available information and discover more about your zodiac sign and the fascinating world of astrology.",
+          "Free astrology information is for general interest and educational purposes. Personalized consultations or professional readings may involve separate charges.",
+        ],
+      },
+      {
+        heading: "Calling All Astrologers – Join GoDesi!",
+        paragraphs: [
+          "Are you an astrologer serving clients in the USA, India or anywhere around the world?",
+          "Don’t limit your expertise to word-of-mouth referrals. Let more people discover you online.",
+          "Create or claim your GoDesi business profile, introduce your services, share your knowledge and connect with the community.",
+          "Your knowledge deserves an audience. Your expertise deserves visibility.",
+          "Visit today: 🌐 https://godesi.com/astrology",
+          "GoDesi.com – Connecting Desi Businesses, Professionals and Communities Worldwide.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        q: "How can an astrologer join GoDesi?",
+        a: "Create or claim your GoDesi business profile, introduce your services, share your knowledge and connect with the community.",
+      },
+      {
+        q: "Is the horoscope information on GoDesi free?",
+        a: "Yes. Free astrology information is for general interest and educational purposes. Personalized consultations or professional readings may involve separate charges.",
+      },
+    ],
+  },
+  {
     slug: "vedic-vs-western-astrology",
     emoji: "🌌",
     title: "Vedic vs Western astrology: why your sign changes",

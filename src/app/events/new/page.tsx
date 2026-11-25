@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HelpClipCard } from "@/components/HelpClipCard";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getCategoryTree } from "@/lib/directory";
@@ -49,8 +50,13 @@ export default async function NewEventPage({
             </Link>
           </p>
         </div>
-        <div className="lg:hidden">
+        <div className="space-y-4 lg:hidden">
           <EventPostGuide collapsible />
+          <HelpClipCard
+            categorySlug="section:event-organizers"
+            sitewide={false}
+            className="w-full max-w-[260px]"
+          />
         </div>
         <Card>
           <EventForm
@@ -70,6 +76,7 @@ export default async function NewEventPage({
 
       <div className="hidden w-[300px] shrink-0 space-y-6 lg:block">
         <EventPostGuide />
+        <HelpClipCard categorySlug="section:event-organizers" sitewide={false} />
         <FeaturedEventRail />
       </div>
     </div>

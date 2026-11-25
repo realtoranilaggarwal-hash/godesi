@@ -51,6 +51,11 @@ const CLIPS: Record<string, ClipSeed> = {
     title: "Desi events near you",
     url: "https://youtube.com/shorts/h-UFiA5wN5c",
   },
+  "section:event-organizers": {
+    title: "Promote your event, sell tickets & create coupons",
+    url: "https://youtube.com/shorts/dO4XuvC2hN4",
+    note: "Discount coupons by category and ticket type, plus comp tickets",
+  },
   "section:festivals": {
     title: "Promote your festival event",
     url: "https://youtube.com/shorts/BSlRup0hcqw",
@@ -78,6 +83,11 @@ const CLIPS: Record<string, ClipSeed> = {
   "section:astrology": {
     title: "Free astrology on GoDesi",
     url: "https://youtube.com/shorts/ezizkg7yuVc",
+  },
+  "section:astrology-media-kit": {
+    title: "Astrologers: advertise on GoDesi",
+    url: "https://youtube.com/shorts/axsui4ViaLk",
+    note: "The astrologer media kit: banner + Featured from $35 a month",
   },
   "buy-sell": { title: "Buy & sell in the desi marketplace", url: "" },
   "section:news": {
