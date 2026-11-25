@@ -9,6 +9,8 @@ export type ParsedNewsItem = {
   imageUrl: string | null;
   link: string;
   publishedAt: Date;
+  /** False when the feed gave no usable date and `publishedAt` is the parse time. */
+  dated?: boolean;
 };
 
 const DEFAULT_FEEDS: { name: string; url: string; topic?: string }[] = [
@@ -233,6 +235,16 @@ function firstImage(block: string) {
   );
 }
 
+/** Atom: the article (`rel="alternate"` or no rel), not an enclosure or self link. */
+function atomLink(block: string) {
+  const links = block.match(/<link\b[^>]*>/gi) ?? [];
+  const article = links.find((link) => {
+    const rel = link.match(/\brel="([^"]*)"/i)?.[1];
+    return !rel || rel.toLowerCase() === "alternate";
+  });
+  return (article ?? links[0])?.match(/\bhref="([^"]+)"/i)?.[1] ?? null;
+}
+
 /** Minimal RSS 2.0 + Atom parser — enough for headline/image/summary ingestion. */
 export function parseFeed(xml: string): ParsedNewsItem[] {
   const blocks = [
@@ -244,7 +256,7 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
 
   for (const block of blocks) {
     const title = tag(block, "title");
-    const link = tag(block, "link") || attr(block, "link", "href");
+    const link = tag(block, "link") || atomLink(block);
     if (!title || !link) continue;
 
     const encoded = tag(block, "content:encoded");
@@ -259,6 +271,7 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
       tag(block, "updated") ??
       "";
     const parsedDate = dateText ? new Date(dateText) : null;
+    const dated = Boolean(parsedDate && !Number.isNaN(parsedDate.getTime()));
 
     items.push({
       guid: tag(block, "guid") ?? link,
@@ -266,10 +279,8 @@ export function parseFeed(xml: string): ParsedNewsItem[] {
       summary: twoLineSummary(description || title),
       imageUrl: firstImage(block),
       link,
-      publishedAt:
-        parsedDate && !Number.isNaN(parsedDate.getTime())
-          ? parsedDate
-          : new Date(),
+      publishedAt: dated && parsedDate ? parsedDate : new Date(),
+      dated,
     });
   }
 
