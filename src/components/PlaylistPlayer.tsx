@@ -12,10 +12,12 @@ export function PlaylistPlayer({
   playlistId,
   videos,
   owner,
+  compact = false,
 }: {
   playlistId: string;
   videos: PlaylistVideo[];
   owner: string;
+  compact?: boolean;
 }) {
   const [picked, setPicked] = useState<PlaylistVideo | null>(null);
   // Start on the newest public video: the bare playlist embed shows "Video
@@ -42,7 +44,13 @@ export function PlaylistPlayer({
         </div>
       </div>
       {videos.length ? (
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+        <div
+          className={
+            compact
+              ? "grid grid-cols-3 gap-2"
+              : "grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5"
+          }
+        >
           {videos.map((video) => (
             <button
               key={video.id}

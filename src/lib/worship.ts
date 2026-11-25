@@ -1,4 +1,5 @@
 import type { Faith, Prisma } from "@prisma/client";
+import { statesMatching } from "@/lib/eventSearch";
 
 export const FAITH_LABELS: Record<Faith, string> = {
   HINDU_TEMPLE: "Hindu temple",
@@ -39,19 +40,36 @@ export function worshipWhere(
   return {
     status: "APPROVED",
     ...(isFaith(filters.faith) ? { faith: filters.faith } : {}),
-    ...(filters.city
-      ? { city: { contains: filters.city, mode: "insensitive" } }
-      : {}),
     ...(filters.country ? { country: filters.country } : {}),
-    ...(filters.q
-      ? {
-          OR: [
-            { name: { contains: filters.q, mode: "insensitive" } },
-            { address: { contains: filters.q, mode: "insensitive" } },
-            { city: { contains: filters.q, mode: "insensitive" } },
-          ],
-        }
-      : {}),
+    AND: [
+      // "nj" or "New Jersey" in the city box means the state.
+      ...(filters.city
+        ? [
+            {
+              OR: [
+                { city: { contains: filters.city, mode: "insensitive" as const } },
+                {
+                  state: {
+                    in: statesMatching(filters.city),
+                    mode: "insensitive" as const,
+                  },
+                },
+              ],
+            },
+          ]
+        : []),
+      ...(filters.q
+        ? [
+            {
+              OR: [
+                { name: { contains: filters.q, mode: "insensitive" as const } },
+                { address: { contains: filters.q, mode: "insensitive" as const } },
+                { city: { contains: filters.q, mode: "insensitive" as const } },
+              ],
+            },
+          ]
+        : []),
+    ],
   };
 }
 

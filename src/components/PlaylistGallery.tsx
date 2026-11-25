@@ -15,10 +15,13 @@ export async function PlaylistGallery({
   url,
   owner,
   heading = "Videos",
+  compact = false,
 }: {
   url: string | null;
   owner: string;
   heading?: string;
+  /** Sidebar-sized player, for pages that already lead with a big video. */
+  compact?: boolean;
 }) {
   const id = playlistId(url);
   if (!id) return null;
@@ -41,8 +44,13 @@ export async function PlaylistGallery({
       </div>
       {title ? <p className="text-sm text-slate-500">{title}</p> : null}
 
-      <div className="mt-3">
-        <PlaylistPlayer playlistId={id} videos={videos} owner={owner} />
+      <div className={compact ? "mt-3 max-w-sm" : "mt-3"}>
+        <PlaylistPlayer
+          playlistId={id}
+          videos={videos}
+          owner={owner}
+          compact={compact}
+        />
       </div>
       {videos.length >= FEED_LIMIT ? (
         <p className="mt-2 text-xs text-slate-500">
