@@ -30,6 +30,8 @@ import {
 } from "@/lib/events";
 import { TicketForm } from "@/components/forms/TicketForm";
 import { NyeExtras, NyeWhatsAppGroup, isNye2027 } from "@/components/NyeExtras";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 import { normalizePromoCode } from "@/lib/ambassadorPromo";
 import { InContentBanner, SidebarBanners } from "@/components/Banners";
 import { EventCard } from "@/components/EventCard";
@@ -979,6 +981,13 @@ export default async function EventPage({
               </section>
             ) : null}
             {!past && isNye2027(event.slug) ? <NyeWhatsAppGroup /> : null}
+            {isNye2027(event.slug) ? (
+              <PlaylistGallery
+                url={GODESI_PLAYLISTS.events}
+                owner="GoDesi"
+                heading="Watch: GoDesi New Year's Eve party"
+              />
+            ) : null}
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
               <PostedBy user={event.organizer} />
               <ShareButtons

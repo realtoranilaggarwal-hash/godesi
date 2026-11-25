@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
 import { AstrologerBanners } from "@/components/Banners";
 import { HelpClipCard } from "@/components/HelpClipCard";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 
 export const revalidate = 3600;
 
@@ -75,6 +77,11 @@ export default function AstrologerMediaKitPage() {
         >
           🌟 Why every astrologer should be on GoDesi.com →
         </Link>
+        <PlaylistGallery
+          url={GODESI_PLAYLISTS.astrology}
+          owner="GoDesi"
+          heading="Watch: astrology on GoDesi"
+        />
         <p className="text-sm text-slate-600">
           Questions? Call or WhatsApp (732) 983-7958 or email
           godesibiz@gmail.com. Prices are in US dollars; visitors in India see ₹
