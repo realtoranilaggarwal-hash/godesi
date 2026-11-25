@@ -46,6 +46,12 @@ export async function generateMetadata({
   };
 }
 
+/** "(201) 479-8197" → "+12014798197"; numbers already starting with + stay as typed. */
+function telHref(phone: string) {
+  const digits = phone.replace(/[^\d+]/g, "");
+  return /^\d{10}$/.test(digits) ? `+1${digits}` : digits;
+}
+
 export default async function WorshipPlacePage({ params }: { params: { slug: string } }) {
   const place = await getPlace(params.slug);
   if (!place) notFound();
@@ -107,7 +113,7 @@ export default async function WorshipPlacePage({ params }: { params: { slug: str
           <div className="flex flex-wrap gap-2">
             {place.phone ? (
               <a
-                href={`tel:${place.phone.replace(/[^\d+]/g, "")}`}
+                href={`tel:${telHref(place.phone)}`}
                 className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-indigo-300"
               >
                 📞 {place.phone}
