@@ -239,10 +239,10 @@ function firstImage(block: string) {
 function atomLink(block: string) {
   const links = block.match(/<link\b[^>]*>/gi) ?? [];
   const article = links.find((link) => {
-    const rel = link.match(/\brel=["']([^"']*)["']/i)?.[1];
+    const rel = link.match(/\brel=(["'])(.*?)\1/i)?.[2];
     return !rel || rel.toLowerCase() === "alternate";
   });
-  const href = (article ?? links[0])?.match(/\bhref=["']([^"']+)["']/i)?.[1];
+  const href = (article ?? links[0])?.match(/\bhref=(["'])(.+?)\1/i)?.[2];
   return href ? decode(href) : null;
 }
 
