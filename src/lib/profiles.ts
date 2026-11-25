@@ -109,6 +109,7 @@ export const RESERVED_USERNAMES = new Set([
   "media",
   "traffic",
   "ambassador",
+  "daily",
 ]);
 
 export const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9._-]{1,28})[a-z0-9]$/;
