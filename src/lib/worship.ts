@@ -48,7 +48,12 @@ export function worshipWhere(
             {
               OR: [
                 { city: { contains: filters.city, mode: "insensitive" as const } },
-                { state: { in: statesMatching(filters.city) } },
+                {
+                  state: {
+                    in: statesMatching(filters.city),
+                    mode: "insensitive" as const,
+                  },
+                },
               ],
             },
           ]
