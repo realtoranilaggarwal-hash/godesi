@@ -25,15 +25,19 @@ export function visitorPanchang() {
       longitude: geo.longitude,
       timeZone,
     };
+    const date = todayIn(timeZone);
     return {
-      panchang: computePanchang(place, todayIn(timeZone)),
+      date,
+      panchang: computePanchang(place, date),
       label: geo.city ?? "your area",
       citySlug: null,
     };
   }
   const city = DEFAULT_PANCHANG_CITY;
+  const date = todayIn(city.timeZone);
   return {
-    panchang: computePanchang(city, todayIn(city.timeZone)),
+    date,
+    panchang: computePanchang(city, date),
     label: city.name,
     citySlug: city.slug,
   };

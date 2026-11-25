@@ -83,7 +83,16 @@ export default async function DailyPage() {
   ]);
   const sky = dailySky();
   const today = visitorPanchang();
-  const festivals = todaysFestivals();
+  // Header, Panchang and festival greetings all use the visitor's local day.
+  const [year, month, day] = today.date.split("-").map(Number);
+  const festivals = todaysFestivals(new Date(year, month - 1, day));
+  const dateLabel = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${today.date}T12:00:00Z`));
   // Cached rows come back JSON-serialised, so dates are strings again.
   const events = eventRows.map((event) => ({
     ...event,
@@ -95,7 +104,7 @@ export default async function DailyPage() {
     <div className="mx-auto max-w-5xl space-y-8">
       <header className="rounded-3xl bg-gradient-to-r from-amber-400 via-rose-500 to-indigo-600 p-6 text-white shadow">
         <p className="text-sm font-semibold uppercase tracking-wider opacity-90">GoDesi Daily</p>
-        <h1 className="text-3xl font-black">{sky.dateLabel}</h1>
+        <h1 className="text-3xl font-black">{dateLabel}</h1>
         <p className="mt-1 opacity-95">
           Panchang, news, markets, events and deals for the desi community — one page, every
           morning.
@@ -114,7 +123,7 @@ export default async function DailyPage() {
           </div>
         ) : null}
         <div className="mt-4">
-          <ShareButtons url={`${siteUrl()}/daily`} title={`GoDesi Daily — ${sky.dateLabel}`} />
+          <ShareButtons url={`${siteUrl()}/daily`} title={`GoDesi Daily — ${dateLabel}`} />
         </div>
       </header>
 
