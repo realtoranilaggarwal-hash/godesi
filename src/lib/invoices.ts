@@ -1,5 +1,6 @@
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { SITE } from "@/lib/site";
+import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 /** A quote paid by card from /pay/<key>. Keys are random so links can't be guessed. */
 export type Invoice = {
@@ -35,6 +36,16 @@ export const INVOICES: Invoice[] = [
 
 export function findInvoice(key: string | null | undefined) {
   return INVOICES.find((invoice) => invoice.key === key) ?? null;
+}
+
+/** Whether this installment already has a succeeded card payment, so a reopened link can't charge it twice. */
+export async function invoicePaid(key: string) {
+  if (!stripeEnabled()) return false;
+  const found = await getStripe().paymentIntents.search({
+    query: `metadata['invoiceKey']:'${key}' AND status:'succeeded'`,
+    limit: 1,
+  });
+  return found.data.length > 0;
 }
 
 export function usdMinor(amountMinor: number) {
