@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 import { Card } from "@/components/ui";
 import { EFAX_AFFILIATE_URL, EFAX_TRACKING_PIXEL } from "@/lib/shop";
 
@@ -71,7 +72,7 @@ export default function MarketingPage() {
       <GodesiWikiBanner />
 
       <PlaylistGallery
-        url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
+        url={GODESI_PLAYLISTS.marketing}
         owner="Godesi"
         heading="Watch: free marketing on Godesi"
       />

@@ -79,6 +79,14 @@ export async function resolvePlaylistField(formData: FormData) {
   }
 }
 
+/** GoDesi's own playlists on its YouTube channel, shown on the matching pages. */
+export const GODESI_PLAYLISTS = {
+  events: "https://www.youtube.com/playlist?list=PLSz2CYeFN8bs",
+  astrology: "https://www.youtube.com/playlist?list=PLVYb7eXhvoXM",
+  festivals: "https://www.youtube.com/playlist?list=PLVeaBJwvIpiM",
+  marketing: "https://www.youtube.com/playlist?list=PLY5LTx5nCX406Iv4g9vr8byyiiJYukbUR",
+};
+
 export function playlistPageUrl(id: string) {
   return `https://www.youtube.com/playlist?list=${id}`;
 }

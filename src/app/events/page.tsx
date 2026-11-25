@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpClipCard } from "@/components/HelpClipCard";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 import { permanentRedirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { venuePath } from "@/lib/venues";
@@ -655,6 +657,12 @@ export default async function EventsPage({
         )}
 
         <EventSuppliersStrip />
+
+        <PlaylistGallery
+          url={GODESI_PLAYLISTS.events}
+          owner="GoDesi"
+          heading="Watch: GoDesi events & New Year's Eve party"
+        />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
           <p className="flex-1 text-sm text-slate-500">

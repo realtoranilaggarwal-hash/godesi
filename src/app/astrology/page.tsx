@@ -8,6 +8,8 @@ import {
 import { searchBusinesses } from "@/lib/businesses";
 import { AstrologerList } from "@/components/AstrologerList";
 import { AstrologerBanners, SidebarBanners } from "@/components/Banners";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 
 export const revalidate = 3600;
 
@@ -91,6 +93,12 @@ export default async function AstrologyPage() {
             </Link>
           ))}
         </div>
+
+        <PlaylistGallery
+          url={GODESI_PLAYLISTS.astrology}
+          owner="GoDesi"
+          heading="Watch: astrology on GoDesi"
+        />
 
         <AstrologerList astrologers={astrologers} />
 
