@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 import { SITE } from "@/lib/site";
 import { publicTeam } from "@/lib/team";
 import { properName } from "@/lib/names";
@@ -77,7 +78,7 @@ export default async function AboutPage() {
       <h2>Marketing — watch how Godesi promotes you</h2>
       <div className="not-prose">
         <PlaylistGallery
-          url="https://youtube.com/playlist?list=PLWppF3dDiHeA"
+          url={GODESI_PLAYLISTS.marketing}
           owner="Godesi"
           heading="Godesi marketing videos"
         />
