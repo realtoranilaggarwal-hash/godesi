@@ -68,6 +68,8 @@ export type SearchFilters = {
   country?: string;
   minRating?: number;
   premiumOnly?: boolean;
+  /** Only cards that are featured (and not past `featuredUntil`) or on an active paid plan. */
+  promotedOnly?: boolean;
   /** Only cards an owner has claimed — never an unclaimed row seeded from public data. */
   claimedOnly?: boolean;
   /** Sub-services the card must offer (all of them).  */
@@ -126,6 +128,7 @@ async function runSearchBusinesses(
     country,
     minRating = 0,
     premiumOnly = false,
+    promotedOnly = false,
     claimedOnly = false,
     specialties,
     certifications,
@@ -198,6 +201,24 @@ async function runSearchBusinesses(
           }
         : {}),
       AND: [
+        ...(promotedOnly
+          ? [
+              {
+                OR: [
+                  {
+                    featured: true,
+                    OR: [{ featuredUntil: null }, { featuredUntil: { gt: new Date() } }],
+                  },
+                  {
+                    owner: {
+                      plan: { in: ["PRO" as const, "PREMIUM" as const] },
+                      planExpiresAt: { gt: new Date() },
+                    },
+                  },
+                ],
+              },
+            ]
+          : []),
         ...optionGroups.map((group) => ({
           serviceOptions: { hasSome: group },
         })),
@@ -290,7 +311,7 @@ async function runSearchBusinesses(
         priceCurrency: row.priceCurrency,
         customQuote: row.customQuote,
         whatsappNumber: row.whatsappNumber,
-        featured: row.featured,
+        featured: row.featured && (!row.featuredUntil || row.featuredUntil > new Date()),
         specialties: row.specialties,
         featuredSpecialty: row.featuredSpecialty,
         certifications: row.certifications,
@@ -368,7 +389,7 @@ export async function featuredBusinesses(
   categorySlugs?: string[],
   take = 12,
 ): Promise<BusinessListItem[]> {
-  const rows = await searchBusinesses({ categorySlugs, take: 60 });
+  const rows = await searchBusinesses({ categorySlugs, promotedOnly: true, take: 60 });
   return rows
     .filter((row) => row.featured || planRank(row.plan) > 0)
     .slice(0, take);
