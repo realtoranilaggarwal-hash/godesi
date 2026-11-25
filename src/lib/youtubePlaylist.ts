@@ -87,6 +87,13 @@ export const GODESI_PLAYLISTS = {
   marketing: "https://www.youtube.com/playlist?list=PLY5LTx5nCX406Iv4g9vr8byyiiJYukbUR",
 };
 
+/** The events playlist is mostly NYE 2027 party videos: show it only until the party night ends (midnight Eastern, Jan 1). */
+const NYE_2027_VIDEOS_END = Date.parse("2027-01-01T05:00:00Z");
+
+export function nyeVideosLive(now = Date.now()) {
+  return now < NYE_2027_VIDEOS_END;
+}
+
 export function playlistPageUrl(id: string) {
   return `https://www.youtube.com/playlist?list=${id}`;
 }
