@@ -10,8 +10,10 @@ import { Card } from "@/components/ui";
 import {
   ALIEXPRESS_AFFILIATE_URL,
   ALIEXPRESS_AUTO_PIXEL,
+  ALIEXPRESS_BANNER_IMAGE,
   ALIEXPRESS_BANNER_URL,
   ALIEXPRESS_HOME_PIXEL,
+  ALIEXPRESS_WIDE_BANNER_IMAGE,
   ALIEXPRESS_WIDE_BANNER_URL,
   ALIEXPRESS_WIDE_URL,
   AMAZON_INFLUENCER_URL,
@@ -142,7 +144,7 @@ export default async function ShopPage() {
           <a href={ALIEXPRESS_AFFILIATE_URL} target="_blank" rel={OUT}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={ALIEXPRESS_BANNER_URL}
+              src={ALIEXPRESS_BANNER_IMAGE}
               width={390}
               height={129}
               alt="AliExpress"
@@ -152,6 +154,15 @@ export default async function ShopPage() {
           <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">
             Paid link
           </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={ALIEXPRESS_BANNER_URL}
+            width="1"
+            height="1"
+            alt=""
+            aria-hidden
+            className="inline-block h-px w-px"
+          />
         </div>
       </Card>
 
@@ -325,7 +336,7 @@ export default async function ShopPage() {
         <a href={ALIEXPRESS_WIDE_URL} target="_blank" rel={OUT}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={ALIEXPRESS_WIDE_BANNER_URL}
+            src={ALIEXPRESS_WIDE_BANNER_IMAGE}
             width={873}
             height={201}
             className="mx-auto h-auto w-full max-w-3xl"
@@ -335,6 +346,15 @@ export default async function ShopPage() {
         <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">
           Paid link
         </p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={ALIEXPRESS_WIDE_BANNER_URL}
+          width="1"
+          height="1"
+          alt=""
+          aria-hidden
+          className="inline-block h-px w-px"
+        />
       </div>
     </div>
   );

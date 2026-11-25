@@ -106,6 +106,9 @@ export const ALIEXPRESS_WIDE_URL =
   "https://www.jdoqocy.com/click-100494444-17242131";
 export const ALIEXPRESS_WIDE_BANNER_URL =
   "https://www.lduhtrp.net/image-100494444-17242131";
+/** Copies of the CJ banners served from godesi.com, so ad blockers don't break the picture; the CJ image URLs stay as impression pixels. */
+export const ALIEXPRESS_BANNER_IMAGE = "/shop/aliexpress-390x129.jpg";
+export const ALIEXPRESS_WIDE_BANNER_IMAGE = "/shop/aliexpress-873x201.png";
 export const ALIEXPRESS_AUTO_URL =
   "https://www.anrdoezrs.net/click-100494444-17242069";
 export const ALIEXPRESS_AUTO_PIXEL =
