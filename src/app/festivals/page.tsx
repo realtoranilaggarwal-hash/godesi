@@ -9,6 +9,8 @@ import {
 } from "@/lib/festivals";
 import { SidebarBanners } from "@/components/Banners";
 import { FestivalShop } from "@/components/FestivalShop";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 import { Card, LinkButton } from "@/components/ui";
 
 export const revalidate = 3600;
@@ -98,6 +100,12 @@ export default function FestivalsPage() {
         <FestivalShop
           festivals={upcoming.slice(0, 3)}
           title="Shop for the next festivals"
+        />
+
+        <PlaylistGallery
+          url={GODESI_PLAYLISTS.festivals}
+          owner="GoDesi"
+          heading="Watch: festivals on GoDesi"
         />
 
         {Array.from(byMonth.entries()).map(([month, festivals]) => (

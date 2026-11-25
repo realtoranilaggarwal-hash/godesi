@@ -15,6 +15,8 @@ import { optionalRead } from "@/lib/resilient";
 import { liveStoreOffers } from "@/lib/storeOffers";
 import { EventCard } from "@/components/EventCard";
 import { FestivalShop } from "@/components/FestivalShop";
+import { PlaylistGallery } from "@/components/PlaylistGallery";
+import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
@@ -294,6 +296,12 @@ export default async function FestivalPage({
         <FestivalShop
           festivals={[festival]}
           title={`Shop for ${festival.name}`}
+        />
+
+        <PlaylistGallery
+          url={GODESI_PLAYLISTS.festivals}
+          owner="GoDesi"
+          heading="Watch: festivals on GoDesi"
         />
 
         {storeOffers.length ? (

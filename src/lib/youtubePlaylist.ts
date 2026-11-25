@@ -83,6 +83,7 @@ export async function resolvePlaylistField(formData: FormData) {
 export const GODESI_PLAYLISTS = {
   events: "https://www.youtube.com/playlist?list=PLSz2CYeFN8bs",
   astrology: "https://www.youtube.com/playlist?list=PLVYb7eXhvoXM",
+  festivals: "https://www.youtube.com/playlist?list=PLVeaBJwvIpiM",
   marketing: "https://www.youtube.com/playlist?list=PLY5LTx5nCX406Iv4g9vr8byyiiJYukbUR",
 };
 
