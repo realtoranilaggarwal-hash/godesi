@@ -31,8 +31,12 @@ const cseWindow = () => window as unknown as CseWindow;
 export function GoogleWebResults({
   query,
   withBox = false,
+  addHref = "/add-business",
+  addLabel = "Is your business missing? List it free →",
 }: {
   query: string;
+  addHref?: string;
+  addLabel?: string;
   /** Show Google's search box above the results so visitors can search again. */
   withBox?: boolean;
 }) {
@@ -85,10 +89,10 @@ export function GoogleWebResults({
           🌐 More results from Google
         </h2>
         <Link
-          href="/add-business"
+          href={addHref}
           className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
         >
-          Is your business missing? List it free →
+          {addLabel}
         </Link>
       </div>
       <p className="mt-1 text-xs text-slate-500">

@@ -234,6 +234,8 @@ export default async function ReligiousPage({
 
         {places.length < 3 && (searchParams.q || searchParams.city) ? (
           <GoogleWebResults
+            addHref="/religious/new"
+            addLabel="Missing a place of worship? Add it free →"
             query={[
               isFaith(searchParams.faith)
                 ? FAITH_LABELS[searchParams.faith]
