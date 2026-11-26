@@ -14,6 +14,7 @@ const db = new PrismaClient();
 const EMAIL = "doctor_deva@yahoo.com";
 const SLUG = "dr-gurudeva-indian-vedic-astrologer-jyotish-highland-park";
 const LINK = `/business/${SLUG}`;
+const SITE = "https://godesi.com";
 const ENDS = new Date("2027-11-26T05:00:00Z"); // end of Nov 25, 2027 ET
 const ADMIN_ID = "cms24edsq0000t9gk48f24h5h"; // GoDesi News Desk author
 const OFFER = "First phone consultation FREE when you mention GoDesi";
@@ -103,6 +104,9 @@ async function main() {
       state: "NJ",
       address: "601 Leia Lane, Highland Park, NJ 08904",
       websiteUrl: "https://www.luckygemfinder.com/",
+      coverUrl: `${SITE}/covers/dr-gurudeva-luckygemfinder.jpg`,
+      // luckygemfinder.com has no RSS of its own, so GoDesi hosts one for its articles.
+      rssFeedUrl: `${SITE}/feeds/luckygemfinder.xml`,
       status: "APPROVED",
       featured: true,
       featuredUntil: ENDS,
