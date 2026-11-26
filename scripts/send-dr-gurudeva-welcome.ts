@@ -44,12 +44,20 @@ const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:au
 async function main() {
   writeFileSync("/tmp/dr-gurudeva-welcome.html", html);
   if (!process.argv.includes("--send")) return console.log("Preview: /tmp/dr-gurudeva-welcome.html");
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    console.error("RESEND_API_KEY and EMAIL_FROM must be set to send");
+    process.exit(1);
+  }
   const ok = await sendEmail({
     to: TO,
     subject: "Welcome to GoDesi Premium, Dr. Gurudeva — your page, QR code and password",
     html,
   });
-  console.log(ok ? `Sent to ${TO}` : "Send failed");
+  if (!ok) {
+    console.error("Send failed");
+    process.exit(1);
+  }
+  console.log(`Sent to ${TO}`);
 }
 
 main();
