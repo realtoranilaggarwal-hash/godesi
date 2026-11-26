@@ -25,13 +25,13 @@ export async function thanksgivingInquiryAction(formData: FormData) {
   if (!parsed.success) redirect(`/thanksgiving?offer=${offer}&error=1#inquire`);
   const data = parsed.data;
 
-  // Same person (email or phone) at most 3 inquiries a day; repeats are dropped quietly.
+  // Same email at most 3 inquiries a day (phones can be shared office lines); repeats are dropped quietly.
   const recent = await db.promoEvent.count({
     where: {
       campaign: THANKSGIVING.campaign,
       kind: "inquiry",
       createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-      OR: [{ email: data.email }, { phone: data.phone }],
+      email: data.email,
     },
   });
   if (recent >= 3) redirect(`/thanksgiving?offer=${data.offer}&sent=1#inquire`);
