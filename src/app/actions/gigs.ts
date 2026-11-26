@@ -95,8 +95,12 @@ function strings(formData: FormData, key: string) {
     .filter(Boolean);
 }
 
-/** Only pictures the seller uploaded here (blob path gigs/<userId>/…) are accepted. */
+/**
+ * Only pictures the seller uploaded here (blob path gigs/<userId>/…), or the
+ * GoDesi-hosted photos staff seed a gig with (/images/gigs/…), are accepted.
+ */
 function ownGigImage(url: string, userId: string) {
+  if (/^\/images\/gigs\/[\w.-]+$/.test(url)) return true;
   try {
     const { hostname, pathname } = new URL(url);
     return (

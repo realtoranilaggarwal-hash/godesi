@@ -91,7 +91,7 @@ const GIGS: GigSeed[] = [
     includes: "Birth chart analysis\nKey planets and current period\nAnswers to your questions",
     price: 31,
     minutes: 30,
-    image: "/images/ads/master-lakshman-logo.jpg",
+    image: "/images/gigs/master-lakshman-logo.jpg",
     tags: ["kundli", "birth chart", "vedic astrology", "horoscope", "jersey city"],
   },
   {
