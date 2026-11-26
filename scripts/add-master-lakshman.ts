@@ -173,6 +173,7 @@ async function main() {
     phone: PHONE,
     whatsappNumber: WHATSAPP,
     websiteUrl: WEBSITE,
+    facebookUrl: "https://www.facebook.com/people/Psychic-Astrologer-Spiritualist-Lakshman-ji/61590992361457/",
     mapsUrl: "https://maps.app.goo.gl/jX7CFqS3kc4yZ5UZA",
     logoUrl: `${SITE}/images/ads/master-lakshman-logo.jpg`,
     coverUrl: `${SITE}/covers/master-lakshman-ji.jpg`,
