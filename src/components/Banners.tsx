@@ -22,6 +22,7 @@ import { HousePromo } from "@/components/HousePromo";
 import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
+import { PORTRAIT_FLYERS } from "@/lib/flyers";
 import { SmallBannerRail } from "@/components/SmallBannerRail";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
@@ -141,6 +142,33 @@ function AdvertiseHere({
 }
 
 /** Even a filled spot stays for sale: the next advertiser can book the rotation. */
+/** GoDesi's own portrait flyer while nobody has booked the half page; a new one each day. */
+function RailFlyer() {
+  const flyer = PORTRAIT_FLYERS[Math.floor(Date.now() / 86_400_000) % PORTRAIT_FLYERS.length];
+  return (
+    <div className="space-y-1">
+      <Link
+        href={flyer.signup}
+        title={flyer.title}
+        className="block overflow-hidden rounded-xl transition hover:opacity-95"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={flyer.rail}
+          alt={`GoDesi flyer: ${flyer.title}. ${flyer.line}`}
+          width={flyer.width}
+          height={flyer.height}
+          loading="lazy"
+          className="h-auto w-full"
+        />
+      </Link>
+      <Link href="/media-kit" className="block text-center text-[11px] font-semibold text-purple-700 hover:underline">
+        Share this flyer · media kit →
+      </Link>
+    </div>
+  );
+}
+
 export function BookThisSpot({
   slot,
   label,
@@ -253,6 +281,7 @@ export async function SidebarBanners({
           sellLabel="300 × 600 half page, shown in rotation"
         />
       ))}
+      {halfPages.length ? null : <RailFlyer />}
       {/* Skyscrapers run two-up so the pair fills the same 300px rail width. */}
       <div className="grid grid-cols-2 gap-3">
         {skyscrapers.slice(0, 2).map((banner) => (
