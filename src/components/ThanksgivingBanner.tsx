@@ -49,7 +49,7 @@ export function ThanksgivingBanner() {
           🦃 Thanksgiving specials – one day only!
         </Link>
         {/* One row on phones too: short labels keep the strip from eating the first screen. */}
-        <div className="flex w-full flex-nowrap items-center justify-center gap-1 sm:w-auto sm:gap-3">
+        <div className="flex w-full flex-wrap items-center justify-center gap-1 sm:w-auto sm:gap-3">
         {offers.map((offer) => (
           <a
             key={offer.href}
