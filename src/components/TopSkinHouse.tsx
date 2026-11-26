@@ -38,6 +38,17 @@ const SKIN_HOUSE: SkinCreative[] = [
     countdownTo: NYE_MIDNIGHT,
   },
   {
+    slug: "nye-thanks",
+    href: "https://www.newyearevesparty.com/blog/thank-you-nye-2026",
+    emoji: "📸",
+    title: "Thank you for NYE 2026",
+    shortTitle: "NYE 2026 photos",
+    line: "See the photo album · Book NYE 2027",
+    colors: "border-indigo-400 bg-indigo-50 text-indigo-900 hover:bg-indigo-100",
+    countdownTo: NYE_MIDNIGHT,
+    external: true,
+  },
+  {
     slug: "suhag",
     href: SUHAG_JEWELLERS_URL,
     emoji: "💎",
