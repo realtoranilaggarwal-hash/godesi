@@ -29,7 +29,9 @@ const LISTING_SLUG = "free-first-consultation-master-lakshman-ji-jersey-city-nj"
 /** His visiting card, which replaced the first "Sri Guru Astrologer Center" poster. */
 const POSTER = `${SITE}/images/business/pandit-lakshman-card.jpg`;
 const OLD_POSTER = `${SITE}/images/business/pandit-lakshman-poster.jpg`;
-/** Wide 16:10 flier built around the card, so the classified's photo box isn't cropped. */
+/** Green "Sri Guru Astrologer Center" flyer he prefers (hours corrected to 9 am – 8 pm); replaces the card. */
+const GREEN = `${SITE}/images/business/pandit-lakshman-green.jpg`;
+/** Wide 16:10 flier built around the green flyer, so the classified's photo box isn't cropped. */
 const FLIER = `${SITE}/images/business/pandit-lakshman-flier.jpg`;
 const AVATAR = `${SITE}/images/business/pandit-lakshman-palm.jpg`;
 /** He was "Master Lakshman Ji" until he asked to be called Panditji (Nov 2026). */
@@ -216,8 +218,8 @@ async function main() {
     create: { ...businessData, slug: SLUG, ownerId: user.id },
   });
 
-  await db.media.deleteMany({ where: { businessId: business.id, url: OLD_POSTER } });
-  for (const [url, sortOrder] of [[FLIER, -2], [POSTER, -1]] as const) {
+  await db.media.deleteMany({ where: { businessId: business.id, url: { in: [OLD_POSTER, POSTER] } } });
+  for (const [url, sortOrder] of [[FLIER, -2], [GREEN, -1]] as const) {
     if (await db.media.count({ where: { businessId: business.id, url } })) continue;
     await db.media.create({
       data: { businessId: business.id, url, type: "IMAGE", caption: "Pandit Lakshman Ji — Astrologer & Psychic Spiritual Healer", sortOrder },
@@ -284,7 +286,7 @@ async function main() {
     where: { listingId: listing.id, url: { contains: "-lakshman-" } },
   });
   await db.listingImage.createMany({
-    data: [FLIER, POSTER].map((url, sortOrder) => ({
+    data: [FLIER, GREEN].map((url, sortOrder) => ({
       listingId: listing.id,
       url,
       sortOrder,
