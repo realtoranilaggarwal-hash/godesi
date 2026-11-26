@@ -155,7 +155,11 @@ export async function activeBanners(
  */
 export async function bookedBanners(slot: BannerSlot) {
   return (await inventory()).filter(
-    (banner) => banner.slot === slot && banner.endsAt !== null,
+    (banner) =>
+      banner.slot === slot &&
+      banner.endsAt !== null &&
+      (banner.impressionCap === null ||
+        banner.impressions < banner.impressionCap),
   );
 }
 
