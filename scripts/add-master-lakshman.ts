@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 
 /**
- * Master Lakshman Ji's $200 Premium package (pay link in his welcome email;
+ * Pandit Lakshman Ji's $200 Premium package (pay link in his welcome email;
  * renews Nov 2027): Premium plan, featured astrologer page with WhatsApp and
  * the "first consultation free when you mention GoDesi" offer, astrologer-rail
  * + sidebar banners, a featured classified, 5 gigs on his profile and a GoDesi
@@ -24,13 +24,18 @@ const PHONE = "+12018843046";
 const WHATSAPP = "12018843046";
 const WEBSITE = "https://astrolakshmanji.com/";
 const ADDRESS = "2984 John F. Kennedy Blvd, Jersey City, NJ 07306";
-const TITLE = "Master Lakshman Ji — Astrologer & Psychic Healer, Jersey City NJ";
+const TITLE = "Pandit Lakshman Ji — Astrologer & Psychic Healer, Jersey City NJ";
 const LISTING_SLUG = "free-first-consultation-master-lakshman-ji-jersey-city-nj";
-const NEWS_TITLE =
+const POSTER = `${SITE}/images/business/pandit-lakshman-poster.jpg`;
+const AVATAR = `${SITE}/images/business/pandit-lakshman-palm.jpg`;
+/** He was "Master Lakshman Ji" until he asked to be called Panditji (Nov 2026). */
+const OLD_NEWS_TITLE =
   "Master Lakshman Ji: Astrology, Kundli and Psychic Guidance on JFK Boulevard, Jersey City";
+const NEWS_TITLE =
+  "Pandit Lakshman Ji: Astrology, Kundli and Psychic Guidance on JFK Boulevard, Jersey City";
 
 const description = [
-  "Master Lakshman Ji is an astrologer, psychic reader and spiritual healer in Jersey City, New Jersey.",
+  "Pandit Lakshman Ji is an astrologer, psychic reader and spiritual healer in Jersey City, New Jersey.",
   "",
   "Services: birth chart (kundli) analysis, marriage and compatibility readings, love and relationship guidance, career and financial guidance, planetary dosha analysis and personalized remedies, palm reading, tarot card reading, psychic reading, and negative energy removal.",
   "",
@@ -40,7 +45,7 @@ const description = [
 ].join("\n");
 
 const listingDescription = [
-  "Kundli and birth chart readings, palm and tarot readings, love, marriage and career guidance, and dosha remedies with Master Lakshman Ji in Jersey City, NJ.",
+  "Kundli and birth chart readings, palm and tarot readings, love, marriage and career guidance, and dosha remedies with Pandit Lakshman Ji in Jersey City, NJ.",
   "",
   `Visit in person at ${ADDRESS} or consult by phone, WhatsApp or online, 9 AM to 11 PM.`,
   "",
@@ -48,9 +53,9 @@ const listingDescription = [
 ].join("\n");
 
 const newsSummary = [
-  "JERSEY CITY, NJ – On John F. Kennedy Boulevard in Jersey City, Master Lakshman Ji offers astrology readings, psychic guidance and spiritual healing to the desi community and anyone looking for direction.",
+  "JERSEY CITY, NJ – On John F. Kennedy Boulevard in Jersey City, Pandit Lakshman Ji offers astrology readings, psychic guidance and spiritual healing to the desi community and anyone looking for direction.",
   "",
-  `His readings start from the birth chart. He prepares kundli and birth chart analyses, marriage and compatibility readings, and guidance on love, career and money, and he looks at planetary doshas and suggests personalized remedies. He also reads palms and tarot cards. You can find him on GoDesi as [Master Lakshman Ji, Astrologer & Psychic Healer](https://godesi.com${LINK}).`,
+  `His readings start from the birth chart. He prepares kundli and birth chart analyses, marriage and compatibility readings, and guidance on love, career and money, and he looks at planetary doshas and suggests personalized remedies. He also reads palms and tarot cards. You can find him on GoDesi as [Pandit Lakshman Ji, Astrologer & Psychic Healer](https://godesi.com${LINK}).`,
   "",
   "In Person, by Phone or Online",
   "",
@@ -67,8 +72,8 @@ const newsSummary = [
 ].join("\n");
 
 const BANNERS = [
-  { slot: "ASTRO", imageUrl: `${SITE}/images/ads/master-lakshman-astro.png` },
-  { slot: "SIDEBAR", imageUrl: `${SITE}/images/ads/master-lakshman-sidebar.png` },
+  { slot: "ASTRO", imageUrl: `${SITE}/images/ads/pandit-lakshman-astro.png` },
+  { slot: "SIDEBAR", imageUrl: `${SITE}/images/ads/pandit-lakshman-sidebar.png` },
 ] as const;
 
 type GigSeed = {
@@ -87,11 +92,11 @@ const GIGS: GigSeed[] = [
     slug: "kundli-birth-chart-reading-master-lakshman-ji",
     title: "Kundli & birth chart reading",
     description:
-      "Master Lakshman Ji reads your birth chart (kundli) and explains your planets, strengths and the periods ahead. Send your date, time and place of birth after you order.",
+      "Pandit Lakshman Ji reads your birth chart (kundli) and explains your planets, strengths and the periods ahead. Send your date, time and place of birth after you order.",
     includes: "Birth chart analysis\nKey planets and current period\nAnswers to your questions",
     price: 31,
     minutes: 30,
-    image: "/images/gigs/master-lakshman-logo.jpg",
+    image: "/images/gigs/pandit-lakshman-logo.jpg",
     tags: ["kundli", "birth chart", "vedic astrology", "horoscope", "jersey city"],
   },
   {
@@ -113,18 +118,18 @@ const GIGS: GigSeed[] = [
     includes: "Career and business reading\nMoney and timing guidance\nAnswers to your questions",
     price: 31,
     minutes: 30,
-    image: "/images/gigs/master-lakshman-business.jpg",
+    image: "/images/gigs/pandit-lakshman-business.jpg",
     tags: ["career", "business", "finance", "job", "astrology"],
   },
   {
     slug: "planetary-dosha-analysis-remedies-master-lakshman-ji",
     title: "Planetary dosha analysis & personal remedies",
     description:
-      "Master Lakshman Ji checks your chart for planetary doshas and suggests personalized remedies. Send your date, time and place of birth after you order.",
+      "Pandit Lakshman Ji checks your chart for planetary doshas and suggests personalized remedies. Send your date, time and place of birth after you order.",
     includes: "Dosha check of your chart\nPersonalized remedies\nAnswers to your questions",
     price: 51,
     minutes: 45,
-    image: "/images/gigs/master-lakshman-b.jpg",
+    image: "/images/gigs/pandit-lakshman-b.jpg",
     tags: ["dosha", "remedies", "manglik", "vedic astrology", "spiritual healing"],
   },
   {
@@ -135,7 +140,7 @@ const GIGS: GigSeed[] = [
     includes: "Palm reading from photos\nTarot card spread\nAnswers to your question",
     price: 21,
     minutes: 20,
-    image: "/images/gigs/master-lakshman-a.jpg",
+    image: "/images/gigs/pandit-lakshman-a.jpg",
     tags: ["palm reading", "tarot", "psychic reading", "jersey city", "new jersey"],
   },
 ];
@@ -156,7 +161,7 @@ async function main() {
 
   await db.user.update({
     where: { id: user.id },
-    data: { plan: "PREMIUM", planExpiresAt: ENDS },
+    data: { plan: "PREMIUM", planExpiresAt: ENDS, name: "Pandit Lakshman Ji", avatarUrl: AVATAR },
   });
 
   const businessData = {
@@ -175,8 +180,8 @@ async function main() {
     websiteUrl: WEBSITE,
     facebookUrl: "https://www.facebook.com/people/Psychic-Astrologer-Spiritualist-Lakshman-ji/61590992361457/",
     mapsUrl: "https://maps.app.goo.gl/jX7CFqS3kc4yZ5UZA",
-    logoUrl: `${SITE}/images/ads/master-lakshman-logo.jpg`,
-    coverUrl: `${SITE}/covers/master-lakshman-ji.jpg`,
+    logoUrl: `${SITE}/images/ads/pandit-lakshman-logo.jpg`,
+    coverUrl: `${SITE}/covers/pandit-lakshman-ji.jpg`,
     availability: "9 AM – 11 PM",
     serviceOptions: ["In person", "Phone call", "Video call", "WhatsApp / chat"],
     specialties: [
@@ -195,7 +200,7 @@ async function main() {
     featuredUntil: ENDS,
     featuredRank: 3,
     referralOffer: OFFER,
-    seoTitle: "Master Lakshman Ji — Astrologer & Psychic in Jersey City, NJ | Kundli, Palm, Tarot",
+    seoTitle: "Pandit Lakshman Ji — Astrologer & Psychic in Jersey City, NJ | Kundli, Palm, Tarot",
     seoDescription:
       "Astrologer and psychic healer in Jersey City, NJ: kundli and birth chart analysis, marriage compatibility, career guidance, dosha remedies, palm and tarot readings. First consultation free when you mention GoDesi: (201) 884-3046.",
   };
@@ -205,11 +210,17 @@ async function main() {
     create: { ...businessData, slug: SLUG, ownerId: user.id },
   });
 
+  if (!(await db.media.count({ where: { businessId: business.id, url: POSTER } }))) {
+    await db.media.create({
+      data: { businessId: business.id, url: POSTER, type: "IMAGE", caption: "Sri Guru Astrologer Center poster", sortOrder: -1 },
+    });
+  }
+
   const deal = await db.deal.findFirst({ where: { businessId: business.id, code: "GODESI" } });
   const dealData = {
     title: OFFER,
     details:
-      "Call or WhatsApp Master Lakshman Ji at (201) 884-3046 and say you found him on GoDesi.com — your first consultation is free. Kundli, love and marriage, career, dosha remedies, palm and tarot readings.",
+      "Call or WhatsApp Pandit Lakshman Ji at (201) 884-3046 and say you found him on GoDesi.com — your first consultation is free. Kundli, love and marriage, career, dosha remedies, palm and tarot readings.",
     code: "GODESI",
     linkUrl: `${SITE}${LINK}`,
     expiresAt: new Date(ENDS.getTime() - 1000),
@@ -222,7 +233,11 @@ async function main() {
     // Absolute URLs: the advertiser's "My ads" editor only accepts full URLs.
     const data = { ...banner, title: TITLE, linkUrl: `${SITE}${LINK}`, endsAt: ENDS, advertiserId: user.id };
     const existing = await db.banner.findFirst({
-      where: { imageUrl: { endsWith: banner.imageUrl.replace(SITE, "") } },
+      where: {
+        OR: [banner.imageUrl, banner.imageUrl.replace("/pandit-", "/master-")].map((url) => ({
+          imageUrl: { endsWith: url.replace(SITE, "") },
+        })),
+      },
       select: { id: true },
     });
     if (existing) {
@@ -235,7 +250,7 @@ async function main() {
 
   const listingData = {
     kind: "MARKETPLACE" as const,
-    title: "FREE first consultation — kundli, palm & tarot, Master Lakshman Ji, Jersey City NJ",
+    title: "FREE first consultation — kundli, palm & tarot, Pandit Lakshman Ji, Jersey City NJ",
     description: listingDescription,
     city: "Jersey City",
     state: "NJ",
@@ -244,7 +259,7 @@ async function main() {
     currency: "USD",
     categorySlug: "buy-sell-free-and-giveaway",
     deliveryOption: "either",
-    contactName: "Master Lakshman Ji",
+    contactName: "Pandit Lakshman Ji",
     contactPhone: PHONE,
     contactEmail: EMAIL,
     whatsapp: WHATSAPP,
@@ -256,9 +271,16 @@ async function main() {
     update: listingData,
     create: { ...listingData, slug: LISTING_SLUG, ownerId: user.id },
   });
-  if (!(await db.listingImage.count({ where: { listingId: listing.id } }))) {
-    await db.listingImage.create({ data: { listingId: listing.id, url: `${SITE}/images/ads/master-lakshman-sidebar.png` } });
-  }
+  await db.listingImage.deleteMany({
+    where: { listingId: listing.id, url: { contains: "-lakshman-" } },
+  });
+  await db.listingImage.createMany({
+    data: [POSTER, `${SITE}/images/ads/pandit-lakshman-sidebar.png`].map((url, sortOrder) => ({
+      listingId: listing.id,
+      url,
+      sortOrder,
+    })),
+  });
 
   for (const gig of GIGS) {
     const columns = {
@@ -272,7 +294,7 @@ async function main() {
       faq: [
         {
           q: "How does the reading happen?",
-          a: "After you order, Master Lakshman Ji contacts you to fix a time for a phone or WhatsApp call, or you can visit him in Jersey City.",
+          a: "After you order, Pandit Lakshman Ji contacts you to fix a time for a phone or WhatsApp call, or you can visit him in Jersey City.",
         },
       ],
       status: "ACTIVE" as const,
@@ -302,7 +324,7 @@ async function main() {
   const newsData = {
     title: NEWS_TITLE,
     summary: newsSummary,
-    imageUrl: "/images/ads/master-lakshman-sidebar.png",
+    imageUrl: "/images/ads/pandit-lakshman-sidebar.png",
     source: "GoDesi News Desk",
     status: "PUBLISHED" as const,
     topic: "faith",
@@ -314,7 +336,7 @@ async function main() {
     sourceUrl: WEBSITE,
     submittedById: ADMIN_ID,
   };
-  const story = await db.newsItem.findFirst({ where: { title: NEWS_TITLE } });
+  const story = await db.newsItem.findFirst({ where: { title: { in: [NEWS_TITLE, OLD_NEWS_TITLE] } } });
   const saved = story
     ? await db.newsItem.update({ where: { id: story.id }, data: newsData })
     : await db.newsItem.create({

@@ -43,7 +43,7 @@ export const INVOICES: Invoice[] = [
   },
   {
     key: "master-lakshman-0b09bc7020fc",
-    client: "Master Lakshman Ji — Astrologer & Psychic Healer",
+    client: "Pandit Lakshman Ji — Astrologer & Psychic Healer",
     email: "astrologerlakshman9@gmail.com",
     title: "GoDesi Premium — 1-year package (Nov 2026 – Nov 2027)",
     description:
