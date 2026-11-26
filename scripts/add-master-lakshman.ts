@@ -26,10 +26,10 @@ const WEBSITE = "https://astrolakshmanji.com/";
 const ADDRESS = "2984 John F. Kennedy Blvd, Jersey City, NJ 07306";
 const TITLE = "Pandit Lakshman Ji — Astrologer & Psychic Healer, Jersey City NJ";
 const LISTING_SLUG = "free-first-consultation-master-lakshman-ji-jersey-city-nj";
-/** His visiting card, which replaced the first "Sri Guru Astrologer Center" poster. */
+/** His visiting card, which replaced his first poster. */
 const POSTER = `${SITE}/images/business/pandit-lakshman-card.jpg`;
 const OLD_POSTER = `${SITE}/images/business/pandit-lakshman-poster.jpg`;
-/** Green "Sri Guru Astrologer Center" flyer he prefers (hours corrected to 9 am – 8 pm); replaces the card. */
+/** Green flyer he prefers (hours corrected to 9 am – 8 pm, "Sri Guru Astrologer Center" title replaced by his name); replaces the card. */
 const GREEN = `${SITE}/images/business/pandit-lakshman-green.jpg`;
 /** Wide 16:10 flier built around the green flyer, so the classified's photo box isn't cropped. */
 const FLIER = `${SITE}/images/business/pandit-lakshman-flier.jpg`;
@@ -241,7 +241,8 @@ async function main() {
 
   for (const banner of BANNERS) {
     // Absolute URLs: the advertiser's "My ads" editor only accepts full URLs.
-    const data = { ...banner, title: TITLE, linkUrl: `${SITE}${LINK}`, endsAt: ENDS, advertiserId: user.id };
+    // Position 0 puts his banners ahead of the other astrologers' bookings in each slot.
+    const data = { ...banner, title: TITLE, linkUrl: `${SITE}${LINK}`, endsAt: ENDS, advertiserId: user.id, position: 0 };
     const existing = await db.banner.findFirst({
       where: {
         slot: banner.slot,
@@ -255,8 +256,7 @@ async function main() {
       await db.banner.update({ where: { id: existing.id }, data: { ...data, active: true, status: "ACTIVE" } });
       continue;
     }
-    const last = await db.banner.aggregate({ where: { slot: banner.slot }, _max: { position: true } });
-    await db.banner.create({ data: { ...data, position: (last._max.position ?? 0) + 1 } });
+    await db.banner.create({ data });
   }
 
   const listingData = {

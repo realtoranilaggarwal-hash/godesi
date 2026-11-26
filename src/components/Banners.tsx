@@ -3,6 +3,7 @@ import type { BannerSlot } from "@prisma/client";
 import {
   activeBanners,
   bookedBanners,
+  bookedFirst,
   HEADER_SIZE,
   SIDEBAR_SIZE,
   SIDEBAR_SLOTS,
@@ -190,7 +191,8 @@ export function BookThisSpot({
 }
 
 /**
- * The sponsored rail: two rotating 300x250 rectangles plus a pair of skyscrapers.
+ * The sponsored rail: paid 300x250 bookings, topped up to two with rotating
+ * rectangles, plus a pair of skyscrapers.
  * Showing a couple per view lets ten advertisers share the slot and keeps each
  * page view from burning everyone's impression quota at once.
  */
@@ -214,7 +216,7 @@ export async function SidebarBanners({
 
   const [rectangles, halfPages, skyscrapers, rectanglesSold, categories] =
     await Promise.all([
-      activeBanners("SIDEBAR", 2),
+      bookedFirst("SIDEBAR", 2),
       activeBanners("HALFPAGE", 1),
       activeBanners("SKYSCRAPER", 2),
       slotSoldCount("SIDEBAR"),
@@ -577,7 +579,7 @@ export async function HeaderBanner() {
  * column still carries rotating sponsors (or Godesi promos when unsold).
  */
 export async function RailRectangles() {
-  const banners = await activeBanners("SIDEBAR", 2);
+  const banners = await bookedFirst("SIDEBAR", 2);
 
   return (
     <div className="space-y-4" aria-label="Sponsored">
