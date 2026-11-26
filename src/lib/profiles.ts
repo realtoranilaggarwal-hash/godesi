@@ -107,6 +107,7 @@ export const RESERVED_USERNAMES = new Set([
   "forgot-password",
   "guide",
   "media",
+  "media-kit",
   "traffic",
   "ambassador",
   "daily",
