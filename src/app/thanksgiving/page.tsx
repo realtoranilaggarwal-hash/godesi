@@ -91,7 +91,19 @@ export default function ThanksgivingPage({
             ? `Get the $${THANKSGIVING.websiteUsd} AI website`
             : `Get the $${THANKSGIVING.marketingUsd} marketing package`}
         </h2>
-        {searchParams.sent ? (
+        {!live ? (
+          <p className="mt-2 text-sm text-slate-600">
+            The Thanksgiving offers have ended. See{" "}
+            <Link href="/website" className="font-semibold text-indigo-700 hover:underline">
+              GoDesi websites
+            </Link>{" "}
+            and{" "}
+            <Link href="/advertise" className="font-semibold text-indigo-700 hover:underline">
+              advertising
+            </Link>{" "}
+            for current prices.
+          </p>
+        ) : searchParams.sent ? (
           <p className="mt-2 rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
             Thank you! The GoDesi team will call or email you shortly.
           </p>

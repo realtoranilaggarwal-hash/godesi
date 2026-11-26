@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { requestGeo } from "@/lib/geo";
-import { THANKSGIVING } from "@/lib/thanksgiving";
+import { THANKSGIVING, thanksgivingLive } from "@/lib/thanksgiving";
 import { WEBSITE_OFFER } from "@/lib/websiteOffer";
 
 const schema = z.object({
@@ -19,6 +19,7 @@ const schema = z.object({
 
 /** Saves a Thanksgiving package inquiry and emails it to the GoDesi team. */
 export async function thanksgivingInquiryAction(formData: FormData) {
+  if (!thanksgivingLive()) redirect("/thanksgiving");
   const parsed = schema.safeParse(Object.fromEntries(formData));
   const offer = formData.get("offer") === "website" ? "website" : "marketing";
   if (!parsed.success) redirect(`/thanksgiving?offer=${offer}&error=1#inquire`);
