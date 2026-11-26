@@ -115,11 +115,11 @@ export default function ThanksgivingPage({
                 Please fill in your name, phone and a valid email.
               </p>
             ) : null}
-            <input name="name" required placeholder="Your name" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <input name="phone" required placeholder="Phone" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <input name="email" type="email" required placeholder="Email" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <input name="business" placeholder="Business name (optional)" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
-            <textarea name="message" rows={3} placeholder="Anything we should know? (optional)" className="rounded-xl border border-slate-300 px-3 py-2 text-sm sm:col-span-2" />
+            <input name="name" maxLength={80} required placeholder="Your name" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            <input name="phone" maxLength={30} required placeholder="Phone" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            <input name="email" maxLength={120} type="email" required placeholder="Email" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            <input name="business" maxLength={120} placeholder="Business name (optional)" className="rounded-xl border border-slate-300 px-3 py-2 text-sm" />
+            <textarea name="message" maxLength={1000} rows={3} placeholder="Anything we should know? (optional)" className="rounded-xl border border-slate-300 px-3 py-2 text-sm sm:col-span-2" />
             <button className="rounded-xl bg-orange-600 px-4 py-2 text-sm font-bold text-white hover:bg-orange-700 sm:col-span-2">
               Send my inquiry
             </button>
