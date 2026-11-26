@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Thanksgiving turkey">
+  <g stroke="#7c2d12" stroke-width="1.5">
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#dc2626" transform="rotate(-72 60 72)"/>
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#f59e0b" transform="rotate(-48 60 72)"/>
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#ea580c" transform="rotate(-24 60 72)"/>
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#facc15" transform="rotate(0 60 72)"/>
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#ea580c" transform="rotate(24 60 72)"/>
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#f59e0b" transform="rotate(48 60 72)"/>
+    <ellipse cx="60" cy="58" rx="13" ry="40" fill="#dc2626" transform="rotate(72 60 72)"/>
+  </g>
+  <g fill="#fde68a" opacity=".9">
+    <circle cx="22" cy="52" r="3"/><circle cx="34" cy="34" r="3"/><circle cx="60" cy="25" r="3"/>
+    <circle cx="86" cy="34" r="3"/><circle cx="98" cy="52" r="3"/>
+  </g>
+  <ellipse cx="60" cy="84" rx="27" ry="25" fill="#92400e" stroke="#5b2a0c" stroke-width="2"/>
+  <ellipse cx="60" cy="90" rx="17" ry="15" fill="#b45309"/>
+  <circle cx="60" cy="58" r="16" fill="#a16207" stroke="#5b2a0c" stroke-width="2"/>
+  <circle cx="54" cy="55" r="4.2" fill="#fff"/><circle cx="66" cy="55" r="4.2" fill="#fff"/>
+  <circle cx="55" cy="56" r="2.2" fill="#111"/><circle cx="65" cy="56" r="2.2" fill="#111"/>
+  <circle cx="55.7" cy="55.2" r=".7" fill="#fff"/><circle cx="65.7" cy="55.2" r=".7" fill="#fff"/>
+  <path d="M55 62 L65 62 L60 70 Z" fill="#facc15" stroke="#b45309" stroke-width="1"/>
+  <path d="M61 66 q6 4 2 12 q-5 -2 -4 -8 z" fill="#ef4444"/>
+  <ellipse cx="49" cy="65" rx="3.5" ry="2" fill="#fb7185" opacity=".7"/>
+  <ellipse cx="71" cy="65" rx="3.5" ry="2" fill="#fb7185" opacity=".7"/>
+  <g stroke="#f59e0b" stroke-width="3" stroke-linecap="round">
+    <path d="M50 107 v8 M46 115 h8"/><path d="M70 107 v8 M66 115 h8"/>
+  </g>
+</svg>

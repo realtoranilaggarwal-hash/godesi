@@ -5,6 +5,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DealRibbon } from "@/components/DealRibbon";
 import { TopSkinBanner } from "@/components/TopSkinBanner";
+import { ThanksgivingBanner } from "@/components/ThanksgivingBanner";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PhoneSmallBanners, SmallBanners } from "@/components/Banners";
@@ -210,6 +211,7 @@ export default async function RootLayout({
         />
         <UnregisterServiceWorkers />
         <SiteHeader />
+        <ThanksgivingBanner />
         <div className="xl:hidden">
           <TopSkinBanner />
         </div>

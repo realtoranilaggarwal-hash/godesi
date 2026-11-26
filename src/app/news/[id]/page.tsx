@@ -22,6 +22,7 @@ import { siteUrl } from "@/lib/format";
 import { isOriginalReport, newsIdFromParam, newsPath } from "@/lib/newsLinks";
 import { ANONYMOUS_BYLINE } from "@/lib/newsTopics";
 import { metaDescription, pageTitle } from "@/lib/seo";
+import { THANKSGIVING } from "@/lib/thanksgiving";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +81,14 @@ export default async function ReportPage({
 
   const canonical = newsPath(report);
   if (`/news/${params.id}` !== canonical) redirect(canonical);
+
+  if (report.guid === THANKSGIVING.articleGuid) {
+    await db.promoEvent
+      .create({
+        data: { campaign: THANKSGIVING.campaign, kind: "view", target: "article" },
+      })
+      .catch(() => null);
+  }
 
   const isStaff = user ? can(user, "news") : false;
   const isAuthor = report.submittedById === user?.id;

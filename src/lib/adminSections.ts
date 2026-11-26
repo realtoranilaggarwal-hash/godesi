@@ -49,6 +49,12 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     need: "admin",
   },
   {
+    href: "/admin/thanksgiving",
+    label: "Thanksgiving 2026",
+    icon: "🦃",
+    need: "admin",
+  },
+  {
     href: "/admin/partner-leads",
     label: "Network requests",
     icon: "🏡",
