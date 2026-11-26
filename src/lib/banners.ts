@@ -163,6 +163,22 @@ export async function bookedBanners(slot: BannerSlot) {
   );
 }
 
+/**
+ * Paid term bookings first, in booked order, then rotating creatives to fill
+ * `take` — every booking shows even when there are more of them than `take`.
+ */
+export async function bookedFirst(slot: BannerSlot, take: number) {
+  const [booked, rotating] = await Promise.all([
+    bookedBanners(slot),
+    activeBanners(slot, take),
+  ]);
+  const ids = new Set(booked.map((banner) => banner.id));
+  return [...booked, ...rotating.filter((banner) => !ids.has(banner.id))].slice(
+    0,
+    Math.max(take, booked.length),
+  );
+}
+
 const slotTotals = cachedQuery(
   "banner-slot-stats",
   300,
