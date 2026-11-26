@@ -154,7 +154,7 @@ async function main() {
   else await db.deal.create({ data: { ...dealData, businessId: business.id } });
 
   for (const banner of BANNERS) {
-    const data = { ...banner, title: TITLE, linkUrl: LINK, endsAt: ENDS };
+    const data = { ...banner, title: TITLE, linkUrl: LINK, endsAt: ENDS, advertiserId: user.id };
     const existing = await db.banner.findFirst({
       where: { imageUrl: banner.imageUrl },
       select: { id: true },
