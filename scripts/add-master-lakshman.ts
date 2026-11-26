@@ -25,7 +25,7 @@ const WHATSAPP = "12018843046";
 const WEBSITE = "https://astrolakshmanji.com/";
 const ADDRESS = "2984 John F. Kennedy Blvd, Jersey City, NJ 07306";
 const TITLE = "Master Lakshman Ji — Astrologer & Psychic Healer, Jersey City NJ";
-const LISTING_SLUG = "kundli-palm-tarot-readings-master-lakshman-ji-jersey-city-nj";
+const LISTING_SLUG = "free-first-consultation-master-lakshman-ji-jersey-city-nj";
 const NEWS_TITLE =
   "Master Lakshman Ji: Astrology, Kundli and Psychic Guidance on JFK Boulevard, Jersey City";
 
@@ -234,14 +234,14 @@ async function main() {
 
   const listingData = {
     kind: "MARKETPLACE" as const,
-    title: "Kundli, palm & tarot readings + remedies — Master Lakshman Ji, Jersey City NJ",
+    title: "FREE first consultation — kundli, palm & tarot, Master Lakshman Ji, Jersey City NJ",
     description: listingDescription,
     city: "Jersey City",
     state: "NJ",
     country: "USA",
     price: 0,
     currency: "USD",
-    categorySlug: "buy-sell",
+    categorySlug: "buy-sell-free-and-giveaway",
     deliveryOption: "either",
     contactName: "Master Lakshman Ji",
     contactPhone: PHONE,
