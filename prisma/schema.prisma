@@ -1317,6 +1317,8 @@ model Event {
   onlineUrl         String?
   /// The organiser's own website or booking page, shown as a button.
   websiteUrl        String?
+  /// The page a member pulled this event from with GoDesi Push (Sulekha, Eventbrite…).
+  pushedFrom        String?
   /// Extra the organiser throws in, e.g. "Parents get 2 free yoga classes".
   bonusNote         String?
   /// When the organiser accepted how ticket money and fees are handled.
@@ -1398,6 +1400,7 @@ model Event {
   chatterPosts     ChatterPost[]
 
   @@unique([sourceId, sourceUid])
+  @@index([pushedFrom])
   @@index([startsAt])
   @@index([categorySlug])
   @@index([city])

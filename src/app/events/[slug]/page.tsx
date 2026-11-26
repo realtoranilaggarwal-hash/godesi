@@ -296,7 +296,7 @@ export default async function EventPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { error?: string; promo?: string; comp?: string };
+  searchParams: { error?: string; promo?: string; comp?: string; pushed?: string };
 }) {
   const event = await loadEvent(params.slug);
   if (!event || event.status === "REJECTED") notFound();
@@ -385,6 +385,15 @@ export default async function EventPage({
         })
       : 0;
   const ticketTiers = event.tiers.filter((tier) => tier.kind !== "SPONSOR");
+  // Pulled in with GoDesi Push and still selling only on the original page.
+  const pushedOnly =
+    !imported &&
+    Boolean(event.pushedFrom) &&
+    event.seatsTotal === 0 &&
+    !ticketTiers.length;
+  const pushedHost = event.pushedFrom
+    ? new URL(event.pushedFrom).hostname.replace(/^www\./, "")
+    : "";
   const sponsorTiers = event.tiers.filter((tier) => tier.kind === "SPONSOR");
   const poolLeft = pooledSeatsLeft(event, event.tiers);
   const ticketSeatsLeft = (tier: (typeof ticketTiers)[number]) =>
@@ -513,6 +522,15 @@ export default async function EventPage({
             __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
           }}
         />
+        {searchParams.pushed && user?.id === event.organizerId ? (
+          <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+            🚀 Your event is live on GoDesi. Share it below, or{" "}
+            <Link href={`/events/${event.slug}/edit`} className="underline">
+              edit it
+            </Link>{" "}
+            to add GoDesi tickets.
+          </p>
+        ) : null}
         {searchParams.error === "cancelled" ? (
           <Alert>Payment cancelled — your seats were not booked.</Alert>
         ) : searchParams.error ? (
@@ -563,7 +581,7 @@ export default async function EventPage({
         </nav>
 
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          {event.price || event.tiers.length || imported ? null : (
+          {event.price || event.tiers.length || imported || pushedOnly ? null : (
             <FreeRibbon large />
           )}
           {event.imageUrl ? (
@@ -627,7 +645,7 @@ export default async function EventPage({
                 <Badge tone="amber">🔥 Godesi Partner Event</Badge>
               ) : null}
               {past ? <Badge tone="slate">Finished</Badge> : null}
-              {left === 0 && !past && !imported ? (
+              {left === 0 && !past && !imported && !pushedOnly ? (
                 <Badge tone="red">Sold out</Badge>
               ) : null}
               {imported ? (
@@ -779,11 +797,13 @@ export default async function EventPage({
                   `${ticketTiers.length} ticket types from free`
                 ) : imported ? (
                   "Entry terms: see the organiser"
+                ) : pushedOnly ? (
+                  `Tickets on ${pushedHost}`
                 ) : (
                   "Free entry"
                 )}
               </p>
-              {imported ? null : event.mode === "ONLINE" ? (
+              {imported || pushedOnly ? null : event.mode === "ONLINE" ? (
                 <p>
                   💻 Online —{" "}
                   {hideCounts
@@ -814,6 +834,17 @@ export default async function EventPage({
                 >
                   🎟️ RSVP free
                 </a>
+              </div>
+            ) : null}
+            {pushedOnly && !past ? (
+              <div>
+                <LinkButton
+                  href={event.pushedFrom!}
+                  target="_blank"
+                  rel="noopener nofollow"
+                >
+                  🎟️ Get tickets on {pushedHost} ↗
+                </LinkButton>
               </div>
             ) : null}
             {!imported &&
@@ -1017,7 +1048,7 @@ export default async function EventPage({
                         ? `From ${formatMoney(event.price, event.currency)}`
                         : event.tiers.length
                           ? "Tickets from free"
-                          : imported
+                          : imported || pushedOnly
                             ? "Entry terms: see the organiser"
                             : "Free entry"
                     }
@@ -1037,7 +1068,43 @@ export default async function EventPage({
           </div>
         </div>
 
-        {imported ? (
+        {pushedOnly ? (
+          <Card id="tickets">
+            <h2 className="font-bold">🎟️ Tickets</h2>
+            {past ? (
+              <p className="mt-2 text-sm text-slate-600">
+                This event has already taken place.
+              </p>
+            ) : (
+              <>
+                <p className="mt-2 text-sm text-slate-600">
+                  Tickets for this event are sold on {pushedHost}.
+                </p>
+                <div className="mt-3">
+                  <LinkButton
+                  href={event.pushedFrom!}
+                  target="_blank"
+                  rel="noopener nofollow"
+                >
+                    Get tickets on {pushedHost} ↗
+                  </LinkButton>
+                </div>
+                {user?.id === event.organizerId ? (
+                  <p className="mt-3 text-sm text-slate-600">
+                    Want to sell here too, with QR check-in?{" "}
+                    <Link
+                      href={`/events/${event.slug}/edit`}
+                      className="font-semibold text-indigo-600"
+                    >
+                      Add seats and a price
+                    </Link>
+                    .
+                  </p>
+                ) : null}
+              </>
+            )}
+          </Card>
+        ) : imported ? (
           <Card id="tickets">
             {past ? (
               <>

@@ -450,6 +450,12 @@ export default async function EventsPage({
               Post your event
             </LinkButton>
             <Link
+              href="/events/push"
+              className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+            >
+              🚀 GoDesi Push
+            </Link>
+            <Link
               href="/events/partner"
               className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
             >
@@ -670,7 +676,11 @@ export default async function EventsPage({
           <Link href="/events/new" className="font-semibold text-indigo-600">
             Publish your event
           </Link>{" "}
-          and sell tickets with QR check-in.
+          and sell tickets with QR check-in, or{" "}
+          <Link href="/events/push" className="font-semibold text-indigo-600">
+            push your Sulekha or Eventbrite event
+          </Link>{" "}
+          in one click.
         </p>
         <InlineBanner />
       </div>
