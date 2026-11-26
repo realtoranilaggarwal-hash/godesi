@@ -81,8 +81,11 @@ export function SmallBannerRail({
   categories = [],
   fill = false,
   phone = false,
+  pinned = [],
 }: {
   banners: SmallBanner[];
+  /** Paid bookings shown first, in order, on every page; `banners` rotate after them. */
+  pinned?: SmallBanner[];
   /** Category tree shown above the banners. */
   categories?: PickerGroup[];
   show: number;
@@ -198,9 +201,9 @@ export function SmallBannerRail({
   const stack = (
     <div className="space-y-3" aria-label="Sponsored">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {visible.length ? "Sponsored" : "Explore GoDesi"}
+        {pinned.length || visible.length ? "Sponsored" : "Explore GoDesi"}
       </p>
-      {visible.map((banner) => (
+      {[...pinned, ...visible].map((banner) => (
         <a
           key={banner.id}
           href={`/api/banners/${banner.id}/click`}

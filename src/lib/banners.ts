@@ -52,6 +52,7 @@ type RotatingBanner = {
   linkUrl: string;
   impressions: number;
   impressionCap: number | null;
+  endsAt: Date | null;
 };
 
 /**
@@ -79,6 +80,7 @@ const liveInventory = cachedQuery("banners-live", 30, async () => {
       linkUrl: true,
       impressions: true,
       impressionCap: true,
+      endsAt: true,
     },
   });
 });
@@ -145,6 +147,20 @@ export async function activeBanners(
   );
 
   return rotate(eligible, limit ?? slotCapacity(slots[0]));
+}
+
+/**
+ * Paid term bookings in a slot (they have an end date), in booked position
+ * order, for placements that show every paying advertiser before rotation.
+ */
+export async function bookedBanners(slot: BannerSlot) {
+  return (await inventory()).filter(
+    (banner) =>
+      banner.slot === slot &&
+      banner.endsAt !== null &&
+      (banner.impressionCap === null ||
+        banner.impressions < banner.impressionCap),
+  );
 }
 
 const slotTotals = cachedQuery(
