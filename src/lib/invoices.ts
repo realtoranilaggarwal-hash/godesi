@@ -43,12 +43,21 @@ export const INVOICES: Invoice[] = [
   },
   {
     key: "master-lakshman-0b09bc7020fc",
-    client: "Master Lakshman Ji — Astrologer & Psychic Healer",
+    client: "Pandit Lakshman Ji — Astrologer & Psychic Healer",
     email: "astrologerlakshman9@gmail.com",
     title: "GoDesi Premium — 1-year package (Nov 2026 – Nov 2027)",
     description:
       "Premium membership, Featured astrologer page, astrology + sidebar banner ads, featured classified, 5 gigs and GoDesi News Desk story. Renews Nov 26, 2027.",
     amountMinor: 20000,
+  },
+  {
+    key: "pandit-lakshman-cea49a8a968b",
+    client: "Pandit Lakshman Ji — Astrologer & Psychic Healer",
+    email: "astrologerlakshman9@gmail.com",
+    title: "GoDesi Premium 1-year package + astrolakshmanji.com website redesign",
+    description:
+      "Package deal offered Nov 26, 2026 only: the $200 Premium package (Featured astrologer page, banner ads, featured classified, 5 gigs, News Desk story) plus a full redesign of astrolakshmanji.com (normally $999; $499 holiday price) and NYE party promotion. Total $500.",
+    amountMinor: 50000,
   },
 ];
 
