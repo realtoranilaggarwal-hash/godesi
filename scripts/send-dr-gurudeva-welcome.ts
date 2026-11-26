@@ -12,6 +12,7 @@ const SLUG = "dr-gurudeva-indian-vedic-astrologer-jyotish-highland-park";
 const SITE = "https://godesi.com";
 const PAGE = `${SITE}/business/${SLUG}`;
 const QR = `${SITE}/api/qr/${SLUG}`;
+const PAY = `${SITE}/pay/dr-gurudeva-e440776bfb5a`;
 const RESET = `${SITE}/forgot-password?email=${encodeURIComponent(TO)}`;
 
 const button = (href: string, label: string) =>
@@ -26,16 +27,19 @@ const html = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:au
 <li><b>Your offer</b> on your page and in GoDesi Deals: <i>"First phone consultation FREE when you mention GoDesi"</i></li>
 <li><b>A gemstones & yantras classified</b> and a <b>GoDesi News Desk story</b> about your 35 years of practice</li>
 </ul>
-<h3 style="margin-bottom:4px">1. Set your password</h3>
+<h3 style="margin-bottom:4px">1. Pay $100 for your package</h3>
+<p style="margin-top:0">Please complete your <b>$100</b> payment by card with the button below. It is a secure Stripe checkout, and you will get a receipt by email.</p>
+<p>${button(PAY, "Pay $100 now")}</p>
+<h3 style="margin-bottom:4px">2. Set your password</h3>
 <p style="margin-top:0">Your account is <b>${TO}</b>. Click below and GoDesi will email you a 6-digit code to choose your password.</p>
 <p>${button(RESET, "Set my password")}</p>
-<h3 style="margin-bottom:4px">2. See who is finding you</h3>
+<h3 style="margin-bottom:4px">3. See who is finding you</h3>
 <p style="margin-top:0">After you sign in, your <a href="${SITE}/dashboard">dashboard</a> shows how many people viewed your page, which website they came from (Google, Facebook, GoDesi) and which city they are in. From there you can also edit your page, photos and offer.</p>
-<h3 style="margin-bottom:4px">3. Put your QR code on all your media</h3>
+<h3 style="margin-bottom:4px">4. Put your QR code on all your media</h3>
 <p style="margin-top:0">From now on, please add this QR code to your flyers, visiting cards, posters, social media and videos. People scan it, land on your GoDesi page, see your location on the map and can call or WhatsApp you in one tap. Scans show up in your dashboard.</p>
 <p style="text-align:center"><img src="${QR}" width="240" height="240" alt="Dr. Gurudeva GoDesi QR code"></p>
 <p style="text-align:center">${button(`${QR}?download=1`, "Download QR code")}</p>
-<h3 style="margin-bottom:4px">4. Your GoDesi caller offer</h3>
+<h3 style="margin-bottom:4px">5. Your GoDesi caller offer</h3>
 <p style="margin-top:0">When someone calls and says they found you on GoDesi, please give them their first phone consultation free. Asking "How did you hear about me?" also lets you see how many calls GoDesi sends you.</p>
 <p>Your package renews on November 25, 2027, and we will send you the renewal bill before then. Any questions, just reply to this email or call Anil.</p>
 <p>Thank you for trusting GoDesi,<br><b>Anil Aggarwal</b><br>GoDesi.com</p>

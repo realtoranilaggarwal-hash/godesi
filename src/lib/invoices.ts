@@ -32,6 +32,15 @@ export const INVOICES: Invoice[] = [
     title: "Website + daily astrology page — 2nd half (50%) on completion",
     amountMinor: 64950,
   },
+  {
+    key: "dr-gurudeva-e440776bfb5a",
+    client: "Dr. Gurudeva — Indian Vedic Astrologer",
+    email: "doctor_deva@yahoo.com",
+    title: "GoDesi Premium — 1-year package (Nov 2026 – Nov 2027)",
+    description:
+      "$500 package for $100: Premium membership, Featured astrologer page, astrology + sidebar banner ads, gemstones classified and GoDesi News Desk story. Renews Nov 25, 2027.",
+    amountMinor: 10000,
+  },
 ];
 
 export function findInvoice(key: string | null | undefined) {

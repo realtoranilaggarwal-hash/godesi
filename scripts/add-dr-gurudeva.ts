@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 
 /**
- * Dr. Gurudeva's $500 package, paid $100 for the first year (renewal is billed
+ * Dr. Gurudeva's $500 package for $100 (paid by card from his /pay link; renewal is billed
  * Nov 2027): Premium plan, featured astrologer page with the "first call free
  * when you mention GoDesi" offer, astrologer-rail + sidebar banners, a
  * gemstones classified and a GoDesi News Desk write-up. Re-runnable.
@@ -15,7 +15,6 @@ const EMAIL = "doctor_deva@yahoo.com";
 const SLUG = "dr-gurudeva-indian-vedic-astrologer-jyotish-highland-park";
 const LINK = `/business/${SLUG}`;
 const ENDS = new Date("2027-11-26T05:00:00Z"); // end of Nov 25, 2027 ET
-const PAYMENT_REF = "manual:premium:dr-gurudeva:2026";
 const ADMIN_ID = "cms24edsq0000t9gk48f24h5h"; // GoDesi News Desk author
 const OFFER = "First phone consultation FREE when you mention GoDesi";
 const PHONE = "+17324480667";
@@ -94,18 +93,6 @@ async function main() {
   await db.user.update({
     where: { id: user.id },
     data: { plan: "PREMIUM", planExpiresAt: ENDS },
-  });
-  await db.payment.upsert({
-    where: { reference: PAYMENT_REF },
-    update: {},
-    create: {
-      userId: user.id,
-      plan: "PREMIUM",
-      amountMinor: 10_000,
-      currency: "USD",
-      provider: "manual",
-      reference: PAYMENT_REF,
-    },
   });
 
   await db.business.update({
