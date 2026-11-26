@@ -439,15 +439,10 @@ export async function InContentBanner({
       : [desktopSlot];
   const mobile = AD_PLACEMENTS.MOBILE.size;
 
-  const [wide, booked, rotating] = await Promise.all([
+  const [wide, phone] = await Promise.all([
     activeBanners(sharedSlots, 1),
-    bookedBanners("MOBILE"),
     activeBanners(["MOBILE", "WALL"], 1),
   ]);
-  // A paid booking takes the phone spot whenever there is one.
-  const phone = booked.length
-    ? [booked[Math.floor(Math.random() * booked.length)]]
-    : rotating;
 
   const wideSlot = wide[0]?.slot ?? desktopSlot;
   const desktop = AD_PLACEMENTS[wideSlot].size;
