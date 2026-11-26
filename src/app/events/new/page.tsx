@@ -49,6 +49,13 @@ export default async function NewEventPage({
               Fees, categories, venues and where you get listed →
             </Link>
           </p>
+          <p className="mt-2 rounded-xl bg-indigo-50 px-3 py-2 text-sm text-indigo-900">
+            🚀 Already listed on Sulekha, Eventbrite or Facebook?{" "}
+            <Link href="/events/push" className="font-bold underline">
+              Pull it in with GoDesi Push
+            </Link>{" "}
+            instead of typing it all again.
+          </p>
         </div>
         <div className="space-y-4 lg:hidden">
           <EventPostGuide collapsible />

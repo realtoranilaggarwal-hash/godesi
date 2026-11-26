@@ -148,7 +148,7 @@ export function EventCard({
             {event.partnerStatus === "APPROVED" ? (
               <Badge tone="amber">🔥 Partner event</Badge>
             ) : null}
-            {left === 0 && !imported ? (
+            {left === 0 && event.seatsTotal > 0 && !imported ? (
               <Badge tone="red">Sold out</Badge>
             ) : null}
           </div>

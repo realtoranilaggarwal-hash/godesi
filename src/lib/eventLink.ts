@@ -75,3 +75,6 @@ export async function readEventLink(link: string): Promise<EventDraft> {
   if (!draft.city) draft.missing.push("city");
   return draft;
 }
+
+/** Most events one member can push in a day, so nobody bulk-copies a directory. */
+export const PUSH_DAILY_LIMIT = 5;
