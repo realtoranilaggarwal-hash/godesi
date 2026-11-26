@@ -41,6 +41,15 @@ export const INVOICES: Invoice[] = [
       "$500 package for $100: Premium membership, Featured astrologer page, astrology + sidebar banner ads, gemstones classified and GoDesi News Desk story. Renews Nov 25, 2027.",
     amountMinor: 10000,
   },
+  {
+    key: "master-lakshman-0b09bc7020fc",
+    client: "Master Lakshman Ji — Astrologer & Psychic Healer",
+    email: "astrologerlakshman9@gmail.com",
+    title: "GoDesi Premium — 1-year package (Nov 2026 – Nov 2027)",
+    description:
+      "Premium membership, Featured astrologer page, astrology + sidebar banner ads, featured classified, 5 gigs and GoDesi News Desk story. Renews Nov 26, 2027.",
+    amountMinor: 20000,
+  },
 ];
 
 export function findInvoice(key: string | null | undefined) {

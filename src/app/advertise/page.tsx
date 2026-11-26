@@ -109,6 +109,12 @@ export default async function AdvertisePage({
           >
             New Year&rsquo;s Eve Partnership — $500 / $2,000
           </Link>
+          <Link
+            href="/media-kit"
+            className="rounded-xl border border-white/70 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            GoDesi flyers (media kit)
+          </Link>
         </div>
       </section>
 
