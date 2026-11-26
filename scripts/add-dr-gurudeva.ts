@@ -70,8 +70,8 @@ const newsSummary = [
 ].join("\n");
 
 const BANNERS = [
-  { slot: "ASTRO", imageUrl: "/images/ads/dr-gurudeva-astro.png" },
-  { slot: "SIDEBAR", imageUrl: "/images/ads/dr-gurudeva-sidebar.png" },
+  { slot: "ASTRO", imageUrl: "https://godesi.com/images/ads/dr-gurudeva-astro.png" },
+  { slot: "SIDEBAR", imageUrl: "https://godesi.com/images/ads/dr-gurudeva-sidebar.png" },
 ] as const;
 
 function slugify(input: string) {
@@ -154,9 +154,10 @@ async function main() {
   else await db.deal.create({ data: { ...dealData, businessId: business.id } });
 
   for (const banner of BANNERS) {
-    const data = { ...banner, title: TITLE, linkUrl: LINK, endsAt: ENDS, advertiserId: user.id };
+    // Absolute URLs: the advertiser's "My ads" editor only accepts full URLs.
+    const data = { ...banner, title: TITLE, linkUrl: `https://godesi.com${LINK}`, endsAt: ENDS, advertiserId: user.id };
     const existing = await db.banner.findFirst({
-      where: { imageUrl: banner.imageUrl },
+      where: { imageUrl: { endsWith: banner.imageUrl.replace("https://godesi.com", "") } },
       select: { id: true },
     });
     if (existing) {
