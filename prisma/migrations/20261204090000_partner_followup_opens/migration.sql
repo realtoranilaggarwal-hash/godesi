@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "PartnerFollowUp" ADD COLUMN "openedAt" TIMESTAMP(3),
+ADD COLUMN "opens" INTEGER NOT NULL DEFAULT 0;

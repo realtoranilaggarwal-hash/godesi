@@ -26,7 +26,9 @@ const WEBSITE = "https://astrolakshmanji.com/";
 const ADDRESS = "2984 John F. Kennedy Blvd, Jersey City, NJ 07306";
 const TITLE = "Pandit Lakshman Ji — Astrologer & Psychic Healer, Jersey City NJ";
 const LISTING_SLUG = "free-first-consultation-master-lakshman-ji-jersey-city-nj";
-const POSTER = `${SITE}/images/business/pandit-lakshman-poster.jpg`;
+/** His visiting card, which replaced the first "Sri Guru Astrologer Center" poster. */
+const POSTER = `${SITE}/images/business/pandit-lakshman-card.jpg`;
+const OLD_POSTER = `${SITE}/images/business/pandit-lakshman-poster.jpg`;
 const AVATAR = `${SITE}/images/business/pandit-lakshman-palm.jpg`;
 /** He was "Master Lakshman Ji" until he asked to be called Panditji (Nov 2026). */
 const OLD_NEWS_TITLE =
@@ -39,7 +41,7 @@ const description = [
   "",
   "Services: birth chart (kundli) analysis, marriage and compatibility readings, love and relationship guidance, career and financial guidance, planetary dosha analysis and personalized remedies, palm reading, tarot card reading, psychic reading, and negative energy removal.",
   "",
-  `Consultations in person at ${ADDRESS}, or by phone, WhatsApp and online. Open 9 AM to 11 PM.`,
+  `Consultations in person at ${ADDRESS}, or by phone, WhatsApp and online. Open 9 AM to 8 PM.`,
   "",
   `${OFFER}. Call or WhatsApp (201) 884-3046.`,
 ].join("\n");
@@ -47,7 +49,7 @@ const description = [
 const listingDescription = [
   "Kundli and birth chart readings, palm and tarot readings, love, marriage and career guidance, and dosha remedies with Pandit Lakshman Ji in Jersey City, NJ.",
   "",
-  `Visit in person at ${ADDRESS} or consult by phone, WhatsApp or online, 9 AM to 11 PM.`,
+  `Visit in person at ${ADDRESS} or consult by phone, WhatsApp or online, 9 AM to 8 PM.`,
   "",
   `${OFFER} — call or WhatsApp (201) 884-3046.`,
 ].join("\n");
@@ -59,7 +61,7 @@ const newsSummary = [
   "",
   "In Person, by Phone or Online",
   "",
-  `Clients can visit him at ${ADDRESS}, or consult by phone, WhatsApp or online. He is available from 9 AM to 11 PM, and his Google listing has a 5.0 rating from more than 270 reviews. More about his services is on his website, [astrolakshmanji.com](${WEBSITE}).`,
+  `Clients can visit him at ${ADDRESS}, or consult by phone, WhatsApp or online. He is available from 9 AM to 8 PM, and his Google listing has a 5.0 rating from more than 270 reviews. More about his services is on his website, [astrolakshmanji.com](${WEBSITE}).`,
   "",
   "A Free First Consultation for GoDesi Readers",
   "",
@@ -182,7 +184,7 @@ async function main() {
     mapsUrl: "https://maps.app.goo.gl/jX7CFqS3kc4yZ5UZA",
     logoUrl: `${SITE}/images/ads/pandit-lakshman-logo.jpg`,
     coverUrl: `${SITE}/covers/pandit-lakshman-ji.jpg`,
-    availability: "9 AM – 11 PM",
+    availability: "9 AM – 8 PM",
     serviceOptions: ["In person", "Phone call", "Video call", "WhatsApp / chat"],
     specialties: [
       "Kundli / birth chart analysis",
@@ -210,9 +212,10 @@ async function main() {
     create: { ...businessData, slug: SLUG, ownerId: user.id },
   });
 
+  await db.media.deleteMany({ where: { businessId: business.id, url: OLD_POSTER } });
   if (!(await db.media.count({ where: { businessId: business.id, url: POSTER } }))) {
     await db.media.create({
-      data: { businessId: business.id, url: POSTER, type: "IMAGE", caption: "Sri Guru Astrologer Center poster", sortOrder: -1 },
+      data: { businessId: business.id, url: POSTER, type: "IMAGE", caption: "Pandit Lakshman Ji — Astrologer & Psychic Spiritual Healer", sortOrder: -1 },
     });
   }
 

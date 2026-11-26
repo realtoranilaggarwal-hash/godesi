@@ -54,6 +54,19 @@ function scratchCardsHtml() {
     <a href="${SCRATCH_CARDS_URL}">${SCRATCH_CARDS_URL}</a></p>`;
 }
 
+function openPixel(key: string) {
+  return `<img src="${siteUrl()}/go/partner/${encodeURIComponent(key)}/open" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px" />`;
+}
+
+/** Asks for a yes today: other businesses want the spot. */
+function confirmHtml(key: string) {
+  return `<p style="background:#fff7ed;border:1px solid #fdba74;border-radius:12px;padding:12px 16px">
+    <b>Please confirm today.</b> We have a lot of business coming up for the holidays and New Year's Eve,
+    and other businesses are lining up for your spot. Reply <b>"Yes"</b> to this email or tap the button
+    below to confirm, so we can keep it for you.<br />
+    ${button(followUpLink(key), "Yes, I confirm →", "#ea580c")}</p>`;
+}
+
 /** Subject and body for today's email: invite before a click, "complete payment" after. */
 export function followUpEmail(followUp: FollowUp, now = new Date()) {
   const name = escapeHtml(followUp.contactName);
@@ -70,16 +83,18 @@ export function followUpEmail(followUp: FollowUp, now = new Date()) {
     return {
       subject: lastDay
         ? `Last day: complete your GoDesi partnership, ${followUp.contactName}`
-        : `${followUp.businessName} — please complete your GoDesi partnership payment`,
+        : `Please confirm: ${followUp.businessName} — complete your GoDesi partnership`,
       html: shell(
         "Please complete your payment",
         `<p>Hi ${name} ji,</p>
         <p>Thank you for looking at the GoDesi partnership proposal. Please pick your package and
         complete the payment so Anil and his team can start promoting ${business} right away.</p>
+        ${confirmHtml(followUp.key)}
         ${packagesHtml(followUp.key)}
         ${urgency}
         ${scratchCardsHtml()}
-        ${contact}`,
+        ${contact}
+        ${openPixel(followUp.key)}`,
       ),
     };
   }
@@ -87,11 +102,12 @@ export function followUpEmail(followUp: FollowUp, now = new Date()) {
   return {
     subject: lastDay
       ? `Last day: ${followUp.businessName} × GoDesi partnership`
-      : `${followUp.businessName} × GoDesi partnership — your name is already at the top`,
+      : `Please confirm: ${followUp.businessName} × GoDesi partnership — businesses are lining up`,
     html: shell(
       `${business} × GoDesi partnership`,
       `<p>Hi ${name} ji,</p>
       <p>Thank you for the interview last week and for your interest in becoming a GoDesi.com partner.</p>
+      ${confirmHtml(followUp.key)}
       <p><b>Your name is already at the top:</b> "${business} · 22Kt Gold &amp; Diamond Center · Iselin NJ"
       now shows in the top strip on every GoDesi page.</p>
       <p><b>Your partnership:</b> see everything included and choose your package:</p>
@@ -101,7 +117,8 @@ export function followUpEmail(followUp: FollowUp, now = new Date()) {
       <p><b>The sooner you pay, the sooner Anil and his team can start promoting you.</b></p>
       ${urgency}
       ${scratchCardsHtml()}
-      ${contact}`,
+      ${contact}
+      ${openPixel(followUp.key)}`,
     ),
   };
 }

@@ -3751,6 +3751,9 @@ model PartnerFollowUp {
   deadline     DateTime
   clickedAt    DateTime?
   clicks       Int       @default(0)
+  /// First time the email's tracking pixel loaded; image blocking makes this a lower bound.
+  openedAt     DateTime?
+  opens        Int       @default(0)
   paidAt       DateTime?
   lastSentAt   DateTime?
   sentCount    Int       @default(0)
