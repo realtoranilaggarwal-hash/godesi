@@ -3781,3 +3781,25 @@ model LocalOutreach {
   @@unique([campaign, email])
   @@index([campaign, stoppedAt])
 }
+
+/// Clicks, views and inquiries for a dated site promotion (e.g. Thanksgiving 2026).
+model PromoEvent {
+  id        String   @id @default(cuid())
+  /// Campaign key, e.g. "thanksgiving-2026".
+  campaign  String
+  /// "click", "view" or "inquiry".
+  kind      String
+  /// What was clicked or asked about: "turkey", "nye", "marketing", "website", "article".
+  target    String
+  /// Where the click came from: "turkey", "banner", "article".
+  source    String?
+  city      String?
+  name      String?
+  phone     String?
+  email     String?
+  business  String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  @@index([campaign, kind, target])
+}

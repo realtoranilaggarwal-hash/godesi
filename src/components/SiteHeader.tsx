@@ -19,6 +19,7 @@ import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
 import { emailEnabled } from "@/lib/email";
 import { festivalSlug, headerFestival } from "@/lib/festivals";
+import { thanksgivingLink, thanksgivingLive } from "@/lib/thanksgiving";
 
 const NAV = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -247,7 +248,8 @@ export async function SiteHeader() {
   const unread = user ? await optionalRead(() => unreadCount(user.id), 0) : 0;
   const geo = requestGeo();
   const firstName = user ? (user.name || user.email).split(/[\s@]/)[0] : null;
-  const gurpurab = headerFestival();
+  const turkey = thanksgivingLive();
+  const gurpurab = turkey ? null : headerFestival();
 
   const categoryItems = [
     ...Object.entries(SECTION_LINKS).flatMap(([group, links]) =>
@@ -357,6 +359,22 @@ export async function SiteHeader() {
                 className="h-8 w-auto sm:h-9"
               />
             </Link>
+            {turkey ? (
+              <a
+                href={thanksgivingLink("article", "turkey")}
+                title="Happy Thanksgiving from GoDesi!"
+                className="shrink-0 transition-transform duration-300 hover:-rotate-6 hover:scale-110"
+              >
+                <Image
+                  src="/images/turkey.svg"
+                  alt="Happy Thanksgiving — read our Thanksgiving message"
+                  width={360}
+                  height={360}
+                  unoptimized
+                  className="h-8 w-auto sm:h-9"
+                />
+              </a>
+            ) : null}
             {gurpurab?.headerIcon ? (
               <Link
                 href={`/festivals/${festivalSlug(gurpurab)}`}
