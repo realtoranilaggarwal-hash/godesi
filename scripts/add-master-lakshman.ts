@@ -29,6 +29,8 @@ const LISTING_SLUG = "free-first-consultation-master-lakshman-ji-jersey-city-nj"
 /** His visiting card, which replaced the first "Sri Guru Astrologer Center" poster. */
 const POSTER = `${SITE}/images/business/pandit-lakshman-card.jpg`;
 const OLD_POSTER = `${SITE}/images/business/pandit-lakshman-poster.jpg`;
+/** Wide 16:10 flier built around the card, so the classified's photo box isn't cropped. */
+const FLIER = `${SITE}/images/business/pandit-lakshman-flier.jpg`;
 const AVATAR = `${SITE}/images/business/pandit-lakshman-palm.jpg`;
 /** He was "Master Lakshman Ji" until he asked to be called Panditji (Nov 2026). */
 const OLD_NEWS_TITLE =
@@ -76,6 +78,8 @@ const newsSummary = [
 const BANNERS = [
   { slot: "ASTRO", imageUrl: `${SITE}/images/ads/pandit-lakshman-astro.png` },
   { slot: "SIDEBAR", imageUrl: `${SITE}/images/ads/pandit-lakshman-sidebar.png` },
+  // Phones' "Sponsored" stack under the page, after Master Bedina and Dr. Gurudeva.
+  { slot: "MOBILE", imageUrl: `${SITE}/images/ads/pandit-lakshman-astro.png` },
 ] as const;
 
 type GigSeed = {
@@ -213,9 +217,10 @@ async function main() {
   });
 
   await db.media.deleteMany({ where: { businessId: business.id, url: OLD_POSTER } });
-  if (!(await db.media.count({ where: { businessId: business.id, url: POSTER } }))) {
+  for (const [url, sortOrder] of [[FLIER, -2], [POSTER, -1]] as const) {
+    if (await db.media.count({ where: { businessId: business.id, url } })) continue;
     await db.media.create({
-      data: { businessId: business.id, url: POSTER, type: "IMAGE", caption: "Pandit Lakshman Ji — Astrologer & Psychic Spiritual Healer", sortOrder: -1 },
+      data: { businessId: business.id, url, type: "IMAGE", caption: "Pandit Lakshman Ji — Astrologer & Psychic Spiritual Healer", sortOrder },
     });
   }
 
@@ -237,6 +242,7 @@ async function main() {
     const data = { ...banner, title: TITLE, linkUrl: `${SITE}${LINK}`, endsAt: ENDS, advertiserId: user.id };
     const existing = await db.banner.findFirst({
       where: {
+        slot: banner.slot,
         OR: [banner.imageUrl, banner.imageUrl.replace("/pandit-", "/master-")].map((url) => ({
           imageUrl: { endsWith: url.replace(SITE, "") },
         })),
@@ -278,7 +284,7 @@ async function main() {
     where: { listingId: listing.id, url: { contains: "-lakshman-" } },
   });
   await db.listingImage.createMany({
-    data: [POSTER, `${SITE}/images/ads/pandit-lakshman-sidebar.png`].map((url, sortOrder) => ({
+    data: [FLIER, POSTER].map((url, sortOrder) => ({
       listingId: listing.id,
       url,
       sortOrder,

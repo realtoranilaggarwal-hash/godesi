@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { BannerSlot } from "@prisma/client";
 import {
   activeBanners,
+  bookedBanners,
   HEADER_SIZE,
   SIDEBAR_SIZE,
   SIDEBAR_SLOTS,
@@ -357,16 +358,22 @@ export async function SmallBanners({
 /** Two small banners under the page content, for phones only. */
 export async function PhoneSmallBanners() {
   if (!isPhoneRequest()) return null;
-  const banners = await activeBanners(["MOBILE", "WALL"], 20);
+  const [booked, banners] = await Promise.all([
+    bookedBanners("MOBILE"),
+    activeBanners(["MOBILE", "WALL"], 20),
+  ]);
+  const pinned = new Set(booked.map((banner) => banner.id));
+  const small = (banner: { id: string; title: string; imageUrl: string }) => ({
+    id: banner.id,
+    title: banner.title,
+    imageUrl: proxyImage(banner.imageUrl),
+  });
   return (
     <SmallBannerRail
       phone
       show={2}
-      banners={banners.map((banner) => ({
-        id: banner.id,
-        title: banner.title,
-        imageUrl: proxyImage(banner.imageUrl),
-      }))}
+      pinned={booked.map(small)}
+      banners={banners.filter((banner) => !pinned.has(banner.id)).map(small)}
     />
   );
 }
