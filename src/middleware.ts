@@ -29,6 +29,7 @@ export function middleware(req: NextRequest) {
   // feeds on this domain.
   if (
     path.startsWith("/_next") ||
+    path === "/api/page-views" ||
     /\.(ico|png|jpe?g|gif|webp|avif|svg|woff2?|ttf|otf|css|m?js|map|txt|webmanifest|mp3|mp4|webm|pdf|html?|json)$/i.test(
       path,
     )
