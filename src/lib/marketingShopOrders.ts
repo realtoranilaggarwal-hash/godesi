@@ -1,6 +1,7 @@
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
 import { findMarketingProduct, usd } from "@/lib/marketingShop";
 import { SITE } from "@/lib/site";
+import { getStripe } from "@/lib/stripe";
 
 /** Where the team orders each item to drop-ship it. Server-only: never rendered on public pages. */
 const SUPPLIER_LINKS: Record<string, string> = {
@@ -33,6 +34,7 @@ export function decodeCart(value: string | undefined) {
 
 type ShopSession = {
   id: string;
+  payment_intent?: string | { id: string } | null;
   amount_total: number | null;
   customer_email?: string | null;
   customer_details?: { email?: string | null; name?: string | null; phone?: string | null } | null;
@@ -52,8 +54,59 @@ type ShopSession = {
   metadata?: Record<string, string> | null;
 };
 
-/** Stripe confirmed a Marketing Shop order: send the team the drop-ship sheet and thank the buyer. */
+function itemRows(items: ReturnType<typeof decodeCart>) {
+  return items
+    .map(({ product, qty }) => {
+      const link = SUPPLIER_LINKS[product.id];
+      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}</li>`;
+    })
+    .join("");
+}
+
+/** Card checkout is unavailable: email the team the cart so they can collect payment and the address by phone. */
+export async function requestMarketingShopOrder(order: {
+  items: { id: string; qty: number }[];
+  email: string;
+  name: string;
+  business: string;
+  phone: string;
+  page: string;
+  orderFor: string;
+  notes: string;
+}) {
+  const items = decodeCart(encodeCart(order.items));
+  const total = items.reduce((sum, { product, qty }) => sum + product.priceUsd * qty, 0);
+  return sendEmail({
+    to: SITE.salesEmail,
+    subject: `Marketing Shop order request ${usd(total)} (not paid): ${order.business || order.email}`,
+    html: shell(
+      "Marketing Shop order request — collect payment",
+      `<p>Card checkout was unavailable, so this order is <b>not paid</b>. Contact the client for payment and their shipping address.</p>
+      <p><b>${escapeHtml(order.business || "—")}</b> · ${escapeHtml(order.name)}<br/>
+      Email: ${escapeHtml(order.email)} · Phone: ${escapeHtml(order.phone || "—")}<br/>
+      GoDesi page / website: ${escapeHtml(order.page || "—")}<br/>
+      Adding to: ${escapeHtml(order.orderFor)}</p>
+      <ul>${itemRows(items)}</ul>
+      <p>Total: <b>${usd(total)}</b></p>
+      <p><b>Design notes:</b> ${escapeHtml(order.notes || "—")}</p>`,
+    ),
+    replyTo: order.email,
+  });
+}
+
+/**
+ * Stripe confirmed a Marketing Shop order: send the team the drop-ship sheet and thank the buyer.
+ * Throws if the team email fails so the webhook returns 500 and Stripe retries; a
+ * `shopNotified` flag on the PaymentIntent stops redeliveries from sending it twice.
+ */
 export async function notifyMarketingShopOrder(session: ShopSession) {
+  const paymentIntentId =
+    typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
+  const stripe = getStripe();
+  if (paymentIntentId) {
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (intent.metadata?.shopNotified === "1") return;
+  }
   const items = decodeCart(session.metadata?.items);
   const meta = session.metadata ?? {};
   const email = session.customer_details?.email ?? session.customer_email ?? "";
@@ -65,14 +118,7 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
     .map((line) => escapeHtml(String(line)))
     .join("<br/>");
 
-  const rows = items
-    .map(({ product, qty }) => {
-      const link = SUPPLIER_LINKS[product.id];
-      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}</li>`;
-    })
-    .join("");
-
-  await sendEmail({
+  const sent = await sendEmail({
     to: SITE.salesEmail,
     subject: `Marketing Shop order ${paid}: ${meta.business || email || session.id}`,
     html: shell(
@@ -81,7 +127,7 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       Email: ${escapeHtml(email || "—")} · Phone: ${escapeHtml(meta.phone || session.customer_details?.phone || "—")}<br/>
       GoDesi page / website: ${escapeHtml(meta.page || "—")}<br/>
       Adding to: ${escapeHtml(meta.orderFor || "shop")}</p>
-      <ul>${rows}</ul>
+      <ul>${itemRows(items)}</ul>
       <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>
       <p><b>Ship to:</b><br/>${address || "—"}</p>
       <p><b>Design notes:</b> ${escapeHtml(meta.notes || "—")}</p>
@@ -89,6 +135,10 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
     ),
     ...(email ? { replyTo: email } : {}),
   });
+  if (!sent) throw new Error(`Marketing Shop order email failed for ${session.id}`);
+  if (paymentIntentId) {
+    await stripe.paymentIntents.update(paymentIntentId, { metadata: { shopNotified: "1" } });
+  }
 
   if (email) {
     const list = items.map(({ product, qty }) => `<li>${qty} × ${escapeHtml(product.name)}</li>`).join("");
