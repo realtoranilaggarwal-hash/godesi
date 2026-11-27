@@ -10,7 +10,9 @@ import { PrismaClient } from "@prisma/client";
  */
 const db = new PrismaClient();
 const SITE = "https://godesi.com";
-const OWNER_EMAIL = "anilsellshomenj@gmail.com";
+// A user owns at most one business: NJFind goes on his spare account; the other
+// two stay unowned (claims need admin approval) until he picks accounts for them.
+const OWNERS: Record<string, string> = { "njfind-iselin": "anil.bizwiz@gmail.com" };
 
 type NewPage = {
   name: string;
@@ -100,16 +102,17 @@ const BANNERS = [
 ] as const;
 
 async function main() {
-  const owner = await db.user.findFirstOrThrow({ where: { email: OWNER_EMAIL }, select: { id: true } });
-
   for (const [image, page] of Object.entries({ njfind: "njfind-iselin", "vylla-in": "vylla-india", intensivecareindia: "intensive-care-india" })) {
     if (await db.business.findUnique({ where: { slug: page }, select: { id: true } })) continue;
     const data = NEW_PAGES[page];
+    const owner = OWNERS[page]
+      ? await db.user.findFirstOrThrow({ where: { email: OWNERS[page], business: null }, select: { id: true } })
+      : null;
     const business = await db.business.create({
       data: {
         ...data,
         slug: page,
-        ownerId: owner.id,
+        ownerId: owner?.id ?? null,
         status: "APPROVED",
         logoUrl: `${SITE}/images/business/house-${image}-logo.png`,
         coverUrl: `${SITE}/images/business/house-${image}-cover.jpg`,
