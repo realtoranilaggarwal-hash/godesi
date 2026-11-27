@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
+import { marketingShopMember } from "@/lib/marketingShopMember";
 import {
   MARKETING_CATEGORIES,
   MARKETING_SHOP_ORDER_FOR,
@@ -17,13 +19,13 @@ export const metadata: Metadata = {
 
 const ERRORS: Record<string, string> = {
   items: "Add at least one item to your order.",
-  email: "Enter a valid email so we can send your design preview.",
+  email: "Your GoDesi account needs a valid email so we can send your design preview.",
   artwork: "Tell us the design or details for each item: text to print, logo, photo or colours.",
   returns: "Please confirm you understand custom-made items can't be returned.",
   checkout: "Card checkout is not available right now. Call or WhatsApp Anil at (732) 983-7958 to order.",
 };
 
-export default function MarketingShopPage({
+export default async function MarketingShopPage({
   searchParams,
 }: {
   searchParams: { for?: string; cat?: string; paid?: string; requested?: string; error?: string };
@@ -35,6 +37,8 @@ export default function MarketingShopPage({
   const category = MARKETING_CATEGORIES.find((c) => c.id === searchParams.cat)?.id as
     | MarketingCategory
     | undefined;
+  const user = await getCurrentUser();
+  const member = user ? await marketingShopMember(user) : null;
   return (
     <div className="space-y-6">
       <section className="rounded-3xl bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-600 px-5 py-8 text-white sm:px-8">
@@ -70,7 +74,7 @@ export default function MarketingShopPage({
         </p>
       ) : null}
 
-      <MarketingShopOrderForm orderFor={orderFor} category={category} />
+      <MarketingShopOrderForm orderFor={orderFor} category={category} member={member} />
     </div>
   );
 }

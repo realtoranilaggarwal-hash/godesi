@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { startMarketingShopCheckout } from "@/app/actions/marketingShop";
 import {
   MARKETING_CATEGORIES,
@@ -11,17 +12,40 @@ import {
   type MarketingShopOrderFor,
   usd,
 } from "@/lib/marketingShop";
+import type { MarketingShopMember } from "@/lib/marketingShopMember";
 
+const CART_KEY = "godesi-marketing-cart";
+const LOGIN_NEXT = encodeURIComponent("/marketing-shop#order");
 const input = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm";
 
 export function MarketingShopOrderForm({
   orderFor,
   category: initialCategory,
+  member,
 }: {
   orderFor: MarketingShopOrderFor;
   category?: MarketingCategory;
+  member: MarketingShopMember | null;
 }) {
   const [qty, setQty] = useState<Record<string, number>>({});
+  const [restored, setRestored] = useState(false);
+  // Keep the cart across the log-in / join round trip.
+  useEffect(() => {
+    try {
+      if (/[?&](paid|requested)=/.test(window.location.search)) localStorage.removeItem(CART_KEY);
+      else {
+        const saved = JSON.parse(localStorage.getItem(CART_KEY) ?? "{}");
+        if (saved && typeof saved === "object") setQty(saved);
+      }
+    } catch {}
+    setRestored(true);
+  }, []);
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(qty));
+    } catch {}
+  }, [qty, restored]);
   const [category, setCategory] = useState<MarketingCategory | undefined>(initialCategory);
   const shown = MARKETING_PRODUCTS.filter((p) => !category || p.category === category);
   const chip = (active: boolean) =>
@@ -58,6 +82,12 @@ export function MarketingShopOrderForm({
                 <h2 className="font-black text-slate-900">{p.name}</h2>
                 {p.size ? <p className="mt-1 text-xs font-bold text-indigo-700">Size: {p.size}</p> : null}
                 <p className="mt-1 flex-1 text-sm text-slate-600">{p.blurb}</p>
+                {p.example ? (
+                  <a href={p.example} target="_blank" rel="noopener" className="mt-3 flex items-center gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-2 text-xs font-semibold text-indigo-800">
+                    <Image src={p.example} alt={`Example ${p.name} we designed`} width={90} height={120} className="h-24 w-auto rounded" />
+                    <span>Example: we&apos;ll design one like this for you, with your photo, logo and QR code.</span>
+                  </a>
+                ) : null}
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <strong className="text-lg text-orange-600">{usd(p.priceUsd)}</strong>
                   {n ? (
@@ -107,29 +137,68 @@ export function MarketingShopOrderForm({
         ) : (
           <p className="mt-2 text-sm text-slate-600">Tap “Add to my order” on the items you want.</p>
         )}
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <input name="name" required placeholder="Your name" className={input} />
-          <input name="email" type="email" required placeholder="Email" className={input} />
-          <input name="phone" placeholder="Phone / WhatsApp" className={input} />
-          <input name="business" placeholder="Business name" className={input} />
-          <input name="page" placeholder="Your GoDesi page or website (optional)" className={`${input} sm:col-span-2`} />
-          <select name="orderFor" defaultValue={orderFor} className={input}>
-            {Object.entries(MARKETING_SHOP_ORDER_FOR).map(([value, label]) => (
-              <option key={value} value={value}>Add to: {label}</option>
-            ))}
-          </select>
-          <textarea name="notes" rows={2} maxLength={450} placeholder="Anything else we should know? (optional)" className={`${input} sm:col-span-2`} />
-        </div>
-        <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
-          <input type="checkbox" name="noReturns" required className="mt-1 h-4 w-4" />
-          <span>I understand every item is custom-made for me, so it can&apos;t be returned.</span>
-        </label>
-        <p className="mt-3 text-xs text-slate-600">
-          You enter your shipping address on the next step. After you pay, reply to our email with your logo or artwork; we design it, send you a preview, and order and ship it once you approve.
-        </p>
-        <button type="submit" disabled={!chosen.length} className="mt-3 w-full rounded-xl bg-orange-500 px-4 py-3 text-base font-black text-white hover:bg-orange-600 disabled:opacity-50 sm:w-auto">
-          {chosen.length ? `Pay ${usd(total)} and ship to me` : "Add items to order"}
-        </button>
+        {member ? (
+          <>
+            <div className="mt-4 rounded-xl border border-indigo-200 bg-white p-3 text-sm text-slate-700">
+              Ordering as <b>{member.name}</b> ({member.email}).{" "}
+              {member.qrUrl ? (
+                <>
+                  Your QR code will open{" "}
+                  <a href={member.qrUrl} target="_blank" rel="noopener" className="font-semibold text-indigo-700 underline">
+                    {member.qrUrl.replace(/^https?:\/\//, "")}
+                  </a>
+                  .
+                </>
+              ) : null}
+              {!member.hasBusiness ? (
+                <>
+                  {" "}
+                  <Link href="/add-business" className="font-semibold text-orange-600 underline">
+                    Add your business page
+                  </Link>{" "}
+                  so your QR code and details come from it.
+                </>
+              ) : null}
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <input name="name" required defaultValue={member.name} placeholder="Your name" className={input} />
+              <input name="phone" defaultValue={member.phone} placeholder="Phone / WhatsApp" className={input} />
+              <input name="business" defaultValue={member.business} placeholder="Business name" className={input} />
+              <input name="website" defaultValue={member.website} placeholder="Your website (optional)" className={input} />
+              <select name="orderFor" defaultValue={orderFor} className={`${input} sm:col-span-2`}>
+                {Object.entries(MARKETING_SHOP_ORDER_FOR).map(([value, label]) => (
+                  <option key={value} value={value}>Add to: {label}</option>
+                ))}
+              </select>
+              <textarea name="notes" rows={2} maxLength={450} placeholder="Anything else we should know? (optional)" className={`${input} sm:col-span-2`} />
+            </div>
+            <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
+              <input type="checkbox" name="noReturns" required className="mt-1 h-4 w-4" />
+              <span>I understand every item is custom-made for me, so it can&apos;t be returned.</span>
+            </label>
+            <p className="mt-3 text-xs text-slate-600">
+              You enter your shipping address on the next step. After you pay, reply to our email with your logo or artwork; we design it, send you a preview, and order and ship it once you approve.
+            </p>
+            <button type="submit" disabled={!chosen.length} className="mt-3 w-full rounded-xl bg-orange-500 px-4 py-3 text-base font-black text-white hover:bg-orange-600 disabled:opacity-50 sm:w-auto">
+              {chosen.length ? `Pay ${usd(total)} and ship to me` : "Add items to order"}
+            </button>
+          </>
+        ) : (
+          <div className="mt-4 rounded-xl border border-indigo-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-800">
+              Log in or join GoDesi free to order. We use your GoDesi business page for your QR code, phone and details.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link href={`/login?next=${LOGIN_NEXT}`} className="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-black text-white hover:bg-orange-600">
+                Log in to order
+              </Link>
+              <Link href={`/signup?next=${LOGIN_NEXT}`} className="rounded-xl border-2 border-orange-500 px-5 py-2.5 text-sm font-black text-orange-600 hover:bg-orange-50">
+                Join free
+              </Link>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">Your cart stays saved while you log in.</p>
+          </div>
+        )}
       </section>
     </form>
   );

@@ -7,6 +7,8 @@ export type MarketingProduct = {
   category: MarketingCategory;
   /** Printed size, shown on the card. */
   size?: string;
+  /** A finished design we made, shown as "we'll design one like this". */
+  example?: string;
 };
 
 /** Shop sections, in display order. Add a category here, then tag products with its id. */
@@ -22,9 +24,9 @@ export type MarketingCategory = (typeof MARKETING_CATEGORIES)[number]["id"];
 
 /** GoDesi Marketing Shop: custom-printed items we design with the client's logo and GoDesi QR, then ship to them. */
 export const MARKETING_PRODUCTS: MarketingProduct[] = [
-  { id: "triangle-flags", name: "Custom triangle flags", blurb: "Pennant flags with your logo for doors, stores, weddings and festivals.", image: "/images/shop/triangle-flags.jpg", priceUsd: 10.24, category: "flags" },
-  { id: "car-sticker", name: "Large custom car sticker", blurb: "Waterproof, removable sticker with your logo, phone and QR code.", image: "/images/shop/car-sticker.jpg", priceUsd: 11.55, category: "print" },
-  { id: "wall-banner", name: "Custom photo / text wall banner", blurb: "Entrance banner or photo backdrop for events, openings and parties.", image: "/images/shop/wall-banner.jpg", priceUsd: 6.11, category: "flags" },
+  { id: "triangle-flags", name: "Custom triangle flags", blurb: "Pennant flag with your photo, logo, phone and GoDesi QR code for doors, stores, weddings and festivals. We design one like the example.", image: "/images/shop/triangle-flags.jpg", priceUsd: 10.24, category: "flags", size: "11.81 × 15.75 in", example: "/images/shop/triangle-flag-example.jpg" },
+  { id: "car-sticker", name: "Large custom car sticker", blurb: "Waterproof, removable sticker with your logo, phone and QR code.", image: "/images/shop/car-sticker.jpg", priceUsd: 11.55, category: "print", size: "7.87 × 7.87 in" },
+  { id: "wall-banner", name: "Custom photo / text wall banner", blurb: "Big entrance banner or photo backdrop with your photo, text and QR code for events, openings and parties. Price includes design. Stand not included.", image: "/images/shop/wall-banner.jpg", priceUsd: 49.99, category: "flags", size: "70.87 × 90.55 in", example: "/media-kit/flyers/godesi-grow-business-300w.jpg" },
   { id: "vertical-flags", name: "Custom vertical door banner flag", blurb: "Tall polyester flag with your logo, photo and text, for indoor or outdoor events. Price includes design.", image: "/images/shop/vertical-flags.jpg", priceUsd: 50, category: "flags", size: "35.4 × 70.8 in" },
   { id: "qr-stickers", name: "1000 round QR code stickers", blurb: "Full-colour stickers we design with your text, with your QR code to your GoDesi page in the middle. For bags, boxes, envelopes and handouts.", image: "/images/shop/qr-stickers.jpg", priceUsd: 50, category: "print", size: "1.97 in round" },
   { id: "a5-flyers", name: "50 custom double-sided flyers", blurb: "50 sheets printed on both sides for your offers and events. Price includes design and shipping.", image: "/images/shop/a5-flyers.jpg", priceUsd: 99, category: "print", size: "5.5 × 8.27 in" },

@@ -77,6 +77,7 @@ export async function requestMarketingShopOrder(order: {
   business: string;
   phone: string;
   page: string;
+  website: string;
   orderFor: string;
   notes: string;
   designs: Record<string, string>;
@@ -91,7 +92,8 @@ export async function requestMarketingShopOrder(order: {
       `<p>Card checkout was unavailable, so this order is <b>not paid</b>. Contact the client for payment and their shipping address.</p>
       <p><b>${escapeHtml(order.business || "—")}</b> · ${escapeHtml(order.name)}<br/>
       Email: ${escapeHtml(order.email)} · Phone: ${escapeHtml(order.phone || "—")}<br/>
-      GoDesi page / website: ${escapeHtml(order.page || "—")}<br/>
+      QR code links to: ${escapeHtml(order.page || "— (no GoDesi page yet; ask them)")}<br/>
+      Website: ${escapeHtml(order.website || "—")}<br/>
       Adding to: ${escapeHtml(order.orderFor)}</p>
       <ul>${itemRows(items, order.designs)}</ul>
       <p>Total: <b>${usd(total)}</b></p>
@@ -133,7 +135,8 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       "Marketing Shop order — drop-ship",
       `<p><b>${escapeHtml(meta.business || "—")}</b> · ${escapeHtml(meta.name || session.customer_details?.name || "")}<br/>
       Email: ${escapeHtml(email || "—")} · Phone: ${escapeHtml(meta.phone || session.customer_details?.phone || "—")}<br/>
-      GoDesi page / website: ${escapeHtml(meta.page || "—")}<br/>
+      QR code links to: ${escapeHtml(meta.page || "— (no GoDesi page yet; ask them)")}<br/>
+      Website: ${escapeHtml(meta.website || "—")}<br/>
       Adding to: ${escapeHtml(meta.orderFor || "shop")}</p>
       <ul>${itemRows(items, meta)}</ul>
       <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>

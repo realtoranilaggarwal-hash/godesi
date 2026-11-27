@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 import { siteUrl } from "@/lib/format";
 import {
   MARKETING_PRODUCTS,
@@ -8,6 +9,7 @@ import {
   type MarketingShopOrderFor,
 } from "@/lib/marketingShop";
 import { designKey, encodeCart, requestMarketingShopOrder } from "@/lib/marketingShopOrders";
+import { marketingShopMember } from "@/lib/marketingShopMember";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 const MAX_QTY = 50;
@@ -18,11 +20,14 @@ function field(formData: FormData, name: string, max: number) {
 
 export async function startMarketingShopCheckout(formData: FormData) {
   const back = `${siteUrl()}/marketing-shop`;
+  const user = await getCurrentUser();
+  if (!user) redirect(`/login?next=${encodeURIComponent("/marketing-shop#order")}`);
+  const member = await marketingShopMember(user);
   const items = MARKETING_PRODUCTS.flatMap((product) => {
     const qty = Math.floor(Number(formData.get(`qty-${product.id}`) ?? 0));
     return Number.isFinite(qty) && qty > 0 ? [{ product, qty: Math.min(qty, MAX_QTY) }] : [];
   });
-  const email = field(formData, "email", 200);
+  const email = member.email;
   if (!items.length) redirect(`${back}?error=items#order`);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) redirect(`${back}?error=email#order`);
   const designs = Object.fromEntries(
@@ -36,10 +41,12 @@ export async function startMarketingShopCheckout(formData: FormData) {
   const metadata = {
     kind: "marketing-shop",
     items: encodeCart(items.map(({ product, qty }) => ({ id: product.id, qty }))),
-    name: field(formData, "name", 100),
-    business: field(formData, "business", 120),
-    phone: field(formData, "phone", 40),
-    page: field(formData, "page", 200),
+    userId: user.id,
+    name: field(formData, "name", 100) || member.name,
+    business: field(formData, "business", 120) || member.business,
+    phone: field(formData, "phone", 40) || member.phone,
+    page: member.qrUrl,
+    website: field(formData, "website", 200),
     orderFor,
     notes: field(formData, "notes", 450),
     noReturns: "agreed",
