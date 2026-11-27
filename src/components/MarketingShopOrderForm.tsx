@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { startMarketingShopCheckout } from "@/app/actions/marketingShop";
 import {
   MARKETING_CATEGORIES,
@@ -31,11 +31,24 @@ export function MarketingShopOrderForm({
   const [designs, setDesigns] = useState<Record<string, string>>({});
   const [restored, setRestored] = useState(false);
   const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+  const zoomClose = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!zoom) return;
-    const close = (e: KeyboardEvent) => e.key === "Escape" && setZoom(null);
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
+    const opener = document.activeElement as HTMLElement | null;
+    zoomClose.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZoom(null);
+      // Close is the only control in the lightbox, so Tab stays on it.
+      if (e.key === "Tab") {
+        e.preventDefault();
+        zoomClose.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
   }, [zoom]);
   const loginNext = encodeURIComponent(`/marketing-shop${orderFor === "shop" ? "" : `?for=${orderFor}`}#order`);
   // Keep the cart across the log-in / join round trip.
@@ -125,7 +138,7 @@ export function MarketingShopOrderForm({
       </ul>
       {zoom ? (
         <div role="dialog" aria-modal="true" aria-label={zoom.alt} onClick={() => setZoom(null)} className="fixed inset-0 z-[100] !mt-0 flex cursor-zoom-out items-center justify-center bg-black/80 p-4">
-          <button type="button" onClick={() => setZoom(null)} className="absolute right-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-900" aria-label="Close">✕ Close</button>
+          <button ref={zoomClose} type="button" onClick={() => setZoom(null)} className="absolute right-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-900" aria-label="Close">✕ Close</button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={zoom.src} alt={zoom.alt} className="max-h-[90vh] max-w-full rounded-xl bg-white object-contain" />
         </div>
