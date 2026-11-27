@@ -20,6 +20,20 @@ export function generateFreeCourseCode() {
   return `ANIL-${body}-${signature(body)}`;
 }
 
+/**
+ * `count` codes derived from `seed` (e.g. a Stripe Checkout session id): the same seed always
+ * yields the same codes, so retried webhooks resend the same codes instead of minting new ones.
+ */
+export function freeCourseCodesFor(seed: string, count: number) {
+  return Array.from({ length: count }, (_, index) => {
+    const secret = process.env.AUTH_SECRET;
+    if (!secret) throw new Error("AUTH_SECRET is not set");
+    const digest = createHmac("sha256", secret).update(`bonus:${seed}:${index}`).digest();
+    const body = Array.from(digest.subarray(0, 6), (byte) => ALPHABET[byte % ALPHABET.length]).join("");
+    return `ANIL-${body}-${signature(body)}`;
+  });
+}
+
 /** Returns the canonical code when it is genuine, otherwise null. */
 export function verifyFreeCourseCode(input: string) {
   const code = input.trim().toUpperCase().replace(/\s+/g, "");

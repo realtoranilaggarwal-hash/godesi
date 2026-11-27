@@ -3,6 +3,13 @@ const nextConfig = {
   // Tags every asset request with the build that asked for it, so Vercel's skew
   // protection can serve an open tab its own build instead of failing chunks.
   deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
+  experimental: {
+    // react-pdf breaks when webpack bundles it into server routes (course ebooks).
+    serverComponentsExternalPackages: ["@react-pdf/renderer"],
+    outputFileTracingIncludes: {
+      "/course/[slug]/ebook": ["./public/images/courses/**", "./public/qr-logo.png"],
+    },
+  },
   images: {
     // Uploads live on Vercel Blob; without this the optimizer answers 400.
     remotePatterns: [

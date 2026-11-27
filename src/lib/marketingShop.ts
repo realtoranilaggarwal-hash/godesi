@@ -52,6 +52,13 @@ const RETIRED_MARKETING_PRODUCTS: MarketingProduct[] = [
   { id: "logo-beanie", name: "Custom text beanie", blurb: "Warm winter beanie printed with your business name or logo.", image: "/images/shop/logo-beanie.jpg", priceUsd: 13.99, category: "gifts" },
 ];
 
+/** Marketing Shop bonus: one free GoDesi course (with its PDF ebook) for every $9 spent, the course launch price. */
+export const EBOOK_BONUS_STEP_USD = 9;
+
+export function ebookBonusCount(totalUsd: number, courseCount: number) {
+  return Math.min(courseCount, Math.floor(totalUsd / EBOOK_BONUS_STEP_USD + 1e-9));
+}
+
 export function findMarketingProduct(id: string) {
   return [...MARKETING_PRODUCTS, ...RETIRED_MARKETING_PRODUCTS].find((p) => p.id === id);
 }

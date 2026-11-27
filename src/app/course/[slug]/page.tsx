@@ -96,7 +96,7 @@ export default async function CourseSalesPage({
                 LAUNCH DEAL · was ${listPrice}
               </span>
               <span className="text-xs text-slate-400">
-                One payment · lifetime access · {course.lessons.length} lessons
+                One payment · lifetime access · {course.lessons.length} lessons + PDF ebook
               </span>
             </div>
             {searchParams.error === "cancelled" ? (
