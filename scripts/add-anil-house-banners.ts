@@ -1,4 +1,8 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
+import { canonicalEmail } from "../src/lib/signupGuard";
+import { ensureUsername } from "../src/lib/profiles";
 
 /**
  * Anil's own sites as house 320x100 banners in the MOBILE slot (right-side
@@ -10,9 +14,14 @@ import { PrismaClient } from "@prisma/client";
  */
 const db = new PrismaClient();
 const SITE = "https://godesi.com";
-// A user owns at most one business: NJFind goes on his spare account; the other
-// two stay unowned (claims need admin approval) until he picks accounts for them.
-const OWNERS: Record<string, string> = { "njfind-iselin": "anil.bizwiz@gmail.com" };
+// A user owns at most one business, so each page gets its own login. Missing
+// accounts are created with an unusable password: he signs in with Google or
+// "Forgot password".
+const OWNERS: Record<string, string> = {
+  "njfind-iselin": "anil.bizwiz@gmail.com",
+  "vylla-india": "anil@vylla.in",
+  "intensive-care-india": "anil@intensivecareindia.com",
+};
 
 type NewPage = {
   name: string;
@@ -60,6 +69,8 @@ const NEW_PAGES: Record<string, NewPage> = {
     city: "Noida",
     state: "UP",
     country: "India",
+    phone: "+1-732-983-7958",
+    whatsappNumber: "17329837958",
     websiteUrl: "https://vylla.in/",
     description: [
       "Vylla.in is India's verified real-estate marketplace: find RERA-registered agents, builders and new projects, list your property, and connect with trusted home-service partners.",
@@ -101,18 +112,48 @@ const BANNERS = [
   ["intensivecareindia", "IntensiveCareIndia.com — Top hospitals & surgeons in India", "intensive-care-india"],
 ] as const;
 
+/** The page's login; refuses an account that already owns another business. */
+async function ownerAccount(email: string, name: string, page: string) {
+  const existing = await db.user.findFirst({
+    where: { OR: [{ email }, { emailCanonical: canonicalEmail(email) }] },
+    select: { id: true, business: { select: { slug: true } } },
+  });
+  if (existing?.business && existing.business.slug !== page) {
+    throw new Error(`${email} already owns /business/${existing.business.slug}`);
+  }
+  if (existing) return existing;
+  const user = await db.user.create({
+    data: {
+      name,
+      email,
+      emailCanonical: canonicalEmail(email),
+      role: "BUSINESS",
+      passwordHash: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
+    },
+    select: { id: true },
+  });
+  await ensureUsername(user.id);
+  return user;
+}
+
 async function main() {
   for (const [image, page] of Object.entries({ njfind: "njfind-iselin", "vylla-in": "vylla-india", intensivecareindia: "intensive-care-india" })) {
-    if (await db.business.findUnique({ where: { slug: page }, select: { id: true } })) continue;
     const data = NEW_PAGES[page];
-    const owner = OWNERS[page]
-      ? await db.user.findFirstOrThrow({ where: { email: OWNERS[page], business: null }, select: { id: true } })
-      : null;
+    const owner = await ownerAccount(OWNERS[page], data.name, page);
+    const found = await db.business.findUnique({ where: { slug: page }, select: { id: true, ownerId: true } });
+    if (found) {
+      await db.business.update({
+        where: { id: found.id },
+        data: { phone: data.phone ?? null, whatsappNumber: data.whatsappNumber ?? null, ...(found.ownerId ? {} : { ownerId: owner.id }) },
+      });
+      console.log(`updated /business/${page} (owner ${OWNERS[page]})`);
+      continue;
+    }
     const business = await db.business.create({
       data: {
         ...data,
         slug: page,
-        ownerId: owner?.id ?? null,
+        ownerId: owner.id,
         status: "APPROVED",
         logoUrl: `${SITE}/images/business/house-${image}-logo.png`,
         coverUrl: `${SITE}/images/business/house-${image}-cover.jpg`,
