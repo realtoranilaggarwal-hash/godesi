@@ -156,7 +156,8 @@ async function main() {
           ...(found.ownerId ? {} : { ownerId: owner.id }),
         },
       });
-      console.log(`updated /business/${page} (owner ${OWNERS[page]})`);
+      const kept = found.ownerId && found.ownerId !== owner.id;
+      console.log(`updated /business/${page} (${kept ? `kept its other owner, not ${OWNERS[page]}` : `owner ${OWNERS[page]}`})`);
       continue;
     }
     const business = await db.business.create({
