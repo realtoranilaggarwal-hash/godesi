@@ -142,6 +142,17 @@ const EARN_HERE = [
   },
 ];
 
+const PARTNER_OFFERS = [
+  {
+    name: "Temu influencer program",
+    icon: "🛍️",
+    href: "https://temu.to/k/ue3yf90kwvi",
+    code: "ina040777",
+    blurb:
+      "Sign up through this link and verify your social media account. Temu advertises free products worth up to $500 for new influencers, and you can then earn by sharing your own Temu links.",
+  },
+];
+
 export default async function EarnPage() {
   const me = await getCurrentUser();
   const locked = !me;
@@ -278,10 +289,46 @@ export default async function EarnPage() {
         </ul>
       </section>
 
+      <section className="rounded-3xl border border-slate-200 bg-white p-5">
+        <h2 className="text-lg font-black text-slate-900">
+          📣 For influencers — earn with partner programs
+        </h2>
+        <ul className="mt-3 space-y-3">
+          {PARTNER_OFFERS.map((offer) => (
+            <li key={offer.name} className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+              <p className="text-sm font-bold text-slate-800">
+                {offer.icon} {offer.name}{" "}
+                <span className="ml-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold uppercase text-slate-600">
+                  Partner link
+                </span>
+              </p>
+              <p className="mt-1 text-sm text-slate-600">{offer.blurb}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <a
+                  href={offer.href}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow sponsored"
+                  className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600"
+                >
+                  Join on Temu →
+                </a>
+                <span className="text-sm text-slate-700">
+                  Code: <strong className="font-mono">{offer.code}</strong>
+                </span>
+                <CopyButton value={offer.code} label="Copy code" />
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                GoDesi&apos;s founder earns a referral bonus when you join with
+                this link or code. Rewards and rules are set by Temu and can change.
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <p className="px-1 text-xs text-slate-500">
         Guides are educational, not income promises — results depend on your
-        effort and market. If we ever add partner links, they&apos;ll be
-        labelled.
+        effort and market. Partner links are labelled.
       </p>
     </div>
   );
