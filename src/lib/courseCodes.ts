@@ -44,6 +44,19 @@ export function verifyFreeCourseCode(input: string) {
   return expected.length === given.length && timingSafeEqual(expected, given) ? code : null;
 }
 
+/** One shared promo code: every member can use it once to unlock one course (and its ebook) free. */
+export const SIGNUP_PROMO_CODE = "GODESIFREE";
+export const SIGNUP_PROMO_PROVIDER = "signup-promo";
+
+export function isSignupPromoCode(input: string) {
+  return input.trim().toUpperCase().replace(/\s+/g, "") === SIGNUP_PROMO_CODE;
+}
+
+/** Stored as the enrollment's unique `reference`, so each account can use the promo code once. */
+export function signupPromoReference(userId: string) {
+  return `${SIGNUP_PROMO_PROVIDER}:${userId}`;
+}
+
 export function freeCodeReference(code: string) {
   return `${FREE_CODE_PROVIDER}:${code}`;
 }

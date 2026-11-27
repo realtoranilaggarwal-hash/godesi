@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { DealRibbon } from "@/components/DealRibbon";
 import { TopSkinBanner } from "@/components/TopSkinBanner";
 import { ThanksgivingBanner } from "@/components/ThanksgivingBanner";
+import { BlackFridayBanner } from "@/components/BlackFridayBanner";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PageViewCount } from "@/components/PageViewCount";
@@ -214,6 +215,7 @@ export default async function RootLayout({
         <UnregisterServiceWorkers />
         <SiteHeader />
         <ThanksgivingBanner />
+        <BlackFridayBanner />
         <div className="xl:hidden">
           <TopSkinBanner />
         </div>

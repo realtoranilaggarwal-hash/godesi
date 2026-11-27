@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { metaDescription } from "@/lib/seo";
 import Link from "next/link";
+import { SIGNUP_PROMO_CODE } from "@/lib/courseCodes";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -123,8 +124,9 @@ export default async function CourseSalesPage({
       <Card id="free-code" className="p-5">
         <h2 className="text-lg font-bold">Got a free-course code?</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Clients who buy or sell a home with {AUTHOR_NAME} get any one course
-          free. Ask Anil for your code and enter it here.
+          New GoDesi members: enter <strong>{SIGNUP_PROMO_CODE}</strong> to get
+          one course and its PDF ebook free. Clients who buy or sell a home with{" "}
+          {AUTHOR_NAME} get a course free too: enter the code Anil gave you.
         </p>
         {user ? (
           <form
@@ -135,7 +137,7 @@ export default async function CourseSalesPage({
             <input
               name="code"
               required
-              placeholder="ANIL-XXXXXX-XXXX"
+              placeholder={`${SIGNUP_PROMO_CODE} or ANIL-XXXXXX-XXXX`}
               autoComplete="off"
               className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm uppercase sm:max-w-xs"
             />
@@ -157,6 +159,11 @@ export default async function CourseSalesPage({
         {searchParams.error === "code_invalid" ? (
           <p className="mt-2 text-sm font-semibold text-red-600">
             That code is not valid — check it and try again.
+          </p>
+        ) : null}
+        {searchParams.error === "promo_used" ? (
+          <p className="mt-2 text-sm font-semibold text-red-600">
+            You have already used {SIGNUP_PROMO_CODE} on your account. Each member gets one free course.
           </p>
         ) : null}
         {searchParams.error === "code_used" ? (
