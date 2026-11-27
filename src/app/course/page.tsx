@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SIGNUP_PROMO_CODE } from "@/lib/courseCodes";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import {
@@ -68,6 +69,35 @@ export default async function CourseCatalogPage() {
             />
           </Link>
         </div>
+      </section>
+
+      <section
+        id="free-ebook"
+        className="flex flex-wrap items-center gap-4 rounded-3xl border-2 border-emerald-300 bg-emerald-50 px-5 py-5 sm:px-8"
+      >
+        <p className="text-3xl" aria-hidden>
+          🎁
+        </p>
+        <div className="min-w-0 flex-1">
+          <p className="text-lg font-black text-emerald-900">
+            Join GoDesi free and get one course + PDF ebook free
+          </p>
+          <p className="mt-1 text-sm text-emerald-900/80">
+            {user ? "Pick" : "Sign up free, then pick"} any course below, and enter code{" "}
+            <code className="rounded bg-white px-1.5 py-0.5 font-black text-emerald-800">
+              {SIGNUP_PROMO_CODE}
+            </code>{" "}
+            in its &ldquo;Got a free-course code?&rdquo; box. One free course per member.
+          </p>
+        </div>
+        {user ? null : (
+          <Link
+            href="/signup?next=/course%23free-ebook"
+            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-black text-white hover:bg-emerald-700"
+          >
+            Join GoDesi free
+          </Link>
+        )}
       </section>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
