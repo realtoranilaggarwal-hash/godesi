@@ -19,6 +19,13 @@ const NAKULA = {
     "Website redo of astrologerpsychicnakula.com ($799) + automated daily astrology page, first year ($500). Leads plan ($79/month) waived. Total $1,299, paid in two halves.",
 };
 
+const RENU = {
+  client: "Renu Mistry — GRM Advisory",
+  email: "rmistry@grsadvisory.com",
+  description:
+    "GRM Advisory package, $500 total in two halves: website on GRMAdvisory.com (Home, About us, Services, Areas we serve, Contact; call, WhatsApp, inquiry, quote and appointment buttons), a daily email with a new ready-to-share content picture on her topics, 2 promo videos (normally $50 each), a featured GoDesi classified, and her 320×100 side banner plus other GoDesi banner spots.",
+};
+
 export const INVOICES: Invoice[] = [
   {
     key: "nakula-3025fb37f5cf",
@@ -58,6 +65,18 @@ export const INVOICES: Invoice[] = [
     description:
       "Package deal offered Nov 26, 2026 only: the $200 Premium package (Featured astrologer page, banner ads, featured classified, 5 gigs, News Desk story) plus a full redesign of astrolakshmanji.com (normally $999; $499 holiday price) and NYE party promotion. Total $500.",
     amountMinor: 50000,
+  },
+  {
+    key: "renu-grm-ee183b7a6e65",
+    ...RENU,
+    title: "GRM Advisory website + marketing package — 1st half (50%) to start",
+    amountMinor: 25000,
+  },
+  {
+    key: "renu-grm-f19a55668c99",
+    ...RENU,
+    title: "GRM Advisory website + marketing package — 2nd half (50%) on completion",
+    amountMinor: 25000,
   },
 ];
 
