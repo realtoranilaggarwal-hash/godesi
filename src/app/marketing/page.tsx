@@ -3,6 +3,7 @@ import Link from "next/link";
 import { GodesiWikiBanner } from "@/components/GodesiWikiPromo";
 import { PlaylistGallery } from "@/components/PlaylistGallery";
 import { GODESI_PLAYLISTS } from "@/lib/youtubePlaylist";
+import { MarketingShopCard } from "@/components/MarketingShopCard";
 import { Card } from "@/components/ui";
 import { EFAX_AFFILIATE_URL, EFAX_TRACKING_PIXEL } from "@/lib/shop";
 
@@ -76,6 +77,8 @@ export default function MarketingPage() {
         owner="Godesi"
         heading="Watch: free marketing on Godesi"
       />
+
+      <MarketingShopCard />
 
       <section className="space-y-3">
         <h2 className="text-xl font-black">How it works</h2>

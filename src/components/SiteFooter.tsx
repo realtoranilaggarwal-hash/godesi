@@ -76,6 +76,7 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] =
         { href: "/professionals", label: "GoDesi Professionals" },
         { href: "/buzz", label: "#godesi social wall" },
         { href: "/earn", label: "💸 Make money online" },
+        { href: "/marketing-shop", label: "🛒 Marketing Shop" },
         { href: "/people", label: "People on GoDesi" },
         { href: "/rishta/new", label: "Post a Rishta profile" },
         { href: "/rewards", label: "Refer & earn rewards" },

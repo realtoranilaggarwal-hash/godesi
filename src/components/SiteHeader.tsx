@@ -113,6 +113,7 @@ const SECTION_LINKS: Record<
     { href: "/search", label: "Cards", icon: "🪪" },
     { href: "/tools", label: "Tools", icon: "🧰" },
     { href: "/earn", label: "Earn", icon: "💸" },
+    { href: "/marketing-shop", label: "Marketing Shop", icon: "🛒" },
     { href: "/trending", label: "Trending hashtags", icon: "🔥" },
     { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
     { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
@@ -308,6 +309,7 @@ export async function SiteHeader() {
     { href: "/pricing", label: "Pricing", icon: "⭐" },
     { href: "/tools", label: "Free business tools", icon: "🧰" },
     { href: "/earn", label: "Make money online", icon: "💸" },
+    { href: "/marketing-shop", label: "Marketing Shop", icon: "🛒" },
     { href: "/rewards", label: "Refer & earn", icon: "🎁" },
   ];
 
