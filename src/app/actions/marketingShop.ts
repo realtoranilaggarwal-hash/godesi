@@ -13,7 +13,7 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 const MAX_QTY = 50;
 
 function field(formData: FormData, name: string, max: number) {
-  return String(formData.get(name) ?? "").trim().slice(0, max);
+  return String(formData.get(name) ?? "").replace(/\r\n/g, "\n").trim().slice(0, max);
 }
 
 export async function startMarketingShopCheckout(formData: FormData) {

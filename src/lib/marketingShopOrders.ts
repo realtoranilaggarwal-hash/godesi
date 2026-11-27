@@ -63,7 +63,7 @@ function itemRows(items: ReturnType<typeof decodeCart>, designs: Record<string, 
     .map(({ product, qty }) => {
       const link = SUPPLIER_LINKS[product.id];
       const design = designs[designKey(product.id)];
-      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}<br/><i>Design:</i> ${escapeHtml(design || "—")}</li>`;
+      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}<br/><i>Design:</i> ${escapeHtml(design || "—").replace(/\n/g, "<br/>")}</li>`;
     })
     .join("");
 }
