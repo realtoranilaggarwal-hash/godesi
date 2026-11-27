@@ -15,7 +15,7 @@ import {
 import type { MarketingShopMember } from "@/lib/marketingShopMember";
 
 const CART_KEY = "godesi-marketing-cart";
-const LOGIN_NEXT = encodeURIComponent("/marketing-shop#order");
+const DESIGNS_KEY = "godesi-marketing-designs";
 const input = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm";
 
 export function MarketingShopOrderForm({
@@ -28,14 +28,20 @@ export function MarketingShopOrderForm({
   member: MarketingShopMember | null;
 }) {
   const [qty, setQty] = useState<Record<string, number>>({});
+  const [designs, setDesigns] = useState<Record<string, string>>({});
   const [restored, setRestored] = useState(false);
+  const loginNext = encodeURIComponent(`/marketing-shop${orderFor === "shop" ? "" : `?for=${orderFor}`}#order`);
   // Keep the cart across the log-in / join round trip.
   useEffect(() => {
     try {
-      if (/[?&](paid|requested)=/.test(window.location.search)) localStorage.removeItem(CART_KEY);
-      else {
+      if (/[?&](paid|requested)=/.test(window.location.search)) {
+        localStorage.removeItem(CART_KEY);
+        localStorage.removeItem(DESIGNS_KEY);
+      } else {
         const saved = JSON.parse(localStorage.getItem(CART_KEY) ?? "{}");
         if (saved && typeof saved === "object") setQty(saved);
+        const savedDesigns = JSON.parse(localStorage.getItem(DESIGNS_KEY) ?? "{}");
+        if (savedDesigns && typeof savedDesigns === "object") setDesigns(savedDesigns);
       }
     } catch {}
     setRestored(true);
@@ -44,8 +50,9 @@ export function MarketingShopOrderForm({
     if (!restored) return;
     try {
       localStorage.setItem(CART_KEY, JSON.stringify(qty));
+      localStorage.setItem(DESIGNS_KEY, JSON.stringify(designs));
     } catch {}
-  }, [qty, restored]);
+  }, [qty, designs, restored]);
   const [category, setCategory] = useState<MarketingCategory | undefined>(initialCategory);
   const shown = MARKETING_PRODUCTS.filter((p) => !category || p.category === category);
   const chip = (active: boolean) =>
@@ -120,6 +127,8 @@ export function MarketingShopOrderForm({
                 </div>
                 <textarea
                   name={`design-${p.id}`}
+                  value={designs[p.id] ?? ""}
+                  onChange={(e) => setDesigns((d) => ({ ...d, [p.id]: e.target.value }))}
                   rows={2}
                   required
                   maxLength={300}
@@ -189,10 +198,10 @@ export function MarketingShopOrderForm({
               Log in or join GoDesi free to order. We use your GoDesi business page for your QR code, phone and details.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href={`/login?next=${LOGIN_NEXT}`} className="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-black text-white hover:bg-orange-600">
+              <Link href={`/login?next=${loginNext}`} className="rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-black text-white hover:bg-orange-600">
                 Log in to order
               </Link>
-              <Link href={`/signup?next=${LOGIN_NEXT}`} className="rounded-xl border-2 border-orange-500 px-5 py-2.5 text-sm font-black text-orange-600 hover:bg-orange-50">
+              <Link href={`/signup?next=${loginNext}`} className="rounded-xl border-2 border-orange-500 px-5 py-2.5 text-sm font-black text-orange-600 hover:bg-orange-50">
                 Join free
               </Link>
             </div>
