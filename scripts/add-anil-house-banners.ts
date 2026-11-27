@@ -122,7 +122,9 @@ async function ownerAccount(email: string, name: string, page: string) {
     where: { OR: [{ email }, { emailCanonical: canonicalEmail(email) }] },
     select: { id: true, emailVerifiedAt: true, business: { select: { slug: true } } },
   });
-  if (existing && !existing.emailVerifiedAt) throw new Error(`${email} has an unverified account`);
+  if (existing && !existing.emailVerifiedAt && existing.business?.slug !== page) {
+    throw new Error(`${email} has an unverified account`);
+  }
   if (existing?.business && existing.business.slug !== page) {
     throw new Error(`${email} already owns /business/${existing.business.slug}`);
   }
