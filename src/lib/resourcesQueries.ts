@@ -48,6 +48,26 @@ type LinkRow = {
   impressionCap: number | null;
 };
 
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/** One link per title (picked at random among duplicates, so each affiliate URL gets its turn), in a fresh random order. */
+export function dedupeAndRotate<T extends { title: string }>(links: T[]): T[] {
+  const seen = new Set<string>();
+  return shuffle(links).filter((link) => {
+    const key = link.title.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /** Weighted towards links with the most views still owed, as banners are. */
 function rotate(links: LinkRow[], take: number) {
   const pool = links.map((link) => ({
@@ -123,9 +143,13 @@ export async function recommendedLinks(
   );
   const general = withQuota.filter((link) => link.categorySlug === null);
 
-  const picked = rotate(targeted, take);
+  const picked = rotate(dedupeAndRotate(targeted), take);
   if (picked.length < take) {
-    picked.push(...rotate(general, take - picked.length));
+    const titles = new Set(picked.map((link) => link.title.trim().toLowerCase()));
+    const rest = dedupeAndRotate(general).filter(
+      (link) => !titles.has(link.title.trim().toLowerCase()),
+    );
+    picked.push(...rotate(rest, take - picked.length));
   }
   return picked;
 }
