@@ -90,7 +90,8 @@ export async function requestMarketingShopOrder(order: {
       Adding to: ${escapeHtml(order.orderFor)}</p>
       <ul>${itemRows(items)}</ul>
       <p>Total: <b>${usd(total)}</b></p>
-      <p><b>Design notes:</b> ${escapeHtml(order.notes || "—")}</p>`,
+      <p><b>Artwork / design notes:</b> ${escapeHtml(order.notes || "—")}</p>
+      <p>Client confirmed: custom-made, no returns.</p>`,
     ),
     replyTo: order.email,
   });
@@ -132,7 +133,8 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       <ul>${itemRows(items)}</ul>
       <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>
       <p><b>Ship to:</b><br/>${address || "—"}</p>
-      <p><b>Design notes:</b> ${escapeHtml(meta.notes || "—")}</p>
+      <p><b>Artwork / design notes:</b> ${escapeHtml(meta.notes || "—")}</p>
+      <p>No returns confirmed: ${meta.noReturns === "agreed" ? "yes" : "no"}</p>
       <p>Design each item with their logo and GoDesi QR code before ordering.</p>`,
     ),
     ...(email ? { replyTo: email } : {}),
@@ -150,7 +152,7 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       html: shell(
         "Thank you for your order",
         `<p>We received your <b>${paid}</b> order:</p><ul>${list}</ul>
-        <p>Reply to this email with your logo (PNG or JPG) and any text you want printed. We design each item with your logo and your GoDesi QR code, send you a preview, and then ship it to your address.</p>
+        <p>Reply to this email with your logo or artwork (PNG or JPG) and any text you want printed. We design each item with your artwork and your GoDesi QR code, send you a preview, and order and ship it to your address once you approve. Items are custom-made, so they can't be returned.</p>
         <p>Questions? Call or WhatsApp Anil at (732) 983-7958.</p>`,
       ),
       replyTo: SITE.alertsEmail,

@@ -18,6 +18,8 @@ export const metadata: Metadata = {
 const ERRORS: Record<string, string> = {
   items: "Add at least one item to your order.",
   email: "Enter a valid email so we can send your design preview.",
+  artwork: "Tell us what artwork you want: text to print, logo, photo or colours.",
+  returns: "Please confirm you understand custom-made items can't be returned.",
   checkout: "Card checkout is not available right now. Call or WhatsApp Anil at (732) 983-7958 to order.",
 };
 

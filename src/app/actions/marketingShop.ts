@@ -25,6 +25,8 @@ export async function startMarketingShopCheckout(formData: FormData) {
   const email = field(formData, "email", 200);
   if (!items.length) redirect(`${back}?error=items#order`);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) redirect(`${back}?error=email#order`);
+  if (!field(formData, "notes", 450)) redirect(`${back}?error=artwork#order`);
+  if (formData.get("noReturns") !== "on") redirect(`${back}?error=returns#order`);
   const orderForRaw = field(formData, "orderFor", 20);
   const orderFor: MarketingShopOrderFor =
     orderForRaw in MARKETING_SHOP_ORDER_FOR ? (orderForRaw as MarketingShopOrderFor) : "shop";
@@ -37,6 +39,7 @@ export async function startMarketingShopCheckout(formData: FormData) {
     page: field(formData, "page", 200),
     orderFor,
     notes: field(formData, "notes", 450),
+    noReturns: "agreed",
   };
   const cart = items.map(({ product, qty }) => ({ id: product.id, qty }));
 
