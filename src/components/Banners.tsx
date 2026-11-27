@@ -25,6 +25,7 @@ import { proxyImage } from "@/lib/proxyImage";
 import { AD_PLACEMENTS } from "@/lib/ads";
 import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
 import { PORTRAIT_FLYERS } from "@/lib/flyers";
+import { currentSidePromo } from "@/lib/sidePromos";
 import { SmallBannerRail } from "@/components/SmallBannerRail";
 
 /** AdSense slot ids per placement, so unsold space still earns. */
@@ -171,6 +172,28 @@ function RailFlyer() {
   );
 }
 
+/** One of GoDesi's own section banners, linking to its section; rotates hourly. */
+function RailSidePromo() {
+  const promo = currentSidePromo();
+  return (
+    <Link
+      href={promo.href}
+      title={promo.title}
+      className="block overflow-hidden rounded-xl transition hover:opacity-95"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={promo.image}
+        alt={`GoDesi: ${promo.title}`}
+        width={promo.width}
+        height={promo.height}
+        loading="lazy"
+        className="h-auto w-full"
+      />
+    </Link>
+  );
+}
+
 export function BookThisSpot({
   slot,
   label,
@@ -285,6 +308,7 @@ export async function SidebarBanners({
         />
       ))}
       {halfPages.length ? null : <RailFlyer />}
+      <RailSidePromo />
       {/* Skyscrapers run two-up so the pair fills the same 300px rail width. */}
       <div className="grid grid-cols-2 gap-3">
         {skyscrapers.slice(0, 2).map((banner) => (
