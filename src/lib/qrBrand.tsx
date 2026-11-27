@@ -32,7 +32,7 @@ const SIZE = 720;
 const QR_SIZE = 600;
 
 /** The GoDesi logo for the middle of the code, served from /public; null if it can't be fetched. */
-async function logoDataUrl() {
+export async function logoDataUrl() {
   try {
     const response = await fetch(`${siteUrl()}/qr-logo.png`, {
       next: { revalidate: 86400 },
