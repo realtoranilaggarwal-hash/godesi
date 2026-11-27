@@ -11,6 +11,7 @@ export type MarketingProduct = {
 export const MARKETING_CATEGORIES = [
   { id: "flags", label: "Flags & banners" },
   { id: "print", label: "Stickers & print" },
+  { id: "reviews", label: "Reviews & social" },
   { id: "gifts", label: "Promo gifts" },
   { id: "apparel", label: "Apparel" },
 ] as const;
@@ -30,6 +31,8 @@ export const MARKETING_PRODUCTS: MarketingProduct[] = [
   { id: "logo-vest", name: "Custom logo vest", blurb: "Multi-pocket vest with your logo for promoters, markets and volunteers.", image: "/images/shop/logo-vest.jpg", priceUsd: 9.34, category: "apparel" },
   { id: "bamboo-pens", name: "50 engraved bamboo pens", blurb: "Engraved bamboo pens for client gifts, guest books and weddings.", image: "/images/shop/bamboo-pens.jpg", priceUsd: 99.99, category: "gifts" },
   { id: "logo-hoodie", name: "Custom logo hoodie", blurb: "Front/back printed hoodie for uniforms and promotional wear.", image: "/images/shop/logo-hoodie.jpg", priceUsd: 30.99, category: "apparel" },
+  { id: "nfc-review-stand", name: "NFC tap + QR review stand", blurb: "Counter stand: customers tap their phone or scan to review you or follow your socials.", image: "/images/shop/nfc-review-stand.jpg", priceUsd: 23.39, category: "reviews" },
+  { id: "logo-beanie", name: "Custom text beanie", blurb: "Warm winter beanie printed with your business name or logo.", image: "/images/shop/logo-beanie.jpg", priceUsd: 13.99, category: "apparel" },
 ];
 
 export const MARKETING_SHOP_ORDER_FOR = {

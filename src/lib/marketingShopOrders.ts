@@ -16,6 +16,8 @@ const SUPPLIER_LINKS: Record<string, string> = {
   "logo-vest": "https://temu.to/k/p6xwpuyb0v9",
   "bamboo-pens": "https://temu.to/k/poceweyx9bf",
   "logo-hoodie": "https://temu.to/k/ph5d9h1qyd5",
+  "nfc-review-stand": "https://temu.to/k/ppzirlueuw8",
+  "logo-beanie": "https://temu.to/k/puisxje148q",
 };
 
 /** Cart as stored in Stripe metadata: `id:qty,id:qty`. */
