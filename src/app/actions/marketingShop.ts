@@ -21,7 +21,11 @@ function field(formData: FormData, name: string, max: number) {
 export async function startMarketingShopCheckout(formData: FormData) {
   const back = `${siteUrl()}/marketing-shop`;
   const user = await getCurrentUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent("/marketing-shop#order")}`);
+  if (!user) {
+    const forRaw = field(formData, "orderFor", 20);
+    const query = forRaw in MARKETING_SHOP_ORDER_FOR && forRaw !== "shop" ? `?for=${forRaw}` : "";
+    redirect(`/login?next=${encodeURIComponent(`/marketing-shop${query}#order`)}`);
+  }
   const member = await marketingShopMember(user);
   const items = MARKETING_PRODUCTS.flatMap((product) => {
     const qty = Math.floor(Number(formData.get(`qty-${product.id}`) ?? 0));
@@ -43,8 +47,8 @@ export async function startMarketingShopCheckout(formData: FormData) {
     items: encodeCart(items.map(({ product, qty }) => ({ id: product.id, qty }))),
     userId: user.id,
     name: field(formData, "name", 100) || member.name,
-    business: field(formData, "business", 120) || member.business,
-    phone: field(formData, "phone", 40) || member.phone,
+    business: field(formData, "business", 120),
+    phone: field(formData, "phone", 40),
     page: member.qrUrl,
     website: field(formData, "website", 200),
     orderFor,
