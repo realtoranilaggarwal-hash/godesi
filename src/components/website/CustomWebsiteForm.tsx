@@ -152,6 +152,10 @@ export function CustomWebsiteForm({
     yearly -
     (referred ? WEBSITE_OFFER.customHostingYearUsd : 0) +
     (ordering ? WEBSITE_OFFER.onlineOrderingUsd : 0);
+  const packageToday =
+    WEBSITE_CONTENT_PACKAGE.priceUsd +
+    (ordering ? WEBSITE_OFFER.onlineOrderingUsd : 0) +
+    (articles ? WEBSITE_OFFER.dailyArticlesUsd : 0);
   const setFriend = (index: number, field: "name" | "contact", value: string) =>
     setFriends(
       friends.map((friend, i) =>
@@ -164,15 +168,33 @@ export function CustomWebsiteForm({
   const estimate = defaults?.contentPackage ? (
     <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 text-sm">
       <h2 className="font-black text-slate-900">Your package</h2>
-      <p className="mt-1 text-slate-700">Website + Content package, first year</p>
+      <ul className="mt-2 space-y-1.5">
+        <li className="flex justify-between gap-2">
+          <span>Website + Content package, first year</span>
+          <strong className="shrink-0">{usd(WEBSITE_CONTENT_PACKAGE.priceUsd)}</strong>
+        </li>
+        {ordering ? (
+          <li className="flex justify-between gap-2">
+            <span>{orderingLabel}</span>
+            <strong className="shrink-0">{usd(WEBSITE_OFFER.onlineOrderingUsd)} once</strong>
+          </li>
+        ) : null}
+        {articles ? (
+          <li className="flex justify-between gap-2">
+            <span>Daily articles instead of weekly</span>
+            <strong className="shrink-0">${WEBSITE_OFFER.dailyArticlesUsd}/year</strong>
+          </li>
+        ) : null}
+      </ul>
       <div className="mt-3 border-t border-amber-200 pt-2">
         <div className="flex justify-between gap-2 text-base">
           <span className="font-semibold">First year</span>
-          <strong>{usd(WEBSITE_CONTENT_PACKAGE.priceUsd)}</strong>
+          <strong>{usd(packageToday)}</strong>
         </div>
         <div className="text-xs text-slate-600">
-          {usd(WEBSITE_CONTENT_PACKAGE.depositUsd)} to start,{" "}
+          Package: {usd(WEBSITE_CONTENT_PACKAGE.depositUsd)} to start,{" "}
           {usd(WEBSITE_CONTENT_PACKAGE.priceUsd - WEBSITE_CONTENT_PACKAGE.depositUsd)} when your website is finished.
+          {packageToday > WEBSITE_CONTENT_PACKAGE.priceUsd ? " Add-ons are billed on the same invoice." : ""}
           From year 2: {WEBSITE_CONTENT_PACKAGE.renewals.join(" · ")}.
         </div>
       </div>
