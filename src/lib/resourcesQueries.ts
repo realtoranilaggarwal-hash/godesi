@@ -68,18 +68,21 @@ export function dedupeAndRotate<T extends { title: string }>(links: T[]): T[] {
   });
 }
 
-/** Weighted towards links with the most views still owed, as banners are. */
-function rotate(links: LinkRow[], take: number) {
-  const pool = links.map((link) => ({
-    link,
-    weight:
-      link.impressionCap === null
-        ? 1
-        : Math.max(1, link.impressionCap - link.impressions),
-  }));
+/** Weighted towards links with the most views still owed, as banners are. Skips titles already in `picked` (and adds its picks), so same-name duplicates never show twice. */
+function rotate(links: LinkRow[], take: number, picked = new Set<string>()) {
+  const titleKey = (link: LinkRow) => link.title.trim().toLowerCase();
+  const pool = links
+    .filter((link) => !picked.has(titleKey(link)))
+    .map((link) => ({
+      link,
+      weight:
+        link.impressionCap === null
+          ? 1
+          : Math.max(1, link.impressionCap - link.impressions),
+    }));
 
-  const picked: LinkRow[] = [];
-  while (picked.length < take && pool.length) {
+  const out: LinkRow[] = [];
+  while (out.length < take && pool.length) {
     const total = pool.reduce((sum, entry) => sum + entry.weight, 0);
     let target = Math.random() * total;
     let index = pool.length - 1;
@@ -90,10 +93,14 @@ function rotate(links: LinkRow[], take: number) {
         break;
       }
     }
-    picked.push(pool[index].link);
-    pool.splice(index, 1);
+    const chosen = pool[index].link;
+    out.push(chosen);
+    picked.add(titleKey(chosen));
+    for (let i = pool.length - 1; i >= 0; i -= 1) {
+      if (titleKey(pool[i].link) === titleKey(chosen)) pool.splice(i, 1);
+    }
   }
-  return picked;
+  return out;
 }
 
 export async function recommendedLinks(
@@ -143,13 +150,10 @@ export async function recommendedLinks(
   );
   const general = withQuota.filter((link) => link.categorySlug === null);
 
-  const picked = rotate(dedupeAndRotate(targeted), take);
+  const titles = new Set<string>();
+  const picked = rotate(targeted, take, titles);
   if (picked.length < take) {
-    const titles = new Set(picked.map((link) => link.title.trim().toLowerCase()));
-    const rest = dedupeAndRotate(general).filter(
-      (link) => !titles.has(link.title.trim().toLowerCase()),
-    );
-    picked.push(...rotate(rest, take - picked.length));
+    picked.push(...rotate(general, take - picked.length, titles));
   }
   return picked;
 }
