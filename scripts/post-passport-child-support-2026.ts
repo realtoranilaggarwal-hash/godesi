@@ -14,7 +14,7 @@ const GUID = "godesi-news-passport-child-support-10k-2026-11-30";
 
 const SUMMARY = `From Monday, November 30, 2026, the U.S. Department of State will start revoking the passports of Americans who owe $10,000 or more in past-due child support. People in this group who apply for a new passport can also be refused.
 
-This is the seventh round of a crackdown that began in May 2026. It started with parents who owed $100,000 or more and has stepped down since then. The next rounds could go lower: the law already lets the State Department refuse or revoke a passport once child-support debt is more than $2,500.
+This is the next phase of a crackdown that began in May 2026 with parents who owed $100,000 or more, and the amount has been lowered step by step since then. California's child-support agency says revocations at $10,000 began there on November 16, so act now even if you haven't had a notice yet. The next rounds could go lower: the law already lets the State Department refuse or revoke a passport once child-support debt is more than $2,500.
 
 Why this matters to our community
 Many Desi families are U.S. citizens who travel to India, Pakistan, Bangladesh, Nepal or Sri Lanka for weddings, funerals, property and family visits. A revoked passport cannot be used, even if you pay the debt afterwards. If you are abroad when it is revoked, you may only get a limited passport to fly straight back to the U.S.
@@ -51,7 +51,7 @@ This article is general information, not legal advice. For your own case, speak 
 
 Share this with friends and family who travel. It could save someone a missed flight home.
 
-Sources: U.S. Department of State (travel.state.gov, May 26, 2026; state.gov release, May 7, 2026), Oregon Department of Justice (November 13, 2026), Puerto Rico ASUME (November 23, 2026).
+Sources: U.S. Department of State (travel.state.gov; state.gov release, May 7, 2026), Oregon Department of Justice (November 13, 2026), California Child Support Services, Puerto Rico ASUME, WFTV (November 25, 2026).
 
 #Passport #ChildSupport #TravelAlert #Immigration #DesiAmericans #GoDesiNews`;
 
