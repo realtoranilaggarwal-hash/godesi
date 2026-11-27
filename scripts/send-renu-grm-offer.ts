@@ -35,11 +35,11 @@ ${item("4. Weekly content emails (52 a year)", "Every week you will get an email
 ${item("5. Your website posts, live on GoDesi", "Your 5 latest website posts will show on your GoDesi page through an RSS feed, so your page stays live and interactive and every post links back to your website.", "Free")}
 ${item("6. Two promotional videos", "Two short videos made for GRM Advisory from your services and message, $50 each.", "$100")}
 ${item("7. Featured on GoDesi.com for a year", "A featured GRM Advisory classified and listing on GoDesi.com, the Desi community site for events, businesses and deals ($20 a month, or $100 a year).", "$100")}
-${item("8. Banners on GoDesi.com for a year", "Your 320×100 GRM Advisory banner in the GoDesi side banner spot ($24 a month × 12), plus your banners in other GoDesi banner spots.", "$288")}
-<tr><td style="padding:12px 0 0;font-weight:700;font-size:16px">Regular GoDesi price</td><td style="padding:12px 0 0 12px;text-align:right;font-weight:700;font-size:16px;color:#6b7280;text-decoration:line-through">$1,366</td></tr>
+${item("8. Banners on GoDesi.com for a year", "Your 320×100 GRM Advisory banner in the GoDesi side banner spot ($24 a month, 20% off for a full year), plus your banners in other GoDesi banner spots.", "$230")}
+<tr><td style="padding:12px 0 0;font-weight:700;font-size:16px">Regular GoDesi price</td><td style="padding:12px 0 0 12px;text-align:right;font-weight:700;font-size:16px;color:#6b7280;text-decoration:line-through">$1,308</td></tr>
 </table>
 <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:12px;padding:16px 18px;margin:18px 0">
-<p style="margin:0;font-size:18px"><b>Your price for everything, for the first year: $500</b> <span style="color:#b45309">(you save $866)</span></p>
+<p style="margin:0;font-size:18px"><b>Your price for everything, for the first year: $500</b> <span style="color:#b45309">(you save $808)</span></p>
 <p style="margin:6px 0 0;font-size:14px;color:#374151">The domain and hosting are free for the first year, and your website and promotion are discounted.</p>
 <p style="margin:10px 0 0">• <b>$250 now</b> to start the work<br>• <b>$250 later</b>, when your website is finished</p>
 <p style="margin:14px 0 0"><a href="${PAY_NOW}" style="display:inline-block;background:#047857;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:8px">Pay $250 now →</a></p>
