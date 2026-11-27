@@ -88,8 +88,9 @@ export function MarketingShopOrderForm({
                   <span>{qty[p.id]} × {p.name}</span>
                   <strong>{usd(p.priceUsd * qty[p.id])}</strong>
                 </div>
-                <input
+                <textarea
                   name={`design-${p.id}`}
+                  rows={2}
                   required
                   maxLength={300}
                   aria-label={`Design or details for ${p.name}`}
