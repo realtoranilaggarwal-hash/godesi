@@ -112,12 +112,17 @@ const BANNERS = [
   ["intensivecareindia", "IntensiveCareIndia.com — Top hospitals & surgeons in India", "intensive-care-india"],
 ] as const;
 
-/** The page's login; refuses an account that already owns another business. */
+/**
+ * The page's login; refuses an account that already owns another business or
+ * was self-registered without proving the mailbox. Accounts made here are
+ * marked verified: Anil gave these addresses as his own.
+ */
 async function ownerAccount(email: string, name: string, page: string) {
   const existing = await db.user.findFirst({
     where: { OR: [{ email }, { emailCanonical: canonicalEmail(email) }] },
-    select: { id: true, business: { select: { slug: true } } },
+    select: { id: true, emailVerifiedAt: true, business: { select: { slug: true } } },
   });
+  if (existing && !existing.emailVerifiedAt) throw new Error(`${email} has an unverified account`);
   if (existing?.business && existing.business.slug !== page) {
     throw new Error(`${email} already owns /business/${existing.business.slug}`);
   }
@@ -129,6 +134,7 @@ async function ownerAccount(email: string, name: string, page: string) {
       emailCanonical: canonicalEmail(email),
       role: "BUSINESS",
       passwordHash: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
+      emailVerifiedAt: new Date(),
     },
     select: { id: true },
   });
