@@ -26,16 +26,17 @@ const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:au
 </div>
 <div style="border:1px solid #d1d5db;border-top:0;border-radius:0 0 12px 12px;padding:20px 24px">
 <p>Dear Renu,</p>
-<p>Thank you for sending your website details through our GoDesi website form. We have everything we need, and we will build your <b>GRM Advisory</b> website. Here is everything included in your package:</p>
+<p>Thank you for sending your website details through our GoDesi website form. We have everything we need, and we will build your <b>GRM Advisory</b> website. Here is everything included in your package. Everything below runs for your <b>first full year</b>:</p>
 <table style="width:100%;border-collapse:collapse">
-${item("1. Your GRM Advisory website", "Built on your new domain <b>GRMAdvisory.com</b>, with the pages you asked for: Home, About us, Services, Areas we serve and Contact. It will feature financial planning, advanced tax strategies, tax minimisation, and wealth building and preservation. Visitors can call you, WhatsApp you at (347) 238-8467, send an inquiry, ask for a quote or book an appointment.")}
-${item("2. Automated daily content emails", "Every day you will get an email with a new picture and short post on your topics (tax savings, financial planning, wealth building), ready to share on WhatsApp, Facebook, Instagram and LinkedIn.")}
-${item("3. Two promotional videos", "Two short videos made for GRM Advisory from your services and message.", "$100 value")}
-${item("4. Featured classified on GoDesi.com", "A featured GRM Advisory classified on GoDesi.com, the Desi community site for events, businesses and deals.")}
-${item("5. Banners on GoDesi.com", "Your 320×100 GRM Advisory banner in the GoDesi side banner spot, plus your banners in other GoDesi banner spots.")}
+${item("1. Your GRM Advisory website", "Built on your new domain <b>GRMAdvisory.com</b> (the domain is included for the first year), with the pages you asked for: Home, About us, Services, Areas we serve and Contact. It will feature financial planning, advanced tax strategies, tax minimisation, and wealth building and preservation. Visitors can call you, WhatsApp you at (347) 238-8467, send an inquiry, ask for a quote or book an appointment.")}
+${item("2. Automated daily content emails", "Every day you will get an email with a new picture and short post on your topics (tax savings, financial planning, wealth building). Each picture carries a GoDesi QR code that opens your GoDesi page, and your GoDesi page links to your website. <b>Your part:</b> post the daily picture and text to your social media (WhatsApp, Facebook, Instagram, LinkedIn) every day — that is what brings people to you.")}
+${item("3. Your website posts, live on GoDesi", "Your 5 latest website posts will show on your GoDesi page through an RSS feed, so your page stays live and interactive and every post links back to your website.")}
+${item("4. Two promotional videos", "Two short videos made for GRM Advisory from your services and message.", "$100 value")}
+${item("5. Featured classified on GoDesi.com", "A featured GRM Advisory classified on GoDesi.com, the Desi community site for events, businesses and deals.")}
+${item("6. Banners on GoDesi.com", "Your 320×100 GRM Advisory banner in the GoDesi side banner spot, plus your banners in other GoDesi banner spots.")}
 </table>
 <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:12px;padding:16px 18px;margin:18px 0">
-<p style="margin:0;font-size:18px"><b>Your price for everything: $500</b></p>
+<p style="margin:0;font-size:18px"><b>Your price for everything, for the first year: $500</b></p>
 <p style="margin:6px 0 0">• <b>$250 now</b> to start the work<br>• <b>$250 later</b>, when your website is finished</p>
 <p style="margin:14px 0 0"><a href="${PAY_NOW}" style="display:inline-block;background:#047857;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:8px">Pay $250 now →</a></p>
 <p style="margin:10px 0 0;font-size:13px;color:#6b7280">Secure card payment by Stripe. You will get a receipt by email.</p>

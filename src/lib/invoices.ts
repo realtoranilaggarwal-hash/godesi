@@ -23,7 +23,7 @@ const RENU = {
   client: "Renu Mistry — GRM Advisory",
   email: "rmistry@grsadvisory.com",
   description:
-    "GRM Advisory package, $500 total in two halves: website on GRMAdvisory.com (Home, About us, Services, Areas we serve, Contact; call, WhatsApp, inquiry, quote and appointment buttons), a daily email with a new ready-to-share content picture on her topics, 2 promo videos (normally $50 each), a featured GoDesi classified, and her 320×100 side banner plus other GoDesi banner spots.",
+    "GRM Advisory package for the first year, $500 total in two halves: website on GRMAdvisory.com, domain included (Home, About us, Services, Areas we serve, Contact; call, WhatsApp, inquiry, quote and appointment buttons), a daily email with a new ready-to-share content picture on her topics carrying her GoDesi QR code, her 5 latest website posts on her GoDesi page by RSS, 2 promo videos (normally $50 each), a featured GoDesi classified, and her 320×100 side banner plus other GoDesi banner spots.",
 };
 
 export const INVOICES: Invoice[] = [
