@@ -150,7 +150,11 @@ async function main() {
     if (found) {
       await db.business.update({
         where: { id: found.id },
-        data: { phone: data.phone ?? null, whatsappNumber: data.whatsappNumber ?? null, ...(found.ownerId ? {} : { ownerId: owner.id }) },
+        data: {
+          ...(data.phone ? { phone: data.phone } : {}),
+          ...(data.whatsappNumber ? { whatsappNumber: data.whatsappNumber } : {}),
+          ...(found.ownerId ? {} : { ownerId: owner.id }),
+        },
       });
       console.log(`updated /business/${page} (owner ${OWNERS[page]})`);
       continue;
