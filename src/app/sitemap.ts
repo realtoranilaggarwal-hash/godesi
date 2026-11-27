@@ -310,6 +310,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.7,
     },
+    {
+      url: `${base}/astrology/palmistry`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     ...SIGN_SLUGS.map((sign) => ({
       url: `${base}/astrology/horoscope/${sign}`,
       changeFrequency: "daily" as const,

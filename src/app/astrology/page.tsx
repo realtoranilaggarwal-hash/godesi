@@ -60,6 +60,12 @@ export default async function AstrologyPage() {
             >
               🪔 Today&apos;s panchang
             </Link>
+            <Link
+              href="/astrology/palmistry"
+              className="rounded-xl bg-white px-3 py-2 text-violet-700"
+            >
+              ✋ Free palm reading guide
+            </Link>
             <a
               href="#astrologers"
               className="rounded-xl bg-white px-3 py-2 text-violet-700"
