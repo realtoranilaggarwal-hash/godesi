@@ -124,7 +124,7 @@ export function MarketingShopOrderForm({
         })}
       </ul>
       {zoom ? (
-        <div role="dialog" aria-modal="true" aria-label={zoom.alt} onClick={() => setZoom(null)} className="fixed inset-0 z-[100] flex cursor-zoom-out items-center justify-center bg-black/80 p-4">
+        <div role="dialog" aria-modal="true" aria-label={zoom.alt} onClick={() => setZoom(null)} className="fixed inset-0 z-[100] !mt-0 flex cursor-zoom-out items-center justify-center bg-black/80 p-4">
           <button type="button" onClick={() => setZoom(null)} className="absolute right-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-900" aria-label="Close">✕ Close</button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={zoom.src} alt={zoom.alt} className="max-h-[90vh] max-w-full rounded-xl bg-white object-contain" />
