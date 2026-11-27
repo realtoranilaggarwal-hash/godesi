@@ -6,7 +6,7 @@ import { ASTRO_MEDIA_KIT } from "@/lib/astrology";
 export const metadata: Metadata = {
   title: "GoDesi media kit — flyers to share and print",
   description:
-    "Download GoDesi's flyers for WhatsApp, Instagram, Facebook and print. Each QR code opens GoDesi sign-up.",
+    "Download GoDesi's flyers for WhatsApp, Instagram, Facebook and print. Each QR code opens the matching GoDesi page.",
   alternates: { canonical: "/media-kit" },
 };
 
@@ -20,7 +20,12 @@ export default function MediaKitPage() {
         <h1 className="mt-2 text-2xl font-bold sm:text-3xl">Share GoDesi 📣</h1>
         <p className="mt-2 max-w-2xl text-white/90">
           Download a flyer and post it on WhatsApp, Instagram or Facebook, or
-          print it for your shop counter. Every QR code opens GoDesi sign-up.
+          print it for your shop counter. Every QR code opens the matching GoDesi
+          page. Want one with your own business QR code? Order it from the{" "}
+          <Link href="/marketing-shop" className="font-bold underline">
+            GoDesi Marketing Shop
+          </Link>
+          .
         </p>
         <div className="mt-4 flex flex-wrap gap-2 text-sm font-bold">
           <Link href="/advertise" className="rounded-xl bg-white px-3 py-2 text-purple-700">
