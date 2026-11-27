@@ -97,7 +97,7 @@ export function MarketingShopOrderForm({
               <div className="flex flex-1 flex-col p-3">
                 <h2 className="text-sm font-black leading-tight text-slate-900">{p.name}</h2>
                 {p.size ? <p className="mt-1 text-[11px] font-bold text-indigo-700">Size: {p.size}</p> : null}
-                <p className="mt-1 line-clamp-3 flex-1 text-xs text-slate-600" title={p.blurb}>{p.blurb}</p>
+                <p className="mt-1 flex-1 text-xs text-slate-600">{p.blurb}</p>
                 {p.example ? (
                   <button type="button" onClick={() => setZoom({ src: p.example!, alt: `Example ${p.name} we designed` })} className="mt-2 flex cursor-zoom-in items-center gap-2 rounded-xl border border-indigo-100 bg-indigo-50 p-1.5 text-left text-[11px] font-semibold leading-tight text-indigo-800">
                     <Image src={p.example} alt={`Example ${p.name} we designed`} width={48} height={64} className="h-12 w-auto rounded" />
