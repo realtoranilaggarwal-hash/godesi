@@ -10,6 +10,7 @@ import { ShareButtons } from "@/components/ShareButtons";
 import { SidebarBanners } from "@/components/Banners";
 import { FoundingOffer } from "@/components/FoundingOffer";
 import { FoundingBadge } from "@/components/FoundingBadge";
+import { SpinOpenButton } from "@/components/SpinWheel";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -96,6 +97,7 @@ export default async function RewardsExplainerPage() {
             >
               {user ? "Open my rewards" : "Join free & get my link"}
             </Link>
+            <SpinOpenButton className="rounded-xl bg-amber-300 px-4 py-2 text-slate-900 hover:bg-amber-200" />
             <Link
               href="/pricing"
               className="rounded-xl border border-white/70 px-4 py-2"

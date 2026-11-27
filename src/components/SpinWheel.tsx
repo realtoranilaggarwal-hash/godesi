@@ -20,6 +20,18 @@ const SPIN_MS = 4200;
 /** Dispatch on `window` to open the wheel from anywhere on the page. */
 export const OPEN_SPIN_EVENT = "godesi:open-spin";
 
+export function SpinOpenButton({ className }: { className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new Event(OPEN_SPIN_EVENT))}
+      className={className}
+    >
+      🎡 Spin the wheel
+    </button>
+  );
+}
+
 function point(deg: number, radius: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
   return [R + radius * Math.cos(rad), R + radius * Math.sin(rad)];
