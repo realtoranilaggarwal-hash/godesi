@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { RAKUTEN_REFERRAL } from "@/components/RakutenCashback";
 import { getCurrentUser } from "@/lib/auth";
 import { TOOL_CATEGORIES } from "@/lib/tools";
 import { CopyButton } from "@/components/CopyButton";
@@ -148,8 +149,20 @@ const PARTNER_OFFERS = [
     icon: "🛍️",
     href: "https://temu.to/k/ue3yf90kwvi",
     code: "ina040777",
+    cta: "Join on Temu →",
+    brand: "Temu",
     blurb:
       "Sign up through this link and verify your social media account. Temu advertises free products worth up to $500 for new influencers, and you can then earn by sharing your own Temu links.",
+  },
+  {
+    name: "Rakuten cash back",
+    icon: "💜",
+    href: RAKUTEN_REFERRAL,
+    code: null,
+    cta: "Join Rakuten free →",
+    brand: "Rakuten",
+    blurb:
+      "Join Rakuten free and get cash back when you shop online at thousands of stores like Walmart, Target and Expedia. New members can get a welcome bonus.",
   },
 ];
 
@@ -310,16 +323,21 @@ export default async function EarnPage() {
                   rel="noopener noreferrer nofollow sponsored"
                   className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600"
                 >
-                  Join on Temu →
+                  {offer.cta}
                 </a>
-                <span className="text-sm text-slate-700">
-                  Code: <strong className="font-mono">{offer.code}</strong>
-                </span>
-                <CopyButton value={offer.code} label="Copy code" />
+                {offer.code ? (
+                  <>
+                    <span className="text-sm text-slate-700">
+                      Code: <strong className="font-mono">{offer.code}</strong>
+                    </span>
+                    <CopyButton value={offer.code} label="Copy code" />
+                  </>
+                ) : null}
               </div>
               <p className="mt-2 text-xs text-slate-500">
                 GoDesi&apos;s founder earns a referral bonus when you join with
-                this link or code. Rewards and rules are set by Temu and can change.
+                this link{offer.code ? " or code" : ""}. Rewards and rules are set
+                by {offer.brand} and can change.
               </p>
             </li>
           ))}
