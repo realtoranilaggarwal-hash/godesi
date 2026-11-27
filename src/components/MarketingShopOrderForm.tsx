@@ -4,7 +4,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { startMarketingShopCheckout } from "@/app/actions/marketingShop";
 import {
+  MARKETING_CATEGORIES,
   MARKETING_PRODUCTS,
+  type MarketingCategory,
   MARKETING_SHOP_ORDER_FOR,
   type MarketingShopOrderFor,
   usd,
@@ -12,16 +14,42 @@ import {
 
 const input = "w-full rounded-xl border border-slate-300 px-3 py-2 text-sm";
 
-export function MarketingShopOrderForm({ orderFor }: { orderFor: MarketingShopOrderFor }) {
+export function MarketingShopOrderForm({
+  orderFor,
+  category: initialCategory,
+}: {
+  orderFor: MarketingShopOrderFor;
+  category?: MarketingCategory;
+}) {
   const [qty, setQty] = useState<Record<string, number>>({});
+  const [category, setCategory] = useState<MarketingCategory | undefined>(initialCategory);
+  const shown = MARKETING_PRODUCTS.filter((p) => !category || p.category === category);
+  const chip = (active: boolean) =>
+    `rounded-full border px-4 py-1.5 text-sm font-semibold ${active ? "border-orange-500 bg-orange-500 text-white" : "border-slate-300 bg-white text-slate-700 hover:border-orange-400"}`;
   const set = (id: string, n: number) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(50, n)) }));
   const chosen = MARKETING_PRODUCTS.filter((p) => (qty[p.id] ?? 0) > 0);
   const total = chosen.reduce((sum, p) => sum + p.priceUsd * qty[p.id], 0);
 
   return (
     <form action={startMarketingShopCheckout} className="space-y-6">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Categories">
+        <button type="button" onClick={() => setCategory(undefined)} className={chip(!category)} aria-pressed={!category}>
+          All ({MARKETING_PRODUCTS.length})
+        </button>
+        {MARKETING_CATEGORIES.map((c) => {
+          const count = MARKETING_PRODUCTS.filter((p) => p.category === c.id).length;
+          return count ? (
+            <button key={c.id} type="button" onClick={() => setCategory(c.id)} className={chip(category === c.id)} aria-pressed={category === c.id}>
+              {c.label} ({count})
+            </button>
+          ) : null;
+        })}
+      </div>
+      {MARKETING_PRODUCTS.map((p) => (
+        <input key={p.id} type="hidden" name={`qty-${p.id}`} value={qty[p.id] ?? 0} />
+      ))}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MARKETING_PRODUCTS.map((p) => {
+        {shown.map((p) => {
           const n = qty[p.id] ?? 0;
           return (
             <li key={p.id} className={`flex flex-col overflow-hidden rounded-2xl border bg-white ${n ? "border-orange-400 ring-2 ring-orange-200" : "border-slate-200"}`}>
@@ -43,7 +71,6 @@ export function MarketingShopOrderForm({ orderFor }: { orderFor: MarketingShopOr
                     </button>
                   )}
                 </div>
-                <input type="hidden" name={`qty-${p.id}`} value={n} />
               </div>
             </li>
           );
