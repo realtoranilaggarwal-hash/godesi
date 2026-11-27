@@ -45,8 +45,13 @@ export const MARKETING_SHOP_ORDER_FOR = {
 
 export type MarketingShopOrderFor = keyof typeof MARKETING_SHOP_ORDER_FOR;
 
+/** No longer sold, but kept so carts paid before removal still decode in order emails. */
+const RETIRED_MARKETING_PRODUCTS: MarketingProduct[] = [
+  { id: "logo-beanie", name: "Custom text beanie", blurb: "Warm winter beanie printed with your business name or logo.", image: "/images/shop/logo-beanie.jpg", priceUsd: 13.99, category: "gifts" },
+];
+
 export function findMarketingProduct(id: string) {
-  return MARKETING_PRODUCTS.find((p) => p.id === id);
+  return [...MARKETING_PRODUCTS, ...RETIRED_MARKETING_PRODUCTS].find((p) => p.id === id);
 }
 
 export function marketingShopFromUsd() {
