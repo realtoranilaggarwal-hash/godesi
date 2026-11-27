@@ -323,43 +323,49 @@ const MOCKUPS: Record<string, Mockup> = {
 
   "qr-stickers": {
     size: LANDSCAPE,
-    render: ({ qr }) => (
+    render: ({ logo, qr }) => (
       <div
         style={{
           display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignContent: "center",
-          gap: 18,
+          flexDirection: "column",
+          alignItems: "center",
           width: 660,
-          height: 500,
+          height: 520,
           borderRadius: 18,
           background: "#f5f5f4",
           boxShadow: SHADOW,
-          padding: 24,
+          padding: "16px 24px",
+          gap: 12,
         }}
       >
-        {Array.from({ length: 12 }, (_, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 134,
-              height: 134,
-              borderRadius: 67,
-              background: `linear-gradient(135deg, ${ORANGE}, ${ROSE} 55%, #312e81)`,
-              boxShadow: i === 5 ? "0 10px 18px rgba(0,0,0,0.35)" : "0 1px 3px rgba(0,0,0,0.25)",
-              ...(i === 5 ? { transform: "rotate(-12deg) translate(6px, -8px)" } : {}),
-            }}
-          >
-            <div style={{ display: "flex", fontSize: 13, color: "#ffffff", marginBottom: 3 }}>GoDesi.com</div>
-            <Qr src={qr} size={62} pad={3} radius={6} />
-            <div style={{ display: "flex", fontSize: 11, color: "#ffffff", marginTop: 3 }}>Scan me</div>
-          </div>
-        ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Logo src={logo} size={48} />
+          <Brand size={26} />
+          <div style={{ display: "flex", fontSize: 18, color: "#78716c" }}>· round QR stickers</div>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, width: 600 }}>
+          {Array.from({ length: 12 }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 122,
+                height: 122,
+                borderRadius: 61,
+                background: `linear-gradient(135deg, ${ORANGE}, ${ROSE} 55%, #312e81)`,
+                boxShadow: i === 5 ? "0 10px 18px rgba(0,0,0,0.35)" : "0 1px 3px rgba(0,0,0,0.25)",
+                ...(i === 5 ? { transform: "rotate(-12deg) translate(6px, -8px)" } : {}),
+              }}
+            >
+              <div style={{ display: "flex", fontSize: 12, color: "#ffffff", marginBottom: 3 }}>GoDesi.com</div>
+              <Qr src={qr} size={58} pad={3} radius={6} />
+              <div style={{ display: "flex", fontSize: 10, color: "#ffffff", marginTop: 3 }}>Scan me</div>
+            </div>
+          ))}
+        </div>
       </div>
     ),
   },
