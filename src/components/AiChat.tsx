@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { GODESI_HELP_AVATAR, GODESI_HELP_WHATSAPP } from "@/lib/help";
 
 type Turn = { role: "user" | "assistant"; content: string };
 type Source = { name: string; url: string };
@@ -183,6 +185,29 @@ export function AiChat() {
               </a>
             ))}
           </div>
+        )}
+
+        {turns.some((turn) => turn.role === "assistant") && !busy && (
+          <a
+            href={GODESI_HELP_WHATSAPP}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 rounded-2xl border border-pink-200 bg-pink-50 p-2 text-xs text-slate-700 hover:bg-pink-100"
+          >
+            <Image
+              src={GODESI_HELP_AVATAR}
+              alt=""
+              width={40}
+              height={40}
+              className="h-10 w-10 shrink-0 rounded-full object-cover"
+            />
+            <span>
+              <span className="block font-bold text-slate-900">
+                Need more help? Talk to our team
+              </span>
+              A real person replies on our WhatsApp channel.
+            </span>
+          </a>
         )}
 
         {busy && <p className="text-xs text-slate-500">Thinking…</p>}

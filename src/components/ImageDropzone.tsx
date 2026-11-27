@@ -115,13 +115,13 @@ export function ImageDropzone({
           void upload(event.dataTransfer.files);
         }}
         disabled={busy}
-        className={`flex w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed text-center text-sm transition ${square ? "mx-auto aspect-square max-w-xs p-3" : compact ? "p-3" : "p-6"} ${
+        className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed text-center transition ${square ? "aspect-square w-36 p-2 text-xs" : compact ? "w-full p-3 text-sm" : "w-full p-6 text-sm"} ${
           dragging
             ? "border-fuchsia-500 bg-fuchsia-50"
             : "border-slate-300 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50"
         } ${busy ? "opacity-60" : ""}`}
       >
-        <span aria-hidden className="text-2xl">
+        <span aria-hidden className={square ? "text-xl" : "text-2xl"}>
           {busy ? "⏳" : "🖼️"}
         </span>
         <span className="font-semibold text-slate-700">

@@ -20,6 +20,18 @@ const SPIN_MS = 4200;
 /** Dispatch on `window` to open the wheel from anywhere on the page. */
 export const OPEN_SPIN_EVENT = "godesi:open-spin";
 
+export function SpinOpenButton({ className }: { className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new Event(OPEN_SPIN_EVENT))}
+      className={className}
+    >
+      🎡 Spin the wheel
+    </button>
+  );
+}
+
 function point(deg: number, radius: number) {
   const rad = ((deg - 90) * Math.PI) / 180;
   return [R + radius * Math.cos(rad), R + radius * Math.sin(rad)];
@@ -208,16 +220,6 @@ export function SpinWheel() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-rose-500 px-2 py-3 text-xs font-black text-white shadow-lg hover:brightness-110"
-        aria-label="Spin the GoDesi wheel"
-      >
-        <span className="text-xl leading-none">🎡</span>
-        <span>Spin</span>
-      </button>
-
       {open ? (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-3"
