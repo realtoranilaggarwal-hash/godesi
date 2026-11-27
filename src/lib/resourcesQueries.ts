@@ -48,18 +48,41 @@ type LinkRow = {
   impressionCap: number | null;
 };
 
-/** Weighted towards links with the most views still owed, as banners are. */
-function rotate(links: LinkRow[], take: number) {
-  const pool = links.map((link) => ({
-    link,
-    weight:
-      link.impressionCap === null
-        ? 1
-        : Math.max(1, link.impressionCap - link.impressions),
-  }));
+function shuffle<T>(items: T[]): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
-  const picked: LinkRow[] = [];
-  while (picked.length < take && pool.length) {
+/** One link per title (picked at random among duplicates, so each affiliate URL gets its turn), in a fresh random order. */
+export function dedupeAndRotate<T extends { title: string }>(links: T[]): T[] {
+  const seen = new Set<string>();
+  return shuffle(links).filter((link) => {
+    const key = link.title.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/** Weighted towards links with the most views still owed, as banners are. Skips titles already in `picked` (and adds its picks), so same-name duplicates never show twice. */
+function rotate(links: LinkRow[], take: number, picked = new Set<string>()) {
+  const titleKey = (link: LinkRow) => link.title.trim().toLowerCase();
+  const pool = links
+    .filter((link) => !picked.has(titleKey(link)))
+    .map((link) => ({
+      link,
+      weight:
+        link.impressionCap === null
+          ? 1
+          : Math.max(1, link.impressionCap - link.impressions),
+    }));
+
+  const out: LinkRow[] = [];
+  while (out.length < take && pool.length) {
     const total = pool.reduce((sum, entry) => sum + entry.weight, 0);
     let target = Math.random() * total;
     let index = pool.length - 1;
@@ -70,10 +93,14 @@ function rotate(links: LinkRow[], take: number) {
         break;
       }
     }
-    picked.push(pool[index].link);
-    pool.splice(index, 1);
+    const chosen = pool[index].link;
+    out.push(chosen);
+    picked.add(titleKey(chosen));
+    for (let i = pool.length - 1; i >= 0; i -= 1) {
+      if (titleKey(pool[i].link) === titleKey(chosen)) pool.splice(i, 1);
+    }
   }
-  return picked;
+  return out;
 }
 
 export async function recommendedLinks(
@@ -123,9 +150,10 @@ export async function recommendedLinks(
   );
   const general = withQuota.filter((link) => link.categorySlug === null);
 
-  const picked = rotate(targeted, take);
+  const titles = new Set<string>();
+  const picked = rotate(targeted, take, titles);
   if (picked.length < take) {
-    picked.push(...rotate(general, take - picked.length));
+    picked.push(...rotate(general, take - picked.length, titles));
   }
   return picked;
 }

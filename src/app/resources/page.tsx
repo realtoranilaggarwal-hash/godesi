@@ -12,6 +12,7 @@ import { InlineBanner, SidebarBanners } from "@/components/Banners";
 import { TagCloud } from "@/components/TagCloud";
 import { KeywordMatches } from "@/components/KeywordMatches";
 import { keywordSearch } from "@/lib/keywordSearch";
+import { dedupeAndRotate } from "@/lib/resourcesQueries";
 import { Alert, Badge, Card, EmptyState, LinkButton, inputClass } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function ResourcesPage({
     getCategoryTree(),
     term ? keywordSearch(term) : Promise.resolve(null),
   ]);
-  const links = query ? (matches?.links ?? []) : tagLinks;
+  const links = dedupeAndRotate(query ? (matches?.links ?? []) : tagLinks);
 
   const grouped = new Map<string, typeof links>();
   for (const link of links) {
