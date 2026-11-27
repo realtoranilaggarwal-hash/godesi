@@ -10,6 +10,8 @@ import {
   type MarketingCategory,
   MARKETING_SHOP_ORDER_FOR,
   type MarketingShopOrderFor,
+  EBOOK_BONUS_STEP_USD,
+  ebookBonusCount,
   usd,
 } from "@/lib/marketingShop";
 import type { MarketingShopMember } from "@/lib/marketingShopMember";
@@ -22,10 +24,12 @@ export function MarketingShopOrderForm({
   orderFor,
   category: initialCategory,
   member,
+  courseCount,
 }: {
   orderFor: MarketingShopOrderFor;
   category?: MarketingCategory;
   member: MarketingShopMember | null;
+  courseCount: number;
 }) {
   const [qty, setQty] = useState<Record<string, number>>({});
   const [designs, setDesigns] = useState<Record<string, string>>({});
@@ -60,6 +64,7 @@ export function MarketingShopOrderForm({
   const set = (id: string, n: number) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(50, n)) }));
   const chosen = MARKETING_PRODUCTS.filter((p) => (qty[p.id] ?? 0) > 0);
   const total = chosen.reduce((sum, p) => sum + p.priceUsd * qty[p.id], 0);
+  const ebooks = ebookBonusCount(total, courseCount);
 
   return (
     <form action={startMarketingShopCheckout} className="space-y-6">
@@ -142,6 +147,12 @@ export function MarketingShopOrderForm({
               <span className="font-semibold">Total</span>
               <strong>{usd(total)}</strong>
             </li>
+            {ebooks > 0 ? (
+              <li className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+                🎁 Free bonus: {ebooks} GoDesi course ebook{ebooks === 1 ? "" : "s"} worth{" "}
+                {usd(ebooks * EBOOK_BONUS_STEP_USD)}. Your codes arrive by email after payment.
+              </li>
+            ) : null}
           </ul>
         ) : (
           <p className="mt-2 text-sm text-slate-600">Tap “Add to my order” on the items you want.</p>

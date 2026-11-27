@@ -7,8 +7,10 @@ import {
   MARKETING_SHOP_ORDER_FOR,
   type MarketingCategory,
   type MarketingShopOrderFor,
+  EBOOK_BONUS_STEP_USD,
 } from "@/lib/marketingShop";
 import { MarketingShopOrderForm } from "@/components/MarketingShopOrderForm";
+import { COURSES } from "@/lib/courses";
 
 export const metadata: Metadata = {
   title: "GoDesi Marketing Shop: custom flags, car stickers, banners, flyers & logo gifts",
@@ -58,9 +60,26 @@ export default async function MarketingShopPage({
         </ul>
       </section>
 
+      <section className="flex flex-wrap items-center gap-4 rounded-3xl border border-amber-300 bg-slate-900 px-5 py-5 text-white sm:px-8">
+        <p className="text-3xl" aria-hidden>🎁</p>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-400">Free bonus with every order</p>
+          <p className="mt-1 text-lg font-black">
+            Get GoDesi course ebooks free, worth what you spend: 1 ebook for every ${EBOOK_BONUS_STEP_USD}
+          </p>
+          <p className="mt-1 text-sm text-white/80">
+            Spend $50 and pick 5 of our {COURSES.length} courses on marketing, affiliate income, YouTube, TikTok,
+            real estate and more. Each is a $99 course with a downloadable PDF ebook. Your codes come by email after payment.
+          </p>
+        </div>
+        <a href="/course" className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-amber-300">
+          See the courses
+        </a>
+      </section>
+
       {searchParams.paid ? (
         <p className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
-          Thank you, your order is in. Check your email and reply with your logo; we&apos;ll send a design preview before we ship.
+          Thank you, your order is in. Check your email and reply with your logo; we&apos;ll send a design preview before we ship. Your free course ebook codes are in that email too.
         </p>
       ) : null}
       {searchParams.requested ? (
@@ -74,7 +93,7 @@ export default async function MarketingShopPage({
         </p>
       ) : null}
 
-      <MarketingShopOrderForm orderFor={orderFor} category={category} member={member} />
+      <MarketingShopOrderForm orderFor={orderFor} category={category} member={member} courseCount={COURSES.length} />
     </div>
   );
 }
