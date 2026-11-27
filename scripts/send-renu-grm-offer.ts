@@ -22,7 +22,7 @@ const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:au
 <div style="background:#064e3b;color:#fff;border-radius:12px 12px 0 0;padding:22px 24px">
 <p style="margin:0;font-size:13px;letter-spacing:2px;color:#fcd34d">GODESI.COM · WEBSITE + MARKETING PACKAGE</p>
 <h1 style="margin:6px 0 0;font-size:26px">GRM Advisory</h1>
-<p style="margin:4px 0 0;color:#d1fae5">Prepared for Renu Mistry · Piscataway, NJ</p>
+<p style="margin:4px 0 0;color:#d1fae5">Prepared for Renu Mistry · P.O. Box 10055, New Brunswick, NJ 08907</p>
 </div>
 <div style="border:1px solid #d1d5db;border-top:0;border-radius:0 0 12px 12px;padding:20px 24px">
 <p>Dear Renu,</p>
