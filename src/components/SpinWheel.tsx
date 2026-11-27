@@ -208,16 +208,6 @@ export function SpinWheel() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-rose-500 px-2 py-3 text-xs font-black text-white shadow-lg hover:brightness-110"
-        aria-label="Spin the GoDesi wheel"
-      >
-        <span className="text-xl leading-none">🎡</span>
-        <span>Spin</span>
-      </button>
-
       {open ? (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/50 p-3"
