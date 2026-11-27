@@ -8,6 +8,7 @@ import { TopSkinBanner } from "@/components/TopSkinBanner";
 import { ThanksgivingBanner } from "@/components/ThanksgivingBanner";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PageViewCount } from "@/components/PageViewCount";
 import { PhoneSmallBanners, SmallBanners } from "@/components/Banners";
 import { LiveMediaPlayer } from "@/components/LiveMediaPlayer";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -222,6 +223,7 @@ export default async function RootLayout({
           <SmallBanners side="left" start={10} />
           <div className="min-w-0 flex-1">
             {children}
+            <PageViewCount />
             <PhoneSmallBanners />
           </div>
           <SmallBanners />

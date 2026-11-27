@@ -8,6 +8,7 @@ const SUPPLIER_LINKS: Record<string, string> = {
   "triangle-flags": "https://temu.to/k/pghibh3a0tc",
   "car-sticker": "https://temu.to/k/pnfxxaemq6x",
   "wall-banner": "https://temu.to/k/piel24o9o1s",
+  "rollup-banner-stand": "https://temu.to/k/pprt99t4jxb",
   "vertical-flags": "https://temu.to/k/p7mvglj8wcp",
   "qr-stickers": "https://temu.to/k/p2ynlppu5g3",
   "a5-flyers": "https://temu.to/k/pvk5ko4h4lf",
