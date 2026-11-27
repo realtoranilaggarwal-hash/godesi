@@ -57,11 +57,16 @@ function shuffle<T>(items: T[]): T[] {
   return out;
 }
 
-/** One link per title (picked at random among duplicates, so each affiliate URL gets its turn), in a fresh random order. */
+/** The name before " — ", so "Air India" and "Air India — Book flights" count as one name. */
+export function linkNameKey(title: string) {
+  return title.split(/\s+[—–-]\s+|:\s/)[0].trim().toLowerCase();
+}
+
+/** One link per name (picked at random among duplicates, so each affiliate URL gets its turn), in a fresh random order. */
 export function dedupeAndRotate<T extends { title: string }>(links: T[]): T[] {
   const seen = new Set<string>();
   return shuffle(links).filter((link) => {
-    const key = link.title.trim().toLowerCase();
+    const key = linkNameKey(link.title);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
@@ -70,7 +75,7 @@ export function dedupeAndRotate<T extends { title: string }>(links: T[]): T[] {
 
 /** Weighted towards links with the most views still owed, as banners are. Skips titles already in `picked` (and adds its picks), so same-name duplicates never show twice. */
 function rotate(links: LinkRow[], take: number, picked = new Set<string>()) {
-  const titleKey = (link: LinkRow) => link.title.trim().toLowerCase();
+  const titleKey = (link: LinkRow) => linkNameKey(link.title);
   const pool = links
     .filter((link) => !picked.has(titleKey(link)))
     .map((link) => ({

@@ -5,7 +5,31 @@ import { db } from "@/lib/db";
 import { cachedQuery, CONTENT_TTL } from "@/lib/cache";
 import { citySlug } from "@/lib/citySlug";
 
-const PERKS = [
+const PERKS: { icon: string; title: string; body: string; href?: string }[] = [
+  {
+    icon: "📻",
+    title: "Free live desi radio",
+    body: "Bollywood, Hindi, Punjabi and news stations, live and free.",
+    href: "/live-radio",
+  },
+  {
+    icon: "📘",
+    title: "Free ebooks",
+    body: "Like our palm reading guide: read your own hand, free to download.",
+    href: "/astrology/palmistry",
+  },
+  {
+    icon: "🛍️",
+    title: "Marketing tools at the lowest price",
+    body: "Handpicked flags, banners, business cards and QR stickers, designed for you.",
+    href: "/marketing-shop",
+  },
+  {
+    icon: "⚡",
+    title: "One-click event import",
+    body: "GoDesi Push brings your Sulekha or Eventbrite event over in one click.",
+    href: "/events/push",
+  },
   {
     icon: "📇",
     title: "Free digital business card",
@@ -96,7 +120,15 @@ export async function JoinPerks() {
                 {perk.icon}
               </span>
               <div>
-                <p className="text-sm font-bold text-slate-900">{perk.title}</p>
+                <p className="text-sm font-bold text-slate-900">
+                  {perk.href ? (
+                    <Link href={perk.href} className="hover:text-rose-600 hover:underline">
+                      {perk.title} →
+                    </Link>
+                  ) : (
+                    perk.title
+                  )}
+                </p>
                 <p className="text-xs text-slate-600">{perk.body}</p>
               </div>
             </li>
