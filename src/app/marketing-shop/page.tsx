@@ -11,7 +11,7 @@ import { MarketingShopOrderForm } from "@/components/MarketingShopOrderForm";
 export const metadata: Metadata = {
   title: "GoDesi Marketing Shop: custom flags, car stickers, banners, flyers & logo gifts",
   description:
-    "Custom marketing items designed with your logo and GoDesi QR code and shipped to you: flags, car stickers, banners, flyers, QR keychains, pens, vests and hoodies.",
+    "Custom marketing items designed with your logo and GoDesi QR code and shipped to you: flags, car stickers, banners, flyers, QR keychains, pens and review stands.",
   alternates: { canonical: `${siteUrl()}/marketing-shop` },
 };
 
