@@ -5,6 +5,7 @@ import { recommendedLinks } from "@/lib/resourcesQueries";
 import { cachedLiveStoreOffers } from "@/lib/storeOffers";
 import { LinkImpressions } from "@/components/LinkImpressions";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
+import { MarketingShopCard } from "@/components/MarketingShopCard";
 import { TemuPicks } from "@/components/TemuPicks";
 import { Card } from "@/components/ui";
 import {
@@ -276,6 +277,7 @@ export default async function ShopPage() {
         </section>
       ) : null}
 
+      <MarketingShopCard />
       <TemuPicks />
 
       {storeOffers.length ? (

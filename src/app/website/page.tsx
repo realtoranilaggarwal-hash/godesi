@@ -7,6 +7,7 @@ import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { CustomWebsiteForm } from "@/components/website/CustomWebsiteForm";
 import { WEBSITE_CONTENT_PACKAGE, WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { MarketingShopCard } from "@/components/MarketingShopCard";
 import { WebsiteContentPackage } from "@/components/website/WebsiteContentPackage";
 import { websitePath } from "@/lib/websiteBuilder";
 
@@ -97,6 +98,8 @@ export default async function WebsiteOfferPage({
         </p>
 
         <WebsiteContentPackage />
+
+        <MarketingShopCard />
 
         {recent.length ? (
           <Card>

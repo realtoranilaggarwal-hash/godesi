@@ -11,6 +11,14 @@ export type HouseBanner = {
 
 export const HOUSE_BANNERS: HouseBanner[] = [
   {
+    slug: "marketing-shop",
+    href: "/marketing-shop",
+    emoji: "🛒",
+    title: "Marketing Shop",
+    line: "Logo flags, car stickers & flyers from $1.92",
+    colors: "from-orange-500 to-indigo-600",
+  },
+  {
     slug: "wall",
     href: "/walloffame",
     emoji: "🧱",
