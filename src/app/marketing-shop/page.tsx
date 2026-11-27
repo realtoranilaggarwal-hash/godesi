@@ -13,12 +13,13 @@ export const metadata: Metadata = {
 const ERRORS: Record<string, string> = {
   items: "Add at least one item to your order.",
   email: "Enter a valid email so we can send your design preview.",
+  checkout: "Card checkout is not available right now. Call or WhatsApp Anil at (732) 983-7958 to order.",
 };
 
 export default function MarketingShopPage({
   searchParams,
 }: {
-  searchParams: { for?: string; paid?: string; error?: string };
+  searchParams: { for?: string; paid?: string; requested?: string; error?: string };
 }) {
   const orderFor: MarketingShopOrderFor =
     searchParams.for && searchParams.for in MARKETING_SHOP_ORDER_FOR
@@ -43,6 +44,11 @@ export default function MarketingShopPage({
       {searchParams.paid ? (
         <p className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
           Thank you, your order is in. Check your email and reply with your logo; we&apos;ll send a design preview before we ship.
+        </p>
+      ) : null}
+      {searchParams.requested ? (
+        <p className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+          Thank you, we got your order request. We&apos;ll contact you to take payment and your shipping address.
         </p>
       ) : null}
       {searchParams.error && ERRORS[searchParams.error] ? (

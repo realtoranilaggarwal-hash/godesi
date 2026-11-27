@@ -7,7 +7,7 @@ import {
   MARKETING_SHOP_ORDER_FOR,
   type MarketingShopOrderFor,
 } from "@/lib/marketingShop";
-import { encodeCart } from "@/lib/marketingShopOrders";
+import { encodeCart, requestMarketingShopOrder } from "@/lib/marketingShopOrders";
 import { getStripe, stripeEnabled } from "@/lib/stripe";
 
 const MAX_QTY = 50;
@@ -25,8 +25,6 @@ export async function startMarketingShopCheckout(formData: FormData) {
   const email = field(formData, "email", 200);
   if (!items.length) redirect(`${back}?error=items#order`);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) redirect(`${back}?error=email#order`);
-  if (!stripeEnabled()) redirect("/venmo");
-
   const orderForRaw = field(formData, "orderFor", 20);
   const orderFor: MarketingShopOrderFor =
     orderForRaw in MARKETING_SHOP_ORDER_FOR ? (orderForRaw as MarketingShopOrderFor) : "shop";
@@ -40,6 +38,12 @@ export async function startMarketingShopCheckout(formData: FormData) {
     orderFor,
     notes: field(formData, "notes", 450),
   };
+  const cart = items.map(({ product, qty }) => ({ id: product.id, qty }));
+
+  if (!stripeEnabled() || !process.env.STRIPE_WEBHOOK_SECRET) {
+    const sent = await requestMarketingShopOrder({ ...metadata, items: cart, email });
+    redirect(sent ? `${back}?requested=1` : `${back}?error=checkout#order`);
+  }
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
