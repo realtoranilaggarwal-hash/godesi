@@ -1,5 +1,5 @@
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
-import { generateFreeCourseCode } from "@/lib/courseCodes";
+import { freeCourseCodesFor } from "@/lib/courseCodes";
 import { COURSES } from "@/lib/courses";
 import { ebookBonusCount, findMarketingProduct, usd } from "@/lib/marketingShop";
 import { siteUrl } from "@/lib/format";
@@ -128,17 +128,15 @@ export async function requestMarketingShopOrder(order: {
 
 /**
  * Stripe confirmed a Marketing Shop order: send the team the drop-ship sheet and thank the buyer.
- * Throws if the team email fails so the webhook returns 500 and Stripe retries; a
- * `shopNotified` flag on the PaymentIntent stops redeliveries from sending it twice.
+ * Throws if either email fails so the webhook returns 500 and Stripe retries; `shopNotified` /
+ * `shopBuyerNotified` flags on the PaymentIntent stop redeliveries from sending either twice.
  */
 export async function notifyMarketingShopOrder(session: ShopSession) {
   const paymentIntentId =
     typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
   const stripe = getStripe();
-  if (paymentIntentId) {
-    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    if (intent.metadata?.shopNotified === "1") return;
-  }
+  const flags = paymentIntentId ? (await stripe.paymentIntents.retrieve(paymentIntentId)).metadata ?? {} : {};
+  if (flags.shopNotified === "1" && flags.shopBuyerNotified === "1") return;
   const items = decodeCart(session.metadata?.items);
   const meta = session.metadata ?? {};
   const email = session.customer_details?.email ?? session.customer_email ?? "";
@@ -150,37 +148,39 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
     .map((line) => escapeHtml(String(line)))
     .join("<br/>");
 
-  const sent = await sendEmail({
-    to: SITE.salesEmail,
-    subject: `Marketing Shop order ${paid}: ${meta.business || email || session.id}`,
-    html: shell(
-      "Marketing Shop order — drop-ship",
-      `<p><b>${escapeHtml(meta.business || "—")}</b> · ${escapeHtml(meta.name || session.customer_details?.name || "")}<br/>
-      Email: ${escapeHtml(email || "—")} · Phone: ${escapeHtml(meta.phone || session.customer_details?.phone || "—")}<br/>
-      QR code links to: ${escapeHtml(meta.page || "— (no GoDesi page yet; ask them)")}<br/>
-      Website: ${escapeHtml(meta.website || "—")}<br/>
-      Adding to: ${escapeHtml(meta.orderFor || "shop")}</p>
-      <ul>${itemRows(items, meta)}</ul>
-      <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>
-      <p><b>Ship to:</b><br/>${address || "—"}</p>
-      <p><b>Other notes:</b> ${escapeHtml(meta.notes || "—")}</p>
-      <p>No returns confirmed: ${meta.noReturns === "agreed" ? "yes" : "no"}</p>
-      <p>Design each item with their logo and GoDesi QR code before ordering.</p>`,
-    ),
-    ...(email ? { replyTo: email } : {}),
-  });
-  if (!sent) throw new Error(`Marketing Shop order email failed for ${session.id}`);
-  if (paymentIntentId) {
-    await stripe.paymentIntents.update(paymentIntentId, { metadata: { shopNotified: "1" } });
+  if (flags.shopNotified !== "1") {
+    const sent = await sendEmail({
+      to: SITE.salesEmail,
+      subject: `Marketing Shop order ${paid}: ${meta.business || email || session.id}`,
+      html: shell(
+        "Marketing Shop order — drop-ship",
+        `<p><b>${escapeHtml(meta.business || "—")}</b> · ${escapeHtml(meta.name || session.customer_details?.name || "")}<br/>
+        Email: ${escapeHtml(email || "—")} · Phone: ${escapeHtml(meta.phone || session.customer_details?.phone || "—")}<br/>
+        QR code links to: ${escapeHtml(meta.page || "— (no GoDesi page yet; ask them)")}<br/>
+        Website: ${escapeHtml(meta.website || "—")}<br/>
+        Adding to: ${escapeHtml(meta.orderFor || "shop")}</p>
+        <ul>${itemRows(items, meta)}</ul>
+        <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>
+        <p><b>Ship to:</b><br/>${address || "—"}</p>
+        <p><b>Other notes:</b> ${escapeHtml(meta.notes || "—")}</p>
+        <p>No returns confirmed: ${meta.noReturns === "agreed" ? "yes" : "no"}</p>
+        <p>Design each item with their logo and GoDesi QR code before ordering.</p>`,
+      ),
+      ...(email ? { replyTo: email } : {}),
+    });
+    if (!sent) throw new Error(`Marketing Shop order email failed for ${session.id}`);
+    if (paymentIntentId) {
+      await stripe.paymentIntents.update(paymentIntentId, { metadata: { shopNotified: "1" } });
+    }
   }
 
-  if (email) {
-    const codes = Array.from(
-      { length: ebookBonusCount((session.amount_total ?? 0) / 100, COURSES.length) },
-      generateFreeCourseCode,
+  if (email && flags.shopBuyerNotified !== "1") {
+    const codes = freeCourseCodesFor(
+      session.id,
+      ebookBonusCount((session.amount_total ?? 0) / 100, COURSES.length),
     );
     const list = items.map(({ product, qty }) => `<li>${qty} × ${escapeHtml(product.name)}</li>`).join("");
-    await sendEmail({
+    const buyerSent = await sendEmail({
       to: email,
       subject: `Your GoDesi Marketing Shop order (${paid})`,
       html: shell(
@@ -192,5 +192,9 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       ),
       replyTo: SITE.alertsEmail,
     });
+    if (!buyerSent) throw new Error(`Marketing Shop buyer email failed for ${session.id}`);
+    if (paymentIntentId) {
+      await stripe.paymentIntents.update(paymentIntentId, { metadata: { shopBuyerNotified: "1" } });
+    }
   }
 }
