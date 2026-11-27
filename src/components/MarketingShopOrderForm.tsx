@@ -83,9 +83,19 @@ export function MarketingShopOrderForm({
         {chosen.length ? (
           <ul className="mt-2 space-y-1 text-sm">
             {chosen.map((p) => (
-              <li key={p.id} className="flex justify-between gap-2">
-                <span>{qty[p.id]} × {p.name}</span>
-                <strong>{usd(p.priceUsd * qty[p.id])}</strong>
+              <li key={p.id} className="space-y-1 pb-2">
+                <div className="flex justify-between gap-2">
+                  <span>{qty[p.id]} × {p.name}</span>
+                  <strong>{usd(p.priceUsd * qty[p.id])}</strong>
+                </div>
+                <input
+                  name={`design-${p.id}`}
+                  required
+                  maxLength={300}
+                  aria-label={`Design or details for ${p.name}`}
+                  placeholder="Design or details for this item: text, logo, photo, colours (required)"
+                  className={`${input} bg-white`}
+                />
               </li>
             ))}
             <li className="flex justify-between gap-2 border-t border-orange-200 pt-2 text-base">
@@ -107,7 +117,7 @@ export function MarketingShopOrderForm({
               <option key={value} value={value}>Add to: {label}</option>
             ))}
           </select>
-          <textarea name="notes" rows={3} required maxLength={450} placeholder="Your artwork: what should we design? Text to print, logo, photo, colours (required)" className={`${input} sm:col-span-2`} />
+          <textarea name="notes" rows={2} maxLength={450} placeholder="Anything else we should know? (optional)" className={`${input} sm:col-span-2`} />
         </div>
         <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
           <input type="checkbox" name="noReturns" required className="mt-1 h-4 w-4" />
