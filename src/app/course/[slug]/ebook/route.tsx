@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { hasCourseAccess } from "@/app/actions/course";
 import { courseBySlug } from "@/lib/courses";
-import { renderCourseEbook } from "@/lib/courseEbook";
+import { pdfText, renderCourseEbook } from "@/lib/courseEbook";
 import { siteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export async function GET(_request: Request, { params }: { params: { slug: strin
     return NextResponse.redirect(`${siteUrl()}/course/${course.slug}`);
   }
 
-  const pdf = await renderCourseEbook(course, user.name?.trim() || user.email);
+  const pdf = await renderCourseEbook(course, pdfText(user.name ?? "") || user.email);
   return new Response(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",
