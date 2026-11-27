@@ -1257,6 +1257,14 @@ model VisitorPing {
   @@index([createdAt])
 }
 
+/// Running view total for one page path, shown as "N views" on that page.
+/// Counted once per browser tab session per page; nothing identifying stored.
+model PageViewCount {
+  path      String   @id
+  views     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
 /// One row per day of site traffic, for the "visitors so far" counter in the
 /// footer. Counted in the browser and deduplicated per device per day, so it is
 /// visits and returning-device counts, never anything identifying.
