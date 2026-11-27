@@ -6,7 +6,8 @@ import { db } from "@/lib/db";
 import { Card } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { CustomWebsiteForm } from "@/components/website/CustomWebsiteForm";
-import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { WEBSITE_CONTENT_PACKAGE, WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { WebsiteContentPackage } from "@/components/website/WebsiteContentPackage";
 import { websitePath } from "@/lib/websiteBuilder";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 export default async function WebsiteOfferPage({
   searchParams,
 }: {
-  searchParams: { website?: string; wish?: string; add?: string };
+  searchParams: { website?: string; wish?: string; add?: string; package?: string };
 }) {
   const user = await getCurrentUser();
   const business = user
@@ -76,6 +77,12 @@ export default async function WebsiteOfferPage({
               🚀 Get started
             </a>
             <a
+              href="#package"
+              className="rounded-xl bg-amber-300 px-4 py-3 text-sm font-bold text-amber-950"
+            >
+              🎁 ${WEBSITE_CONTENT_PACKAGE.priceUsd} website + content package
+            </a>
+            <a
               href={WEBSITE_OFFER.phoneTel}
               className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white"
             >
@@ -88,6 +95,8 @@ export default async function WebsiteOfferPage({
           <strong>Our ${WEBSITE_OFFER.priceUsd} AI website plan is full right now.</strong> We are
           only taking custom-built websites, from ${WEBSITE_OFFER.customPriceUsd}.
         </p>
+
+        <WebsiteContentPackage />
 
         {recent.length ? (
           <Card>
@@ -126,9 +135,10 @@ export default async function WebsiteOfferPage({
             phone: business?.phone ?? undefined,
             email: user?.email,
             website: searchParams.website ?? business?.websiteUrl ?? undefined,
-            wish: searchParams.wish,
+            wish: searchParams.wish ?? (searchParams.package === "content" ? WEBSITE_CONTENT_PACKAGE.wish : undefined),
             articles: searchParams.add === "articles",
             ordering: searchParams.add === "ordering",
+            contentPackage: searchParams.package === "content",
           }}
         />
 

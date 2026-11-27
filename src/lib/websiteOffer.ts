@@ -65,3 +65,37 @@ export function whatsappOfferLink() {
   const message = `Hi Godesi, I would like a custom website for my business.`;
   return `https://wa.me/${WEBSITE_OFFER.whatsapp}?text=${encodeURIComponent(message)}`;
 }
+
+/**
+ * First-year "website + content" package: the custom site plus weekly content
+ * pictures, RSS, videos, a featured spot and a side banner on GoDesi.
+ * Regular prices are what each item costs on its own on GoDesi.
+ */
+export const WEBSITE_CONTENT_PACKAGE = {
+  priceUsd: 500,
+  depositUsd: 250,
+  items: [
+    { name: "Custom website", detail: "Your pages, logo, photos, click-to-call and WhatsApp", regularUsd: WEBSITE_OFFER.customPriceUsd },
+    { name: "Domain name", detail: "Free for the first year", regularUsd: 19 },
+    { name: "Website hosting", detail: "Included for the first year", regularUsd: 100 },
+    { name: "Weekly content emails", detail: "52 a year: a new post and picture with your GoDesi QR code", regularUsd: 52 * 5 },
+    { name: "Website posts on GoDesi via RSS", detail: "Your 5 latest posts shown live on your GoDesi page", regularUsd: 0 },
+    { name: "Two promotional videos", detail: "$50 each", regularUsd: 100 },
+    { name: "Featured on GoDesi for a year", detail: "Featured business page and classified", regularUsd: 100 },
+    { name: "320×100 side banner for a year", detail: "$24 a month, 20% off for 12 months", regularUsd: 230 },
+  ],
+  renewals: [
+    "Domain: $19 a year",
+    "Hosting: $100 a year",
+    `Daily content instead of weekly (optional): $${WEBSITE_OFFER.dailyArticlesUsd} a year`,
+  ],
+  /** A featured business whose website posts already show on GoDesi through RSS. */
+  rssExample: {
+    name: "Dr. Gurudeva, Vedic astrologer",
+    href: "/business/dr-gurudeva-indian-vedic-astrologer-jyotish-highland-park",
+  },
+  wish: "I want the $500 Website + Content package for the first year.",
+};
+
+export const websiteContentPackageRegularUsd = () =>
+  WEBSITE_CONTENT_PACKAGE.items.reduce((sum, item) => sum + item.regularUsd, 0);

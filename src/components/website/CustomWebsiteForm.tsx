@@ -8,7 +8,7 @@ import { Button, Field, inputClass } from "@/components/ui";
 import { FormError } from "@/components/forms/FormError";
 import { ALBUM_LINK_STEPS } from "@/components/forms/PhotoAlbumField";
 import { PLAYLIST_LINK_STEPS } from "@/components/forms/PlaylistField";
-import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { WEBSITE_CONTENT_PACKAGE, WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
   CUSTOM_INCLUDES,
   CUSTOM_PAGE_NAMES,
@@ -120,6 +120,7 @@ export function CustomWebsiteForm({
     wish?: string;
     articles?: boolean;
     ordering?: boolean;
+    contentPackage?: boolean;
   };
 }) {
   const [state, formAction] = useFormState(startCustomWebsiteAction, emptyState);
@@ -151,6 +152,10 @@ export function CustomWebsiteForm({
     yearly -
     (referred ? WEBSITE_OFFER.customHostingYearUsd : 0) +
     (ordering ? WEBSITE_OFFER.onlineOrderingUsd : 0);
+  const packageToday =
+    WEBSITE_CONTENT_PACKAGE.priceUsd +
+    (ordering ? WEBSITE_OFFER.onlineOrderingUsd : 0) +
+    (articles ? WEBSITE_OFFER.dailyArticlesUsd : 0);
   const setFriend = (index: number, field: "name" | "contact", value: string) =>
     setFriends(
       friends.map((friend, i) =>
@@ -160,7 +165,41 @@ export function CustomWebsiteForm({
   const toggle = (list: string[], value: string) =>
     list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
 
-  const estimate = (
+  const estimate = defaults?.contentPackage ? (
+    <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 text-sm">
+      <h2 className="font-black text-slate-900">Your package</h2>
+      <ul className="mt-2 space-y-1.5">
+        <li className="flex justify-between gap-2">
+          <span>Website + Content package, first year</span>
+          <strong className="shrink-0">{usd(WEBSITE_CONTENT_PACKAGE.priceUsd)}</strong>
+        </li>
+        {ordering ? (
+          <li className="flex justify-between gap-2">
+            <span>{orderingLabel}</span>
+            <strong className="shrink-0">{usd(WEBSITE_OFFER.onlineOrderingUsd)} once</strong>
+          </li>
+        ) : null}
+        {articles ? (
+          <li className="flex justify-between gap-2">
+            <span>Daily articles instead of weekly</span>
+            <strong className="shrink-0">${WEBSITE_OFFER.dailyArticlesUsd}/year</strong>
+          </li>
+        ) : null}
+      </ul>
+      <div className="mt-3 border-t border-amber-200 pt-2">
+        <div className="flex justify-between gap-2 text-base">
+          <span className="font-semibold">First year</span>
+          <strong>{usd(packageToday)}</strong>
+        </div>
+        <div className="text-xs text-slate-600">
+          Package: {usd(WEBSITE_CONTENT_PACKAGE.depositUsd)} to start,{" "}
+          {usd(WEBSITE_CONTENT_PACKAGE.priceUsd - WEBSITE_CONTENT_PACKAGE.depositUsd)} when your website is finished.
+          {packageToday > WEBSITE_CONTENT_PACKAGE.priceUsd ? " Add-ons are billed on the same invoice." : ""}
+          From year 2: {WEBSITE_CONTENT_PACKAGE.renewals.join(" · ")}.
+        </div>
+      </div>
+    </div>
+  ) : (
     <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 p-4 text-sm">
       <h2 className="font-black text-slate-900">Your price</h2>
       <ul className="mt-2 space-y-1.5">
@@ -214,6 +253,7 @@ export function CustomWebsiteForm({
 
   return (
     <form action={formAction} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
+      {defaults?.contentPackage ? <input type="hidden" name="contentPackage" value="1" /> : null}
       <div className="min-w-0 space-y-5">
         <FormError>{state.error}</FormError>
 
