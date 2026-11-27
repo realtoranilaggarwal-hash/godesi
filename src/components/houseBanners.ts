@@ -15,7 +15,7 @@ export const HOUSE_BANNERS: HouseBanner[] = [
     href: "/marketing-shop",
     emoji: "🛒",
     title: "Marketing Shop",
-    line: "Logo flags, car stickers & flyers from $1.92",
+    line: "Your logo on flags, stickers & flyers",
     colors: "from-orange-500 to-indigo-600",
   },
   {

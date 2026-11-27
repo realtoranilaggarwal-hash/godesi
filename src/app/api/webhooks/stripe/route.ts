@@ -18,6 +18,7 @@ import { notifyPartnerPackagePaid } from "@/lib/partnerPackage";
 import { markPartnerFollowUpPaid } from "@/lib/partnerFollowUp";
 import { notifyInvoicePaid } from "@/lib/invoices";
 import { confirmLocalFeature } from "@/lib/localFeature";
+import { notifyMarketingShopOrder } from "@/lib/marketingShopOrders";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -167,6 +168,8 @@ export async function POST(request: Request) {
         await notifyInvoicePaid(session);
       } else if (session.metadata?.kind === "local-feature") {
         await confirmLocalFeature(session);
+      } else if (session.metadata?.kind === "marketing-shop") {
+        await notifyMarketingShopOrder(session);
       } else if (session.metadata?.kind === "bundle" && userId) {
         const months = Number(session.metadata?.months ?? 12);
         await grantBundle({

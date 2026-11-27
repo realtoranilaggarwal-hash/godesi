@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { cachedQuery } from "@/lib/cache";
 import { listingWhere, priceLabel } from "@/lib/listings";
+import { MarketingShopCard } from "@/components/MarketingShopCard";
 import { LinkButton } from "@/components/ui";
 
 export const metadata: Metadata = {
@@ -174,6 +175,8 @@ export default async function ClassifiedsPage() {
           <LinkButton href="/jobs/new" variant="secondary">Post a job</LinkButton>
         </div>
       </section>
+
+      <MarketingShopCard orderFor="classified" />
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
         <h2 className="text-lg font-black text-slate-900">More free desi listings</h2>
