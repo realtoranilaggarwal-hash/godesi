@@ -31,6 +31,7 @@ import {
 } from "@/lib/rates";
 import { formatUsd, fromMinor, toMinor } from "@/lib/format";
 import { checkCoupon, discountFor, planCouponScopes } from "@/lib/coupons";
+import { MarketingShopCard } from "@/components/MarketingShopCard";
 import { WhyGodesi } from "@/components/WhyGodesi";
 import { monthlyOffer } from "@/lib/monthlyOffer";
 import { FiveYearUpsell } from "@/components/FiveYearUpsell";
@@ -495,6 +496,8 @@ export default async function PricingPage({
           </div>
         </div>
       </Card>
+
+      <MarketingShopCard orderFor="premium" />
 
       <WhyGodesi />
 

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { TOOL_CATEGORIES } from "@/lib/tools";
-import { MarketingShopCard } from "@/components/MarketingShopCard";
 import { CopyButton } from "@/components/CopyButton";
 import { LinkButton } from "@/components/ui";
 
@@ -289,8 +288,6 @@ export default async function EarnPage() {
           ))}
         </ul>
       </section>
-
-      <MarketingShopCard />
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5">
         <h2 className="text-lg font-black text-slate-900">

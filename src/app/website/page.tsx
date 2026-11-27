@@ -99,7 +99,7 @@ export default async function WebsiteOfferPage({
 
         <WebsiteContentPackage />
 
-        <MarketingShopCard />
+        <MarketingShopCard orderFor="website" />
 
         {recent.length ? (
           <Card>

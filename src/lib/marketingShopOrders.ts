@@ -1,0 +1,107 @@
+import { escapeHtml, sendEmail, shell } from "@/lib/email";
+import { findMarketingProduct, usd } from "@/lib/marketingShop";
+import { SITE } from "@/lib/site";
+
+/** Where the team orders each item to drop-ship it. Server-only: never rendered on public pages. */
+const SUPPLIER_LINKS: Record<string, string> = {
+  "triangle-flags": "https://temu.to/k/pghibh3a0tc",
+  "car-sticker": "https://temu.to/k/pnfxxaemq6x",
+  "wall-banner": "https://temu.to/k/piel24o9o1s",
+  "vertical-flags": "https://temu.to/k/p7mvglj8wcp",
+  "a5-flyers": "https://temu.to/k/pvk5ko4h4lf",
+  "qr-keychains": "https://temu.to/k/pz27dn3v72m",
+  "logo-pin": "https://temu.to/k/pri7dvyfzck",
+  "printed-pens": "https://temu.to/k/pwz113guw4r",
+  "logo-vest": "https://temu.to/k/p6xwpuyb0v9",
+  "bamboo-pens": "https://temu.to/k/poceweyx9bf",
+  "logo-hoodie": "https://temu.to/k/ph5d9h1qyd5",
+};
+
+/** Cart as stored in Stripe metadata: `id:qty,id:qty`. */
+export function encodeCart(items: { id: string; qty: number }[]) {
+  return items.map((i) => `${i.id}:${i.qty}`).join(",");
+}
+
+export function decodeCart(value: string | undefined) {
+  return (value ?? "").split(",").flatMap((part) => {
+    const [id, qty] = part.split(":");
+    const product = findMarketingProduct(id);
+    const n = Number(qty);
+    return product && Number.isInteger(n) && n > 0 ? [{ product, qty: n }] : [];
+  });
+}
+
+type ShopSession = {
+  id: string;
+  amount_total: number | null;
+  customer_email?: string | null;
+  customer_details?: { email?: string | null; name?: string | null; phone?: string | null } | null;
+  collected_information?: {
+    shipping_details?: {
+      name?: string | null;
+      address?: {
+        line1?: string | null;
+        line2?: string | null;
+        city?: string | null;
+        state?: string | null;
+        postal_code?: string | null;
+        country?: string | null;
+      } | null;
+    } | null;
+  } | null;
+  metadata?: Record<string, string> | null;
+};
+
+/** Stripe confirmed a Marketing Shop order: send the team the drop-ship sheet and thank the buyer. */
+export async function notifyMarketingShopOrder(session: ShopSession) {
+  const items = decodeCart(session.metadata?.items);
+  const meta = session.metadata ?? {};
+  const email = session.customer_details?.email ?? session.customer_email ?? "";
+  const paid = usd((session.amount_total ?? 0) / 100);
+  const ship = session.collected_information?.shipping_details;
+  const a = ship?.address;
+  const address = [ship?.name, a?.line1, a?.line2, [a?.city, a?.state, a?.postal_code].filter(Boolean).join(" "), a?.country]
+    .filter(Boolean)
+    .map((line) => escapeHtml(String(line)))
+    .join("<br/>");
+
+  const rows = items
+    .map(({ product, qty }) => {
+      const link = SUPPLIER_LINKS[product.id];
+      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}</li>`;
+    })
+    .join("");
+
+  await sendEmail({
+    to: SITE.salesEmail,
+    subject: `Marketing Shop order ${paid}: ${meta.business || email || session.id}`,
+    html: shell(
+      "Marketing Shop order — drop-ship",
+      `<p><b>${escapeHtml(meta.business || "—")}</b> · ${escapeHtml(meta.name || session.customer_details?.name || "")}<br/>
+      Email: ${escapeHtml(email || "—")} · Phone: ${escapeHtml(meta.phone || session.customer_details?.phone || "—")}<br/>
+      GoDesi page / website: ${escapeHtml(meta.page || "—")}<br/>
+      Adding to: ${escapeHtml(meta.orderFor || "shop")}</p>
+      <ul>${rows}</ul>
+      <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>
+      <p><b>Ship to:</b><br/>${address || "—"}</p>
+      <p><b>Design notes:</b> ${escapeHtml(meta.notes || "—")}</p>
+      <p>Design each item with their logo and GoDesi QR code before ordering.</p>`,
+    ),
+    ...(email ? { replyTo: email } : {}),
+  });
+
+  if (email) {
+    const list = items.map(({ product, qty }) => `<li>${qty} × ${escapeHtml(product.name)}</li>`).join("");
+    await sendEmail({
+      to: email,
+      subject: `Your GoDesi Marketing Shop order (${paid})`,
+      html: shell(
+        "Thank you for your order",
+        `<p>We received your <b>${paid}</b> order:</p><ul>${list}</ul>
+        <p>Reply to this email with your logo (PNG or JPG) and any text you want printed. We design each item with your logo and your GoDesi QR code, send you a preview, and then ship it to your address.</p>
+        <p>Questions? Call or WhatsApp Anil at (732) 983-7958.</p>`,
+      ),
+      replyTo: SITE.alertsEmail,
+    });
+  }
+}

@@ -12,7 +12,7 @@ const imageUrl = "/images/ads/house-marketing-shop-320x100.png";
 const data = {
   slot: "MOBILE" as const,
   imageUrl,
-  title: "GoDesi Marketing Shop — logo flags, car stickers, banners & flyers",
+  title: "GoDesi Marketing Shop — your logo on flags, car stickers, banners & flyers",
   linkUrl: "https://godesi.com/marketing-shop",
 };
 
