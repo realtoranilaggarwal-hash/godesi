@@ -8,6 +8,7 @@ import { FeaturedOfferBar } from "@/components/FeaturedOfferBar";
 import { DealCard } from "@/components/DealCard";
 import { StoreOfferCard } from "@/components/StoreOfferCard";
 import { TemuPicks } from "@/components/TemuPicks";
+import { RakutenCashback } from "@/components/RakutenCashback";
 import { EmptyState, LinkButton } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -73,6 +74,8 @@ export default async function DealsPage({
       {active ? null : <DealOfTheDay />}
 
       {active ? null : <TemuPicks />}
+
+      {active ? null : <RakutenCashback />}
 
       {categories.length > 1 ? (
         <div className="flex flex-wrap gap-1.5 text-xs">
