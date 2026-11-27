@@ -56,6 +56,7 @@ export function MarketingShopOrderForm({
               <Image src={p.image} alt={p.name} width={600} height={600} className="aspect-square w-full object-cover" />
               <div className="flex flex-1 flex-col p-4">
                 <h2 className="font-black text-slate-900">{p.name}</h2>
+                {p.size ? <p className="mt-1 text-xs font-bold text-indigo-700">Size: {p.size}</p> : null}
                 <p className="mt-1 flex-1 text-sm text-slate-600">{p.blurb}</p>
                 <div className="mt-3 flex items-center justify-between gap-2">
                   <strong className="text-lg text-orange-600">{usd(p.priceUsd)}</strong>
@@ -82,9 +83,20 @@ export function MarketingShopOrderForm({
         {chosen.length ? (
           <ul className="mt-2 space-y-1 text-sm">
             {chosen.map((p) => (
-              <li key={p.id} className="flex justify-between gap-2">
-                <span>{qty[p.id]} × {p.name}</span>
-                <strong>{usd(p.priceUsd * qty[p.id])}</strong>
+              <li key={p.id} className="space-y-1 pb-2">
+                <div className="flex justify-between gap-2">
+                  <span>{qty[p.id]} × {p.name}</span>
+                  <strong>{usd(p.priceUsd * qty[p.id])}</strong>
+                </div>
+                <textarea
+                  name={`design-${p.id}`}
+                  rows={2}
+                  required
+                  maxLength={300}
+                  aria-label={`Design or details for ${p.name}`}
+                  placeholder="Design or details for this item: text, logo, photo, colours (required)"
+                  className={`${input} bg-white`}
+                />
               </li>
             ))}
             <li className="flex justify-between gap-2 border-t border-orange-200 pt-2 text-base">
@@ -106,10 +118,14 @@ export function MarketingShopOrderForm({
               <option key={value} value={value}>Add to: {label}</option>
             ))}
           </select>
-          <textarea name="notes" rows={2} maxLength={450} placeholder="Text to print, colours, sizes (optional)" className={`${input} sm:col-span-2`} />
+          <textarea name="notes" rows={2} maxLength={450} placeholder="Anything else we should know? (optional)" className={`${input} sm:col-span-2`} />
         </div>
+        <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
+          <input type="checkbox" name="noReturns" required className="mt-1 h-4 w-4" />
+          <span>I understand every item is custom-made for me, so it can&apos;t be returned.</span>
+        </label>
         <p className="mt-3 text-xs text-slate-600">
-          You enter your shipping address on the next step. After you pay, reply to our email with your logo; we send a design preview before we ship.
+          You enter your shipping address on the next step. After you pay, reply to our email with your logo or artwork; we design it, send you a preview, and order and ship it once you approve.
         </p>
         <button type="submit" disabled={!chosen.length} className="mt-3 w-full rounded-xl bg-orange-500 px-4 py-3 text-base font-black text-white hover:bg-orange-600 disabled:opacity-50 sm:w-auto">
           {chosen.length ? `Pay ${usd(total)} and ship to me` : "Add items to order"}

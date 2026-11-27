@@ -11,11 +11,8 @@ const SUPPLIER_LINKS: Record<string, string> = {
   "vertical-flags": "https://temu.to/k/p7mvglj8wcp",
   "a5-flyers": "https://temu.to/k/pvk5ko4h4lf",
   "qr-keychains": "https://temu.to/k/pz27dn3v72m",
-  "logo-pin": "https://temu.to/k/pri7dvyfzck",
   "printed-pens": "https://temu.to/k/pwz113guw4r",
-  "logo-vest": "https://temu.to/k/p6xwpuyb0v9",
   "bamboo-pens": "https://temu.to/k/poceweyx9bf",
-  "logo-hoodie": "https://temu.to/k/ph5d9h1qyd5",
   "nfc-review-stand": "https://temu.to/k/ppzirlueuw8",
   "logo-beanie": "https://temu.to/k/puisxje148q",
 };
@@ -56,11 +53,17 @@ type ShopSession = {
   metadata?: Record<string, string> | null;
 };
 
-function itemRows(items: ReturnType<typeof decodeCart>) {
+/** Metadata key holding the client's design details for one item. */
+export function designKey(id: string) {
+  return `design-${id}`;
+}
+
+function itemRows(items: ReturnType<typeof decodeCart>, designs: Record<string, string | undefined>) {
   return items
     .map(({ product, qty }) => {
       const link = SUPPLIER_LINKS[product.id];
-      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}</li>`;
+      const design = designs[designKey(product.id)];
+      return `<li>${qty} × ${escapeHtml(product.name)} (${usd(product.priceUsd * qty)})${link ? ` — <a href="${link}">order on Temu</a>` : ""}<br/><i>Design:</i> ${escapeHtml(design || "—").replace(/\n/g, "<br/>")}</li>`;
     })
     .join("");
 }
@@ -75,6 +78,7 @@ export async function requestMarketingShopOrder(order: {
   page: string;
   orderFor: string;
   notes: string;
+  designs: Record<string, string>;
 }) {
   const items = decodeCart(encodeCart(order.items));
   const total = items.reduce((sum, { product, qty }) => sum + product.priceUsd * qty, 0);
@@ -88,9 +92,10 @@ export async function requestMarketingShopOrder(order: {
       Email: ${escapeHtml(order.email)} · Phone: ${escapeHtml(order.phone || "—")}<br/>
       GoDesi page / website: ${escapeHtml(order.page || "—")}<br/>
       Adding to: ${escapeHtml(order.orderFor)}</p>
-      <ul>${itemRows(items)}</ul>
+      <ul>${itemRows(items, order.designs)}</ul>
       <p>Total: <b>${usd(total)}</b></p>
-      <p><b>Design notes:</b> ${escapeHtml(order.notes || "—")}</p>`,
+      <p><b>Other notes:</b> ${escapeHtml(order.notes || "—")}</p>
+      <p>Client confirmed: custom-made, no returns.</p>`,
     ),
     replyTo: order.email,
   });
@@ -129,10 +134,11 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       Email: ${escapeHtml(email || "—")} · Phone: ${escapeHtml(meta.phone || session.customer_details?.phone || "—")}<br/>
       GoDesi page / website: ${escapeHtml(meta.page || "—")}<br/>
       Adding to: ${escapeHtml(meta.orderFor || "shop")}</p>
-      <ul>${itemRows(items)}</ul>
+      <ul>${itemRows(items, meta)}</ul>
       <p>Paid: <b>${paid}</b> · Stripe: ${escapeHtml(session.id)}</p>
       <p><b>Ship to:</b><br/>${address || "—"}</p>
-      <p><b>Design notes:</b> ${escapeHtml(meta.notes || "—")}</p>
+      <p><b>Other notes:</b> ${escapeHtml(meta.notes || "—")}</p>
+      <p>No returns confirmed: ${meta.noReturns === "agreed" ? "yes" : "no"}</p>
       <p>Design each item with their logo and GoDesi QR code before ordering.</p>`,
     ),
     ...(email ? { replyTo: email } : {}),
@@ -150,7 +156,7 @@ export async function notifyMarketingShopOrder(session: ShopSession) {
       html: shell(
         "Thank you for your order",
         `<p>We received your <b>${paid}</b> order:</p><ul>${list}</ul>
-        <p>Reply to this email with your logo (PNG or JPG) and any text you want printed. We design each item with your logo and your GoDesi QR code, send you a preview, and then ship it to your address.</p>
+        <p>Reply to this email with your logo or artwork (PNG or JPG) and any text you want printed. We design each item with your artwork and your GoDesi QR code, send you a preview, and order and ship it to your address once you approve. Items are custom-made, so they can't be returned.</p>
         <p>Questions? Call or WhatsApp Anil at (732) 983-7958.</p>`,
       ),
       replyTo: SITE.alertsEmail,
