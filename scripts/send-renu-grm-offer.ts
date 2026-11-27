@@ -26,10 +26,10 @@ const html = `<div style="font-family:Arial,sans-serif;max-width:640px;margin:au
 </div>
 <div style="border:1px solid #d1d5db;border-top:0;border-radius:0 0 12px 12px;padding:20px 24px">
 <p>Dear Renu,</p>
-<p>Thank you for sending your website details through our GoDesi website form. We have everything we need, and we will build your <b>GRM Advisory</b> website. Here is everything included in your package. Everything below runs for your <b>first full year</b>:</p>
+<p>Thank you for sending your website details through our GoDesi website form. We have everything we need, and we will build your <b>GRM Advisory</b> website. Here is everything included in your package. Everything below runs for your <b>first full year</b>, and website hosting is included for that year:</p>
 <table style="width:100%;border-collapse:collapse">
 ${item("1. Your GRM Advisory website", "Built on your new domain <b>GRMAdvisory.com</b> (the domain is included for the first year), with the pages you asked for: Home, About us, Services, Areas we serve and Contact. It will feature financial planning, advanced tax strategies, tax minimisation, and wealth building and preservation. Visitors can call you, WhatsApp you at (347) 238-8467, send an inquiry, ask for a quote or book an appointment.")}
-${item("2. Automated daily content emails", "Every day you will get an email with a new picture and short post on your topics (tax savings, financial planning, wealth building). Each picture carries a GoDesi QR code that opens your GoDesi page, and your GoDesi page links to your website. <b>Your part:</b> post the daily picture and text to your social media (WhatsApp, Facebook, Instagram, LinkedIn) every day — that is what brings people to you.")}
+${item("2. Weekly content emails (52 a year)", "Every week you will get an email with a new picture and short post on your topics (tax savings, financial planning, wealth building). Each picture carries a GoDesi QR code that opens your GoDesi page, and your GoDesi page links to your website. <b>Your part:</b> post each picture and text to your social media (WhatsApp, Facebook, Instagram, LinkedIn) as soon as you get it — that is what brings people to you.", "52 × $5 = $260")}
 ${item("3. Your website posts, live on GoDesi", "Your 5 latest website posts will show on your GoDesi page through an RSS feed, so your page stays live and interactive and every post links back to your website.")}
 ${item("4. Two promotional videos", "Two short videos made for GRM Advisory from your services and message.", "$100 value")}
 ${item("5. Featured classified on GoDesi.com", "A featured GRM Advisory classified on GoDesi.com, the Desi community site for events, businesses and deals.")}
@@ -37,9 +37,14 @@ ${item("6. Banners on GoDesi.com", "Your 320×100 GRM Advisory banner in the GoD
 </table>
 <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:12px;padding:16px 18px;margin:18px 0">
 <p style="margin:0;font-size:18px"><b>Your price for everything, for the first year: $500</b></p>
-<p style="margin:6px 0 0">• <b>$250 now</b> to start the work<br>• <b>$250 later</b>, when your website is finished</p>
+<p style="margin:6px 0 0;font-size:14px;color:#374151">52 weekly content emails at $5 each = $260, and the remaining $240 covers your website, discounted.</p>
+<p style="margin:10px 0 0">• <b>$250 now</b> to start the work<br>• <b>$250 later</b>, when your website is finished</p>
 <p style="margin:14px 0 0"><a href="${PAY_NOW}" style="display:inline-block;background:#047857;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:8px">Pay $250 now →</a></p>
 <p style="margin:10px 0 0;font-size:13px;color:#6b7280">Secure card payment by Stripe. You will get a receipt by email.</p>
+</div>
+<div style="border:1px solid #d1d5db;border-radius:12px;padding:14px 18px;margin:0 0 18px">
+<p style="margin:0;font-weight:700;color:#064e3b">After the first year, and optional upgrades</p>
+<p style="margin:6px 0 0">• <b>Hosting:</b> $100 a year from the second year to keep your website online.<br>• <b>Daily content:</b> want a new picture and post every day instead of every week? Daily content emails are an add-on at <b>$500 a year</b>.</p>
 </div>
 <p>As soon as your first payment comes in, we will start on your website. If you would like to change anything, just reply to this email or call/WhatsApp Anil at (732) 983-7958.</p>
 <p>Thank you,<br><b>Anil Aggarwal</b><br>GoDesi.com</p>
