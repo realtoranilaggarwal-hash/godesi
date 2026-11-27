@@ -138,6 +138,7 @@ export default async function WebsiteOfferPage({
             wish: searchParams.wish ?? (searchParams.package === "content" ? WEBSITE_CONTENT_PACKAGE.wish : undefined),
             articles: searchParams.add === "articles",
             ordering: searchParams.add === "ordering",
+            contentPackage: searchParams.package === "content",
           }}
         />
 

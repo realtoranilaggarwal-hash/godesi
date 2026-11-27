@@ -11,7 +11,7 @@ import { getStripe, stripeEnabled } from "@/lib/stripe";
 import { siteUrl } from "@/lib/format";
 import { checkCoupon, couponMetadata } from "@/lib/coupons";
 import { escapeHtml, sendEmail, shell } from "@/lib/email";
-import { WEBSITE_OFFER } from "@/lib/websiteOffer";
+import { WEBSITE_CONTENT_PACKAGE, WEBSITE_OFFER } from "@/lib/websiteOffer";
 import {
   CUSTOM_PAGE_NAMES,
   CUSTOM_SOURCES,
@@ -489,6 +489,7 @@ export async function startCustomWebsiteAction(
     }
     const dailyArticles = formData.get("dailyArticles") === "1";
     const onlineOrdering = formData.get("onlineOrdering") === "1";
+    const contentPackage = formData.get("contentPackage") === "1";
     const friends = [
       [input.friend1Name, input.friend1Contact],
       [input.friend2Name, input.friend2Contact],
@@ -501,6 +502,9 @@ export async function startCustomWebsiteAction(
     const wish =
       [
         input.contactName ? `Contact: ${input.contactName}.` : "",
+        contentPackage
+          ? `Chose the $${WEBSITE_CONTENT_PACKAGE.priceUsd} Website + Content package (first year): bill $${WEBSITE_CONTENT_PACKAGE.depositUsd} now and $${WEBSITE_CONTENT_PACKAGE.priceUsd - WEBSITE_CONTENT_PACKAGE.depositUsd} on completion with a package invoice, not the standard checkout.`
+          : "",
         gift
           ? `Used code ${WEBSITE_OFFER.giftCode}: give them a free featured ad on GoDesi for ${WEBSITE_OFFER.giftFeaturedMonths} months.`
           : input.code
@@ -539,7 +543,9 @@ export async function startCustomWebsiteAction(
     });
     rememberProject(project.id);
     await emailDesk(
-      `Custom website order: ${project.businessName} (${project.city})${gift ? ` — code ${WEBSITE_OFFER.giftCode}` : ""}${
+      `Custom website order: ${project.businessName} (${project.city})${
+        contentPackage ? ` — $${WEBSITE_CONTENT_PACKAGE.priceUsd} package` : ""
+      }${gift ? ` — code ${WEBSITE_OFFER.giftCode}` : ""}${
         onlineOrdering ? " — online ordering" : ""
       }${referred ? " — 2 referrals" : ""}`,
       `<h2>New $${WEBSITE_OFFER.customPriceUsd} custom website request</h2>
