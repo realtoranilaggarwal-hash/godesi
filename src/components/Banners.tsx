@@ -336,10 +336,19 @@ export async function SmallBanners({
   side?: "left" | "right";
 } = {}) {
   if (isPhoneRequest()) return null;
-  const [banners, categories] = await Promise.all([
+  // Paid bookings are pinned once per page, on the right-side rail.
+  const pin = !embedded && side !== "left";
+  const [booked, banners, categories] = await Promise.all([
+    pin ? bookedBanners("MOBILE") : [],
     activeBanners(["MOBILE", "WALL"], 20),
     tree && side !== "left" ? categoryPickerGroups() : [],
   ]);
+  const pinned = new Set(booked.map((banner) => banner.id));
+  const small = (banner: { id: string; title: string; imageUrl: string }) => ({
+    id: banner.id,
+    title: banner.title,
+    imageUrl: proxyImage(banner.imageUrl),
+  });
   return (
     <SmallBannerRail
       categories={categories}
@@ -348,11 +357,8 @@ export async function SmallBanners({
       fill={fill}
       start={start}
       side={side}
-      banners={banners.map((banner) => ({
-        id: banner.id,
-        title: banner.title,
-        imageUrl: proxyImage(banner.imageUrl),
-      }))}
+      pinned={booked.map(small)}
+      banners={banners.filter((banner) => !pinned.has(banner.id)).map(small)}
     />
   );
 }

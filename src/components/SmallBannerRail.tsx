@@ -185,9 +185,11 @@ export function SmallBannerRail({
     return null;
   }
 
-  const count = fills
+  // Desktop rails keep their size: pinned bookings take spots from rotation.
+  const total = fills
     ? Math.min(fit ?? show, banners.length + HOUSE_BANNERS.length + 1)
     : show;
+  const count = phone ? total : Math.max(0, total - pinned.length);
   const visible = Array.from(
     { length: Math.min(count, banners.length) },
     (_, index) => banners[(offset + index) % banners.length],
