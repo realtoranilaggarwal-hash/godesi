@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { siteSearch, type SiteSearchHit } from "@/lib/siteSearch";
 import { Card, EmptyState, inputClass } from "@/components/ui";
 import { SidebarBanners } from "@/components/Banners";
 import { GoogleWebResults } from "@/components/GoogleWebResults";
+import { TrendingMatches } from "@/components/TrendingMatches";
 import { recordSearchMiss, WEB_RESULTS_BELOW } from "@/lib/searchMiss";
 import { gradientFor } from "@/lib/categories";
 import { siteUrl } from "@/lib/format";
@@ -143,6 +145,11 @@ export default async function FindPage({
             <Group title="Recommended links" hits={results.resources} />
           </>
         )}
+        {q.length >= 2 ? (
+          <Suspense fallback={null}>
+            <TrendingMatches query={q} />
+          </Suspense>
+        ) : null}
         {showWeb ? (
           <GoogleWebResults
             query={[q, searchParams.city].filter(Boolean).join(" ")}
