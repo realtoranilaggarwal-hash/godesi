@@ -47,12 +47,14 @@ export async function liveStoreOffers(take = 24): Promise<PublicStoreOffer[]> {
     query("CJ"),
   ]);
   const offers = [...own, ...feed];
-  // One advertiser can post dozens; spread the space across stores.
+  // One advertiser can post dozens in the feed; spread the space across stores.
+  // Hand-picked offers always show, and count toward their store's share.
   const perStore = new Map<string, number>();
   const picked: PublicStoreOffer[] = [];
-  for (const offer of offers) {
+  for (let index = 0; index < offers.length; index += 1) {
+    const offer = offers[index];
     const count = perStore.get(offer.advertiserName) ?? 0;
-    if (count >= 3) continue;
+    if (count >= 3 && index >= own.length) continue;
     perStore.set(offer.advertiserName, count + 1);
     picked.push(offer);
     if (picked.length >= take) break;
