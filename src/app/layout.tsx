@@ -17,6 +17,7 @@ import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
 import { AiChat } from "@/components/AiChat";
+import { HelpButton } from "@/components/HelpButton";
 import { BackToTop } from "@/components/BackToTop";
 import { SpinWheel } from "@/components/SpinWheel";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
@@ -238,7 +239,7 @@ export default async function RootLayout({
         <GoogleTranslate />
         <BackToTop />
         <SpinWheel />
-        {aiEnabled() && <AiChat />}
+        {aiEnabled() ? <AiChat /> : <HelpButton />}
       </body>
     </html>
   );

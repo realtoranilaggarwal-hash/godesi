@@ -187,7 +187,7 @@ export function AiChat() {
           </div>
         )}
 
-        {turns.some((turn) => turn.role === "assistant") && !busy && (
+        {!busy && (
           <a
             href={GODESI_HELP_WHATSAPP}
             target="_blank"
