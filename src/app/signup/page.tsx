@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SignupForm } from "@/components/forms/SignupForm";
 import { Card } from "@/components/ui";
-import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
+import { JoinHighlights, JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 import { NewsMediaStrip } from "@/components/NewsMediaStrip";
 import { SmallBanners } from "@/components/Banners";
@@ -49,6 +49,7 @@ export default async function SignupPage({
             next={searchParams.next}
           />
         </Card>
+        <JoinHighlights />
         <Card className="space-y-2 border-indigo-200 bg-indigo-50/60">
           <h2 className="font-bold text-slate-900">
             Free bonuses you get the day you join 🎁
@@ -59,8 +60,6 @@ export default async function SignupPage({
             <li>🔮 <b>Daily horoscope &amp; panchang</b> — every morning in your email</li>
             <li>🏷️ <b>Member deals &amp; coupons</b> — community discounts and the Deal of the Day</li>
             <li>🧰 <b>50+ free tools</b> — design, video, SEO and automation</li>
-            <li>📻 <b><Link href="/live-radio" className="hover:underline">Free live desi radio</Link></b> — Bollywood, Hindi, Punjabi and news</li>
-            <li>📘 <b><Link href="/astrology/palmistry" className="hover:underline">Free ebooks</Link></b> — like our palm reading guide</li>
             <li>🛍️ <b><Link href="/marketing-shop" className="hover:underline">Marketing tools at the lowest price</Link></b> — handpicked flags, banners, business cards and QR stickers</li>
             <li>⚡ <b><Link href="/events/push" className="hover:underline">GoDesi Push</Link></b> — import your Sulekha or Eventbrite event in one click</li>
             <li>✨ <b>And a lot more</b> — news, jobs, classifieds, rishta, games and rewards</li>
