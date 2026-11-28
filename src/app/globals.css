@@ -59,6 +59,7 @@ blockquote {
 }
 
 .wall-scroller {
+  overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;

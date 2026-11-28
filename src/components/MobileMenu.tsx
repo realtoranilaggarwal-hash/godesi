@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import type { StripItem } from "@/components/CategoryStrip";
 import { CategoryPicker, type PickerGroup } from "@/components/CategoryPicker";
@@ -27,11 +28,13 @@ export function MobileMenu({
 }) {
   const [open, setOpen] = useState(false);
   const [hint, setHint] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const close = () => setOpen(false);
 
   // Pointing hand under ☰ until a visitor opens the menu once, so they know the categories live there.
   useEffect(() => {
     if (!localStorage.getItem("godesi-menu-seen")) setHint(true);
+    setMounted(true);
   }, []);
   const toggle = () => {
     setOpen((value) => !value);
@@ -51,9 +54,14 @@ export function MobileMenu({
           aria-label={
             open ? "Close menu" : "Open menu: all pages and categories"
           }
-          className="rounded-xl border border-slate-300 px-2.5 py-1.5 text-lg leading-none text-slate-700"
+          className="flex flex-col items-center rounded-xl bg-gradient-to-b from-amber-400 to-orange-500 px-2 py-1 leading-none text-white shadow-sm hover:brightness-110"
         >
-          {open ? "✕" : "☰"}
+          <span aria-hidden className="text-base leading-none">
+            {open ? "✕" : "☰"}
+          </span>
+          <span className="text-[9px] font-black uppercase tracking-wide">
+            {open ? "Close" : "Menu"}
+          </span>
         </button>
         {hint && !open ? (
           <span
@@ -64,6 +72,24 @@ export function MobileMenu({
           </span>
         ) : null}
       </span>
+
+      {/* The header lives under a backdrop blur, which would trap a fixed child, so the side tab mounts on body. */}
+      {mounted && !open
+        ? createPortal(
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label="Open menu: all pages and categories"
+              className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-orange-500 px-1.5 py-2 text-[10px] font-black uppercase leading-none text-white shadow-lg hover:brightness-110 print:hidden"
+            >
+              <span aria-hidden className="text-base">
+                👈
+              </span>
+              Menu
+            </button>,
+            document.body,
+          )
+        : null}
 
       {open ? (
         <div className="absolute inset-x-0 top-full max-h-[calc(100vh-8rem)] supports-[height:100dvh]:max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain border-t border-slate-200 bg-white shadow-lg">
