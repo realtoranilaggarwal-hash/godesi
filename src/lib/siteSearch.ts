@@ -394,11 +394,16 @@ export async function siteSearch(
           ? db.user.findMany({
               where: {
                 ...PUBLIC_PROFILE,
-                ...everyWordIn(words, [
-                  (has) => ({ name: has }),
-                  (has) => ({ headline: has }),
-                  (has) => ({ location: has }),
-                ])[0],
+                AND: [
+                  ...everyWordIn(words, [
+                    (has) => ({ name: has }),
+                    (has) => ({ headline: has }),
+                    (has) => ({ location: has }),
+                  ]),
+                  ...(city
+                    ? [{ location: { contains: city, mode: "insensitive" as const } }]
+                    : []),
+                ],
               },
               select: {
                 id: true,
@@ -409,7 +414,7 @@ export async function siteSearch(
                 location: true,
               },
               orderBy: [{ avatarUrl: "desc" }, { createdAt: "asc" }],
-              take: city ? 25 : 5,
+              take: 5,
             })
           : [],
       ]).then(([byName, byWords]) => {
