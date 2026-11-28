@@ -97,7 +97,23 @@ const homeFeaturedEvents = cachedQuery(
 
 const homeNews = cachedQuery("home-news", CONTENT_TTL, () =>
   db.newsItem.findMany({
-    where: { status: "PUBLISHED", publishedAt: { gte: freshNewsCutoff() } },
+    where: {
+      status: "PUBLISHED",
+      publishedAt: { gte: freshNewsCutoff() },
+      topic: { not: "entertainment" },
+    },
+    orderBy: { publishedAt: "desc" },
+    take: 4,
+  }),
+);
+
+const homeBollywood = cachedQuery("home-bollywood", CONTENT_TTL, () =>
+  db.newsItem.findMany({
+    where: {
+      status: "PUBLISHED",
+      publishedAt: { gte: freshNewsCutoff() },
+      topic: "entertainment",
+    },
     orderBy: { publishedAt: "desc" },
     take: 4,
   }),
@@ -138,6 +154,7 @@ export default async function HomePage() {
     eventRows,
     featuredRows,
     newsRows,
+    bollywoodRows,
     spaCount,
     memberRows,
     fng,
@@ -146,6 +163,7 @@ export default async function HomePage() {
     homeEvents(),
     homeFeaturedEvents(),
     homeNews(),
+    homeBollywood(),
     homeSpaCount(),
     homeMembers(),
     cryptoFearGreed(),
@@ -164,6 +182,11 @@ export default async function HomePage() {
     ...item,
     publishedAt: new Date(item.publishedAt),
   }));
+  const bollywood = bollywoodRows.map((item) => ({
+    ...item,
+    publishedAt: new Date(item.publishedAt),
+  }));
+  const hasNews = news.length > 0 || bollywood.length > 0;
   const newMembers = memberRows.map((member) => ({
     ...member,
     createdAt: new Date(member.createdAt),
@@ -324,36 +347,53 @@ export default async function HomePage() {
             </section>
           </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 [&>*]:min-w-0">
-            {news.length ? (
-              <section className="lg:col-span-2">
-                <SectionHeading
-                  title="Desi news 📰"
-                  href="/news"
-                  linkLabel="All news"
-                  gradient="from-sky-500 to-indigo-500"
-                />
-                <p className="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-                  🗞️ Are you a journalist, or have news to share? Post it and
-                  your story shows right here.{" "}
-                  <Link href="/news/report" className="font-bold underline">
-                    Share news
-                  </Link>{" "}
-                  ·{" "}
-                  <Link href="/journalists" className="font-bold underline">
-                    Become a journalist
-                  </Link>
-                </p>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {news.map((item) => (
-                    <NewsCard key={item.id} item={item} openOnGodesi />
-                  ))}
+            {hasNews ? (
+              <section className="space-y-6 lg:col-span-2">
+                {bollywood.length ? (
+                  <div>
+                    <SectionHeading
+                      title="Bollywood news 🎬"
+                      href="/bollywood"
+                      linkLabel="All Bollywood"
+                      gradient="from-fuchsia-500 to-rose-500"
+                    />
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {bollywood.map((item) => (
+                        <NewsCard key={item.id} item={item} openOnGodesi />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <div>
+                  <SectionHeading
+                    title="Desi news 📰"
+                    href="/news"
+                    linkLabel="All news"
+                    gradient="from-sky-500 to-indigo-500"
+                  />
+                  <p className="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+                    🗞️ Are you a journalist, or have news to share? Post it and
+                    your story shows right here.{" "}
+                    <Link href="/news/report" className="font-bold underline">
+                      Share news
+                    </Link>{" "}
+                    ·{" "}
+                    <Link href="/journalists" className="font-bold underline">
+                      Become a journalist
+                    </Link>
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {news.map((item) => (
+                      <NewsCard key={item.id} item={item} openOnGodesi />
+                    ))}
+                  </div>
                 </div>
               </section>
             ) : null}
 
             <ActivityWall
               limit={16}
-              className={news.length ? "" : "lg:col-span-3"}
+              className={hasNews ? "" : "lg:col-span-3"}
             />
           </div>
 
