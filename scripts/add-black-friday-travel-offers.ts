@@ -1,5 +1,5 @@
 /**
- * Pins Anil's Black Friday CJ travel links to the top of /deals and /shop (source
+ * Pins Anil's Black Friday CJ travel links (plus an Amazon massage-equipment link) to the top of /deals and /shop (source
  * "PINNED", which the CJ sync never retires) and rotates the LEVEL8 450x75 banner in
  * the FULLBANNER slot. These links are not in the CJ deals feed, so advertiser details
  * come from CJ Link Search. Re-runnable; re-runs never touch "hidden".
@@ -45,6 +45,17 @@ const OFFERS = [
     category: "Travel",
     promotionType: "sale",
     clickUrl: "https://www.anrdoezrs.net/click-101917857-17061683",
+    endsAt: null,
+  },
+  {
+    externalId: "amazon-massage-equipment",
+    advertiserId: "amazon",
+    advertiserName: "Amazon",
+    title: "Professional massage equipment on Amazon, lowest prices first",
+    description: "Massage tables, chairs, guns and spa tools for therapists and salons. As an Amazon Associate GoDesi earns from qualifying purchases.",
+    category: "Beauty",
+    promotionType: "sale",
+    clickUrl: "https://link.amazon/B0dNLfbWM",
     endsAt: null,
   },
 ];
