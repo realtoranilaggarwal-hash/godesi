@@ -1,22 +1,39 @@
 import { BLACK_FRIDAY, blackFridayLive } from "@/lib/blackFriday";
 import { SIGNUP_PROMO_CODE } from "@/lib/courseCodes";
+import { NYE_SUPPORTER_SPECIAL, nyeSupporterSpecialLive } from "@/lib/nyeSupporterSpecial";
 
 /** Black Friday → Cyber Monday specials strip under the header. */
 export function BlackFridayBanner() {
   if (!blackFridayLive()) return null;
+  // Thanksgiving weekend ticket-buyer perks ride on the NYE chip instead of a separate strip.
+  const supporterSpecial = nyeSupporterSpecialLive();
   const offers = [
-    {
-      href: BLACK_FRIDAY.nyeUrl,
-      label: (
-        <>
-          🎆 <span className="hidden sm:inline">NYE party tickets </span>
-          <span className="sm:hidden">NYE </span>
-          <strong>$75</strong>
-          <span className="hidden sm:inline"> till Nov 30</span>
-        </>
-      ),
-      external: true,
-    },
+    supporterSpecial
+      ? {
+          href: NYE_SUPPORTER_SPECIAL.nyeUrl,
+          label: (
+            <>
+              🦃 <span className="hidden sm:inline">NYE tickets </span>
+              <span className="sm:hidden">NYE </span>
+              <strong>$75</strong> +{" "}
+              <span className="hidden sm:inline">free featured classified, Supporter listing &amp; your 10% code till Sat</span>
+              <span className="sm:hidden">free perks</span>
+            </>
+          ),
+          external: true,
+        }
+      : {
+          href: BLACK_FRIDAY.nyeUrl,
+          label: (
+            <>
+              🎆 <span className="hidden sm:inline">NYE party tickets </span>
+              <span className="sm:hidden">NYE </span>
+              <strong>$75</strong>
+              <span className="hidden sm:inline"> till Nov 30</span>
+            </>
+          ),
+          external: true,
+        },
     {
       href: "/course#free-ebook",
       label: (
