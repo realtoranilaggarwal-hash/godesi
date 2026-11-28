@@ -63,7 +63,7 @@ export function BlackFridayBanner() {
               key={offer.href}
               href={offer.href}
               {...(offer.external ? { target: "_blank", rel: "noopener" } : {})}
-              className="whitespace-nowrap rounded-full border border-white/30 bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold transition hover:bg-white/20 sm:px-3 sm:py-1 sm:text-sm"
+              className="max-w-full whitespace-nowrap rounded-full border border-white/30 sm:whitespace-normal bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold transition hover:bg-white/20 sm:px-3 sm:py-1 sm:text-sm"
             >
               {offer.label}
               <span className="hidden sm:inline"> →</span>
