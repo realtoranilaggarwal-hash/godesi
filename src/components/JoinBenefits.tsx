@@ -290,7 +290,7 @@ export function JoinHighlights() {
         >
           #godesi
         </a>{" "}
-        is the number one hashtag on X (Twitter).
+        is a top desi hashtag on X (Twitter).
       </p>
       <p className="mt-2 text-sm text-slate-700">
         📰 <b>Read news by hashtag:</b> tap one below and{" "}
