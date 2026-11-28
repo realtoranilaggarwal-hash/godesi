@@ -73,14 +73,14 @@ export function MobileMenu({
         ) : null}
       </span>
 
-      {/* The header lives under a backdrop blur, which would trap a fixed child, so the side tab mounts on body. */}
+      {/* Mounted on body: the header backdrop blur would trap a fixed child. Sits above the fallback Help tab. */}
       {mounted && !open
         ? createPortal(
             <button
               type="button"
               onClick={toggle}
               aria-label="Open menu: all pages and categories"
-              className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-orange-500 px-1.5 py-2 text-[10px] font-black uppercase leading-none text-white shadow-lg hover:brightness-110 print:hidden"
+              className="fixed right-0 top-1/2 z-30 flex -translate-y-[calc(100%+3.5rem)] flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-orange-500 px-1.5 py-2 text-[10px] font-black uppercase leading-none text-white shadow-lg hover:brightness-110 print:hidden"
             >
               <span aria-hidden className="text-base">
                 👈
