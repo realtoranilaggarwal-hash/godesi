@@ -28,8 +28,14 @@ export type PublicStoreOffer = Prisma.StoreOfferGetPayload<{
   select: typeof storeOfferSelect;
 }>;
 
-/** Coupons first, then whatever ends soonest, so a page shows the most useful few. */
-export async function liveStoreOffers(take = 24): Promise<PublicStoreOffer[]> {
+/**
+ * Coupons first, then whatever ends soonest, so a page shows the most useful few.
+ * `allPinned` lets the full deal pages show every hand-picked offer, beyond `take`.
+ */
+export async function liveStoreOffers(
+  take = 24,
+  allPinned = false,
+): Promise<PublicStoreOffer[]> {
   const query = (source: Prisma.StoreOfferWhereInput["source"]) =>
     db.storeOffer.findMany({
       where: { ...liveStoreOfferWhere(), source },
@@ -38,14 +44,11 @@ export async function liveStoreOffers(take = 24): Promise<PublicStoreOffer[]> {
         { code: { sort: "asc", nulls: "last" } },
         { endsAt: { sort: "asc", nulls: "last" } },
       ],
-      take: take * 3,
+      take: allPinned ? undefined : take * 3,
     });
   // Offers the owner adds by hand (e.g. Temu) come before the CJ feed,
   // which has hundreds of rows and would otherwise crowd them out.
-  const [own, feed] = await Promise.all([
-    query({ not: "CJ" }),
-    query("CJ"),
-  ]);
+  const [own, feed] = await Promise.all([query({ not: "CJ" }), query("CJ")]);
   const offers = [...own, ...feed];
   // One advertiser can post dozens in the feed; spread the space across stores.
   // Hand-picked offers always show, and count toward their store's share.
@@ -53,22 +56,25 @@ export async function liveStoreOffers(take = 24): Promise<PublicStoreOffer[]> {
   const picked: PublicStoreOffer[] = [];
   for (let index = 0; index < offers.length; index += 1) {
     const offer = offers[index];
+    const isOwn = index < own.length;
+    if (picked.length >= take && !(allPinned && isOwn)) break;
     const count = perStore.get(offer.advertiserName) ?? 0;
-    if (count >= 3 && index >= own.length) continue;
+    if (count >= 3 && !isOwn) continue;
     perStore.set(offer.advertiserName, count + 1);
     picked.push(offer);
-    if (picked.length >= take) break;
   }
   return picked;
 }
 
-const cachedOffers = cachedQuery("live-store-offers", CONTENT_TTL, (take: number) =>
-  liveStoreOffers(take),
+const cachedOffers = cachedQuery(
+  "live-store-offers",
+  CONTENT_TTL,
+  (take: number, allPinned: boolean) => liveStoreOffers(take, allPinned),
 );
 
 /** liveStoreOffers for public pages, read from the database once a minute. */
-export async function cachedLiveStoreOffers(take = 24) {
-  return (await cachedOffers(take)).map((offer) => ({
+export async function cachedLiveStoreOffers(take = 24, allPinned = false) {
+  return (await cachedOffers(take, allPinned)).map((offer) => ({
     ...offer,
     endsAt: offer.endsAt ? new Date(offer.endsAt) : null,
   }));

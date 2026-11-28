@@ -61,7 +61,7 @@ export default async function ShopPage() {
   const hasShelfStores = Boolean(
     amazonTag || ebayCampaignId || ALIEXPRESS_AFFILIATE_URL,
   );
-  const storeOffers = await cachedLiveStoreOffers(9);
+  const storeOffers = await cachedLiveStoreOffers(9, true);
 
   return (
     <div className="space-y-6">
