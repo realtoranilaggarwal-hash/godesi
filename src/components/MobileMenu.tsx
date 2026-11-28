@@ -18,6 +18,7 @@ export function MobileMenu({
   groups,
   account,
   signOut,
+  sideTab = true,
 }: {
   links: MenuLink[];
   categories: StripItem[];
@@ -25,6 +26,8 @@ export function MobileMenu({
   groups: PickerGroup[];
   account: { href: string; label: string } | null;
   signOut: () => Promise<void>;
+  /** Off when the fallback WhatsApp Help tab holds the right edge. */
+  sideTab?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [hint, setHint] = useState(false);
@@ -73,14 +76,14 @@ export function MobileMenu({
         ) : null}
       </span>
 
-      {/* Mounted on body: the header backdrop blur would trap a fixed child. Sits above the fallback Help tab. */}
-      {mounted && !open
+      {/* Mounted on body: the header backdrop blur would trap a fixed child; kept below the sticky header. */}
+      {sideTab && mounted && !open
         ? createPortal(
             <button
               type="button"
               onClick={toggle}
               aria-label="Open menu: all pages and categories"
-              className="fixed right-0 top-1/2 z-30 flex -translate-y-[calc(100%+3.5rem)] flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-orange-500 px-1.5 py-2 text-[10px] font-black uppercase leading-none text-white shadow-lg hover:brightness-110 print:hidden"
+              className="fixed right-0 z-30 flex top-[max(50%,11rem)] -translate-y-1/2 flex-col items-center gap-0.5 rounded-l-2xl bg-gradient-to-b from-amber-400 to-orange-500 px-1.5 py-2 text-[10px] font-black uppercase leading-none text-white shadow-lg hover:brightness-110 print:hidden"
             >
               <span aria-hidden className="text-base">
                 👈

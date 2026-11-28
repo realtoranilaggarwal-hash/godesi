@@ -18,6 +18,7 @@ import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
 import { emailEnabled } from "@/lib/email";
+import { aiEnabled } from "@/lib/ai";
 import { festivalSlug, headerFestival } from "@/lib/festivals";
 import { thanksgivingLink, thanksgivingLive } from "@/lib/thanksgiving";
 
@@ -423,6 +424,7 @@ export async function SiteHeader() {
                     : null
                 }
                 signOut={logoutAction}
+                sideTab={aiEnabled()}
               />
             </div>
 
