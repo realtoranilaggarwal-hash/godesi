@@ -28,6 +28,9 @@ export async function TrendingMatches({ query }: { query: string }) {
           See all on Trending →
         </Link>
       </div>
+      <p className="mt-1 text-xs text-slate-500">
+        Live news from Google News &amp; Mastodon
+      </p>
       {hits.length ? (
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {hits.map((hit) => (
