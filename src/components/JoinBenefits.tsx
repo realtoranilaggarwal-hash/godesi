@@ -4,6 +4,7 @@ import { isPhoneRequest } from "@/lib/device";
 import { db } from "@/lib/db";
 import { cachedQuery, CONTENT_TTL } from "@/lib/cache";
 import { citySlug } from "@/lib/citySlug";
+import { HASHTAG_LINKS } from "@/lib/social";
 
 const PERKS: { icon: string; title: string; body: string; href?: string }[] = [
   {
@@ -122,7 +123,10 @@ export async function JoinPerks() {
               <div>
                 <p className="text-sm font-bold text-slate-900">
                   {perk.href ? (
-                    <Link href={perk.href} className="hover:text-rose-600 hover:underline">
+                    <Link
+                      href={perk.href}
+                      className="hover:text-rose-600 hover:underline"
+                    >
                       {perk.title} →
                     </Link>
                   ) : (
@@ -217,5 +221,98 @@ export function JoinRail() {
       {/* Signup pages keep it slim so the rail doesn't outrun the form. */}
       <SidebarBanners slim />
     </div>
+  );
+}
+
+const HIGHLIGHTS = [
+  {
+    icon: "📘",
+    title: "Free ebooks",
+    body: "Guides like our palm reading ebook, free to download.",
+    href: "/astrology/palmistry",
+  },
+  {
+    icon: "📻",
+    title: "Free live radio",
+    body: "Bollywood, Hindi, Punjabi and news stations.",
+    href: "/live-radio",
+  },
+  {
+    icon: "☀️",
+    title: "Free daily news",
+    body: "GoDesi Daily: desi news, panchang, gold and rupee rates.",
+    href: "/daily",
+  },
+  {
+    icon: "📇",
+    title: "The first exclusive desi directory",
+    body: "Desi businesses, pros and services near you.",
+    href: "/search",
+  },
+];
+
+const NEWS_TAGS = ["#godesi", "#Diwali", "#H1B", "#Bollywood"];
+
+/** The join pitch for every screen size, phones included. */
+export function JoinHighlights() {
+  return (
+    <section className="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-indigo-50 p-4">
+      <h2 className="font-black text-slate-900">Join free and get 🎁</h2>
+      <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {HIGHLIGHTS.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="flex gap-2 rounded-xl bg-white/80 p-2 hover:bg-white"
+            >
+              <span className="text-lg leading-none" aria-hidden>
+                {item.icon}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-bold text-slate-900">
+                  {item.title} →
+                </span>
+                <span className="block text-xs text-slate-600">
+                  {item.body}
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 text-sm text-slate-700">
+        💡 <b>Did you know?</b>{" "}
+        <a
+          href={HASHTAG_LINKS.X}
+          target="_blank"
+          rel="noreferrer"
+          className="font-bold text-indigo-700 underline"
+        >
+          #godesi
+        </a>{" "}
+        is the number one hashtag on X (Twitter).
+      </p>
+      <p className="mt-2 text-sm text-slate-700">
+        📰 <b>Read news by hashtag:</b> tap one below and{" "}
+        <Link
+          href="/trending"
+          className="font-semibold text-indigo-700 underline"
+        >
+          Trending
+        </Link>{" "}
+        shows the news, blogs and posts that use it.
+      </p>
+      <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-semibold">
+        {NEWS_TAGS.map((tag) => (
+          <Link
+            key={tag}
+            href={`/trending?tag=${encodeURIComponent(tag)}`}
+            className="rounded-full bg-slate-900 px-2.5 py-1 text-white hover:bg-slate-700"
+          >
+            {tag}
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
