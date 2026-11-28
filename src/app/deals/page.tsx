@@ -26,7 +26,7 @@ export default async function DealsPage({
 }) {
   const [all, storeOffers] = await Promise.all([
     cachedLiveDeals({ take: 200 }),
-    cachedLiveStoreOffers(12),
+    cachedLiveStoreOffers(12, true),
   ]);
   // Only categories that have an offer running get a chip.
   const categories = Array.from(
