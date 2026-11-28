@@ -211,44 +211,45 @@ export default async function HomePage() {
 
           <ChatterHomeBox />
 
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0 space-y-3">
-              <nav className="flex flex-wrap gap-2 text-sm font-semibold">
+              <nav className="flex flex-wrap gap-1.5 text-xs font-semibold sm:gap-2 sm:text-sm">
                 <Link
                   href="/markets"
-                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-800 hover:bg-indigo-100"
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 sm:px-3 sm:py-1.5 text-indigo-800 hover:bg-indigo-100"
                 >
                   📈 Markets today
                 </Link>
                 <Link
                   href="/travel"
-                  className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-800 hover:bg-indigo-100"
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 sm:px-3 sm:py-1.5 text-indigo-800 hover:bg-indigo-100"
                 >
                   ✈️ Travel deals
                 </Link>
                 <Link
                   href="/games"
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:bg-slate-100"
+                  className="rounded-full border border-slate-200 bg-white px-2.5 py-1 sm:px-3 sm:py-1.5 text-slate-700 hover:bg-slate-100"
                 >
                   🎮 Games
                 </Link>
                 <Link
                   href="/claim"
-                  className="rounded-full bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-700"
+                  className="rounded-full bg-slate-900 px-2.5 py-1 sm:px-3 sm:py-1.5 text-white hover:bg-slate-700"
                 >
                   Claim godesi.com/yourname
                 </Link>
                 {fng ? (
                   <Link
                     href="/crypto-fear-greed"
-                    className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700 hover:bg-slate-100"
+                    className="rounded-full border border-slate-200 bg-white px-2.5 py-1 sm:px-3 sm:py-1.5 text-slate-700 hover:bg-slate-100"
                   >
-                    😬 Crypto mood: {fng.value} · {fng.label}
+                    😬 Crypto<span className="max-sm:hidden"> mood</span>:{" "}
+                    {fng.value} · {fng.label}
                   </Link>
                 ) : null}
               </nav>
 
-              <div className="grid gap-3 [&>*]:min-w-0">
+              <div className="grid grid-cols-1 gap-3 [&>*]:min-w-0">
                 {today.panchang ? (
                   <AstroToday panchang={today.panchang} place={today.label} />
                 ) : null}
@@ -285,7 +286,7 @@ export default async function HomePage() {
 
         <DealsStrip />
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <CategoryFeatured />
           <aside className="relative hidden xl:block">
             <div className="absolute inset-0">
@@ -295,7 +296,7 @@ export default async function HomePage() {
         </div>
 
         <div className="space-y-8">
-          <div className="grid gap-3 lg:grid-cols-2 [&>*]:min-w-0">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 [&>*]:min-w-0">
             <DjsWikiCard />
             <section className="flex flex-col justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
               <p>
@@ -321,7 +322,7 @@ export default async function HomePage() {
               </div>
             </section>
           </div>
-          <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 [&>*]:min-w-0">
             {news.length ? (
               <section className="lg:col-span-2">
                 <SectionHeading
@@ -341,7 +342,7 @@ export default async function HomePage() {
                     Become a journalist
                   </Link>
                 </p>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {news.map((item) => (
                     <NewsCard key={item.id} item={item} openOnGodesi />
                   ))}
@@ -363,7 +364,7 @@ export default async function HomePage() {
               gradient="from-orange-500 to-rose-500"
             />
             {businesses.length ? (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {businesses.map((business) => (
                   <BusinessTile key={business.id} business={business} />
                 ))}
@@ -383,7 +384,7 @@ export default async function HomePage() {
             )}
           </section>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <SpaSpotlight listings={spaCount} />
             <ReferEarnTile />
             <WebsiteOfferTile />
