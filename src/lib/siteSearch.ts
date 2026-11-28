@@ -1,5 +1,6 @@
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { findProfilesByName } from "@/lib/peopleLookup";
+import { PUBLIC_PROFILE, findProfilesByName } from "@/lib/peopleLookup";
 import { searchWords } from "@/lib/keywordSearch";
 import { LEGACY_EVENT_ZONE } from "@/lib/time";
 
@@ -205,6 +206,34 @@ function eventWordsMatch(q: string) {
   ];
 }
 
+/** Words people type for a trade that listings name differently. */
+const WORD_ALIASES: Record<string, string[]> = {
+  realtor: ["real estate", "realty"],
+  realty: ["real estate", "realtor"],
+};
+
+type FieldMatch = (has: Prisma.StringFilter) => object;
+
+/**
+ * Every word of a multi-word query must appear in one of `fields`, so
+ * "anil aggarwal realtor" finds a real estate agent owned by Anil Aggarwal
+ * even though no single field holds that exact phrase.
+ */
+function everyWordIn(words: string[], fields: FieldMatch[]) {
+  if (words.length < 2) return [];
+  return [
+    {
+      AND: words.map((word) => ({
+        OR: [word, ...(WORD_ALIASES[word] ?? [])].flatMap((variant) =>
+          fields.map((field) =>
+            field({ contains: variant, mode: "insensitive" }),
+          ),
+        ),
+      })),
+    },
+  ];
+}
+
 /**
  * One query across every surface — businesses, wedding vendors, events, property
  * and item listings, temples, requirements, categories and resource links — so
@@ -232,6 +261,7 @@ export async function siteSearch(
 
   const like = { contains: q, mode: "insensitive" as const };
   const cityFilter = city ? { city: { contains: city, mode: "insensitive" as const } } : {};
+  const words = searchWords(q);
 
   const [
     businesses,
@@ -257,6 +287,15 @@ export async function siteSearch(
             { subcategoryRef: { name: like } },
             // People search for the owner's name as often as the shop name.
             { owner: { name: like } },
+            ...everyWordIn(words, [
+              (has) => ({ name: has }),
+              (has) => ({ description: has }),
+              (has) => ({ category: has }),
+              (has) => ({ city: has }),
+              (has) => ({ categoryRef: { name: has } }),
+              (has) => ({ subcategoryRef: { name: has } }),
+              (has) => ({ owner: { name: has } }),
+            ]),
           ],
         },
         orderBy: [
@@ -349,15 +388,41 @@ export async function siteSearch(
           _count: { select: { events: { where: { status: "APPROVED" } } } },
         },
       }),
-      findProfilesByName(q, city ? 25 : 5).then((rows) =>
-        city
-          ? rows
-              .filter((row) =>
+      Promise.all([
+        findProfilesByName(q, city ? 25 : 5),
+        words.length > 1
+          ? db.user.findMany({
+              where: {
+                ...PUBLIC_PROFILE,
+                ...everyWordIn(words, [
+                  (has) => ({ name: has }),
+                  (has) => ({ headline: has }),
+                  (has) => ({ location: has }),
+                ])[0],
+              },
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                avatarUrl: true,
+                headline: true,
+                location: true,
+              },
+              orderBy: [{ avatarUrl: "desc" }, { createdAt: "asc" }],
+              take: city ? 25 : 5,
+            })
+          : [],
+      ]).then(([byName, byWords]) => {
+        const seen = new Set(byName.map((row) => row.id));
+        const rows = [...byName, ...byWords.filter((row) => !seen.has(row.id))];
+        return (
+          city
+            ? rows.filter((row) =>
                 row.location?.toLowerCase().includes(city.toLowerCase()),
               )
-              .slice(0, 5)
-          : rows,
-      ),
+            : rows
+        ).slice(0, 5);
+      }),
     ]);
 
   const results: SiteSearchResults = {
