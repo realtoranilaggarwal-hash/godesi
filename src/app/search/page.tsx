@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { searchBusinesses, listCities, listCountries } from "@/lib/businesses";
 import { FeaturedStrip } from "@/components/FeaturedStrip";
 import { getCategoryTree } from "@/lib/directory";
 import { BusinessCard } from "@/components/BusinessCard";
 import { GoogleWebResults } from "@/components/GoogleWebResults";
+import { TrendingMatches } from "@/components/TrendingMatches";
 import { recordSearchMiss, WEB_RESULTS_BELOW } from "@/lib/searchMiss";
 import {
   InContentBanner,
@@ -282,6 +284,11 @@ export default async function SearchPage({
             }
           />
         )}
+        {q.length >= 2 ? (
+          <Suspense fallback={null}>
+            <TrendingMatches query={q} />
+          </Suspense>
+        ) : null}
         {showWeb ? (
           <GoogleWebResults
             query={[q, searchParams.city].filter(Boolean).join(" ")}
