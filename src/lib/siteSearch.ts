@@ -207,10 +207,10 @@ function eventWordsMatch(q: string) {
 }
 
 /** Words people type for a trade that listings name differently. */
-const WORD_ALIASES: Record<string, string[]> = {
-  realtor: ["real estate", "realty"],
-  realty: ["real estate", "realtor"],
-};
+const WORD_ALIASES = new Map<string, string[]>([
+  ["realtor", ["real estate", "realty"]],
+  ["realty", ["real estate", "realtor"]],
+]);
 
 type FieldMatch = (has: Prisma.StringFilter) => object;
 
@@ -224,7 +224,7 @@ function everyWordIn(words: string[], fields: FieldMatch[]) {
   return [
     {
       AND: words.map((word) => ({
-        OR: [word, ...(WORD_ALIASES[word] ?? [])].flatMap((variant) =>
+        OR: [word, ...(WORD_ALIASES.get(word) ?? [])].flatMap((variant) =>
           fields.map((field) =>
             field({ contains: variant, mode: "insensitive" }),
           ),
