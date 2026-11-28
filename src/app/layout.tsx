@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { DealRibbon } from "@/components/DealRibbon";
 import { TopSkinBanner } from "@/components/TopSkinBanner";
 import { ThanksgivingBanner } from "@/components/ThanksgivingBanner";
+import { BlackFridayBanner } from "@/components/BlackFridayBanner";
 import { SiteTicker } from "@/components/SiteTicker";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PageViewCount } from "@/components/PageViewCount";
@@ -16,9 +17,9 @@ import { GoogleTranslate } from "@/components/GoogleTranslate";
 import { RewardsNudge } from "@/components/RewardsNudge";
 import { LiveActivity } from "@/components/LiveActivity";
 import { AiChat } from "@/components/AiChat";
+import { HelpButton } from "@/components/HelpButton";
 import { BackToTop } from "@/components/BackToTop";
 import { SpinWheel } from "@/components/SpinWheel";
-import { HelpButton } from "@/components/HelpButton";
 import { UnregisterServiceWorkers } from "@/components/UnregisterServiceWorkers";
 import { QuoraSignupEvent } from "@/components/QuoraSignupEvent";
 import { MetaPixel } from "@/components/MetaPixel";
@@ -214,6 +215,7 @@ export default async function RootLayout({
         <UnregisterServiceWorkers />
         <SiteHeader />
         <ThanksgivingBanner />
+        <BlackFridayBanner />
         <div className="xl:hidden">
           <TopSkinBanner />
         </div>
@@ -237,8 +239,7 @@ export default async function RootLayout({
         <GoogleTranslate />
         <BackToTop />
         <SpinWheel />
-        <HelpButton />
-        {aiEnabled() && <AiChat />}
+        {aiEnabled() ? <AiChat /> : <HelpButton />}
       </body>
     </html>
   );

@@ -16,7 +16,9 @@ export async function ChatterHomeBox() {
   if (!user && !latest) return null;
 
   return (
-    <section className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 to-rose-50 px-3 py-2">
+    <section
+      className={`flex ${user ? "flex-wrap" : "flex-nowrap"} items-center gap-x-3 gap-y-2 rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 to-rose-50 px-3 py-2`}
+    >
       <Link
         href="/chatter"
         className="flex shrink-0 items-center gap-1.5"
@@ -29,7 +31,10 @@ export async function ChatterHomeBox() {
           🧔
         </span>
         <span className="relative rounded-xl bg-white px-2 py-1 text-xs font-bold text-orange-800 shadow-sm before:absolute before:-left-1 before:top-1/2 before:h-2 before:w-2 before:-translate-y-1/2 before:rotate-45 before:bg-white">
-          Be a Gapodi, talk your heart out! 💬
+          <span className="sm:hidden">Be a Gapodi! 💬</span>
+          <span className="hidden sm:inline">
+            Be a Gapodi, talk your heart out! 💬
+          </span>
         </span>
       </Link>
       {user ? (
@@ -37,7 +42,7 @@ export async function ChatterHomeBox() {
       ) : (
         <Link
           href="/signup?next=/chatter"
-          className="rounded-full bg-orange-600 px-3 py-1 text-xs font-bold text-white hover:bg-orange-500"
+          className="shrink-0 whitespace-nowrap rounded-full bg-orange-600 px-3 py-1 text-xs font-bold text-white hover:bg-orange-500"
         >
           Join free to post →
         </Link>

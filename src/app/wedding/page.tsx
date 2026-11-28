@@ -85,10 +85,12 @@ export default async function WeddingPage({
     <div className="flex gap-6">
       <div className="min-w-0 flex-1 space-y-6">
         <section
-          className={`rounded-3xl bg-gradient-to-r ${gradientFor("rose")} px-5 py-8 text-white sm:px-8`}
+          className={`rounded-3xl bg-gradient-to-r ${gradientFor("rose")} px-4 py-5 text-white sm:px-8 sm:py-8`}
         >
-          <h1 className="text-3xl font-black">Wedding services 💐</h1>
-          <p className="mt-1 max-w-xl text-white/90">
+          <h1 className="text-2xl font-black sm:text-3xl">
+            Wedding services 💐
+          </h1>
+          <p className="mt-1 max-w-xl text-sm text-white/90 sm:text-base">
             Planners, photographers, makeup and mehndi artists, DJs, dhol,
             caterers, decorators, mandap, venues, pandits, cars and invitations
             — see photos, packages and prices, then message the vendor on
@@ -175,7 +177,7 @@ export default async function WeddingPage({
             </div>
             <div className="no-scrollbar mt-3 flex gap-4 overflow-x-auto pb-2">
               {featured.map((vendor) => (
-                <div key={vendor.id} className="w-64 shrink-0">
+                <div key={vendor.id} className="w-48 shrink-0 sm:w-64">
                   <VendorCard vendor={vendor} />
                 </div>
               ))}
@@ -196,7 +198,7 @@ export default async function WeddingPage({
               <p className="text-sm font-black text-rose-900">
                 {group.icon} {group.title}
               </p>
-              <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="mt-2 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-4">
                 {group.items.map((item) => {
                   const slug = weddingServiceSlug(item);
                   const active = service === slug;
@@ -207,20 +209,20 @@ export default async function WeddingPage({
                       href={`/wedding?service=${slug}${
                         city ? `&city=${encodeURIComponent(city)}` : ""
                       }`}
-                      className={`rounded-2xl border p-3 text-center transition ${
+                      className={`rounded-2xl border p-2 text-center transition sm:p-3 ${
                         active
                           ? "border-rose-600 bg-rose-600 text-white"
                           : "border-rose-100 bg-white hover:border-rose-300 hover:bg-rose-50"
                       }`}
                     >
-                      <span className="block text-2xl leading-none">
+                      <span className="block text-xl leading-none sm:text-2xl">
                         {group.icon}
                       </span>
-                      <span className="mt-2 block text-sm font-bold leading-tight">
+                      <span className="mt-1 block text-xs font-bold leading-tight sm:mt-2 sm:text-sm">
                         {item}
                       </span>
                       <span
-                        className={`mt-1 block text-xs ${
+                        className={`mt-1 block text-[10px] sm:text-xs ${
                           active ? "text-white/80" : "text-slate-500"
                         }`}
                       >

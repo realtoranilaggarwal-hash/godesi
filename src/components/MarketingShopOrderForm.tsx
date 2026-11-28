@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { startMarketingShopCheckout } from "@/app/actions/marketingShop";
 import {
   MARKETING_CATEGORIES,
@@ -10,6 +10,8 @@ import {
   type MarketingCategory,
   MARKETING_SHOP_ORDER_FOR,
   type MarketingShopOrderFor,
+  EBOOK_BONUS_STEP_USD,
+  ebookBonusCount,
   usd,
 } from "@/lib/marketingShop";
 import type { MarketingShopMember } from "@/lib/marketingShopMember";
@@ -22,14 +24,36 @@ export function MarketingShopOrderForm({
   orderFor,
   category: initialCategory,
   member,
+  courseCount,
 }: {
   orderFor: MarketingShopOrderFor;
   category?: MarketingCategory;
   member: MarketingShopMember | null;
+  courseCount: number;
 }) {
   const [qty, setQty] = useState<Record<string, number>>({});
   const [designs, setDesigns] = useState<Record<string, string>>({});
   const [restored, setRestored] = useState(false);
+  const [zoom, setZoom] = useState<{ src: string; alt: string } | null>(null);
+  const zoomClose = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!zoom) return;
+    const opener = document.activeElement as HTMLElement | null;
+    zoomClose.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZoom(null);
+      // Close is the only control in the lightbox, so Tab stays on it.
+      if (e.key === "Tab") {
+        e.preventDefault();
+        zoomClose.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
+  }, [zoom]);
   const loginNext = encodeURIComponent(`/marketing-shop${orderFor === "shop" ? "" : `?for=${orderFor}`}#order`);
   // Keep the cart across the log-in / join round trip.
   useEffect(() => {
@@ -60,6 +84,7 @@ export function MarketingShopOrderForm({
   const set = (id: string, n: number) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(50, n)) }));
   const chosen = MARKETING_PRODUCTS.filter((p) => (qty[p.id] ?? 0) > 0);
   const total = chosen.reduce((sum, p) => sum + p.priceUsd * qty[p.id], 0);
+  const ebooks = ebookBonusCount(total, courseCount);
 
   return (
     <form action={startMarketingShopCheckout} className="space-y-6">
@@ -79,24 +104,26 @@ export function MarketingShopOrderForm({
       {MARKETING_PRODUCTS.map((p) => (
         <input key={p.id} type="hidden" name={`qty-${p.id}`} value={qty[p.id] ?? 0} />
       ))}
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {shown.map((p) => {
           const n = qty[p.id] ?? 0;
           return (
             <li key={p.id} className={`flex flex-col overflow-hidden rounded-2xl border bg-white ${n ? "border-orange-400 ring-2 ring-orange-200" : "border-slate-200"}`}>
-              <Image src={p.image} alt={p.name} width={600} height={600} className="aspect-square w-full object-cover" />
-              <div className="flex flex-1 flex-col p-4">
-                <h2 className="font-black text-slate-900">{p.name}</h2>
-                {p.size ? <p className="mt-1 text-xs font-bold text-indigo-700">Size: {p.size}</p> : null}
-                <p className="mt-1 flex-1 text-sm text-slate-600">{p.blurb}</p>
+              <button type="button" onClick={() => setZoom({ src: p.image, alt: p.name })} className="cursor-zoom-in" aria-label={`See a bigger photo of ${p.name}`}>
+                <Image src={p.image} alt={p.name} width={300} height={300} className="aspect-[4/3] w-full object-cover" />
+              </button>
+              <div className="flex flex-1 flex-col p-3">
+                <h2 className="text-sm font-black leading-tight text-slate-900">{p.name}</h2>
+                {p.size ? <p className="mt-1 text-[11px] font-bold text-indigo-700">Size: {p.size}</p> : null}
+                <p className="mt-1 flex-1 text-xs text-slate-600">{p.blurb}</p>
                 {p.example ? (
-                  <a href={p.example} target="_blank" rel="noopener" className="mt-3 flex items-center gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-2 text-xs font-semibold text-indigo-800">
-                    <Image src={p.example} alt={`Example ${p.name} we designed`} width={90} height={120} className="h-24 w-auto rounded" />
-                    <span>Example: we&apos;ll design one like this for you, with your photo, logo and QR code.</span>
-                  </a>
+                  <button type="button" onClick={() => setZoom({ src: p.example!, alt: `Example ${p.name} we designed` })} className="mt-2 flex cursor-zoom-in items-center gap-2 rounded-xl border border-indigo-100 bg-indigo-50 p-1.5 text-left text-[11px] font-semibold leading-tight text-indigo-800">
+                    <Image src={p.example} alt={`Example ${p.name} we designed`} width={48} height={64} className="h-12 w-auto rounded" />
+                    <span>Example design: tap to see it big</span>
+                  </button>
                 ) : null}
-                <div className="mt-3 flex items-center justify-between gap-2">
-                  <strong className="text-lg text-orange-600">{usd(p.priceUsd)}</strong>
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <strong className="text-base text-orange-600">{usd(p.priceUsd)}</strong>
                   {n ? (
                     <div className="flex items-center gap-2">
                       <button type="button" onClick={() => set(p.id, n - 1)} className="h-8 w-8 rounded-lg border border-slate-300 font-bold" aria-label={`Fewer ${p.name}`}>−</button>
@@ -104,8 +131,8 @@ export function MarketingShopOrderForm({
                       <button type="button" onClick={() => set(p.id, n + 1)} className="h-8 w-8 rounded-lg border border-slate-300 font-bold" aria-label={`More ${p.name}`}>+</button>
                     </div>
                   ) : (
-                    <button type="button" onClick={() => set(p.id, 1)} className="rounded-xl bg-orange-500 px-4 py-2 text-sm font-bold text-white hover:bg-orange-600">
-                      Add to my order
+                    <button type="button" onClick={() => set(p.id, 1)} className="rounded-xl bg-orange-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-orange-600">
+                      Add to order
                     </button>
                   )}
                 </div>
@@ -114,6 +141,13 @@ export function MarketingShopOrderForm({
           );
         })}
       </ul>
+      {zoom ? (
+        <div role="dialog" aria-modal="true" aria-label={zoom.alt} onClick={() => setZoom(null)} className="fixed inset-0 z-[100] !mt-0 flex cursor-zoom-out items-center justify-center bg-black/80 p-4">
+          <button ref={zoomClose} type="button" onClick={() => setZoom(null)} className="absolute right-4 top-4 rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-900" aria-label="Close">✕ Close</button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={zoom.src} alt={zoom.alt} className="max-h-[90vh] max-w-full rounded-xl bg-white object-contain" />
+        </div>
+      ) : null}
 
       <section id="order" className="scroll-mt-24 rounded-2xl border-2 border-orange-300 bg-orange-50 p-5">
         <h2 className="text-xl font-black text-slate-900">Your order</h2>
@@ -142,6 +176,12 @@ export function MarketingShopOrderForm({
               <span className="font-semibold">Total</span>
               <strong>{usd(total)}</strong>
             </li>
+            {ebooks > 0 ? (
+              <li className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800">
+                🎁 Free bonus: {ebooks} GoDesi course ebook{ebooks === 1 ? "" : "s"} worth{" "}
+                {usd(ebooks * EBOOK_BONUS_STEP_USD)}. Your codes arrive by email after payment.
+              </li>
+            ) : null}
           </ul>
         ) : (
           <p className="mt-2 text-sm text-slate-600">Tap “Add to my order” on the items you want.</p>

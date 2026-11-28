@@ -53,6 +53,12 @@ export default async function CourseLearnPage({
         <h1 className="mt-1 text-2xl font-black sm:text-3xl">
           Your lessons — {course.lessons.length} steps to a new income skill
         </h1>
+        <a
+          href={`/course/${course.slug}/ebook`}
+          className="mt-4 inline-block rounded-xl bg-white px-4 py-2 text-sm font-black text-slate-900 shadow hover:bg-amber-100"
+        >
+          Download the ebook (PDF)
+        </a>
       </section>
 
       <ol className="space-y-5">

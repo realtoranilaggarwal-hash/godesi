@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "@/components/forms/LoginForm";
 import { Card } from "@/components/ui";
-import { JoinPerks, JoinRail } from "@/components/JoinBenefits";
+import { JoinHighlights, JoinPerks, JoinRail } from "@/components/JoinBenefits";
 import { SocialSignIn } from "@/components/SocialSignIn";
 
 export const dynamic = "force-dynamic";
@@ -45,10 +45,11 @@ export default async function LoginPage({
             create your account. Please allow email on the Facebook screen, or
             sign up with your email below.
           </p>
-        ) : searchParams.error === "google" || searchParams.error === "facebook" ? (
+        ) : searchParams.error === "google" ||
+          searchParams.error === "facebook" ? (
           <p className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-            {searchParams.error === "google" ? "Google" : "Facebook"} sign-in did
-            not complete. Please try again or use your email and password.
+            {searchParams.error === "google" ? "Google" : "Facebook"} sign-in
+            did not complete. Please try again or use your email and password.
           </p>
         ) : null}
         <Card>
@@ -68,6 +69,8 @@ export default async function LoginPage({
             Create an account
           </Link>
         </p>
+
+        <JoinHighlights />
 
         <Card>
           <p className="text-sm font-bold text-slate-700">

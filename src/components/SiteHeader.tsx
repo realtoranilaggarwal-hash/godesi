@@ -18,6 +18,7 @@ import { displayCurrency } from "@/lib/displayCurrency";
 import { LocalWeather } from "@/components/LocalWeather";
 import { greetingFor, requestGeo } from "@/lib/geo";
 import { emailEnabled } from "@/lib/email";
+import { aiEnabled } from "@/lib/ai";
 import { festivalSlug, headerFestival } from "@/lib/festivals";
 import { thanksgivingLink, thanksgivingLive } from "@/lib/thanksgiving";
 
@@ -34,7 +35,7 @@ const NAV = [
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
   { href: "/marketplace", label: "Buy & Sell", icon: "🛍️" },
   { href: "/classifieds", label: "Classifieds", icon: "📣" },
-  { href: "/wedding", label: "Wedding Services", icon: "💐" },
+  { href: "/wedding", label: "Wedding", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/chatter", label: "Chatter", icon: "💬" },
@@ -44,10 +45,10 @@ const NAV = [
   { href: "/professionals", label: "Professionals", icon: "👔" },
   { href: "/news", label: "News", icon: "📰" },
   { href: "/bollywood", label: "Bollywood", icon: "🎬" },
-  { href: "/complaints", label: "File a complaint", icon: "⚠️" },
+  { href: "/complaints", label: "Complaints", icon: "⚠️" },
   { href: "/trending", label: "Trending", icon: "🔥" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
-  { href: "/leaderboard", label: "Top contributors", icon: "🏅" },
+  { href: "/leaderboard", label: "Top members", icon: "🏅" },
 ];
 
 /**
@@ -60,6 +61,7 @@ const STRIP_GROUPS: StripGroup[] = [
   { id: "explore", label: "Explore", icon: "✨" },
   { id: "astrology", label: "Astrology", icon: "🔮", href: "/astrology" },
   { id: "community", label: "Community", icon: "👥", href: "/people" },
+  { id: "wall", label: "Wall of Fame", icon: "🧱", href: "/walloffame" },
   { id: "cards", label: "Cards", icon: "🪪", href: "/search" },
   {
     id: "classifieds",
@@ -288,29 +290,40 @@ export async function SiteHeader() {
       name: child.name,
     })),
   }));
+  const [homeLink, ...otherNav] = NAV;
   const menuLinks = [
-    ...NAV,
-    { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
-    { href: "/journalists", label: "Local journalists", icon: "🗞️" },
-    { href: "/buzz", label: "#godesi wall", icon: "🌍" },
-    { href: "/alumni", label: "Find batchmates", icon: "🎓" },
-    { href: "/rishta/new", label: "Post a Rishta profile", icon: "💍" },
-    { href: "/resources", label: "Links", icon: "🔗" },
-    { href: "/deals", label: "Deals", icon: "🏷️" },
-    { href: "/shop", label: "Shop", icon: "🛍️" },
-    { href: "/festivals", label: "Festival calendar", icon: "🪔" },
-    { href: "/pooja", label: "Video pooja", icon: "🙏" },
-    { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
-    { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
-    { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
-    { href: "/guide", label: "City guides", icon: "🗺️" },
-    { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
-    { href: "/advertise", label: "Advertise", icon: "📢" },
-    { href: "/pricing", label: "Pricing", icon: "⭐" },
-    { href: "/tools", label: "Free business tools", icon: "🧰" },
-    { href: "/earn", label: "Make money online", icon: "💸" },
-    { href: "/marketing-shop", label: "Marketing Shop", icon: "🛒" },
-    { href: "/rewards", label: "Refer & earn", icon: "🎁" },
+    homeLink,
+    ...[
+      ...otherNav,
+      { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
+      { href: "/journalists", label: "Journalists", icon: "🗞️" },
+      { href: "/buzz", label: "#godesi wall", icon: "🌍" },
+      { href: "/walloffame", label: "Wall of Fame", icon: "🧱" },
+      { href: "/alumni", label: "Find batchmates", icon: "🎓" },
+      { href: "/rishta/new", label: "Post Rishta", icon: "💍" },
+      { href: "/resources", label: "Links", icon: "🔗" },
+      { href: "/deals", label: "Deals", icon: "🏷️" },
+      { href: "/shop", label: "Shop", icon: "🛍️" },
+      { href: "/festivals", label: "Festivals", icon: "🪔" },
+      { href: "/pooja", label: "Video pooja", icon: "🙏" },
+      { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
+      { href: "/usd-to-inr", label: "$ to ₹ today", icon: "💱" },
+      { href: "/crypto-fear-greed", label: "Crypto mood", icon: "😱" },
+      { href: "/guide", label: "City guides", icon: "🗺️" },
+      { href: "/marketing", label: "Free SEO", icon: "🌐" },
+      { href: "/advertise", label: "Advertise", icon: "📢" },
+      { href: "/pricing", label: "Pricing", icon: "⭐" },
+      { href: "/tools", label: "Free tools", icon: "🧰" },
+      { href: "/earn", label: "Earn online", icon: "💸" },
+      { href: "/marketing-shop", label: "Marketing Shop", icon: "🛒" },
+      { href: "/rewards", label: "Refer & earn", icon: "🎁" },
+    ].sort((a, b) =>
+      a.label
+        .replace(/^\W+/, "")
+        .localeCompare(b.label.replace(/^\W+/, ""), "en", {
+          sensitivity: "base",
+        }),
+    ),
   ];
 
   return (
@@ -349,50 +362,72 @@ export async function SiteHeader() {
         bar={
           <div className="relative mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-4 lg:pr-16">
             <div className="flex shrink-0 items-center gap-1.5">
-            <Link href="/" className="shrink-0" aria-label="Godesi home">
-              <Image
-                src="/logo-godesi.png"
-                alt="Godesi"
-                width={1355}
-                height={400}
-                // Without this the optimizer was asked for a 3840px copy of a 120px logo.
-                sizes="122px"
-                priority
-                className="h-8 w-auto sm:h-9"
-              />
-            </Link>
-            {turkey ? (
-              <a
-                href={thanksgivingLink("article", "turkey")}
-                title="Happy Thanksgiving from GoDesi!"
-                className="shrink-0 transition-transform duration-300 hover:-rotate-6 hover:scale-110"
-              >
+              <Link href="/" className="shrink-0" aria-label="Godesi home">
                 <Image
-                  src="/images/turkey.svg"
-                  alt="Happy Thanksgiving — read our Thanksgiving message"
-                  width={360}
-                  height={360}
-                  unoptimized
-                  className="h-8 w-auto sm:h-9"
-                />
-              </a>
-            ) : null}
-            {gurpurab?.headerIcon ? (
-              <Link
-                href={`/festivals/${festivalSlug(gurpurab)}`}
-                title={`Happy ${gurpurab.name}`}
-                className="shrink-0"
-              >
-                <Image
-                  src={gurpurab.headerIcon}
-                  alt={gurpurab.name}
-                  width={303}
-                  height={374}
-                  unoptimized
+                  src="/logo-godesi.png"
+                  alt="Godesi"
+                  width={1355}
+                  height={400}
+                  // Without this the optimizer was asked for a 3840px copy of a 120px logo.
+                  sizes="122px"
+                  priority
                   className="h-8 w-auto sm:h-9"
                 />
               </Link>
-            ) : null}
+              {turkey ? (
+                <a
+                  href={thanksgivingLink("article", "turkey")}
+                  title="Happy Thanksgiving from GoDesi!"
+                  className="shrink-0 transition-transform duration-300 hover:-rotate-6 hover:scale-110"
+                >
+                  <Image
+                    src="/images/turkey.svg"
+                    alt="Happy Thanksgiving — read our Thanksgiving message"
+                    width={360}
+                    height={360}
+                    unoptimized
+                    className="h-8 w-auto sm:h-9"
+                  />
+                </a>
+              ) : null}
+              {gurpurab?.headerIcon ? (
+                <Link
+                  href={`/festivals/${festivalSlug(gurpurab)}`}
+                  title={`Happy ${gurpurab.name}`}
+                  className="shrink-0"
+                >
+                  <Image
+                    src={gurpurab.headerIcon}
+                    alt={gurpurab.name}
+                    width={303}
+                    height={374}
+                    unoptimized
+                    className="h-8 w-auto sm:h-9"
+                  />
+                </Link>
+              ) : null}
+              <Link
+                href="/find"
+                aria-label="Search Godesi"
+                className="rounded-xl border border-slate-300 px-2 py-1.5 text-lg leading-none sm:hidden"
+              >
+                🔍
+              </Link>
+              <MobileMenu
+                links={menuLinks}
+                categories={categoryItems}
+                groups={pickerGroups}
+                account={
+                  user
+                    ? {
+                        href: staffHome(user),
+                        label: staffLabel(user, "Admin panel", "My dashboard"),
+                      }
+                    : null
+                }
+                signOut={logoutAction}
+                sideTab={aiEnabled()}
+              />
             </div>
 
             <form
@@ -421,27 +456,6 @@ export async function SiteHeader() {
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-1 text-sm font-medium sm:gap-2">
-              <Link
-                href="/find"
-                aria-label="Search Godesi"
-                className="rounded-xl border border-slate-300 px-2 py-1.5 text-lg leading-none sm:hidden"
-              >
-                🔍
-              </Link>
-              <MobileMenu
-                links={menuLinks}
-                categories={categoryItems}
-                groups={pickerGroups}
-                account={
-                  user
-                    ? {
-                        href: staffHome(user),
-                        label: staffLabel(user, "Admin panel", "My dashboard"),
-                      }
-                    : null
-                }
-                signOut={logoutAction}
-              />
               <span className="max-[380px]:hidden">
                 <LocalePicker currency={displayCurrency()} />
               </span>

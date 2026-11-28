@@ -40,6 +40,25 @@ export function CategoryStrip({
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const rail = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState(false);
+
+  // Arrow on the right edge while sections are still hidden off-screen.
+  useEffect(() => {
+    const element = rail.current;
+    if (!element) return;
+    const update = () =>
+      setMore(
+        element.scrollLeft + element.clientWidth < element.scrollWidth - 4,
+      );
+    update();
+    element.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      element.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -70,58 +89,80 @@ export function CategoryStrip({
 
   return (
     <div ref={ref} className="mx-auto max-w-screen-2xl px-4 py-2">
-      <div className="flex gap-1.5 overflow-x-auto whitespace-nowrap text-[11px] font-semibold [scrollbar-width:none] sm:text-xs [&::-webkit-scrollbar]:hidden">
-        {loose.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`shrink-0 rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5 ${item.className}`}
-          >
-            {item.icon} {item.label}
-          </Link>
-        ))}
-        {sections.map((section) => {
-          const active = section.id === open;
-          if (!section.items.length && section.href) {
-            return (
-              <Link
-                key={section.id}
-                href={section.href}
-                className="shrink-0 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-slate-800 hover:bg-slate-50 sm:px-3 sm:py-1.5"
-              >
-                {section.icon} {section.label}
-              </Link>
-            );
-          }
-          return (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => setOpen(active ? null : section.id)}
-              aria-expanded={active}
-              aria-controls="category-strip-panel"
-              className={`shrink-0 rounded-full border px-2.5 py-1 sm:px-3 sm:py-1.5 ${
-                active
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
-              }`}
+      <div className="relative">
+        <div
+          ref={rail}
+          className="flex gap-1.5 overflow-x-auto whitespace-nowrap text-[11px] font-semibold [scrollbar-width:none] sm:text-xs [&::-webkit-scrollbar]:hidden"
+        >
+          {loose.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`shrink-0 rounded-full px-2.5 py-1 sm:px-3 sm:py-1.5 ${item.className}`}
             >
-              {section.icon} {section.label} {active ? "▴" : "▾"}
-            </button>
-          );
-        })}
-        {links.length ? (
-          <span aria-hidden className="mx-1 w-px shrink-0 bg-slate-200" />
-        ) : null}
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-slate-700 hover:bg-slate-200 sm:px-3 sm:py-1.5"
+              {item.icon} {item.label}
+            </Link>
+          ))}
+          {sections.map((section) => {
+            const active = section.id === open;
+            if (!section.items.length && section.href) {
+              return (
+                <Link
+                  key={section.id}
+                  href={section.href}
+                  className="shrink-0 rounded-full border border-slate-300 bg-white px-2.5 py-1 text-slate-800 hover:bg-slate-50 sm:px-3 sm:py-1.5"
+                >
+                  {section.icon} {section.label}
+                </Link>
+              );
+            }
+            return (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => setOpen(active ? null : section.id)}
+                aria-expanded={active}
+                aria-controls="category-strip-panel"
+                className={`shrink-0 rounded-full border px-2.5 py-1 sm:px-3 sm:py-1.5 ${
+                  active
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                {section.icon} {section.label} {active ? "▴" : "▾"}
+              </button>
+            );
+          })}
+          {links.length ? (
+            <span aria-hidden className="mx-1 w-px shrink-0 bg-slate-200" />
+          ) : null}
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-slate-700 hover:bg-slate-200 sm:px-3 sm:py-1.5"
+            >
+              {link.icon} {link.label}
+            </Link>
+          ))}
+        </div>
+        {more ? (
+          <button
+            type="button"
+            onClick={() =>
+              rail.current?.scrollBy({
+                left: rail.current.clientWidth * 0.7,
+                behavior: "smooth",
+              })
+            }
+            aria-label="More sections"
+            className="absolute inset-y-0 right-0 flex items-center bg-gradient-to-l from-white via-white/90 to-transparent pl-6"
           >
-            {link.icon} {link.label}
-          </Link>
-        ))}
+            <span className="flex h-6 w-6 animate-pulse items-center justify-center rounded-full bg-slate-900 text-sm font-black text-white shadow">
+              ›
+            </span>
+          </button>
+        ) : null}
       </div>
 
       {current ? (
