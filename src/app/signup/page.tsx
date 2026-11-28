@@ -38,14 +38,6 @@ export default async function SignupPage({
 
       <div className="w-[28rem] max-w-full space-y-4">
         <h1 className="text-2xl font-bold">Create your Godesi account</h1>
-        <NewsMediaStrip />
-        <Link
-          href="/tools"
-          className="block rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-900 transition hover:bg-teal-100"
-        >
-          🧰 Members unlock 50+ free creator tools — SEO, design, video, email
-          &amp; automation →
-        </Link>
         <Card>
           <SocialSignIn next={searchParams.next} verb="Sign up" />
           <SignupForm
@@ -94,6 +86,7 @@ export default async function SignupPage({
             Sign in
           </Link>
         </p>
+        <NewsMediaStrip />
       </div>
 
       <div className="hidden w-[260px] shrink-0 space-y-4 lg:block">
