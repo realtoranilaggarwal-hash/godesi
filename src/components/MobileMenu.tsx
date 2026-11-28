@@ -66,7 +66,7 @@ export function MobileMenu({
       </span>
 
       {open ? (
-        <div className="absolute inset-x-0 top-full max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain border-t border-slate-200 bg-white shadow-lg">
+        <div className="absolute inset-x-0 top-full max-h-[calc(100vh-8rem)] supports-[height:100dvh]:max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain border-t border-slate-200 bg-white shadow-lg">
           {account ? (
             <div className="flex items-center justify-between gap-2 border-b border-slate-100 px-4 py-2 text-sm font-semibold">
               <Link
