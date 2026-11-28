@@ -8,6 +8,7 @@ import { uniqueViolation } from "@/lib/actions";
  * godesi.com/<username>, so they must never shadow a real page.
  */
 export const RESERVED_USERNAMES = new Set([
+  "ebooks",
   "admin",
   "advertise",
   "api",

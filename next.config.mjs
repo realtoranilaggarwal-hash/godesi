@@ -8,6 +8,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ["@react-pdf/renderer"],
     outputFileTracingIncludes: {
       "/course/[slug]/ebook": ["./public/images/courses/**", "./public/qr-logo.png"],
+      "/ebooks/[slug]/pdf": ["./member-ebooks/**", "./public/images/member-ebooks/**", "./public/qr-logo.png"],
     },
   },
   images: {

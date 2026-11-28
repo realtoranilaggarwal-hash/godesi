@@ -143,7 +143,10 @@ export async function POST(request: Request) {
           setupMinor: session.amount_total ?? 0,
           metadata: session.metadata,
         });
-      } else if (session.metadata?.kind === "course" && courseEnrollmentId) {
+      } else if (
+        (session.metadata?.kind === "course" || session.metadata?.kind === "member-ebook") &&
+        courseEnrollmentId
+      ) {
         await confirmCourseEnrollment({
           enrollmentId: courseEnrollmentId,
           provider: "stripe",

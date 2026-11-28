@@ -47,6 +47,9 @@ import { profileFactsList } from "@/lib/profileQuiz";
 import { thumbImage } from "@/lib/proxyImage";
 import { metaDescription, pageTitle } from "@/lib/seo";
 import { TrackVisit } from "@/components/TrackVisit";
+import { MemberEbookShelf } from "@/components/MemberEbookShelf";
+import { freePickUsed } from "@/app/actions/memberEbook";
+import { memberEbookKey, memberEbooksFor } from "@/lib/memberEbooks";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +129,19 @@ export default async function PublicProfilePage({
       (currency === "INR" ? 8500 : 100)
     : 0;
   const isOwner = viewer?.id === user.id;
+  const ebooks = memberEbooksFor(user.username);
+  const [ebookPickUsed, ownedEbooks] =
+    ebooks.length && viewer
+      ? await Promise.all([
+          freePickUsed(ebooks[0].owner, viewer.id),
+          db.courseEnrollment
+            .findMany({
+              where: { userId: viewer.id, status: "PAID", courseSlug: { in: ebooks.map((b) => memberEbookKey(b.slug)) } },
+              select: { courseSlug: true },
+            })
+            .then((rows) => new Set(rows.map((r) => r.courseSlug.replace(/^ebook:/, "")))),
+        ])
+      : [false, new Set<string>()];
   const plan = effectivePlan(user);
   const playlistUrl = visibleMediaLink(
     user.playlistUrl,
@@ -507,6 +523,13 @@ export default async function PublicProfilePage({
               </ul>
             </Card>
           ) : null}
+
+          <MemberEbookShelf
+            books={ebooks}
+            ownedSlugs={ownedEbooks}
+            pickUsed={ebookPickUsed}
+            signedIn={Boolean(viewer)}
+          />
 
           {gigs.length ? (
             <section className="space-y-2">
