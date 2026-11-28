@@ -61,6 +61,7 @@ const STRIP_GROUPS: StripGroup[] = [
   { id: "explore", label: "Explore", icon: "✨" },
   { id: "astrology", label: "Astrology", icon: "🔮", href: "/astrology" },
   { id: "community", label: "Community", icon: "👥", href: "/people" },
+  { id: "wall", label: "Wall of Fame", icon: "🧱", href: "/walloffame" },
   { id: "cards", label: "Cards", icon: "🪪", href: "/search" },
   {
     id: "classifieds",
@@ -297,6 +298,7 @@ export async function SiteHeader() {
       { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
       { href: "/journalists", label: "Journalists", icon: "🗞️" },
       { href: "/buzz", label: "#godesi wall", icon: "🌍" },
+      { href: "/walloffame", label: "Wall of Fame", icon: "🧱" },
       { href: "/alumni", label: "Find batchmates", icon: "🎓" },
       { href: "/rishta/new", label: "Post Rishta", icon: "💍" },
       { href: "/resources", label: "Links", icon: "🔗" },
