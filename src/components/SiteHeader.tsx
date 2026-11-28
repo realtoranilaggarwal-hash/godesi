@@ -34,7 +34,7 @@ const NAV = [
   { href: "/rooms", label: "Rooms", icon: "🛋️" },
   { href: "/marketplace", label: "Buy & Sell", icon: "🛍️" },
   { href: "/classifieds", label: "Classifieds", icon: "📣" },
-  { href: "/wedding", label: "Wedding Services", icon: "💐" },
+  { href: "/wedding", label: "Wedding", icon: "💐" },
   { href: "/religious", label: "Temples", icon: "🛕" },
   { href: "/connect", label: "Connect", icon: "🤝" },
   { href: "/chatter", label: "Chatter", icon: "💬" },
@@ -44,10 +44,10 @@ const NAV = [
   { href: "/professionals", label: "Professionals", icon: "👔" },
   { href: "/news", label: "News", icon: "📰" },
   { href: "/bollywood", label: "Bollywood", icon: "🎬" },
-  { href: "/complaints", label: "File a complaint", icon: "⚠️" },
+  { href: "/complaints", label: "Complaints", icon: "⚠️" },
   { href: "/trending", label: "Trending", icon: "🔥" },
   { href: "/desi-elite", label: "GoDesi Elite", icon: "🏆" },
-  { href: "/leaderboard", label: "Top contributors", icon: "🏅" },
+  { href: "/leaderboard", label: "Top members", icon: "🏅" },
 ];
 
 /**
@@ -288,29 +288,37 @@ export async function SiteHeader() {
       name: child.name,
     })),
   }));
+  const [homeLink, ...otherNav] = NAV;
   const menuLinks = [
-    ...NAV,
-    { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
-    { href: "/journalists", label: "Local journalists", icon: "🗞️" },
-    { href: "/buzz", label: "#godesi wall", icon: "🌍" },
-    { href: "/alumni", label: "Find batchmates", icon: "🎓" },
-    { href: "/rishta/new", label: "Post a Rishta profile", icon: "💍" },
-    { href: "/resources", label: "Links", icon: "🔗" },
-    { href: "/deals", label: "Deals", icon: "🏷️" },
-    { href: "/shop", label: "Shop", icon: "🛍️" },
-    { href: "/festivals", label: "Festival calendar", icon: "🪔" },
-    { href: "/pooja", label: "Video pooja", icon: "🙏" },
-    { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
-    { href: "/usd-to-inr", label: "Dollar to rupee today", icon: "💱" },
-    { href: "/crypto-fear-greed", label: "Crypto Fear & Greed", icon: "😱" },
-    { href: "/guide", label: "City guides", icon: "🗺️" },
-    { href: "/marketing", label: "Free marketing & SEO", icon: "🌐" },
-    { href: "/advertise", label: "Advertise", icon: "📢" },
-    { href: "/pricing", label: "Pricing", icon: "⭐" },
-    { href: "/tools", label: "Free business tools", icon: "🧰" },
-    { href: "/earn", label: "Make money online", icon: "💸" },
-    { href: "/marketing-shop", label: "Marketing Shop", icon: "🛒" },
-    { href: "/rewards", label: "Refer & earn", icon: "🎁" },
+    homeLink,
+    ...[
+      ...otherNav,
+      { href: "/daily", label: "GoDesi Daily", icon: "☀️" },
+      { href: "/journalists", label: "Journalists", icon: "🗞️" },
+      { href: "/buzz", label: "#godesi wall", icon: "🌍" },
+      { href: "/alumni", label: "Find batchmates", icon: "🎓" },
+      { href: "/rishta/new", label: "Post Rishta", icon: "💍" },
+      { href: "/resources", label: "Links", icon: "🔗" },
+      { href: "/deals", label: "Deals", icon: "🏷️" },
+      { href: "/shop", label: "Shop", icon: "🛍️" },
+      { href: "/festivals", label: "Festivals", icon: "🪔" },
+      { href: "/pooja", label: "Video pooja", icon: "🙏" },
+      { href: "/visa-bulletin", label: "Visa Bulletin", icon: "🛂" },
+      { href: "/usd-to-inr", label: "$ to ₹ today", icon: "💱" },
+      { href: "/crypto-fear-greed", label: "Crypto mood", icon: "😱" },
+      { href: "/guide", label: "City guides", icon: "🗺️" },
+      { href: "/marketing", label: "Free SEO", icon: "🌐" },
+      { href: "/advertise", label: "Advertise", icon: "📢" },
+      { href: "/pricing", label: "Pricing", icon: "⭐" },
+      { href: "/tools", label: "Free tools", icon: "🧰" },
+      { href: "/earn", label: "Earn online", icon: "💸" },
+      { href: "/marketing-shop", label: "Marketing Shop", icon: "🛒" },
+      { href: "/rewards", label: "Refer & earn", icon: "🎁" },
+    ].sort((a, b) =>
+      a.label
+        .replace(/^\W+/, "")
+        .localeCompare(b.label.replace(/^\W+/, ""), "en", { sensitivity: "base" }),
+    ),
   ];
 
   return (
