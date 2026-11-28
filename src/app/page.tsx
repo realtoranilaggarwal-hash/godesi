@@ -213,18 +213,6 @@ export default async function HomePage() {
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="min-w-0 space-y-3">
-              <div className="space-y-3 xl:hidden">
-                <Link
-                  href="/markets#predict"
-                  className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
-                >
-                  🎯 Daily prediction — call it right, win 10 points{" "}
-                  <span className="font-normal text-indigo-600">
-                    → play on the markets page
-                  </span>
-                </Link>
-              </div>
-
               <nav className="flex flex-wrap gap-2 text-sm font-semibold">
                 <Link
                   href="/markets"
@@ -289,15 +277,6 @@ export default async function HomePage() {
             </div>
             <aside className="relative hidden xl:block">
               <div className="absolute inset-0 space-y-3 overflow-y-auto">
-                <Link
-                  href="/markets#predict"
-                  className="block rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-amber-50 p-3 text-sm font-bold text-indigo-900 shadow-sm hover:border-indigo-300"
-                >
-                  🎯 Daily prediction — call it right, win 10 points{" "}
-                  <span className="font-normal text-indigo-600">
-                    → play on the markets page
-                  </span>
-                </Link>
                 <CategoryTree groups={pickerGroups} />
               </div>
             </aside>
