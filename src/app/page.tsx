@@ -236,7 +236,8 @@ export default async function HomePage() {
                   href="/claim"
                   className="rounded-full bg-slate-900 px-2.5 py-1 sm:px-3 sm:py-1.5 text-white hover:bg-slate-700"
                 >
-                  Claim godesi.com/yourname
+                  Claim godesi.com/you
+                  <span className="max-sm:hidden">rname</span>
                 </Link>
                 {fng ? (
                   <Link
